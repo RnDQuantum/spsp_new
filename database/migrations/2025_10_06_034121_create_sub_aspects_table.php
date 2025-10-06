@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('aspect_id')->constrained('aspects')->cascadeOnDelete();
             $table->string('code');
             $table->string('name');
+            $table->text('description')->nullable();
             $table->integer('standard_rating')->nullable();
             $table->integer('order');
             $table->timestamps();

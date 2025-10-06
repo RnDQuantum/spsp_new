@@ -21,9 +21,9 @@ return new class extends Migration
             $table->decimal('individual_score', 8, 2);
             $table->decimal('gap_rating', 8, 2);
             $table->decimal('gap_score', 8, 2);
-            $table->integer('percentage_score');
-            $table->string('conclusion_code');
-            $table->string('conclusion_text');
+            $table->integer('percentage_score')->nullable();
+            $table->string('conclusion_code')->nullable();
+            $table->string('conclusion_text')->nullable();
             $table->text('description_text')->nullable();
             $table->timestamps();
 

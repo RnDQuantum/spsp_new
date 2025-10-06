@@ -13,11 +13,18 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
+        // Create default user
         User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+            'name' => 'Admin User',
+            'email' => 'admin@example.com',
+        ]);
+
+        // Seed master data and sample data
+        $this->call([
+            InstitutionSeeder::class,
+            AssessmentTemplateSeeder::class,
+            MasterDataSeeder::class,
+            SampleDataSeeder::class,
         ]);
     }
 }

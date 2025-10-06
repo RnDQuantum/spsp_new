@@ -23,11 +23,11 @@ return new class extends Migration
             $table->decimal('total_standard_score', 8, 2);
             $table->decimal('total_individual_score', 8, 2);
             $table->decimal('achievement_percentage', 5, 2);
-            $table->string('final_conclusion_code');
-            $table->string('final_conclusion_text');
+            $table->string('conclusion_code');
+            $table->string('conclusion_text');
             $table->timestamps();
 
-            $table->index('final_conclusion_code');
+            $table->index('conclusion_code');
             $table->index('achievement_percentage');
         });
     }

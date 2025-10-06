@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('category_type_id')->constrained('category_types')->cascadeOnDelete();
             $table->string('code');
             $table->string('name');
-            $table->integer('weight_percentage');
+            $table->integer('weight_percentage')->nullable();
             $table->decimal('standard_rating', 5, 2)->nullable();
             $table->integer('order');
             $table->timestamps();
