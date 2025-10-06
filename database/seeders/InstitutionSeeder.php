@@ -16,19 +16,25 @@ class InstitutionSeeder extends Seeder
     {
         $institutions = [
             [
-                'code' => 'INST001',
+                'code' => 'kejaksaan',
+                'name' => 'Kejaksaan Agung RI',
+                'logo_path' => null,
+                'api_key' => Str::random(32),
+            ],
+            [
+                'code' => 'bkn',
                 'name' => 'Badan Kepegawaian Negara (BKN)',
                 'logo_path' => null,
                 'api_key' => Str::random(32),
             ],
             [
-                'code' => 'INST002',
+                'code' => 'kemendikbud',
                 'name' => 'Kementerian Pendidikan dan Kebudayaan',
                 'logo_path' => null,
                 'api_key' => Str::random(32),
             ],
             [
-                'code' => 'INST003',
+                'code' => 'kemenkes',
                 'name' => 'Kementerian Kesehatan',
                 'logo_path' => null,
                 'api_key' => Str::random(32),

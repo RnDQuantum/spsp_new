@@ -15,14 +15,19 @@ class AssessmentTemplateSeeder extends Seeder
     {
         $templates = [
             [
-                'code' => 'SPSP2024',
-                'name' => 'Standard SPSP 2024',
-                'description' => 'Template standar untuk assessment SPSP tahun 2024',
+                'code' => 'p3k_standard_2025',
+                'name' => 'Standar Asesmen P3K 2025',
+                'description' => 'Template standar untuk asesmen P3K (Pegawai Pemerintah dengan Perjanjian Kerja) tahun 2025. Menggunakan 2 kategori utama: Potensi (40%) dan Kompetensi (60%).',
             ],
             [
-                'code' => 'SPSP2025',
-                'name' => 'Standard SPSP 2025',
-                'description' => 'Template standar untuk assessment SPSP tahun 2025',
+                'code' => 'cpns_jpt_pratama',
+                'name' => 'Standar Asesmen CPNS JPT Pratama',
+                'description' => 'Template standar untuk asesmen CPNS Jabatan Pimpinan Tinggi Pratama (eselon II).',
+            ],
+            [
+                'code' => 'cpns_administrator',
+                'name' => 'Standar Asesmen CPNS Administrator',
+                'description' => 'Template standar untuk asesmen CPNS Jabatan Administrator (eselon III).',
             ],
         ];
 
