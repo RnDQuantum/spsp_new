@@ -29,16 +29,27 @@ class SampleDataSeeder extends Seeder
      */
     public function run(): void
     {
-        // Get institution, template, and categories
-        $institution = Institution::where('code', 'INST001')->first();
-        $template = AssessmentTemplate::where('code', 'SPSP2024')->first();
+        // ==========================================
+        // 1. GET MASTER DATA
+        // ==========================================
+
+        // Institution: Kejaksaan Agung RI (from PDF sample)
+        $kejaksaan = Institution::where('code', 'kejaksaan')->first();
+
+        // Template: P3K Standard 2025
+        $templateP3K = AssessmentTemplate::where('code', 'p3k_standard_2025')->first();
+
+        // Categories: Potensi & Kompetensi
         $categoryPotensi = CategoryType::where('code', 'potensi')->first();
         $categoryKompetensi = CategoryType::where('code', 'kompetensi')->first();
 
-        // Create Assessment Event
+        // ==========================================
+        // 2. CREATE EVENT
+        // ==========================================
+
         $event = AssessmentEvent::create([
-            'institution_id' => $institution->id,
-            'template_id' => $template->id,
+            'institution_id' => $kejaksaan->id,
+            'template_id' => $templateP3K->id,
             'code' => 'P3K-KEJAKSAAN-2025',
             'name' => 'Asesmen P3K Kejaksaan Agung RI 2025',
             'year' => 2025,
@@ -47,7 +58,10 @@ class SampleDataSeeder extends Seeder
             'status' => 'completed',
         ]);
 
-        // Create Batch
+        // ==========================================
+        // 3. CREATE BATCH & POSITION
+        // ==========================================
+
         $batch = Batch::create([
             'event_id' => $event->id,
             'code' => 'BATCH-1-MOJOKERTO',
@@ -58,7 +72,6 @@ class SampleDataSeeder extends Seeder
             'end_date' => '2025-09-28',
         ]);
 
-        // Create Position Formation
         $position = PositionFormation::create([
             'event_id' => $event->id,
             'code' => 'fisikawan_medis',
@@ -66,7 +79,10 @@ class SampleDataSeeder extends Seeder
             'quota' => 10,
         ]);
 
-        // Create Sample Participant (from PDF)
+        // ==========================================
+        // 4. PARTICIPANT #1: EKA FEBRIYANI (from PDF)
+        // ==========================================
+
         $participant = Participant::create([
             'event_id' => $event->id,
             'batch_id' => $batch->id,
@@ -80,7 +96,7 @@ class SampleDataSeeder extends Seeder
             'assessment_date' => '2025-09-27',
         ]);
 
-        // Create Category Assessment - POTENSI
+        // --- 4.1. Category Assessment: POTENSI ---
         $catPotensi = CategoryAssessment::create([
             'participant_id' => $participant->id,
             'category_type_id' => $categoryPotensi->id,
@@ -94,7 +110,7 @@ class SampleDataSeeder extends Seeder
             'conclusion_text' => 'DI BAWAH STANDARD',
         ]);
 
-        // Create Aspect Assessment - Kecerdasan
+        // --- 4.2. Aspect Assessment: Kecerdasan ---
         $aspectKecerdasan = Aspect::where('code', 'kecerdasan')->first();
         $aspKecerdasan = AspectAssessment::create([
             'category_assessment_id' => $catPotensi->id,
@@ -110,7 +126,7 @@ class SampleDataSeeder extends Seeder
             'description_text' => null,
         ]);
 
-        // Create Sub-Aspect Assessments for Kecerdasan
+        // --- 4.3. Sub-Aspect Assessments for Kecerdasan ---
         $kecerdasanSubAspects = [
             ['code' => 'kecerdasan_umum', 'standard' => 3, 'individual' => 3, 'label' => 'Cukup'],
             ['code' => 'daya_tangkap', 'standard' => 4, 'individual' => 4, 'label' => 'Baik'],
@@ -131,7 +147,7 @@ class SampleDataSeeder extends Seeder
             ]);
         }
 
-        // Create Category Assessment - KOMPETENSI
+        // --- 4.4. Category Assessment: KOMPETENSI ---
         $catKompetensi = CategoryAssessment::create([
             'participant_id' => $participant->id,
             'category_type_id' => $categoryKompetensi->id,
@@ -145,7 +161,7 @@ class SampleDataSeeder extends Seeder
             'conclusion_text' => 'SANGAT KOMPETEN',
         ]);
 
-        // Create Aspect Assessment - Integritas
+        // --- 4.5. Aspect Assessment: Integritas ---
         $aspectIntegritas = Aspect::where('code', 'integritas')->first();
         AspectAssessment::create([
             'category_assessment_id' => $catKompetensi->id,
@@ -161,7 +177,7 @@ class SampleDataSeeder extends Seeder
             'description_text' => 'Individu kompeten menampilkan kompetensi integritas sesuai dengan standar level yang di tetapkan.',
         ]);
 
-        // Create Final Assessment
+        // --- 4.6. Final Assessment ---
         FinalAssessment::create([
             'participant_id' => $participant->id,
             'potensi_weight' => 40,
@@ -177,7 +193,7 @@ class SampleDataSeeder extends Seeder
             'conclusion_text' => 'MASIH MEMENUHI SYARAT (MMS)',
         ]);
 
-        // Create Psychological Test
+        // --- 4.7. Psychological Test ---
         PsychologicalTest::create([
             'participant_id' => $participant->id,
             'raw_score' => 40.00,
@@ -192,7 +208,7 @@ class SampleDataSeeder extends Seeder
             'notes' => 'Mungkin terdapat psikopatologi (gejala kejiwaan) yang disembunyikan.',
         ]);
 
-        // Create Interpretations
+        // --- 4.8. Interpretations ---
         Interpretation::create([
             'participant_id' => $participant->id,
             'category_type_id' => $categoryPotensi->id,
@@ -205,7 +221,10 @@ class SampleDataSeeder extends Seeder
             'interpretation_text' => 'Dalam bekerja, individu cukup mampu mengelola pekerjaan yang menjadi tanggung jawabnya sesuai dengan prioritas penyelesaian masalah.',
         ]);
 
-        // Create additional sample participants
+        // ==========================================
+        // 5. ADDITIONAL SAMPLE PARTICIPANTS (3 more)
+        // ==========================================
+
         $this->createAdditionalParticipants($event, $batch, $position, $categoryPotensi, $categoryKompetensi);
     }
 

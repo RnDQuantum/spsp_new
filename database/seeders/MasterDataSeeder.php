@@ -13,8 +13,8 @@ class MasterDataSeeder extends Seeder
      */
     public function run(): void
     {
-        // Get template SPSP2024
-        $template = AssessmentTemplate::where('code', 'SPSP2024')->first();
+        // Get template P3K Standard 2025
+        $template = AssessmentTemplate::where('code', 'p3k_standard_2025')->first();
 
         // ==========================================
         // CATEGORY: POTENSI (40%)
