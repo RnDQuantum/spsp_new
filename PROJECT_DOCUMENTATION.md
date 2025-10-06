@@ -1,0 +1,1023 @@
+# 📊 APLIKASI DASHBOARD ANALYTICS ASESMEN - LARAVEL
+
+## 🎯 TUJUAN APLIKASI
+
+### **Primary Purpose:**
+
+Aplikasi dashboard analytics untuk menampilkan dan menganalisis data hasil asesmen secara berkelompok (per instansi, event, batch, formasi jabatan).
+
+### **Secondary Purpose:**
+
+Menampilkan laporan individual per peserta yang mirip dengan format PDF dari aplikasi utama.
+
+### **Key Features:**
+
+-   ✅ Dashboard analytics dengan visualisasi chart (spider chart, bar chart)
+-   ✅ Perbandingan statistik (per batch, per formasi, per aspek)
+-   ✅ Detail report individual (seperti PDF)
+-   ✅ Manual sync data dari aplikasi utama (CI3)
+-   ✅ Read-only application (tidak ada aksi edit/delete)
+-   ✅ Simple authentication (optional)
+
+---
+
+## 🏗️ ARSITEKTUR SISTEM
+
+### **Stack Teknologi:**
+
+-   pakai projek ini
+
+### **Integrasi:**
+
+-   **Aplikasi Utama:** CodeIgniter 3 (sudah production)
+-   **Data Flow:** Manual sync via button (tidak realtime)
+-   **API:** REST API dari CI3 → Laravel
+
+---
+
+## 📊 STRUKTUR DATA
+
+### **Hierarki Data:**
+
+```
+Institution (Instansi)
+    └─ Assessment Event (Pelaksanaan Asesmen)
+        ├─ Template (Potensi + Kompetensi struktur)
+        ├─ Batches (Gelombang/Lokasi)
+        ├─ Position Formations (Formasi Jabatan)
+        └─ Participants (Peserta)
+            ├─ Category Assessments (Potensi & Kompetensi)
+            │   └─ Aspect Assessments
+            │       └─ Sub-Aspect Assessments
+            ├─ Final Assessment (Hasil Akhir)
+            ├─ Psychological Test (Tes Kejiwaan)
+            └─ Interpretations (Narasi)
+```
+
+### **Kategori Penilaian:**
+
+1. **POTENSI (40%)**
+
+    - Kecerdasan (30%)
+    - Sikap Kerja (20%)
+    - Hubungan Sosial (20%)
+    - Kepribadian (30%)
+
+2. **KOMPETENSI (60%)**
+    - Integritas (12%)
+    - Kerjasama (11%)
+    - Komunikasi (11%)
+    - Orientasi Pada Hasil (11%)
+    - Pelayanan Publik (11%)
+    - Pengembangan Diri & Orang Lain (11%)
+    - Mengelola Perubahan (11%)
+    - Pengambilan Keputusan (11%)
+    - Perekat Bangsa (11%)
+
+---
+
+## 🗄️ DATABASE DESIGN
+
+### **Total Tables: 16**
+
+---
+
+### **MASTER TABLES (5)**
+
+#### **1. institutions**
+```
+├─ id (PK, bigint unsigned)
+├─ code (string, UNIQUE) - 'kejaksaan', 'kemenkeu'
+├─ name (string)
+├─ logo_path (string, nullable)
+├─ api_key (string, UNIQUE) - untuk validasi API
+└─ timestamps
+
+INDEX: code
+```
+
+#### **2. assessment_templates**
+```
+├─ id (PK, bigint unsigned)
+├─ code (string, UNIQUE) - 'p3k_standard_2025'
+├─ name (string)
+├─ description (text, nullable)
+└─ timestamps
+
+INDEX: code
+```
+
+#### **3. category_types** (Potensi / Kompetensi)
+```
+├─ id (PK, bigint unsigned)
+├─ template_id (FK → assessment_templates)
+├─ code (string) - 'potensi', 'kompetensi'
+├─ name (string)
+├─ weight_percentage (integer) - 40, 60
+├─ order (integer)
+└─ timestamps
+
+INDEX: template_id
+UNIQUE: template_id + code
+```
+
+#### **4. aspects**
+```
+├─ id (PK, bigint unsigned)
+├─ category_type_id (FK → category_types)
+├─ code (string) - 'kecerdasan', 'integritas'
+├─ name (string)
+├─ weight_percentage (integer) - 30, 20, 12, 11
+├─ standard_rating (decimal 5,2, nullable) - 3.50, 2.70
+├─ order (integer)
+└─ timestamps
+
+INDEX: category_type_id
+INDEX: code
+```
+
+#### **5. sub_aspects**
+```
+├─ id (PK, bigint unsigned)
+├─ aspect_id (FK → aspects)
+├─ code (string) - 'kecerdasan_umum'
+├─ name (string)
+├─ standard_rating (integer, nullable) - 3, 4, 5
+├─ order (integer)
+└─ timestamps
+
+INDEX: aspect_id
+
+NOTE: Untuk kompetensi yang tidak punya sub-aspect,
+      table ini tidak perlu diisi (empty relation)
+```
+
+---
+
+### **EVENT & EXECUTION (3)**
+
+#### **6. assessment_events**
+```
+├─ id (PK, bigint unsigned)
+├─ institution_id (FK → institutions)
+├─ template_id (FK → assessment_templates)
+├─ code (string, UNIQUE) - 'P3K-KEJAKSAAN-2025'
+├─ name (string)
+├─ year (integer)
+├─ start_date (date)
+├─ end_date (date)
+├─ status (enum) - 'draft', 'ongoing', 'completed'
+├─ last_synced_at (timestamp, nullable) - track terakhir sync
+└─ timestamps
+
+INDEX: institution_id
+INDEX: code
+INDEX: status
+```
+
+#### **7. batches** (Gelombang/Lokasi)
+```
+├─ id (PK, bigint unsigned)
+├─ event_id (FK → assessment_events)
+├─ code (string) - 'BATCH-1-MOJOKERTO'
+├─ name (string)
+├─ location (string)
+├─ batch_number (integer)
+├─ start_date (date)
+├─ end_date (date)
+└─ timestamps
+
+INDEX: event_id
+UNIQUE: event_id + code
+```
+
+#### **8. position_formations** (Formasi Jabatan)
+```
+├─ id (PK, bigint unsigned)
+├─ event_id (FK → assessment_events)
+├─ code (string) - 'fisikawan_medis'
+├─ name (string)
+├─ quota (integer, nullable)
+└─ timestamps
+
+INDEX: event_id
+UNIQUE: event_id + code
+```
+
+---
+
+### **PARTICIPANT DATA (1)**
+
+#### **9. participants**
+```
+├─ id (PK, bigint unsigned)
+├─ event_id (FK → assessment_events)
+├─ batch_id (FK → batches, nullable)
+├─ position_formation_id (FK → position_formations)
+├─ test_number (string, UNIQUE) - '03-5-2-18-001'
+├─ skb_number (string)
+├─ name (string)
+├─ email (string, nullable)
+├─ phone (string, nullable)
+├─ photo_path (string, nullable)
+├─ assessment_date (date)
+└─ timestamps
+
+UNIQUE INDEX: test_number
+INDEX: event_id
+INDEX: batch_id
+INDEX: position_formation_id
+INDEX: name (untuk search)
+```
+
+---
+
+### **ASSESSMENT SCORES (3)**
+
+#### **10. category_assessments** (Nilai per Kategori)
+```
+├─ id (PK, bigint unsigned)
+├─ participant_id (FK → participants)
+├─ category_type_id (FK → category_types)
+├─ total_standard_rating (decimal 8,2) - 11.94, 24.30
+├─ total_standard_score (decimal 8,2) - 300.21, 270.00
+├─ total_individual_rating (decimal 8,2) - 11.83, 27.48
+├─ total_individual_score (decimal 8,2) - 294.25, 305.36
+├─ gap_rating (decimal 8,2) - -0.11, 3.18
+├─ gap_score (decimal 8,2) - -5.97, 35.36
+├─ conclusion_code (string) - 'below_standard', 'competent', 'very_competent'
+├─ conclusion_text (string) - 'DI BAWAH STANDARD', 'SANGAT KOMPETEN'
+└─ timestamps
+
+UNIQUE INDEX: participant_id + category_type_id
+INDEX: category_type_id
+INDEX: conclusion_code (untuk filtering dashboard)
+```
+
+#### **11. aspect_assessments** (Nilai per Aspek)
+```
+├─ id (PK, bigint unsigned)
+├─ category_assessment_id (FK → category_assessments)
+├─ aspect_id (FK → aspects)
+├─ standard_rating (decimal 5,2) - 3.15
+├─ standard_score (decimal 8,2) - 94.50
+├─ individual_rating (decimal 5,2) - 2.58
+├─ individual_score (decimal 8,2) - 77.29
+├─ gap_rating (decimal 8,2) - -0.57
+├─ gap_score (decimal 8,2) - -17.21
+├─ percentage_score (integer) - 78 (untuk display & chart)
+├─ conclusion_code (string) - 'below_standard', 'meets_standard', 'exceeds_standard'
+├─ conclusion_text (string) - 'Kurang Memenuhi Standard'
+├─ description_text (text, nullable) - khusus untuk kompetensi
+└─ timestamps
+
+INDEX: category_assessment_id
+INDEX: aspect_id (untuk aggregate by aspect)
+```
+
+#### **12. sub_aspect_assessments** (Nilai per Sub-Aspek)
+```
+├─ id (PK, bigint unsigned)
+├─ aspect_assessment_id (FK → aspect_assessments)
+├─ sub_aspect_id (FK → sub_aspects)
+├─ standard_rating (integer) - 3
+├─ individual_rating (integer) - 3
+├─ rating_label (string) - 'Cukup', 'Baik', 'Baik Sekali'
+└─ timestamps
+
+INDEX: aspect_assessment_id
+INDEX: sub_aspect_id
+```
+
+---
+
+### **FINAL RESULTS (3)**
+
+#### **13. final_assessments**
+```
+├─ id (PK, bigint unsigned)
+├─ participant_id (FK → participants, UNIQUE)
+├─ potensi_weight (integer) - 40
+├─ potensi_standard_score (decimal 8,2) - 133.43
+├─ potensi_individual_score (decimal 8,2) - 117.70
+├─ kompetensi_weight (integer) - 60
+├─ kompetensi_standard_score (decimal 8,2) - 180.00
+├─ kompetensi_individual_score (decimal 8,2) - 183.22
+├─ total_standard_score (decimal 8,2) - 313.43
+├─ total_individual_score (decimal 8,2) - 300.91
+├─ achievement_percentage (decimal 5,2) - 96.01 (calculated: individual/standard*100)
+├─ final_conclusion_code (string) - 'mms', 'ms', 'tms'
+├─ final_conclusion_text (string) - 'MASIH MEMENUHI SYARAT (MMS)'
+└─ timestamps
+
+UNIQUE INDEX: participant_id
+INDEX: final_conclusion_code
+INDEX: achievement_percentage (untuk ranking)
+```
+
+#### **14. psychological_tests**
+```
+├─ id (PK, bigint unsigned)
+├─ participant_id (FK → participants, UNIQUE)
+├─ raw_score (decimal 5,2) - 40.00
+├─ iq_score (integer, nullable) - 97
+├─ validity_status (string)
+├─ internal_status (string)
+├─ interpersonal_status (string)
+├─ work_capacity_status (string)
+├─ clinical_status (string)
+├─ conclusion_code (string) - 'ms', 'tms'
+├─ conclusion_text (string)
+├─ notes (text, nullable)
+└─ timestamps
+
+UNIQUE INDEX: participant_id
+INDEX: conclusion_code
+```
+
+#### **15. interpretations**
+```
+├─ id (PK, bigint unsigned)
+├─ participant_id (FK → participants)
+├─ category_type_id (FK → category_types, nullable)
+├─ interpretation_text (text)
+└─ timestamps
+
+INDEX: participant_id
+INDEX: category_type_id
+
+NOTE: 1 peserta bisa punya 2 interpretations:
+      - 1 untuk Potensi (category_type_id = potensi)
+      - 1 untuk Kompetensi (category_type_id = kompetensi)
+      Atau bisa general (category_type_id = null)
+```
+
+---
+
+### **AUTH (1)**
+
+#### **16. users** (Laravel default, simplified)
+```
+├─ id (PK, bigint unsigned)
+├─ name (string)
+├─ email (string, UNIQUE)
+├─ password (string)
+├─ remember_token (string, nullable)
+└─ timestamps
+
+NOTE: Simple auth, no roles
+      Semua user punya akses sama
+```
+
+---
+
+### **DATABASE RELATIONSHIPS**
+
+```
+Institution (1) ──< (N) AssessmentEvent
+AssessmentTemplate (1) ──< (N) AssessmentEvent
+AssessmentTemplate (1) ──< (N) CategoryType
+CategoryType (1) ──< (N) Aspect
+Aspect (1) ──< (N) SubAspect (optional, bisa 0)
+
+AssessmentEvent (1) ──< (N) Batch
+AssessmentEvent (1) ──< (N) PositionFormation
+AssessmentEvent (1) ──< (N) Participant
+
+Participant (1) ──< (N) CategoryAssessment (selalu 2: Potensi + Kompetensi)
+Participant (1) ──── (1) FinalAssessment
+Participant (1) ──── (1) PsychologicalTest
+Participant (1) ──< (N) Interpretation (0-2 records)
+
+CategoryAssessment (1) ──< (N) AspectAssessment
+AspectAssessment (1) ──< (N) SubAspectAssessment (0-N, tergantung aspek)
+```
+
+---
+
+### **Key Unique Identifiers:**
+
+-   **Institution:** `code` (kejaksaan, kemenkeu)
+-   **Event:** `code` (P3K-KEJAKSAAN-2025)
+-   **Participant:** `test_number` (03-5-2-18-001) ← PRIMARY KEY
+
+---
+
+## 🔄 DATA FLOW & SYNC MECHANISM
+
+### **Sync Process:**
+
+```
+┌─────────────────────────────────────┐
+│   UI LARAVEL (Manual Button)       │
+│   Input: Event Code                 │
+│   Click: [Sync Data]                │
+└──────────────┬──────────────────────┘
+               │
+               ↓ HTTP GET + API Key
+┌──────────────┴──────────────────────┐
+│   CI3 API Controller                │
+│   GET /api/events/{code}/export     │
+│   - Validate API Key                │
+│   - Get event + template structure  │
+│   - Get all participants + scores   │
+│   - Return JSON (complete data)     │
+└──────────────┬──────────────────────┘
+               │
+               ↓ JSON Response
+┌──────────────┴──────────────────────┐
+│   Laravel SyncService               │
+│   - Validate structure              │
+│   - Begin DB Transaction            │
+│   - Upsert institution              │
+│   - Upsert template (dynamic)       │
+│   - Upsert event                    │
+│   - Upsert batches & positions      │
+│   - Loop participants:              │
+│     • Upsert participant            │
+│     • Upsert assessments            │
+│     • Upsert final result           │
+│     • Upsert psych test             │
+│   - Commit transaction              │
+│   - Update last_synced_at           │
+└──────────────┬──────────────────────┘
+               │
+               ↓
+       [Data Ready to Display]
+```
+
+### **Karakteristik Sync:**
+
+-   ✅ **Manual trigger** - tidak otomatis
+-   ✅ **Idempotent** - bisa sync berulang tanpa duplikasi
+-   ✅ **Upsert pattern** - update if exists, insert if not
+-   ✅ **Transaction-based** - all or nothing
+-   ✅ **Error handling** - log & continue untuk participant gagal
+-   ✅ **Progress tracking** - log setiap 10 peserta
+
+---
+
+## 📡 API SPECIFICATION
+
+### **Endpoint CI3 (yang harus dibuat):**
+
+**GET** `/api/events/{event_code}/export`
+
+**Headers:**
+```
+X-API-Key: {shared_secret_key}
+```
+
+**Note:** Untuk detail lengkap API specification termasuk full JSON structure, error responses, dan testing guide, lihat file [API_SPECIFICATION.md](./API_SPECIFICATION.md)
+
+**Response Summary:**
+```json
+{
+  "success": true,
+  "data": {
+    "institution": {...},
+    "template": {
+      "categories": [
+        {
+          "code": "potensi",
+          "aspects": [...with sub_aspects]
+        },
+        {
+          "code": "kompetensi",
+          "aspects": [...no sub_aspects]
+        }
+      ]
+    },
+    "event": {...},
+    "batches": [...],
+    "positions": [...],
+    "participants": [...]
+  },
+  "meta": {...}
+}
+```
+
+---
+
+## 🎨 UI/UX STRUCTURE
+
+### **Page Hierarchy:**
+
+1. **Home/Dashboard** (`/`)
+
+    - List semua events
+    - Button: Sync Event Baru
+    - Button per event: View Dashboard, Re-sync
+
+2. **Event Dashboard** (`/events/{code}`)
+
+    - Overview statistics
+    - Spider charts (Potensi & Kompetensi rata-rata)
+    - Distribution charts
+    - Comparison by batch
+    - Comparison by position
+    - Top performers table
+    - All participants table (searchable)
+
+3. **Batch Detail** (`/events/{code}/batches/{id}`)
+
+    - Stats khusus batch
+    - Comparison dengan batch lain
+    - List participants in batch
+
+4. **Position Detail** (`/events/{code}/positions/{id}`)
+
+    - Stats khusus formasi
+    - Comparison dengan formasi lain
+    - Ranking participants
+
+5. **Participant Detail** (`/participants/{test_number}`)
+
+    - Info peserta
+    - Spider charts (Individual vs Standard)
+    - Table Profil Potensi
+    - Table Profil Kompetensi
+    - Interpretasi text
+    - Psych test result
+    - Final conclusion
+    - (Future: Export PDF button)
+
+6. **Sync Page** (`/sync`)
+    - Form input event code
+    - Button: Fetch & Sync
+    - Progress indicator
+    - Success/Error message
+
+---
+
+## 📝 IMPLEMENTATION CHECKLIST
+
+### **PHASE 1: Project Setup** ⏳
+
+-   [ ] Install Laravel 11
+-   [ ] Setup database connection
+-   [ ] Configure .env (CI3_API_URL, CI3_API_KEY)
+-   [ ] Install dependencies:
+    -   [ ] Tailwind CSS
+    -   [ ] Alpine.js
+    -   [ ] Chart.js / ApexCharts
+-   [ ] Setup Git repository
+
+### **PHASE 2: Database & Models** ⏳
+
+-   [ ] Create all migrations (16 tables)
+    -   [ ] Master tables (5)
+    -   [ ] Event & execution (3)
+    -   [ ] Participant data (1)
+    -   [ ] Assessment scores (3)
+    -   [ ] Final results (3)
+    -   [ ] Auth table (1)
+-   [ ] Test migrations (up & down)
+-   [ ] Create all Eloquent models (15 models)
+-   [ ] Define relationships
+-   [ ] Test relationships via Tinker
+-   [ ] Create seeders for testing (optional)
+
+### **PHASE 3: API Integration (CI3 Side)** ⏳
+
+-   [ ] Create API controller in CI3
+-   [ ] Implement authentication (API key validation)
+-   [ ] Create method to get event data
+-   [ ] Create method to get all participants with scores
+-   [ ] Structure JSON response
+-   [ ] Test endpoint with Postman/Insomnia
+-   [ ] Handle edge cases (event not found, no participants, etc)
+
+### **PHASE 4: Sync Service (Laravel)** ⏳
+
+-   [ ] Create SyncService class
+-   [ ] Implement HTTP client to CI3 API
+-   [ ] Implement validation methods
+-   [ ] Implement sync methods:
+    -   [ ] syncInstitution()
+    -   [ ] syncTemplate() - dynamic structure
+    -   [ ] syncEvent()
+    -   [ ] syncBatches()
+    -   [ ] syncPositions()
+    -   [ ] syncParticipants() - with loop
+    -   [ ] syncCategoryAssessment()
+    -   [ ] syncAspectAssessment()
+    -   [ ] syncSubAspectAssessment()
+    -   [ ] syncFinalAssessment()
+    -   [ ] syncPsychologicalTest()
+    -   [ ] syncInterpretations()
+-   [ ] Implement helper methods (mapping, calculation)
+-   [ ] Implement error handling & logging
+-   [ ] Test with sample data
+
+### **PHASE 5: Analytics Service** ⏳
+
+-   [ ] Create AnalyticsService class
+-   [ ] Implement query methods:
+    -   [ ] getEventOverview()
+    -   [ ] getAverageScoresByAspect() - untuk spider chart
+    -   [ ] getRatingDistribution() - untuk bar chart
+    -   [ ] getComparisonByBatch()
+    -   [ ] getComparisonByPosition()
+    -   [ ] getTopPerformers()
+-   [ ] Optimize queries with indexes
+-   [ ] Test queries dengan large dataset
+
+### **PHASE 6: Controllers & Routes** ⏳
+
+-   [ ] Create SyncController
+    -   [ ] index() - show sync form
+    -   [ ] sync() - process sync
+    -   [ ] resync() - re-sync existing event
+-   [ ] Create EventController
+    -   [ ] index() - list events
+    -   [ ] dashboard() - event analytics
+    -   [ ] batchDetail()
+    -   [ ] positionDetail()
+-   [ ] Create ParticipantController
+    -   [ ] show() - individual report
+    -   [ ] downloadPdf() (future)
+-   [ ] Create DashboardController
+    -   [ ] home() - landing page
+-   [ ] Setup routes in web.php
+-   [ ] Setup API routes (future)
+
+### **PHASE 7: Views & Blade Templates** ⏳
+
+-   [ ] Setup Tailwind CSS config
+-   [ ] Create main layout template
+    -   [ ] Header/navbar
+    -   [ ] Sidebar (optional)
+    -   [ ] Footer
+    -   [ ] Flash messages component
+-   [ ] Create sync views:
+    -   [ ] sync/index.blade.php - form
+-   [ ] Create event views:
+    -   [ ] events/index.blade.php - list
+    -   [ ] events/dashboard.blade.php - analytics
+    -   [ ] events/batch-detail.blade.php
+    -   [ ] events/position-detail.blade.php
+-   [ ] Create participant views:
+    -   [ ] participants/show.blade.php - individual report
+-   [ ] Create home view:
+    -   [ ] home.blade.php
+
+### **PHASE 8: Chart Implementation** ⏳
+
+-   [ ] Install & setup Chart.js / ApexCharts
+-   [ ] Create chart components:
+    -   [ ] Spider chart component (reusable)
+    -   [ ] Bar chart component
+    -   [ ] Line chart component (optional)
+-   [ ] Implement Potensi spider chart
+-   [ ] Implement Kompetensi spider chart
+-   [ ] Implement distribution charts
+-   [ ] Implement comparison charts
+-   [ ] Make charts responsive
+-   [ ] Add chart legends & tooltips
+
+### **PHASE 9: Authentication (Optional)** ⏳
+
+-   [ ] Setup Laravel Breeze/UI
+-   [ ] Disable registration
+-   [ ] Create default user seeder
+-   [ ] Add auth middleware to sensitive routes
+-   [ ] Customize login view
+
+### **PHASE 10: Testing & Refinement** ⏳
+
+-   [ ] Test full sync flow
+    -   [ ] New event sync
+    -   [ ] Re-sync existing event
+    -   [ ] Error handling
+-   [ ] Test with multiple events
+-   [ ] Test with large dataset (100+ participants)
+-   [ ] Test all analytics queries
+-   [ ] Test all visualizations
+-   [ ] Cross-browser testing
+-   [ ] Mobile responsive testing
+-   [ ] Performance optimization:
+    -   [ ] Add database indexes
+    -   [ ] Optimize N+1 queries
+    -   [ ] Add pagination where needed
+-   [ ] UI/UX improvements
+-   [ ] Add loading indicators
+-   [ ] Add empty states
+-   [ ] Add error states
+
+### **PHASE 11: Documentation** ⏳
+
+-   [ ] Write README.md
+-   [ ] Document API integration
+-   [ ] Document sync process
+-   [ ] Document deployment steps
+-   [ ] Create user guide (optional)
+-   [ ] Add inline code comments
+
+### **PHASE 12: Deployment Preparation** ⏳
+
+-   [ ] Setup production .env
+-   [ ] Configure production database
+-   [ ] Setup HTTPS for API calls
+-   [ ] Setup queue worker (if using jobs)
+-   [ ] Setup error monitoring (Sentry, etc)
+-   [ ] Setup backup strategy
+-   [ ] Create deployment script
+-   [ ] Test in staging environment
+
+---
+
+## ⚠️ KNOWN ISSUES & CONSIDERATIONS
+
+### **Database:**
+
+1. **Dynamic Template Structure**
+
+    - Setiap event bisa punya struktur aspect berbeda
+    - Solution: Template system dengan master tables
+    - Status: ✅ Designed
+
+2. **Large Dataset Performance**
+
+    - Event bisa punya ratusan/ribuan peserta
+    - Solution: Proper indexing, pagination, lazy loading
+    - Status: ⚠️ Need testing
+
+3. **Data Consistency**
+    - Data bisa berubah di CI3 setelah sync
+    - Solution: Manual re-sync, show last_synced_at
+    - Status: ✅ Handled
+
+### **API Integration:**
+
+1. **Network Timeout**
+
+    - Export data besar bisa lama
+    - Solution: Increase timeout, add retry mechanism
+    - Status: ⚠️ Set 120s timeout
+
+2. **API Authentication**
+
+    - Shared API key perlu secure
+    - Solution: HTTPS, environment variable
+    - Status: ⚠️ Need HTTPS in production
+
+3. **CI3 Server Availability**
+    - Jika CI3 down, sync gagal
+    - Solution: Graceful error handling, retry later
+    - Status: ✅ Error handling implemented
+
+### **Performance:**
+
+1. **Spider Chart Rendering**
+
+    - Multiple charts per page bisa lambat
+    - Solution: Lazy load, optimize data
+    - Status: ⏳ Belum ditest
+
+2. **Analytics Queries**
+    - Complex aggregate queries bisa lambat
+    - Solution: Proper indexes, caching (future)
+    - Status: ⚠️ Need optimization testing
+
+### **UI/UX:**
+
+1. **Mobile Responsive**
+
+    - Charts sulit di mobile
+    - Solution: Responsive design, touch-friendly
+    - Status: ⏳ Need implementation
+
+2. **Data Presentation**
+    - Banyak data, bisa overwhelming
+    - Solution: Good hierarchy, filters, search
+    - Status: ⏳ Need design
+
+---
+
+## 🐛 POTENTIAL PROBLEMS & SOLUTIONS
+
+### **Problem 1: Sync Timeout untuk Event Besar**
+
+**Scenario:** Event dengan 1000+ peserta, JSON response besar, timeout.
+
+**Solutions:**
+
+-   ✅ Increase HTTP timeout (120s)
+-   🔄 Implement pagination di API CI3 (batch 100 peserta)
+-   🔄 Use queue jobs untuk background sync
+-   🔄 Show progress bar dengan AJAX polling
+
+**Priority:** Medium (jika dataset > 500 peserta)
+
+---
+
+### **Problem 2: Data Tidak Konsisten Setelah Re-sync**
+
+**Scenario:** Data di CI3 berubah, re-sync override data lama.
+
+**Solutions:**
+
+-   ✅ Upsert pattern (update existing)
+-   ✅ Show last_synced_at di UI
+-   🔄 Add audit log (track changes)
+-   🔄 Soft delete untuk historical data
+
+**Priority:** Low (acceptable behavior)
+
+---
+
+### **Problem 3: Template Structure Berubah**
+
+**Scenario:** CI3 update structure (tambah aspek baru), existing data jadi incompatible.
+
+**Solutions:**
+
+-   ✅ Template versioning system
+-   ✅ Dynamic template from API
+-   🔄 Migration tool untuk update old data
+-   🔄 Support multiple template versions
+
+**Priority:** Medium (future-proof)
+
+---
+
+### **Problem 4: Spider Chart Tidak Muncul**
+
+**Scenario:** Chart library gagal load atau data format salah.
+
+**Solutions:**
+
+-   ✅ Validate data format sebelum render
+-   ✅ Add fallback (show table if chart fails)
+-   ✅ Console error logging
+-   🔄 Use reliable chart library (ApexCharts)
+
+**Priority:** High (core feature)
+
+---
+
+### **Problem 5: Slow Analytics Queries**
+
+**Scenario:** Dashboard load lama karena complex queries.
+
+**Solutions:**
+
+-   ✅ Add proper database indexes
+-   ✅ Use eager loading (with())
+-   🔄 Implement query result caching
+-   🔄 Add pre-calculated statistics table
+-   🔄 Use database views for complex queries
+
+**Priority:** High (UX critical)
+
+---
+
+### **Problem 6: API Key Exposed**
+
+**Scenario:** API key tercantum di client-side atau version control.
+
+**Solutions:**
+
+-   ✅ Always use .env file
+-   ✅ Add .env to .gitignore
+-   ✅ Server-side API calls only
+-   ✅ Use HTTPS in production
+-   🔄 Implement key rotation mechanism
+
+**Priority:** Critical (security)
+
+---
+
+## 📈 FUTURE ENHANCEMENTS
+
+### **Short Term (1-3 months):**
+
+-   [ ] Export individual report to PDF
+-   [ ] Export analytics to Excel
+-   [ ] Add data filtering (by date range, score range)
+-   [ ] Add search functionality (global search)
+-   [ ] Email notification setelah sync berhasil
+-   [ ] Batch comparison chart (side-by-side)
+
+### **Medium Term (3-6 months):**
+
+-   [ ] Caching layer untuk improve performance
+-   [ ] Real-time sync dengan webhook (push dari CI3)
+-   [ ] Multi-tenancy support (jika ada banyak instansi)
+-   [ ] Custom report builder
+-   [ ] Data visualization customization
+-   [ ] API untuk third-party integration
+
+### **Long Term (6-12 months):**
+
+-   [ ] Machine learning untuk prediksi passing rate
+-   [ ] Automated anomaly detection
+-   [ ] Advanced analytics (correlation, regression)
+-   [ ] Mobile app (Flutter/React Native)
+-   [ ] White-label solution untuk instansi lain
+
+---
+
+## 📞 CONTACT & SUPPORT
+
+### **Development Team:**
+
+-   Lead Developer: [Your Name]
+-   Backend: Laravel 11 + MySQL
+-   Frontend: Blade + Tailwind + Alpine.js
+-   Integration: CodeIgniter 3 (existing)
+
+### **Repository:**
+
+-   Git: [repository URL]
+-   Branch Strategy: main (production), develop (development)
+-   Commit Convention: [conventional commits]
+
+### **Environment:**
+
+-   Local Development: http://localhost:8000
+-   CI3 App: http://localhost/aplikasi-utama
+-   Production: [TBD]
+
+---
+
+## 📅 PROJECT TIMELINE
+
+### **Estimated Timeline: 4-6 weeks**
+
+**Week 1:** Database & Models (Phase 1-2)
+**Week 2:** API Integration & Sync (Phase 3-4)
+**Week 3:** Analytics & Controllers (Phase 5-6)
+**Week 4:** Views & Charts (Phase 7-8)
+**Week 5:** Testing & Refinement (Phase 9-10)
+**Week 6:** Documentation & Deployment (Phase 11-12)
+
+---
+
+## ✅ ACCEPTANCE CRITERIA
+
+### **Minimum Viable Product (MVP):**
+
+-   ✅ Dapat sync data dari CI3 via button
+-   ✅ Tampil event dashboard dengan statistics
+-   ✅ Tampil spider chart Potensi & Kompetensi
+-   ✅ Tampil list participants dengan search
+-   ✅ Tampil individual report lengkap
+-   ✅ Responsive design (desktop & tablet)
+-   ✅ Error handling yang baik
+
+### **Success Metrics:**
+
+-   Sync 150 peserta < 2 menit
+-   Dashboard load < 3 detik
+-   Individual report load < 2 detik
+-   Mobile usability score > 80%
+-   Zero critical bugs
+
+---
+
+## 📝 NOTES & DECISIONS
+
+### **Design Decisions:**
+
+1. **Manual Sync vs Real-time**
+
+    - Decision: Manual sync via button
+    - Reason: Tidak membebani aplikasi utama, data tidak perlu real-time
+
+2. **Database: MySQL vs PostgreSQL**
+
+    - Decision: Support both (using Laravel migrations)
+    - Reason: Flexibility untuk production environment
+
+3. **Charts: Chart.js vs ApexCharts**
+
+    - Decision: ApexCharts (recommended)
+    - Reason: Better untuk spider chart, more features, modern UI
+
+4. **Auth: Simple vs Role-based**
+
+    - Decision: Simple auth, no roles
+    - Reason: Semua user akses sama, tidak perlu complexity
+
+5. **Caching: Now vs Later**
+    - Decision: Later (Phase 10+)
+    - Reason: Fokus functionality dulu, optimize kemudian
+
+### **Technical Debt:**
+
+-   None yet (greenfield project)
+
+### **Open Questions:**
+
+-   [ ] Apakah perlu support multiple institutions dalam 1 instance?
+-   [ ] Apakah perlu archive/soft delete untuk old events?
+-   [ ] Apakah perlu audit trail untuk tracking changes?
+-   [ ] Apakah perlu role management di future?
+
+---
+
+**Last Updated:** 2025-10-05
+**Version:** 1.0
+**Status:** Planning Phase ✍️
