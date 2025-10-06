@@ -1,4 +1,4 @@
-<div x-data="{ mobileOpen: false, minimized: false }" @sidebar-toggled.window="minimized = $event.detail.minimized">
+<div x-data="{ mobileOpen: false, minimized: false, individualOpen: false, generalOpen: false }" @sidebar-toggled.window="minimized = $event.detail.minimized">
     <!-- Mobile Toggle Button -->
     <button @click="mobileOpen = !mobileOpen"
         class="fixed top-4 left-4 z-50 p-2 bg-gray-800 text-white rounded-lg md:hidden">
@@ -8,11 +8,7 @@
     </button>
 
     <!-- Overlay untuk Mobile -->
-    <div x-show="mobileOpen" @click="mobileOpen = false"
-        x-transition:enter="transition-opacity ease-linear duration-300" x-transition:enter-start="opacity-0"
-        x-transition:enter-end="opacity-100" x-transition:leave="transition-opacity ease-linear duration-300"
-        x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
-        class="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden" style="display: none;">
+    <div x-show="mobileOpen" @click="mobileOpen = false" class="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden">
     </div>
 
     <!-- Sidebar -->
@@ -24,7 +20,8 @@
         class="fixed top-0 left-0 z-40 h-screen bg-gray-800 transition-all duration-300">
 
         <!-- Toggle Button Desktop -->
-        <button @click="minimized = !minimized; $dispatch('sidebar-toggled', { minimized: minimized })"
+        <button
+            @click="minimized = !minimized; if (minimized) { individualOpen = false; generalOpen = false } ; $dispatch('sidebar-toggled', { minimized: minimized })"
             class="hidden md:block absolute -right-3 top-6 bg-gray-800 text-white rounded-full p-1 border-2 border-gray-600 hover:bg-gray-700">
             <svg :class="minimized ? 'rotate-180' : ''" class="w-4 h-4 transition-transform" fill="none"
                 stroke="currentColor" viewBox="0 0 24 24">
@@ -53,10 +50,12 @@
 
                 <!-- Individual Report dengan Sub Menu -->
                 <div>
-                    <button @click="individualOpen = !individualOpen"
+                    <button id="btn-individual"
+                        @click="if (minimized) { minimized = false; $dispatch('sidebar-toggled', { minimized: minimized }); individualOpen = true } else { individualOpen = !individualOpen }"
                         :class="minimized ? 'justify-center' : 'justify-between'"
-                        class="w-full flex items-center px-4 py-3 text-gray-300 hover:bg-gray-700 rounded"
-                        title="Individual Report">
+                        class="w-full flex items-center px-4 py-3 text-gray-300 hover:bg-gray-700 rounded pointer-events-auto"
+                        title="Individual Report" aria-haspopup="true" :aria-expanded="individualOpen"
+                        aria-controls="submenu-individual">
                         <div class="flex items-center">
                             <svg :class="minimized ? '' : 'mr-3'" class="w-5 h-5" fill="currentColor"
                                 viewBox="0 0 20 20">
@@ -68,7 +67,8 @@
                             <span x-show="!minimized">Individual Report</span>
                         </div>
                         <svg x-show="!minimized" :class="individualOpen ? 'rotate-180' : ''"
-                            class="w-4 h-4 transition-transform" fill="currentColor" viewBox="0 0 20 20">
+                            class="w-4 h-4 transition-transform" fill="currentColor" viewBox="0 0 20 20"
+                            aria-hidden="true" focusable="false">
                             <path fill-rule="evenodd"
                                 d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
                                 clip-rule="evenodd"></path>
@@ -76,28 +76,55 @@
                     </button>
 
                     <!-- Sub Menu Individual Report -->
-                    <div x-show="individualOpen && !minimized" x-transition:enter="transition ease-out duration-200"
-                        x-transition:enter-start="opacity-0 transform -translate-y-2"
-                        x-transition:enter-end="opacity-100 transform translate-y-0" class="ml-4 mt-2 space-y-1"
-                        style="display: none;">
-                        <a href="#" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
-                            Report A
+                    <div x-show="individualOpen" x-cloak id="submenu-individual" class="ml-4 mt-2 space-y-1"
+                        role="menu" aria-labelledby="btn-individual">
+                        <a href="#" role="menuitem"
+                            class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
+                            General Matching
                         </a>
-                        <a href="#" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
-                            Report B
+                        <a href="#" role="menuitem"
+                            class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
+                            General Mapping
                         </a>
-                        <a href="#" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
-                            Report C
+                        <a href="#" role="menuitem"
+                            class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
+                            General Potency Mapping
+                        </a>
+                        <a href="#" role="menuitem"
+                            class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
+                            General Psychology Mapping
+                        </a>
+                        <a href="#" role="menuitem"
+                            class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
+                            Managerial Potency Mapping
+                        </a>
+                        <a href="#" role="menuitem"
+                            class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
+                            Ringkasan Managerial Potency Mapping
+                        </a>
+                        <a href="#" role="menuitem"
+                            class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
+                            Gambaran Individu & Deskripsi Kompetensi
+                        </a>
+                        <a href="#" role="menuitem"
+                            class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
+                            Ringkasan Hasil Assessment Individu
+                        </a>
+                        <a href="#" role="menuitem"
+                            class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
+                            Hasil Emotional Quotient (EQ)
                         </a>
                     </div>
                 </div>
 
                 <!-- General Report dengan Sub Menu -->
                 <div>
-                    <button @click="generalOpen = !generalOpen"
+                    <button id="btn-general"
+                        @click="if (minimized) { minimized = false; $dispatch('sidebar-toggled', { minimized: minimized }); generalOpen = true } else { generalOpen = !generalOpen }"
                         :class="minimized ? 'justify-center' : 'justify-between'"
-                        class="w-full flex items-center px-4 py-3 text-gray-300 hover:bg-gray-700 rounded"
-                        title="General Report">
+                        class="w-full flex items-center px-4 py-3 text-gray-300 hover:bg-gray-700 rounded pointer-events-auto"
+                        title="General Report" aria-haspopup="true" :aria-expanded="generalOpen"
+                        aria-controls="submenu-general">
                         <div class="flex items-center">
                             <svg :class="minimized ? '' : 'mr-3'" class="w-5 h-5" fill="currentColor"
                                 viewBox="0 0 20 20">
@@ -109,7 +136,8 @@
                             <span x-show="!minimized">General Report</span>
                         </div>
                         <svg x-show="!minimized" :class="generalOpen ? 'rotate-180' : ''"
-                            class="w-4 h-4 transition-transform" fill="currentColor" viewBox="0 0 20 20">
+                            class="w-4 h-4 transition-transform" fill="currentColor" viewBox="0 0 20 20"
+                            aria-hidden="true" focusable="false">
                             <path fill-rule="evenodd"
                                 d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
                                 clip-rule="evenodd"></path>
@@ -117,18 +145,23 @@
                     </button>
 
                     <!-- Sub Menu General Report -->
-                    <div x-show="generalOpen && !minimized" x-transition:enter="transition ease-out duration-200"
-                        x-transition:enter-start="opacity-0 transform -translate-y-2"
-                        x-transition:enter-end="opacity-100 transform translate-y-0" class="ml-4 mt-2 space-y-1"
-                        style="display: none;">
-                        <a href="#" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
-                            Summary Report
+                    <div x-show="generalOpen" x-cloak id="submenu-general" class="ml-4 mt-2 space-y-1"
+                        role="menu" aria-labelledby="btn-general">
+                        <a href="#" role="menuitem"
+                            class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
+                            Ranking & Analytics
                         </a>
-                        <a href="#" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
-                            Detailed Report
+                        <a href="#" role="menuitem"
+                            class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
+                            Standar Managerial Competency Mapping
                         </a>
-                        <a href="#" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
-                            Annual Report
+                        <a href="#" role="menuitem"
+                            class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
+                            Standar Potential Mapping
+                        </a>
+                        <a href="#" role="menuitem"
+                            class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
+                            Tes Kesehatan Mental Indonesia (TKMI)
                         </a>
                     </div>
                 </div>
