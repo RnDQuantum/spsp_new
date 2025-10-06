@@ -14,7 +14,7 @@
 | 2  | assessment_templates | ✅ DONE | N/A | N/A | 3 templates ready |
 | 3  | category_types | ✅ DONE | ✅ YES | ✅ YES | Potensi 40%, Kompetensi 60% |
 | 4  | aspects | ✅ DONE | ✅ YES | ✅ YES | All weights filled (30,20,20,30 & 11-12%) |
-| 5  | sub_aspects | ⏳ NEXT | N/A | N/A | - |
+| 5  | sub_aspects | ✅ DONE | ✅ YES | N/A | 23 records, all have standard_rating |
 | 6  | assessment_events | ⏸️ PENDING | N/A | N/A | - |
 | 7  | batches | ⏸️ PENDING | N/A | N/A | - |
 | 8  | position_formations | ⏸️ PENDING | N/A | N/A | - |
@@ -162,15 +162,88 @@ id, template_id, category_type_id, code, name, weight_percentage, standard_ratin
 
 ---
 
-### ⏳ 5. sub_aspects
+### ✅ 5. sub_aspects
 
-**Status:** NEXT - Ready for review
+**Reviewed:** 2025-10-06
+**Status:** PASSED ✅
+
+**Structure:**
+```
+id, aspect_id, code, name, description, standard_rating, order, timestamps
+```
+
+**Data Count:** 23 records (only for Potensi aspects)
+
+**Findings:**
+
+**POTENSI Breakdown:**
+- Kecerdasan (aspect_id: 1) → 6 sub-aspects ✅
+  - standard_rating range: 3-4
+- Sikap Kerja (aspect_id: 2) → 7 sub-aspects ✅
+  - standard_rating range: 3-4
+- Hubungan Sosial (aspect_id: 3) → 4 sub-aspects ✅
+  - standard_rating range: 3-4
+- Kepribadian (aspect_id: 4) → 6 sub-aspects ✅
+  - standard_rating range: 3-4
+
+**KOMPETENSI (aspects 5-13):**
+- 0 sub-aspects ✅ (Expected - Kompetensi tidak punya sub-aspects)
+
+**Validation Checks:**
+- ✅ All sub_aspects have aspect_id (no orphans)
+- ✅ All sub_aspects have standard_rating (FIXED - was NULL before)
+- ✅ Code naming convention: snake_case
+- ✅ Name descriptive in Indonesian
+- ✅ Description present for all
+- ✅ Order sequential per aspect
+- ✅ Total count: 23 records (6+7+4+6)
+- ✅ Foreign key constraint with cascade delete
+- ✅ Index on aspect_id
+
+**Design Decision:**
+- ✅ No template_id needed (inherited from aspect relationship)
+- ✅ standard_rating filled with dummy data (will come from API in production)
+- ✅ Snapshot pattern confirmed: standard_rating stored in both master (sub_aspects) and assessment (sub_aspect_assessments) tables
+
+**Approved by:** User
+**Comments:** PASSED - All standard_rating filled, snapshot pattern implemented correctly
 
 ---
 
 ## 🔧 Changes Log
 
-### 2025-10-06 - Aspects Table Structure Fix
+### 2025-10-06 PM - Master Tables Standard Rating Fill
+
+**Issue Identified:**
+- `aspects.standard_rating` was NULL for all records
+- `sub_aspects.standard_rating` was NULL for all records
+- These fields are needed for "snapshot pattern" - storing historical standard values in assessment tables
+
+**Solution Implemented:**
+1. ✅ Updated MasterDataSeeder to fill `standard_rating` for all aspects
+   - Potensi aspects: 3.20 - 3.75 range
+   - Kompetensi aspects: 3.25 - 3.75 range
+2. ✅ Updated MasterDataSeeder to fill `standard_rating` for all sub-aspects
+   - Range: 3-4 (integer values)
+3. ✅ Ran migrate:fresh --seed successfully
+
+**Design Pattern Confirmed: "Snapshot Pattern"**
+- Master tables (aspects, sub_aspects) store current/blueprint standard values
+- Assessment tables (aspect_assessments, sub_aspect_assessments) store snapshot at time of assessment
+- Purpose: Historical data integrity, audit trail, performance optimization
+- Trade-off: Data redundancy acceptable for data integrity
+
+**Files Modified:**
+- `database/seeders/MasterDataSeeder.php`
+
+**Verification:**
+- ✅ All 13 aspects have standard_rating filled
+- ✅ All 23 sub-aspects have standard_rating filled
+- ✅ Values are reasonable dummy data (will be replaced by API data in production)
+
+---
+
+### 2025-10-06 AM - Aspects Table Structure Fix
 
 **Problem Identified:**
 User pointed out that if Template 1 uses 2 Potensi aspects, Kecerdasan would be 50%, but Template 2 with 4 aspects would need Kecerdasan at 25%. Without template_id, this creates a conflict.
@@ -237,8 +310,8 @@ Where:
 
 ## 🎯 Next Steps
 
-1. ⏳ Review table `sub_aspects`
-2. ⏸️ Review table `assessment_events`
+1. ✅ ~~Review table `sub_aspects`~~ - COMPLETED
+2. ⏳ Review table `assessment_events` - NEXT
 3. ⏸️ Review table `batches`
 4. ⏸️ Review table `position_formations`
 5. ⏸️ Review remaining tables...
@@ -246,4 +319,4 @@ Where:
 ---
 
 **Last Updated:** 2025-10-06
-**Progress:** 4/16 tables (25%)
+**Progress:** 5/16 tables (31%)

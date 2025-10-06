@@ -133,7 +133,7 @@ UNIQUE: template_id + code
 ├─ code (string) - 'kecerdasan', 'integritas'
 ├─ name (string)
 ├─ weight_percentage (integer) - 30, 20, 12, 11
-├─ standard_rating (decimal 5,2, nullable) - 3.50, 2.70
+├─ standard_rating (decimal 5,2, nullable) - 3.50, 3.20, 3.75 ← FILLED 2025-10-06
 ├─ order (integer)
 └─ timestamps
 
@@ -146,6 +146,10 @@ NOTE: template_id ditambahkan untuk mendukung template berbeda
       yang bisa punya aspek dengan bobot berbeda.
       Contoh: Template 1 (4 aspek Potensi) vs Template 2 (2 aspek Potensi)
       akan punya weight_percentage berbeda untuk aspek yang sama.
+
+      standard_rating: Nilai standar per aspek (master/blueprint).
+      Akan di-snapshot ke aspect_assessments saat assessment untuk
+      historical data integrity (Snapshot Pattern).
 ```
 
 #### **5. sub_aspects**
@@ -155,7 +159,8 @@ NOTE: template_id ditambahkan untuk mendukung template berbeda
 ├─ aspect_id (FK → aspects)
 ├─ code (string) - 'kecerdasan_umum'
 ├─ name (string)
-├─ standard_rating (integer, nullable) - 3, 4, 5
+├─ standard_rating (integer, nullable) - 3, 4 ← FILLED 2025-10-06
+├─ description (text, nullable)
 ├─ order (integer)
 └─ timestamps
 
@@ -163,6 +168,10 @@ INDEX: aspect_id
 
 NOTE: Untuk kompetensi yang tidak punya sub-aspect,
       table ini tidak perlu diisi (empty relation)
+
+      standard_rating: Nilai standar per sub-aspect (master/blueprint).
+      Akan di-snapshot ke sub_aspect_assessments saat assessment untuk
+      historical data integrity (Snapshot Pattern).
 ```
 
 ---
@@ -1068,7 +1077,61 @@ X-API-Key: {shared_secret_key}
 
 ## 📝 DEVELOPMENT PROGRESS LOG
 
-### **2025-10-06 PM - Database QC & Structure Improvement ⚙️**
+### **2025-10-06 PM (2) - Master Tables Standard Rating Implementation ✅**
+
+**Issue Identified:**
+During database QC, discovered that `standard_rating` fields were NULL in master tables:
+- `aspects.standard_rating` - NULL for all 13 aspects
+- `sub_aspects.standard_rating` - NULL for all 23 sub-aspects
+
+**Discussion Points:**
+1. **Best Practice Question:** Should standard_rating be stored in BOTH master tables AND assessment tables?
+2. **Answer:** YES - This is called "Snapshot Pattern"
+3. **Reasoning:**
+   - Master table = Current/blueprint value (can change over time)
+   - Assessment table = Historical snapshot (never changes after assessment)
+   - Purpose: Historical data integrity, audit trail, performance
+   - Trade-off: Data redundancy acceptable for data integrity
+
+**Example Scenario Why Snapshot is Needed:**
+```
+Jan 2025: aspect.standard_rating = 3.50
+- Peserta A tested → aspect_assessment.standard_rating = 3.50 (snapshot)
+- Gap = individual_rating - 3.50
+
+Mar 2025: aspect.standard_rating changed to 4.00
+- Peserta B tested → aspect_assessment.standard_rating = 4.00 (snapshot)
+- Peserta A's historical gap STILL = individual_rating - 3.50 ✅ (correct)
+- If no snapshot, Peserta A's gap would recalculate as 4.00 ❌ (wrong!)
+```
+
+**Solution Implemented:**
+1. ✅ Updated MasterDataSeeder.php to fill standard_rating for all aspects
+   - Potensi: 3.20 - 3.75 range (decimal)
+   - Kompetensi: 3.25 - 3.75 range (decimal)
+2. ✅ Updated MasterDataSeeder.php to fill standard_rating for all sub-aspects
+   - Range: 3-4 (integer)
+3. ✅ Added documentation notes about Snapshot Pattern
+4. ✅ Ran migrate:fresh --seed successfully
+5. ✅ QC verification: sub_aspects table PASSED (5/16 tables)
+
+**Files Modified:**
+- `database/seeders/MasterDataSeeder.php`
+- `PROJECT_DOCUMENTATION.md` (added standard_rating notes)
+- `DATABASE_QC_PROGRESS.md` (updated sub_aspects QC result)
+
+**Database QC Progress:**
+- ✅ institutions (1/16)
+- ✅ assessment_templates (2/16)
+- ✅ category_types (3/16)
+- ✅ aspects (4/16)
+- ✅ sub_aspects (5/16) ← NEW
+- ⏳ assessment_events (6/16) - NEXT
+- ⏸️ Remaining 10 tables...
+
+---
+
+### **2025-10-06 PM (1) - Database QC & Structure Improvement ⚙️**
 
 **Issue Identified:**
 During database QC session, user identified critical design flaw:
@@ -1097,10 +1160,11 @@ During database QC session, user identified critical design flaw:
 - `PROJECT_DOCUMENTATION.md` (documentation updated)
 
 **Database QC Progress:**
-- ✅ institutions (4/16)
-- ✅ assessment_templates (4/16)
-- ✅ category_types (4/16)
+- ✅ institutions (1/16)
+- ✅ assessment_templates (2/16)
+- ✅ category_types (3/16)
 - ✅ aspects (4/16) - FIXED & VERIFIED
+- ⏸️ sub_aspects (5/16) - Will be reviewed next
 - ⏳ Continuing QC for remaining tables...
 
 **Tracking File Created:**
@@ -1143,12 +1207,12 @@ During database QC session, user identified critical design flaw:
 - 32 Interpretations (2 per participant)
 
 **Next Steps:**
-- ✅ Database QC in progress (4/16 tables verified)
+- ✅ Database QC in progress (5/16 tables verified)
 - Skip Phase 3 & 4 (API Integration) - will do later
 - Move to Phase 5-7: UI Development (Controllers, Routes, Views, Livewire)
 
 ---
 
-**Last Updated:** 2025-10-06
-**Version:** 1.2
-**Status:** Phase 2 Complete + Database QC in Progress 🔍
+**Last Updated:** 2025-10-06 PM
+**Version:** 1.3
+**Status:** Phase 2 Complete + Database QC in Progress 🔍 (31% done)
