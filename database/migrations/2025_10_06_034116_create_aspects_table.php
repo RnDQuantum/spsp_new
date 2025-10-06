@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('aspects', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('template_id')->constrained('assessment_templates')->cascadeOnDelete();
             $table->foreignId('category_type_id')->constrained('category_types')->cascadeOnDelete();
             $table->string('code');
             $table->string('name');
@@ -21,8 +22,10 @@ return new class extends Migration
             $table->integer('order');
             $table->timestamps();
 
+            $table->index('template_id');
             $table->index('category_type_id');
             $table->index('code');
+            $table->unique(['template_id', 'category_type_id', 'code']);
         });
     }
 
