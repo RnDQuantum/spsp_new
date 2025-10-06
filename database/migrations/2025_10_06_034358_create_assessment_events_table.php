@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreignId('template_id')->constrained('assessment_templates')->cascadeOnDelete();
             $table->string('code')->unique();
             $table->string('name');
+            $table->text('description')->nullable();
             $table->integer('year');
             $table->date('start_date');
             $table->date('end_date');

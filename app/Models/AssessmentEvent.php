@@ -13,6 +13,7 @@ class AssessmentEvent extends Model
         'template_id',
         'code',
         'name',
+        'description',
         'year',
         'start_date',
         'end_date',

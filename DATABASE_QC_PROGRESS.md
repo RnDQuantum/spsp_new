@@ -15,8 +15,8 @@
 | 3  | category_types | ✅ DONE | ✅ YES | ✅ YES | Potensi 40%, Kompetensi 60% |
 | 4  | aspects | ✅ DONE | ✅ YES | ✅ YES | All weights filled (30,20,20,30 & 11-12%) |
 | 5  | sub_aspects | ✅ DONE | ✅ YES | N/A | 23 records, all have standard_rating |
-| 6  | assessment_events | ⏸️ PENDING | N/A | N/A | - |
-| 7  | batches | ⏸️ PENDING | N/A | N/A | - |
+| 6  | assessment_events | ✅ DONE | N/A | N/A | 1 event, added description field |
+| 7  | batches | ✅ DONE | N/A | N/A | 3 batches, FK verified |
 | 8  | position_formations | ⏸️ PENDING | N/A | N/A | - |
 | 9  | participants | ⏸️ PENDING | N/A | N/A | - |
 | 10 | category_assessments | ⏸️ PENDING | N/A | N/A | - |
@@ -210,9 +210,137 @@ id, aspect_id, code, name, description, standard_rating, order, timestamps
 
 ---
 
+### ✅ 6. assessment_events
+
+**Reviewed:** 2025-10-06
+**Status:** PASSED ✅ (After Improvement)
+
+**Structure:**
+```
+id, institution_id, template_id, code, name, description, year, start_date, end_date, status, last_synced_at, timestamps
+```
+
+**Data Count:** 1 record
+
+**Data Sample:**
+- Code: `P3K-KEJAKSAAN-2025`
+- Name: `Asesmen P3K Kejaksaan Agung RI 2025`
+- Description: `Pelaksanaan asesmen kompetensi untuk calon pegawai P3K Kejaksaan Agung RI tahun 2025. Asesmen dilakukan di 3 lokasi berbeda dengan total 150 peserta dari berbagai formasi jabatan.`
+- Year: 2025
+- Date Range: 2025-09-01 to 2025-12-31
+- Status: `completed`
+
+**Foreign Key Verification:**
+- ✅ institution_id = 1 → "Kejaksaan Agung RI" (VALID)
+- ✅ template_id = 1 → "Standar Asesmen P3K 2025" (VALID)
+
+**Initial Findings & Recommendations:**
+- ⚠️ Field `year` redundant dengan start_date/end_date (NOTED - kept as is)
+- ⚠️ Status enum bisa ditambah 'cancelled', 'archived' (FUTURE)
+- ⚠️ No CHECK constraint for date range validation (ACCEPTED)
+- ⚠️ No soft delete support (FUTURE)
+- ❌ Missing `description` field (FIXED ✅)
+
+**Actions Taken:**
+1. ✅ Added `description` field (text, nullable) to migration
+2. ✅ Updated AssessmentEvent model fillable
+3. ✅ Updated SampleDataSeeder with sample description
+4. ✅ Ran migrate:fresh --seed successfully
+
+**Final Verification:**
+- ✅ All FK relationships valid
+- ✅ Status enum value correct
+- ✅ Date range logical (start < end)
+- ✅ Description field present and filled
+- ✅ All indexes present (institution_id, code, status)
+- ✅ Unique constraint on code
+- ✅ No orphaned records
+- ✅ No issues found
+
+**Approved by:** User
+**Comments:** PASSED - description field added successfully
+
+---
+
+### ✅ 7. batches
+
+**Reviewed:** 2025-10-06
+**Status:** PASSED ✅
+
+**Structure:**
+```
+id, event_id, code, name, location, batch_number, start_date, end_date, timestamps
+```
+
+**Data Count:** 3 records
+
+**Data Sample:**
+- Batch 1: BATCH-1-MOJOKERTO | Gelombang 1 - Mojokerto | 2025-09-27 to 2025-09-28
+- Batch 2: BATCH-2-SURABAYA | Gelombang 2 - Surabaya | 2025-10-15 to 2025-10-16
+- Batch 3: BATCH-3-JAKARTA | Gelombang 3 - Jakarta Pusat | 2025-11-05 to 2025-11-06
+
+**Foreign Key Verification:**
+- ✅ All batches: event_id = 1 → "P3K-KEJAKSAAN-2025" (VALID)
+
+**Field Validation:**
+- ✅ code: Unique per event, format BATCH-{number}-{location}
+- ✅ name: Descriptive format "Gelombang X - Lokasi"
+- ✅ location: City names
+- ✅ batch_number: Sequential (1, 2, 3)
+- ✅ start_date & end_date: Valid, 2-day duration per batch
+- ✅ Date progression: Chronological order (Batch 1 → 2 → 3)
+
+**Index Verification:**
+- ✅ Index on event_id
+- ✅ Unique constraint on (event_id, code)
+
+**Recommendations (NOTED, not implemented):**
+- ⚠️ Could add UNIQUE constraint (event_id, batch_number)
+- 💡 Could add `status` enum field (planned, ongoing, completed)
+- 💡 Could add `capacity` field for quota tracking
+- 💡 Could add `description` field for notes
+- 💡 Could split `location` into city, venue_name, venue_address
+
+**Final Verification:**
+- ✅ All FK relationships valid
+- ✅ No duplicate batch_number within same event
+- ✅ Date ranges logical
+- ✅ All indexes present
+- ✅ No orphaned records
+- ✅ No issues found
+
+**Approved by:** User
+**Comments:** PASSED - Structure OK, recommendations noted for future
+
+---
+
 ## 🔧 Changes Log
 
-### 2025-10-06 PM - Master Tables Standard Rating Fill
+### 2025-10-06 PM (2) - Assessment Events Description Field
+
+**Issue Identified:**
+- Missing `description` field for event details
+- No place to store additional event information (location, PIC, notes)
+
+**Solution Implemented:**
+1. ✅ Added `description` field (text, nullable) to assessment_events migration
+2. ✅ Updated AssessmentEvent model fillable array
+3. ✅ Updated SampleDataSeeder with descriptive sample text
+4. ✅ Ran migrate:fresh --seed successfully
+
+**Files Modified:**
+- `database/migrations/2025_10_06_034358_create_assessment_events_table.php`
+- `app/Models/AssessmentEvent.php`
+- `database/seeders/SampleDataSeeder.php`
+
+**Verification:**
+- ✅ description field present in schema
+- ✅ Sample description filled with meaningful text
+- ✅ Nullable (won't break existing sync logic)
+
+---
+
+### 2025-10-06 PM (1) - Master Tables Standard Rating Fill
 
 **Issue Identified:**
 - `aspects.standard_rating` was NULL for all records
@@ -311,12 +439,12 @@ Where:
 ## 🎯 Next Steps
 
 1. ✅ ~~Review table `sub_aspects`~~ - COMPLETED
-2. ⏳ Review table `assessment_events` - NEXT
-3. ⏸️ Review table `batches`
-4. ⏸️ Review table `position_formations`
+2. ✅ ~~Review table `assessment_events`~~ - COMPLETED
+3. ✅ ~~Review table `batches`~~ - COMPLETED
+4. ⏳ Review table `position_formations` - NEXT
 5. ⏸️ Review remaining tables...
 
 ---
 
 **Last Updated:** 2025-10-06
-**Progress:** 5/16 tables (31%)
+**Progress:** 7/16 tables (43.75%)

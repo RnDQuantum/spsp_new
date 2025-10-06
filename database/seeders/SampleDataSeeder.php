@@ -52,6 +52,7 @@ class SampleDataSeeder extends Seeder
             'template_id' => $templateP3K->id,
             'code' => 'P3K-KEJAKSAAN-2025',
             'name' => 'Asesmen P3K Kejaksaan Agung RI 2025',
+            'description' => 'Pelaksanaan asesmen kompetensi untuk calon pegawai P3K Kejaksaan Agung RI tahun 2025. Asesmen dilakukan di 3 lokasi berbeda dengan total 150 peserta dari berbagai formasi jabatan.',
             'year' => 2025,
             'start_date' => '2025-09-01',
             'end_date' => '2025-12-31',
