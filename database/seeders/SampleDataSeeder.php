@@ -59,25 +59,85 @@ class SampleDataSeeder extends Seeder
         ]);
 
         // ==========================================
-        // 3. CREATE BATCH & POSITION
+        // 3. CREATE BATCHES (Multiple Gelombang/Lokasi)
         // ==========================================
 
-        $batch = Batch::create([
-            'event_id' => $event->id,
-            'code' => 'BATCH-1-MOJOKERTO',
-            'name' => 'Gelombang 1 - Mojokerto',
-            'location' => 'Mojokerto',
-            'batch_number' => 1,
-            'start_date' => '2025-09-27',
-            'end_date' => '2025-09-28',
-        ]);
+        $batches = [
+            [
+                'code' => 'BATCH-1-MOJOKERTO',
+                'name' => 'Gelombang 1 - Mojokerto',
+                'location' => 'Mojokerto',
+                'batch_number' => 1,
+                'start_date' => '2025-09-27',
+                'end_date' => '2025-09-28',
+            ],
+            [
+                'code' => 'BATCH-2-SURABAYA',
+                'name' => 'Gelombang 2 - Surabaya',
+                'location' => 'Surabaya',
+                'batch_number' => 2,
+                'start_date' => '2025-10-15',
+                'end_date' => '2025-10-16',
+            ],
+            [
+                'code' => 'BATCH-3-JAKARTA',
+                'name' => 'Gelombang 3 - Jakarta',
+                'location' => 'Jakarta Pusat',
+                'batch_number' => 3,
+                'start_date' => '2025-11-05',
+                'end_date' => '2025-11-06',
+            ],
+        ];
 
-        $position = PositionFormation::create([
-            'event_id' => $event->id,
-            'code' => 'fisikawan_medis',
-            'name' => 'Fisikawan Medis Ahli Pertama',
-            'quota' => 10,
-        ]);
+        $createdBatches = [];
+        foreach ($batches as $batchData) {
+            $createdBatches[] = Batch::create([
+                'event_id' => $event->id,
+                ...$batchData,
+            ]);
+        }
+        $batch = $createdBatches[0]; // Default batch for first participant
+
+        // ==========================================
+        // 4. CREATE POSITION FORMATIONS (Multiple Formasi Jabatan)
+        // ==========================================
+
+        $positions = [
+            [
+                'code' => 'fisikawan_medis',
+                'name' => 'Fisikawan Medis Ahli Pertama',
+                'quota' => 10,
+            ],
+            [
+                'code' => 'analis_kebijakan',
+                'name' => 'Analis Kebijakan Ahli Pertama',
+                'quota' => 15,
+            ],
+            [
+                'code' => 'auditor',
+                'name' => 'Auditor Ahli Pertama',
+                'quota' => 8,
+            ],
+            [
+                'code' => 'pranata_komputer',
+                'name' => 'Pranata Komputer Ahli Pertama',
+                'quota' => 12,
+            ],
+            [
+                'code' => 'pengelola_pengadaan',
+                'name' => 'Pengelola Pengadaan Barang dan Jasa',
+                'quota' => 6,
+            ],
+        ];
+
+        $createdPositions = [];
+        foreach ($positions as $positionData) {
+            $createdPositions[] = PositionFormation::create([
+                'event_id' => $event->id,
+                ...$positionData,
+            ]);
+        }
+        $position = $createdPositions[0]; // Default position for first participant
 
         // ==========================================
         // 4. PARTICIPANT #1: EKA FEBRIYANI (from PDF)
@@ -222,36 +282,176 @@ class SampleDataSeeder extends Seeder
         ]);
 
         // ==========================================
-        // 5. ADDITIONAL SAMPLE PARTICIPANTS (3 more)
+        // 5. ADDITIONAL SAMPLE PARTICIPANTS (15 more - distributed across batches & positions)
         // ==========================================
 
-        $this->createAdditionalParticipants($event, $batch, $position, $categoryPotensi, $categoryKompetensi);
+        $this->createAdditionalParticipants($event, $createdBatches, $createdPositions, $categoryPotensi, $categoryKompetensi);
     }
 
-    private function createAdditionalParticipants($event, $batch, $position, $categoryPotensi, $categoryKompetensi): void
+    private function createAdditionalParticipants($event, $batches, $positions, $categoryPotensi, $categoryKompetensi): void
     {
         $sampleParticipants = [
+            // Batch 1 - Mojokerto
             [
                 'test_number' => '03-5-2-18-002',
                 'skb_number' => '24400240120012572',
                 'name' => 'BUDI SANTOSO, S.T',
                 'email' => 'budi.santoso@example.com',
+                'batch_index' => 0,
+                'position_index' => 0,
+                'assessment_date' => '2025-09-27',
+                'achievement' => 88.50,
             ],
             [
                 'test_number' => '03-5-2-18-003',
                 'skb_number' => '24400240120012573',
                 'name' => 'CITRA DEWI, S.Kom',
                 'email' => 'citra.dewi@example.com',
+                'batch_index' => 0,
+                'position_index' => 1,
+                'assessment_date' => '2025-09-27',
+                'achievement' => 105.20,
             ],
             [
                 'test_number' => '03-5-2-18-004',
                 'skb_number' => '24400240120012574',
                 'name' => 'DARMAWAN PUTRA, S.E',
                 'email' => 'darmawan.putra@example.com',
+                'batch_index' => 0,
+                'position_index' => 2,
+                'assessment_date' => '2025-09-27',
+                'achievement' => 92.15,
+            ],
+            [
+                'test_number' => '03-5-2-18-005',
+                'skb_number' => '24400240120012575',
+                'name' => 'ERNI WULANDARI, S.Psi',
+                'email' => 'erni.wulandari@example.com',
+                'batch_index' => 0,
+                'position_index' => 3,
+                'assessment_date' => '2025-09-28',
+                'achievement' => 78.90,
+            ],
+
+            // Batch 2 - Surabaya
+            [
+                'test_number' => '03-5-2-19-001',
+                'skb_number' => '24400240120012576',
+                'name' => 'FAISAL RAHMAN, S.H',
+                'email' => 'faisal.rahman@example.com',
+                'batch_index' => 1,
+                'position_index' => 0,
+                'assessment_date' => '2025-10-15',
+                'achievement' => 110.50,
+            ],
+            [
+                'test_number' => '03-5-2-19-002',
+                'skb_number' => '24400240120012577',
+                'name' => 'GITA PUSPITA, S.Ak',
+                'email' => 'gita.puspita@example.com',
+                'batch_index' => 1,
+                'position_index' => 1,
+                'assessment_date' => '2025-10-15',
+                'achievement' => 95.75,
+            ],
+            [
+                'test_number' => '03-5-2-19-003',
+                'skb_number' => '24400240120012578',
+                'name' => 'HENDRA GUNAWAN, S.T',
+                'email' => 'hendra.gunawan@example.com',
+                'batch_index' => 1,
+                'position_index' => 2,
+                'assessment_date' => '2025-10-15',
+                'achievement' => 102.30,
+            ],
+            [
+                'test_number' => '03-5-2-19-004',
+                'skb_number' => '24400240120012579',
+                'name' => 'INDAH SARI, S.Kom',
+                'email' => 'indah.sari@example.com',
+                'batch_index' => 1,
+                'position_index' => 3,
+                'assessment_date' => '2025-10-16',
+                'achievement' => 87.45,
+            ],
+            [
+                'test_number' => '03-5-2-19-005',
+                'skb_number' => '24400240120012580',
+                'name' => 'JOKO WIDODO, S.E',
+                'email' => 'joko.widodo@example.com',
+                'batch_index' => 1,
+                'position_index' => 4,
+                'assessment_date' => '2025-10-16',
+                'achievement' => 98.60,
+            ],
+
+            // Batch 3 - Jakarta
+            [
+                'test_number' => '03-5-2-20-001',
+                'skb_number' => '24400240120012581',
+                'name' => 'KARTIKA PUTRI, S.Pd',
+                'email' => 'kartika.putri@example.com',
+                'batch_index' => 2,
+                'position_index' => 0,
+                'assessment_date' => '2025-11-05',
+                'achievement' => 83.20,
+            ],
+            [
+                'test_number' => '03-5-2-20-002',
+                'skb_number' => '24400240120012582',
+                'name' => 'LUKMAN HAKIM, S.Si',
+                'email' => 'lukman.hakim@example.com',
+                'batch_index' => 2,
+                'position_index' => 1,
+                'assessment_date' => '2025-11-05',
+                'achievement' => 107.80,
+            ],
+            [
+                'test_number' => '03-5-2-20-003',
+                'skb_number' => '24400240120012583',
+                'name' => 'MAYA ANGGRAINI, S.H',
+                'email' => 'maya.anggraini@example.com',
+                'batch_index' => 2,
+                'position_index' => 2,
+                'assessment_date' => '2025-11-05',
+                'achievement' => 91.40,
+            ],
+            [
+                'test_number' => '03-5-2-20-004',
+                'skb_number' => '24400240120012584',
+                'name' => 'NANDA PRATAMA, S.Kom',
+                'email' => 'nanda.pratama@example.com',
+                'batch_index' => 2,
+                'position_index' => 3,
+                'assessment_date' => '2025-11-06',
+                'achievement' => 99.15,
+            ],
+            [
+                'test_number' => '03-5-2-20-005',
+                'skb_number' => '24400240120012585',
+                'name' => 'OKTAVIA LESTARI, S.E',
+                'email' => 'oktavia.lestari@example.com',
+                'batch_index' => 2,
+                'position_index' => 4,
+                'assessment_date' => '2025-11-06',
+                'achievement' => 104.70,
+            ],
+            [
+                'test_number' => '03-5-2-20-006',
+                'skb_number' => '24400240120012586',
+                'name' => 'PUTRA ANDIKA, S.T',
+                'email' => 'putra.andika@example.com',
+                'batch_index' => 2,
+                'position_index' => 0,
+                'assessment_date' => '2025-11-06',
+                'achievement' => 75.30,
             ],
         ];
 
         foreach ($sampleParticipants as $data) {
+            $batch = $batches[$data['batch_index']];
+            $position = $positions[$data['position_index']];
+
             $participant = Participant::create([
                 'event_id' => $event->id,
                 'batch_id' => $batch->id,
@@ -262,21 +462,26 @@ class SampleDataSeeder extends Seeder
                 'email' => $data['email'],
                 'phone' => '081234567890',
                 'photo_path' => null,
-                'assessment_date' => '2025-09-27',
+                'assessment_date' => $data['assessment_date'],
             ]);
 
             // Create basic assessments for additional participants
+            $achievement = $data['achievement'];
+            $isHigh = $achievement >= 100;
+            $isMedium = $achievement >= 85 && $achievement < 100;
+            $isLow = $achievement < 85;
+
             CategoryAssessment::create([
                 'participant_id' => $participant->id,
                 'category_type_id' => $categoryPotensi->id,
                 'total_standard_rating' => 12.50,
                 'total_standard_score' => 310.00,
-                'total_individual_rating' => 13.20,
-                'total_individual_score' => 325.00,
-                'gap_rating' => 0.70,
-                'gap_score' => 15.00,
-                'conclusion_code' => 'MS',
-                'conclusion_text' => 'MEMENUHI STANDARD',
+                'total_individual_rating' => $isHigh ? 13.50 : ($isMedium ? 12.80 : 11.20),
+                'total_individual_score' => $isHigh ? 335.00 : ($isMedium ? 318.00 : 278.00),
+                'gap_rating' => $isHigh ? 1.00 : ($isMedium ? 0.30 : -1.30),
+                'gap_score' => $isHigh ? 25.00 : ($isMedium ? 8.00 : -32.00),
+                'conclusion_code' => $isHigh ? 'SK' : ($isMedium ? 'MS' : 'DBS'),
+                'conclusion_text' => $isHigh ? 'SANGAT KOMPETEN' : ($isMedium ? 'MEMENUHI STANDARD' : 'DI BAWAH STANDARD'),
             ]);
 
             CategoryAssessment::create([
@@ -284,41 +489,69 @@ class SampleDataSeeder extends Seeder
                 'category_type_id' => $categoryKompetensi->id,
                 'total_standard_rating' => 25.00,
                 'total_standard_score' => 280.00,
-                'total_individual_rating' => 26.50,
-                'total_individual_score' => 295.00,
-                'gap_rating' => 1.50,
-                'gap_score' => 15.00,
-                'conclusion_code' => 'K',
-                'conclusion_text' => 'KOMPETEN',
+                'total_individual_rating' => $isHigh ? 27.50 : ($isMedium ? 26.00 : 23.50),
+                'total_individual_score' => $isHigh ? 308.00 : ($isMedium ? 291.00 : 263.00),
+                'gap_rating' => $isHigh ? 2.50 : ($isMedium ? 1.00 : -1.50),
+                'gap_score' => $isHigh ? 28.00 : ($isMedium ? 11.00 : -17.00),
+                'conclusion_code' => $isHigh ? 'SK' : ($isMedium ? 'K' : 'DBS'),
+                'conclusion_text' => $isHigh ? 'SANGAT KOMPETEN' : ($isMedium ? 'KOMPETEN' : 'DI BAWAH STANDARD'),
             ]);
+
+            $totalStandardScore = 313.00;
+            $totalIndividualScore = ($achievement / 100) * $totalStandardScore;
 
             FinalAssessment::create([
                 'participant_id' => $participant->id,
                 'potensi_weight' => 40,
                 'potensi_standard_score' => 124.00,
-                'potensi_individual_score' => 130.00,
+                'potensi_individual_score' => $isHigh ? 134.00 : ($isMedium ? 127.20 : 111.20),
                 'kompetensi_weight' => 60,
-                'kompetensi_standard_score' => 168.00,
-                'kompetensi_individual_score' => 177.00,
-                'total_standard_score' => 292.00,
-                'total_individual_score' => 307.00,
-                'achievement_percentage' => 105.14,
-                'conclusion_code' => 'MS',
-                'conclusion_text' => 'MEMENUHI SYARAT (MS)',
+                'kompetensi_standard_score' => 189.00,
+                'kompetensi_individual_score' => $isHigh ? 184.80 : ($isMedium ? 174.60 : 158.40),
+                'total_standard_score' => $totalStandardScore,
+                'total_individual_score' => $totalIndividualScore,
+                'achievement_percentage' => $achievement,
+                'conclusion_code' => $isHigh ? 'MS' : ($isMedium ? 'MMS' : 'TMS'),
+                'conclusion_text' => $isHigh ? 'MEMENUHI SYARAT (MS)' : ($isMedium ? 'MASIH MEMENUHI SYARAT (MMS)' : 'TIDAK MEMENUHI SYARAT (TMS)'),
             ]);
 
             PsychologicalTest::create([
                 'participant_id' => $participant->id,
-                'raw_score' => 45.00,
-                'iq_score' => 105,
-                'validity_status' => 'Hasil tes ini konsisten dan dapat dipercaya',
-                'internal_status' => 'Terbuka',
-                'interpersonal_status' => 'Terbuka',
-                'work_capacity_status' => 'Terbuka',
-                'clinical_status' => 'Terbuka',
-                'conclusion_code' => 'MS',
-                'conclusion_text' => 'MEMENUHI SYARAT (MS)',
-                'notes' => null,
+                'raw_score' => $isHigh ? 48.00 : ($isMedium ? 42.00 : 38.00),
+                'iq_score' => $isHigh ? 110 : ($isMedium ? 100 : 90),
+                'validity_status' => $isHigh ? 'Hasil tes ini konsisten dan dapat dipercaya' : ($isMedium ? 'Hasil tes ini cukup konsisten' : 'Hasil tes ini kurang konsisten'),
+                'internal_status' => $isHigh ? 'Terbuka' : ($isMedium ? 'Cukup terbuka' : 'Kurang terbuka'),
+                'interpersonal_status' => $isHigh ? 'Terbuka' : ($isMedium ? 'Cukup terbuka' : 'Kurang terbuka'),
+                'work_capacity_status' => $isHigh ? 'Terbuka' : ($isMedium ? 'Cukup terbuka' : 'Kurang terbuka'),
+                'clinical_status' => $isHigh ? 'Terbuka' : ($isMedium ? 'Cukup terbuka' : 'Kurang terbuka'),
+                'conclusion_code' => $isHigh ? 'MS' : ($isMedium ? 'MS' : 'TMS'),
+                'conclusion_text' => $isHigh ? 'MEMENUHI SYARAT (MS)' : ($isMedium ? 'MEMENUHI SYARAT (MS)' : 'TIDAK MEMENUHI SYARAT (TMS)'),
+                'notes' => $isLow ? 'Perlu perhatian khusus pada aspek kejiwaan' : null,
+            ]);
+
+            // Interpretations - setiap peserta punya 2: Potensi & Kompetensi
+            $interpretationPotensi = $isHigh
+                ? 'Individu memiliki potensi yang sangat baik dengan kemampuan kognitif dan sikap kerja yang menonjol. Mampu beradaptasi dengan baik dalam berbagai situasi kerja.'
+                : ($isMedium
+                    ? 'Memiliki kepekaan yang cukup memadai dalam memahami kebutuhan orang-orang yang ada di sekitarnya. Menunjukkan potensi yang memadai untuk menjalankan tugas.'
+                    : 'Memerlukan pengembangan lebih lanjut pada aspek potensi, terutama dalam hal kemampuan analisis dan pemecahan masalah.');
+
+            $interpretationKompetensi = $isHigh
+                ? 'Menunjukkan kompetensi yang sangat baik dalam semua aspek pekerjaan. Konsisten dalam menampilkan perilaku kerja yang sesuai dengan standar organisasi dan mampu menjadi role model bagi rekan kerja.'
+                : ($isMedium
+                    ? 'Dalam bekerja, individu cukup mampu mengelola pekerjaan yang menjadi tanggung jawabnya sesuai dengan prioritas penyelesaian masalah. Menampilkan kompetensi yang memadai sesuai standar yang ditetapkan.'
+                    : 'Perlu meningkatkan kompetensi pada beberapa aspek pekerjaan, terutama dalam hal kerjasama dan orientasi pada hasil.');
+
+            Interpretation::create([
+                'participant_id' => $participant->id,
+                'category_type_id' => $categoryPotensi->id,
+                'interpretation_text' => $interpretationPotensi,
+            ]);
+
+            Interpretation::create([
+                'participant_id' => $participant->id,
+                'category_type_id' => $categoryKompetensi->id,
+                'interpretation_text' => $interpretationKompetensi,
             ]);
         }
     }

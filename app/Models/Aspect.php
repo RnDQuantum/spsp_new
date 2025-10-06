@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Aspect extends Model
 {
     protected $fillable = [
+        'template_id',
         'category_type_id',
         'code',
         'name',
@@ -24,6 +25,11 @@ class Aspect extends Model
             'standard_rating' => 'decimal:2',
             'order' => 'integer',
         ];
+    }
+
+    public function template(): BelongsTo
+    {
+        return $this->belongsTo(AssessmentTemplate::class);
     }
 
     public function categoryType(): BelongsTo

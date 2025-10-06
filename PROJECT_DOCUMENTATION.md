@@ -128,6 +128,7 @@ UNIQUE: template_id + code
 
 ```
 ├─ id (PK, bigint unsigned)
+├─ template_id (FK → assessment_templates) ← ADDED 2025-10-06
 ├─ category_type_id (FK → category_types)
 ├─ code (string) - 'kecerdasan', 'integritas'
 ├─ name (string)
@@ -136,8 +137,15 @@ UNIQUE: template_id + code
 ├─ order (integer)
 └─ timestamps
 
+INDEX: template_id
 INDEX: category_type_id
 INDEX: code
+UNIQUE: template_id + category_type_id + code
+
+NOTE: template_id ditambahkan untuk mendukung template berbeda
+      yang bisa punya aspek dengan bobot berbeda.
+      Contoh: Template 1 (4 aspek Potensi) vs Template 2 (2 aspek Potensi)
+      akan punya weight_percentage berbeda untuk aspek yang sama.
 ```
 
 #### **5. sub_aspects**
@@ -393,6 +401,7 @@ NOTE: Simple auth, no roles
 Institution (1) ──< (N) AssessmentEvent
 AssessmentTemplate (1) ──< (N) AssessmentEvent
 AssessmentTemplate (1) ──< (N) CategoryType
+AssessmentTemplate (1) ──< (N) Aspect ← ADDED 2025-10-06 (direct relation)
 CategoryType (1) ──< (N) Aspect
 Aspect (1) ──< (N) SubAspect (optional, bisa 0)
 
@@ -407,6 +416,17 @@ Participant (1) ──< (N) Interpretation (0-2 records)
 
 CategoryAssessment (1) ──< (N) AspectAssessment
 AspectAssessment (1) ──< (N) SubAspectAssessment (0-N, tergantung aspek)
+```
+
+**IMPORTANT NOTE (2025-10-06):**
+Aspects now have DUAL relationship:
+- template_id: Direct FK to template (for defining weight per template)
+- category_type_id: FK to category (for grouping Potensi/Kompetensi)
+
+This allows same aspect code to have different weights in different templates.
+Example:
+- Template P3K: Kecerdasan (30% of Potensi)
+- Template CPNS: Kecerdasan (50% of Potensi)
 ```
 
 ---
@@ -1048,7 +1068,47 @@ X-API-Key: {shared_secret_key}
 
 ## 📝 DEVELOPMENT PROGRESS LOG
 
-### **2025-10-06 - Phase 2 Completed ✅**
+### **2025-10-06 PM - Database QC & Structure Improvement ⚙️**
+
+**Issue Identified:**
+During database QC session, user identified critical design flaw:
+- Different templates can have different number of aspects
+- Same aspect (e.g., "kecerdasan") needs different weight in different templates
+- Example: Template with 2 aspects needs 50% weight, template with 4 aspects needs 25% weight
+- Without template_id in aspects table, this creates data conflict
+
+**Solution Implemented:**
+1. ✅ Added `template_id` field to `aspects` table migration
+2. ✅ Added `template()` relationship to Aspect model
+3. ✅ Updated seeder to populate template_id and weight_percentage for all aspects
+4. ✅ Added unique constraint: (template_id, category_type_id, code)
+5. ✅ Verified all aspects have correct weights (Potensi: 30,20,20,30 & Kompetensi: 12,11,11,11,11,11,11,11,11)
+
+**Design Decision Confirmed:**
+- Weight percentage stored in master tables (best practice)
+- Template = fixed blueprint with predefined weights
+- Different templates = different structures & weights
+- Event chooses appropriate template
+
+**Files Modified:**
+- `database/migrations/2025_10_06_034116_create_aspects_table.php`
+- `app/Models/Aspect.php`
+- `database/seeders/MasterDataSeeder.php`
+- `PROJECT_DOCUMENTATION.md` (documentation updated)
+
+**Database QC Progress:**
+- ✅ institutions (4/16)
+- ✅ assessment_templates (4/16)
+- ✅ category_types (4/16)
+- ✅ aspects (4/16) - FIXED & VERIFIED
+- ⏳ Continuing QC for remaining tables...
+
+**Tracking File Created:**
+- `DATABASE_QC_PROGRESS.md` - Progress tracking document
+
+---
+
+### **2025-10-06 AM - Phase 2 Completed ✅**
 
 **Completed Tasks:**
 - ✅ Created all 16 database migrations with proper relationships
@@ -1059,29 +1119,36 @@ X-API-Key: {shared_secret_key}
   - InstitutionSeeder: 4 institutions (Kejaksaan, BKN, Kemendikbud, Kemenkes)
   - AssessmentTemplateSeeder: 3 templates (P3K 2025, CPNS JPT Pratama, Administrator)
   - MasterDataSeeder: Complete structure from PDF (2 categories, 13 aspects, 23 sub-aspects)
-  - SampleDataSeeder: 4 participants with full assessment data
+  - SampleDataSeeder: 16 participants across 3 batches and 5 position formations
 
 **Key Changes:**
 - Updated institution codes to be more semantic (kejaksaan, bkn, etc)
 - Renamed templates for clarity (p3k_standard_2025 instead of SPSP2024)
 - Fixed Event → Institution relationship (Kejaksaan event now correctly uses Kejaksaan institution)
 - Improved seeder readability with section comments
+- Added multiple batches (3 batches: Mojokerto, Surabaya, Jakarta)
+- Added multiple position formations (5 formasi jabatan)
+- Added interpretations for all participants (2 per participant)
 
 **Data Summary:**
 - 4 Institutions seeded
 - 3 Assessment Templates
 - 2 Category Types (Potensi 40%, Kompetensi 60%)
-- 13 Aspects (4 Potensi, 9 Kompetensi)
+- 13 Aspects (4 Potensi, 9 Kompetensi) - NOW WITH WEIGHTS ✅
 - 23 Sub-Aspects (only for Potensi aspects)
 - 1 Event (P3K Kejaksaan 2025)
-- 4 Participants with complete assessments
+- 3 Batches (Mojokerto, Surabaya, Jakarta)
+- 5 Position Formations
+- 16 Participants with complete assessments
+- 32 Interpretations (2 per participant)
 
 **Next Steps:**
+- ✅ Database QC in progress (4/16 tables verified)
 - Skip Phase 3 & 4 (API Integration) - will do later
 - Move to Phase 5-7: UI Development (Controllers, Routes, Views, Livewire)
 
 ---
 
 **Last Updated:** 2025-10-06
-**Version:** 1.1
-**Status:** Phase 2 Complete - Moving to UI Development 🚀
+**Version:** 1.2
+**Status:** Phase 2 Complete + Database QC in Progress 🔍

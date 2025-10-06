@@ -29,9 +29,11 @@ class MasterDataSeeder extends Seeder
 
         // --- Aspect: KECERDASAN (30%) ---
         $aspectKecerdasan = Aspect::create([
+            'template_id' => $template->id,
             'category_type_id' => $categoryPotensi->id,
             'code' => 'kecerdasan',
             'name' => 'Kecerdasan',
+            'weight_percentage' => 30,
             'order' => 1,
         ]);
 
@@ -56,9 +58,11 @@ class MasterDataSeeder extends Seeder
 
         // --- Aspect: SIKAP KERJA (20%) ---
         $aspectSikapKerja = Aspect::create([
+            'template_id' => $template->id,
             'category_type_id' => $categoryPotensi->id,
             'code' => 'sikap_kerja',
             'name' => 'Sikap Kerja',
+            'weight_percentage' => 20,
             'order' => 2,
         ]);
 
@@ -84,9 +88,11 @@ class MasterDataSeeder extends Seeder
 
         // --- Aspect: HUBUNGAN SOSIAL (20%) ---
         $aspectHubunganSosial = Aspect::create([
+            'template_id' => $template->id,
             'category_type_id' => $categoryPotensi->id,
             'code' => 'hubungan_sosial',
             'name' => 'Hubungan Sosial',
+            'weight_percentage' => 20,
             'order' => 3,
         ]);
 
@@ -109,9 +115,11 @@ class MasterDataSeeder extends Seeder
 
         // --- Aspect: KEPRIBADIAN (30%) ---
         $aspectKepribadian = Aspect::create([
+            'template_id' => $template->id,
             'category_type_id' => $categoryPotensi->id,
             'code' => 'kepribadian',
             'name' => 'Kepribadian',
+            'weight_percentage' => 30,
             'order' => 4,
         ]);
 
@@ -146,23 +154,26 @@ class MasterDataSeeder extends Seeder
         ]);
 
         // Kompetensi aspects (tidak ada sub-aspects)
+        // Total weight harus 100%, 9 aspek masing-masing ~11%
         $kompetensiAspects = [
-            ['code' => 'integritas', 'name' => 'Integritas', 'order' => 1],
-            ['code' => 'kerjasama', 'name' => 'Kerjasama', 'order' => 2],
-            ['code' => 'komunikasi', 'name' => 'Komunikasi', 'order' => 3],
-            ['code' => 'orientasi_pada_hasil', 'name' => 'Orientasi Pada Hasil', 'order' => 4],
-            ['code' => 'pelayanan_publik', 'name' => 'Pelayanan Publik', 'order' => 5],
-            ['code' => 'pengembangan_diri_orang_lain', 'name' => 'Pengembangan Diri & Orang Lain', 'order' => 6],
-            ['code' => 'mengelola_perubahan', 'name' => 'Mengelola Perubahan', 'order' => 7],
-            ['code' => 'pengambilan_keputusan', 'name' => 'Pengambilan Keputusan', 'order' => 8],
-            ['code' => 'perekat_bangsa', 'name' => 'Perekat Bangsa', 'order' => 9],
-        ];
+            ['code' => 'integritas', 'name' => 'Integritas', 'weight' => 12, 'order' => 1],
+            ['code' => 'kerjasama', 'name' => 'Kerjasama', 'weight' => 11, 'order' => 2],
+            ['code' => 'komunikasi', 'name' => 'Komunikasi', 'weight' => 11, 'order' => 3],
+            ['code' => 'orientasi_pada_hasil', 'name' => 'Orientasi Pada Hasil', 'weight' => 11, 'order' => 4],
+            ['code' => 'pelayanan_publik', 'name' => 'Pelayanan Publik', 'weight' => 11, 'order' => 5],
+            ['code' => 'pengembangan_diri_orang_lain', 'name' => 'Pengembangan Diri & Orang Lain', 'weight' => 11, 'order' => 6],
+            ['code' => 'mengelola_perubahan', 'name' => 'Mengelola Perubahan', 'weight' => 11, 'order' => 7],
+            ['code' => 'pengambilan_keputusan', 'name' => 'Pengambilan Keputusan', 'weight' => 11, 'order' => 8],
+            ['code' => 'perekat_bangsa', 'name' => 'Perekat Bangsa', 'weight' => 11, 'order' => 9],
+        ]; // Total = 100%
 
         foreach ($kompetensiAspects as $aspect) {
             Aspect::create([
+                'template_id' => $template->id,
                 'category_type_id' => $categoryKompetensi->id,
                 'code' => $aspect['code'],
                 'name' => $aspect['name'],
+                'weight_percentage' => $aspect['weight'],
                 'order' => $aspect['order'],
             ]);
         }
