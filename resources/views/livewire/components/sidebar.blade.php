@@ -1,4 +1,4 @@
-<div x-data="{ mobileOpen: false, minimized: false, individualOpen: false, generalOpen: false }">
+<div x-data="{ mobileOpen: false, minimized: false }" @sidebar-toggled.window="minimized = $event.detail.minimized">
     <!-- Mobile Toggle Button -->
     <button @click="mobileOpen = !mobileOpen"
         class="fixed top-4 left-4 z-50 p-2 bg-gray-800 text-white rounded-lg md:hidden">
@@ -24,7 +24,7 @@
         class="fixed top-0 left-0 z-40 h-screen bg-gray-800 transition-all duration-300">
 
         <!-- Toggle Button Desktop -->
-        <button @click="minimized = !minimized"
+        <button @click="minimized = !minimized; $dispatch('sidebar-toggled', { minimized: minimized })"
             class="hidden md:block absolute -right-3 top-6 bg-gray-800 text-white rounded-full p-1 border-2 border-gray-600 hover:bg-gray-700">
             <svg :class="minimized ? 'rotate-180' : ''" class="w-4 h-4 transition-transform" fill="none"
                 stroke="currentColor" viewBox="0 0 24 24">
