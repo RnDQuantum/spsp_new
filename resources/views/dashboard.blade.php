@@ -61,7 +61,7 @@
                 <!-- Chart Segi 5 (Pentagon) -->
                 <div class="bg-white p-6 rounded-lg shadow">
                     <h3 class="text-lg text-center font-semibold text-gray-800 mb-4">Potential Mapping (Rating)</h3>
-                    <div class="relative h-80">
+                    <div class="relative h-96">
                         <canvas id="pentagonChart"></canvas>
                     </div>
                 </div>
@@ -70,7 +70,7 @@
                 <div class="bg-white p-6 rounded-lg shadow">
                     <h3 class="text-lg text-center font-semibold text-gray-800 mb-4">Managerial Potency Mapping (Rating)
                     </h3>
-                    <div class="relative h-80">
+                    <div class="relative h-96">
                         <canvas id="nonagonChart"></canvas>
                     </div>
                 </div>
@@ -99,7 +99,7 @@
                 const pentagonChart = new Chart(ctxPentagon, {
                     type: 'radar',
                     data: {
-                        labels: ['Aspek 1', 'Aspek 2', 'Aspek 3', 'Aspek 4', 'Aspek 5'],
+                        labels: ['Kecerdasan', 'Cara Kerja', 'Potensi Kerja', 'Hubungan Sosial', 'Kepribadian'],
                         datasets: [{
                             label: 'Rating',
                             data: [4.2, 3.8, 4.5, 3.2, 4.0],
@@ -153,8 +153,10 @@
                     type: 'radar',
                     data: {
                         labels: [
-                            'Aspek 1', 'Aspek 2', 'Aspek 3', 'Aspek 4', 'Aspek 5',
-                            'Aspek 6', 'Aspek 7', 'Aspek 8', 'Aspek 9'
+                            'Integritas', 'Kerjasama', 'Komunikasi', 'Oriantasi Pada Hasil',
+                            'Pelayanan Publik',
+                            'Pengembangan Diri dari Orang Lain', 'Mengelola Perubahan',
+                            'Pengambilan Keputusan', 'Perekat Bangsa'
                         ],
                         datasets: [{
                             label: 'Rating',
@@ -209,13 +211,17 @@
                     type: 'radar',
                     data: {
                         labels: [
-                            'Aspek 1', 'Aspek 2', 'Aspek 3', 'Aspek 4', 'Aspek 5',
-                            'Aspek 6', 'Aspek 7', 'Aspek 8', 'Aspek 9', 'Aspek 10',
-                            'Aspek 11', 'Aspek 12', 'Aspek 13'
+                            'Kecerdasan', 'Cara Kerja', 'Potensi Kerja', 'Hubungan Sosial', 'Kepribadian',
+                            'Integritas', 'Kerjasama', 'Komunikasi', 'Orientasi Pada Hasil',
+                            'Pelayanan Publik',
+                            'Pengembangan Diri dan Orang Lain', 'Mengelola Perubahan',
+                            'Pengambilan Keputusan', 'Perekat Bangsa'
                         ],
                         datasets: [{
                             label: 'Rating',
-                            data: [4.5, 3.2, 4.8, 3.9, 4.1, 3.5, 4.3, 3.8, 4.6, 3.7, 4.2, 3.4, 4.0],
+                            data: [4.5, 3.2, 4.8, 3.9, 4.1, 3.5, 4.3, 3.8, 4.6, 3.7, 4.2, 3.4, 4.0,
+                                4.0
+                            ],
                             fill: true,
                             backgroundColor: 'rgba(16, 185, 129, 0.2)',
                             borderColor: 'rgb(16, 185, 129)',
