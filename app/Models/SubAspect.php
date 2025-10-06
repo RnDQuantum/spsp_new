@@ -12,6 +12,7 @@ class SubAspect extends Model
         'aspect_id',
         'code',
         'name',
+        'description',
         'standard_rating',
         'order',
     ];

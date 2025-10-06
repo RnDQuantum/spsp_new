@@ -18,8 +18,8 @@ class FinalAssessment extends Model
         'total_standard_score',
         'total_individual_score',
         'achievement_percentage',
-        'final_conclusion_code',
-        'final_conclusion_text',
+        'conclusion_code',
+        'conclusion_text',
     ];
 
     protected function casts(): array
