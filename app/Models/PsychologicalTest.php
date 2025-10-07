@@ -9,6 +9,7 @@ class PsychologicalTest extends Model
 {
     protected $fillable = [
         'participant_id',
+        'event_id',
         'raw_score',
         'iq_score',
         'validity_status',
@@ -32,5 +33,10 @@ class PsychologicalTest extends Model
     public function participant(): BelongsTo
     {
         return $this->belongsTo(Participant::class);
+    }
+
+    public function event(): BelongsTo
+    {
+        return $this->belongsTo(AssessmentEvent::class, 'event_id');
     }
 }

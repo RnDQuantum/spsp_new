@@ -9,6 +9,9 @@ class FinalAssessment extends Model
 {
     protected $fillable = [
         'participant_id',
+        'event_id',
+        'batch_id',
+        'position_formation_id',
         'potensi_weight',
         'potensi_standard_score',
         'potensi_individual_score',
@@ -40,5 +43,20 @@ class FinalAssessment extends Model
     public function participant(): BelongsTo
     {
         return $this->belongsTo(Participant::class);
+    }
+
+    public function event(): BelongsTo
+    {
+        return $this->belongsTo(AssessmentEvent::class, 'event_id');
+    }
+
+    public function batch(): BelongsTo
+    {
+        return $this->belongsTo(Batch::class);
+    }
+
+    public function positionFormation(): BelongsTo
+    {
+        return $this->belongsTo(PositionFormation::class);
     }
 }

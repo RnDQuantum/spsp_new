@@ -8,9 +8,8 @@
 
 ## 📚 RELATED DOCUMENTATION
 
-- 👉 **[PROJECT_DOCUMENTATION.md](./PROJECT_DOCUMENTATION.md)** - High-level project overview
-- 👉 **[DATABASE_DESIGN.md](./DATABASE_DESIGN.md)** - Database structure & relationships
-- 👉 **[DATABASE_QC_PROGRESS.md](./DATABASE_QC_PROGRESS.md)** - QC progress tracking
+- 👉 **[DATABASE_AND_ASSESSMENT_LOGIC.md](./DATABASE_AND_ASSESSMENT_LOGIC.md)** - Complete database design, structure, relationships & assessment overview
+- 👉 **[DATABASE_QC_AND_PERFORMANCE.md](./DATABASE_QC_AND_PERFORMANCE.md)** - QC progress tracking & performance optimization
 
 ---
 
