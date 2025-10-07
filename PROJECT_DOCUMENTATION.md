@@ -1,5 +1,22 @@
 # 📊 APLIKASI DASHBOARD ANALYTICS ASESMEN - LARAVEL
 
+**Version:** 1.6
+**Last Updated:** 2025-10-06
+**Status:** Phase 2 Complete + Database QC in Progress (56%)
+
+---
+
+## 📚 DOCUMENTATION STRUCTURE
+
+This project has been organized into focused documentation files:
+
+1. **[PROJECT_DOCUMENTATION.md](./PROJECT_DOCUMENTATION.md)** (this file) - High-level overview, goals, stack, implementation checklist
+2. **[DATABASE_DESIGN.md](./DATABASE_DESIGN.md)** - Complete database structure, schemas, relationships, design patterns
+3. **[ASSESSMENT_CALCULATION_FLOW.md](./ASSESSMENT_CALCULATION_FLOW.md)** - Calculation logic, formulas, code examples, API requirements
+4. **[DATABASE_QC_PROGRESS.md](./DATABASE_QC_PROGRESS.md)** - Quality control progress tracking for all 16 tables
+
+---
+
 ## 🎯 TUJUAN APLIKASI
 
 ### **Primary Purpose:**
@@ -106,373 +123,63 @@ Assessment Events (Pelaksanaan Asesmen)
 
 ## 🗄️ DATABASE DESIGN
 
-### **Total Tables: 16**
+For detailed database structure, table schemas, relationships, and design principles, see:
+👉 **[DATABASE_DESIGN.md](./DATABASE_DESIGN.md)**
+
+### **Quick Overview:**
+
+**Total Tables: 16**
+
+**5 Master Tables:**
+- institutions, assessment_templates, category_types, aspects, sub_aspects
+
+**3 Event/Execution Tables:**
+- assessment_events, batches, position_formations
+
+**1 Participant Table:**
+- participants
+
+**3 Assessment Score Tables:**
+- category_assessments, aspect_assessments, sub_aspect_assessments
+
+**3 Final Result Tables:**
+- final_assessments, psychological_tests, interpretations
+
+**1 Auth Table:**
+- users
+
+**Key Design Concepts:**
+- ✅ **"HOW vs WHO" Paradigm** - Template defines structure, Event defines participants
+- ✅ **Snapshot Pattern** - Historical data integrity for standards
+- ✅ **Dynamic Templates** - Different templates can have different structures
+- ✅ **DUAL FK on Aspects** - template_id + category_type_id for flexibility
 
 ---
 
-### **MASTER TABLES (5)**
+## 📊 ASSESSMENT CALCULATION FLOW & LOGIC
 
-#### **1. institutions**
+For complete calculation formulas, code examples, and business logic, see:
+👉 **[ASSESSMENT_CALCULATION_FLOW.md](./ASSESSMENT_CALCULATION_FLOW.md)**
 
-```
-├─ id (PK, bigint unsigned)
-├─ code (string, UNIQUE) - 'kejaksaan', 'kemenkeu'
-├─ name (string)
-├─ logo_path (string, nullable)
-├─ api_key (string, UNIQUE) - untuk validasi API
-└─ timestamps
+### **Quick Overview:**
 
-INDEX: code
-```
-
-#### **2. assessment_templates**
+**Bottom-Up Aggregation (4 Levels):**
 
 ```
-├─ id (PK, bigint unsigned)
-├─ code (string, UNIQUE) - 'p3k_standard_2025'
-├─ name (string)
-├─ description (text, nullable)
-└─ timestamps
-
-INDEX: code
+Level 1: Sub-Aspect Ratings (Raw data from CI3)
+    ↓ AGGREGATE (Average)
+Level 2: Aspect Ratings (Calculated or Direct)
+    ↓ AGGREGATE (Sum with weights)
+Level 3: Category Ratings (Potensi 40% + Kompetensi 60%)
+    ↓ WEIGHTED CALCULATION
+Level 4: Final Assessment (Achievement percentage + Conclusion)
 ```
 
-#### **3. category_types** (Potensi / Kompetensi)
-
-```
-├─ id (PK, bigint unsigned)
-├─ template_id (FK → assessment_templates)
-├─ code (string) - 'potensi', 'kompetensi'
-├─ name (string)
-├─ weight_percentage (integer) - 40, 60
-├─ order (integer)
-└─ timestamps
-
-INDEX: template_id
-UNIQUE: template_id + code
-```
-
-#### **4. aspects**
-
-```
-├─ id (PK, bigint unsigned)
-├─ template_id (FK → assessment_templates) ← ADDED 2025-10-06
-├─ category_type_id (FK → category_types)
-├─ code (string) - 'kecerdasan', 'integritas'
-├─ name (string)
-├─ weight_percentage (integer) - 30, 20, 12, 11
-├─ standard_rating (decimal 5,2, nullable) - 3.50, 3.20, 3.75 ← FILLED 2025-10-06
-├─ order (integer)
-└─ timestamps
-
-INDEX: template_id
-INDEX: category_type_id
-INDEX: code
-UNIQUE: template_id + category_type_id + code
-
-NOTE: template_id ditambahkan untuk mendukung template berbeda
-      yang bisa punya aspek dengan bobot berbeda.
-      Contoh: Template 1 (4 aspek Potensi) vs Template 2 (2 aspek Potensi)
-      akan punya weight_percentage berbeda untuk aspek yang sama.
-
-      standard_rating: Nilai standar per aspek (master/blueprint).
-      Akan di-snapshot ke aspect_assessments saat assessment untuk
-      historical data integrity (Snapshot Pattern).
-```
-
-#### **5. sub_aspects**
-
-```
-├─ id (PK, bigint unsigned)
-├─ aspect_id (FK → aspects)
-├─ code (string) - 'kecerdasan_umum'
-├─ name (string)
-├─ standard_rating (integer, nullable) - 3, 4 ← FILLED 2025-10-06
-├─ description (text, nullable)
-├─ order (integer)
-└─ timestamps
-
-INDEX: aspect_id
-
-NOTE: Untuk kompetensi yang tidak punya sub-aspect,
-      table ini tidak perlu diisi (empty relation)
-
-      standard_rating: Nilai standar per sub-aspect (master/blueprint).
-      Akan di-snapshot ke sub_aspect_assessments saat assessment untuk
-      historical data integrity (Snapshot Pattern).
-```
-
----
-
-### **EVENT & EXECUTION (3)**
-
-#### **6. assessment_events**
-
-```
-├─ id (PK, bigint unsigned)
-├─ institution_id (FK → institutions)
-├─ template_id (FK → assessment_templates)
-├─ code (string, UNIQUE) - 'P3K-KEJAKSAAN-2025'
-├─ name (string)
-├─ year (integer)
-├─ start_date (date)
-├─ end_date (date)
-├─ status (enum) - 'draft', 'ongoing', 'completed'
-├─ last_synced_at (timestamp, nullable) - track terakhir sync
-└─ timestamps
-
-INDEX: institution_id
-INDEX: code
-INDEX: status
-```
-
-#### **7. batches** (Gelombang/Lokasi)
-
-```
-├─ id (PK, bigint unsigned)
-├─ event_id (FK → assessment_events)
-├─ code (string) - 'BATCH-1-MOJOKERTO'
-├─ name (string)
-├─ location (string)
-├─ batch_number (integer)
-├─ start_date (date)
-├─ end_date (date)
-└─ timestamps
-
-INDEX: event_id
-UNIQUE: event_id + code
-```
-
-#### **8. position_formations** (Formasi Jabatan)
-
-```
-├─ id (PK, bigint unsigned)
-├─ event_id (FK → assessment_events)
-├─ code (string) - 'fisikawan_medis'
-├─ name (string)
-├─ quota (integer, nullable)
-└─ timestamps
-
-INDEX: event_id
-UNIQUE: event_id + code
-```
-
----
-
-### **PARTICIPANT DATA (1)**
-
-#### **9. participants**
-
-```
-├─ id (PK, bigint unsigned)
-├─ event_id (FK → assessment_events)
-├─ batch_id (FK → batches, nullable)
-├─ position_formation_id (FK → position_formations)
-├─ test_number (string, UNIQUE) - '03-5-2-18-001'
-├─ skb_number (string)
-├─ name (string)
-├─ email (string, nullable)
-├─ phone (string, nullable)
-├─ photo_path (string, nullable)
-├─ assessment_date (date)
-└─ timestamps
-
-UNIQUE INDEX: test_number
-INDEX: event_id
-INDEX: batch_id
-INDEX: position_formation_id
-INDEX: name (untuk search)
-```
-
----
-
-### **ASSESSMENT SCORES (3)**
-
-#### **10. category_assessments** (Nilai per Kategori)
-
-```
-├─ id (PK, bigint unsigned)
-├─ participant_id (FK → participants)
-├─ category_type_id (FK → category_types)
-├─ total_standard_rating (decimal 8,2) - 11.94, 24.30
-├─ total_standard_score (decimal 8,2) - 300.21, 270.00
-├─ total_individual_rating (decimal 8,2) - 11.83, 27.48
-├─ total_individual_score (decimal 8,2) - 294.25, 305.36
-├─ gap_rating (decimal 8,2) - -0.11, 3.18
-├─ gap_score (decimal 8,2) - -5.97, 35.36
-├─ conclusion_code (string) - 'below_standard', 'competent', 'very_competent'
-├─ conclusion_text (string) - 'DI BAWAH STANDARD', 'SANGAT KOMPETEN'
-└─ timestamps
-
-UNIQUE INDEX: participant_id + category_type_id
-INDEX: category_type_id
-INDEX: conclusion_code (untuk filtering dashboard)
-```
-
-#### **11. aspect_assessments** (Nilai per Aspek)
-
-```
-├─ id (PK, bigint unsigned)
-├─ category_assessment_id (FK → category_assessments)
-├─ aspect_id (FK → aspects)
-├─ standard_rating (decimal 5,2) - 3.15
-├─ standard_score (decimal 8,2) - 94.50
-├─ individual_rating (decimal 5,2) - 2.58
-├─ individual_score (decimal 8,2) - 77.29
-├─ gap_rating (decimal 8,2) - -0.57
-├─ gap_score (decimal 8,2) - -17.21
-├─ percentage_score (integer) - 78 (untuk display & chart)
-├─ conclusion_code (string) - 'below_standard', 'meets_standard', 'exceeds_standard'
-├─ conclusion_text (string) - 'Kurang Memenuhi Standard'
-├─ description_text (text, nullable) - khusus untuk kompetensi
-└─ timestamps
-
-INDEX: category_assessment_id
-INDEX: aspect_id (untuk aggregate by aspect)
-```
-
-#### **12. sub_aspect_assessments** (Nilai per Sub-Aspek)
-
-```
-├─ id (PK, bigint unsigned)
-├─ aspect_assessment_id (FK → aspect_assessments)
-├─ sub_aspect_id (FK → sub_aspects)
-├─ standard_rating (integer) - 3
-├─ individual_rating (integer) - 3
-├─ rating_label (string) - 'Cukup', 'Baik', 'Baik Sekali'
-└─ timestamps
-
-INDEX: aspect_assessment_id
-INDEX: sub_aspect_id
-```
-
----
-
-### **FINAL RESULTS (3)**
-
-#### **13. final_assessments**
-
-```
-├─ id (PK, bigint unsigned)
-├─ participant_id (FK → participants, UNIQUE)
-├─ potensi_weight (integer) - 40
-├─ potensi_standard_score (decimal 8,2) - 133.43
-├─ potensi_individual_score (decimal 8,2) - 117.70
-├─ kompetensi_weight (integer) - 60
-├─ kompetensi_standard_score (decimal 8,2) - 180.00
-├─ kompetensi_individual_score (decimal 8,2) - 183.22
-├─ total_standard_score (decimal 8,2) - 313.43
-├─ total_individual_score (decimal 8,2) - 300.91
-├─ achievement_percentage (decimal 5,2) - 96.01 (calculated: individual/standard*100)
-├─ final_conclusion_code (string) - 'mms', 'ms', 'tms'
-├─ final_conclusion_text (string) - 'MASIH MEMENUHI SYARAT (MMS)'
-└─ timestamps
-
-UNIQUE INDEX: participant_id
-INDEX: final_conclusion_code
-INDEX: achievement_percentage (untuk ranking)
-```
-
-#### **14. psychological_tests**
-
-```
-├─ id (PK, bigint unsigned)
-├─ participant_id (FK → participants, UNIQUE)
-├─ raw_score (decimal 5,2) - 40.00
-├─ iq_score (integer, nullable) - 97
-├─ validity_status (string)
-├─ internal_status (string)
-├─ interpersonal_status (string)
-├─ work_capacity_status (string)
-├─ clinical_status (string)
-├─ conclusion_code (string) - 'ms', 'tms'
-├─ conclusion_text (string)
-├─ notes (text, nullable)
-└─ timestamps
-
-UNIQUE INDEX: participant_id
-INDEX: conclusion_code
-```
-
-#### **15. interpretations**
-
-```
-├─ id (PK, bigint unsigned)
-├─ participant_id (FK → participants)
-├─ category_type_id (FK → category_types, nullable)
-├─ interpretation_text (text)
-└─ timestamps
-
-INDEX: participant_id
-INDEX: category_type_id
-
-NOTE: 1 peserta bisa punya 2 interpretations:
-      - 1 untuk Potensi (category_type_id = potensi)
-      - 1 untuk Kompetensi (category_type_id = kompetensi)
-      Atau bisa general (category_type_id = null)
-```
-
----
-
-### **AUTH (1)**
-
-#### **16. users** (Laravel default, simplified)
-
-```
-├─ id (PK, bigint unsigned)
-├─ name (string)
-├─ email (string, UNIQUE)
-├─ password (string)
-├─ remember_token (string, nullable)
-└─ timestamps
-
-NOTE: Simple auth, no roles
-      Semua user punya akses sama
-```
-
----
-
-### **DATABASE RELATIONSHIPS**
-
-```
-Institution (1) ──< (N) AssessmentEvent
-AssessmentTemplate (1) ──< (N) AssessmentEvent
-AssessmentTemplate (1) ──< (N) CategoryType
-AssessmentTemplate (1) ──< (N) Aspect ← ADDED 2025-10-06 (direct relation)
-CategoryType (1) ──< (N) Aspect
-Aspect (1) ──< (N) SubAspect (optional, bisa 0)
-
-AssessmentEvent (1) ──< (N) Batch
-AssessmentEvent (1) ──< (N) PositionFormation
-AssessmentEvent (1) ──< (N) Participant
-
-Participant (1) ──< (N) CategoryAssessment (selalu 2: Potensi + Kompetensi)
-Participant (1) ──── (1) FinalAssessment
-Participant (1) ──── (1) PsychologicalTest
-Participant (1) ──< (N) Interpretation (0-2 records)
-
-CategoryAssessment (1) ──< (N) AspectAssessment
-AspectAssessment (1) ──< (N) SubAspectAssessment (0-N, tergantung aspek)
-```
-
-**IMPORTANT NOTE (2025-10-06):**
-Aspects now have DUAL relationship:
-- template_id: Direct FK to template (for defining weight per template)
-- category_type_id: FK to category (for grouping Potensi/Kompetensi)
-
-This allows same aspect code to have different weights in different templates.
-Example:
-- Template P3K: Kecerdasan (30% of Potensi)
-- Template CPNS: Kecerdasan (50% of Potensi)
-```
-
----
-
-### **Key Unique Identifiers:**
-
--   **Institution:** `code` (kejaksaan, kemenkeu)
--   **Event:** `code` (P3K-KEJAKSAAN-2025)
--   **Participant:** `test_number` (03-5-2-18-001) ← PRIMARY KEY
+**Key Principles:**
+- ✅ **Gap Comparison** - Individual vs Standard at every level
+- ✅ **Weighted Calculation** - Aspects weighted within categories, categories weighted in final
+- ✅ **Snapshot Pattern** - Standard ratings copied from master to preserve historical accuracy
+- ✅ **Dynamic Structure** - Different templates support different aspect structures
 
 ---
 
@@ -527,6 +234,9 @@ Example:
 -   ✅ **Transaction-based** - all or nothing
 -   ✅ **Error handling** - log & continue untuk participant gagal
 -   ✅ **Progress tracking** - log setiap 10 peserta
+
+**For detailed API data requirements (WAJIB vs OPSIONAL), see:**
+👉 **[ASSESSMENT_CALCULATION_FLOW.md - API Data Requirements](./ASSESSMENT_CALCULATION_FLOW.md#api-data-requirements)**
 
 ---
 
@@ -1105,6 +815,74 @@ X-API-Key: {shared_secret_key}
 
 ## 📝 DEVELOPMENT PROGRESS LOG
 
+### **2025-10-06 PM (4) - Assessment Calculation Flow Documentation ✅**
+
+**Achievement:**
+Documented complete assessment calculation flow & logic sebagai **PONDASI KOKOH** untuk aplikasi.
+
+**Documentation Added:**
+1. ✅ **Assessment Calculation Flow & Logic** - Complete section
+   - Level 1: Sub-Aspect Assessment (raw data)
+   - Level 2: Aspect Assessment (aggregated or direct)
+   - Level 3: Category Assessment (Potensi + Kompetensi)
+   - Level 4: Final Assessment (weighted calculation)
+
+2. ✅ **Calculation Logic dengan Code Examples**
+   - PHP code snippets untuk setiap level calculation
+   - Formula untuk aggregation, gap, percentage
+   - Business logic untuk conclusion determination
+
+3. ✅ **Template Standard Role & Snapshot Pattern**
+   - Why snapshot pattern is critical
+   - Timeline example showing historical integrity
+   - 5 key benefits documented
+
+4. ✅ **Dynamic Template Structure**
+   - Examples of different templates with different structures
+   - Database support explanation
+   - UNIQUE constraint rationale
+
+5. ✅ **API Data Requirements (WAJIB vs OPSIONAL)**
+   - Detailed table of required vs optional data
+   - Mapping to application goals (Tujuan 1 & 2)
+   - Example API response structure
+   - Critical notes about sub-aspects
+
+**Key Clarifications Documented:**
+
+✅ **WAJIB dari API:**
+- Template structure lengkap (aspects + sub-aspects + standard_ratings)
+- Sub-aspects dengan individual_rating untuk Potensi
+- Aspects individual_rating untuk Kompetensi (direct)
+- Standard_rating di semua level (untuk gap comparison)
+
+✅ **OPSIONAL dari API:**
+- Aspects individual_rating untuk Potensi (bisa di-calculate)
+
+✅ **KONSEP "HOW vs WHO":**
+- Template = "HOW to Assess" (structure, weights, standards)
+- Event = "WHO to Assess" (participants, batches, positions)
+
+✅ **Bottom-Up Aggregation:**
+- Sub-Aspects → Aspects → Categories → Final Score
+- Setiap level punya gap comparison (individual vs standard)
+
+**Impact:**
+- 📚 Developer yang baru akan mudah memahami flow calculation
+- 🔧 CI3 developer tahu persis data apa yang harus dikirim API
+- ✅ Service layer development jadi jelas (calculation logic terdokumentasi)
+- 🎯 QC bisa fokus struktur database (calculation di service layer)
+
+**Files Modified:**
+- `PROJECT_DOCUMENTATION.md` - Added comprehensive calculation flow section
+
+**Database QC Status:**
+- ✅ 9/16 tables completed (56.25%)
+- ⏳ Current: Reviewing category_assessments
+- 📝 Calculation accuracy validation SKIPPED (akan di-handle by service layer)
+
+---
+
 ### **2025-10-06 PM (3) - Documentation Hierarchy Correction ✅**
 
 **Issue Identified:**
@@ -1266,13 +1044,65 @@ During database QC session, user identified critical design flaw:
 - 32 Interpretations (2 per participant)
 
 **Next Steps:**
-- ✅ Database QC in progress (8/16 tables verified - 50% COMPLETE! 🎉)
-- ⏳ Next: Review table `participants` (Table 9/16)
+- ✅ Database QC in progress (9/16 tables verified - 56.25% COMPLETE!)
+- ⏳ Next: Continue QC remaining assessment tables (category, aspect, sub-aspect assessments)
+- 📝 Calculation flow documented - ready for Service layer development
 - Skip Phase 3 & 4 (API Integration) - will do later
 - Move to Phase 5-7: UI Development (Controllers, Routes, Views, Livewire)
 
 ---
 
+### **2025-10-06 PM (5) - Documentation Refactoring ✅**
+
+**Achievement:**
+Separated growing PROJECT_DOCUMENTATION.md into focused, organized files.
+
+**Files Created:**
+1. ✅ **DATABASE_DESIGN.md**
+   - Complete database structure (16 tables)
+   - Detailed schemas with SQL
+   - Relationships & indexes
+   - Design validation
+
+2. ✅ **ASSESSMENT_CALCULATION_FLOW.md**
+   - 4 levels of calculation logic
+   - PHP code examples
+   - Business rules & formulas
+   - API data requirements (WAJIB vs OPSIONAL)
+
+**Files Updated:**
+3. ✅ **PROJECT_DOCUMENTATION.md** (Cleaned up)
+   - Removed detailed database design → DATABASE_DESIGN.md
+   - Removed calculation flow → ASSESSMENT_CALCULATION_FLOW.md
+   - Added documentation structure section
+   - Added cross-references to all files
+   - Kept high-level overview & implementation checklist
+
+4. ✅ **DATABASE_QC_PROGRESS.md**
+   - Added cross-references to related docs
+
+**Cross-References Added:**
+- All files now reference each other
+- Easy navigation between documentation
+- Clear separation of concerns
+
+**Impact:**
+- 📚 Better documentation organization
+- 🎯 Easier to find specific information
+- ✅ No information lost - everything preserved
+- 🔗 Clear cross-linking between files
+
+**Documentation Structure Now:**
+```
+PROJECT_DOCUMENTATION.md (Overview, Goals, Stack, Checklist)
+    ↓
+    ├─→ DATABASE_DESIGN.md (16 tables, schemas, relationships)
+    ├─→ ASSESSMENT_CALCULATION_FLOW.md (Calculation logic, formulas, API)
+    └─→ DATABASE_QC_PROGRESS.md (QC tracking & reports)
+```
+
+---
+
 **Last Updated:** 2025-10-06 PM
-**Version:** 1.4
-**Status:** Phase 2 Complete + Database QC in Progress 🔍 (50% done - HALFWAY THERE!)
+**Version:** 1.6
+**Status:** Phase 2 Complete + Database QC 56% + **DOCUMENTATION ORGANIZED** 📚
