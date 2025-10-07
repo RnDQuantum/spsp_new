@@ -17,7 +17,7 @@
 | 5  | sub_aspects | ✅ DONE | ✅ YES | N/A | 23 records, all have standard_rating |
 | 6  | assessment_events | ✅ DONE | N/A | N/A | 1 event, added description field |
 | 7  | batches | ✅ DONE | N/A | N/A | 3 batches, FK verified |
-| 8  | position_formations | ⏸️ PENDING | N/A | N/A | - |
+| 8  | position_formations | ✅ DONE | N/A | N/A | 5 formations, event-specific (not template) |
 | 9  | participants | ⏸️ PENDING | N/A | N/A | - |
 | 10 | category_assessments | ⏸️ PENDING | N/A | N/A | - |
 | 11 | aspect_assessments | ⏸️ PENDING | N/A | N/A | - |
@@ -314,6 +314,69 @@ id, event_id, code, name, location, batch_number, start_date, end_date, timestam
 
 ---
 
+### ✅ 8. position_formations
+
+**Reviewed:** 2025-10-06
+**Status:** PASSED ✅
+
+**Structure:**
+```
+id, event_id, code, name, quota, timestamps
+```
+
+**Data Count:** 5 records
+
+**Data Sample:**
+- fisikawan_medis: Fisikawan Medis Ahli Pertama (quota: 10)
+- analis_kebijakan: Analis Kebijakan Ahli Pertama (quota: 15)
+- auditor: Auditor Ahli Pertama (quota: 8)
+- pranata_komputer: Pranata Komputer Ahli Pertama (quota: 12)
+- pengelola_pengadaan: Pengelola Pengadaan Barang dan Jasa (quota: 6)
+
+**Foreign Key Verification:**
+- ✅ All position_formations: event_id = 1 → "P3K-KEJAKSAAN-2025" (VALID)
+
+**Key Design Decision: Why `event_id` not `template_id`?**
+
+**Concept: "HOW vs WHO"**
+- ✅ Template = "HOW to Assess" (assessment structure - universal blueprint)
+- ✅ Event = "WHO to Assess" (execution - specific to institution needs)
+
+**Rationale:**
+1. ✅ Position formations are EVENT-SPECIFIC operational decisions
+2. ✅ Different events can use SAME template but need DIFFERENT positions
+3. ✅ Quota per position is specific to each event
+4. ✅ Template defines assessment structure, NOT job positions
+
+**Example Scenario:**
+```
+Template: "P3K Standard 2025" (defines HOW to assess)
+├─ Categories: Potensi 40%, Kompetensi 60%
+└─ Aspects: Kecerdasan, Integritas, dll
+
+Event A: P3K Kejaksaan 2025
+├─ Uses Template: "P3K Standard 2025" ✅
+└─ Positions: Fisikawan (10), Auditor (8), Pranata Komputer (12)
+
+Event B: P3K BKN 2025 (uses SAME template)
+├─ Uses Template: "P3K Standard 2025" ✅
+└─ Positions: Analis (15), Pengelola Pengadaan (6), Auditor (5) ← DIFFERENT!
+```
+
+**Final Verification:**
+- ✅ All FK relationships valid
+- ✅ Code format consistent (snake_case)
+- ✅ Name descriptive and professional
+- ✅ Quota values reasonable
+- ✅ All indexes present (event_id, UNIQUE on event_id+code)
+- ✅ No orphaned records
+- ✅ Correct design: event-specific (not template-specific)
+
+**Approved by:** User
+**Comments:** PASSED - Correct implementation of event-specific positions. "HOW vs WHO" concept validated.
+
+---
+
 ## 🔧 Changes Log
 
 ### 2025-10-06 PM (2) - Assessment Events Description Field
@@ -441,10 +504,11 @@ Where:
 1. ✅ ~~Review table `sub_aspects`~~ - COMPLETED
 2. ✅ ~~Review table `assessment_events`~~ - COMPLETED
 3. ✅ ~~Review table `batches`~~ - COMPLETED
-4. ⏳ Review table `position_formations` - NEXT
-5. ⏸️ Review remaining tables...
+4. ✅ ~~Review table `position_formations`~~ - COMPLETED
+5. ⏳ Review table `participants` - NEXT
+6. ⏸️ Review remaining tables...
 
 ---
 
 **Last Updated:** 2025-10-06
-**Progress:** 7/16 tables (43.75%)
+**Progress:** 8/16 tables (50%)

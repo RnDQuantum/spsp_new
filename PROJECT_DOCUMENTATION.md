@@ -39,20 +39,48 @@ Menampilkan laporan individual per peserta yang mirip dengan format PDF dari apl
 
 ### **Hierarki Data:**
 
+**IMPORTANT: Database hierarchy mengikuti konsep "HOW vs WHO"**
+- **Template** = "HOW to Assess" (Blueprint - struktur penilaian universal)
+- **Event** = "WHO to Assess" (Execution - pelaksanaan konkret dengan peserta spesifik)
+
 ```
-Institution (Instansi)
-    └─ Assessment Event (Pelaksanaan Asesmen)
-        ├─ Template (Potensi + Kompetensi struktur)
-        ├─ Batches (Gelombang/Lokasi)
-        ├─ Position Formations (Formasi Jabatan)
-        └─ Participants (Peserta)
-            ├─ Category Assessments (Potensi & Kompetensi)
-            │   └─ Aspect Assessments
-            │       └─ Sub-Aspect Assessments
-            ├─ Final Assessment (Hasil Akhir)
-            ├─ Psychological Test (Tes Kejiwaan)
-            └─ Interpretations (Narasi)
+┌─────────────────────────────────────────────────────────────────────┐
+│ MASTER LAYER (Blueprint/Template Definitions) - "HOW TO ASSESS"    │
+└─────────────────────────────────────────────────────────────────────┘
+
+Assessment Templates (Independent Master - Reusable Blueprint)
+    ├─ Category Types (Potensi 40%, Kompetensi 60%)
+    │   └─ Aspects (dengan weight per category)
+    │       └─ Sub-Aspects (detail per aspect, optional)
+    │
+    └─ [Referenced by Assessment Events via template_id FK]
+
+Institutions (Independent Master - Standalone)
+    └─ [Referenced by Assessment Events via institution_id FK]
+
+┌─────────────────────────────────────────────────────────────────────┐
+│ EXECUTION LAYER (Transaction/Operational Data) - "WHO TO ASSESS"   │
+└─────────────────────────────────────────────────────────────────────┘
+
+Assessment Events (Pelaksanaan Asesmen)
+    ├─ Uses Template (FK → assessment_templates) ← Event MEMILIH template
+    ├─ Belongs to Institution (FK → institutions)
+    ├─ Batches (Gelombang/Lokasi)
+    ├─ Position Formations (Formasi Jabatan - specific to event)
+    └─ Participants (Peserta)
+        ├─ Category Assessments (Potensi & Kompetensi)
+        │   └─ Aspect Assessments
+        │       └─ Sub-Aspect Assessments
+        ├─ Final Assessment (Hasil Akhir)
+        ├─ Psychological Test (Tes Kejiwaan)
+        └─ Interpretations (Narasi)
 ```
+
+**Key Design Principles:**
+1. **Template = Blueprint** (reusable, defines assessment structure)
+2. **Event = Instance** (uses specific template, has specific participants)
+3. **Separation**: Template defines "HOW", Event defines "WHO"
+4. **Flexibility**: Multiple events can use same template with different participants/positions
 
 ### **Kategori Penilaian:**
 
@@ -1077,6 +1105,37 @@ X-API-Key: {shared_secret_key}
 
 ## 📝 DEVELOPMENT PROGRESS LOG
 
+### **2025-10-06 PM (3) - Documentation Hierarchy Correction ✅**
+
+**Issue Identified:**
+During database QC session, discovered that hierarchy diagram in PROJECT_DOCUMENTATION.md was **misleading**:
+- Showed `Template` as child of `Assessment Event` ❌
+- Actual implementation: `Template` is independent master, `Event` references it ✅
+
+**Correction Made:**
+1. ✅ Updated "Hierarki Data" section with correct structure
+2. ✅ Added "HOW vs WHO" concept explanation:
+   - Template = "HOW to Assess" (Blueprint - universal structure)
+   - Event = "WHO to Assess" (Execution - specific participants)
+3. ✅ Added clear separation between MASTER LAYER and EXECUTION LAYER
+4. ✅ Added Key Design Principles
+5. ✅ Updated DATABASE_QC_PROGRESS.md with position_formations rationale
+
+**Key Clarification: Why `position_formations` uses `event_id` not `template_id`?**
+- Position formations are EVENT-SPECIFIC (operational decisions)
+- Template defines assessment structure, NOT job positions
+- Different events can use SAME template but need DIFFERENT positions/quotas
+- Example: Event A needs Fisikawan (10), Event B needs Analis (15) - both use same template
+
+**Files Modified:**
+- `PROJECT_DOCUMENTATION.md` - Hierarki Data section
+- `DATABASE_QC_PROGRESS.md` - Added position_formations QC report + "HOW vs WHO" concept
+
+**Database QC Progress:**
+- ✅ position_formations (8/16) - 50% COMPLETE! 🎉
+
+---
+
 ### **2025-10-06 PM (2) - Master Tables Standard Rating Implementation ✅**
 
 **Issue Identified:**
@@ -1207,12 +1266,13 @@ During database QC session, user identified critical design flaw:
 - 32 Interpretations (2 per participant)
 
 **Next Steps:**
-- ✅ Database QC in progress (5/16 tables verified)
+- ✅ Database QC in progress (8/16 tables verified - 50% COMPLETE! 🎉)
+- ⏳ Next: Review table `participants` (Table 9/16)
 - Skip Phase 3 & 4 (API Integration) - will do later
 - Move to Phase 5-7: UI Development (Controllers, Routes, Views, Livewire)
 
 ---
 
 **Last Updated:** 2025-10-06 PM
-**Version:** 1.3
-**Status:** Phase 2 Complete + Database QC in Progress 🔍 (31% done)
+**Version:** 1.4
+**Status:** Phase 2 Complete + Database QC in Progress 🔍 (50% done - HALFWAY THERE!)
