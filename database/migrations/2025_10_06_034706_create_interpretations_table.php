@@ -14,12 +14,14 @@ return new class extends Migration
         Schema::create('interpretations', function (Blueprint $table) {
             $table->id();
             $table->foreignId('participant_id')->constrained('participants')->cascadeOnDelete();
+            $table->foreignId('event_id')->constrained('assessment_events')->cascadeOnDelete();
             $table->foreignId('category_type_id')->nullable()->constrained('category_types')->cascadeOnDelete();
             $table->text('interpretation_text');
             $table->timestamps();
 
             $table->index('participant_id');
             $table->index('category_type_id');
+            $table->index(['event_id', 'category_type_id'], 'idx_interp_event_category');
         });
     }
 

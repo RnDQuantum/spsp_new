@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('psychological_tests', function (Blueprint $table) {
             $table->id();
             $table->foreignId('participant_id')->unique()->constrained('participants')->cascadeOnDelete();
+            $table->foreignId('event_id')->constrained('assessment_events')->cascadeOnDelete();
             $table->decimal('raw_score', 5, 2);
             $table->integer('iq_score')->nullable();
             $table->string('validity_status');
@@ -27,6 +28,7 @@ return new class extends Migration
             $table->timestamps();
 
             $table->index('conclusion_code');
+            $table->index(['event_id', 'conclusion_code'], 'idx_psych_event_conclusion');
         });
     }
 

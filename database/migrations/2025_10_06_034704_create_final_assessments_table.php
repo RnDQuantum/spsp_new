@@ -14,6 +14,9 @@ return new class extends Migration
         Schema::create('final_assessments', function (Blueprint $table) {
             $table->id();
             $table->foreignId('participant_id')->unique()->constrained('participants')->cascadeOnDelete();
+            $table->foreignId('event_id')->constrained('assessment_events')->cascadeOnDelete();
+            $table->foreignId('batch_id')->nullable()->constrained('batches')->nullOnDelete();
+            $table->foreignId('position_formation_id')->nullable()->constrained('position_formations')->nullOnDelete();
             $table->integer('potensi_weight');
             $table->decimal('potensi_standard_score', 8, 2);
             $table->decimal('potensi_individual_score', 8, 2);
@@ -29,6 +32,9 @@ return new class extends Migration
 
             $table->index('conclusion_code');
             $table->index('achievement_percentage');
+            $table->index(['event_id', 'achievement_percentage'], 'idx_final_event_achievement');
+            $table->index(['batch_id', 'achievement_percentage'], 'idx_final_batch_achievement');
+            $table->index(['position_formation_id', 'achievement_percentage'], 'idx_final_position_achievement');
         });
     }
 
