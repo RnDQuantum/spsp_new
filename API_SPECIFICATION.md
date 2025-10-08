@@ -41,15 +41,59 @@ API ini digunakan untuk **sync data assessment** dari aplikasi CI3 (source of tr
 
 ### **What Laravel Will Calculate (NO NEED TO SEND)**
 
-| Data Element | Calculated By Laravel |
-|--------------|-----------------------|
-| Aspect individual_rating (Potensi) | ✅ AVG from sub-aspects |
-| All scores (standard_score, individual_score) | ✅ rating × weight |
-| All gaps (gap_rating, gap_score) | ✅ individual - standard |
-| Percentage scores (spider chart) | ✅ (rating / 5) × 100 |
-| Category totals | ✅ SUM from aspects |
-| Final assessment | ✅ Weighted calculation |
-| All conclusion codes & texts | ✅ Based on thresholds |
+| Data Element | Data Type | Calculated By Laravel |
+|--------------|-----------|----------------------|
+| Aspect `individual_rating` (Potensi) | DECIMAL | ✅ AVG from sub-aspects `individual_rating` (INTEGER) |
+| All scores (`standard_score`, `individual_score`) | DECIMAL | ✅ rating × weight |
+| All gaps (`gap_rating`, `gap_score`) | DECIMAL | ✅ individual - standard |
+| Percentage scores (spider chart) | INTEGER | ✅ (rating / 5) × 100 |
+| Category totals | DECIMAL | ✅ SUM from aspects |
+| Final assessment | DECIMAL | ✅ Weighted calculation |
+| All conclusion codes & texts | STRING | ✅ Based on thresholds |
+
+### **Visual Flow: What API Sends vs What Laravel Calculates**
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ CI3 API SENDS (RAW DATA)                                    │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│ POTENSI:                                                    │
+│   Aspect: Kecerdasan                                        │
+│   ├─ ❌ NO individual_rating at aspect level               │
+│   └─ Sub-aspects:                                           │
+│       ├─ Kecerdasan Umum: individual_rating = 3 (INTEGER)  │
+│       ├─ Daya Tangkap: individual_rating = 4 (INTEGER)     │
+│       └─ ... (6 sub-aspects)                                │
+│                                                             │
+│ KOMPETENSI:                                                 │
+│   Aspect: Integritas                                        │
+│   ├─ ✅ individual_rating = 3 (INTEGER)                    │
+│   └─ ❌ NO sub-aspects                                     │
+└─────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────┐
+│ LARAVEL CALCULATES                                          │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│ POTENSI:                                                    │
+│   Aspect: Kecerdasan                                        │
+│   ✅ individual_rating = 3.50 (DECIMAL)                    │
+│      ↑ Calculated as AVG(3, 4, 3, 4, 3, 4) = 3.50         │
+│   ✅ standard_score = 3.20 × 30% = 96.00                   │
+│   ✅ individual_score = 3.50 × 30% = 105.00                │
+│   ✅ gap_rating = 3.50 - 3.20 = 0.30                       │
+│   ✅ percentage_score = (3.50 / 5) × 100 = 70%             │
+│                                                             │
+│ KOMPETENSI:                                                 │
+│   Aspect: Integritas                                        │
+│   ✅ individual_rating = 3 (from API, stored as-is)        │
+│   ✅ standard_score = 3.50 × 12% = 42.00                   │
+│   ✅ individual_score = 3 × 12% = 36.00                    │
+│   ✅ gap_rating = 3 - 3.50 = -0.50                         │
+│   ✅ percentage_score = (3 / 5) × 100 = 60%                │
+└─────────────────────────────────────────────────────────────┘
+```
 
 ---
 
@@ -453,27 +497,43 @@ Content-Type: application/json
 
 **CRITICAL:** Only send RAW individual_rating values!
 
+#### **📌 IMPORTANT CLARIFICATION: `individual_rating` Field**
+
+The term `individual_rating` appears in BOTH sub-aspects and aspects, but they have **DIFFERENT data types**:
+
+| Location | Field Name | Data Type | Source | Stored In Table |
+|----------|-----------|-----------|--------|-----------------|
+| **Sub-Aspect (Potensi)** | `individual_rating` | **INTEGER 1-5** | ✅ **FROM API** (must send) | `sub_aspect_assessments.individual_rating` |
+| **Aspect (Potensi)** | `individual_rating` | **DECIMAL** | ❌ **CALCULATED by Laravel** (AVG from sub-aspects) | `aspect_assessments.individual_rating` |
+| **Aspect (Kompetensi)** | `individual_rating` | **INTEGER 1-5** | ✅ **FROM API** (must send) | `aspect_assessments.individual_rating` |
+
+**Summary:**
+- **API sends:** Sub-aspect ratings (INTEGER) + Kompetensi aspect ratings (INTEGER)
+- **Laravel calculates:** Potensi aspect ratings (DECIMAL) from sub-aspects average
+
 ```json
 {
   "potensi": [
     {
       "aspect_code": "kecerdasan",      // Must exist in template
+      // ❌ NO "individual_rating" here - will be calculated by Laravel!
       "sub_aspects": [                  // ✅ MUST NOT BE EMPTY for Potensi
         {
           "sub_aspect_code": "kecerdasan_umum",  // Must exist
-          "individual_rating": 3        // ⚠️ INTEGER 1-5 (RAW from test)
+          "individual_rating": 3        // ✅ INTEGER 1-5 (RAW from test) - SEND THIS
         },
         {
           "sub_aspect_code": "daya_tangkap",
-          "individual_rating": 4
+          "individual_rating": 4        // ✅ INTEGER 1-5 - SEND THIS
         }
         // ... all sub-aspects for this aspect
       ]
     },
     {
       "aspect_code": "sikap_kerja",
+      // ❌ NO "individual_rating" here - will be calculated!
       "sub_aspects": [
-        // ... sub-aspects
+        // ... sub-aspects with individual_rating (INTEGER)
       ]
     }
     // ... all Potensi aspects
@@ -481,11 +541,11 @@ Content-Type: application/json
   "kompetensi": [
     {
       "aspect_code": "integritas",      // Must exist in template
-      "individual_rating": 3            // ⚠️ INTEGER 1-5 (RAW, NO sub-aspects)
+      "individual_rating": 3            // ✅ INTEGER 1-5 (RAW, NO sub-aspects) - SEND THIS
     },
     {
       "aspect_code": "kerjasama",
-      "individual_rating": 4
+      "individual_rating": 4            // ✅ INTEGER 1-5 - SEND THIS
     }
     // ... all Kompetensi aspects
   ]
@@ -497,20 +557,22 @@ Content-Type: application/json
 **Potensi:**
 - `aspect_code`: required, string, must exist in template
 - `sub_aspects`: required, array, min:1 (MUST NOT BE EMPTY)
-- `sub_aspect_code`: required, string, must exist in template
-- `individual_rating`: required, integer, min:1, max:5
+  - `sub_aspect_code`: required, string, must exist in template
+  - `individual_rating`: required, **INTEGER**, min:1, max:5 ← **FROM API**
+- ❌ **DO NOT send** `individual_rating` at aspect level (will be calculated by Laravel as DECIMAL)
 
 **Kompetensi:**
 - `aspect_code`: required, string, must exist in template
-- `individual_rating`: required, integer, min:1, max:5
-- NO `sub_aspects` field
+- `individual_rating`: required, **INTEGER**, min:1, max:5 ← **FROM API**
+- ❌ **NO `sub_aspects` field** (Kompetensi has no sub-aspects)
 
 **Important Notes:**
-1. ✅ **Send ONLY individual_rating** (Laravel will calculate scores, gaps, percentages)
-2. ✅ **Potensi MUST have sub_aspects** with individual ratings
-3. ✅ **Kompetensi NO sub_aspects** - direct aspect rating
-4. ✅ **Individual ratings MUST be INTEGER 1-5** (not decimal)
-5. ✅ **All aspects from template MUST be present** in assessments
+1. ✅ **API only sends:** sub-aspect `individual_rating` (Potensi) + aspect `individual_rating` (Kompetensi)
+2. ✅ **Laravel calculates:** aspect `individual_rating` for Potensi (as DECIMAL average)
+3. ✅ **Potensi structure:** aspect → sub_aspects (with ratings) → Laravel calculates aspect rating
+4. ✅ **Kompetensi structure:** aspect (with rating) → no sub-aspects
+5. ✅ **All individual_rating from API MUST be INTEGER 1-5** (not decimal, not float)
+6. ✅ **All aspects from template MUST be present** in assessments
 
 ---
 
