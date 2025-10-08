@@ -10,9 +10,8 @@ Route::get('/', function () {
     return view('dashboard');
 })->name('dashboard');
 
-Route::get('/shortlist-peserta', function () {
-    return view('livewire.pages.shortlist');
-})->name('shortlist');
+Route::get('/shortlist-peserta', \App\Livewire\Pages\ParticipantsList::class)->name('shortlist');
+
 
 
 // Individual Report Route

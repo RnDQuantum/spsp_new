@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('email')->nullable();
             $table->string('phone')->nullable();
+            $table->string('gender')->nullable();
             $table->string('photo_path')->nullable();
             $table->date('assessment_date');
             $table->timestamps();
