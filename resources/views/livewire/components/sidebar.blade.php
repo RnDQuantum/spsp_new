@@ -85,7 +85,7 @@
                             class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
                             General Matching
                         </a>
-                        <a href="#" role="menuitem"
+                        <a href="{{ Route('general_mapping') }}" role="menuitem"
                             class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
                             General Mapping
                         </a>
