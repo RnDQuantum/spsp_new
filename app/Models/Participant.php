@@ -18,6 +18,7 @@ class Participant extends Model
         'name',
         'email',
         'phone',
+        'gender',
         'photo_path',
         'assessment_date',
     ];
