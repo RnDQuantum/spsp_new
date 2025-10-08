@@ -35,6 +35,11 @@ class Participant extends Model
         return $this->belongsTo(AssessmentEvent::class, 'event_id');
     }
 
+    public function event(): BelongsTo
+    {
+        return $this->belongsTo(AssessmentEvent::class, 'event_id');
+    }
+
     public function batch(): BelongsTo
     {
         return $this->belongsTo(Batch::class);
