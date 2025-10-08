@@ -5,7 +5,7 @@ namespace App\Livewire;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 
-#[Layout('components.layouts.app')]
+#[Layout('components.layouts.app', ['title' => 'General Matching'])]
 class ReportComponent extends Component
 {
     // Public properties to hold percentage data

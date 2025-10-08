@@ -1,4 +1,3 @@
-{{-- <x-layouts.app title="General Matching Report - Aspek Psikologi"> --}}
 <style>
     /* Ensure equal width for Range Scale columns */
     .range-scale {
@@ -636,4 +635,3 @@
         </table>
     </div>
 </div>
-{{-- </x-layouts.app> --}}
