@@ -2,25 +2,22 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Aspect;
+use App\Models\AspectAssessment;
+use App\Models\AssessmentEvent;
+use App\Models\AssessmentTemplate;
+use App\Models\Batch;
+use App\Models\CategoryAssessment;
+use App\Models\CategoryType;
+use App\Models\FinalAssessment;
+use App\Models\Institution;
+use App\Models\Interpretation;
+use App\Models\Participant;
+use App\Models\PositionFormation;
+use App\Models\PsychologicalTest;
+use App\Models\SubAspect;
+use App\Models\SubAspectAssessment;
 use Illuminate\Database\Seeder;
-use App\Models\{
-    Institution,
-    AssessmentTemplate,
-    AssessmentEvent,
-    Batch,
-    PositionFormation,
-    Participant,
-    CategoryType,
-    CategoryAssessment,
-    Aspect,
-    AspectAssessment,
-    SubAspect,
-    SubAspectAssessment,
-    FinalAssessment,
-    PsychologicalTest,
-    Interpretation
-};
 
 class SampleDataSeeder extends Seeder
 {
@@ -190,7 +187,7 @@ class SampleDataSeeder extends Seeder
             'individual_score' => 77.29,
             'gap_rating' => -0.57,
             'gap_score' => -17.21,
-            'percentage_score' => 78,
+            'percentage_score' => round((2.58 / 5) * 100),
             'conclusion_text' => 'Kurang Memenuhi Standard',
             'description_text' => null,
         ]);
@@ -218,6 +215,10 @@ class SampleDataSeeder extends Seeder
 
         // --- 4.5. Aspect Assessment: Integritas (manual example) ---
         $aspectIntegritas = Aspect::where('code', 'integritas')->first();
+
+        // For Kompetensi, individual_rating should be INTEGER 1-5
+        $integritasIndividualRating = 3; // Integer rating
+
         AspectAssessment::create([
             'category_assessment_id' => $catKompetensi->id,
             'participant_id' => $participant->id,
@@ -227,11 +228,11 @@ class SampleDataSeeder extends Seeder
             'aspect_id' => $aspectIntegritas->id,
             'standard_rating' => 2.70,
             'standard_score' => 32.40,
-            'individual_rating' => 3.08,
-            'individual_score' => 36.96,
-            'gap_rating' => 0.38,
-            'gap_score' => 4.56,
-            'percentage_score' => null,
+            'individual_rating' => $integritasIndividualRating,
+            'individual_score' => $integritasIndividualRating * ($aspectIntegritas->weight_percentage / 100),
+            'gap_rating' => $integritasIndividualRating - 2.70,
+            'gap_score' => ($integritasIndividualRating * ($aspectIntegritas->weight_percentage / 100)) - 32.40,
+            'percentage_score' => round(($integritasIndividualRating / 5) * 100),
             'conclusion_text' => 'Sangat Memenuhi Standard',
             'description_text' => 'Individu kompeten menampilkan kompetensi integritas sesuai dengan standar level yang di tetapkan.',
         ]);
@@ -266,7 +267,7 @@ class SampleDataSeeder extends Seeder
                 'individual_score' => round($individualScore, 2),
                 'gap_rating' => round($gapRating, 2),
                 'gap_score' => round($gapScore, 2),
-                'percentage_score' => $standardScore > 0 ? round(($individualScore / $standardScore) * 100) : null,
+                'percentage_score' => round(($individualRating / 5) * 100),
                 'conclusion_code' => null,
                 'conclusion_text' => $conclusionText,
                 'description_text' => $this->getAspectDescription($aspect->code, $conclusionText),
@@ -284,7 +285,11 @@ class SampleDataSeeder extends Seeder
 
         foreach ($kompetensiAspects as $aspect) {
             $performanceMultiplier = 1.02; // Slightly above standard for Kompetensi
-            $individualRating = max(1.0, min(5.0, $aspect->standard_rating * $performanceMultiplier));
+
+            // For Kompetensi, individual_rating should be INTEGER 1-5
+            $baseRating = $aspect->standard_rating * $performanceMultiplier;
+            $individualRating = (int) max(1, min(5, round($baseRating)));
+
             $standardScore = $aspect->standard_rating * ($aspect->weight_percentage / 100);
             $individualScore = $individualRating * ($aspect->weight_percentage / 100);
             $gapRating = $individualRating - $aspect->standard_rating;
@@ -301,11 +306,11 @@ class SampleDataSeeder extends Seeder
                 'aspect_id' => $aspect->id,
                 'standard_rating' => $aspect->standard_rating,
                 'standard_score' => round($standardScore, 2),
-                'individual_rating' => round($individualRating, 2),
+                'individual_rating' => $individualRating,
                 'individual_score' => round($individualScore, 2),
                 'gap_rating' => round($gapRating, 2),
                 'gap_score' => round($gapScore, 2),
-                'percentage_score' => $standardScore > 0 ? round(($individualScore / $standardScore) * 100) : null,
+                'percentage_score' => round(($individualRating / 5) * 100),
                 'conclusion_code' => null,
                 'conclusion_text' => $conclusionText,
                 'description_text' => $this->getAspectDescription($aspect->code, $conclusionText),
@@ -690,9 +695,19 @@ class SampleDataSeeder extends Seeder
             ->get();
 
         foreach ($aspects as $aspect) {
+            // Check if this is Potensi or Kompetensi
+            $isPotensi = $categoryTypeId == 1;
+
             // Calculate individual rating based on performance multiplier
             $baseIndividualRating = $aspect->standard_rating * $performanceMultiplier;
-            $individualRating = max(1.0, min(5.0, $baseIndividualRating)); // Clamp between 1-5
+
+            // For Kompetensi, rating must be INTEGER 1-5
+            // For Potensi, will be recalculated after sub-aspects are generated
+            if ($isPotensi) {
+                $individualRating = max(1.0, min(5.0, $baseIndividualRating)); // Temporary value
+            } else {
+                $individualRating = (int) max(1, min(5, round($baseIndividualRating))); // Integer for Kompetensi
+            }
 
             // Calculate scores
             $standardScore = $aspect->standard_rating * ($aspect->weight_percentage / 100);
@@ -724,17 +739,18 @@ class SampleDataSeeder extends Seeder
                 'aspect_id' => $aspect->id,
                 'standard_rating' => $aspect->standard_rating,
                 'standard_score' => round($standardScore, 2),
-                'individual_rating' => round($individualRating, 2),
+                'individual_rating' => $isPotensi ? round($individualRating, 2) : $individualRating,
                 'individual_score' => round($individualScore, 2),
                 'gap_rating' => round($gapRating, 2),
                 'gap_score' => round($gapScore, 2),
-                'percentage_score' => $standardScore > 0 ? round(($individualScore / $standardScore) * 100) : null,
+                'percentage_score' => round(($individualRating / 5) * 100),
                 'conclusion_code' => $conclusionCode,
                 'conclusion_text' => $conclusionText,
                 'description_text' => $descriptionText,
             ]);
 
             // Generate sub-aspect assessments (for Potensi aspects only)
+            // This will recalculate individual_rating and percentage_score for Potensi
             $this->generateSubAspectAssessments($aspectAssessment, $performanceMultiplier);
         }
     }
@@ -745,19 +761,19 @@ class SampleDataSeeder extends Seeder
     private function getAspectDescription(string $aspectCode, string $conclusion): ?string
     {
         $descriptions = [
-            'kecerdasan' => 'Individu menampilkan kemampuan intelektual dan daya tangkap yang ' . ($conclusion === 'Sangat Memenuhi Standard' ? 'sangat baik' : ($conclusion === 'Memenuhi Standard' ? 'memadai' : 'perlu ditingkatkan')) . ' dalam memahami informasi dan memecahkan masalah.',
-            'sikap_kerja' => 'Menunjukkan sikap kerja yang ' . ($conclusion === 'Sangat Memenuhi Standard' ? 'sangat positif dan profesional' : ($conclusion === 'Memenuhi Standard' ? 'cukup baik' : 'perlu pengembangan')) . ' dalam menjalankan tugas dan tanggung jawab.',
-            'hubungan_sosial' => 'Kemampuan berinteraksi dan membangun hubungan dengan orang lain ' . ($conclusion === 'Sangat Memenuhi Standard' ? 'sangat baik' : ($conclusion === 'Memenuhi Standard' ? 'cukup memadai' : 'memerlukan perhatian')),
-            'kepribadian' => 'Karakteristik kepribadian yang ditampilkan ' . ($conclusion === 'Sangat Memenuhi Standard' ? 'sangat sesuai' : ($conclusion === 'Memenuhi Standard' ? 'sesuai' : 'kurang sesuai')) . ' dengan profil jabatan yang diharapkan.',
-            'integritas' => 'Individu ' . ($conclusion === 'Sangat Memenuhi Standard' ? 'sangat kompeten' : ($conclusion === 'Memenuhi Standard' ? 'kompeten' : 'cukup kompeten')) . ' menampilkan kompetensi integritas sesuai dengan standar level yang ditetapkan.',
-            'kerjasama' => 'Kemampuan bekerja sama dalam tim ' . ($conclusion === 'Sangat Memenuhi Standard' ? 'sangat menonjol' : ($conclusion === 'Memenuhi Standard' ? 'memadai' : 'perlu ditingkatkan')),
-            'komunikasi' => 'Keterampilan komunikasi yang ditampilkan ' . ($conclusion === 'Sangat Memenuhi Standard' ? 'sangat efektif' : ($conclusion === 'Memenuhi Standard' ? 'cukup efektif' : 'perlu pengembangan')),
-            'orientasi_pada_hasil' => 'Fokus pada pencapaian hasil kerja ' . ($conclusion === 'Sangat Memenuhi Standard' ? 'sangat kuat' : ($conclusion === 'Memenuhi Standard' ? 'cukup baik' : 'memerlukan peningkatan')),
-            'pelayanan_publik' => 'Orientasi pada pelayanan kepada publik ' . ($conclusion === 'Sangat Memenuhi Standard' ? 'sangat baik' : ($conclusion === 'Memenuhi Standard' ? 'memadai' : 'perlu perhatian')),
-            'pengembangan_diri_dan_orang_lain' => 'Komitmen terhadap pengembangan diri dan orang lain ' . ($conclusion === 'Sangat Memenuhi Standard' ? 'sangat tinggi' : ($conclusion === 'Memenuhi Standard' ? 'cukup baik' : 'perlu ditingkatkan')),
-            'mengelola_perubahan' => 'Kemampuan mengelola dan beradaptasi dengan perubahan ' . ($conclusion === 'Sangat Memenuhi Standard' ? 'sangat baik' : ($conclusion === 'Memenuhi Standard' ? 'memadai' : 'memerlukan pengembangan')),
-            'pengambilan_keputusan' => 'Kualitas dalam pengambilan keputusan ' . ($conclusion === 'Sangat Memenuhi Standard' ? 'sangat baik' : ($conclusion === 'Memenuhi Standard' ? 'cukup baik' : 'perlu peningkatan')),
-            'perekat_bangsa' => 'Komitmen sebagai perekat bangsa dan pemersatu ' . ($conclusion === 'Sangat Memenuhi Standard' ? 'sangat kuat' : ($conclusion === 'Memenuhi Standard' ? 'memadai' : 'perlu penguatan')),
+            'kecerdasan' => 'Individu menampilkan kemampuan intelektual dan daya tangkap yang '.($conclusion === 'Sangat Memenuhi Standard' ? 'sangat baik' : ($conclusion === 'Memenuhi Standard' ? 'memadai' : 'perlu ditingkatkan')).' dalam memahami informasi dan memecahkan masalah.',
+            'sikap_kerja' => 'Menunjukkan sikap kerja yang '.($conclusion === 'Sangat Memenuhi Standard' ? 'sangat positif dan profesional' : ($conclusion === 'Memenuhi Standard' ? 'cukup baik' : 'perlu pengembangan')).' dalam menjalankan tugas dan tanggung jawab.',
+            'hubungan_sosial' => 'Kemampuan berinteraksi dan membangun hubungan dengan orang lain '.($conclusion === 'Sangat Memenuhi Standard' ? 'sangat baik' : ($conclusion === 'Memenuhi Standard' ? 'cukup memadai' : 'memerlukan perhatian')),
+            'kepribadian' => 'Karakteristik kepribadian yang ditampilkan '.($conclusion === 'Sangat Memenuhi Standard' ? 'sangat sesuai' : ($conclusion === 'Memenuhi Standard' ? 'sesuai' : 'kurang sesuai')).' dengan profil jabatan yang diharapkan.',
+            'integritas' => 'Individu '.($conclusion === 'Sangat Memenuhi Standard' ? 'sangat kompeten' : ($conclusion === 'Memenuhi Standard' ? 'kompeten' : 'cukup kompeten')).' menampilkan kompetensi integritas sesuai dengan standar level yang ditetapkan.',
+            'kerjasama' => 'Kemampuan bekerja sama dalam tim '.($conclusion === 'Sangat Memenuhi Standard' ? 'sangat menonjol' : ($conclusion === 'Memenuhi Standard' ? 'memadai' : 'perlu ditingkatkan')),
+            'komunikasi' => 'Keterampilan komunikasi yang ditampilkan '.($conclusion === 'Sangat Memenuhi Standard' ? 'sangat efektif' : ($conclusion === 'Memenuhi Standard' ? 'cukup efektif' : 'perlu pengembangan')),
+            'orientasi_pada_hasil' => 'Fokus pada pencapaian hasil kerja '.($conclusion === 'Sangat Memenuhi Standard' ? 'sangat kuat' : ($conclusion === 'Memenuhi Standard' ? 'cukup baik' : 'memerlukan peningkatan')),
+            'pelayanan_publik' => 'Orientasi pada pelayanan kepada publik '.($conclusion === 'Sangat Memenuhi Standard' ? 'sangat baik' : ($conclusion === 'Memenuhi Standard' ? 'memadai' : 'perlu perhatian')),
+            'pengembangan_diri_dan_orang_lain' => 'Komitmen terhadap pengembangan diri dan orang lain '.($conclusion === 'Sangat Memenuhi Standard' ? 'sangat tinggi' : ($conclusion === 'Memenuhi Standard' ? 'cukup baik' : 'perlu ditingkatkan')),
+            'mengelola_perubahan' => 'Kemampuan mengelola dan beradaptasi dengan perubahan '.($conclusion === 'Sangat Memenuhi Standard' ? 'sangat baik' : ($conclusion === 'Memenuhi Standard' ? 'memadai' : 'memerlukan pengembangan')),
+            'pengambilan_keputusan' => 'Kualitas dalam pengambilan keputusan '.($conclusion === 'Sangat Memenuhi Standard' ? 'sangat baik' : ($conclusion === 'Memenuhi Standard' ? 'cukup baik' : 'perlu peningkatan')),
+            'perekat_bangsa' => 'Komitmen sebagai perekat bangsa dan pemersatu '.($conclusion === 'Sangat Memenuhi Standard' ? 'sangat kuat' : ($conclusion === 'Memenuhi Standard' ? 'memadai' : 'perlu penguatan')),
         ];
 
         return $descriptions[$aspectCode] ?? null;
@@ -795,7 +811,7 @@ class SampleDataSeeder extends Seeder
             $individualRating = (int) max(1, min(5, round($baseIndividualRating))); // Cast to integer for match
 
             // Determine rating label
-            $ratingLabel = match($individualRating) {
+            $ratingLabel = match ($individualRating) {
                 1 => 'Sangat Kurang',
                 2 => 'Kurang',
                 3 => 'Cukup',
@@ -814,6 +830,14 @@ class SampleDataSeeder extends Seeder
                 'rating_label' => $ratingLabel,
             ]);
         }
+
+        // After generating all sub-aspects, recalculate aspect's individual_rating and percentage_score
+        $avgIndividualRating = SubAspectAssessment::where('aspect_assessment_id', $aspectAssessment->id)
+            ->avg('individual_rating');
+
+        $aspectAssessment->update([
+            'individual_rating' => round($avgIndividualRating, 2),
+            'percentage_score' => round(($avgIndividualRating / 5) * 100),
+        ]);
     }
 }
-

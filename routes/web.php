@@ -14,5 +14,6 @@ Route::get('/shortlist-peserta', \App\Livewire\Pages\ParticipantsList::class)->n
 
 
 
-// Individual Report Route
-Route::get('/general_matching', ReportComponent::class)->name('general_matching');
+// Individual Report Route - General Matching
+Route::get('/general-matching/{eventCode}/{testNumber}', ReportComponent::class)
+    ->name('general_matching');
