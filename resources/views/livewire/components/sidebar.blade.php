@@ -81,7 +81,7 @@
                     <!-- Sub Menu Individual Report -->
                     <div x-show="individualOpen" x-cloak id="submenu-individual" class="ml-4 mt-2 space-y-1"
                         role="menu" aria-labelledby="btn-individual">
-                        <a href="#" role="menuitem"
+                        <a href="{{ Route('general_matching') }}" role="menuitem"
                             class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
                             General Matching
                         </a>
