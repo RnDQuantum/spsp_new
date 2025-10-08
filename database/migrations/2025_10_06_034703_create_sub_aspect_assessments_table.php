@@ -14,6 +14,8 @@ return new class extends Migration
         Schema::create('sub_aspect_assessments', function (Blueprint $table) {
             $table->id();
             $table->foreignId('aspect_assessment_id')->constrained('aspect_assessments')->cascadeOnDelete();
+            $table->foreignId('participant_id')->constrained('participants')->cascadeOnDelete();
+            $table->foreignId('event_id')->constrained('assessment_events')->cascadeOnDelete();
             $table->foreignId('sub_aspect_id')->constrained('sub_aspects')->cascadeOnDelete();
             $table->integer('standard_rating');
             $table->integer('individual_rating');
@@ -22,6 +24,8 @@ return new class extends Migration
 
             $table->index('aspect_assessment_id');
             $table->index('sub_aspect_id');
+            $table->index(['event_id', 'sub_aspect_id'], 'idx_sub_event_subaspect');
+            $table->index(['participant_id', 'sub_aspect_id'], 'idx_sub_participant_subaspect');
         });
     }
 

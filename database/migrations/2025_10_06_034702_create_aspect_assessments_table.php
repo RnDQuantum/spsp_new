@@ -14,6 +14,10 @@ return new class extends Migration
         Schema::create('aspect_assessments', function (Blueprint $table) {
             $table->id();
             $table->foreignId('category_assessment_id')->constrained('category_assessments')->cascadeOnDelete();
+            $table->foreignId('participant_id')->constrained('participants')->cascadeOnDelete();
+            $table->foreignId('event_id')->constrained('assessment_events')->cascadeOnDelete();
+            $table->foreignId('batch_id')->nullable()->constrained('batches')->nullOnDelete();
+            $table->foreignId('position_formation_id')->nullable()->constrained('position_formations')->nullOnDelete();
             $table->foreignId('aspect_id')->constrained('aspects')->cascadeOnDelete();
             $table->decimal('standard_rating', 5, 2);
             $table->decimal('standard_score', 8, 2);
@@ -29,6 +33,10 @@ return new class extends Migration
 
             $table->index('category_assessment_id');
             $table->index('aspect_id');
+            $table->index(['event_id', 'aspect_id'], 'idx_asp_event_aspect');
+            $table->index(['batch_id', 'aspect_id'], 'idx_asp_batch_aspect');
+            $table->index(['position_formation_id', 'aspect_id'], 'idx_asp_position_aspect');
+            $table->index(['participant_id', 'aspect_id'], 'idx_asp_participant_aspect');
         });
     }
 

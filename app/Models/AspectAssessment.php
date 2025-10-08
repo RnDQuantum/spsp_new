@@ -10,6 +10,10 @@ class AspectAssessment extends Model
 {
     protected $fillable = [
         'category_assessment_id',
+        'participant_id',
+        'event_id',
+        'batch_id',
+        'position_formation_id',
         'aspect_id',
         'standard_rating',
         'standard_score',
@@ -39,6 +43,26 @@ class AspectAssessment extends Model
     public function categoryAssessment(): BelongsTo
     {
         return $this->belongsTo(CategoryAssessment::class);
+    }
+
+    public function participant(): BelongsTo
+    {
+        return $this->belongsTo(Participant::class);
+    }
+
+    public function event(): BelongsTo
+    {
+        return $this->belongsTo(AssessmentEvent::class, 'event_id');
+    }
+
+    public function batch(): BelongsTo
+    {
+        return $this->belongsTo(Batch::class);
+    }
+
+    public function positionFormation(): BelongsTo
+    {
+        return $this->belongsTo(PositionFormation::class);
     }
 
     public function aspect(): BelongsTo

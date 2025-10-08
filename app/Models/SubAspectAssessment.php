@@ -9,6 +9,8 @@ class SubAspectAssessment extends Model
 {
     protected $fillable = [
         'aspect_assessment_id',
+        'participant_id',
+        'event_id',
         'sub_aspect_id',
         'standard_rating',
         'individual_rating',
@@ -26,6 +28,16 @@ class SubAspectAssessment extends Model
     public function aspectAssessment(): BelongsTo
     {
         return $this->belongsTo(AspectAssessment::class);
+    }
+
+    public function participant(): BelongsTo
+    {
+        return $this->belongsTo(Participant::class);
+    }
+
+    public function event(): BelongsTo
+    {
+        return $this->belongsTo(AssessmentEvent::class, 'event_id');
     }
 
     public function subAspect(): BelongsTo
