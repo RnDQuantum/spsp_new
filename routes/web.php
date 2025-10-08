@@ -1,6 +1,7 @@
 <?php
 
 use App\Livewire\Welcome;
+use App\Livewire\ReportComponent;
 use Illuminate\Support\Facades\Route;
 
 // Route::get('/', Welcome::class);
@@ -15,6 +16,4 @@ Route::get('/shortlist-peserta', function () {
 
 
 // Individual Report Route
-Route::get('/general_matching', function () {
-    return view('livewire.pages.general_matching');
-})->name('general_matching');
+Route::get('/general_matching', ReportComponent::class)->name('general_matching');
