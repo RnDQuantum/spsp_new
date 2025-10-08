@@ -1,575 +1,1280 @@
-# 📡 API SPECIFICATION - CI3 EXPORT ENDPOINT
+# 📡 API SPECIFICATION - SPSP Assessment Data Sync
 
-## Overview
-
-API ini digunakan oleh aplikasi Laravel untuk melakukan sync data asesmen dari aplikasi utama (CodeIgniter 3).
+**Project:** SPSP Analytics Dashboard
+**Purpose:** API contract between CI3 Application (source) and Laravel Dashboard (analytics)
+**Version:** 1.0
+**Last Updated:** 2025-10-08
 
 ---
 
-## Endpoint Details
+## 📚 RELATED DOCUMENTATION
 
-### **GET** `/api/events/{event_code}/export`
+- 👉 **[DATABASE_AND_ASSESSMENT_LOGIC.md](./DATABASE_AND_ASSESSMENT_LOGIC.md)** - Database structure & assessment overview
+- 👉 **[ASSESSMENT_CALCULATION_FLOW.md](./ASSESSMENT_CALCULATION_FLOW.md)** - Calculation logic & formulas
 
-**Description:** Export semua data event beserta participants dan scores
+---
 
-**Authentication:** API Key via Header
+## 🎯 OVERVIEW
 
-**Headers:**
+### **Purpose**
+
+API ini digunakan untuk **sync data assessment** dari aplikasi CI3 (source of truth) ke Laravel Dashboard (analytics).
+
+### **Key Principles**
+
+1. ✅ **Minimal Data Transfer:** API hanya mengirim data DASAR (raw ratings)
+2. ✅ **Laravel Calculates:** Semua derived values (scores, gaps, percentages) dihitung oleh Laravel
+3. ✅ **Fully Dynamic:** Support multiple templates dengan struktur berbeda
+4. ✅ **Snapshot Pattern:** Standard ratings dikirim untuk historical integrity
+5. ✅ **Upsert-Friendly:** Menggunakan unique codes untuk upsert (tidak duplikat)
+
+### **What CI3 API MUST Send**
+
+| Data Element | Required | Notes |
+|--------------|----------|-------|
+| **Master Data** (Template structure) | ✅ YES | Template, categories, aspects, sub-aspects dengan weights & standards |
+| **Event Data** | ✅ YES | Event, batches, position formations |
+| **Participant Data** | ✅ YES | Basic info (test_number, name, etc.) |
+| **RAW Individual Ratings** | ✅ YES | Sub-aspect ratings (Potensi) + Aspect ratings (Kompetensi) |
+| **Psychological Test Results** | ✅ YES | For individual report |
+| **Interpretations Text** | ✅ YES | Narrative for reports |
+
+### **What Laravel Will Calculate (NO NEED TO SEND)**
+
+| Data Element | Data Type | Calculated By Laravel |
+|--------------|-----------|----------------------|
+| Aspect `individual_rating` (Potensi) | DECIMAL | ✅ AVG from sub-aspects `individual_rating` (INTEGER) |
+| All scores (`standard_score`, `individual_score`) | DECIMAL | ✅ rating × weight |
+| All gaps (`gap_rating`, `gap_score`) | DECIMAL | ✅ individual - standard |
+| Percentage scores (spider chart) | INTEGER | ✅ (rating / 5) × 100 |
+| Category totals | DECIMAL | ✅ SUM from aspects |
+| Final assessment | DECIMAL | ✅ Weighted calculation |
+| All conclusion codes & texts | STRING | ✅ Based on thresholds |
+
+### **Visual Flow: What API Sends vs What Laravel Calculates**
+
 ```
-X-API-Key: {shared_secret_key}
+┌─────────────────────────────────────────────────────────────┐
+│ CI3 API SENDS (RAW DATA)                                    │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│ POTENSI:                                                    │
+│   Aspect: Kecerdasan                                        │
+│   ├─ ❌ NO individual_rating at aspect level               │
+│   └─ Sub-aspects:                                           │
+│       ├─ Kecerdasan Umum: individual_rating = 3 (INTEGER)  │
+│       ├─ Daya Tangkap: individual_rating = 4 (INTEGER)     │
+│       └─ ... (6 sub-aspects)                                │
+│                                                             │
+│ KOMPETENSI:                                                 │
+│   Aspect: Integritas                                        │
+│   ├─ ✅ individual_rating = 3 (INTEGER)                    │
+│   └─ ❌ NO sub-aspects                                     │
+└─────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────┐
+│ LARAVEL CALCULATES                                          │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│ POTENSI:                                                    │
+│   Aspect: Kecerdasan                                        │
+│   ✅ individual_rating = 3.50 (DECIMAL)                    │
+│      ↑ Calculated as AVG(3, 4, 3, 4, 3, 4) = 3.50         │
+│   ✅ standard_score = 3.20 × 30% = 96.00                   │
+│   ✅ individual_score = 3.50 × 30% = 105.00                │
+│   ✅ gap_rating = 3.50 - 3.20 = 0.30                       │
+│   ✅ percentage_score = (3.50 / 5) × 100 = 70%             │
+│                                                             │
+│ KOMPETENSI:                                                 │
+│   Aspect: Integritas                                        │
+│   ✅ individual_rating = 3 (from API, stored as-is)        │
+│   ✅ standard_score = 3.50 × 12% = 42.00                   │
+│   ✅ individual_score = 3 × 12% = 36.00                    │
+│   ✅ gap_rating = 3 - 3.50 = -0.50                         │
+│   ✅ percentage_score = (3 / 5) × 100 = 60%                │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 🔐 AUTHENTICATION
+
+### **API Key Authentication**
+
+```http
+POST /api/sync-assessment
+Authorization: Bearer {institution_api_key}
 Content-Type: application/json
 ```
 
-**URL Parameters:**
-- `event_code` (string, required) - Event code yang akan di-export
-  - Example: `P3K-KEJAKSAAN-2025`
+**institution_api_key:** Stored in `institutions.api_key` table
 
-**Success Response (200 OK):**
+---
+
+## 📊 ENDPOINT: Sync Assessment Data
+
+### **Endpoint**
+
+```
+POST /api/sync-assessment
+```
+
+### **Headers**
+
+```http
+Authorization: Bearer {institution_api_key}
+Content-Type: application/json
+```
+
+### **Request Body Structure**
+
+```json
+{
+  "institution": {
+    "code": "string",
+    "name": "string",
+    "logo_path": "string|null"
+  },
+  "template": {
+    "code": "string",
+    "name": "string",
+    "description": "string|null",
+    "category_types": [
+      {
+        "code": "string",
+        "name": "string",
+        "weight_percentage": "integer",
+        "order": "integer",
+        "aspects": [
+          {
+            "code": "string",
+            "name": "string",
+            "weight_percentage": "integer",
+            "standard_rating": "decimal",
+            "order": "integer",
+            "sub_aspects": [
+              {
+                "code": "string",
+                "name": "string",
+                "standard_rating": "integer",
+                "description": "string|null",
+                "order": "integer"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "event": {
+    "code": "string",
+    "name": "string",
+    "description": "string|null",
+    "year": "integer",
+    "start_date": "date (YYYY-MM-DD)",
+    "end_date": "date (YYYY-MM-DD)",
+    "status": "enum: draft|ongoing|completed"
+  },
+  "batches": [
+    {
+      "code": "string",
+      "name": "string",
+      "location": "string",
+      "batch_number": "integer",
+      "start_date": "date (YYYY-MM-DD)",
+      "end_date": "date (YYYY-MM-DD)"
+    }
+  ],
+  "position_formations": [
+    {
+      "code": "string",
+      "name": "string",
+      "quota": "integer|null"
+    }
+  ],
+  "participants": [
+    {
+      "test_number": "string (UNIQUE)",
+      "batch_code": "string",
+      "position_formation_code": "string",
+      "skb_number": "string",
+      "name": "string",
+      "email": "string|null",
+      "phone": "string|null",
+      "photo_path": "string|null",
+      "assessment_date": "date (YYYY-MM-DD)",
+      "assessments": {
+        "potensi": [
+          {
+            "aspect_code": "string",
+            "sub_aspects": [
+              {
+                "sub_aspect_code": "string",
+                "individual_rating": "integer (1-5)"
+              }
+            ]
+          }
+        ],
+        "kompetensi": [
+          {
+            "aspect_code": "string",
+            "individual_rating": "integer (1-5)"
+          }
+        ]
+      },
+      "psychological_test": {
+        "raw_score": "decimal",
+        "iq_score": "integer|null",
+        "validity_status": "string",
+        "internal_status": "string",
+        "interpersonal_status": "string",
+        "work_capacity_status": "string",
+        "clinical_status": "string",
+        "conclusion_code": "string",
+        "conclusion_text": "string",
+        "notes": "string|null"
+      },
+      "interpretations": [
+        {
+          "category_type_code": "string|null",
+          "interpretation_text": "text"
+        }
+      ]
+    }
+  ]
+}
+```
+
+---
+
+## 📋 DETAILED FIELD SPECIFICATIONS
+
+### **1. Institution Object**
+
+```json
+{
+  "code": "kejaksaan",          // UNIQUE identifier (lowercase, no spaces)
+  "name": "Kejaksaan Republik Indonesia",
+  "logo_path": "/uploads/logos/kejaksaan.png"  // Optional, nullable
+}
+```
+
+**Validation Rules:**
+- `code`: required, string, unique, max:50, lowercase, no spaces
+- `name`: required, string, max:255
+- `logo_path`: nullable, string, max:500
+
+---
+
+### **2. Template Object**
+
+```json
+{
+  "code": "p3k_standard_2025",  // UNIQUE identifier
+  "name": "P3K Standard 2025",
+  "description": "Template standar untuk P3K tahun 2025",  // Optional
+  "category_types": [...]  // Array of category types
+}
+```
+
+**Validation Rules:**
+- `code`: required, string, unique, max:100
+- `name`: required, string, max:255
+- `description`: nullable, text
+- `category_types`: required, array, min:1
+
+---
+
+### **3. Category Types Array**
+
+**CRITICAL:** Weights MUST be dynamic (not always 40/60)!
+
+```json
+{
+  "code": "potensi",              // UNIQUE per template
+  "name": "POTENSI",
+  "weight_percentage": 40,        // ⚠️ DYNAMIC! Could be 30, 40, 50, etc.
+  "order": 1,
+  "aspects": [...]                // Array of aspects
+}
+```
+
+**Example - Different Template:**
+```json
+[
+  {
+    "code": "potensi",
+    "weight_percentage": 30      // ← Different weight!
+  },
+  {
+    "code": "kompetensi",
+    "weight_percentage": 70      // ← Different weight!
+  }
+]
+```
+
+**Validation Rules:**
+- `code`: required, string, max:50
+- `name`: required, string, max:255
+- `weight_percentage`: required, integer, min:0, max:100
+- `order`: required, integer
+- SUM of all `weight_percentage` in category_types MUST = 100
+
+---
+
+### **4. Aspects Array**
+
+**CRITICAL:** Aspects structure is DYNAMIC per template!
+
+```json
+{
+  "code": "kecerdasan",           // UNIQUE per template + category
+  "name": "KECERDASAN",
+  "weight_percentage": 30,        // ⚠️ DYNAMIC! Different per template
+  "standard_rating": 3.20,        // ⚠️ For snapshot pattern
+  "order": 1,
+  "sub_aspects": [...]            // Array (can be empty for Kompetensi)
+}
+```
+
+**Potensi vs Kompetensi:**
+
+```json
+// POTENSI - HAS sub_aspects
+{
+  "code": "kecerdasan",
+  "weight_percentage": 30,
+  "standard_rating": 3.20,
+  "sub_aspects": [                // ✅ NOT EMPTY
+    {
+      "code": "kecerdasan_umum",
+      "standard_rating": 3
+    }
+  ]
+}
+
+// KOMPETENSI - NO sub_aspects
+{
+  "code": "integritas",
+  "weight_percentage": 12,
+  "standard_rating": 3.50,
+  "sub_aspects": []               // ✅ EMPTY ARRAY
+}
+```
+
+**Validation Rules:**
+- `code`: required, string, max:100
+- `name`: required, string, max:255
+- `weight_percentage`: required, integer, min:0, max:100
+- `standard_rating`: required, decimal (5,2), min:0, max:5
+- `order`: required, integer
+- `sub_aspects`: required, array (can be empty for Kompetensi)
+- SUM of `weight_percentage` per category MUST = 100
+
+---
+
+### **5. Sub-Aspects Array**
+
+**Only for Potensi aspects!**
+
+```json
+{
+  "code": "kecerdasan_umum",      // UNIQUE per aspect
+  "name": "Kecerdasan Umum",
+  "standard_rating": 3,           // ⚠️ INTEGER 1-5 (for snapshot)
+  "description": "Kemampuan berpikir logis",  // Optional
+  "order": 1
+}
+```
+
+**Validation Rules:**
+- `code`: required, string, max:100
+- `name`: required, string, max:255
+- `standard_rating`: required, integer, min:1, max:5
+- `description`: nullable, text
+- `order`: required, integer
+
+---
+
+### **6. Event Object**
+
+```json
+{
+  "code": "P3K-KEJAKSAAN-2025",   // UNIQUE identifier
+  "name": "Seleksi P3K Kejaksaan 2025",
+  "description": "Seleksi PPPK untuk Kejaksaan tahun 2025",
+  "year": 2025,
+  "start_date": "2025-01-15",     // ISO 8601 format
+  "end_date": "2025-03-30",
+  "status": "ongoing"             // draft, ongoing, completed
+}
+```
+
+**Validation Rules:**
+- `code`: required, string, unique, max:100
+- `name`: required, string, max:255
+- `description`: nullable, text
+- `year`: required, integer, min:2020, max:2100
+- `start_date`: required, date (YYYY-MM-DD)
+- `end_date`: required, date (YYYY-MM-DD), after:start_date
+- `status`: required, enum (draft, ongoing, completed)
+
+---
+
+### **7. Batches Array**
+
+```json
+{
+  "code": "BATCH-1-MOJOKERTO",    // UNIQUE per event
+  "name": "Batch 1 - Mojokerto",
+  "location": "Mojokerto, Jawa Timur",
+  "batch_number": 1,
+  "start_date": "2025-01-15",
+  "end_date": "2025-01-17"
+}
+```
+
+**Validation Rules:**
+- `code`: required, string, max:100, unique per event
+- `name`: required, string, max:255
+- `location`: required, string, max:255
+- `batch_number`: required, integer, min:1
+- `start_date`: required, date
+- `end_date`: required, date, after_or_equal:start_date
+
+---
+
+### **8. Position Formations Array**
+
+```json
+{
+  "code": "fisikawan_medis",      // UNIQUE per event
+  "name": "Fisikawan Medis",
+  "quota": 5                      // Optional, nullable
+}
+```
+
+**Validation Rules:**
+- `code`: required, string, max:100, unique per event
+- `name`: required, string, max:255
+- `quota`: nullable, integer, min:0
+
+---
+
+### **9. Participants Array**
+
+```json
+{
+  "test_number": "03-5-2-18-001",     // UNIQUE globally
+  "batch_code": "BATCH-1-MOJOKERTO",  // FK reference
+  "position_formation_code": "fisikawan_medis",  // FK reference
+  "skb_number": "123456789",
+  "name": "EKA FEBRIYANI, S.Si",
+  "email": "eka.febriyani@example.com",  // Optional
+  "phone": "08123456789",                // Optional
+  "photo_path": "/uploads/photos/eka.jpg",  // Optional
+  "assessment_date": "2025-01-15",
+  "assessments": {...},           // Assessment data (see below)
+  "psychological_test": {...},    // Psych test (see below)
+  "interpretations": [...]        // Interpretations (see below)
+}
+```
+
+**Validation Rules:**
+- `test_number`: required, string, unique globally, max:50
+- `batch_code`: required, string, exists in batches array
+- `position_formation_code`: required, string, exists in position_formations array
+- `skb_number`: required, string, max:50
+- `name`: required, string, max:255
+- `email`: nullable, email, max:255
+- `phone`: nullable, string, max:20
+- `photo_path`: nullable, string, max:500
+- `assessment_date`: required, date
+
+---
+
+### **10. Assessments Object (RAW RATINGS ONLY)**
+
+**CRITICAL:** Only send RAW individual_rating values!
+
+#### **📌 IMPORTANT CLARIFICATION: `individual_rating` Field**
+
+The term `individual_rating` appears in BOTH sub-aspects and aspects, but they have **DIFFERENT data types**:
+
+| Location | Field Name | Data Type | Source | Stored In Table |
+|----------|-----------|-----------|--------|-----------------|
+| **Sub-Aspect (Potensi)** | `individual_rating` | **INTEGER 1-5** | ✅ **FROM API** (must send) | `sub_aspect_assessments.individual_rating` |
+| **Aspect (Potensi)** | `individual_rating` | **DECIMAL** | ❌ **CALCULATED by Laravel** (AVG from sub-aspects) | `aspect_assessments.individual_rating` |
+| **Aspect (Kompetensi)** | `individual_rating` | **INTEGER 1-5** | ✅ **FROM API** (must send) | `aspect_assessments.individual_rating` |
+
+**Summary:**
+- **API sends:** Sub-aspect ratings (INTEGER) + Kompetensi aspect ratings (INTEGER)
+- **Laravel calculates:** Potensi aspect ratings (DECIMAL) from sub-aspects average
+
+```json
+{
+  "potensi": [
+    {
+      "aspect_code": "kecerdasan",      // Must exist in template
+      // ❌ NO "individual_rating" here - will be calculated by Laravel!
+      "sub_aspects": [                  // ✅ MUST NOT BE EMPTY for Potensi
+        {
+          "sub_aspect_code": "kecerdasan_umum",  // Must exist
+          "individual_rating": 3        // ✅ INTEGER 1-5 (RAW from test) - SEND THIS
+        },
+        {
+          "sub_aspect_code": "daya_tangkap",
+          "individual_rating": 4        // ✅ INTEGER 1-5 - SEND THIS
+        }
+        // ... all sub-aspects for this aspect
+      ]
+    },
+    {
+      "aspect_code": "sikap_kerja",
+      // ❌ NO "individual_rating" here - will be calculated!
+      "sub_aspects": [
+        // ... sub-aspects with individual_rating (INTEGER)
+      ]
+    }
+    // ... all Potensi aspects
+  ],
+  "kompetensi": [
+    {
+      "aspect_code": "integritas",      // Must exist in template
+      "individual_rating": 3            // ✅ INTEGER 1-5 (RAW, NO sub-aspects) - SEND THIS
+    },
+    {
+      "aspect_code": "kerjasama",
+      "individual_rating": 4            // ✅ INTEGER 1-5 - SEND THIS
+    }
+    // ... all Kompetensi aspects
+  ]
+}
+```
+
+**Validation Rules:**
+
+**Potensi:**
+- `aspect_code`: required, string, must exist in template
+- `sub_aspects`: required, array, min:1 (MUST NOT BE EMPTY)
+  - `sub_aspect_code`: required, string, must exist in template
+  - `individual_rating`: required, **INTEGER**, min:1, max:5 ← **FROM API**
+- ❌ **DO NOT send** `individual_rating` at aspect level (will be calculated by Laravel as DECIMAL)
+
+**Kompetensi:**
+- `aspect_code`: required, string, must exist in template
+- `individual_rating`: required, **INTEGER**, min:1, max:5 ← **FROM API**
+- ❌ **NO `sub_aspects` field** (Kompetensi has no sub-aspects)
+
+**Important Notes:**
+1. ✅ **API only sends:** sub-aspect `individual_rating` (Potensi) + aspect `individual_rating` (Kompetensi)
+2. ✅ **Laravel calculates:** aspect `individual_rating` for Potensi (as DECIMAL average)
+3. ✅ **Potensi structure:** aspect → sub_aspects (with ratings) → Laravel calculates aspect rating
+4. ✅ **Kompetensi structure:** aspect (with rating) → no sub-aspects
+5. ✅ **All individual_rating from API MUST be INTEGER 1-5** (not decimal, not float)
+6. ✅ **All aspects from template MUST be present** in assessments
+
+---
+
+### **11. Psychological Test Object**
+
+```json
+{
+  "raw_score": 85.50,
+  "iq_score": 120,                // Optional
+  "validity_status": "Valid",
+  "internal_status": "Stabil",
+  "interpersonal_status": "Baik",
+  "work_capacity_status": "Tinggi",
+  "clinical_status": "Normal",
+  "conclusion_code": "MS",        // MS, TMS
+  "conclusion_text": "Memenuhi Syarat",
+  "notes": "Tidak ada catatan khusus"  // Optional
+}
+```
+
+**Validation Rules:**
+- `raw_score`: required, decimal (5,2), min:0
+- `iq_score`: nullable, integer, min:0
+- `validity_status`: required, string, max:100
+- `internal_status`: required, string, max:100
+- `interpersonal_status`: required, string, max:100
+- `work_capacity_status`: required, string, max:100
+- `clinical_status`: required, string, max:100
+- `conclusion_code`: required, string, max:50
+- `conclusion_text`: required, string, max:255
+- `notes`: nullable, text
+
+---
+
+### **12. Interpretations Array**
+
+```json
+[
+  {
+    "category_type_code": "potensi",  // Optional, can be null for general
+    "interpretation_text": "Peserta menunjukkan kemampuan kognitif yang baik..."
+  },
+  {
+    "category_type_code": "kompetensi",
+    "interpretation_text": "Peserta memiliki integritas dan kerjasama yang tinggi..."
+  }
+]
+```
+
+**Validation Rules:**
+- `category_type_code`: nullable, string, must exist in template if provided
+- `interpretation_text`: required, text
+
+---
+
+## 📝 COMPLETE EXAMPLE REQUEST
+
+<details>
+<summary><strong>Click to expand full example</strong></summary>
+
+```json
+{
+  "institution": {
+    "code": "kejaksaan",
+    "name": "Kejaksaan Republik Indonesia",
+    "logo_path": "/uploads/logos/kejaksaan.png"
+  },
+  "template": {
+    "code": "p3k_standard_2025",
+    "name": "P3K Standard 2025",
+    "description": "Template standar untuk P3K tahun 2025",
+    "category_types": [
+      {
+        "code": "potensi",
+        "name": "POTENSI",
+        "weight_percentage": 40,
+        "order": 1,
+        "aspects": [
+          {
+            "code": "kecerdasan",
+            "name": "KECERDASAN",
+            "weight_percentage": 30,
+            "standard_rating": 3.20,
+            "order": 1,
+            "sub_aspects": [
+              {
+                "code": "kecerdasan_umum",
+                "name": "Kecerdasan Umum",
+                "standard_rating": 3,
+                "description": "Kemampuan berpikir logis dan analitis",
+                "order": 1
+              },
+              {
+                "code": "daya_tangkap",
+                "name": "Daya Tangkap",
+                "standard_rating": 4,
+                "description": "Kemampuan memahami informasi dengan cepat",
+                "order": 2
+              },
+              {
+                "code": "ketelitian",
+                "name": "Ketelitian",
+                "standard_rating": 3,
+                "description": "Kemampuan bekerja dengan detail dan akurat",
+                "order": 3
+              },
+              {
+                "code": "daya_nalar",
+                "name": "Daya Nalar",
+                "standard_rating": 3,
+                "description": "Kemampuan berpikir logis",
+                "order": 4
+              },
+              {
+                "code": "kecepatan_berpikir",
+                "name": "Kecepatan Berpikir",
+                "standard_rating": 3,
+                "description": "Kemampuan berpikir cepat",
+                "order": 5
+              },
+              {
+                "code": "fleksibilitas_berpikir",
+                "name": "Fleksibilitas Berpikir",
+                "standard_rating": 4,
+                "description": "Kemampuan berpikir fleksibel",
+                "order": 6
+              }
+            ]
+          },
+          {
+            "code": "sikap_kerja",
+            "name": "SIKAP KERJA",
+            "weight_percentage": 20,
+            "standard_rating": 3.50,
+            "order": 2,
+            "sub_aspects": [
+              {
+                "code": "ketekunan",
+                "name": "Ketekunan",
+                "standard_rating": 3,
+                "order": 1
+              },
+              {
+                "code": "keuletan",
+                "name": "Keuletan",
+                "standard_rating": 4,
+                "order": 2
+              },
+              {
+                "code": "daya_tahan",
+                "name": "Daya Tahan",
+                "standard_rating": 3,
+                "order": 3
+              },
+              {
+                "code": "motivasi_berprestasi",
+                "name": "Motivasi Berprestasi",
+                "standard_rating": 4,
+                "order": 4
+              },
+              {
+                "code": "sikap_terhadap_atasan",
+                "name": "Sikap Terhadap Atasan",
+                "standard_rating": 4,
+                "order": 5
+              },
+              {
+                "code": "sikap_terhadap_pekerjaan",
+                "name": "Sikap Terhadap Pekerjaan",
+                "standard_rating": 4,
+                "order": 6
+              },
+              {
+                "code": "inisiatif",
+                "name": "Inisiatif",
+                "standard_rating": 3,
+                "order": 7
+              }
+            ]
+          },
+          {
+            "code": "hubungan_sosial",
+            "name": "HUBUNGAN SOSIAL",
+            "weight_percentage": 20,
+            "standard_rating": 3.75,
+            "order": 3,
+            "sub_aspects": [
+              {
+                "code": "kemampuan_beradaptasi",
+                "name": "Kemampuan Beradaptasi",
+                "standard_rating": 4,
+                "order": 1
+              },
+              {
+                "code": "kemampuan_bekerja_sama",
+                "name": "Kemampuan Bekerja Sama",
+                "standard_rating": 4,
+                "order": 2
+              },
+              {
+                "code": "kepemimpinan",
+                "name": "Kepemimpinan",
+                "standard_rating": 3,
+                "order": 3
+              },
+              {
+                "code": "kemampuan_komunikasi",
+                "name": "Kemampuan Komunikasi",
+                "standard_rating": 4,
+                "order": 4
+              }
+            ]
+          },
+          {
+            "code": "kepribadian",
+            "name": "KEPRIBADIAN",
+            "weight_percentage": 30,
+            "standard_rating": 3.17,
+            "order": 4,
+            "sub_aspects": [
+              {
+                "code": "stabilitas_emosi",
+                "name": "Stabilitas Emosi",
+                "standard_rating": 3,
+                "order": 1
+              },
+              {
+                "code": "kontrol_diri",
+                "name": "Kontrol Diri",
+                "standard_rating": 3,
+                "order": 2
+              },
+              {
+                "code": "kepercayaan_diri",
+                "name": "Kepercayaan Diri",
+                "standard_rating": 3,
+                "order": 3
+              },
+              {
+                "code": "kesadaran_diri",
+                "name": "Kesadaran Diri",
+                "standard_rating": 3,
+                "order": 4
+              },
+              {
+                "code": "tanggung_jawab",
+                "name": "Tanggung Jawab",
+                "standard_rating": 4,
+                "order": 5
+              },
+              {
+                "code": "kejujuran",
+                "name": "Kejujuran",
+                "standard_rating": 3,
+                "order": 6
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "code": "kompetensi",
+        "name": "KOMPETENSI",
+        "weight_percentage": 60,
+        "order": 2,
+        "aspects": [
+          {
+            "code": "integritas",
+            "name": "INTEGRITAS",
+            "weight_percentage": 12,
+            "standard_rating": 3.50,
+            "order": 1,
+            "sub_aspects": []
+          },
+          {
+            "code": "kerjasama",
+            "name": "KERJASAMA",
+            "weight_percentage": 11,
+            "standard_rating": 3.00,
+            "order": 2,
+            "sub_aspects": []
+          },
+          {
+            "code": "komunikasi",
+            "name": "KOMUNIKASI",
+            "weight_percentage": 10,
+            "standard_rating": 3.00,
+            "order": 3,
+            "sub_aspects": []
+          },
+          {
+            "code": "orientasi_pada_hasil",
+            "name": "ORIENTASI PADA HASIL",
+            "weight_percentage": 11,
+            "standard_rating": 3.50,
+            "order": 4,
+            "sub_aspects": []
+          },
+          {
+            "code": "pelayanan_publik",
+            "name": "PELAYANAN PUBLIK",
+            "weight_percentage": 11,
+            "standard_rating": 3.00,
+            "order": 5,
+            "sub_aspects": []
+          },
+          {
+            "code": "pengembangan_diri_dan_orang_lain",
+            "name": "PENGEMBANGAN DIRI DAN ORANG LAIN",
+            "weight_percentage": 11,
+            "standard_rating": 3.00,
+            "order": 6,
+            "sub_aspects": []
+          },
+          {
+            "code": "mengelola_perubahan",
+            "name": "MENGELOLA PERUBAHAN",
+            "weight_percentage": 11,
+            "standard_rating": 3.00,
+            "order": 7,
+            "sub_aspects": []
+          },
+          {
+            "code": "pengambilan_keputusan",
+            "name": "PENGAMBILAN KEPUTUSAN",
+            "weight_percentage": 11,
+            "standard_rating": 3.00,
+            "order": 8,
+            "sub_aspects": []
+          },
+          {
+            "code": "perekat_bangsa",
+            "name": "PEREKAT BANGSA",
+            "weight_percentage": 12,
+            "standard_rating": 3.00,
+            "order": 9,
+            "sub_aspects": []
+          }
+        ]
+      }
+    ]
+  },
+  "event": {
+    "code": "P3K-KEJAKSAAN-2025",
+    "name": "Seleksi P3K Kejaksaan 2025",
+    "description": "Seleksi PPPK untuk Kejaksaan tahun 2025",
+    "year": 2025,
+    "start_date": "2025-01-15",
+    "end_date": "2025-03-30",
+    "status": "ongoing"
+  },
+  "batches": [
+    {
+      "code": "BATCH-1-MOJOKERTO",
+      "name": "Batch 1 - Mojokerto",
+      "location": "Mojokerto, Jawa Timur",
+      "batch_number": 1,
+      "start_date": "2025-01-15",
+      "end_date": "2025-01-17"
+    },
+    {
+      "code": "BATCH-2-SURABAYA",
+      "name": "Batch 2 - Surabaya",
+      "location": "Surabaya, Jawa Timur",
+      "batch_number": 2,
+      "start_date": "2025-01-20",
+      "end_date": "2025-01-22"
+    }
+  ],
+  "position_formations": [
+    {
+      "code": "fisikawan_medis",
+      "name": "Fisikawan Medis",
+      "quota": 5
+    },
+    {
+      "code": "analis_kesehatan",
+      "name": "Analis Kesehatan",
+      "quota": 10
+    }
+  ],
+  "participants": [
+    {
+      "test_number": "03-5-2-18-001",
+      "batch_code": "BATCH-1-MOJOKERTO",
+      "position_formation_code": "fisikawan_medis",
+      "skb_number": "123456789",
+      "name": "EKA FEBRIYANI, S.Si",
+      "email": "eka.febriyani@example.com",
+      "phone": "08123456789",
+      "photo_path": "/uploads/photos/eka.jpg",
+      "assessment_date": "2025-01-15",
+      "assessments": {
+        "potensi": [
+          {
+            "aspect_code": "kecerdasan",
+            "sub_aspects": [
+              {
+                "sub_aspect_code": "kecerdasan_umum",
+                "individual_rating": 3
+              },
+              {
+                "sub_aspect_code": "daya_tangkap",
+                "individual_rating": 4
+              },
+              {
+                "sub_aspect_code": "ketelitian",
+                "individual_rating": 3
+              },
+              {
+                "sub_aspect_code": "daya_nalar",
+                "individual_rating": 4
+              },
+              {
+                "sub_aspect_code": "kecepatan_berpikir",
+                "individual_rating": 3
+              },
+              {
+                "sub_aspect_code": "fleksibilitas_berpikir",
+                "individual_rating": 4
+              }
+            ]
+          },
+          {
+            "aspect_code": "sikap_kerja",
+            "sub_aspects": [
+              {
+                "sub_aspect_code": "ketekunan",
+                "individual_rating": 4
+              },
+              {
+                "sub_aspect_code": "keuletan",
+                "individual_rating": 4
+              },
+              {
+                "sub_aspect_code": "daya_tahan",
+                "individual_rating": 3
+              },
+              {
+                "sub_aspect_code": "motivasi_berprestasi",
+                "individual_rating": 4
+              },
+              {
+                "sub_aspect_code": "sikap_terhadap_atasan",
+                "individual_rating": 4
+              },
+              {
+                "sub_aspect_code": "sikap_terhadap_pekerjaan",
+                "individual_rating": 3
+              },
+              {
+                "sub_aspect_code": "inisiatif",
+                "individual_rating": 4
+              }
+            ]
+          },
+          {
+            "aspect_code": "hubungan_sosial",
+            "sub_aspects": [
+              {
+                "sub_aspect_code": "kemampuan_beradaptasi",
+                "individual_rating": 3
+              },
+              {
+                "sub_aspect_code": "kemampuan_bekerja_sama",
+                "individual_rating": 4
+              },
+              {
+                "sub_aspect_code": "kepemimpinan",
+                "individual_rating": 3
+              },
+              {
+                "sub_aspect_code": "kemampuan_komunikasi",
+                "individual_rating": 4
+              }
+            ]
+          },
+          {
+            "aspect_code": "kepribadian",
+            "sub_aspects": [
+              {
+                "sub_aspect_code": "stabilitas_emosi",
+                "individual_rating": 4
+              },
+              {
+                "sub_aspect_code": "kontrol_diri",
+                "individual_rating": 3
+              },
+              {
+                "sub_aspect_code": "kepercayaan_diri",
+                "individual_rating": 4
+              },
+              {
+                "sub_aspect_code": "kesadaran_diri",
+                "individual_rating": 3
+              },
+              {
+                "sub_aspect_code": "tanggung_jawab",
+                "individual_rating": 4
+              },
+              {
+                "sub_aspect_code": "kejujuran",
+                "individual_rating": 4
+              }
+            ]
+          }
+        ],
+        "kompetensi": [
+          {
+            "aspect_code": "integritas",
+            "individual_rating": 3
+          },
+          {
+            "aspect_code": "kerjasama",
+            "individual_rating": 4
+          },
+          {
+            "aspect_code": "komunikasi",
+            "individual_rating": 3
+          },
+          {
+            "aspect_code": "orientasi_pada_hasil",
+            "individual_rating": 4
+          },
+          {
+            "aspect_code": "pelayanan_publik",
+            "individual_rating": 3
+          },
+          {
+            "aspect_code": "pengembangan_diri_dan_orang_lain",
+            "individual_rating": 3
+          },
+          {
+            "aspect_code": "mengelola_perubahan",
+            "individual_rating": 4
+          },
+          {
+            "aspect_code": "pengambilan_keputusan",
+            "individual_rating": 3
+          },
+          {
+            "aspect_code": "perekat_bangsa",
+            "individual_rating": 4
+          }
+        ]
+      },
+      "psychological_test": {
+        "raw_score": 85.50,
+        "iq_score": 120,
+        "validity_status": "Valid",
+        "internal_status": "Stabil",
+        "interpersonal_status": "Baik",
+        "work_capacity_status": "Tinggi",
+        "clinical_status": "Normal",
+        "conclusion_code": "MS",
+        "conclusion_text": "Memenuhi Syarat",
+        "notes": null
+      },
+      "interpretations": [
+        {
+          "category_type_code": "potensi",
+          "interpretation_text": "Peserta menunjukkan kemampuan kognitif yang baik dengan kecerdasan umum dan daya tangkap di atas rata-rata. Kemampuan berpikir logis dan analitis cukup baik untuk menunjang tugas-tugas kompleks."
+        },
+        {
+          "category_type_code": "kompetensi",
+          "interpretation_text": "Peserta memiliki integritas dan kerjasama yang baik. Orientasi pada hasil dan kemampuan mengelola perubahan menunjukkan potensi untuk berkembang dalam organisasi."
+        }
+      ]
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+## ✅ RESPONSE FORMAT
+
+### **Success Response (200 OK)**
 
 ```json
 {
   "success": true,
+  "message": "Assessment data synced successfully",
   "data": {
-    "institution": {
-      "code": "kejaksaan",
-      "name": "Kejaksaan Agung RI",
-      "logo_url": "https://example.com/logo.png"
-    },
+    "institution_id": 1,
+    "event_id": 1,
+    "participants_synced": 2000,
+    "assessments_calculated": 2000,
+    "synced_at": "2025-10-08T10:30:00Z"
+  }
+}
+```
 
-    "template": {
-      "code": "p3k_standard_2025",
-      "name": "Template P3K Standard 2025",
-      "description": "Template standar untuk P3K 2025",
-      "categories": [
-        {
-          "code": "potensi",
-          "name": "Potensi",
-          "weight": 40,
-          "order": 1,
-          "aspects": [
-            {
-              "code": "kecerdasan",
-              "name": "Kecerdasan",
-              "weight": 30,
-              "standard_rating": 3.50,
-              "order": 1,
-              "sub_aspects": [
-                {
-                  "code": "kecerdasan_umum",
-                  "name": "Kecerdasan Umum",
-                  "standard_rating": 3,
-                  "order": 1
-                },
-                {
-                  "code": "daya_tangkap",
-                  "name": "Daya Tangkap",
-                  "standard_rating": 4,
-                  "order": 2
-                },
-                {
-                  "code": "kemampuan_analisa",
-                  "name": "Kemampuan Analisa",
-                  "standard_rating": 4,
-                  "order": 3
-                },
-                {
-                  "code": "berpikir_konseptual",
-                  "name": "Berpikir Konseptual",
-                  "standard_rating": 3,
-                  "order": 4
-                },
-                {
-                  "code": "logika_berpikir",
-                  "name": "Logika Berpikir",
-                  "standard_rating": 4,
-                  "order": 5
-                },
-                {
-                  "code": "kemampuan_numerik",
-                  "name": "Kemampuan Numerik",
-                  "standard_rating": 3,
-                  "order": 6
-                }
-              ]
-            },
-            {
-              "code": "sikap_kerja",
-              "name": "Sikap Kerja",
-              "weight": 20,
-              "standard_rating": 3.09,
-              "order": 2,
-              "sub_aspects": [
-                {
-                  "code": "sistematika_kerja",
-                  "name": "Sistematika Kerja",
-                  "standard_rating": 3,
-                  "order": 1
-                },
-                {
-                  "code": "perhatian_terhadap_detail",
-                  "name": "Perhatian Terhadap Detail",
-                  "standard_rating": 3,
-                  "order": 2
-                },
-                {
-                  "code": "ketekunan_kerja",
-                  "name": "Ketekunan Kerja",
-                  "standard_rating": 3,
-                  "order": 3
-                },
-                {
-                  "code": "kerjasama",
-                  "name": "Kerjasama",
-                  "standard_rating": 4,
-                  "order": 4
-                },
-                {
-                  "code": "tanggung_jawab",
-                  "name": "Tanggung Jawab",
-                  "standard_rating": 4,
-                  "order": 5
-                },
-                {
-                  "code": "dorongan_berprestasi",
-                  "name": "Dorongan Berprestasi",
-                  "standard_rating": 4,
-                  "order": 6
-                },
-                {
-                  "code": "inisiatif",
-                  "name": "Inisiatif",
-                  "standard_rating": 3,
-                  "order": 7
-                }
-              ]
-            },
-            {
-              "code": "hubungan_sosial",
-              "name": "Hubungan Sosial",
-              "weight": 20,
-              "standard_rating": 2.70,
-              "order": 3,
-              "sub_aspects": [
-                {
-                  "code": "kepekaan_interpersonal",
-                  "name": "Kepekaan Interpersonal",
-                  "standard_rating": 3,
-                  "order": 1
-                },
-                {
-                  "code": "komunikasi",
-                  "name": "Komunikasi",
-                  "standard_rating": 3,
-                  "order": 2
-                },
-                {
-                  "code": "hubungan_interpersonal",
-                  "name": "Hubungan Interpersonal",
-                  "standard_rating": 3,
-                  "order": 3
-                },
-                {
-                  "code": "penyesuaian_diri",
-                  "name": "Penyesuaian Diri",
-                  "standard_rating": 3,
-                  "order": 4
-                }
-              ]
-            },
-            {
-              "code": "kepribadian",
-              "name": "Kepribadian",
-              "weight": 30,
-              "standard_rating": 3.00,
-              "order": 4,
-              "sub_aspects": [
-                {
-                  "code": "stabilitas_kematangan_emosi",
-                  "name": "Stabilitas/Kematangan Emosi",
-                  "standard_rating": 3,
-                  "order": 1
-                },
-                {
-                  "code": "agility",
-                  "name": "Agility",
-                  "standard_rating": 3,
-                  "order": 2
-                },
-                {
-                  "code": "kepercayaan_diri",
-                  "name": "Kepercayaan Diri",
-                  "standard_rating": 3,
-                  "order": 3
-                },
-                {
-                  "code": "daya_tahan_stress",
-                  "name": "Daya Tahan Stress",
-                  "standard_rating": 4,
-                  "order": 4
-                },
-                {
-                  "code": "kepemimpinan",
-                  "name": "Kepemimpinan",
-                  "standard_rating": 4,
-                  "order": 5
-                },
-                {
-                  "code": "loyalitas",
-                  "name": "Loyalitas",
-                  "standard_rating": 3,
-                  "order": 6
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "code": "kompetensi",
-          "name": "Kompetensi",
-          "weight": 60,
-          "order": 2,
-          "aspects": [
-            {
-              "code": "integritas",
-              "name": "Integritas",
-              "weight": 12,
-              "standard_rating": 2.70,
-              "order": 1,
-              "sub_aspects": []
-            },
-            {
-              "code": "kerjasama",
-              "name": "Kerjasama",
-              "weight": 11,
-              "standard_rating": 2.70,
-              "order": 2,
-              "sub_aspects": []
-            },
-            {
-              "code": "komunikasi",
-              "name": "Komunikasi",
-              "weight": 11,
-              "standard_rating": 2.70,
-              "order": 3,
-              "sub_aspects": []
-            },
-            {
-              "code": "orientasi_pada_hasil",
-              "name": "Orientasi Pada Hasil",
-              "weight": 11,
-              "standard_rating": 2.70,
-              "order": 4,
-              "sub_aspects": []
-            },
-            {
-              "code": "pelayanan_publik",
-              "name": "Pelayanan Publik",
-              "weight": 11,
-              "standard_rating": 2.70,
-              "order": 5,
-              "sub_aspects": []
-            },
-            {
-              "code": "pengembangan_diri_orang_lain",
-              "name": "Pengembangan Diri & Orang Lain",
-              "weight": 11,
-              "standard_rating": 2.70,
-              "order": 6,
-              "sub_aspects": []
-            },
-            {
-              "code": "mengelola_perubahan",
-              "name": "Mengelola Perubahan",
-              "weight": 11,
-              "standard_rating": 2.70,
-              "order": 7,
-              "sub_aspects": []
-            },
-            {
-              "code": "pengambilan_keputusan",
-              "name": "Pengambilan Keputusan",
-              "weight": 11,
-              "standard_rating": 2.70,
-              "order": 8,
-              "sub_aspects": []
-            },
-            {
-              "code": "perekat_bangsa",
-              "name": "Perekat Bangsa",
-              "weight": 11,
-              "standard_rating": 2.70,
-              "order": 9,
-              "sub_aspects": []
-            }
-          ]
-        }
-      ]
-    },
+### **Error Response (422 Unprocessable Entity)**
 
-    "event": {
-      "code": "P3K-KEJAKSAAN-2025",
-      "name": "Asesmen P3K Kejaksaan Agung RI 2025",
-      "year": 2025,
-      "start_date": "2025-09-01",
-      "end_date": "2025-12-31",
-      "status": "completed"
-    },
-
-    "batches": [
-      {
-        "code": "BATCH-1-MOJOKERTO",
-        "name": "Gelombang 1 - Mojokerto",
-        "location": "Mojokerto",
-        "batch_number": 1,
-        "start_date": "2025-09-27",
-        "end_date": "2025-09-28"
-      }
+```json
+{
+  "success": false,
+  "message": "Validation failed",
+  "errors": {
+    "template.category_types.0.weight_percentage": [
+      "The sum of category weights must equal 100"
     ],
-
-    "positions": [
-      {
-        "code": "fisikawan_medis",
-        "name": "Fisikawan Medis Ahli Pertama",
-        "quota": 10
-      }
+    "participants.0.assessments.potensi.0.sub_aspects": [
+      "Sub-aspects cannot be empty for Potensi aspects"
     ],
-
-    "participants": [
-      {
-        "test_number": "03-5-2-18-001",
-        "skb_number": "24400240120012571",
-        "name": "EKA FEBRIYANI, s.si",
-        "position_code": "fisikawan_medis",
-        "batch_code": "BATCH-1-MOJOKERTO",
-        "assessment_date": "2025-09-27",
-        "photo_url": "https://example.com/photos/03-5-2-18-001.jpg",
-
-        "assessments": {
-          "potensi": {
-            "total_standard_rating": 11.94,
-            "total_standard_score": 300.21,
-            "total_individual_rating": 11.83,
-            "total_individual_score": 294.25,
-            "gap_rating": -0.11,
-            "gap_score": -5.97,
-            "conclusion": "DI BAWAH STANDARD",
-
-            "aspects": [
-              {
-                "aspect_code": "kecerdasan",
-                "standard_rating": 3.15,
-                "standard_score": 94.50,
-                "individual_rating": 2.58,
-                "individual_score": 77.29,
-                "gap_rating": -0.57,
-                "gap_score": -17.21,
-                "percentage": 78,
-                "conclusion": "Kurang Memenuhi Standard",
-
-                "sub_aspects": [
-                  {
-                    "sub_aspect_code": "kecerdasan_umum",
-                    "standard_rating": 3,
-                    "individual_rating": 3,
-                    "rating_label": "Cukup"
-                  },
-                  {
-                    "sub_aspect_code": "daya_tangkap",
-                    "standard_rating": 4,
-                    "individual_rating": 4,
-                    "rating_label": "Baik"
-                  },
-                  {
-                    "sub_aspect_code": "kemampuan_analisa",
-                    "standard_rating": 4,
-                    "individual_rating": 4,
-                    "rating_label": "Baik"
-                  },
-                  {
-                    "sub_aspect_code": "berpikir_konseptual",
-                    "standard_rating": 3,
-                    "individual_rating": 3,
-                    "rating_label": "Cukup"
-                  },
-                  {
-                    "sub_aspect_code": "logika_berpikir",
-                    "standard_rating": 4,
-                    "individual_rating": 4,
-                    "rating_label": "Baik"
-                  },
-                  {
-                    "sub_aspect_code": "kemampuan_numerik",
-                    "standard_rating": 3,
-                    "individual_rating": 3,
-                    "rating_label": "Cukup"
-                  }
-                ]
-              }
-            ]
-          },
-
-          "kompetensi": {
-            "total_standard_rating": 24.30,
-            "total_standard_score": 270.00,
-            "total_individual_rating": 27.48,
-            "total_individual_score": 305.36,
-            "gap_rating": 3.18,
-            "gap_score": 35.36,
-            "conclusion": "SANGAT KOMPETEN",
-
-            "aspects": [
-              {
-                "aspect_code": "integritas",
-                "standard_rating": 2.70,
-                "standard_score": 32.40,
-                "individual_rating": 3.08,
-                "individual_score": 36.96,
-                "gap_rating": 0.38,
-                "gap_score": 4.56,
-                "conclusion": "Sangat Memenuhi Standard",
-                "description": "Individu kompeten menampilkan kompetensi integritas sesuai dengan standar level yang di tetapkan. Secara konsisten mampu mengingatkan dan mengajak rekan kerja untuk bertindak sesuai dengan etika dan kode etik. Hal ini tentunya akan memberikan dukungan terhadap peran tugasnya sesuai dengan formasi yang dituju.",
-                "sub_aspects": []
-              },
-              {
-                "aspect_code": "kerjasama",
-                "standard_rating": 2.70,
-                "standard_score": 29.70,
-                "individual_rating": 2.90,
-                "individual_score": 31.90,
-                "gap_rating": 0.20,
-                "gap_score": 2.20,
-                "conclusion": "Masih Memenuhi Standard",
-                "description": "Kemampuan menumbuhkan tim kerja cukup kompeten...",
-                "sub_aspects": []
-              }
-            ]
-          }
-        },
-
-        "final_result": {
-          "potensi_weight": 40,
-          "potensi_standard_score": 133.43,
-          "potensi_individual_score": 117.70,
-          "kompetensi_weight": 60,
-          "kompetensi_standard_score": 180.00,
-          "kompetensi_individual_score": 183.22,
-          "total_standard_score": 313.43,
-          "total_individual_score": 300.91,
-          "achievement_percentage": 96.01,
-          "conclusion": "MASIH MEMENUHI SYARAT (MMS)"
-        },
-
-        "psychological_test": {
-          "raw_score": 40.00,
-          "iq_score": 97,
-          "validity_status": "Hasil tes ini konsisten, tetapi kurang akurat dan kurang dapat dipercaya, karena klien cenderung menjawab lebih bagus dari keadaan yang sebenarnya.",
-          "internal_status": "Kurang terbuka",
-          "interpersonal_status": "Kurang terbuka",
-          "work_capacity_status": "Kurang terbuka",
-          "clinical_status": "Kurang terbuka",
-          "conclusion": "TIDAK MEMENUHI SYARAT (TMS)",
-          "notes": "Mungkin terdapat psikopatologi (gejala kejiwaan) yang disembunyikan."
-        },
-
-        "interpretations": {
-          "potensi": "Memiliki kepekaan yang cukup memadai dalam memahami kebutuhan orang-orang yang ada di sekitarnya. Individu berusaha untuk memenuhi kebutuhan yang diperlukan oleh orang yang ada di sekitarnya, terutama yang menjadi kebutuhan kelompoknya...",
-          "kompetensi": "Dalam bekerja, individu cukup mampu mengelola pekerjaan yang menjadi tanggung jawabnya sesuai dengan prioritas penyelesaian masalah sehingga dapat selesai sesuai tenggat waktunya..."
-        }
-      }
+    "participants.5.test_number": [
+      "The test number has already been taken"
     ]
-  },
-
-  "meta": {
-    "total_participants": 150,
-    "synced_at": "2025-10-05 14:30:00"
   }
 }
 ```
 
----
-
-## Error Responses
-
-### **401 Unauthorized**
-Invalid API Key
+### **Error Response (401 Unauthorized)**
 
 ```json
 {
   "success": false,
-  "error": {
-    "code": "UNAUTHORIZED",
-    "message": "Invalid API Key"
-  }
-}
-```
-
-### **404 Not Found**
-Event tidak ditemukan
-
-```json
-{
-  "success": false,
-  "error": {
-    "code": "EVENT_NOT_FOUND",
-    "message": "Event with code 'P3K-KEJAKSAAN-2025' not found"
-  }
-}
-```
-
-### **500 Internal Server Error**
-Server error
-
-```json
-{
-  "success": false,
-  "error": {
-    "code": "INTERNAL_ERROR",
-    "message": "An error occurred while processing your request"
-  }
+  "message": "Invalid API key"
 }
 ```
 
 ---
 
-## Notes
+## 🔍 VALIDATION CHECKLIST
 
-1. **Nested Structure**: Template structure bersifat dynamic, bisa berbeda per event
-2. **Sub-Aspects**: Kompetensi tidak punya sub-aspects (empty array)
-3. **Interpretations**: Bisa per category (potensi/kompetensi) atau general (null)
-4. **Photo URL**: Optional, bisa null jika tidak ada foto
-5. **Batch Code**: Optional, peserta bisa tidak masuk batch tertentu (null)
+Before sending data, please verify:
+
+### **Template Structure**
+
+- [ ] Category weights sum to 100
+- [ ] Aspect weights per category sum to 100
+- [ ] Potensi aspects HAVE sub_aspects (not empty)
+- [ ] Kompetensi aspects DO NOT HAVE sub_aspects (empty array)
+- [ ] All standard_rating values are provided
+
+### **Assessments Data**
+
+- [ ] All aspects from template are present in assessments
+- [ ] All sub-aspects from template are present for Potensi
+- [ ] Individual ratings are INTEGER 1-5 (not decimal)
+- [ ] Potensi has sub_aspects with ratings
+- [ ] Kompetensi has direct aspect ratings (no sub_aspects)
+
+### **Relationships**
+
+- [ ] batch_code exists in batches array
+- [ ] position_formation_code exists in position_formations array
+- [ ] aspect_code exists in template aspects
+- [ ] sub_aspect_code exists in template sub_aspects
+- [ ] category_type_code exists in template categories
+
+### **Unique Identifiers**
+
+- [ ] institution.code is unique
+- [ ] template.code is unique
+- [ ] event.code is unique
+- [ ] test_number is unique globally
+- [ ] batch.code is unique per event
+- [ ] position_formation.code is unique per event
 
 ---
 
-## Testing
+## 🚀 WHAT HAPPENS AFTER API CALL
 
-**Example cURL:**
+### **Laravel Processing Steps:**
 
-```bash
-curl -X GET "http://ci3-app.local/api/events/P3K-KEJAKSAAN-2025/export" \
-  -H "X-API-Key: your-secret-api-key-here" \
-  -H "Accept: application/json"
-```
-
-**Example Response Time:**
-- 50 participants: ~2-5 seconds
-- 150 participants: ~5-10 seconds
-- 500 participants: ~15-30 seconds
+1. **Validate** incoming data (structure, relationships, constraints)
+2. **Upsert Master Data:**
+   - Institution
+   - Template structure (categories, aspects, sub-aspects)
+3. **Upsert Event Data:**
+   - Event, batches, position formations
+4. **Upsert Participants:**
+   - Participant basic info
+5. **Store Raw Assessments:**
+   - Sub-aspect assessments (Potensi)
+   - Aspect assessments (Kompetensi - direct)
+6. **Calculate Derived Values:**
+   - Aspect ratings for Potensi (AVG from sub-aspects)
+   - All scores (rating × weight)
+   - All gaps (individual - standard)
+   - All percentages
+   - Category totals (SUM from aspects)
+   - Final assessment (weighted: Potensi × weight% + Kompetensi × weight%)
+7. **Store Psychological Tests & Interpretations**
+8. **Return Success Response**
 
 ---
 
-## Implementation Checklist (CI3 Side)
+## 📞 SUPPORT & QUESTIONS
 
-- [ ] Create API controller
-- [ ] Implement API key validation
-- [ ] Create query untuk get event + template structure
-- [ ] Create query untuk get all participants
-- [ ] Create query untuk get all assessments (category, aspect, sub-aspect)
-- [ ] Create query untuk get final assessments
-- [ ] Create query untuk get psychological tests
-- [ ] Create query untuk get interpretations
-- [ ] Structure JSON response sesuai format di atas
-- [ ] Add error handling
-- [ ] Test dengan Postman/Insomnia
-- [ ] Optimize query performance (N+1 problem)
-- [ ] Add request logging
+If you have questions about this API specification:
+
+1. Review [DATABASE_AND_ASSESSMENT_LOGIC.md](./DATABASE_AND_ASSESSMENT_LOGIC.md) for database structure
+2. Review [ASSESSMENT_CALCULATION_FLOW.md](./ASSESSMENT_CALCULATION_FLOW.md) for calculation logic
+3. Contact the Laravel Dashboard development team
+
+---
+
+**Version:** 1.0
+**Status:** ✅ Complete & Ready for Implementation
+**Last Updated:** 2025-10-08

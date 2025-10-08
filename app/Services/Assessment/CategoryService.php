@@ -1,0 +1,121 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Services\Assessment;
+
+use App\Models\AspectAssessment;
+use App\Models\CategoryAssessment;
+use App\Models\CategoryType;
+use App\Models\Participant;
+
+class CategoryService
+{
+    /**
+     * Calculate category assessment from aspects
+     */
+    public function calculateCategory(CategoryAssessment $categoryAssessment): void
+    {
+        // 1. Get all aspect assessments for this category
+        $aspectAssessments = AspectAssessment::where(
+            'category_assessment_id',
+            $categoryAssessment->id
+        )->get();
+
+        if ($aspectAssessments->isEmpty()) {
+            return;
+        }
+
+        // 2. Aggregate all aspects (SUM)
+        $totalStandardRating = $aspectAssessments->sum('standard_rating');
+        $totalStandardScore = $aspectAssessments->sum('standard_score');
+        $totalIndividualRating = $aspectAssessments->sum('individual_rating');
+        $totalIndividualScore = $aspectAssessments->sum('individual_score');
+
+        // 3. Calculate gaps
+        $gapRating = $totalIndividualRating - $totalStandardRating;
+        $gapScore = $totalIndividualScore - $totalStandardScore;
+
+        // 4. Determine conclusion based on gap score
+        $conclusionCode = $this->determineCategoryConclusion($gapScore);
+        $conclusionText = $this->getCategoryConclusionText($conclusionCode);
+
+        // 5. Update category assessment
+        $categoryAssessment->update([
+            'total_standard_rating' => round($totalStandardRating, 2),
+            'total_standard_score' => round($totalStandardScore, 2),
+            'total_individual_rating' => round($totalIndividualRating, 2),
+            'total_individual_score' => round($totalIndividualScore, 2),
+            'gap_rating' => round($gapRating, 2),
+            'gap_score' => round($gapScore, 2),
+            'conclusion_code' => $conclusionCode,
+            'conclusion_text' => $conclusionText,
+        ]);
+    }
+
+    /**
+     * Create category assessment record (without calculation)
+     */
+    public function createCategoryAssessment(
+        Participant $participant,
+        string $categoryCode
+    ): CategoryAssessment {
+        // 1. Find category type from master
+        $participant->loadMissing('event');
+        $categoryType = CategoryType::where('template_id', $participant->event->template_id)
+            ->where('code', $categoryCode)
+            ->firstOrFail();
+
+        // 2. Create category assessment (values will be calculated later)
+        return CategoryAssessment::updateOrCreate(
+            [
+                'participant_id' => $participant->id,
+                'category_type_id' => $categoryType->id,
+            ],
+            [
+                'event_id' => $participant->event_id,
+                'batch_id' => $participant->batch_id,
+                'position_formation_id' => $participant->position_formation_id,
+                // Default values (will be updated by calculateCategory)
+                'total_standard_rating' => 0,
+                'total_standard_score' => 0,
+                'total_individual_rating' => 0,
+                'total_individual_score' => 0,
+                'gap_rating' => 0,
+                'gap_score' => 0,
+                'conclusion_code' => 'MS',
+                'conclusion_text' => 'MEMENUHI STANDARD',
+            ]
+        );
+    }
+
+    /**
+     * Determine category conclusion based on gap score
+     */
+    private function determineCategoryConclusion(float $gapScore): string
+    {
+        if ($gapScore < -10) {
+            return 'DBS'; // Di Bawah Standard
+        } elseif ($gapScore < 0) {
+            return 'MS'; // Memenuhi Standard
+        } elseif ($gapScore < 20) {
+            return 'K'; // Kompeten
+        } else {
+            return 'SK'; // Sangat Kompeten
+        }
+    }
+
+    /**
+     * Get category conclusion text from code
+     */
+    private function getCategoryConclusionText(string $code): string
+    {
+        return match ($code) {
+            'DBS' => 'DI BAWAH STANDARD',
+            'MS' => 'MEMENUHI STANDARD',
+            'K' => 'KOMPETEN',
+            'SK' => 'SANGAT KOMPETEN',
+            default => 'MEMENUHI STANDARD',
+        };
+    }
+}

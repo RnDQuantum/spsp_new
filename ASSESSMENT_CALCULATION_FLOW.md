@@ -2,7 +2,13 @@
 
 **Project:** SPSP Analytics Dashboard
 **Purpose:** Document complete calculation logic from raw data to final score
-**Last Updated:** 2025-10-06
+**Last Updated:** 2025-10-08
+
+**Recent Updates:**
+- ✅ Fixed `percentage_score` formula: now uses `(individual_rating / 5) × 100` instead of `(score / standardScore) × 100`
+- ✅ Clarified Kompetensi `individual_rating` MUST be INTEGER 1-5 (not decimal)
+- ✅ Fixed Final Assessment `totalStandardScore` formula
+- ✅ Updated all examples to reflect correct calculations
 
 ---
 
@@ -99,7 +105,9 @@ Aspect: Kecerdasan (Potensi)
 ├─ individual_score (decimal) ← Rating × weight percentage
 ├─ gap_rating (decimal) ← Individual - Standard
 ├─ gap_score (decimal) ← Individual Score - Standard Score
-├─ percentage_score (integer) ← For spider chart (individual/standard × 100)
+├─ percentage_score (integer) ← For spider chart: (individual_rating / 5) × 100
+│                                  NOTE: Using rating (1-5 scale), NOT score!
+│                                  This ensures percentage is 0-100% for visualization
 ├─ conclusion_code (string) ← "below_standard", "meets_standard", "exceeds_standard"
 └─ conclusion_text (string) ← "Kurang Memenuhi Standard"
 ```
@@ -150,8 +158,8 @@ class AspectCalculationService
         $gapRating = $individualRating - $assessment->standard_rating;
         $gapScore = $individualScore - $standardScore;
 
-        // 7. Calculate percentage for spider chart
-        $percentageScore = round(($individualScore / $standardScore) * 100);
+        // 7. Calculate percentage for spider chart (rating out of max scale 5)
+        $percentageScore = round(($individualRating / 5) * 100);
 
         // 8. Determine conclusion
         $conclusionCode = $this->determineConclusion($gapRating);
@@ -196,10 +204,12 @@ class AspectCalculationService
 ```php
 /**
  * Calculate kompetensi aspect (direct from API, no aggregation)
+ *
+ * IMPORTANT: individualRating MUST be INTEGER 1-5 from API
  */
 public function calculateKompetensiAspect(
     AspectAssessment $assessment,
-    float $individualRating // From API
+    int $individualRating // From API - MUST BE INTEGER 1-5
 ): void
 {
     // 1. Get aspect weight from master
@@ -213,15 +223,15 @@ public function calculateKompetensiAspect(
     $gapRating = $individualRating - $assessment->standard_rating;
     $gapScore = $individualScore - $standardScore;
 
-    // 4. Calculate percentage
-    $percentageScore = round(($individualScore / $standardScore) * 100);
+    // 4. Calculate percentage (rating out of max scale 5)
+    $percentageScore = round(($individualRating / 5) * 100);
 
     // 5. Determine conclusion
     $conclusionCode = $this->determineConclusion($gapRating);
 
     // 6. Update assessment
     $assessment->update([
-        'individual_rating' => round($individualRating, 2),
+        'individual_rating' => $individualRating, // Already integer from API
         'individual_score' => round($individualScore, 2),
         'standard_score' => round($standardScore, 2),
         'gap_rating' => round($gapRating, 2),
@@ -243,17 +253,17 @@ POTENSI - Aspect: Kecerdasan (30% weight)
 ├─ Individual Score: 105.00 (3.50 × 30%)
 ├─ Gap Rating: +0.30 (exceeds standard)
 ├─ Gap Score: +9.00
-├─ Percentage: 109% (105/96 × 100)
+├─ Percentage: 70% (3.50/5 × 100)
 └─ Conclusion: "Melebihi Standard" (exceeds_standard)
 
 KOMPETENSI - Aspect: Integritas (12% weight)
 ├─ Standard Rating: 3.50 (snapshot dari master)
 ├─ Standard Score: 42.00 (3.50 × 12%)
-├─ Individual Rating: 3.08 (direct dari API, no aggregation)
-├─ Individual Score: 36.96 (3.08 × 12%)
-├─ Gap Rating: -0.42 (below standard)
-├─ Gap Score: -5.04
-├─ Percentage: 88% (36.96/42 × 100)
+├─ Individual Rating: 3 (INTEGER 1-5, direct dari API, no aggregation)
+├─ Individual Score: 36.00 (3 × 12%)
+├─ Gap Rating: -0.50 (below standard)
+├─ Gap Score: -6.00
+├─ Percentage: 60% (3/5 × 100)
 └─ Conclusion: "Kurang Memenuhi Standard" (below_standard)
 ```
 
@@ -438,8 +448,8 @@ class FinalAssessmentService
 
         // 3. Calculate weighted scores
         $totalStandardScore =
-            ($potensiAssessment->total_individual_score * ($potensiWeight / 100)) +
-            ($kompetensiAssessment->total_individual_score * ($kompetensiWeight / 100));
+            ($potensiAssessment->total_standard_score * ($potensiWeight / 100)) +
+            ($kompetensiAssessment->total_standard_score * ($kompetensiWeight / 100));
 
         $totalIndividualScore =
             ($potensiAssessment->total_individual_score * ($potensiWeight / 100)) +
