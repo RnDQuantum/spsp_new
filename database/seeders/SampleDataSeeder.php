@@ -195,27 +195,8 @@ class SampleDataSeeder extends Seeder
         ]);
 
         // --- 4.3. Sub-Aspect Assessments for Kecerdasan ---
-        $kecerdasanSubAspects = [
-            ['code' => 'kecerdasan_umum', 'standard' => 3, 'individual' => 3, 'label' => 'Cukup'],
-            ['code' => 'daya_tangkap', 'standard' => 4, 'individual' => 4, 'label' => 'Baik'],
-            ['code' => 'kemampuan_analisa', 'standard' => 4, 'individual' => 4, 'label' => 'Baik'],
-            ['code' => 'berpikir_konseptual', 'standard' => 3, 'individual' => 3, 'label' => 'Cukup'],
-            ['code' => 'logika_berpikir', 'standard' => 4, 'individual' => 4, 'label' => 'Baik'],
-            ['code' => 'kemampuan_numerik', 'standard' => 3, 'individual' => 3, 'label' => 'Cukup'],
-        ];
-
-        foreach ($kecerdasanSubAspects as $subAspectData) {
-            $subAspect = SubAspect::where('code', $subAspectData['code'])->first();
-            SubAspectAssessment::create([
-                'aspect_assessment_id' => $aspKecerdasan->id,
-                'participant_id' => $participant->id,
-                'event_id' => $participant->event_id,
-                'sub_aspect_id' => $subAspect->id,
-                'standard_rating' => $subAspectData['standard'],
-                'individual_rating' => $subAspectData['individual'],
-                'rating_label' => $subAspectData['label'],
-            ]);
-        }
+        // Generate sub-aspect assessments using helper method
+        $this->generateSubAspectAssessments($aspKecerdasan, 0.96); // performance multiplier 96%
 
         // --- 4.4. Category Assessment: KOMPETENSI ---
         $catKompetensi = CategoryAssessment::create([
@@ -271,7 +252,7 @@ class SampleDataSeeder extends Seeder
 
             $conclusionText = $gapRating < -0.5 ? 'Kurang Memenuhi Standard' : ($gapRating < 0.5 ? 'Memenuhi Standard' : 'Sangat Memenuhi Standard');
 
-            AspectAssessment::create([
+            $aspectAssessment = AspectAssessment::create([
                 'category_assessment_id' => $catPotensi->id,
                 'participant_id' => $participant->id,
                 'event_id' => $participant->event_id,
@@ -289,6 +270,9 @@ class SampleDataSeeder extends Seeder
                 'conclusion_text' => $conclusionText,
                 'description_text' => $this->getAspectDescription($aspect->code, $conclusionText),
             ]);
+
+            // Generate sub-aspect assessments (Sikap Kerja, Hubungan Sosial, Kepribadian)
+            $this->generateSubAspectAssessments($aspectAssessment, $performanceMultiplier);
         }
 
         // For Kompetensi: generate aspects OTHER than Integritas (already created manually)
@@ -714,7 +698,7 @@ class SampleDataSeeder extends Seeder
             // Get description text based on aspect
             $descriptionText = $this->getAspectDescription($aspect->code, $conclusionText);
 
-            AspectAssessment::create([
+            $aspectAssessment = AspectAssessment::create([
                 'category_assessment_id' => $categoryAssessment->id,
                 'participant_id' => $categoryAssessment->participant_id,
                 'event_id' => $categoryAssessment->event_id,
@@ -732,6 +716,9 @@ class SampleDataSeeder extends Seeder
                 'conclusion_text' => $conclusionText,
                 'description_text' => $descriptionText,
             ]);
+
+            // Generate sub-aspect assessments (for Potensi aspects only)
+            $this->generateSubAspectAssessments($aspectAssessment, $performanceMultiplier);
         }
     }
 
@@ -757,6 +744,59 @@ class SampleDataSeeder extends Seeder
         ];
 
         return $descriptions[$aspectCode] ?? null;
+    }
+
+    /**
+     * Generate sub-aspect assessments for a given aspect assessment (POTENSI only)
+     * Kompetensi aspects don't have sub-aspects
+     */
+    private function generateSubAspectAssessments(
+        AspectAssessment $aspectAssessment,
+        float $performanceMultiplier = 1.0
+    ): void {
+        // Get the aspect to determine if it has sub-aspects
+        $aspect = Aspect::find($aspectAssessment->aspect_id);
+
+        // Only Potensi category (category_type_id = 1) has sub-aspects
+        if ($aspect->category_type_id != 1) {
+            return; // Kompetensi doesn't have sub-aspects
+        }
+
+        // Get all sub-aspects for this aspect
+        $subAspects = SubAspect::where('aspect_id', $aspect->id)
+            ->orderBy('order')
+            ->get();
+
+        // If no sub-aspects found, skip
+        if ($subAspects->isEmpty()) {
+            return;
+        }
+
+        foreach ($subAspects as $subAspect) {
+            // Calculate individual rating based on performance multiplier
+            $baseIndividualRating = $subAspect->standard_rating * $performanceMultiplier;
+            $individualRating = (int) max(1, min(5, round($baseIndividualRating))); // Cast to integer for match
+
+            // Determine rating label
+            $ratingLabel = match($individualRating) {
+                1 => 'Sangat Kurang',
+                2 => 'Kurang',
+                3 => 'Cukup',
+                4 => 'Baik',
+                5 => 'Sangat Baik',
+                default => 'Cukup',
+            };
+
+            SubAspectAssessment::create([
+                'aspect_assessment_id' => $aspectAssessment->id,
+                'participant_id' => $aspectAssessment->participant_id,
+                'event_id' => $aspectAssessment->event_id,
+                'sub_aspect_id' => $subAspect->id,
+                'standard_rating' => $subAspect->standard_rating,
+                'individual_rating' => $individualRating,
+                'rating_label' => $ratingLabel,
+            ]);
+        }
     }
 }
 
