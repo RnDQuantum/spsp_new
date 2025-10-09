@@ -114,8 +114,25 @@ class AspectService
             ->where('code', $aspectCode)
             ->firstOrFail();
 
-        // 2. Snapshot standard_rating from master
-        $standardRating = $aspect->standard_rating;
+        // 2. Determine standard_rating based on category type
+        $categoryAssessment->loadMissing('categoryType');
+        $categoryCode = $categoryAssessment->categoryType->code;
+
+        if ($categoryCode === 'potensi') {
+            // POTENSI: Calculate standard_rating from sub-aspects average
+            // Load sub-aspects from master
+            $aspect->loadMissing('subAspects');
+
+            if ($aspect->subAspects->isNotEmpty()) {
+                $standardRating = (float) $aspect->subAspects->avg('standard_rating');
+            } else {
+                // Fallback: use aspect standard_rating if no sub-aspects
+                $standardRating = (float) $aspect->standard_rating;
+            }
+        } else {
+            // KOMPETENSI: Use standard_rating from master (hardcoded)
+            $standardRating = (float) $aspect->standard_rating;
+        }
 
         // 3. Create aspect assessment (values will be calculated later)
         return AspectAssessment::updateOrCreate(
@@ -128,7 +145,7 @@ class AspectService
                 'event_id' => $categoryAssessment->event_id,
                 'batch_id' => $categoryAssessment->batch_id,
                 'position_formation_id' => $categoryAssessment->position_formation_id,
-                'standard_rating' => $standardRating,
+                'standard_rating' => round($standardRating, 2),
                 // Default values (will be updated by calculate methods)
                 'standard_score' => 0,
                 'individual_rating' => 0,
