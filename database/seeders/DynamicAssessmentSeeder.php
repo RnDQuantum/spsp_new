@@ -59,9 +59,9 @@ class DynamicAssessmentSeeder extends Seeder
                 ],
                 'participants_count' => 100, // JUMLAH PESERTA
                 'performance_distribution' => [
-                    'high' => 30,   // 30% high performers (>= 100%)
-                    'medium' => 50, // 50% medium performers (85-100%)
-                    'low' => 20,    // 20% low performers (< 85%)
+                    'high' => 25,      // 25% high performers (exceed standard)
+                    'medium' => 60,    // 60% medium performers (around standard)
+                    'low' => 15,       // 15% low performers (below standard)
                 ],
             ],
 
@@ -235,10 +235,11 @@ class DynamicAssessmentSeeder extends Seeder
         CategoryType $kompetensiCategory,
         string $performanceLevel
     ): array {
-        $performanceMultiplier = match ($performanceLevel) {
-            'high' => fake()->randomFloat(2, 1.05, 1.15),   // 105% - 115%
-            'medium' => fake()->randomFloat(2, 0.90, 1.05), // 90% - 105%
-            'low' => fake()->randomFloat(2, 0.75, 0.90),    // 75% - 90%
+        // Base performance multiplier range by level
+        [$minMultiplier, $maxMultiplier] = match ($performanceLevel) {
+            'high' => [1.05, 1.25],    // Exceed standard significantly
+            'medium' => [0.85, 1.10],  // Around standard (more variation)
+            'low' => [0.65, 0.85],     // Below standard
         };
 
         $assessmentsData = [
@@ -256,7 +257,11 @@ class DynamicAssessmentSeeder extends Seeder
             $subAspectsData = [];
 
             foreach ($aspect->subAspects as $subAspect) {
-                $baseRating = $subAspect->standard_rating * $performanceMultiplier;
+                // Add random variation per sub-aspect (±0.3 variance)
+                $variance = fake()->randomFloat(2, -0.3, 0.3);
+                $performanceMultiplier = fake()->randomFloat(2, $minMultiplier, $maxMultiplier);
+
+                $baseRating = ($subAspect->standard_rating * $performanceMultiplier) + $variance;
                 $individualRating = (int) max(1, min(5, round($baseRating)));
 
                 $subAspectsData[] = [
@@ -277,7 +282,11 @@ class DynamicAssessmentSeeder extends Seeder
             ->get();
 
         foreach ($kompetensiAspects as $aspect) {
-            $baseRating = $aspect->standard_rating * $performanceMultiplier;
+            // Add random variation per aspect (±0.3 variance)
+            $variance = fake()->randomFloat(2, -0.3, 0.3);
+            $performanceMultiplier = fake()->randomFloat(2, $minMultiplier, $maxMultiplier);
+
+            $baseRating = ($aspect->standard_rating * $performanceMultiplier) + $variance;
             $individualRating = (int) max(1, min(5, round($baseRating)));
 
             $assessmentsData['kompetensi'][] = [
