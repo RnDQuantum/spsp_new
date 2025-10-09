@@ -33,8 +33,9 @@ class AspectService
         $aspect = Aspect::findOrFail($aspectAssessment->aspect_id);
 
         // 4. Calculate scores
-        $standardScore = $aspectAssessment->standard_rating * ($aspect->weight_percentage / 100);
-        $individualScore = $individualRating * ($aspect->weight_percentage / 100);
+        // Score = rating × weight_percentage
+        $standardScore = $aspectAssessment->standard_rating * $aspect->weight_percentage;
+        $individualScore = $individualRating * $aspect->weight_percentage;
 
         // 5. Calculate gaps
         $gapRating = $individualRating - $aspectAssessment->standard_rating;
@@ -73,8 +74,9 @@ class AspectService
         $aspect = Aspect::findOrFail($aspectAssessment->aspect_id);
 
         // 2. Calculate scores
-        $standardScore = $aspectAssessment->standard_rating * ($aspect->weight_percentage / 100);
-        $individualScore = $individualRating * ($aspect->weight_percentage / 100);
+        // Score = rating × weight_percentage
+        $standardScore = $aspectAssessment->standard_rating * $aspect->weight_percentage;
+        $individualScore = $individualRating * $aspect->weight_percentage;
 
         // 3. Calculate gaps
         $gapRating = $individualRating - $aspectAssessment->standard_rating;

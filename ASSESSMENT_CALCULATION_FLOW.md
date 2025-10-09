@@ -2,13 +2,14 @@
 
 **Project:** SPSP Analytics Dashboard
 **Purpose:** Document complete calculation logic from raw data to final score
-**Last Updated:** 2025-10-08
+**Last Updated:** 2025-10-09
 
 **Recent Updates:**
+- ✅ **CRITICAL FIX:** Corrected score calculation formula to `rating × weight_percentage` (not `(rating/5) × 100 × weight%`)
 - ✅ Fixed `percentage_score` formula: now uses `(individual_rating / 5) × 100` instead of `(score / standardScore) × 100`
 - ✅ Clarified Kompetensi `individual_rating` MUST be INTEGER 1-5 (not decimal)
-- ✅ Fixed Final Assessment `totalStandardScore` formula
 - ✅ Updated all examples to reflect correct calculations
+- ✅ Added description field to aspects table (from template designer)
 
 ---
 
@@ -99,12 +100,12 @@ Aspect: Kecerdasan (Potensi)
 
 ```sql
 ├─ aspect_id (FK → aspects)
-├─ standard_rating (decimal) ← Snapshot OR aggregated
-├─ standard_score (decimal) ← Rating × weight percentage
-├─ individual_rating (decimal) ← Aggregated OR direct
-├─ individual_score (decimal) ← Rating × weight percentage
-├─ gap_rating (decimal) ← Individual - Standard
-├─ gap_score (decimal) ← Individual Score - Standard Score
+├─ standard_rating (decimal) ← Snapshot OR aggregated from sub-aspects
+├─ standard_score (decimal) ← standard_rating × weight_percentage
+├─ individual_rating (decimal) ← AVG(sub-aspects) OR direct from API
+├─ individual_score (decimal) ← individual_rating × weight_percentage
+├─ gap_rating (decimal) ← individual_rating - standard_rating
+├─ gap_score (decimal) ← individual_score - standard_score
 ├─ percentage_score (integer) ← For spider chart: (individual_rating / 5) × 100
 │                                  NOTE: Using rating (1-5 scale), NOT score!
 │                                  This ensures percentage is 0-100% for visualization
@@ -148,23 +149,22 @@ class AspectCalculationService
         // 3. Get aspect weight from master
         $aspect = Aspect::find($assessment->aspect_id);
 
-        // 4. Calculate individual_score = rating × weight
-        $individualScore = $individualRating * ($aspect->weight_percentage / 100);
+        // 4. Calculate scores
+        // Formula: score = rating × weight_percentage
+        $standardScore = $assessment->standard_rating * $aspect->weight_percentage;
+        $individualScore = $individualRating * $aspect->weight_percentage;
 
-        // 5. Calculate standard_score = standard_rating × weight
-        $standardScore = $assessment->standard_rating * ($aspect->weight_percentage / 100);
-
-        // 6. Calculate gaps
+        // 5. Calculate gaps
         $gapRating = $individualRating - $assessment->standard_rating;
         $gapScore = $individualScore - $standardScore;
 
-        // 7. Calculate percentage for spider chart (rating out of max scale 5)
+        // 6. Calculate percentage for spider chart (rating out of max scale 5)
         $percentageScore = round(($individualRating / 5) * 100);
 
-        // 8. Determine conclusion
+        // 7. Determine conclusion
         $conclusionCode = $this->determineConclusion($gapRating);
 
-        // 9. Update assessment
+        // 8. Update assessment
         $assessment->update([
             'individual_rating' => round($individualRating, 2),
             'individual_score' => round($individualScore, 2),
@@ -216,8 +216,9 @@ public function calculateKompetensiAspect(
     $aspect = Aspect::find($assessment->aspect_id);
 
     // 2. Calculate scores
-    $individualScore = $individualRating * ($aspect->weight_percentage / 100);
-    $standardScore = $assessment->standard_rating * ($aspect->weight_percentage / 100);
+    // Formula: score = rating × weight_percentage
+    $standardScore = $assessment->standard_rating * $aspect->weight_percentage;
+    $individualScore = $individualRating * $aspect->weight_percentage;
 
     // 3. Calculate gaps
     $gapRating = $individualRating - $assessment->standard_rating;
@@ -247,24 +248,24 @@ public function calculateKompetensiAspect(
 
 ```
 POTENSI - Aspect: Kecerdasan (30% weight)
-├─ Standard Rating: 3.20 (snapshot dari master)
-├─ Standard Score: 96.00 (3.20 × 30%)
-├─ Individual Rating: 3.50 (aggregated dari 6 sub-aspects: AVG)
-├─ Individual Score: 105.00 (3.50 × 30%)
-├─ Gap Rating: +0.30 (exceeds standard)
-├─ Gap Score: +9.00
-├─ Percentage: 70% (3.50/5 × 100)
+├─ Standard Rating: 3.50 (snapshot dari master)
+├─ Standard Score: 105.00 (3.50 × 30)
+├─ Individual Rating: 4.00 (aggregated dari 6 sub-aspects: AVG)
+├─ Individual Score: 120.00 (4.00 × 30)
+├─ Gap Rating: +0.50 (exceeds standard)
+├─ Gap Score: +15.00
+├─ Percentage: 80% (4.00/5 × 100)
 └─ Conclusion: "Melebihi Standard" (exceeds_standard)
 
 KOMPETENSI - Aspect: Integritas (12% weight)
 ├─ Standard Rating: 3.50 (snapshot dari master)
-├─ Standard Score: 42.00 (3.50 × 12%)
-├─ Individual Rating: 3 (INTEGER 1-5, direct dari API, no aggregation)
-├─ Individual Score: 36.00 (3 × 12%)
-├─ Gap Rating: -0.50 (below standard)
-├─ Gap Score: -6.00
-├─ Percentage: 60% (3/5 × 100)
-└─ Conclusion: "Kurang Memenuhi Standard" (below_standard)
+├─ Standard Score: 42.00 (3.50 × 12)
+├─ Individual Rating: 4 (INTEGER 1-5, direct dari API, no aggregation)
+├─ Individual Score: 48.00 (4 × 12)
+├─ Gap Rating: +0.50 (exceeds standard)
+├─ Gap Score: +6.00
+├─ Percentage: 80% (4/5 × 100)
+└─ Conclusion: "Melebihi Standard" (exceeds_standard)
 ```
 
 ---
@@ -365,32 +366,37 @@ class CategoryCalculationService
 
 ```
 POTENSI (40% weight - 4 aspects)
-├─ Kecerdasan: Individual 105.00 vs Standard 96.00 (+9.00)
-├─ Sikap Kerja: Individual 80.00 vs Standard 75.00 (+5.00)
-├─ Hubungan Sosial: Individual 65.00 vs Standard 70.00 (-5.00)
-├─ Kepribadian: Individual 85.00 vs Standard 90.00 (-5.00)
+├─ Kecerdasan (30%): Individual 120.00 vs Standard 105.00 (+15.00)
+├─ Sikap Kerja (20%): Individual 71.43 vs Standard 64.00 (+7.43)
+├─ Hubungan Sosial (20%): Individual 90.00 vs Standard 75.00 (+15.00)
+├─ Kepribadian (30%): Individual 130.00 vs Standard 110.10 (+19.90)
 │
-├─ Total Standard Rating: 11.94
-├─ Total Standard Score: 300.21
-├─ Total Individual Rating: 11.83
-├─ Total Individual Score: 294.25
-├─ Gap Rating: -0.11
-├─ Gap Score: -5.97 (below standard, but > -10)
-└─ Conclusion: "MEMENUHI STANDARD" (MS)
+├─ Total Standard Rating: 14.12
+├─ Total Standard Score: 354.10 (105+64+75+110.10)
+├─ Total Individual Rating: 16.40
+├─ Total Individual Score: 411.43 (120+71.43+90+130)
+├─ Gap Rating: +2.28
+├─ Gap Score: +57.33 (exceeds standard > 20)
+└─ Conclusion: "SANGAT KOMPETEN" (SK)
 
 KOMPETENSI (60% weight - 9 aspects)
-├─ Integritas: Individual 36.96 vs Standard 42.00 (-5.04)
-├─ Kerjasama: Individual 38.50 vs Standard 33.00 (+5.50)
-├─ Komunikasi: Individual 35.00 vs Standard 30.00 (+5.00)
-├─ ... (9 aspects total)
+├─ Integritas (12%): Individual 48.00 vs Standard 42.00 (+6.00)
+├─ Kerjasama (11%): Individual 44.00 vs Standard 35.75 (+8.25)
+├─ Komunikasi (11%): Individual 41.25 vs Standard 41.25 (0.00)
+├─ Orientasi Pada Hasil (11%): Individual 38.50 vs Standard 38.50 (0.00)
+├─ Pelayanan Publik (11%): Individual 39.60 vs Standard 39.60 (0.00)
+├─ Pengembangan Diri & Orang Lain (11%): Individual 37.40 vs Standard 37.40 (0.00)
+├─ Mengelola Perubahan (11%): Individual 36.30 vs Standard 36.30 (0.00)
+├─ Pengambilan Keputusan (11%): Individual 37.95 vs Standard 37.95 (0.00)
+├─ Perekat Bangsa (11%): Individual 39.05 vs Standard 39.05 (0.00)
 │
-├─ Total Standard Rating: 24.30
-├─ Total Standard Score: 270.00
-├─ Total Individual Rating: 27.48
-├─ Total Individual Score: 305.36
-├─ Gap Rating: +3.18
-├─ Gap Score: +35.36 (exceeds standard > 20)
-└─ Conclusion: "SANGAT KOMPETEN" (SK)
+├─ Total Standard Rating: 31.30
+├─ Total Standard Score: 348.00 (sum of all aspects)
+├─ Total Individual Rating: 36.00
+├─ Total Individual Score: 362.05 (sum of all aspects)
+├─ Gap Rating: +4.70
+├─ Gap Score: +14.05 (kompeten: 0 < gap < 20)
+└─ Conclusion: "KOMPETEN" (K)
 ```
 
 ---
@@ -505,24 +511,27 @@ class FinalAssessmentService
 ### **Example Data:**
 
 ```
-Participant: EKA FEBRIYANI, s.si
+Participant: ANDI WIJAYA, S.KOM
 
 POTENSI (40%):
-├─ Standard Score: 300.21
-├─ Individual Score: 294.25
-└─ Weighted: 294.25 × 40% = 117.70
+├─ Standard Score: 354.10
+├─ Individual Score: 411.43
+└─ Weighted: 411.43 × 40% = 164.57
 
 KOMPETENSI (60%):
-├─ Standard Score: 270.00
-├─ Individual Score: 305.36
-└─ Weighted: 305.36 × 60% = 183.22
+├─ Standard Score: 348.00
+├─ Individual Score: 362.05
+└─ Weighted: 362.05 × 60% = 217.23
 
 FINAL CALCULATION:
-├─ Total Standard Score: (300.21 × 0.40) + (270.00 × 0.60) = 282.08
-├─ Total Individual Score: 117.70 + 183.22 = 300.92
-├─ Achievement Percentage: (300.92 / 282.08) × 100 = 106.71%
-├─ Threshold: 106.71% >= 90%
+├─ Total Standard Score: (354.10 × 0.40) + (348.00 × 0.60) = 350.44
+├─ Total Individual Score: 164.57 + 217.23 = 381.80
+├─ Achievement Percentage: (381.80 / 350.44) × 100 = 108.95%
+├─ Threshold: 108.95% >= 90%
 └─ Conclusion: "MEMENUHI SYARAT (MS)"
+
+NOTE: Achievement percentage > 100% adalah NORMAL dan menunjukkan
+      peserta EXCEED standard (melebihi standar yang ditetapkan).
 ```
 
 ---
@@ -748,6 +757,73 @@ This design allows same aspect code (e.g., "Kecerdasan") to have different weigh
 
 ---
 
-**Version:** 1.0
+## 🧮 KEY CALCULATION FORMULAS - QUICK REFERENCE
+
+### **LEVEL 1: Sub-Aspect Assessment**
+```
+individual_rating = INTEGER 1-5 (dari API CI3)
+standard_rating = INTEGER 1-5 (snapshot dari master)
+```
+
+### **LEVEL 2: Aspect Assessment**
+
+**Potensi (dengan sub-aspects):**
+```
+individual_rating = AVG(sub_aspect_ratings)
+```
+
+**Kompetensi (tanpa sub-aspects):**
+```
+individual_rating = INTEGER 1-5 (langsung dari API)
+```
+
+**Score Calculation (SEMUA ASPECT - POTENSI & KOMPETENSI):**
+```
+standard_score = standard_rating × weight_percentage
+individual_score = individual_rating × weight_percentage
+
+Contoh:
+  Rating: 3.50, Weight: 30
+  Score = 3.50 × 30 = 105.00 ✓
+
+  BUKAN (3.50/5) × 100 × (30/100) = 21.00 ❌
+```
+
+**Gap & Percentage:**
+```
+gap_rating = individual_rating - standard_rating
+gap_score = individual_score - standard_score
+percentage_score = (individual_rating / 5) × 100  // untuk spider chart
+```
+
+### **LEVEL 3: Category Assessment**
+```
+total_standard_score = SUM(aspect_standard_scores)
+total_individual_score = SUM(aspect_individual_scores)
+gap_score = total_individual_score - total_standard_score
+```
+
+### **LEVEL 4: Final Assessment**
+```
+total_standard_score =
+    (potensi_standard_score × 40%) +
+    (kompetensi_standard_score × 60%)
+
+total_individual_score =
+    (potensi_individual_score × 40%) +
+    (kompetensi_individual_score × 60%)
+
+achievement_percentage =
+    (total_individual_score / total_standard_score) × 100
+```
+
+**IMPORTANT NOTES:**
+- ✅ Achievement percentage > 100% adalah **NORMAL** jika peserta exceed standard
+- ✅ Score = rating × weight (BUKAN rating × weight% / 100)
+- ✅ Percentage score untuk chart menggunakan rating (1-5), bukan score
+
+---
+
+**Version:** 1.1
 **Status:** ✅ Complete & Production-Ready
-**Last Updated:** 2025-10-06
+**Last Updated:** 2025-10-09
