@@ -14,6 +14,5 @@ Route::get('/shortlist-peserta', \App\Livewire\Pages\ParticipantsList::class)->n
 // Individual Report Route - General Matching
 Route::get('/general-matching/{eventCode}/{testNumber}', App\Livewire\Pages\IndividualReport\GeneralMatching::class)->name('general_matching');
 
-Route::get('/general-mapping', function () {
-    return view('livewire.pages.individual-report.general-mapping');
-})->name('general_mapping');
+// Individual Report Route - General Mapping
+Route::get('/general-mapping/{eventCode}/{testNumber}', App\Livewire\Pages\IndividualReport\GeneralMapping::class)->name('general_mapping');

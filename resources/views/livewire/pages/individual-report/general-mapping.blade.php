@@ -1,10 +1,13 @@
-<x-layouts.app title="General Mapping Report">
+<div>
     <div class="bg-white mx-auto my-8 shadow overflow-hidden" style="max-width: 1400px;">
         <!-- Header -->
         <div class="border-b-4 border-black py-3 bg-sky-200">
             <h1 class="text-center text-lg font-bold uppercase tracking-wide text-gray-900">
                 GENERAL MAPPING
             </h1>
+            <p class="text-center text-sm font-semibold text-gray-700 mt-1">
+                {{ $participant->name }}
+            </p>
         </div>
 
         <!-- Table Section -->
@@ -36,209 +39,68 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td class="border border-black px-3 py-2 text-center">I</td>
-                        <td class="border border-black px-3 py-2">Kecerdasan</td>
-                        <td class="border border-black px-3 py-2 text-center">20</td>
-                        <td class="border border-black px-3 py-2 text-center">3.50</td>
-                        <td class="border border-black px-3 py-2 text-center">70.00</td>
-                        <td class="border border-black px-3 py-2 text-center">3.83</td>
-                        <td class="border border-black px-3 py-2 text-center">76.67</td>
-                        <td class="border border-black px-3 py-2 text-center">0.33</td>
-                        <td class="border border-black px-3 py-2 text-center">6.67</td>
-                        <td class="border border-black px-3 py-2 text-center">110%</td>
-                        <td class="border border-black px-3 py-2">Lebih Memenuhi/More Requirement</td>
-                    </tr>
-                    <tr>
-                        <td class="border border-black px-3 py-2 text-center">II</td>
-                        <td class="border border-black px-3 py-2">Cara Kerja</td>
-                        <td class="border border-black px-3 py-2 text-center">20</td>
-                        <td class="border border-black px-3 py-2 text-center">3.40</td>
-                        <td class="border border-black px-3 py-2 text-center">68.00</td>
-                        <td class="border border-black px-3 py-2 text-center">3.60</td>
-                        <td class="border border-black px-3 py-2 text-center">72.00</td>
-                        <td class="border border-black px-3 py-2 text-center">0.20</td>
-                        <td class="border border-black px-3 py-2 text-center">4.00</td>
-                        <td class="border border-black px-3 py-2 text-center">106%</td>
-                        <td class="border border-black px-3 py-2">Lebih Memenuhi/More Requirement</td>
-                    </tr>
-                    <tr>
-                        <td class="border border-black px-3 py-2 text-center">III</td>
-                        <td class="border border-black px-3 py-2">Potensi Kerja</td>
-                        <td class="border border-black px-3 py-2 text-center">20</td>
-                        <td class="border border-black px-3 py-2 text-center">3.25</td>
-                        <td class="border border-black px-3 py-2 text-center">65.00</td>
-                        <td class="border border-black px-3 py-2 text-center">3.50</td>
-                        <td class="border border-black px-3 py-2 text-center">70.00</td>
-                        <td class="border border-black px-3 py-2 text-center">0.25</td>
-                        <td class="border border-black px-3 py-2 text-center">5.00</td>
-                        <td class="border border-black px-3 py-2 text-center">108%</td>
-                        <td class="border border-black px-3 py-2">Lebih Memenuhi/More Requirement</td>
-                    </tr>
-                    <tr>
-                        <td class="border border-black px-3 py-2 text-center">IV</td>
-                        <td class="border border-black px-3 py-2">Hubungan Sosial</td>
-                        <td class="border border-black px-3 py-2 text-center">20</td>
-                        <td class="border border-black px-3 py-2 text-center">3.00</td>
-                        <td class="border border-black px-3 py-2 text-center">60.00</td>
-                        <td class="border border-black px-3 py-2 text-center">2.50</td>
-                        <td class="border border-black px-3 py-2 text-center">50.00</td>
-                        <td class="border border-black px-3 py-2 text-center">-0.50</td>
-                        <td class="border border-black px-3 py-2 text-center">-10.00</td>
-                        <td class="border border-black px-3 py-2 text-center">83%</td>
-                        <td class="border border-black px-3 py-2">Kurang Memenuhi/Below Requirement</td>
-                    </tr>
-                    <tr>
-                        <td class="border border-black px-3 py-2 text-center">V</td>
-                        <td class="border border-black px-3 py-2">Kepribadian</td>
-                        <td class="border border-black px-3 py-2 text-center">20</td>
-                        <td class="border border-black px-3 py-2 text-center">3.25</td>
-                        <td class="border border-black px-3 py-2 text-center">65.00</td>
-                        <td class="border border-black px-3 py-2 text-center">3.25</td>
-                        <td class="border border-black px-3 py-2 text-center">65.00</td>
-                        <td class="border border-black px-3 py-2 text-center">0.00</td>
-                        <td class="border border-black px-3 py-2 text-center">0.00</td>
-                        <td class="border border-black px-3 py-2 text-center">100%</td>
-                        <td class="border border-black px-3 py-2">Memenuhi/Meet Requirement</td>
-                    </tr>
-                    <tr>
-                        <td class="border border-black px-3 py-2 text-center">I</td>
-                        <td class="border border-black px-3 py-2">Integritas</td>
-                        <td class="border border-black px-3 py-2 text-center">12</td>
-                        <td class="border border-black px-3 py-2 text-center">4.00</td>
-                        <td class="border border-black px-3 py-2 text-center">48.00</td>
-                        <td class="border border-black px-3 py-2 text-center">4.00</td>
-                        <td class="border border-black px-3 py-2 text-center">48.00</td>
-                        <td class="border border-black px-3 py-2 text-center">0.00</td>
-                        <td class="border border-black px-3 py-2 text-center">0.00</td>
-                        <td class="border border-black px-3 py-2 text-center">100%</td>
-                        <td class="border border-black px-3 py-2">Memenuhi/Meet Requirement</td>
-                    </tr>
-                    <tr>
-                        <td class="border border-black px-3 py-2 text-center">II</td>
-                        <td class="border border-black px-3 py-2">Kerjasama</td>
-                        <td class="border border-black px-3 py-2 text-center">11</td>
-                        <td class="border border-black px-3 py-2 text-center">4.00</td>
-                        <td class="border border-black px-3 py-2 text-center">44.00</td>
-                        <td class="border border-black px-3 py-2 text-center">3.00</td>
-                        <td class="border border-black px-3 py-2 text-center">33.00</td>
-                        <td class="border border-black px-3 py-2 text-center">-1.00</td>
-                        <td class="border border-black px-3 py-2 text-center">-11.00</td>
-                        <td class="border border-black px-3 py-2 text-center">75%</td>
-                        <td class="border border-black px-3 py-2">Belum Memenuhi/Under Perform</td>
-                    </tr>
-                    <tr>
-                        <td class="border border-black px-3 py-2 text-center">III</td>
-                        <td class="border border-black px-3 py-2">Komunikasi</td>
-                        <td class="border border-black px-3 py-2 text-center">11</td>
-                        <td class="border border-black px-3 py-2 text-center">4.00</td>
-                        <td class="border border-black px-3 py-2 text-center">44.00</td>
-                        <td class="border border-black px-3 py-2 text-center">3.00</td>
-                        <td class="border border-black px-3 py-2 text-center">33.00</td>
-                        <td class="border border-black px-3 py-2 text-center">-1.00</td>
-                        <td class="border border-black px-3 py-2 text-center">-11.00</td>
-                        <td class="border border-black px-3 py-2 text-center">75%</td>
-                        <td class="border border-black px-3 py-2">Belum Memenuhi/Under Perform</td>
-                    </tr>
-                    <tr>
-                        <td class="border border-black px-3 py-2 text-center">IV</td>
-                        <td class="border border-black px-3 py-2">Orientasi pada Hasil</td>
-                        <td class="border border-black px-3 py-2 text-center">11</td>
-                        <td class="border border-black px-3 py-2 text-center">4.00</td>
-                        <td class="border border-black px-3 py-2 text-center">44.00</td>
-                        <td class="border border-black px-3 py-2 text-center">4.00</td>
-                        <td class="border border-black px-3 py-2 text-center">44.00</td>
-                        <td class="border border-black px-3 py-2 text-center">0.00</td>
-                        <td class="border border-black px-3 py-2 text-center">0.00</td>
-                        <td class="border border-black px-3 py-2 text-center">100%</td>
-                        <td class="border border-black px-3 py-2">Memenuhi/Meet Requirement</td>
-                    </tr>
-                    <tr>
-                        <td class="border border-black px-3 py-2 text-center">V</td>
-                        <td class="border border-black px-3 py-2">Pelayanan Publik</td>
-                        <td class="border border-black px-3 py-2 text-center">11</td>
-                        <td class="border border-black px-3 py-2 text-center">4.00</td>
-                        <td class="border border-black px-3 py-2 text-center">44.00</td>
-                        <td class="border border-black px-3 py-2 text-center">3.00</td>
-                        <td class="border border-black px-3 py-2 text-center">33.00</td>
-                        <td class="border border-black px-3 py-2 text-center">-1.00</td>
-                        <td class="border border-black px-3 py-2 text-center">-11.00</td>
-                        <td class="border border-black px-3 py-2 text-center">75%</td>
-                        <td class="border border-black px-3 py-2">Belum Memenuhi/Under Perform</td>
-                    </tr>
-                    <tr>
-                        <td class="border border-black px-3 py-2 text-center">VI</td>
-                        <td class="border border-black px-3 py-2">Pengembangan Diri dan Orang Lain</td>
-                        <td class="border border-black px-3 py-2 text-center">11</td>
-                        <td class="border border-black px-3 py-2 text-center">4.00</td>
-                        <td class="border border-black px-3 py-2 text-center">44.00</td>
-                        <td class="border border-black px-3 py-2 text-center">4.00</td>
-                        <td class="border border-black px-3 py-2 text-center">44.00</td>
-                        <td class="border border-black px-3 py-2 text-center">0.00</td>
-                        <td class="border border-black px-3 py-2 text-center">0.00</td>
-                        <td class="border border-black px-3 py-2 text-center">100%</td>
-                        <td class="border border-black px-3 py-2">Memenuhi/Meet Requirement</td>
-                    </tr>
-                    <tr>
-                        <td class="border border-black px-3 py-2 text-center">VII</td>
-                        <td class="border border-black px-3 py-2">Mengelola Perubahan</td>
-                        <td class="border border-black px-3 py-2 text-center">11</td>
-                        <td class="border border-black px-3 py-2 text-center">4.00</td>
-                        <td class="border border-black px-3 py-2 text-center">44.00</td>
-                        <td class="border border-black px-3 py-2 text-center">4.00</td>
-                        <td class="border border-black px-3 py-2 text-center">44.00</td>
-                        <td class="border border-black px-3 py-2 text-center">0.00</td>
-                        <td class="border border-black px-3 py-2 text-center">0.00</td>
-                        <td class="border border-black px-3 py-2 text-center">100%</td>
-                        <td class="border border-black px-3 py-2">Memenuhi/Meet Requirement</td>
-                    </tr>
-                    <tr>
-                        <td class="border border-black px-3 py-2 text-center">VIII</td>
-                        <td class="border border-black px-3 py-2">Pengambilan Keputusan</td>
-                        <td class="border border-black px-3 py-2 text-center">11</td>
-                        <td class="border border-black px-3 py-2 text-center">4.00</td>
-                        <td class="border border-black px-3 py-2 text-center">44.00</td>
-                        <td class="border border-black px-3 py-2 text-center">3.00</td>
-                        <td class="border border-black px-3 py-2 text-center">33.00</td>
-                        <td class="border border-black px-3 py-2 text-center">-1.00</td>
-                        <td class="border border-black px-3 py-2 text-center">-11.00</td>
-                        <td class="border border-black px-3 py-2 text-center">75%</td>
-                        <td class="border border-black px-3 py-2">Belum Memenuhi/Under Perform</td>
-                    </tr>
-                    <tr>
-                        <td class="border border-black px-3 py-2 text-center">IX</td>
-                        <td class="border border-black px-3 py-2">Perekat Bangsa</td>
-                        <td class="border border-black px-3 py-2 text-center">11</td>
-                        <td class="border border-black px-3 py-2 text-center">4.00</td>
-                        <td class="border border-black px-3 py-2 text-center">44.00</td>
-                        <td class="border border-black px-3 py-2 text-center">4.00</td>
-                        <td class="border border-black px-3 py-2 text-center">44.00</td>
-                        <td class="border border-black px-3 py-2 text-center">0.00</td>
-                        <td class="border border-black px-3 py-2 text-center">0.00</td>
-                        <td class="border border-black px-3 py-2 text-center">100%</td>
-                        <td class="border border-black px-3 py-2">Memenuhi/Meet Requirement</td>
-                    </tr>
+                    @foreach ($aspectsData as $index => $aspect)
+                        <tr>
+                            <td class="border border-black px-3 py-2 text-center">
+                                @if ($index < 4)
+                                    {{ ['I', 'II', 'III', 'IV', 'V'][$index] }}
+                                @else
+                                    {{ ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX'][$index - 4] }}
+                                @endif
+                            </td>
+                            <td class="border border-black px-3 py-2">{{ $aspect['name'] }}</td>
+                            <td class="border border-black px-3 py-2 text-center">{{ $aspect['weight_percentage'] }}</td>
+                            <td class="border border-black px-3 py-2 text-center">
+                                {{ number_format($aspect['standard_rating'], 2) }}</td>
+                            <td class="border border-black px-3 py-2 text-center">
+                                {{ number_format($aspect['standard_score'], 2) }}</td>
+                            <td class="border border-black px-3 py-2 text-center">
+                                {{ number_format($aspect['individual_rating'], 2) }}</td>
+                            <td class="border border-black px-3 py-2 text-center">
+                                {{ number_format($aspect['individual_score'], 2) }}</td>
+                            <td class="border border-black px-3 py-2 text-center">
+                                {{ number_format($aspect['gap_rating'], 2) }}</td>
+                            <td class="border border-black px-3 py-2 text-center">
+                                {{ number_format($aspect['gap_score'], 2) }}</td>
+                            <td class="border border-black px-3 py-2 text-center">
+                                @php
+                                    $percentage = $aspect['standard_score'] > 0
+                                        ? round(($aspect['individual_score'] / $aspect['standard_score']) * 100)
+                                        : 0;
+                                @endphp
+                                {{ $percentage }}%
+                            </td>
+                            <td class="border border-black px-3 py-2">{{ $aspect['conclusion_text'] }}</td>
+                        </tr>
+                    @endforeach
+
+                    <!-- Total Rating Row -->
                     <tr class="font-bold bg-sky-100">
                         <td class="border border-black px-3 py-2 text-right" colspan="3">Total Rating</td>
-                        <td class="border border-black px-3 py-2 text-center">52.40</td>
+                        <td class="border border-black px-3 py-2 text-center">{{ number_format($totalStandardRating, 2) }}
+                        </td>
                         <td class="border border-black px-3 py-2"></td>
-                        <td class="border border-black px-3 py-2 text-center">48.68</td>
+                        <td class="border border-black px-3 py-2 text-center">
+                            {{ number_format($totalIndividualRating, 2) }}</td>
                         <td class="border border-black px-3 py-2"></td>
-                        <td class="border border-black px-3 py-2 text-center">-3.72</td>
+                        <td class="border border-black px-3 py-2 text-center">{{ number_format($totalGapRating, 2) }}
+                        </td>
                         <td class="border border-black px-3 py-2"></td>
-                        <td class="border border-black px-3 py-2" colspan="2">Memenuhi Standar/Meet Requirement
-                            Standard</td>
+                        <td class="border border-black px-3 py-2" colspan="2">{{ $overallConclusion }}</td>
                     </tr>
+
+                    <!-- Total Score Row -->
                     <tr class="font-bold bg-sky-100">
                         <td class="border border-black px-3 py-2 text-right" colspan="3">Total Score</td>
                         <td class="border border-black px-3 py-2"></td>
-                        <td class="border border-black px-3 py-2 text-center">728.00</td>
+                        <td class="border border-black px-3 py-2 text-center">{{ number_format($totalStandardScore, 2) }}
+                        </td>
                         <td class="border border-black px-3 py-2"></td>
-                        <td class="border border-black px-3 py-2 text-center">689.67</td>
+                        <td class="border border-black px-3 py-2 text-center">
+                            {{ number_format($totalIndividualScore, 2) }}</td>
                         <td class="border border-black px-3 py-2"></td>
-                        <td class="border border-black px-3 py-2 text-center">-38.33</td>
-                        <td class="border border-black px-3 py-2" colspan="2">Memenuhi Standar/Meet Requirement
-                            Standard</td>
+                        <td class="border border-black px-3 py-2 text-center">{{ number_format($totalGapScore, 2) }}</td>
+                        <td class="border border-black px-3 py-2" colspan="2">{{ $overallConclusion }}</td>
                     </tr>
                 </tbody>
             </table>
@@ -246,7 +108,7 @@
 
         <!-- Chart Section Rating -->
         <div class="p-6 border-t-2 border-black bg-white">
-            <div class="text-center text-base font-bold mb-6 text-gray-900">Static Pribadi Spider Plot Chart (Rating)
+            <div class="text-center text-base font-bold mb-6 text-gray-900">Profil Pribadi Spider Plot Chart (Rating)
             </div>
             <div class="flex justify-center mb-6">
                 <div style="width: 700px; height: 700px; position: relative;">
@@ -260,7 +122,7 @@
                 </span>
                 <span class="flex items-center gap-2">
                     <span class="inline-block w-10 border-b-2 border-red-600"></span>
-                    <span class="text-red-600 font-bold">Alphi Yusminanda, dr., MAPS</span>
+                    <span class="text-red-600 font-bold">{{ $participant->name }}</span>
                 </span>
                 <span class="flex items-center gap-2">
                     <span class="inline-block w-10" style="border-bottom: 1px dashed #6B7280;"></span>
@@ -271,7 +133,7 @@
 
         <!-- Chart Section Score -->
         <div class="p-6 border-t-2 border-black bg-white">
-            <div class="text-center text-base font-bold mb-6 text-gray-900">Static Pribadi Spider Plot Chart (Score)
+            <div class="text-center text-base font-bold mb-6 text-gray-900">Profil Pribadi Spider Plot Chart (Score)
             </div>
             <div class="flex justify-center mb-6">
                 <div style="width: 700px; height: 700px; position: relative;">
@@ -285,7 +147,7 @@
                 </span>
                 <span class="flex items-center gap-2">
                     <span class="inline-block w-10 border-b-2 border-red-600"></span>
-                    <span class="text-red-600 font-bold">Alphi Yusminanda, dr., MAPS</span>
+                    <span class="text-red-600 font-bold">{{ $participant->name }}</span>
                 </span>
                 <span class="flex items-center gap-2">
                     <span class="inline-block w-10" style="border-bottom: 1px dashed #6B7280;"></span>
@@ -298,26 +160,21 @@
     <!-- Include Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
     <script>
-        const LABELS = [
-            'Kecerdasan', 'Cara Kerja', 'Potensi Kerja', 'Hubungan Sosial', 'Kepribadian',
-            'Integritas', 'Kerjasama', 'Komunikasi', 'Orientasi pada Hasil',
-            'Pelayanan Publik', 'Pengembangan Diri dan Orang Lain', 'Mengelola Perubahan',
-            'Pengambilan Keputusan', 'Perekat Bangsa'
-        ];
+        const LABELS = @js($chartLabels);
 
         const ratingData = {
             labels: LABELS,
             datasets: [{
                 label: 'Standar',
-                data: [3.50, 3.40, 3.25, 3.00, 3.25, 4.00, 4.00, 4.00, 4.00, 4.00, 4.00, 4.00, 4.00, 4.00],
+                data: @js($chartStandardRatings),
                 borderColor: '#000000',
                 backgroundColor: 'rgba(0, 0, 0, 0.05)',
                 borderWidth: 2,
                 pointRadius: 3,
                 pointBackgroundColor: '#000000'
             }, {
-                label: 'Alphi Yusminanda, dr., MAPS',
-                data: [3.83, 3.60, 3.50, 2.50, 3.25, 4.00, 3.00, 3.00, 4.00, 3.00, 4.00, 4.00, 3.00, 4.00],
+                label: @js($participant->name),
+                data: @js($chartIndividualRatings),
                 borderColor: '#DC2626',
                 backgroundColor: 'rgba(220, 38, 38, 0.05)',
                 borderWidth: 2,
@@ -330,19 +187,15 @@
             labels: LABELS,
             datasets: [{
                 label: 'Standar',
-                data: [70.00, 68.00, 65.00, 60.00, 65.00, 48.00, 44.00, 44.00, 44.00, 44.00, 44.00, 44.00,
-                    44.00, 44.00
-                ],
+                data: @js($chartStandardScores),
                 borderColor: '#000000',
                 backgroundColor: 'rgba(0, 0, 0, 0.05)',
                 borderWidth: 2,
                 pointRadius: 3,
                 pointBackgroundColor: '#000000'
             }, {
-                label: 'Alphi Yusminanda, dr., MAPS',
-                data: [76.67, 72.00, 70.00, 50.00, 65.00, 48.00, 33.00, 33.00, 44.00, 33.00, 44.00, 44.00,
-                    33.00, 44.00
-                ],
+                label: @js($participant->name),
+                data: @js($chartIndividualScores),
                 borderColor: '#DC2626',
                 backgroundColor: 'rgba(220, 38, 38, 0.05)',
                 borderWidth: 2,
@@ -413,7 +266,7 @@
                 r: {
                     beginAtZero: true,
                     min: 0,
-                    max: 80,
+                    max: Math.max(...@js($chartStandardScores), ...@js($chartIndividualScores)) * 1.2,
                     ticks: {
                         stepSize: 20,
                         color: '#000000',
@@ -453,4 +306,4 @@
             options: scoreOptions
         });
     </script>
-</x-layouts.app>
+</div>
