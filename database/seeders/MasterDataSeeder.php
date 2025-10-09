@@ -28,6 +28,18 @@ class MasterDataSeeder extends Seeder
         ]);
 
         // --- Aspect: KECERDASAN (30%) ---
+        $kecerdasanSubAspects = [
+            ['code' => 'kecerdasan_umum', 'name' => 'Kecerdasan Umum', 'description' => 'Kemampuan intelektual secara umum', 'standard_rating' => 3, 'order' => 1],
+            ['code' => 'daya_tangkap', 'name' => 'Daya Tangkap', 'description' => 'Kemampuan memahami informasi dengan cepat', 'standard_rating' => 3, 'order' => 2],
+            ['code' => 'kemampuan_analisa', 'name' => 'Kemampuan Analisa', 'description' => 'Kemampuan menganalisa masalah', 'standard_rating' => 4, 'order' => 3],
+            ['code' => 'berpikir_konseptual', 'name' => 'Berpikir Konseptual', 'description' => 'Kemampuan berpikir secara konseptual', 'standard_rating' => 4, 'order' => 4],
+            ['code' => 'logika_berpikir', 'name' => 'Logika Berpikir', 'description' => 'Kemampuan berpikir logis dan sistematis', 'standard_rating' => 4, 'order' => 5],
+            ['code' => 'kemampuan_numerik', 'name' => 'Kemampuan Numerik', 'description' => 'Kemampuan dalam hal angka dan perhitungan', 'standard_rating' => 3, 'order' => 6],
+        ];
+
+        // Calculate standard_rating as AVERAGE of sub-aspects (POTENSI pattern)
+        $kecerdasanStandardRating = collect($kecerdasanSubAspects)->avg('standard_rating');
+
         $aspectKecerdasan = Aspect::create([
             'template_id' => $template->id,
             'category_type_id' => $categoryPotensi->id,
@@ -35,11 +47,9 @@ class MasterDataSeeder extends Seeder
             'name' => 'Kecerdasan',
             'description' => 'Mengukur kemampuan kognitif dan intelektual dalam memahami, menganalisa, dan memecahkan masalah secara logis dan sistematis.',
             'weight_percentage' => 30,
-            'standard_rating' => 3.5,
+            'standard_rating' => round($kecerdasanStandardRating, 2),
             'order' => 1,
         ]);
-
-        $kecerdasanSubAspects = [['code' => 'kecerdasan_umum', 'name' => 'Kecerdasan Umum', 'description' => 'Kemampuan intelektual secara umum', 'standard_rating' => 4, 'order' => 1], ['code' => 'daya_tangkap', 'name' => 'Daya Tangkap', 'description' => 'Kemampuan memahami informasi dengan cepat', 'standard_rating' => 3, 'order' => 2], ['code' => 'kemampuan_analisa', 'name' => 'Kemampuan Analisa', 'description' => 'Kemampuan menganalisa masalah', 'standard_rating' => 4, 'order' => 3], ['code' => 'berpikir_konseptual', 'name' => 'Berpikir Konseptual', 'description' => 'Kemampuan berpikir secara konseptual', 'standard_rating' => 3, 'order' => 4], ['code' => 'logika_berpikir', 'name' => 'Logika Berpikir', 'description' => 'Kemampuan berpikir logis dan sistematis', 'standard_rating' => 4, 'order' => 5], ['code' => 'kemampuan_numerik', 'name' => 'Kemampuan Numerik', 'description' => 'Kemampuan dalam hal angka dan perhitungan', 'standard_rating' => 3, 'order' => 6]];
 
         foreach ($kecerdasanSubAspects as $subAspect) {
             SubAspect::create([
@@ -53,6 +63,19 @@ class MasterDataSeeder extends Seeder
         }
 
         // --- Aspect: SIKAP KERJA (20%) ---
+        $sikapKerjaSubAspects = [
+            ['code' => 'sistematika_kerja', 'name' => 'Sistematika Kerja', 'description' => 'Kemampuan bekerja secara sistematis', 'standard_rating' => 3, 'order' => 1],
+            ['code' => 'perhatian_terhadap_detail', 'name' => 'Perhatian Terhadap Detail', 'description' => 'Ketelitian dalam bekerja', 'standard_rating' => 3, 'order' => 2],
+            ['code' => 'ketekunan_kerja', 'name' => 'Ketekunan Kerja', 'description' => 'Konsistensi dan ketekunan dalam bekerja', 'standard_rating' => 3, 'order' => 3],
+            ['code' => 'kerjasama', 'name' => 'Kerjasama', 'description' => 'Kemampuan bekerja dalam tim', 'standard_rating' => 4, 'order' => 4],
+            ['code' => 'tanggung_jawab', 'name' => 'Tanggung Jawab', 'description' => 'Rasa tanggung jawab terhadap tugas', 'standard_rating' => 4, 'order' => 5],
+            ['code' => 'dorongan_berprestasi', 'name' => 'Dorongan Berprestasi', 'description' => 'Motivasi untuk berprestasi', 'standard_rating' => 3, 'order' => 6],
+            ['code' => 'inisiatif', 'name' => 'Inisiatif', 'description' => 'Kemampuan mengambil inisiatif', 'standard_rating' => 3, 'order' => 7],
+        ];
+
+        // Calculate standard_rating as AVERAGE of sub-aspects (POTENSI pattern)
+        $sikapKerjaStandardRating = collect($sikapKerjaSubAspects)->avg('standard_rating');
+
         $aspectSikapKerja = Aspect::create([
             'template_id' => $template->id,
             'category_type_id' => $categoryPotensi->id,
@@ -60,19 +83,9 @@ class MasterDataSeeder extends Seeder
             'name' => 'Sikap Kerja',
             'description' => 'Menilai perilaku dan etos kerja yang mencakup sistematika, ketelitian, ketekunan, kerjasama, tanggung jawab, dan dorongan berprestasi.',
             'weight_percentage' => 20,
-            'standard_rating' => 3.2,
+            'standard_rating' => round($sikapKerjaStandardRating, 2),
             'order' => 2,
         ]);
-
-        $sikapKerjaSubAspects = [
-            ['code' => 'sistematika_kerja', 'name' => 'Sistematika Kerja', 'description' => 'Kemampuan bekerja secara sistematis', 'standard_rating' => 3, 'order' => 1],
-            ['code' => 'perhatian_terhadap_detail', 'name' => 'Perhatian Terhadap Detail', 'description' => 'Ketelitian dalam bekerja', 'standard_rating' => 4, 'order' => 2],
-            ['code' => 'ketekunan_kerja', 'name' => 'Ketekunan Kerja', 'description' => 'Konsistensi dan ketekunan dalam bekerja', 'standard_rating' => 3, 'order' => 3],
-            ['code' => 'kerjasama', 'name' => 'Kerjasama', 'description' => 'Kemampuan bekerja dalam tim', 'standard_rating' => 3, 'order' => 4],
-            ['code' => 'tanggung_jawab', 'name' => 'Tanggung Jawab', 'description' => 'Rasa tanggung jawab terhadap tugas', 'standard_rating' => 4, 'order' => 5],
-            ['code' => 'dorongan_berprestasi', 'name' => 'Dorongan Berprestasi', 'description' => 'Motivasi untuk berprestasi', 'standard_rating' => 3, 'order' => 6],
-            ['code' => 'inisiatif', 'name' => 'Inisiatif', 'description' => 'Kemampuan mengambil inisiatif', 'standard_rating' => 3, 'order' => 7],
-        ];
 
         foreach ($sikapKerjaSubAspects as $subAspect) {
             SubAspect::create([
@@ -86,6 +99,16 @@ class MasterDataSeeder extends Seeder
         }
 
         // --- Aspect: HUBUNGAN SOSIAL (20%) ---
+        $hubunganSosialSubAspects = [
+            ['code' => 'kepekaan_interpersonal', 'name' => 'Kepekaan Interpersonal', 'description' => 'Kepekaan terhadap hubungan antar pribadi', 'standard_rating' => 4, 'order' => 1],
+            ['code' => 'komunikasi', 'name' => 'Komunikasi', 'description' => 'Kemampuan berkomunikasi efektif', 'standard_rating' => 4, 'order' => 2],
+            ['code' => 'hubungan_interpersonal', 'name' => 'Hubungan Interpersonal', 'description' => 'Kemampuan menjalin hubungan dengan orang lain', 'standard_rating' => 3, 'order' => 3],
+            ['code' => 'penyesuaian_diri', 'name' => 'Penyesuaian Diri', 'description' => 'Kemampuan menyesuaikan diri dengan lingkungan', 'standard_rating' => 4, 'order' => 4],
+        ];
+
+        // Calculate standard_rating as AVERAGE of sub-aspects (POTENSI pattern)
+        $hubunganSosialStandardRating = collect($hubunganSosialSubAspects)->avg('standard_rating');
+
         $aspectHubunganSosial = Aspect::create([
             'template_id' => $template->id,
             'category_type_id' => $categoryPotensi->id,
@@ -93,11 +116,9 @@ class MasterDataSeeder extends Seeder
             'name' => 'Hubungan Sosial',
             'description' => 'Mengukur kemampuan berinteraksi, berkomunikasi, dan menjalin hubungan interpersonal yang efektif dengan berbagai pihak.',
             'weight_percentage' => 20,
-            'standard_rating' => 3.75,
+            'standard_rating' => round($hubunganSosialStandardRating, 2),
             'order' => 3,
         ]);
-
-        $hubunganSosialSubAspects = [['code' => 'kepekaan_interpersonal', 'name' => 'Kepekaan Interpersonal', 'description' => 'Kepekaan terhadap hubungan antar pribadi', 'standard_rating' => 4, 'order' => 1], ['code' => 'komunikasi', 'name' => 'Komunikasi', 'description' => 'Kemampuan berkomunikasi efektif', 'standard_rating' => 4, 'order' => 2], ['code' => 'hubungan_interpersonal', 'name' => 'Hubungan Interpersonal', 'description' => 'Kemampuan menjalin hubungan dengan orang lain', 'standard_rating' => 3, 'order' => 3], ['code' => 'penyesuaian_diri', 'name' => 'Penyesuaian Diri', 'description' => 'Kemampuan menyesuaikan diri dengan lingkungan', 'standard_rating' => 4, 'order' => 4]];
 
         foreach ($hubunganSosialSubAspects as $subAspect) {
             SubAspect::create([
@@ -111,6 +132,18 @@ class MasterDataSeeder extends Seeder
         }
 
         // --- Aspect: KEPRIBADIAN (30%) ---
+        $kepribadianSubAspects = [
+            ['code' => 'stabilitas_kematangan_emosi', 'name' => 'Stabilitas/Kematangan Emosi', 'description' => 'Kemampuan mengelola emosi', 'standard_rating' => 4, 'order' => 1],
+            ['code' => 'agility', 'name' => 'Agility', 'description' => 'Kelincahan dalam beradaptasi', 'standard_rating' => 3, 'order' => 2],
+            ['code' => 'kepercayaan_diri', 'name' => 'Kepercayaan Diri', 'description' => 'Tingkat kepercayaan diri', 'standard_rating' => 4, 'order' => 3],
+            ['code' => 'daya_tahan_stress', 'name' => 'Daya Tahan Stress', 'description' => 'Kemampuan mengelola tekanan', 'standard_rating' => 4, 'order' => 4],
+            ['code' => 'kepemimpinan', 'name' => 'Kepemimpinan', 'description' => 'Kemampuan memimpin', 'standard_rating' => 3, 'order' => 5],
+            ['code' => 'loyalitas', 'name' => 'Loyalitas', 'description' => 'Kesetiaan terhadap organisasi', 'standard_rating' => 4, 'order' => 6],
+        ];
+
+        // Calculate standard_rating as AVERAGE of sub-aspects (POTENSI pattern)
+        $kepribadianStandardRating = collect($kepribadianSubAspects)->avg('standard_rating');
+
         $aspectKepribadian = Aspect::create([
             'template_id' => $template->id,
             'category_type_id' => $categoryPotensi->id,
@@ -118,11 +151,9 @@ class MasterDataSeeder extends Seeder
             'name' => 'Kepribadian',
             'description' => 'Menilai karakteristik pribadi yang mencakup stabilitas emosi, kepercayaan diri, daya tahan terhadap stress, dan kemampuan kepemimpinan.',
             'weight_percentage' => 30,
-            'standard_rating' => 3.67,
+            'standard_rating' => round($kepribadianStandardRating, 2),
             'order' => 4,
         ]);
-
-        $kepribadianSubAspects = [['code' => 'stabilitas_kematangan_emosi', 'name' => 'Stabilitas/Kematangan Emosi', 'description' => 'Kemampuan mengelola emosi', 'standard_rating' => 4, 'order' => 1], ['code' => 'agility', 'name' => 'Agility', 'description' => 'Kelincahan dalam beradaptasi', 'standard_rating' => 3, 'order' => 2], ['code' => 'kepercayaan_diri', 'name' => 'Kepercayaan Diri', 'description' => 'Tingkat kepercayaan diri', 'standard_rating' => 4, 'order' => 3], ['code' => 'daya_tahan_stress', 'name' => 'Daya Tahan Stress', 'description' => 'Kemampuan mengelola tekanan', 'standard_rating' => 4, 'order' => 4], ['code' => 'kepemimpinan', 'name' => 'Kepemimpinan', 'description' => 'Kemampuan memimpin', 'standard_rating' => 3, 'order' => 5], ['code' => 'loyalitas', 'name' => 'Loyalitas', 'description' => 'Kesetiaan terhadap organisasi', 'standard_rating' => 4, 'order' => 6]];
 
         foreach ($kepribadianSubAspects as $subAspect) {
             SubAspect::create([
