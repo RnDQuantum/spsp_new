@@ -50,7 +50,7 @@ class ReportComponent extends Component
         $this->finalAssessment = FinalAssessment::where('participant_id', $this->participant->id)->first();
 
         if ($this->finalAssessment) {
-            $this->jobMatchPercentage = round($this->finalAssessment->achievement_percentage);
+            $this->jobMatchPercentage = round((float) $this->finalAssessment->achievement_percentage);
         }
 
         // Get template from event
@@ -101,7 +101,7 @@ class ReportComponent extends Component
                 'percentage' => $assessment->percentage_score,
                 'individual_rating' => $assessment->individual_rating,
                 'standard_rating' => $assessment->standard_rating,
-                'description' => $assessment->description_text,
+                'description' => $assessment->aspect->description,
                 'sub_aspects' => $this->loadSubAspects($assessment),
             ];
         })->toArray();

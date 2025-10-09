@@ -35,18 +35,11 @@ class MasterDataSeeder extends Seeder
             'name' => 'Kecerdasan',
             'description' => 'Mengukur kemampuan kognitif dan intelektual dalam memahami, menganalisa, dan memecahkan masalah secara logis dan sistematis.',
             'weight_percentage' => 30,
-            'standard_rating' => 3.50,
+            'standard_rating' => 3.5,
             'order' => 1,
         ]);
 
-        $kecerdasanSubAspects = [
-            ['code' => 'kecerdasan_umum', 'name' => 'Kecerdasan Umum', 'description' => 'Kemampuan intelektual secara umum', 'standard_rating' => 4, 'order' => 1],
-            ['code' => 'daya_tangkap', 'name' => 'Daya Tangkap', 'description' => 'Kemampuan memahami informasi dengan cepat', 'standard_rating' => 3, 'order' => 2],
-            ['code' => 'kemampuan_analisa', 'name' => 'Kemampuan Analisa', 'description' => 'Kemampuan menganalisa masalah', 'standard_rating' => 4, 'order' => 3],
-            ['code' => 'berpikir_konseptual', 'name' => 'Berpikir Konseptual', 'description' => 'Kemampuan berpikir secara konseptual', 'standard_rating' => 3, 'order' => 4],
-            ['code' => 'logika_berpikir', 'name' => 'Logika Berpikir', 'description' => 'Kemampuan berpikir logis dan sistematis', 'standard_rating' => 4, 'order' => 5],
-            ['code' => 'kemampuan_numerik', 'name' => 'Kemampuan Numerik', 'description' => 'Kemampuan dalam hal angka dan perhitungan', 'standard_rating' => 3, 'order' => 6],
-        ];
+        $kecerdasanSubAspects = [['code' => 'kecerdasan_umum', 'name' => 'Kecerdasan Umum', 'description' => 'Kemampuan intelektual secara umum', 'standard_rating' => 4, 'order' => 1], ['code' => 'daya_tangkap', 'name' => 'Daya Tangkap', 'description' => 'Kemampuan memahami informasi dengan cepat', 'standard_rating' => 3, 'order' => 2], ['code' => 'kemampuan_analisa', 'name' => 'Kemampuan Analisa', 'description' => 'Kemampuan menganalisa masalah', 'standard_rating' => 4, 'order' => 3], ['code' => 'berpikir_konseptual', 'name' => 'Berpikir Konseptual', 'description' => 'Kemampuan berpikir secara konseptual', 'standard_rating' => 3, 'order' => 4], ['code' => 'logika_berpikir', 'name' => 'Logika Berpikir', 'description' => 'Kemampuan berpikir logis dan sistematis', 'standard_rating' => 4, 'order' => 5], ['code' => 'kemampuan_numerik', 'name' => 'Kemampuan Numerik', 'description' => 'Kemampuan dalam hal angka dan perhitungan', 'standard_rating' => 3, 'order' => 6]];
 
         foreach ($kecerdasanSubAspects as $subAspect) {
             SubAspect::create([
@@ -67,7 +60,7 @@ class MasterDataSeeder extends Seeder
             'name' => 'Sikap Kerja',
             'description' => 'Menilai perilaku dan etos kerja yang mencakup sistematika, ketelitian, ketekunan, kerjasama, tanggung jawab, dan dorongan berprestasi.',
             'weight_percentage' => 20,
-            'standard_rating' => 3.20,
+            'standard_rating' => 3.2,
             'order' => 2,
         ]);
 
@@ -104,12 +97,7 @@ class MasterDataSeeder extends Seeder
             'order' => 3,
         ]);
 
-        $hubunganSosialSubAspects = [
-            ['code' => 'kepekaan_interpersonal', 'name' => 'Kepekaan Interpersonal', 'description' => 'Kepekaan terhadap hubungan antar pribadi', 'standard_rating' => 4, 'order' => 1],
-            ['code' => 'komunikasi', 'name' => 'Komunikasi', 'description' => 'Kemampuan berkomunikasi efektif', 'standard_rating' => 4, 'order' => 2],
-            ['code' => 'hubungan_interpersonal', 'name' => 'Hubungan Interpersonal', 'description' => 'Kemampuan menjalin hubungan dengan orang lain', 'standard_rating' => 3, 'order' => 3],
-            ['code' => 'penyesuaian_diri', 'name' => 'Penyesuaian Diri', 'description' => 'Kemampuan menyesuaikan diri dengan lingkungan', 'standard_rating' => 4, 'order' => 4],
-        ];
+        $hubunganSosialSubAspects = [['code' => 'kepekaan_interpersonal', 'name' => 'Kepekaan Interpersonal', 'description' => 'Kepekaan terhadap hubungan antar pribadi', 'standard_rating' => 4, 'order' => 1], ['code' => 'komunikasi', 'name' => 'Komunikasi', 'description' => 'Kemampuan berkomunikasi efektif', 'standard_rating' => 4, 'order' => 2], ['code' => 'hubungan_interpersonal', 'name' => 'Hubungan Interpersonal', 'description' => 'Kemampuan menjalin hubungan dengan orang lain', 'standard_rating' => 3, 'order' => 3], ['code' => 'penyesuaian_diri', 'name' => 'Penyesuaian Diri', 'description' => 'Kemampuan menyesuaikan diri dengan lingkungan', 'standard_rating' => 4, 'order' => 4]];
 
         foreach ($hubunganSosialSubAspects as $subAspect) {
             SubAspect::create([
@@ -134,14 +122,7 @@ class MasterDataSeeder extends Seeder
             'order' => 4,
         ]);
 
-        $kepribadianSubAspects = [
-            ['code' => 'stabilitas_kematangan_emosi', 'name' => 'Stabilitas/Kematangan Emosi', 'description' => 'Kemampuan mengelola emosi', 'standard_rating' => 4, 'order' => 1],
-            ['code' => 'agility', 'name' => 'Agility', 'description' => 'Kelincahan dalam beradaptasi', 'standard_rating' => 3, 'order' => 2],
-            ['code' => 'kepercayaan_diri', 'name' => 'Kepercayaan Diri', 'description' => 'Tingkat kepercayaan diri', 'standard_rating' => 4, 'order' => 3],
-            ['code' => 'daya_tahan_stress', 'name' => 'Daya Tahan Stress', 'description' => 'Kemampuan mengelola tekanan', 'standard_rating' => 4, 'order' => 4],
-            ['code' => 'kepemimpinan', 'name' => 'Kepemimpinan', 'description' => 'Kemampuan memimpin', 'standard_rating' => 3, 'order' => 5],
-            ['code' => 'loyalitas', 'name' => 'Loyalitas', 'description' => 'Kesetiaan terhadap organisasi', 'standard_rating' => 4, 'order' => 6],
-        ];
+        $kepribadianSubAspects = [['code' => 'stabilitas_kematangan_emosi', 'name' => 'Stabilitas/Kematangan Emosi', 'description' => 'Kemampuan mengelola emosi', 'standard_rating' => 4, 'order' => 1], ['code' => 'agility', 'name' => 'Agility', 'description' => 'Kelincahan dalam beradaptasi', 'standard_rating' => 3, 'order' => 2], ['code' => 'kepercayaan_diri', 'name' => 'Kepercayaan Diri', 'description' => 'Tingkat kepercayaan diri', 'standard_rating' => 4, 'order' => 3], ['code' => 'daya_tahan_stress', 'name' => 'Daya Tahan Stress', 'description' => 'Kemampuan mengelola tekanan', 'standard_rating' => 4, 'order' => 4], ['code' => 'kepemimpinan', 'name' => 'Kepemimpinan', 'description' => 'Kemampuan memimpin', 'standard_rating' => 3, 'order' => 5], ['code' => 'loyalitas', 'name' => 'Loyalitas', 'description' => 'Kesetiaan terhadap organisasi', 'standard_rating' => 4, 'order' => 6]];
 
         foreach ($kepribadianSubAspects as $subAspect) {
             SubAspect::create([
@@ -168,15 +149,96 @@ class MasterDataSeeder extends Seeder
         // Kompetensi aspects (tidak ada sub-aspects)
         // Total weight harus 100%, 9 aspek masing-masing ~11%
         $kompetensiAspects = [
-            ['code' => 'integritas', 'name' => 'Integritas', 'description' => 'Kemampuan bertindak konsisten sesuai nilai, norma, dan etika organisasi dengan jujur dan bertanggung jawab.', 'weight' => 12, 'standard_rating' => 3.50, 'order' => 1],
-            ['code' => 'kerjasama', 'name' => 'Kerjasama', 'description' => 'Kemampuan bekerja bersama secara sinergis dalam mencapai tujuan organisasi dengan menghargai kontribusi setiap pihak.', 'weight' => 11, 'standard_rating' => 3.25, 'order' => 2],
-            ['code' => 'komunikasi', 'name' => 'Komunikasi', 'description' => 'Kemampuan menyampaikan dan menerima informasi secara efektif, jelas, dan tepat sasaran baik lisan maupun tertulis.', 'weight' => 11, 'standard_rating' => 3.75, 'order' => 3],
-            ['code' => 'orientasi_pada_hasil', 'name' => 'Orientasi Pada Hasil', 'description' => 'Komitmen untuk mencapai hasil berkualitas tinggi dengan efektif dan efisien sesuai target yang ditetapkan.', 'weight' => 11, 'standard_rating' => 3.50, 'order' => 4],
-            ['code' => 'pelayanan_publik', 'name' => 'Pelayanan Publik', 'description' => 'Kemampuan memberikan pelayanan prima kepada masyarakat dengan responsif, ramah, dan berorientasi pada kepuasan publik.', 'weight' => 11, 'standard_rating' => 3.60, 'order' => 5],
-            ['code' => 'pengembangan_diri_orang_lain', 'name' => 'Pengembangan Diri & Orang Lain', 'description' => 'Komitmen untuk terus belajar dan mengembangkan kompetensi diri serta membantu pengembangan orang lain.', 'weight' => 11, 'standard_rating' => 3.40, 'order' => 6],
-            ['code' => 'mengelola_perubahan', 'name' => 'Mengelola Perubahan', 'description' => 'Kemampuan beradaptasi dan memimpin perubahan dengan proaktif untuk meningkatkan efektivitas organisasi.', 'weight' => 11, 'standard_rating' => 3.30, 'order' => 7],
-            ['code' => 'pengambilan_keputusan', 'name' => 'Pengambilan Keputusan', 'description' => 'Kemampuan menganalisis informasi dan mengambil keputusan yang tepat, cepat, dan akurat berdasarkan data dan pertimbangan matang.', 'weight' => 11, 'standard_rating' => 3.45, 'order' => 8],
-            ['code' => 'perekat_bangsa', 'name' => 'Perekat Bangsa', 'description' => 'Kemampuan menjaga persatuan dengan menghargai keberagaman dan mempromosikan toleransi dalam kebhinekaan.', 'weight' => 11, 'standard_rating' => 3.55, 'order' => 9],
+            [
+                'code' => 'integritas',
+                'name' => 'Integritas',
+                'description' => "Konsisten berperilaku selaras dengan nilai, norma dan/atau etika organisasi, dan jujur dalam hubungan dengan manajemen, rekan kerja, bawahan langsung, dan pemangku kepentingan, menciptakan budaya etika tinggi, bertanggung jawab atas tindakan atau keputusan beserta risiko yang menyertainya.
+        Level 4
+        Mampu menciptakan situasi kerja yang mendorong kepatuhan pada nilai, norma, dan etika organisasi.",
+                'weight' => 12,
+                'standard_rating' => 3.5,
+                'order' => 1,
+            ],
+            [
+                'code' => 'kerjasama',
+                'name' => 'Kerjasama',
+                'description' => "Kemampuan menjalin, membina, memertahankan hubungan kerja yang efektif, memiliki komitmen saling membantu dalam penyelesaian tugas, dan mengoptimalkan segala sumber daya untuk mencapai tujuan strategis organisasi.
+        Level 4
+        Membangun komitmen tim, sinergi.",
+                'weight' => 11,
+                'standard_rating' => 3.25,
+                'order' => 2,
+            ],
+            [
+                'code' => 'komunikasi',
+                'name' => 'Komunikasi',
+                'description' => "Kemampuan untuk menerangkan pandangan dan gagasan secara jelas, sistematis disertai argumentasi yang logis dengan cara-cara yang sesuai baik secara lisan maupun tertulis; memastikan pemahaman; mendengarkan secara aktif dan efektif; mempersuasi, meyakinkan dan membujuk orang lain dalam rangka mencapai tujuan organisasi.
+        Level 4
+        Mampu mengemukakan pemikiran multidimensi secara lisan dan tertulis untuk mendorong kesepakatan dengan tujuan meningkatkan kinerja secara keseluruhan.",
+                'weight' => 11,
+                'standard_rating' => 3.75,
+                'order' => 3,
+            ],
+            [
+                'code' => 'orientasi_pada_hasil',
+                'name' => 'Orientasi Pada Hasil',
+                'description' => "Kemampuan memertahankan komitmen pribadi yang tinggi untuk menyelesaikan tugas, dapat diandalkan, bertanggung jawab, mampu secara sistematis mengidentifikasi risiko dan peluang dengan memperhatikan keterhubungan antara perencanaan dan hasil, untuk keberhasilan organisasi.
+        Level 4
+        Mendorong unit kerja mencapai target yang ditetapkan atau melebihi hasil kerja sebelumnya.",
+                'weight' => 11,
+                'standard_rating' => 3.5,
+                'order' => 4,
+            ],
+            [
+                'code' => 'pelayanan_publik',
+                'name' => 'Pelayanan Publik',
+                'description' => "Kemampuan dalam melaksanakan tugas-tugas pemerintahan, pembangunan dan kegiatan pemenuhan kebutuhan pelayanan publik secara profesional, transparan, mengikuti standar pelayanan yang objektif, netral, tidak memihak, tidak diskriminatif, serta tidak terpengaruh kepentingan pribadi/kelompok/golongan/partai politik.
+        Level 4
+        Mampu memonitor, mengevaluasi, memperhitungkan dan mengantisipasi dampak dari isu-isu jangka panjang, kesempatan, atau kekuatan politik dalam hal pelayanan kebutuhan pemangku kepentingan yang transparan, objektif, dan profesional.",
+                'weight' => 11,
+                'standard_rating' => 3.6,
+                'order' => 5,
+            ],
+            [
+                'code' => 'pengembangan_diri_orang_lain',
+                'name' => 'Pengembangan Diri & Orang Lain',
+                'description' => "Kemampuan untuk meningkatkan pengetahuan dan menyempurnakan keterampilan diri; menginspirasi orang lain untuk mengembangkan dan menyempurnakan pengetahuan dan keterampilan yang relevan dengan pekerjaan dan pengembangan karir jangka panjang, mendorong kemauan belajar sepanjang hidup, memberikan saran/bantuan, umpan balik, bimbingan untuk membantu orang lain untuk mengembangkan potensi dirinya.
+        Level 4
+        Menyusun program pengembangan jangka panjang dalam rangka mendorong manajemen pembelajaran.",
+                'weight' => 11,
+                'standard_rating' => 3.4,
+                'order' => 6,
+            ],
+            [
+                'code' => 'mengelola_perubahan',
+                'name' => 'Mengelola Perubahan',
+                'description' => "Kemampuan dalam menyesuaikan diri dengan situasi yang baru atau berubah dan tidak bergantung secara berlebihan pada metode dan proses lama, mengambil tindakan untuk mendukung dan melaksanakan inisiatif perubahan, memimpin usaha perubahan, mengambil tanggung jawab pribadi untuk memastikan perubahan berhasil diimplementasikan secara efektif.
+        Level 4
+        Memimpin perubahan pada unit kerja.",
+                'weight' => 11,
+                'standard_rating' => 3.3,
+                'order' => 7,
+            ],
+            [
+                'code' => 'pengambilan_keputusan',
+                'name' => 'Pengambilan Keputusan',
+                'description' => "Kemampuan membuat keputusan yang baik secara tepat waktu dan dengan keyakinan diri setelah mempertimbangkan prinsip kehati-hatian, dirumuskan secara sistematis dan seksama berdasarkan berbagai informasi, alternatif pemecahan masalah dan konsekuensinya, serta bertanggung jawab atas keputusan yang diambil.
+        Level 4
+        Menyelesaikan masalah yang mengandung risiko tinggi, mengantisipasi dampak keputusan, membuat tindakan pengamanan; mitigasi risiko.",
+                'weight' => 11,
+                'standard_rating' => 3.45,
+                'order' => 8,
+            ],
+            [
+                'code' => 'perekat_bangsa',
+                'name' => 'Perekat Bangsa',
+                'description' => "Kemampuan dalam mempromosikan sikap toleransi, keterbukaan, peka terhadap perbedaan individu/kelompok masyarakat; mampu menjadi perpanjangan tangan pemerintah dalam mempersatukan masyarakat dan membangun hubungan sosial psikologis dengan masyarakat di tengah kemajemukan Indonesia sehingga menciptakan kelekatan yang kuat antara ASN dan para pemangku kepentingan serta di antara para pemangku kepentingan itu sendiri; menjaga, mengembangkan, dan mewujudkan rasa persatuan dan kesatuan dalam kehidupan bermasyarakat, berbangsa dan bernegara Indonesia.
+        Level 4
+        Mendayagunakan perbedaan secara konstruktif dan kreatif untuk meningkatkan efektivitas organisasi.",
+                'weight' => 11,
+                'standard_rating' => 3.55,
+                'order' => 9,
+            ],
         ]; // Total = 100%
 
         foreach ($kompetensiAspects as $aspect) {
