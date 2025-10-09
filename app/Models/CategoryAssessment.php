@@ -27,12 +27,12 @@ class CategoryAssessment extends Model
     protected function casts(): array
     {
         return [
-            'total_standard_rating' => 'decimal:2',
-            'total_standard_score' => 'decimal:2',
-            'total_individual_rating' => 'decimal:2',
-            'total_individual_score' => 'decimal:2',
-            'gap_rating' => 'decimal:2',
-            'gap_score' => 'decimal:2',
+            'total_standard_rating' => 'float',
+            'total_standard_score' => 'float',
+            'total_individual_rating' => 'float',
+            'total_individual_score' => 'float',
+            'gap_rating' => 'float',
+            'gap_score' => 'float',
         ];
     }
 
