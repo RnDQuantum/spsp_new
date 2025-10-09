@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire;
+namespace App\Livewire\Pages\IndividualReport;
 
 use App\Models\Aspect;
 use App\Models\AspectAssessment;
@@ -11,7 +11,7 @@ use Livewire\Attributes\Layout;
 use Livewire\Component;
 
 #[Layout('components.layouts.app', ['title' => 'General Matching'])]
-class ReportComponent extends Component
+class GeneralMatching extends Component
 {
     // Participant info
     public ?Participant $participant = null;
@@ -152,6 +152,6 @@ class ReportComponent extends Component
 
     public function render()
     {
-        return view('livewire.pages.general_matching');
+        return view('livewire.pages.individual-report.general-matching');
     }
 }
