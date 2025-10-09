@@ -161,47 +161,83 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
     <script>
         const LABELS = @js($chartLabels);
+        const standardRatings = @js($chartStandardRatings);
+        const standardScores = @js($chartStandardScores);
+
+        // Calculate tolerance (standard - 10%)
+        const toleranceRatings = standardRatings.map(val => val * 0.9);
+        const toleranceScores = standardScores.map(val => val * 0.9);
 
         const ratingData = {
             labels: LABELS,
             datasets: [{
-                label: 'Standar',
-                data: @js($chartStandardRatings),
-                borderColor: '#000000',
-                backgroundColor: 'rgba(0, 0, 0, 0.05)',
-                borderWidth: 2,
-                pointRadius: 3,
-                pointBackgroundColor: '#000000'
-            }, {
-                label: @js($participant->name),
-                data: @js($chartIndividualRatings),
-                borderColor: '#DC2626',
-                backgroundColor: 'rgba(220, 38, 38, 0.05)',
-                borderWidth: 2,
-                pointRadius: 3,
-                pointBackgroundColor: '#DC2626'
-            }]
+                    label: 'Standar',
+                    data: standardRatings,
+                    borderColor: '#000000',
+                    backgroundColor: 'rgba(0, 0, 0, 0.05)',
+                    borderWidth: 2,
+                    pointRadius: 3,
+                    pointBackgroundColor: '#000000',
+                    order: 1
+                },
+                {
+                    label: 'Toleransi 10%',
+                    data: toleranceRatings,
+                    borderColor: '#6B7280',
+                    backgroundColor: 'transparent',
+                    borderWidth: 1.5,
+                    borderDash: [5, 5],
+                    pointRadius: 2,
+                    pointBackgroundColor: '#6B7280',
+                    order: 2
+                },
+                {
+                    label: @js($participant->name),
+                    data: @js($chartIndividualRatings),
+                    borderColor: '#DC2626',
+                    backgroundColor: 'rgba(220, 38, 38, 0.05)',
+                    borderWidth: 2,
+                    pointRadius: 3,
+                    pointBackgroundColor: '#DC2626',
+                    order: 0
+                }
+            ]
         };
 
         const scoreData = {
             labels: LABELS,
             datasets: [{
-                label: 'Standar',
-                data: @js($chartStandardScores),
-                borderColor: '#000000',
-                backgroundColor: 'rgba(0, 0, 0, 0.05)',
-                borderWidth: 2,
-                pointRadius: 3,
-                pointBackgroundColor: '#000000'
-            }, {
-                label: @js($participant->name),
-                data: @js($chartIndividualScores),
-                borderColor: '#DC2626',
-                backgroundColor: 'rgba(220, 38, 38, 0.05)',
-                borderWidth: 2,
-                pointRadius: 3,
-                pointBackgroundColor: '#DC2626'
-            }]
+                    label: 'Standar',
+                    data: standardScores,
+                    borderColor: '#000000',
+                    backgroundColor: 'rgba(0, 0, 0, 0.05)',
+                    borderWidth: 2,
+                    pointRadius: 3,
+                    pointBackgroundColor: '#000000',
+                    order: 1
+                },
+                {
+                    label: 'Toleransi 10%',
+                    data: toleranceScores,
+                    borderColor: '#6B7280',
+                    backgroundColor: 'transparent',
+                    borderWidth: 1.5,
+                    borderDash: [5, 5],
+                    pointRadius: 2,
+                    pointBackgroundColor: '#6B7280',
+                    order: 2
+                },
+                {
+                    label: @js($participant->name),
+                    data: @js($chartIndividualScores),
+                    borderColor: '#DC2626',
+                    backgroundColor: 'rgba(220, 38, 38, 0.05)',
+                    borderWidth: 2,
+                    pointRadius: 3,
+                    pointBackgroundColor: '#DC2626',
+                    order: 0
+                }
+            ]
         };
 
         const radarOptions = {
