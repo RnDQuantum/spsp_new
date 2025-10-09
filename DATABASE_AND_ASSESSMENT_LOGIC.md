@@ -3,8 +3,13 @@
 **Project:** Dashboard Analytics Asesmen SPSP
 **Database:** MySQL/MariaDB
 **Total Tables:** 16
-**Last Updated:** 2025-10-07
+**Last Updated:** 2025-10-09
 **Status:** ✅ Production-Ready + Performance Optimized
+
+**Recent Updates:**
+- ✅ Corrected score calculation formula to `rating × weight_percentage`
+- ✅ Added `description` field to `aspects` table for template designer notes
+- ✅ Removed `description_text` field from `aspect_assessments` table
 
 ---
 
@@ -301,6 +306,7 @@ CASCADE DELETE: template deleted → categories deleted
 ├─ category_type_id (FK → category_types) ← DUAL FK
 ├─ code (string) - 'kecerdasan', 'integritas'
 ├─ name (string)
+├─ description (text, nullable) ← Template designer's notes/explanation
 ├─ weight_percentage (integer) - 30, 20, 12, 11
 ├─ standard_rating (decimal 5,2, nullable) - 3.50, 3.20
 ├─ order (integer)
@@ -494,15 +500,14 @@ CASCADE DELETE: participant/category deleted → assessments deleted
 ├─ position_formation_id (FK → position_formations, nullable) ← PERF: Added 2025-10-07
 ├─ aspect_id (FK → aspects)
 ├─ standard_rating (decimal 5,2) ← SNAPSHOT from master
-├─ standard_score (decimal 8,2) ← rating × weight
+├─ standard_score (decimal 8,2) ← rating × weight_percentage
 ├─ individual_rating (decimal 5,2) ← aggregated OR direct
-├─ individual_score (decimal 8,2) ← rating × weight
+├─ individual_score (decimal 8,2) ← rating × weight_percentage
 ├─ gap_rating (decimal 8,2) ← individual - standard
 ├─ gap_score (decimal 8,2)
-├─ percentage_score (integer) ← for spider chart
+├─ percentage_score (integer) ← for spider chart (rating/5 × 100)
 ├─ conclusion_code (string)
 ├─ conclusion_text (string)
-├─ description_text (text, nullable)
 └─ timestamps
 
 INDEX: category_assessment_id, aspect_id
@@ -825,7 +830,8 @@ For more detailed information:
 
 ---
 
-**Version:** 2.0
+**Version:** 2.1
 **Status:** ✅ Production-Ready + Performance Optimized
-**Last Updated:** 2025-10-07
+**Last Updated:** 2025-10-09
 **Performance:** 1000x faster queries for scale (2000+ participants)
+**Recent Changes:** Fixed score calculation formula, added aspect descriptions

@@ -2,8 +2,8 @@
 
 **Project:** SPSP Analytics Dashboard
 **Purpose:** API contract between CI3 Application (source) and Laravel Dashboard (analytics)
-**Version:** 1.0
-**Last Updated:** 2025-10-08
+**Version:** 1.1
+**Last Updated:** 2025-10-09
 
 ---
 
@@ -44,7 +44,7 @@ API ini digunakan untuk **sync data assessment** dari aplikasi CI3 (source of tr
 | Data Element | Data Type | Calculated By Laravel |
 |--------------|-----------|----------------------|
 | Aspect `individual_rating` (Potensi) | DECIMAL | ✅ AVG from sub-aspects `individual_rating` (INTEGER) |
-| All scores (`standard_score`, `individual_score`) | DECIMAL | ✅ rating × weight |
+| All scores (`standard_score`, `individual_score`) | DECIMAL | ✅ `rating × weight_percentage` |
 | All gaps (`gap_rating`, `gap_score`) | DECIMAL | ✅ individual - standard |
 | Percentage scores (spider chart) | INTEGER | ✅ (rating / 5) × 100 |
 | Category totals | DECIMAL | ✅ SUM from aspects |
@@ -77,21 +77,21 @@ API ini digunakan untuk **sync data assessment** dari aplikasi CI3 (source of tr
 ├─────────────────────────────────────────────────────────────┤
 │                                                             │
 │ POTENSI:                                                    │
-│   Aspect: Kecerdasan                                        │
+│   Aspect: Kecerdasan (weight 30)                           │
 │   ✅ individual_rating = 3.50 (DECIMAL)                    │
 │      ↑ Calculated as AVG(3, 4, 3, 4, 3, 4) = 3.50         │
-│   ✅ standard_score = 3.20 × 30% = 96.00                   │
-│   ✅ individual_score = 3.50 × 30% = 105.00                │
-│   ✅ gap_rating = 3.50 - 3.20 = 0.30                       │
+│   ✅ standard_score = 3.50 × 30 = 105.00                   │
+│   ✅ individual_score = 3.50 × 30 = 105.00                 │
+│   ✅ gap_rating = 3.50 - 3.50 = 0.00                       │
 │   ✅ percentage_score = (3.50 / 5) × 100 = 70%             │
 │                                                             │
 │ KOMPETENSI:                                                 │
-│   Aspect: Integritas                                        │
-│   ✅ individual_rating = 3 (from API, stored as-is)        │
-│   ✅ standard_score = 3.50 × 12% = 42.00                   │
-│   ✅ individual_score = 3 × 12% = 36.00                    │
-│   ✅ gap_rating = 3 - 3.50 = -0.50                         │
-│   ✅ percentage_score = (3 / 5) × 100 = 60%                │
+│   Aspect: Integritas (weight 12)                           │
+│   ✅ individual_rating = 4 (from API, stored as-is)        │
+│   ✅ standard_score = 3.50 × 12 = 42.00                    │
+│   ✅ individual_score = 4 × 12 = 48.00                     │
+│   ✅ gap_rating = 4 - 3.50 = +0.50                         │
+│   ✅ percentage_score = (4 / 5) × 100 = 80%                │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -1255,7 +1255,7 @@ Before sending data, please verify:
    - Aspect assessments (Kompetensi - direct)
 6. **Calculate Derived Values:**
    - Aspect ratings for Potensi (AVG from sub-aspects)
-   - All scores (rating × weight)
+   - All scores (`rating × weight_percentage`)
    - All gaps (individual - standard)
    - All percentages
    - Category totals (SUM from aspects)
@@ -1275,6 +1275,6 @@ If you have questions about this API specification:
 
 ---
 
-**Version:** 1.0
+**Version:** 1.1
 **Status:** ✅ Complete & Ready for Implementation
-**Last Updated:** 2025-10-08
+**Last Updated:** 2025-10-09
