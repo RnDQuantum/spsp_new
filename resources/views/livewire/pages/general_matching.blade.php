@@ -5,6 +5,10 @@
         /* Equal width for columns 1-5 (5 columns, 40% total, 8% each) */
     }
 
+    .col-number {
+        width: 3%;
+    }
+
     /* Ensure progress bar spans the full Range Scale section */
     .progress-container {
         position: relative;
@@ -122,7 +126,7 @@
                         <!-- Sub-Aspects -->
                         @foreach ($aspect['sub_aspects'] as $subIndex => $subAspect)
                             <tr class="bg-gray-50">
-                                <td class="border border-gray-300 px-4 py-1 text-xs text-black">
+                                <td class="border border-gray-300 px-4 py-1 text-xs text-black col-number">
                                     {{ $subIndex + 1 }}.</td>
                                 <td class="border border-gray-300 px-4 py-1 text-xs text-black">
                                     {{ $subAspect['name'] }}</td>
