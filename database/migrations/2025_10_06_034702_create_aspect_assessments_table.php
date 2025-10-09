@@ -28,7 +28,6 @@ return new class extends Migration
             $table->integer('percentage_score')->nullable();
             $table->string('conclusion_code')->nullable();
             $table->string('conclusion_text')->nullable();
-            $table->text('description_text')->nullable();
             $table->timestamps();
 
             $table->index('category_assessment_id');

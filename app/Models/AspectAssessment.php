@@ -24,7 +24,6 @@ class AspectAssessment extends Model
         'percentage_score',
         'conclusion_code',
         'conclusion_text',
-        'description_text',
     ];
 
     protected function casts(): array

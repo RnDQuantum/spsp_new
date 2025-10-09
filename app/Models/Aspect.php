@@ -13,6 +13,7 @@ class Aspect extends Model
         'category_type_id',
         'code',
         'name',
+        'description',
         'weight_percentage',
         'standard_rating',
         'order',
