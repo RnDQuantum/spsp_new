@@ -19,3 +19,11 @@ Route::get('/general-matching/{eventCode}/{testNumber}', App\Livewire\Pages\Indi
 
 // Individual Report Route - General Mapping
 Route::get('/general-mapping/{eventCode}/{testNumber}', App\Livewire\Pages\IndividualReport\GeneralMapping::class)->name('general_mapping');
+
+Route::get('/general-psy-mapping', function () {
+    return view('livewire.pages.individual-report.general-psy-mapping');
+})->name('general-psy-mapping');
+
+Route::get('/general-mc-mapping', function () {
+    return view('livewire.pages.individual-report.general-mc-mapping');
+})->name('general-mc-mapping');
