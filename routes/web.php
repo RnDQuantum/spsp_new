@@ -20,15 +20,11 @@ Route::get('/general-matching/{eventCode}/{testNumber}', App\Livewire\Pages\Indi
 // Individual Report Route - General Mapping
 Route::get('/general-mapping/{eventCode}/{testNumber}', App\Livewire\Pages\IndividualReport\GeneralMapping::class)->name('general_mapping');
 
+// Individual Report Route - General MC Mapping (Kompetensi Only)
+Route::get('/general-mc-mapping/{eventCode}/{testNumber}', App\Livewire\Pages\IndividualReport\GeneralMcMapping::class)->name('general_mc_mapping');
+
+// Individual Report Route - General PSY Mapping (Potensi Only)
+Route::get('/general-psy-mapping/{eventCode}/{testNumber}', App\Livewire\Pages\IndividualReport\GeneralPsyMapping::class)->name('general_psy_mapping');
+
 // Individual Report Route - Spider Plot
 Route::get('/spider-plot/{eventCode}/{testNumber}', App\Livewire\Pages\IndividualReport\SpiderPlot::class)->name('spider_plot');
-
-// Individual Report Route - General Psychology Mapping
-Route::get('/general-psy-mapping', function () {
-    return view('livewire.pages.individual-report.general-psy-mapping');
-})->name('general-psy-mapping');
-
-// Individual Report Route - Managerial Potency Mapping
-Route::get('/general-mc-mapping', function () {
-    return view('livewire.pages.individual-report.general-mc-mapping');
-})->name('general-mc-mapping');
