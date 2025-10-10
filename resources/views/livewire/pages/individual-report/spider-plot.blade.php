@@ -26,7 +26,7 @@
             <!-- Charts -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
                 <!-- Chart Potensi (Pentagon) -->
-                <div class="bg-white p-6 rounded-lg shadow border border-gray-200">
+                <div class="bg-white p-6 rounded-lg shadow border border-gray-200" wire:ignore>
                     <h3 class="text-lg text-center font-semibold text-gray-800 mb-4">Potential Mapping (Rating)</h3>
                     <div class="relative h-96">
                         <canvas id="potensiChart-{{ $potensiChartId }}"></canvas>
@@ -34,7 +34,7 @@
                 </div>
 
                 <!-- Chart Kompetensi (Nonagon) -->
-                <div class="bg-white p-6 rounded-lg shadow border border-gray-200">
+                <div class="bg-white p-6 rounded-lg shadow border border-gray-200" wire:ignore>
                     <h3 class="text-lg text-center font-semibold text-gray-800 mb-4">Managerial Potency Mapping (Rating)
                     </h3>
                     <div class="relative h-96">
@@ -46,7 +46,7 @@
             <!-- Chart General (Tetradecagon) di tengah dengan ukuran lebih besar -->
             <div class="flex justify-center mt-6">
                 <div class="w-full lg:w-2/3">
-                    <div class="bg-white p-6 rounded-lg shadow border border-gray-200">
+                    <div class="bg-white p-6 rounded-lg shadow border border-gray-200" wire:ignore>
                         <h3 class="text-lg text-center font-semibold text-gray-800 mb-4">General Mapping (Rating)</h3>
                         <div class="relative h-96">
                             <canvas id="generalChart-{{ $generalChartId }}"></canvas>
@@ -62,20 +62,45 @@
 
     <!-- Chart Scripts -->
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Initialize all charts
-            initializePotensiChart();
-            initializeKompetensiChart();
-            initializeGeneralChart();
+        (function() {
+            // Prevent multiple initializations
+            if (window['spiderChartSetup_{{ $potensiChartId }}']) return;
+            window['spiderChartSetup_{{ $potensiChartId }}'] = true;
 
-            // Setup Livewire event listeners
-            setupLivewireListeners();
-        });
+            // Wait for Chart.js to be available
+            function waitForChartJs(callback) {
+                if (typeof Chart !== 'undefined') {
+                    callback();
+                } else {
+                    setTimeout(() => waitForChartJs(callback), 50);
+                }
+            }
+
+            // Wait for DOM and Chart.js
+            function init() {
+                initializePotensiChart();
+                initializeKompetensiChart();
+                initializeGeneralChart();
+                setupLivewireListeners();
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', () => waitForChartJs(init));
+            } else {
+                waitForChartJs(init);
+            }
+        })();
 
         function initializePotensiChart() {
-            const ctxPotensi = document.getElementById('potensiChart-{{ $potensiChartId }}').getContext('2d');
+            // Destroy existing chart if exists
+            if (window.potensiChart_{{ $potensiChartId }}) {
+                window.potensiChart_{{ $potensiChartId }}.destroy();
+            }
 
-            window.potensiChart_{{ $potensiChartId }} = new Chart(ctxPotensi, {
+            const ctxPotensi = document.getElementById('potensiChart-{{ $potensiChartId }}');
+            if (!ctxPotensi) return;
+
+            window.potensiChart_{{ $potensiChartId }} = new Chart(ctxPotensi.getContext('2d'), {
                 type: 'radar',
                 data: {
                     labels: @js($potensiLabels),
@@ -148,9 +173,15 @@
         }
 
         function initializeKompetensiChart() {
-            const ctxKompetensi = document.getElementById('kompetensiChart-{{ $kompetensiChartId }}').getContext('2d');
+            // Destroy existing chart if exists
+            if (window.kompetensiChart_{{ $kompetensiChartId }}) {
+                window.kompetensiChart_{{ $kompetensiChartId }}.destroy();
+            }
 
-            window.kompetensiChart_{{ $kompetensiChartId }} = new Chart(ctxKompetensi, {
+            const ctxKompetensi = document.getElementById('kompetensiChart-{{ $kompetensiChartId }}');
+            if (!ctxKompetensi) return;
+
+            window.kompetensiChart_{{ $kompetensiChartId }} = new Chart(ctxKompetensi.getContext('2d'), {
                 type: 'radar',
                 data: {
                     labels: @js($kompetensiLabels),
@@ -223,9 +254,15 @@
         }
 
         function initializeGeneralChart() {
-            const ctxGeneral = document.getElementById('generalChart-{{ $generalChartId }}').getContext('2d');
+            // Destroy existing chart if exists
+            if (window.generalChart_{{ $generalChartId }}) {
+                window.generalChart_{{ $generalChartId }}.destroy();
+            }
 
-            window.generalChart_{{ $generalChartId }} = new Chart(ctxGeneral, {
+            const ctxGeneral = document.getElementById('generalChart-{{ $generalChartId }}');
+            if (!ctxGeneral) return;
+
+            window.generalChart_{{ $generalChartId }} = new Chart(ctxGeneral.getContext('2d'), {
                 type: 'radar',
                 data: {
                     labels: @js($generalLabels),
