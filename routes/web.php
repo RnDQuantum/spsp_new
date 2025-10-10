@@ -11,6 +11,9 @@ Route::get('/', function () {
 
 Route::get('/shortlist-peserta', \App\Livewire\Pages\ParticipantsList::class)->name('shortlist');
 
+// Detail Peserta Route
+Route::get('/participant-detail/{eventCode}/{testNumber}', \App\Livewire\Pages\ParticipantDetail::class)->name('participant_detail');
+
 // Individual Report Route - General Matching
 Route::get('/general-matching/{eventCode}/{testNumber}', App\Livewire\Pages\IndividualReport\GeneralMatching::class)->name('general_matching');
 
