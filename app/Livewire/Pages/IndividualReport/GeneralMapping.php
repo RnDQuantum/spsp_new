@@ -260,8 +260,10 @@ class GeneralMapping extends Component
         $passingAspects = 0;
 
         foreach ($this->aspectsData as $aspect) {
-            if (str_contains($aspect['conclusion_text'], 'Memenuhi') ||
-                str_contains($aspect['conclusion_text'], 'Lebih Memenuhi')) {
+            // Count as passing if conclusion text is "Memenuhi" or "Lebih Memenuhi"
+            // Exclude "Belum Memenuhi" and "Kurang Memenuhi"
+            if ($aspect['conclusion_text'] === 'Memenuhi/Meet Requirement' ||
+                $aspect['conclusion_text'] === 'Lebih Memenuhi/More Requirement') {
                 $passingAspects++;
             }
         }
