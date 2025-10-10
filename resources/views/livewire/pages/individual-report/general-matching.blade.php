@@ -202,17 +202,16 @@
         <table class="w-full border-collapse">
             <thead>
                 <tr class="bg-blue-100">
-                    <th class="border border-gray-300 px-4 py-2 text-center text-sm font-bold text-black col-number">NO.
-                    </th>
-                    <th class="border border-gray-300 px-4 py-2 text-left text-sm font-bold text-black">ASPEK</th>
+                    <th class="border border-gray-300 px-4 py-2 text-center text-sm font-bold text-black col-number"
+                        rowspan="2">NO.</th>
+                    <th class="border border-gray-300 px-4 py-2 text-center text-sm font-bold text-black"
+                        rowspan="2">
+                        ASPEK</th>
                     <th class="border border-gray-300 px-2 py-2 text-center text-sm font-bold text-black">STANDARD</th>
                     <th class="border border-gray-300 px-2 py-2 text-center text-xs font-bold text-black range-scale"
                         colspan="5">RATING</th>
                 </tr>
                 <tr class="bg-blue-100">
-                    <th class="border border-gray-300 px-4 py-2 text-center text-sm font-bold text-black col-number">
-                    </th>
-                    <th class="border border-gray-300 px-4 py-2 text-left text-sm font-bold text-black"></th>
                     <th
                         class="border border-gray-300 px-2 py-1 text-center text-xs font-bold text-black rating-cell-standard-1">
                     </th>
