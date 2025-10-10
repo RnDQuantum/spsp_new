@@ -39,6 +39,12 @@ class GeneralMapping extends Component
 
     public $overallConclusion = '';
 
+    // Tolerance percentage (loaded from session)
+    public int $tolerancePercentage = 10;
+
+    // Unique chart ID
+    public string $chartId = '';
+
     // Data for charts
     public $chartLabels = [];
 
@@ -52,6 +58,12 @@ class GeneralMapping extends Component
 
     public function mount($eventCode, $testNumber): void
     {
+        // Generate unique chart ID
+        $this->chartId = 'generalMapping'.uniqid();
+
+        // Load tolerance from session
+        $this->tolerancePercentage = session('individual_report.tolerance', 10);
+
         // Load participant
         $this->participant = Participant::with([
             'assessmentEvent.template',
@@ -130,20 +142,21 @@ class GeneralMapping extends Component
             ->orderBy('aspect_id')
             ->get();
 
-        return $aspectAssessments->map(function ($assessment) {
-            return [
-                'name' => $assessment->aspect->name,
-                'weight_percentage' => $assessment->aspect->weight_percentage,
-                'standard_rating' => $assessment->standard_rating,
-                'standard_score' => $assessment->standard_score,
-                'individual_rating' => $assessment->individual_rating,
-                'individual_score' => $assessment->individual_score,
-                'gap_rating' => $assessment->gap_rating,
-                'gap_score' => $assessment->gap_score,
-                'percentage_score' => $assessment->percentage_score,
-                'conclusion_text' => $this->getConclusionText($assessment->gap_rating),
-            ];
-        })->toArray();
+        return $aspectAssessments->map(fn ($assessment) => [
+            'name' => $assessment->aspect->name,
+            'weight_percentage' => $assessment->aspect->weight_percentage,
+            'standard_rating' => $assessment->standard_rating,
+            'standard_score' => $assessment->standard_score,
+            'individual_rating' => $assessment->individual_rating,
+            'individual_score' => $assessment->individual_score,
+            'gap_rating' => $assessment->gap_rating,
+            'gap_score' => $assessment->gap_score,
+            'percentage_score' => $assessment->percentage_score,
+            'conclusion_text' => $this->getConclusionText(
+                (float) $assessment->gap_rating,
+                (float) $assessment->standard_rating
+            ),
+        ])->toArray();
     }
 
     private function calculateTotals(): void
@@ -172,13 +185,16 @@ class GeneralMapping extends Component
         }
     }
 
-    private function getConclusionText(float $gapRating): string
+    private function getConclusionText(float $gapRating, float $standardRating): string
     {
-        if ($gapRating > 0.5) {
+        // Calculate tolerance threshold based on standard rating
+        $toleranceThreshold = -($standardRating * ($this->tolerancePercentage / 100));
+
+        if ($gapRating >= 0) {
             return 'Lebih Memenuhi/More Requirement';
-        } elseif ($gapRating >= -0.5) {
+        } elseif ($gapRating >= $toleranceThreshold) {
             return 'Memenuhi/Meet Requirement';
-        } elseif ($gapRating >= -1.0) {
+        } elseif ($gapRating >= ($toleranceThreshold * 2)) {
             return 'Kurang Memenuhi/Below Requirement';
         } else {
             return 'Belum Memenuhi/Under Perform';
@@ -201,6 +217,60 @@ class GeneralMapping extends Component
         }
 
         return round(($individualScore / $standardScore) * 100);
+    }
+
+    /**
+     * Listen to tolerance updates from ToleranceSelector component
+     */
+    protected $listeners = ['tolerance-updated' => 'handleToleranceUpdate'];
+
+    /**
+     * Handle tolerance update from child component
+     */
+    public function handleToleranceUpdate(int $tolerance): void
+    {
+        $this->tolerancePercentage = $tolerance;
+
+        // Reload aspects data with new tolerance
+        $this->loadAspectsData();
+
+        // Recalculate totals
+        $this->calculateTotals();
+
+        // Update chart data
+        $this->prepareChartData();
+
+        // Dispatch event to update charts
+        $this->dispatch('chartDataUpdated', [
+            'tolerance' => $tolerance,
+            'labels' => $this->chartLabels,
+            'standardRatings' => $this->chartStandardRatings,
+            'individualRatings' => $this->chartIndividualRatings,
+            'standardScores' => $this->chartStandardScores,
+            'individualScores' => $this->chartIndividualScores,
+        ]);
+    }
+
+    /**
+     * Get summary statistics for passing aspects
+     */
+    public function getPassingSummary(): array
+    {
+        $totalAspects = count($this->aspectsData);
+        $passingAspects = 0;
+
+        foreach ($this->aspectsData as $aspect) {
+            if (str_contains($aspect['conclusion_text'], 'Memenuhi') ||
+                str_contains($aspect['conclusion_text'], 'Lebih Memenuhi')) {
+                $passingAspects++;
+            }
+        }
+
+        return [
+            'total' => $totalAspects,
+            'passing' => $passingAspects,
+            'percentage' => $totalAspects > 0 ? round(($passingAspects / $totalAspects) * 100) : 0,
+        ];
     }
 
     public function render()

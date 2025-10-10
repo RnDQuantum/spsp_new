@@ -10,6 +10,15 @@
             </p>
         </div>
 
+        <!-- Tolerance Selector Component -->
+        @php
+            $summary = $this->getPassingSummary();
+        @endphp
+        @livewire('components.tolerance-selector', [
+            'passing' => $summary['passing'],
+            'total' => $summary['total']
+        ])
+
         <!-- Table Section -->
         <div class="p-4 overflow-x-auto">
             <table class="min-w-full border border-black text-xs text-gray-900">
@@ -107,12 +116,12 @@
         </div>
 
         <!-- Chart Section Rating -->
-        <div class="p-6 border-t-2 border-black bg-white">
+        <div class="p-6 border-t-2 border-black bg-white" wire:ignore id="chart-rating-{{ $chartId }}">
             <div class="text-center text-base font-bold mb-6 text-gray-900">Profil Pribadi Spider Plot Chart (Rating)
             </div>
             <div class="flex justify-center mb-6">
                 <div style="width: 700px; height: 700px; position: relative;">
-                    <canvas id="spiderRatingChart"></canvas>
+                    <canvas id="spiderRatingChart-{{ $chartId }}"></canvas>
                 </div>
             </div>
             <div class="flex justify-center text-sm gap-8 text-gray-900 mb-8">
@@ -126,18 +135,128 @@
                 </span>
                 <span class="flex items-center gap-2">
                     <span class="inline-block w-10" style="border-bottom: 1px dashed #6B7280;"></span>
-                    <span>Toleransi 10%</span>
+                    <span x-data x-text="'Toleransi ' + $wire.tolerancePercentage + '%'"></span>
                 </span>
             </div>
+
+            <script>
+                (function() {
+                    if (window['ratingChartSetup_{{ $chartId }}']) return;
+                    window['ratingChartSetup_{{ $chartId }}'] = true;
+
+                    function setupRatingChart() {
+                        if (window.ratingChart_{{ $chartId }}) {
+                            window.ratingChart_{{ $chartId }}.destroy();
+                        }
+
+                        let chartInstance = null;
+                        const chartLabels = @js($chartLabels);
+                        const standardRatings = @js($chartStandardRatings);
+                        const individualRatings = @js($chartIndividualRatings);
+                        const participantName = @js($participant->name);
+                        let tolerancePercentage = @js($tolerancePercentage);
+
+                        function calculateToleranceValues(tolerance) {
+                            const factor = 1 - (tolerance / 100);
+                            return standardRatings.map(val => val * factor);
+                        }
+
+                        function initChart() {
+                            const canvas = document.getElementById('spiderRatingChart-{{ $chartId }}');
+                            if (!canvas) return;
+
+                            const toleranceRatings = calculateToleranceValues(tolerancePercentage);
+                            const ctx = canvas.getContext('2d');
+
+                            chartInstance = new Chart(ctx, {
+                                type: 'radar',
+                                data: {
+                                    labels: chartLabels,
+                                    datasets: [{
+                                        label: 'Standar',
+                                        data: standardRatings,
+                                        borderColor: '#000000',
+                                        backgroundColor: 'rgba(0, 0, 0, 0.05)',
+                                        borderWidth: 2,
+                                        pointRadius: 3,
+                                        pointBackgroundColor: '#000000'
+                                    }, {
+                                        label: `Toleransi ${tolerancePercentage}%`,
+                                        data: toleranceRatings,
+                                        borderColor: '#6B7280',
+                                        backgroundColor: 'transparent',
+                                        borderWidth: 1.5,
+                                        borderDash: [5, 5],
+                                        pointRadius: 2,
+                                        pointBackgroundColor: '#6B7280'
+                                    }, {
+                                        label: participantName,
+                                        data: individualRatings,
+                                        borderColor: '#DC2626',
+                                        backgroundColor: 'rgba(220, 38, 38, 0.05)',
+                                        borderWidth: 2,
+                                        pointRadius: 3,
+                                        pointBackgroundColor: '#DC2626'
+                                    }]
+                                },
+                                options: {
+                                    responsive: true,
+                                    maintainAspectRatio: true,
+                                    plugins: {
+                                        legend: { display: false },
+                                        tooltip: { enabled: true }
+                                    },
+                                    scales: {
+                                        r: {
+                                            beginAtZero: true,
+                                            min: 0,
+                                            max: 5,
+                                            ticks: { stepSize: 1, color: '#000000', font: { size: 11, weight: 'bold' } },
+                                            pointLabels: { font: { size: 11, weight: '600' }, color: '#000000' },
+                                            grid: { color: 'rgba(0, 0, 0, 0.15)' },
+                                            angleLines: { color: 'rgba(0, 0, 0, 0.15)' }
+                                        }
+                                    }
+                                }
+                            });
+
+                            window.ratingChart_{{ $chartId }} = chartInstance;
+                        }
+
+                        function waitForLivewire(callback) {
+                            if (window.Livewire) callback();
+                            else setTimeout(() => waitForLivewire(callback), 100);
+                        }
+
+                        waitForLivewire(function() {
+                            initChart();
+
+                            Livewire.on('chartDataUpdated', function(data) {
+                                let chartData = Array.isArray(data) && data.length > 0 ? data[0] : data;
+                                if (window.ratingChart_{{ $chartId }} && chartData) {
+                                    tolerancePercentage = chartData.tolerance;
+                                    const newToleranceRatings = calculateToleranceValues(tolerancePercentage);
+
+                                    window.ratingChart_{{ $chartId }}.data.datasets[1].label = `Toleransi ${tolerancePercentage}%`;
+                                    window.ratingChart_{{ $chartId }}.data.datasets[1].data = newToleranceRatings;
+                                    window.ratingChart_{{ $chartId }}.update('active');
+                                }
+                            });
+                        });
+                    }
+
+                    setupRatingChart();
+                })();
+            </script>
         </div>
 
         <!-- Chart Section Score -->
-        <div class="p-6 border-t-2 border-black bg-white">
+        <div class="p-6 border-t-2 border-black bg-white" wire:ignore id="chart-score-{{ $chartId }}">
             <div class="text-center text-base font-bold mb-6 text-gray-900">Profil Pribadi Spider Plot Chart (Score)
             </div>
             <div class="flex justify-center mb-6">
                 <div style="width: 700px; height: 700px; position: relative;">
-                    <canvas id="spiderScoreChart"></canvas>
+                    <canvas id="spiderScoreChart-{{ $chartId }}"></canvas>
                 </div>
             </div>
             <div class="flex justify-center text-sm gap-8 text-gray-900 mb-8">
@@ -151,195 +270,123 @@
                 </span>
                 <span class="flex items-center gap-2">
                     <span class="inline-block w-10" style="border-bottom: 1px dashed #6B7280;"></span>
-                    <span>Toleransi 10%</span>
+                    <span x-data x-text="'Toleransi ' + $wire.tolerancePercentage + '%'"></span>
                 </span>
             </div>
+
+            <script>
+                (function() {
+                    if (window['scoreChartSetup_{{ $chartId }}']) return;
+                    window['scoreChartSetup_{{ $chartId }}'] = true;
+
+                    function setupScoreChart() {
+                        if (window.scoreChart_{{ $chartId }}) {
+                            window.scoreChart_{{ $chartId }}.destroy();
+                        }
+
+                        let chartInstance = null;
+                        const chartLabels = @js($chartLabels);
+                        const standardScores = @js($chartStandardScores);
+                        const individualScores = @js($chartIndividualScores);
+                        const participantName = @js($participant->name);
+                        let tolerancePercentage = @js($tolerancePercentage);
+
+                        function calculateToleranceValues(tolerance) {
+                            const factor = 1 - (tolerance / 100);
+                            return standardScores.map(val => val * factor);
+                        }
+
+                        function initChart() {
+                            const canvas = document.getElementById('spiderScoreChart-{{ $chartId }}');
+                            if (!canvas) return;
+
+                            const toleranceScores = calculateToleranceValues(tolerancePercentage);
+                            const ctx = canvas.getContext('2d');
+                            const maxScore = Math.max(...standardScores, ...individualScores) * 1.2;
+
+                            chartInstance = new Chart(ctx, {
+                                type: 'radar',
+                                data: {
+                                    labels: chartLabels,
+                                    datasets: [{
+                                        label: 'Standar',
+                                        data: standardScores,
+                                        borderColor: '#000000',
+                                        backgroundColor: 'rgba(0, 0, 0, 0.05)',
+                                        borderWidth: 2,
+                                        pointRadius: 3,
+                                        pointBackgroundColor: '#000000'
+                                    }, {
+                                        label: `Toleransi ${tolerancePercentage}%`,
+                                        data: toleranceScores,
+                                        borderColor: '#6B7280',
+                                        backgroundColor: 'transparent',
+                                        borderWidth: 1.5,
+                                        borderDash: [5, 5],
+                                        pointRadius: 2,
+                                        pointBackgroundColor: '#6B7280'
+                                    }, {
+                                        label: participantName,
+                                        data: individualScores,
+                                        borderColor: '#DC2626',
+                                        backgroundColor: 'rgba(220, 38, 38, 0.05)',
+                                        borderWidth: 2,
+                                        pointRadius: 3,
+                                        pointBackgroundColor: '#DC2626'
+                                    }]
+                                },
+                                options: {
+                                    responsive: true,
+                                    maintainAspectRatio: true,
+                                    plugins: {
+                                        legend: { display: false },
+                                        tooltip: { enabled: true }
+                                    },
+                                    scales: {
+                                        r: {
+                                            beginAtZero: true,
+                                            min: 0,
+                                            max: maxScore,
+                                            ticks: { stepSize: 20, color: '#000000', font: { size: 11, weight: 'bold' } },
+                                            pointLabels: { font: { size: 11, weight: '600' }, color: '#000000' },
+                                            grid: { color: 'rgba(0, 0, 0, 0.15)' },
+                                            angleLines: { color: 'rgba(0, 0, 0, 0.15)' }
+                                        }
+                                    }
+                                }
+                            });
+
+                            window.scoreChart_{{ $chartId }} = chartInstance;
+                        }
+
+                        function waitForLivewire(callback) {
+                            if (window.Livewire) callback();
+                            else setTimeout(() => waitForLivewire(callback), 100);
+                        }
+
+                        waitForLivewire(function() {
+                            initChart();
+
+                            Livewire.on('chartDataUpdated', function(data) {
+                                let chartData = Array.isArray(data) && data.length > 0 ? data[0] : data;
+                                if (window.scoreChart_{{ $chartId }} && chartData) {
+                                    tolerancePercentage = chartData.tolerance;
+                                    const newToleranceScores = calculateToleranceValues(tolerancePercentage);
+
+                                    window.scoreChart_{{ $chartId }}.data.datasets[1].label = `Toleransi ${tolerancePercentage}%`;
+                                    window.scoreChart_{{ $chartId }}.data.datasets[1].data = newToleranceScores;
+                                    window.scoreChart_{{ $chartId }}.update('active');
+                                }
+                            });
+                        });
+                    }
+
+                    setupScoreChart();
+                })();
+            </script>
         </div>
     </div>
 
     <!-- Include Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
-    <script>
-        const LABELS = @js($chartLabels);
-        const standardRatings = @js($chartStandardRatings);
-        const standardScores = @js($chartStandardScores);
-
-        // Calculate tolerance (standard - 10%)
-        const toleranceRatings = standardRatings.map(val => val * 0.9);
-        const toleranceScores = standardScores.map(val => val * 0.9);
-
-        const ratingData = {
-            labels: LABELS,
-            datasets: [{
-                    label: 'Standar',
-                    data: standardRatings,
-                    borderColor: '#000000',
-                    backgroundColor: 'rgba(0, 0, 0, 0.05)',
-                    borderWidth: 2,
-                    pointRadius: 3,
-                    pointBackgroundColor: '#000000',
-                    order: 1
-                },
-                {
-                    label: 'Toleransi 10%',
-                    data: toleranceRatings,
-                    borderColor: '#6B7280',
-                    backgroundColor: 'transparent',
-                    borderWidth: 1.5,
-                    borderDash: [5, 5],
-                    pointRadius: 2,
-                    pointBackgroundColor: '#6B7280',
-                    order: 2
-                },
-                {
-                    label: @js($participant->name),
-                    data: @js($chartIndividualRatings),
-                    borderColor: '#DC2626',
-                    backgroundColor: 'rgba(220, 38, 38, 0.05)',
-                    borderWidth: 2,
-                    pointRadius: 3,
-                    pointBackgroundColor: '#DC2626',
-                    order: 0
-                }
-            ]
-        };
-
-        const scoreData = {
-            labels: LABELS,
-            datasets: [{
-                    label: 'Standar',
-                    data: standardScores,
-                    borderColor: '#000000',
-                    backgroundColor: 'rgba(0, 0, 0, 0.05)',
-                    borderWidth: 2,
-                    pointRadius: 3,
-                    pointBackgroundColor: '#000000',
-                    order: 1
-                },
-                {
-                    label: 'Toleransi 10%',
-                    data: toleranceScores,
-                    borderColor: '#6B7280',
-                    backgroundColor: 'transparent',
-                    borderWidth: 1.5,
-                    borderDash: [5, 5],
-                    pointRadius: 2,
-                    pointBackgroundColor: '#6B7280',
-                    order: 2
-                },
-                {
-                    label: @js($participant->name),
-                    data: @js($chartIndividualScores),
-                    borderColor: '#DC2626',
-                    backgroundColor: 'rgba(220, 38, 38, 0.05)',
-                    borderWidth: 2,
-                    pointRadius: 3,
-                    pointBackgroundColor: '#DC2626',
-                    order: 0
-                }
-            ]
-        };
-
-        const radarOptions = {
-            responsive: true,
-            maintainAspectRatio: true,
-            plugins: {
-                legend: {
-                    display: false
-                },
-                tooltip: {
-                    enabled: true,
-                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                    padding: 10
-                }
-            },
-            scales: {
-                r: {
-                    beginAtZero: true,
-                    min: 0,
-                    max: 5,
-                    ticks: {
-                        stepSize: 1,
-                        color: '#000000',
-                        backdropColor: 'transparent',
-                        font: {
-                            size: 11,
-                            weight: 'bold'
-                        }
-                    },
-                    pointLabels: {
-                        font: {
-                            size: 11,
-                            weight: '600'
-                        },
-                        color: '#000000',
-                        padding: 20
-                    },
-                    grid: {
-                        color: 'rgba(0, 0, 0, 0.15)'
-                    },
-                    angleLines: {
-                        color: 'rgba(0, 0, 0, 0.15)'
-                    }
-                }
-            }
-        };
-
-        const scoreOptions = {
-            responsive: true,
-            maintainAspectRatio: true,
-            plugins: {
-                legend: {
-                    display: false
-                },
-                tooltip: {
-                    enabled: true,
-                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                    padding: 10
-                }
-            },
-            scales: {
-                r: {
-                    beginAtZero: true,
-                    min: 0,
-                    max: Math.max(...@js($chartStandardScores), ...@js($chartIndividualScores)) * 1.2,
-                    ticks: {
-                        stepSize: 20,
-                        color: '#000000',
-                        backdropColor: 'transparent',
-                        font: {
-                            size: 11,
-                            weight: 'bold'
-                        }
-                    },
-                    pointLabels: {
-                        font: {
-                            size: 11,
-                            weight: '600'
-                        },
-                        color: '#000000',
-                        padding: 20
-                    },
-                    grid: {
-                        color: 'rgba(0, 0, 0, 0.15)'
-                    },
-                    angleLines: {
-                        color: 'rgba(0, 0, 0, 0.15)'
-                    }
-                }
-            }
-        };
-
-        new Chart(document.getElementById('spiderRatingChart'), {
-            type: 'radar',
-            data: ratingData,
-            options: radarOptions
-        });
-
-        new Chart(document.getElementById('spiderScoreChart'), {
-            type: 'radar',
-            data: scoreData,
-            options: scoreOptions
-        });
-    </script>
 </div>
