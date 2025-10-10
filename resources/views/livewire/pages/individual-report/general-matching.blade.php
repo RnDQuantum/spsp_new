@@ -163,7 +163,7 @@
             </div>
             <div class="flex-grow flex items-center px-4 py-2">
                 <div class="w-full h-8 relative">
-                    <div class="h-full rounded {{ $jobMatchPercentage <= 20 ? 'bg-red-500' : ($jobMatchPercentage >= 30 && $jobMatchPercentage <= 70 ? 'bg-yellow-500' : 'bg-green-500') }}"
+                    <div class="h-full rounded {{ $jobMatchPercentage <= 40 ? 'gradient-bar-low' : ($jobMatchPercentage <= 70 ? 'gradient-bar-medium' : 'gradient-bar-high') }}"
                         style="width: {{ $jobMatchPercentage }}%;"></div>
                     <div class="absolute right-0 top-0 bottom-0 flex items-center pr-2">
                         <span class="text-sm font-bold text-black">{{ $jobMatchPercentage }}%</span>
@@ -189,7 +189,9 @@
                     <th class="border border-gray-300 px-4 py-2 text-center text-sm font-bold text-black col-number">
                     </th>
                     <th class="border border-gray-300 px-4 py-2 text-left text-sm font-bold text-black"></th>
-                    <th class="border border-gray-300 px-2 py-1 text-center text-xs font-bold text-black"></th>
+                    <th
+                        class="border border-gray-300 px-2 py-1 text-center text-xs font-bold text-black rating-cell-standard-1">
+                    </th>
                     <th
                         class="border border-gray-300 px-2 py-1 text-center text-xs text-white range-scale rating-cell-1">
                         1 Rendah
@@ -226,7 +228,7 @@
                                 {{ $loop->iteration }}.</td>
                             <td class="border border-gray-300 px-4 py-2 text-sm font-bold text-black">
                                 {{ $aspect['name'] }}</td>
-                            <td class="border border-gray-300 px-2 py-2 text-sm font-bold text-black text-right">
+                            <td class="border border-gray-300 px-2 py-2 text-sm font-bold text-black text-center">
                                 {{ number_format($aspect['standard_rating'], 2, ',', '.') }}</td>
                             <td class="border border-gray-300 range-scale" colspan="5">
                                 <div class="progress-container">
@@ -279,7 +281,7 @@
                                 {{ $loop->iteration }}.</td>
                             <td class="border border-gray-300 px-4 py-2 text-sm font-bold text-black">
                                 {{ $aspect['name'] }}</td>
-                            <td class="border border-gray-300 px-2 py-2 text-sm font-bold text-black text-right">
+                            <td class="border border-gray-300 px-2 py-2 text-sm font-bold text-black text-center">
                                 {{ number_format($aspect['standard_rating'], 2, ',', '.') }}</td>
                             <td class="border border-gray-300 range-scale" colspan="5">
                                 <div class="progress-container">
