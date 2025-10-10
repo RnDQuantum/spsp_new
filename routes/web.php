@@ -19,3 +19,6 @@ Route::get('/general-matching/{eventCode}/{testNumber}', App\Livewire\Pages\Indi
 
 // Individual Report Route - General Mapping
 Route::get('/general-mapping/{eventCode}/{testNumber}', App\Livewire\Pages\IndividualReport\GeneralMapping::class)->name('general_mapping');
+
+// Individual Report Route - Spider Plot
+Route::get('/spider-plot/{eventCode}/{testNumber}', App\Livewire\Pages\IndividualReport\SpiderPlot::class)->name('spider_plot');
