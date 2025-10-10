@@ -224,7 +224,7 @@
                                     </div>
                                 </div>
                                 <div>
-                                    <h3 class="text-lg font-medium text-gray-900">General MC Mapping</h3>
+                                    <h3 class="text-lg font-medium text-gray-900">Managerial Competency Mapping</h3>
                                     <p class="text-sm text-gray-600">Mapping aspek kompetensi saja</p>
                                 </div>
                             </div>
@@ -262,7 +262,7 @@
                                     </div>
                                 </div>
                                 <div>
-                                    <h3 class="text-lg font-medium text-gray-900">General PSY Mapping</h3>
+                                    <h3 class="text-lg font-medium text-gray-900">Psychology Mapping</h3>
                                     <p class="text-sm text-gray-600">Mapping aspek potensi saja</p>
                                 </div>
                             </div>

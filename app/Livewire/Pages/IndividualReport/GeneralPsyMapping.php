@@ -10,7 +10,7 @@ use App\Models\Participant;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
-#[Layout('components.layouts.app', ['title' => 'General PSY Mapping'])]
+#[Layout('components.layouts.app', ['title' => 'Psychological Mapping'])]
 class GeneralPsyMapping extends Component
 {
     public ?Participant $participant = null;

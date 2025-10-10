@@ -10,7 +10,7 @@ use App\Models\Participant;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
-#[Layout('components.layouts.app', ['title' => 'General MC Mapping'])]
+#[Layout('components.layouts.app', ['title' => 'Managerial Competency Mapping'])]
 class GeneralMcMapping extends Component
 {
     public ?Participant $participant = null;

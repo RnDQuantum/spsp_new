@@ -3,7 +3,7 @@
         <!-- Header -->
         <div class="border-b-4 border-black py-3 bg-sky-200">
             <h1 class="text-center text-lg font-bold uppercase tracking-wide text-gray-900">
-                GENERAL PSY MAPPING
+                PSYCHOLOGY MAPPING
             </h1>
             <p class="text-center text-sm font-semibold text-gray-700 mt-1">
                 {{ $participant->name }}
@@ -16,7 +16,7 @@
         @endphp
         @livewire('components.tolerance-selector', [
             'passing' => $summary['passing'],
-            'total' => $summary['total']
+            'total' => $summary['total'],
         ])
 
         <!-- Table Section -->
@@ -54,7 +54,8 @@
                                 {{ ['I', 'II', 'III', 'IV', 'V'][$index] }}
                             </td>
                             <td class="border border-black px-3 py-2">{{ $aspect['name'] }}</td>
-                            <td class="border border-black px-3 py-2 text-center">{{ $aspect['weight_percentage'] }}</td>
+                            <td class="border border-black px-3 py-2 text-center">{{ $aspect['weight_percentage'] }}
+                            </td>
                             <td class="border border-black px-3 py-2 text-center">
                                 {{ number_format($aspect['standard_rating'], 2) }}</td>
                             <td class="border border-black px-3 py-2 text-center">
@@ -69,9 +70,10 @@
                                 {{ number_format($aspect['gap_score'], 2) }}</td>
                             <td class="border border-black px-3 py-2 text-center">
                                 @php
-                                    $percentage = $aspect['standard_score'] > 0
-                                        ? round(($aspect['individual_score'] / $aspect['standard_score']) * 100)
-                                        : 0;
+                                    $percentage =
+                                        $aspect['standard_score'] > 0
+                                            ? round(($aspect['individual_score'] / $aspect['standard_score']) * 100)
+                                            : 0;
                                 @endphp
                                 {{ $percentage }}%
                             </td>
@@ -82,7 +84,8 @@
                     <!-- Total Rating Row -->
                     <tr class="font-bold bg-sky-100">
                         <td class="border border-black px-3 py-2 text-right" colspan="3">Total Rating</td>
-                        <td class="border border-black px-3 py-2 text-center">{{ number_format($totalStandardRating, 2) }}
+                        <td class="border border-black px-3 py-2 text-center">
+                            {{ number_format($totalStandardRating, 2) }}
                         </td>
                         <td class="border border-black px-3 py-2"></td>
                         <td class="border border-black px-3 py-2 text-center">
@@ -98,13 +101,15 @@
                     <tr class="font-bold bg-sky-100">
                         <td class="border border-black px-3 py-2 text-right" colspan="3">Total Score</td>
                         <td class="border border-black px-3 py-2"></td>
-                        <td class="border border-black px-3 py-2 text-center">{{ number_format($totalStandardScore, 2) }}
+                        <td class="border border-black px-3 py-2 text-center">
+                            {{ number_format($totalStandardScore, 2) }}
                         </td>
                         <td class="border border-black px-3 py-2"></td>
                         <td class="border border-black px-3 py-2 text-center">
                             {{ number_format($totalIndividualScore, 2) }}</td>
                         <td class="border border-black px-3 py-2"></td>
-                        <td class="border border-black px-3 py-2 text-center">{{ number_format($totalGapScore, 2) }}</td>
+                        <td class="border border-black px-3 py-2 text-center">{{ number_format($totalGapScore, 2) }}
+                        </td>
                         <td class="border border-black px-3 py-2" colspan="2">{{ $overallConclusion }}</td>
                     </tr>
                 </tbody>
@@ -199,18 +204,40 @@
                                     responsive: true,
                                     maintainAspectRatio: true,
                                     plugins: {
-                                        legend: { display: false },
-                                        tooltip: { enabled: true }
+                                        legend: {
+                                            display: false
+                                        },
+                                        tooltip: {
+                                            enabled: true
+                                        }
                                     },
                                     scales: {
                                         r: {
                                             beginAtZero: true,
                                             min: 0,
                                             max: 5,
-                                            ticks: { stepSize: 1, color: '#000000', font: { size: 12, weight: 'bold' } },
-                                            pointLabels: { font: { size: 13, weight: '600' }, color: '#000000', padding: 25 },
-                                            grid: { color: 'rgba(0, 0, 0, 0.15)' },
-                                            angleLines: { color: 'rgba(0, 0, 0, 0.15)' }
+                                            ticks: {
+                                                stepSize: 1,
+                                                color: '#000000',
+                                                font: {
+                                                    size: 12,
+                                                    weight: 'bold'
+                                                }
+                                            },
+                                            pointLabels: {
+                                                font: {
+                                                    size: 13,
+                                                    weight: '600'
+                                                },
+                                                color: '#000000',
+                                                padding: 25
+                                            },
+                                            grid: {
+                                                color: 'rgba(0, 0, 0, 0.15)'
+                                            },
+                                            angleLines: {
+                                                color: 'rgba(0, 0, 0, 0.15)'
+                                            }
                                         }
                                     }
                                 }
@@ -233,8 +260,10 @@
                                     tolerancePercentage = chartData.tolerance;
                                     const newToleranceRatings = calculateToleranceValues(tolerancePercentage);
 
-                                    window.ratingChart_{{ $chartId }}.data.datasets[1].label = `Toleransi ${tolerancePercentage}%`;
-                                    window.ratingChart_{{ $chartId }}.data.datasets[1].data = newToleranceRatings;
+                                    window.ratingChart_{{ $chartId }}.data.datasets[1].label =
+                                        `Toleransi ${tolerancePercentage}%`;
+                                    window.ratingChart_{{ $chartId }}.data.datasets[1].data =
+                                        newToleranceRatings;
                                     window.ratingChart_{{ $chartId }}.update('active');
                                 }
                             });
@@ -335,18 +364,40 @@
                                     responsive: true,
                                     maintainAspectRatio: true,
                                     plugins: {
-                                        legend: { display: false },
-                                        tooltip: { enabled: true }
+                                        legend: {
+                                            display: false
+                                        },
+                                        tooltip: {
+                                            enabled: true
+                                        }
                                     },
                                     scales: {
                                         r: {
                                             beginAtZero: true,
                                             min: 0,
                                             max: maxScore,
-                                            ticks: { stepSize: 20, color: '#000000', font: { size: 12, weight: 'bold' } },
-                                            pointLabels: { font: { size: 13, weight: '600' }, color: '#000000', padding: 25 },
-                                            grid: { color: 'rgba(0, 0, 0, 0.15)' },
-                                            angleLines: { color: 'rgba(0, 0, 0, 0.15)' }
+                                            ticks: {
+                                                stepSize: 20,
+                                                color: '#000000',
+                                                font: {
+                                                    size: 12,
+                                                    weight: 'bold'
+                                                }
+                                            },
+                                            pointLabels: {
+                                                font: {
+                                                    size: 13,
+                                                    weight: '600'
+                                                },
+                                                color: '#000000',
+                                                padding: 25
+                                            },
+                                            grid: {
+                                                color: 'rgba(0, 0, 0, 0.15)'
+                                            },
+                                            angleLines: {
+                                                color: 'rgba(0, 0, 0, 0.15)'
+                                            }
                                         }
                                     }
                                 }
@@ -369,8 +420,10 @@
                                     tolerancePercentage = chartData.tolerance;
                                     const newToleranceScores = calculateToleranceValues(tolerancePercentage);
 
-                                    window.scoreChart_{{ $chartId }}.data.datasets[1].label = `Toleransi ${tolerancePercentage}%`;
-                                    window.scoreChart_{{ $chartId }}.data.datasets[1].data = newToleranceScores;
+                                    window.scoreChart_{{ $chartId }}.data.datasets[1].label =
+                                        `Toleransi ${tolerancePercentage}%`;
+                                    window.scoreChart_{{ $chartId }}.data.datasets[1].data =
+                                        newToleranceScores;
                                     window.scoreChart_{{ $chartId }}.update('active');
                                 }
                             });
