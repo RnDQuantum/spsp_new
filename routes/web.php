@@ -22,3 +22,13 @@ Route::get('/general-mapping/{eventCode}/{testNumber}', App\Livewire\Pages\Indiv
 
 // Individual Report Route - Spider Plot
 Route::get('/spider-plot/{eventCode}/{testNumber}', App\Livewire\Pages\IndividualReport\SpiderPlot::class)->name('spider_plot');
+
+// Individual Report Route - General Psychology Mapping
+Route::get('/general-psy-mapping', function () {
+    return view('livewire.pages.individual-report.general-psy-mapping');
+})->name('general-psy-mapping');
+
+// Individual Report Route - Managerial Potency Mapping
+Route::get('/general-mc-mapping', function () {
+    return view('livewire.pages.individual-report.general-mc-mapping');
+})->name('general-mc-mapping');
