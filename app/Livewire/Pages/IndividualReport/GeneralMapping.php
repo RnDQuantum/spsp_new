@@ -240,6 +240,9 @@ class GeneralMapping extends Component
         // Update chart data
         $this->prepareChartData();
 
+        // Get updated summary statistics
+        $summary = $this->getPassingSummary();
+
         // Dispatch event to update charts
         $this->dispatch('chartDataUpdated', [
             'tolerance' => $tolerance,
@@ -248,6 +251,13 @@ class GeneralMapping extends Component
             'individualRatings' => $this->chartIndividualRatings,
             'standardScores' => $this->chartStandardScores,
             'individualScores' => $this->chartIndividualScores,
+        ]);
+
+        // Dispatch event to update summary statistics in ToleranceSelector
+        $this->dispatch('summary-updated', [
+            'passing' => $summary['passing'],
+            'total' => $summary['total'],
+            'percentage' => $summary['percentage'],
         ]);
     }
 

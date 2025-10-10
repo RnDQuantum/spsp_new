@@ -23,6 +23,11 @@ class ToleranceSelector extends Component
     public int $totalCount = 0;
 
     /**
+     * Listen to summary updates from parent component
+     */
+    protected $listeners = ['summary-updated' => 'handleSummaryUpdate'];
+
+    /**
      * Mount component and load tolerance from session
      */
     public function mount(?int $passing = null, ?int $total = null): void
@@ -56,6 +61,15 @@ class ToleranceSelector extends Component
     {
         $this->passingCount = $passing;
         $this->totalCount = $total;
+    }
+
+    /**
+     * Handle summary update from parent component
+     */
+    public function handleSummaryUpdate(array $data): void
+    {
+        $this->passingCount = $data['passing'];
+        $this->totalCount = $data['total'];
     }
 
     /**
