@@ -2,9 +2,11 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Aspect;
+use App\Models\AssessmentTemplate;
+use App\Models\CategoryType;
+use App\Models\SubAspect;
 use Illuminate\Database\Seeder;
-use App\Models\{AssessmentTemplate, CategoryType, Aspect, SubAspect};
 
 class MasterDataSeeder extends Seeder
 {
@@ -183,91 +185,91 @@ class MasterDataSeeder extends Seeder
             [
                 'code' => 'integritas',
                 'name' => 'Integritas',
-                'description' => "Konsisten berperilaku selaras dengan nilai, norma dan/atau etika organisasi, dan jujur dalam hubungan dengan manajemen, rekan kerja, bawahan langsung, dan pemangku kepentingan, menciptakan budaya etika tinggi, bertanggung jawab atas tindakan atau keputusan beserta risiko yang menyertainya.
+                'description' => 'Konsisten berperilaku selaras dengan nilai, norma dan/atau etika organisasi, dan jujur dalam hubungan dengan manajemen, rekan kerja, bawahan langsung, dan pemangku kepentingan, menciptakan budaya etika tinggi, bertanggung jawab atas tindakan atau keputusan beserta risiko yang menyertainya.
         Level 4
-        Mampu menciptakan situasi kerja yang mendorong kepatuhan pada nilai, norma, dan etika organisasi.",
+        Mampu menciptakan situasi kerja yang mendorong kepatuhan pada nilai, norma, dan etika organisasi.',
                 'weight' => 12,
-                'standard_rating' => 3.5,
+                'standard_rating' => 4,
                 'order' => 1,
             ],
             [
                 'code' => 'kerjasama',
                 'name' => 'Kerjasama',
-                'description' => "Kemampuan menjalin, membina, memertahankan hubungan kerja yang efektif, memiliki komitmen saling membantu dalam penyelesaian tugas, dan mengoptimalkan segala sumber daya untuk mencapai tujuan strategis organisasi.
+                'description' => 'Kemampuan menjalin, membina, memertahankan hubungan kerja yang efektif, memiliki komitmen saling membantu dalam penyelesaian tugas, dan mengoptimalkan segala sumber daya untuk mencapai tujuan strategis organisasi.
         Level 4
-        Membangun komitmen tim, sinergi.",
+        Membangun komitmen tim, sinergi.',
                 'weight' => 11,
-                'standard_rating' => 3.25,
+                'standard_rating' => 3,
                 'order' => 2,
             ],
             [
                 'code' => 'komunikasi',
                 'name' => 'Komunikasi',
-                'description' => "Kemampuan untuk menerangkan pandangan dan gagasan secara jelas, sistematis disertai argumentasi yang logis dengan cara-cara yang sesuai baik secara lisan maupun tertulis; memastikan pemahaman; mendengarkan secara aktif dan efektif; mempersuasi, meyakinkan dan membujuk orang lain dalam rangka mencapai tujuan organisasi.
+                'description' => 'Kemampuan untuk menerangkan pandangan dan gagasan secara jelas, sistematis disertai argumentasi yang logis dengan cara-cara yang sesuai baik secara lisan maupun tertulis; memastikan pemahaman; mendengarkan secara aktif dan efektif; mempersuasi, meyakinkan dan membujuk orang lain dalam rangka mencapai tujuan organisasi.
         Level 4
-        Mampu mengemukakan pemikiran multidimensi secara lisan dan tertulis untuk mendorong kesepakatan dengan tujuan meningkatkan kinerja secara keseluruhan.",
+        Mampu mengemukakan pemikiran multidimensi secara lisan dan tertulis untuk mendorong kesepakatan dengan tujuan meningkatkan kinerja secara keseluruhan.',
                 'weight' => 11,
-                'standard_rating' => 3.75,
+                'standard_rating' => 3,
                 'order' => 3,
             ],
             [
                 'code' => 'orientasi_pada_hasil',
                 'name' => 'Orientasi Pada Hasil',
-                'description' => "Kemampuan memertahankan komitmen pribadi yang tinggi untuk menyelesaikan tugas, dapat diandalkan, bertanggung jawab, mampu secara sistematis mengidentifikasi risiko dan peluang dengan memperhatikan keterhubungan antara perencanaan dan hasil, untuk keberhasilan organisasi.
+                'description' => 'Kemampuan memertahankan komitmen pribadi yang tinggi untuk menyelesaikan tugas, dapat diandalkan, bertanggung jawab, mampu secara sistematis mengidentifikasi risiko dan peluang dengan memperhatikan keterhubungan antara perencanaan dan hasil, untuk keberhasilan organisasi.
         Level 4
-        Mendorong unit kerja mencapai target yang ditetapkan atau melebihi hasil kerja sebelumnya.",
+        Mendorong unit kerja mencapai target yang ditetapkan atau melebihi hasil kerja sebelumnya.',
                 'weight' => 11,
-                'standard_rating' => 3.5,
+                'standard_rating' => 4,
                 'order' => 4,
             ],
             [
                 'code' => 'pelayanan_publik',
                 'name' => 'Pelayanan Publik',
-                'description' => "Kemampuan dalam melaksanakan tugas-tugas pemerintahan, pembangunan dan kegiatan pemenuhan kebutuhan pelayanan publik secara profesional, transparan, mengikuti standar pelayanan yang objektif, netral, tidak memihak, tidak diskriminatif, serta tidak terpengaruh kepentingan pribadi/kelompok/golongan/partai politik.
+                'description' => 'Kemampuan dalam melaksanakan tugas-tugas pemerintahan, pembangunan dan kegiatan pemenuhan kebutuhan pelayanan publik secara profesional, transparan, mengikuti standar pelayanan yang objektif, netral, tidak memihak, tidak diskriminatif, serta tidak terpengaruh kepentingan pribadi/kelompok/golongan/partai politik.
         Level 4
-        Mampu memonitor, mengevaluasi, memperhitungkan dan mengantisipasi dampak dari isu-isu jangka panjang, kesempatan, atau kekuatan politik dalam hal pelayanan kebutuhan pemangku kepentingan yang transparan, objektif, dan profesional.",
+        Mampu memonitor, mengevaluasi, memperhitungkan dan mengantisipasi dampak dari isu-isu jangka panjang, kesempatan, atau kekuatan politik dalam hal pelayanan kebutuhan pemangku kepentingan yang transparan, objektif, dan profesional.',
                 'weight' => 11,
-                'standard_rating' => 3.6,
+                'standard_rating' => 4,
                 'order' => 5,
             ],
             [
                 'code' => 'pengembangan_diri_orang_lain',
                 'name' => 'Pengembangan Diri & Orang Lain',
-                'description' => "Kemampuan untuk meningkatkan pengetahuan dan menyempurnakan keterampilan diri; menginspirasi orang lain untuk mengembangkan dan menyempurnakan pengetahuan dan keterampilan yang relevan dengan pekerjaan dan pengembangan karir jangka panjang, mendorong kemauan belajar sepanjang hidup, memberikan saran/bantuan, umpan balik, bimbingan untuk membantu orang lain untuk mengembangkan potensi dirinya.
+                'description' => 'Kemampuan untuk meningkatkan pengetahuan dan menyempurnakan keterampilan diri; menginspirasi orang lain untuk mengembangkan dan menyempurnakan pengetahuan dan keterampilan yang relevan dengan pekerjaan dan pengembangan karir jangka panjang, mendorong kemauan belajar sepanjang hidup, memberikan saran/bantuan, umpan balik, bimbingan untuk membantu orang lain untuk mengembangkan potensi dirinya.
         Level 4
-        Menyusun program pengembangan jangka panjang dalam rangka mendorong manajemen pembelajaran.",
+        Menyusun program pengembangan jangka panjang dalam rangka mendorong manajemen pembelajaran.',
                 'weight' => 11,
-                'standard_rating' => 3.4,
+                'standard_rating' => 3,
                 'order' => 6,
             ],
             [
                 'code' => 'mengelola_perubahan',
                 'name' => 'Mengelola Perubahan',
-                'description' => "Kemampuan dalam menyesuaikan diri dengan situasi yang baru atau berubah dan tidak bergantung secara berlebihan pada metode dan proses lama, mengambil tindakan untuk mendukung dan melaksanakan inisiatif perubahan, memimpin usaha perubahan, mengambil tanggung jawab pribadi untuk memastikan perubahan berhasil diimplementasikan secara efektif.
+                'description' => 'Kemampuan dalam menyesuaikan diri dengan situasi yang baru atau berubah dan tidak bergantung secara berlebihan pada metode dan proses lama, mengambil tindakan untuk mendukung dan melaksanakan inisiatif perubahan, memimpin usaha perubahan, mengambil tanggung jawab pribadi untuk memastikan perubahan berhasil diimplementasikan secara efektif.
         Level 4
-        Memimpin perubahan pada unit kerja.",
+        Memimpin perubahan pada unit kerja.',
                 'weight' => 11,
-                'standard_rating' => 3.3,
+                'standard_rating' => 3,
                 'order' => 7,
             ],
             [
                 'code' => 'pengambilan_keputusan',
                 'name' => 'Pengambilan Keputusan',
-                'description' => "Kemampuan membuat keputusan yang baik secara tepat waktu dan dengan keyakinan diri setelah mempertimbangkan prinsip kehati-hatian, dirumuskan secara sistematis dan seksama berdasarkan berbagai informasi, alternatif pemecahan masalah dan konsekuensinya, serta bertanggung jawab atas keputusan yang diambil.
+                'description' => 'Kemampuan membuat keputusan yang baik secara tepat waktu dan dengan keyakinan diri setelah mempertimbangkan prinsip kehati-hatian, dirumuskan secara sistematis dan seksama berdasarkan berbagai informasi, alternatif pemecahan masalah dan konsekuensinya, serta bertanggung jawab atas keputusan yang diambil.
         Level 4
-        Menyelesaikan masalah yang mengandung risiko tinggi, mengantisipasi dampak keputusan, membuat tindakan pengamanan; mitigasi risiko.",
+        Menyelesaikan masalah yang mengandung risiko tinggi, mengantisipasi dampak keputusan, membuat tindakan pengamanan; mitigasi risiko.',
                 'weight' => 11,
-                'standard_rating' => 3.45,
+                'standard_rating' => 4,
                 'order' => 8,
             ],
             [
                 'code' => 'perekat_bangsa',
                 'name' => 'Perekat Bangsa',
-                'description' => "Kemampuan dalam mempromosikan sikap toleransi, keterbukaan, peka terhadap perbedaan individu/kelompok masyarakat; mampu menjadi perpanjangan tangan pemerintah dalam mempersatukan masyarakat dan membangun hubungan sosial psikologis dengan masyarakat di tengah kemajemukan Indonesia sehingga menciptakan kelekatan yang kuat antara ASN dan para pemangku kepentingan serta di antara para pemangku kepentingan itu sendiri; menjaga, mengembangkan, dan mewujudkan rasa persatuan dan kesatuan dalam kehidupan bermasyarakat, berbangsa dan bernegara Indonesia.
+                'description' => 'Kemampuan dalam mempromosikan sikap toleransi, keterbukaan, peka terhadap perbedaan individu/kelompok masyarakat; mampu menjadi perpanjangan tangan pemerintah dalam mempersatukan masyarakat dan membangun hubungan sosial psikologis dengan masyarakat di tengah kemajemukan Indonesia sehingga menciptakan kelekatan yang kuat antara ASN dan para pemangku kepentingan serta di antara para pemangku kepentingan itu sendiri; menjaga, mengembangkan, dan mewujudkan rasa persatuan dan kesatuan dalam kehidupan bermasyarakat, berbangsa dan bernegara Indonesia.
         Level 4
-        Mendayagunakan perbedaan secara konstruktif dan kreatif untuk meningkatkan efektivitas organisasi.",
+        Mendayagunakan perbedaan secara konstruktif dan kreatif untuk meningkatkan efektivitas organisasi.',
                 'weight' => 11,
-                'standard_rating' => 3.55,
+                'standard_rating' => 4,
                 'order' => 9,
             ],
         ]; // Total = 100%
