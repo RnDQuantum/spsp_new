@@ -224,7 +224,7 @@
                     @foreach ($potensiAspects as $index => $aspect)
                         <!-- Aspect Header with Progress Bar -->
                         <tr class="bg-gray-100">
-                            <td class="border border-gray-300 px-4 py-2 text-sm font-bold text-black">
+                            <td class="border border-gray-300 px-4 py-2 text-sm font-bold text-black text-center">
                                 {{ $loop->iteration }}.</td>
                             <td class="border border-gray-300 px-4 py-2 text-sm font-bold text-black">
                                 {{ $aspect['name'] }}</td>
@@ -244,7 +244,7 @@
                         <!-- Sub-Aspects -->
                         @foreach ($aspect['sub_aspects'] as $subIndex => $subAspect)
                             <tr class="bg-gray-50">
-                                <td class="border border-gray-300 px-4 py-1 text-xs text-black col-number">
+                                <td class="border border-gray-300 px-4 py-1 text-xs text-black col-number text-center">
                                     {{ $subIndex + 1 }}.</td>
                                 <td class="border border-gray-300 px-4 py-1 text-xs text-black">
                                     {{ $subAspect['name'] }}</td>
@@ -277,7 +277,7 @@
                     @foreach ($kompetensiAspects as $index => $aspect)
                         <!-- Aspect Header with Progress Bar -->
                         <tr class="bg-gray-100">
-                            <td class="border border-gray-300 px-4 py-2 text-sm font-bold text-black">
+                            <td class="border border-gray-300 px-4 py-2 text-sm font-bold text-black text-center">
                                 {{ $loop->iteration }}.</td>
                             <td class="border border-gray-300 px-4 py-2 text-sm font-bold text-black">
                                 {{ $aspect['name'] }}</td>
@@ -297,7 +297,7 @@
                         <!-- Kompetensi Description (no sub-aspects, just description) -->
                         @if (isset($aspect['description']) && $aspect['description'])
                             <tr class="bg-gray-50">
-                                <td class="border border-gray-300 px-4 py-1 text-xs text-black">1.</td>
+                                <td class="border border-gray-300 px-4 py-1 text-xs text-black text-center">1.</td>
                                 <td class="border border-gray-300 px-4 py-1 text-xs text-black">
                                     {{ $aspect['description'] }}</td>
                                 <td class="border border-gray-300 px-2 py-1 text-xs text-black text-center">
@@ -317,7 +317,7 @@
                         @else
                             <!-- If no description, show rating directly -->
                             <tr class="bg-gray-50">
-                                <td class="border border-gray-300 px-4 py-1 text-xs text-black">1.</td>
+                                <td class="border border-gray-300 px-4 py-1 text-xs text-black text-center">1.</td>
                                 <td class="border border-gray-300 px-4 py-1 text-xs text-black">Rating Level</td>
                                 <td class="border border-gray-300 px-2 py-1 text-xs text-black text-center">
                                     {{ $aspect['standard_rating'] }}</td>
