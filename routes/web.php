@@ -39,6 +39,5 @@ Route::get('/gambaran_ringkasan', function () {
     return view('livewire.pages.individual-report.gambaran_ringkasan');
 })->name('gambaran_ringkasan');
 
-Route::get('/ringkasan_assessment', function () {
-    return view('livewire.pages.individual-report.ringkasan_assessment');
-})->name('ringkasan_assessment');
+// Individual Report Route - Ringkasan Assessment
+Route::get('/ringkasan-assessment/{eventCode}/{testNumber}', App\Livewire\Pages\IndividualReport\RingkasanAssessment::class)->name('ringkasan_assessment');

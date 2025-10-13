@@ -323,6 +323,44 @@
                         </a>
                     </div>
 
+                    <!-- Ringkasan Assessment Card -->
+                    <div class="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center space-x-3">
+                                <div class="flex-shrink-0">
+                                    <div class="w-10 h-10 bg-cyan-100 rounded-lg flex items-center justify-center">
+                                        <svg class="w-6 h-6 text-cyan-600" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                                            </path>
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-medium text-gray-900">Ringkasan Assessment</h3>
+                                    <p class="text-sm text-gray-600">Ringkasan hasil keseluruhan assessment</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <p class="text-sm text-gray-600">
+                                Laporan ringkasan hasil assessment keseluruhan yang menampilkan skor potensi dan kompetensi,
+                                bobot penilaian, gap score, dan kesimpulan akhir peserta.
+                            </p>
+                        </div>
+
+                        <a href="{{ route('ringkasan_assessment', ['eventCode' => $participant->assessmentEvent->code, 'testNumber' => $participant->test_number]) }}"
+                            class="inline-flex items-center px-4 py-2 bg-cyan-600 text-white text-sm font-medium rounded-md hover:bg-cyan-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500 transition-colors">
+                            Lihat Ringkasan Assessment
+                            <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        </a>
+                    </div>
+
                     <!-- Spider Plot Card -->
                     <div class="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-lg transition-shadow">
                         <div class="flex items-start space-x-4">
