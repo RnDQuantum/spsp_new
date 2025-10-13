@@ -112,6 +112,30 @@
         background-color: #10b981;
         color: white;
     }
+
+    /* Rating display styling */
+    .rating-display {
+        line-height: 1.1;
+    }
+
+    .rating-display .percentage {
+        font-size: 0.75rem;
+        font-weight: bold;
+        color: #1f2937;
+    }
+
+    .rating-display .rating-comparison {
+        font-size: 0.6875rem;
+        font-weight: bold;
+    }
+
+    .rating-display .rating-comparison.above-standard {
+        color: #15803d;
+    }
+
+    .rating-display .rating-comparison.below-standard {
+        color: #dc2626;
+    }
 </style>
 <div class="bg-white rounded-lg shadow-md overflow-hidden max-w-7xl mx-auto my-8">
     <!-- Header -->
@@ -178,17 +202,16 @@
         <table class="w-full border-collapse">
             <thead>
                 <tr class="bg-blue-100">
-                    <th class="border border-gray-300 px-4 py-2 text-center text-sm font-bold text-black col-number">NO.
-                    </th>
-                    <th class="border border-gray-300 px-4 py-2 text-left text-sm font-bold text-black">ASPEK</th>
+                    <th class="border border-gray-300 px-4 py-2 text-center text-sm font-bold text-black col-number"
+                        rowspan="2">NO.</th>
+                    <th class="border border-gray-300 px-4 py-2 text-center text-sm font-bold text-black"
+                        rowspan="2">
+                        ASPEK</th>
                     <th class="border border-gray-300 px-2 py-2 text-center text-sm font-bold text-black">STANDARD</th>
                     <th class="border border-gray-300 px-2 py-2 text-center text-xs font-bold text-black range-scale"
                         colspan="5">RATING</th>
                 </tr>
                 <tr class="bg-blue-100">
-                    <th class="border border-gray-300 px-4 py-2 text-center text-sm font-bold text-black col-number">
-                    </th>
-                    <th class="border border-gray-300 px-4 py-2 text-left text-sm font-bold text-black"></th>
                     <th
                         class="border border-gray-300 px-2 py-1 text-center text-xs font-bold text-black rating-cell-standard-1">
                     </th>
@@ -235,7 +258,15 @@
                                     <div class="h-full rounded {{ $aspect['percentage'] <= 40 ? 'gradient-bar-low' : ($aspect['percentage'] <= 70 ? 'gradient-bar-medium' : 'gradient-bar-high') }}"
                                         style="width: {{ $aspect['percentage'] }}%;"></div>
                                     <div class="absolute right-0 top-0 bottom-0 flex items-center pr-2">
-                                        <span class="text-xs font-bold text-black">{{ $aspect['percentage'] }}%</span>
+                                        <div class="rating-display text-right">
+                                            <div class="percentage">{{ $aspect['percentage'] }}%</div>
+                                            <div
+                                                class="rating-comparison {{ round($aspect['individual_rating']) >= $aspect['standard_rating'] ? 'above-standard' : 'below-standard' }}">
+                                                <span></span>
+                                                {{ number_format($aspect['individual_rating'], 2, ',', '.') }} /
+                                                {{ number_format($aspect['standard_rating'], 2, ',', '.') }}
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </td>
@@ -288,7 +319,14 @@
                                     <div class="h-full rounded {{ $aspect['percentage'] <= 40 ? 'gradient-bar-low' : ($aspect['percentage'] <= 70 ? 'gradient-bar-medium' : 'gradient-bar-high') }}"
                                         style="width: {{ $aspect['percentage'] }}%;"></div>
                                     <div class="absolute right-0 top-0 bottom-0 flex items-center pr-2">
-                                        <span class="text-xs font-bold text-black">{{ $aspect['percentage'] }}%</span>
+                                        <div class="rating-display text-right">
+                                            <div class="percentage">{{ $aspect['percentage'] }}%</div>
+                                            <div
+                                                class="rating-comparison {{ round($aspect['individual_rating']) >= $aspect['standard_rating'] ? 'above-standard' : 'below-standard' }}">
+                                                {{ number_format($aspect['individual_rating'], 2, ',', '.') }} /
+                                                {{ number_format($aspect['standard_rating'], 2, ',', '.') }}
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </td>

@@ -94,11 +94,11 @@
                             class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
                             General Potency Mapping
                         </a>
-                        <a href="{{ route('general-psy-mapping') }}" role="menuitem"
+                        <a href="#" role="menuitem"
                             class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
                             General Psychology Mapping
                         </a>
-                        <a href="{{ route('general-mc-mapping') }}" role="menuitem"
+                        <a href="#" role="menuitem"
                             class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
                             Managerial Potency Mapping
                         </a>

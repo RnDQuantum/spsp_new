@@ -20,14 +20,9 @@ Route::get('/general-matching/{eventCode}/{testNumber}', App\Livewire\Pages\Indi
 // Individual Report Route - General Mapping
 Route::get('/general-mapping/{eventCode}/{testNumber}', App\Livewire\Pages\IndividualReport\GeneralMapping::class)->name('general_mapping');
 
-Route::get('/general-psy-mapping', function () {
-    return view('livewire.pages.individual-report.general-psy-mapping');
-})->name('general-psy-mapping');
+// Individual Report Route - General MC Mapping (Kompetensi Only)
+Route::get('/general-mc-mapping/{eventCode}/{testNumber}', App\Livewire\Pages\IndividualReport\GeneralMcMapping::class)->name('general_mc_mapping');
 
 Route::get('/general-mc-mapping', function () {
     return view('livewire.pages.individual-report.general-mc-mapping');
 })->name('general-mc-mapping');
-
-Route::get('/ringkasan-mc-mapping', function () {
-    return view('livewire.pages.individual-report.ringkasan-mc-mapping');
-})->name('ringkasan-mc-mapping');
