@@ -49,9 +49,7 @@ Route::get('/ranking-mc-mapping', App\Livewire\Pages\GeneralReport\RankingMcMapp
 
 Route::get('/rekap-ranking-assessment', App\Livewire\Pages\GeneralReport\RekapRankingAssessment::class)->name('rekap-ranking-assessment');
 
-Route::get('/statistic', function () {
-    return view('livewire.pages.general-report.statistic');
-})->name('statistic');
+Route::get('/statistic', App\Livewire\Pages\GeneralReport\Statistic::class)->name('statistic');
 
 Route::get('/training-recomendation', function () {
     return view('livewire.pages.general-report.training-recomendation');
