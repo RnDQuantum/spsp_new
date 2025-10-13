@@ -90,6 +90,7 @@
 
 <!-- Chart.js CDN & Script -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
 <script>
     (function() {
         if (window.__statisticChartSetup) return;
@@ -111,6 +112,9 @@
             const coerced = coerceNumbers(data);
             const allZero = coerced.every(v => v === 0);
 
+            // Calculate total for percentage
+            const total = coerced.reduce((sum, val) => sum + val, 0);
+
             if (chartInstance) {
                 chartInstance.destroy();
             }
@@ -131,16 +135,51 @@
                         pointBorderWidth: 2,
                         pointBackgroundColor: 'brown',
                         pointBorderColor: '#5a2a2a',
+                        datalabels: {
+                            align: 'top',
+                            anchor: 'end',
+                            offset: 4,
+                            formatter: function(value) {
+                                if (total === 0) return '0,00%';
+                                const percentage = (value / total * 100).toFixed(2);
+                                return percentage.replace('.', ',') + '%';
+                            }
+                        }
                     }]
                 },
                 options: {
                     responsive: true,
+                    layout: {
+                        padding: {
+                            top: 32,
+                            right: 16,
+                            bottom: 16,
+                            left: 8
+                        }
+                    },
                     plugins: {
                         legend: {
                             display: false
                         },
                         tooltip: {
-                            enabled: true
+                            enabled: true,
+                            callbacks: {
+                                label: function(context) {
+                                    const value = context.parsed.y;
+                                    const percentage = total === 0 ? '0,00' : (value / total * 100).toFixed(2).replace('.', ',');
+                                    return `Jumlah: ${value} (${percentage}%)`;
+                                }
+                            }
+                        },
+                        datalabels: {
+                            backgroundColor: 'rgba(139, 69, 19, 0.85)',
+                            borderRadius: 4,
+                            color: 'white',
+                            font: {
+                                weight: 'bold',
+                                size: 11
+                            },
+                            padding: 6
                         }
                     },
                     scales: {
@@ -167,7 +206,8 @@
                             }
                         }
                     }
-                }
+                },
+                plugins: [ChartDataLabels]
             });
         }
 
