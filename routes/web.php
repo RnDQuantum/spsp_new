@@ -47,9 +47,7 @@ Route::get('/ranking-psy-mapping', App\Livewire\Pages\GeneralReport\RankingPsyMa
 
 Route::get('/ranking-mc-mapping', App\Livewire\Pages\GeneralReport\RankingMcMapping::class)->name('ranking-mc-mapping');
 
-Route::get('/rekap-ranking-assessment', function () {
-    return view('livewire.pages.general-report.rekap-ranking-assessment');
-})->name('rekap-ranking-assessment');
+Route::get('/rekap-ranking-assessment', App\Livewire\Pages\GeneralReport\RekapRankingAssessment::class)->name('rekap-ranking-assessment');
 
 Route::get('/statistic', function () {
     return view('livewire.pages.general-report.statistic');
