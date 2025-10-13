@@ -27,3 +27,7 @@ Route::get('/general-psy-mapping', function () {
 Route::get('/general-mc-mapping', function () {
     return view('livewire.pages.individual-report.general-mc-mapping');
 })->name('general-mc-mapping');
+
+Route::get('/ringkasan-mc-mapping', function () {
+    return view('livewire.pages.individual-report.ringkasan-mc-mapping');
+})->name('ringkasan-mc-mapping');
