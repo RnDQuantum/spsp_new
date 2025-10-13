@@ -26,3 +26,15 @@ Route::get('/general-mc-mapping/{eventCode}/{testNumber}', App\Livewire\Pages\In
 Route::get('/general-mc-mapping', function () {
     return view('livewire.pages.individual-report.general-mc-mapping');
 })->name('general-mc-mapping');
+
+Route::get('/ringkasan-mc-mapping', function () {
+    return view('livewire.pages.individual-report.ringkasan-mc-mapping');
+})->name('ringkasan-mc-mapping');
+
+Route::get('/gambaran_ringkasan', function () {
+    return view('livewire.pages.individual-report.gambaran_ringkasan');
+})->name('gambaran_ringkasan');
+
+Route::get('/ringkasan_assessment', function () {
+    return view('livewire.pages.individual-report.ringkasan_assessment');
+})->name('ringkasan_assessment');

@@ -106,11 +106,11 @@
                             class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
                             Ringkasan Managerial Potency Mapping
                         </a>
-                        <a href="#" role="menuitem"
+                        <a href="{{ route('gambaran_ringkasan') }}" role="menuitem"
                             class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
                             Gambaran Individu & Deskripsi Kompetensi
                         </a>
-                        <a href="#" role="menuitem"
+                        <a href="{{ route('ringkasan_assessment') }}" role="menuitem"
                             class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
                             Ringkasan Hasil Assessment Individu
                         </a>
