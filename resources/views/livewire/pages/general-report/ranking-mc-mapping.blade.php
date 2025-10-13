@@ -55,7 +55,7 @@
             </table>
             @if ($rankings && $rankings->hasPages())
                 <div class="mt-4">
-                    {{ $rankings->links() }}
+                    {{ $rankings->links(data: ['scrollTo' => false]) }}
                 </div>
             @endif
         </div>
