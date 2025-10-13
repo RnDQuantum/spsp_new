@@ -175,7 +175,7 @@
                             class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
                             Ranking & Analytics
                         </a> --}}
-                        <a href="#" role="menuitem"
+                        <a href="{{ route('standard-mc') }}" role="menuitem"
                             class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
                             Standar Managerial Competency Mapping
                         </a>
