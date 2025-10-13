@@ -52,3 +52,7 @@ Route::get('/rekap-ranking-assessment', App\Livewire\Pages\GeneralReport\RekapRa
 Route::get('/statistic', function () {
     return view('livewire.pages.general-report.statistic');
 })->name('statistic');
+
+Route::get('/training-recomendation', function () {
+    return view('livewire.pages.general-report.training-recomendation');
+})->name('training-recomendation');
