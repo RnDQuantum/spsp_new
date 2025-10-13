@@ -54,3 +54,7 @@ Route::get('/statistic', App\Livewire\Pages\GeneralReport\Statistic::class)->nam
 Route::get('/training-recomendation', function () {
     return view('livewire.pages.general-report.training-recomendation');
 })->name('training-recomendation');
+
+Route::get('/standard-mc', function () {
+    return view('livewire.pages.general-report.standard-mc');
+})->name('standard-mc');
