@@ -159,6 +159,14 @@
                             class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
                             Ranking Managerial Competency Mapping
                         </a>
+                        <a href="{{ route('rekap-ranking-assessment') }}" role="menuitem"
+                            class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
+                            Rekap Ranking Assessment
+                        </a>
+                        <a href="{{ route('statistic') }}" role="menuitem"
+                            class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
+                            Statistik
+                        </a>
                         {{-- <a href="#" role="menuitem"
                             class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
                             Ranking & Analytics

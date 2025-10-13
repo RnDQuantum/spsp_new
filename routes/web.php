@@ -53,3 +53,11 @@ Route::get('/ranking-psy-mapping', function () {
 Route::get('/ranking-mc-mapping', function () {
     return view('livewire.pages.general-report.ranking-mc-mapping');
 })->name('ranking-mc-mapping');
+
+Route::get('/rekap-ranking-assessment', function () {
+    return view('livewire.pages.general-report.rekap-ranking-assessment');
+})->name('rekap-ranking-assessment');
+
+Route::get('/statistic', function () {
+    return view('livewire.pages.general-report.statistic');
+})->name('statistic');
