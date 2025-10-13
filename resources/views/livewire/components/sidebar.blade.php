@@ -151,10 +151,18 @@
                     <!-- Sub Menu General Report -->
                     <div x-show="generalOpen" x-cloak id="submenu-general" class="ml-4 mt-2 space-y-1"
                         role="menu" aria-labelledby="btn-general">
-                        <a href="#" role="menuitem"
+                        <a href="{{ route('ranking-psy-mapping') }}" role="menuitem"
+                            class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
+                            Ranking Psychology Mapping
+                        </a>
+                        <a href="{{ route('ranking-mc-mapping') }}" role="menuitem"
+                            class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
+                            Ranking Managerial Competency Mapping
+                        </a>
+                        {{-- <a href="#" role="menuitem"
                             class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
                             Ranking & Analytics
-                        </a>
+                        </a> --}}
                         <a href="#" role="menuitem"
                             class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
                             Standar Managerial Competency Mapping

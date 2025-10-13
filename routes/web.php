@@ -41,3 +41,15 @@ Route::get('/gambaran_ringkasan', function () {
 
 // Individual Report Route - Ringkasan Assessment
 Route::get('/ringkasan-assessment/{eventCode}/{testNumber}', App\Livewire\Pages\IndividualReport\RingkasanAssessment::class)->name('ringkasan_assessment');
+
+
+
+
+// General report Routes
+Route::get('/ranking-psy-mapping', function () {
+    return view('livewire.pages.general-report.ranking-psy-mapping');
+})->name('ranking-psy-mapping');
+
+Route::get('/ranking-mc-mapping', function () {
+    return view('livewire.pages.general-report.ranking-mc-mapping');
+})->name('ranking-mc-mapping');
