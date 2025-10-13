@@ -30,7 +30,7 @@ class ToleranceSelector extends Component
     /**
      * Mount component and load tolerance from session
      */
-    public function mount(?int $passing = null, ?int $total = null): void
+    public function mount(?int $passing = null, ?int $total = null, ?bool $showSummary = null): void
     {
         // Load tolerance from session or use default
         $this->tolerancePercentage = session('individual_report.tolerance', 10);
@@ -39,6 +39,11 @@ class ToleranceSelector extends Component
         if ($passing !== null && $total !== null) {
             $this->passingCount = $passing;
             $this->totalCount = $total;
+        }
+
+        // Optionally control whether to show summary from parent
+        if ($showSummary !== null) {
+            $this->showSummary = $showSummary;
         }
     }
 

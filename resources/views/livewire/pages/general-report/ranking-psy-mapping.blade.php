@@ -18,6 +18,7 @@
         @livewire('components.tolerance-selector', [
             'passing' => $summary['passing'],
             'total' => $summary['total'],
+            'showSummary' => false,
         ])
 
         <!-- Table Section -->
