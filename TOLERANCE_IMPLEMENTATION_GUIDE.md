@@ -6,7 +6,7 @@ Fitur toleransi memungkinkan pengguna untuk menyesuaikan standar penilaian denga
 
 **Status Implementasi:**
 - ✅ **GeneralMapping** - Fully implemented
-- ⏳ **GeneralPsyMapping** - Pending
+- ✅ **GeneralPsyMapping** - Fully implemented
 - ⏳ **GeneralMcMapping** - Pending
 - ⏳ **GeneralMatching** - Pending
 - ⏳ **SpiderPlot** - Pending
@@ -610,4 +610,4 @@ For questions about this implementation, refer to chat history with context abou
 - Visual design: 3-line charts with proper legends
 - Calculation formulas: Adjusted standard, gap, percentage
 
-Last updated: 2025-01-13
+Last updated: 2025-01-13 (GeneralMapping, GeneralPsyMapping completed)

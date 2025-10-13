@@ -27,7 +27,9 @@
                         <th class="border border-black px-3 py-2 font-semibold">No</th>
                         <th class="border border-black px-3 py-2 font-semibold">Atribut/Attribute</th>
                         <th class="border border-black px-3 py-2 font-semibold">Bobot %<br>100</th>
-                        <th class="border border-black px-3 py-2 font-semibold" colspan="2">Standard</th>
+                        <th class="border border-black px-3 py-2 font-semibold" colspan="2">
+                            <span x-data x-text="$wire.tolerancePercentage > 0 ? 'Standard (-' + $wire.tolerancePercentage + '%)' : 'Standard'"></span>
+                        </th>
                         <th class="border border-black px-3 py-2 font-semibold" colspan="2">Individu</th>
                         <th class="border border-black px-3 py-2 font-semibold" colspan="2">Gap</th>
                         <th class="border border-black px-3 py-2 font-semibold">Prosentase<br>Kesesuaian</th>
@@ -152,21 +154,16 @@
 
                         let chartInstance = null;
                         const chartLabels = @js($chartLabels);
-                        const standardRatings = @js($chartStandardRatings);
+                        let originalStandardRatings = @js($chartOriginalStandardRatings);
+                        let standardRatings = @js($chartStandardRatings);
                         const individualRatings = @js($chartIndividualRatings);
                         const participantName = @js($participant->name);
                         let tolerancePercentage = @js($tolerancePercentage);
-
-                        function calculateToleranceValues(tolerance) {
-                            const factor = 1 - (tolerance / 100);
-                            return standardRatings.map(val => val * factor);
-                        }
 
                         function initChart() {
                             const canvas = document.getElementById('spiderRatingChart-{{ $chartId }}');
                             if (!canvas) return;
 
-                            const toleranceRatings = calculateToleranceValues(tolerancePercentage);
                             const ctx = canvas.getContext('2d');
 
                             chartInstance = new Chart(ctx, {
@@ -175,15 +172,15 @@
                                     labels: chartLabels,
                                     datasets: [{
                                         label: 'Standar',
-                                        data: standardRatings,
+                                        data: originalStandardRatings,
                                         borderColor: '#000000',
                                         backgroundColor: 'rgba(0, 0, 0, 0.05)',
                                         borderWidth: 2,
-                                        pointRadius: 4,
+                                        pointRadius: 3,
                                         pointBackgroundColor: '#000000'
                                     }, {
                                         label: `Toleransi ${tolerancePercentage}%`,
-                                        data: toleranceRatings,
+                                        data: standardRatings,
                                         borderColor: '#6B7280',
                                         backgroundColor: 'transparent',
                                         borderWidth: 1.5,
@@ -196,7 +193,7 @@
                                         borderColor: '#DC2626',
                                         backgroundColor: 'rgba(220, 38, 38, 0.05)',
                                         borderWidth: 2,
-                                        pointRadius: 4,
+                                        pointRadius: 3,
                                         pointBackgroundColor: '#DC2626'
                                     }]
                                 },
@@ -258,12 +255,17 @@
                                 let chartData = Array.isArray(data) && data.length > 0 ? data[0] : data;
                                 if (window.ratingChart_{{ $chartId }} && chartData) {
                                     tolerancePercentage = chartData.tolerance;
-                                    const newToleranceRatings = calculateToleranceValues(tolerancePercentage);
+                                    originalStandardRatings = chartData.originalStandardRatings;
+                                    standardRatings = chartData.standardRatings;
 
+                                    // Update all three datasets
+                                    window.ratingChart_{{ $chartId }}.data.datasets[0].data = chartData
+                                        .originalStandardRatings;
                                     window.ratingChart_{{ $chartId }}.data.datasets[1].label =
                                         `Toleransi ${tolerancePercentage}%`;
-                                    window.ratingChart_{{ $chartId }}.data.datasets[1].data =
-                                        newToleranceRatings;
+                                    window.ratingChart_{{ $chartId }}.data.datasets[1].data = chartData
+                                        .standardRatings;
+                                    // Dataset[2] (individual) doesn't change
                                     window.ratingChart_{{ $chartId }}.update('active');
                                 }
                             });
@@ -311,23 +313,18 @@
 
                         let chartInstance = null;
                         const chartLabels = @js($chartLabels);
-                        const standardScores = @js($chartStandardScores);
+                        let originalStandardScores = @js($chartOriginalStandardScores);
+                        let standardScores = @js($chartStandardScores);
                         const individualScores = @js($chartIndividualScores);
                         const participantName = @js($participant->name);
                         let tolerancePercentage = @js($tolerancePercentage);
-
-                        function calculateToleranceValues(tolerance) {
-                            const factor = 1 - (tolerance / 100);
-                            return standardScores.map(val => val * factor);
-                        }
 
                         function initChart() {
                             const canvas = document.getElementById('spiderScoreChart-{{ $chartId }}');
                             if (!canvas) return;
 
-                            const toleranceScores = calculateToleranceValues(tolerancePercentage);
                             const ctx = canvas.getContext('2d');
-                            const maxScore = Math.max(...standardScores, ...individualScores) * 1.2;
+                            const maxScore = Math.max(...originalStandardScores, ...individualScores) * 1.2;
 
                             chartInstance = new Chart(ctx, {
                                 type: 'radar',
@@ -335,15 +332,15 @@
                                     labels: chartLabels,
                                     datasets: [{
                                         label: 'Standar',
-                                        data: standardScores,
+                                        data: originalStandardScores,
                                         borderColor: '#000000',
                                         backgroundColor: 'rgba(0, 0, 0, 0.05)',
                                         borderWidth: 2,
-                                        pointRadius: 4,
+                                        pointRadius: 3,
                                         pointBackgroundColor: '#000000'
                                     }, {
                                         label: `Toleransi ${tolerancePercentage}%`,
-                                        data: toleranceScores,
+                                        data: standardScores,
                                         borderColor: '#6B7280',
                                         backgroundColor: 'transparent',
                                         borderWidth: 1.5,
@@ -356,7 +353,7 @@
                                         borderColor: '#DC2626',
                                         backgroundColor: 'rgba(220, 38, 38, 0.05)',
                                         borderWidth: 2,
-                                        pointRadius: 4,
+                                        pointRadius: 3,
                                         pointBackgroundColor: '#DC2626'
                                     }]
                                 },
@@ -418,12 +415,17 @@
                                 let chartData = Array.isArray(data) && data.length > 0 ? data[0] : data;
                                 if (window.scoreChart_{{ $chartId }} && chartData) {
                                     tolerancePercentage = chartData.tolerance;
-                                    const newToleranceScores = calculateToleranceValues(tolerancePercentage);
+                                    originalStandardScores = chartData.originalStandardScores;
+                                    standardScores = chartData.standardScores;
 
+                                    // Update all three datasets
+                                    window.scoreChart_{{ $chartId }}.data.datasets[0].data = chartData
+                                        .originalStandardScores;
                                     window.scoreChart_{{ $chartId }}.data.datasets[1].label =
                                         `Toleransi ${tolerancePercentage}%`;
-                                    window.scoreChart_{{ $chartId }}.data.datasets[1].data =
-                                        newToleranceScores;
+                                    window.scoreChart_{{ $chartId }}.data.datasets[1].data = chartData
+                                        .standardScores;
+                                    // Dataset[2] (individual) doesn't change
                                     window.scoreChart_{{ $chartId }}.update('active');
                                 }
                             });
