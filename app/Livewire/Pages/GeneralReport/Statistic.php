@@ -51,13 +51,6 @@ class Statistic extends Component
         }
 
         $this->refreshStatistics();
-        $this->dispatch('distribution-updated', [
-            'labels' => ['I', 'II', 'III', 'IV', 'V'],
-            'data' => array_values($this->distribution),
-            'standardRating' => $this->standardRating,
-            'averageRating' => $this->averageRating,
-            'aspectName' => $this->getCurrentAspectName(),
-        ]);
     }
 
     public function updatedEventCode(): void

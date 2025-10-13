@@ -90,15 +90,20 @@
             return (arr || []).map(v => Number(v) || 0);
         }
 
-        function renderChart(labels, data, label) {
+        function renderChart(labels, data, label, standardRating, averageRating) {
             const canvas = document.getElementById('frekuensiChart');
-            if (!canvas) return;
+            if (!canvas) {
+                return;
+            }
             const ctx = canvas.getContext('2d');
 
             const coerced = coerceNumbers(data);
             const allZero = coerced.every(v => v === 0);
 
-            if (chartInstance) chartInstance.destroy();
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+
             chartInstance = new Chart(ctx, {
                 type: 'line',
                 data: {
@@ -159,33 +164,39 @@
             ];
             const aspectName =
                 `{{ collect($availableAspects)->firstWhere('id', (int) $aspectId)['name'] ?? '—' }}`;
-            renderChart(initialLabels, initialData, aspectName);
+            const standardRating = {{ $standardRating }};
+            const averageRating = {{ $averageRating }};
+
+            renderChart(initialLabels, initialData, aspectName, standardRating, averageRating);
         }
 
         function waitForLivewire(callback) {
-            if (window.Livewire) callback();
-            else setTimeout(() => waitForLivewire(callback), 100);
+            if (window.Livewire) {
+                callback();
+            } else {
+                setTimeout(() => waitForLivewire(callback), 100);
+            }
         }
 
-        function onDistributionUpdated(payload) {
+        function onDistributionUpdated(eventData) {
             try {
+                const payload = Array.isArray(eventData) && eventData.length > 0 ? eventData[0] : eventData;
+
                 const labels = payload.labels || ['I', 'II', 'III', 'IV', 'V'];
                 const data = Array.isArray(payload.data) ? payload.data : [];
                 const label = payload.aspectName || '';
-                renderChart(labels, data, label);
+                const standardRating = payload.standardRating || 0;
+                const averageRating = payload.averageRating || 0;
+
+                renderChart(labels, data, label, standardRating, averageRating);
             } catch (e) {
-                console.error('distribution-updated render error', e, payload);
+                console.error('distribution-updated render error:', e, eventData);
             }
         }
 
         waitForLivewire(function() {
             initialRenderFromServer();
             Livewire.on('distribution-updated', onDistributionUpdated);
-        });
-
-        window.addEventListener('distribution-updated', function(e) {
-            const payload = e.detail || {};
-            onDistributionUpdated(payload);
         });
     })();
 </script>
