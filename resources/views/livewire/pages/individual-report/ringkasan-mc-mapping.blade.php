@@ -1,4 +1,39 @@
-<x-layouts.app title="Ringkasan Kompetensi">
+<style>
+    /* Standard rating cell styling */
+    .rating-cell-standard {
+        background: linear-gradient(135deg, #fef3c7, #fde68a);
+        color: #92400e;
+        font-weight: bold;
+    }
+
+    /* Rating scale colors */
+    .rating-1 {
+        background-color: #ef4444;
+        color: white;
+    }
+
+    .rating-2 {
+        background-color: #f97316;
+        color: white;
+    }
+
+    .rating-3 {
+        background-color: #f59e0b;
+        color: white;
+    }
+
+    .rating-4 {
+        background-color: #10b981;
+        color: white;
+    }
+
+    .rating-5 {
+        background-color: #059669;
+        color: white;
+    }
+</style>
+
+<div>
     <div class="bg-white mx-auto my-8 shadow overflow-hidden" style="max-width: 1200px;">
         <!-- Header -->
         <div class="border-b-4 border-black py-4 bg-white">
@@ -13,32 +48,33 @@
                 <tr>
                     <td class="py-1 font-semibold" style="width: 150px;">Nomor Tes</td>
                     <td class="py-1" style="width: 20px;">:</td>
-                    <td class="py-1">1</td>
+                    <td class="py-1">{{ $participant->test_number }}</td>
                 </tr>
                 <tr>
                     <td class="py-1 font-semibold">NIP</td>
                     <td class="py-1">:</td>
-                    <td class="py-1">19780923 199803 1 003</td>
+                    <td class="py-1">{{ $participant->skb_number ?? '-' }}</td>
                 </tr>
                 <tr>
                     <td class="py-1 font-semibold">Nama</td>
                     <td class="py-1">:</td>
-                    <td class="py-1">Badrus Samsu Darusi, S.Stp., M.Si.</td>
+                    <td class="py-1">{{ $participant->name }}</td>
                 </tr>
                 <tr>
                     <td class="py-1 font-semibold">Jabatan Saat Ini</td>
                     <td class="py-1">:</td>
-                    <td class="py-1">Sekretaris Inspektorat Daerah</td>
+                    <td class="py-1">{{ $participant->positionFormation->name ?? '-' }}</td>
                 </tr>
                 <tr>
                     <td class="py-1 font-semibold">Standar Penilaian</td>
                     <td class="py-1">:</td>
-                    <td class="py-1">JPT Pratama</td>
+                    <td class="py-1">{{ $participant->assessmentEvent->template->name ?? '-' }}
+                    </td>
                 </tr>
                 <tr>
                     <td class="py-1 font-semibold">Tanggal Tes</td>
                     <td class="py-1">:</td>
-                    <td class="py-1">15 Maret 2023</td>
+                    <td class="py-1">{{ $participant->assessmentEvent->start_date?->format('d F Y') ?? '-' }}</td>
                 </tr>
             </table>
         </div>
@@ -71,87 +107,38 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td class="border-2 border-black px-3 py-3 text-center">1</td>
-                        <td class="border-2 border-black px-3 py-3">Integritas</td>
-                        <td class="border-2 border-black px-3 py-3 text-center"></td>
-                        <td class="border-2 border-black px-3 py-3 text-center"></td>
-                        <td class="border-2 border-black px-3 py-3 text-center"></td>
-                        <td class="border-2 border-black px-3 py-3 text-center bg-green-500 font-bold text-lg">√</td>
-                        <td class="border-2 border-black px-3 py-3 text-center"></td>
-                        <td class="border-2 border-black px-3 py-3 text-xs">
-                            <strong>Kompeten</strong><br>
-                            Perilaku yang ditunjukkan sesuai dengan tingkat yang diperlukan
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="border-2 border-black px-3 py-3 text-center">2</td>
-                        <td class="border-2 border-black px-3 py-3">Kerjasama</td>
-                        <td class="border-2 border-black px-3 py-3 text-center"></td>
-                        <td class="border-2 border-black px-3 py-3 text-center"></td>
-                        <td class="border-2 border-black px-3 py-3 text-center bg-yellow-400 font-bold text-lg">√</td>
-                        <td class="border-2 border-black px-3 py-3 text-center"></td>
-                        <td class="border-2 border-black px-3 py-3 text-center"></td>
-                        <td class="border-2 border-black px-3 py-3 text-xs">
-                            <strong>Cukup Kompeten</strong><br>
-                            Perilaku yang ditunjukkan cukup sesuai dengan tingkatan yang diperlukan, dengan tetap
-                            memerlukan pengembangan perilaku
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="border-2 border-black px-3 py-3 text-center">3</td>
-                        <td class="border-2 border-black px-3 py-3">Komunikasi</td>
-                        <td class="border-2 border-black px-3 py-3 text-center"></td>
-                        <td class="border-2 border-black px-3 py-3 text-center"></td>
-                        <td class="border-2 border-black px-3 py-3 text-center bg-yellow-400 font-bold text-lg">√</td>
-                        <td class="border-2 border-black px-3 py-3 text-center"></td>
-                        <td class="border-2 border-black px-3 py-3 text-center"></td>
-                        <td class="border-2 border-black px-3 py-3 text-xs">
-                            <strong>Cukup Kompeten</strong><br>
-                            Perilaku yang ditunjukkan cukup sesuai dengan tingkatan yang diperlukan, dengan tetap
-                            memerlukan pengembangan perilaku
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="border-2 border-black px-3 py-3 text-center">4</td>
-                        <td class="border-2 border-black px-3 py-3">Orientasi pada Hasil</td>
-                        <td class="border-2 border-black px-3 py-3 text-center"></td>
-                        <td class="border-2 border-black px-3 py-3 text-center"></td>
-                        <td class="border-2 border-black px-3 py-3 text-center"></td>
-                        <td class="border-2 border-black px-3 py-3 text-center bg-green-500 font-bold text-lg">√</td>
-                        <td class="border-2 border-black px-3 py-3 text-center"></td>
-                        <td class="border-2 border-black px-3 py-3 text-xs">
-                            <strong>Kompeten</strong><br>
-                            Perilaku yang ditunjukkan sesuai dengan tingkat yang diperlukan
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="border-2 border-black px-3 py-3 text-center">5</td>
-                        <td class="border-2 border-black px-3 py-3">Pelayanan Publik</td>
-                        <td class="border-2 border-black px-3 py-3 text-center"></td>
-                        <td class="border-2 border-black px-3 py-3 text-center"></td>
-                        <td class="border-2 border-black px-3 py-3 text-center bg-yellow-400 font-bold text-lg">√</td>
-                        <td class="border-2 border-black px-3 py-3 text-center"></td>
-                        <td class="border-2 border-black px-3 py-3 text-center"></td>
-                        <td class="border-2 border-black px-3 py-3 text-xs">
-                            <strong>Cukup Kompeten</strong><br>
-                            Perilaku yang ditunjukkan cukup sesuai dengan tingkatan yang diperlukan, dengan tetap
-                            memerlukan pengembangan perilaku
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="border-2 border-black px-3 py-3 text-center">9</td>
-                        <td class="border-2 border-black px-3 py-3">Perekat Bangsa</td>
-                        <td class="border-2 border-black px-3 py-3 text-center"></td>
-                        <td class="border-2 border-black px-3 py-3 text-center"></td>
-                        <td class="border-2 border-black px-3 py-3 text-center"></td>
-                        <td class="border-2 border-black px-3 py-3 text-center bg-green-500 font-bold text-lg">√</td>
-                        <td class="border-2 border-black px-3 py-3 text-center"></td>
-                        <td class="border-2 border-black px-3 py-3 text-xs">
-                            <strong>Kompeten</strong><br>
-                            Perilaku yang ditunjukkan sesuai dengan tingkat yang diperlukan
-                        </td>
-                    </tr>
+                    @foreach ($aspectsData as $aspect)
+                        <tr>
+                            <td class="border-2 border-black px-3 py-3 text-center">{{ $aspect['number'] }}</td>
+                            <td class="border-2 border-black px-3 py-3">{{ $aspect['name'] }}</td>
+                            @php
+                                $roundedIndividualRating = round($aspect['individual_rating']);
+                                $roundedStandardRating = round($aspect['standard_rating']);
+                            @endphp
+                            @for ($i = 1; $i <= 5; $i++)
+                                @php
+                                    $isStandard = $i == $roundedStandardRating;
+                                    $isIndividual = $i == $roundedIndividualRating;
+                                    $ratingClass = "rating-{$i}";
+                                @endphp
+                                <td
+                                    class="border-2 border-black px-3 py-3 text-center relative {{ $isStandard ? 'rating-cell-standard' : '' }} {{ $isIndividual && !$isStandard ? "{$ratingClass} font-bold text-lg" : '' }}">
+                                    @if ($isIndividual && $isStandard)
+                                        {{-- Both standard and individual are the same --}}
+                                        <span class="{{ $ratingClass }} font-bold text-lg px-2 py-1 rounded">√</span>
+                                    @elseif ($isIndividual)
+                                        √
+                                    @elseif ($isStandard)
+                                        S
+                                    @endif
+                                </td>
+                            @endfor
+                            <td class="border-2 border-black px-3 py-3 text-xs">
+                                <strong>{{ $aspect['conclusion']['title'] }}</strong><br>
+                                {{ $aspect['conclusion']['description'] }}
+                            </td>
+                        </tr>
+                    @endforeach
                 </tbody>
             </table>
         </div>
@@ -161,31 +148,42 @@
             <div class="text-sm font-bold mb-2 text-gray-900">Note :</div>
             <div class="grid grid-cols-1 gap-2 text-sm text-gray-900">
                 <div class="flex items-center gap-3">
-                    <div class="w-8 h-6 bg-gray-400 border border-black"></div>
+                    <div
+                        class="w-8 h-6 rating-cell-standard border border-black flex items-center justify-center font-bold">
+                        S</div>
                     <span><em>Standar</em></span>
                 </div>
                 <div class="flex items-center gap-3">
-                    <div class="w-8 h-6 bg-pink-300 border border-black"></div>
-                    <span><em>Belum Kompeten</em></span>
-                </div>
-                <div class="flex items-center gap-3">
-                    <div class="w-8 h-6 bg-red-600 border border-black"></div>
-                    <span><em>Kurang Kompeten</em></span>
-                </div>
-                <div class="flex items-center gap-3">
-                    <div class="w-8 h-6 bg-yellow-400 border border-black flex items-center justify-center font-bold">3
+                    <div class="w-8 h-6 rating-1 border border-black flex items-center justify-center font-bold">
+                        √
                     </div>
-                    <span><em>Cukup Kompeten</em></span>
+                    <span><em>Rating 1 - Rendah</em></span>
                 </div>
                 <div class="flex items-center gap-3">
-                    <div class="w-8 h-6 bg-green-500 border border-black"></div>
-                    <span><em>Kompeten</em></span>
+                    <div class="w-8 h-6 rating-2 border border-black flex items-center justify-center font-bold">
+                        √
+                    </div>
+                    <span><em>Rating 2 - Kurang</em></span>
                 </div>
                 <div class="flex items-center gap-3">
-                    <div class="w-8 h-6 bg-blue-600 border border-black"></div>
-                    <span><em>Sangat Kompeten</em></span>
+                    <div class="w-8 h-6 rating-3 border border-black flex items-center justify-center font-bold">
+                        √
+                    </div>
+                    <span><em>Rating 3 - Cukup</em></span>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-6 rating-4 border border-black flex items-center justify-center font-bold">
+                        √
+                    </div>
+                    <span><em>Rating 4 - Baik</em></span>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-6 rating-5 border border-black flex items-center justify-center font-bold">
+                        √
+                    </div>
+                    <span><em>Rating 5 - Baik Sekali</em></span>
                 </div>
             </div>
         </div>
     </div>
-</x-layouts.app>
+</div>

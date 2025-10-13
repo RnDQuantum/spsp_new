@@ -32,9 +32,8 @@ Route::get('/general-psy-mapping/{eventCode}/{testNumber}', App\Livewire\Pages\I
 // Individual Report Route - Spider Plot
 Route::get('/spider-plot/{eventCode}/{testNumber}', App\Livewire\Pages\IndividualReport\SpiderPlot::class)->name('spider_plot');
 
-Route::get('/ringkasan-mc-mapping', function () {
-    return view('livewire.pages.individual-report.ringkasan-mc-mapping');
-})->name('ringkasan-mc-mapping');
+// Individual Report Route - Ringkasan MC Mapping (Kompetensi Summary)
+Route::get('/ringkasan-mc-mapping/{eventCode}/{testNumber}', App\Livewire\Pages\IndividualReport\RingkasanMcMapping::class)->name('ringkasan_mc_mapping');
 
 Route::get('/gambaran_ringkasan', function () {
     return view('livewire.pages.individual-report.gambaran_ringkasan');
