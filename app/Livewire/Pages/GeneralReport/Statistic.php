@@ -32,8 +32,11 @@ class Statistic extends Component
 
     public float $averageRating = 0.0;
 
+    public string $chartId = '';
+
     public function mount(): void
     {
+        $this->chartId = 'statistic'.uniqid();
         $this->availableEvents = AssessmentEvent::query()
             ->orderByDesc('start_date')
             ->get(['code', 'name'])
@@ -67,7 +70,8 @@ class Statistic extends Component
         }
 
         $this->refreshStatistics();
-        $this->dispatch('distribution-updated', [
+        $this->dispatch('chartDataUpdated', [
+            'chartId' => $this->chartId,
             'labels' => ['I', 'II', 'III', 'IV', 'V'],
             'data' => array_values($this->distribution),
             'standardRating' => $this->standardRating,
@@ -80,7 +84,8 @@ class Statistic extends Component
     {
         $this->aspectId = (int) $this->aspectId;
         $this->refreshStatistics();
-        $this->dispatch('distribution-updated', [
+        $this->dispatch('chartDataUpdated', [
+            'chartId' => $this->chartId,
             'labels' => ['I', 'II', 'III', 'IV', 'V'],
             'data' => array_values($this->distribution),
             'standardRating' => $this->standardRating,
@@ -182,6 +187,7 @@ class Statistic extends Component
             'distribution' => $this->distribution,
             'standardRating' => $this->standardRating,
             'averageRating' => $this->averageRating,
+            'chartId' => $this->chartId,
         ]);
     }
 }

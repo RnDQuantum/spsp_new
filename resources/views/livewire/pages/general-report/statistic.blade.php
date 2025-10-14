@@ -37,8 +37,8 @@
     </div>
 
     <!-- Area Chart -->
-    <div class="px-4 pb-1" wire:ignore id="distribution-chart">
-        <canvas id="frekuensiChart" style="max-height: 270px;"></canvas>
+    <div class="px-4 pb-1" wire:ignore id="distribution-chart-{{ $chartId }}">
+        <canvas id="frekuensiChart-{{ $chartId }}" style="max-height: 270px;"></canvas>
     </div>
 
     <!-- Tabel Kelas dan Rentang Nilai -->
@@ -93,14 +93,14 @@
         if (window.__statisticChartSetup) return;
         window.__statisticChartSetup = true;
 
-        let chartInstance = null;
+        let chartInstances = {};
 
         function coerceNumbers(arr) {
             return (arr || []).map(v => Number(v) || 0);
         }
 
-        function renderChart(labels, data, label, standardRating, averageRating) {
-            const canvas = document.getElementById('frekuensiChart');
+        function renderChart(chartId, labels, data, label, standardRating, averageRating) {
+            const canvas = document.getElementById(`frekuensiChart-${chartId}`);
             if (!canvas) {
                 return;
             }
@@ -112,101 +112,107 @@
             // Calculate total for percentage
             const total = coerced.reduce((sum, val) => sum + val, 0);
 
-            if (chartInstance) {
-                chartInstance.destroy();
+            if (!chartInstances[chartId]) {
+                chartInstances[chartId] = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: label,
+                            data: coerced,
+                            borderColor: 'brown',
+                            backgroundColor: 'rgba(200,0,0,0.08)',
+                            tension: 0.5,
+                            fill: false,
+                            pointRadius: 5,
+                            pointHoverRadius: 6,
+                            pointBorderWidth: 2,
+                            pointBackgroundColor: 'brown',
+                            pointBorderColor: '#5a2a2a',
+                            datalabels: {
+                                align: 'top',
+                                anchor: 'end',
+                                offset: 4,
+                                formatter: function(value) {
+                                    if (total === 0) return '0,00%';
+                                    const percentage = (value / total * 100).toFixed(2);
+                                    return percentage.replace('.', ',') + '%';
+                                }
+                            }
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        layout: {
+                            padding: {
+                                top: 32,
+                                right: 16,
+                                bottom: 16,
+                                left: 8
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                enabled: true,
+                                callbacks: {
+                                    label: function(context) {
+                                        const value = context.parsed.y;
+                                        const percentage = total === 0 ? '0,00' : (value / total * 100)
+                                            .toFixed(2).replace('.', ',');
+                                        return `Jumlah: ${value} (${percentage}%)`;
+                                    }
+                                }
+                            },
+                            datalabels: {
+                                backgroundColor: 'rgba(139, 69, 19, 0.85)',
+                                borderRadius: 4,
+                                color: 'white',
+                                font: {
+                                    weight: 'bold',
+                                    size: 11
+                                },
+                                padding: 6
+                            }
+                        },
+                        scales: {
+                            x: {
+                                border: {
+                                    display: false
+                                },
+                                offset: true,
+                                grid: {
+                                    offset: true
+                                }
+                            },
+                            y: {
+                                min: 0,
+                                suggestedMax: allZero ? 1 : undefined,
+                                border: {
+                                    display: false
+                                },
+                                ticks: {
+                                    stepSize: 1,
+                                    callback: function(value) {
+                                        return value + '%';
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    plugins: [ChartDataLabels]
+                });
+            } else {
+                // Update in-place like GeneralPsyMapping
+                const chart = chartInstances[chartId];
+                chart.data.labels = labels;
+                chart.data.datasets[0].label = label;
+                chart.data.datasets[0].data = coerced;
+                chart.update('active');
+                return;
             }
-
-            chartInstance = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: label,
-                        data: coerced,
-                        borderColor: 'brown',
-                        backgroundColor: 'rgba(200,0,0,0.08)',
-                        tension: 0.5,
-                        fill: false,
-                        pointRadius: 5,
-                        pointHoverRadius: 6,
-                        pointBorderWidth: 2,
-                        pointBackgroundColor: 'brown',
-                        pointBorderColor: '#5a2a2a',
-                        datalabels: {
-                            align: 'top',
-                            anchor: 'end',
-                            offset: 4,
-                            formatter: function(value) {
-                                if (total === 0) return '0,00%';
-                                const percentage = (value / total * 100).toFixed(2);
-                                return percentage.replace('.', ',') + '%';
-                            }
-                        }
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    layout: {
-                        padding: {
-                            top: 32,
-                            right: 16,
-                            bottom: 16,
-                            left: 8
-                        }
-                    },
-                    plugins: {
-                        legend: {
-                            display: false
-                        },
-                        tooltip: {
-                            enabled: true,
-                            callbacks: {
-                                label: function(context) {
-                                    const value = context.parsed.y;
-                                    const percentage = total === 0 ? '0,00' : (value / total * 100)
-                                        .toFixed(2).replace('.', ',');
-                                    return `Jumlah: ${value} (${percentage}%)`;
-                                }
-                            }
-                        },
-                        datalabels: {
-                            backgroundColor: 'rgba(139, 69, 19, 0.85)',
-                            borderRadius: 4,
-                            color: 'white',
-                            font: {
-                                weight: 'bold',
-                                size: 11
-                            },
-                            padding: 6
-                        }
-                    },
-                    scales: {
-                        x: {
-                            border: {
-                                display: false
-                            },
-                            offset: true,
-                            grid: {
-                                offset: true
-                            }
-                        },
-                        y: {
-                            min: 0,
-                            suggestedMax: allZero ? 1 : undefined,
-                            border: {
-                                display: false
-                            },
-                            ticks: {
-                                stepSize: 1,
-                                callback: function(value) {
-                                    return value + '%';
-                                }
-                            }
-                        }
-                    }
-                },
-                plugins: [ChartDataLabels]
-            });
         }
 
         function initialRenderFromServer() {
@@ -223,7 +229,8 @@
             const standardRating = {{ $standardRating }};
             const averageRating = {{ $averageRating }};
 
-            renderChart(initialLabels, initialData, aspectName, standardRating, averageRating);
+            renderChart(`{{ $chartId }}`, initialLabels, initialData, aspectName, standardRating,
+                averageRating);
         }
 
         function waitForLivewire(callback) {
@@ -238,13 +245,18 @@
             try {
                 const payload = Array.isArray(eventData) && eventData.length > 0 ? eventData[0] : eventData;
 
+                const chartId = payload.chartId;
+                if (!chartId || chartId !== `{{ $chartId }}`) {
+                    return; // ignore events for other instances
+                }
+
                 const labels = payload.labels || ['I', 'II', 'III', 'IV', 'V'];
                 const data = Array.isArray(payload.data) ? payload.data : [];
                 const label = payload.aspectName || '';
                 const standardRating = payload.standardRating || 0;
                 const averageRating = payload.averageRating || 0;
 
-                renderChart(labels, data, label, standardRating, averageRating);
+                renderChart(chartId, labels, data, label, standardRating, averageRating);
             } catch (e) {
                 console.error('distribution-updated render error:', e, eventData);
             }
@@ -252,7 +264,7 @@
 
         waitForLivewire(function() {
             initialRenderFromServer();
-            Livewire.on('distribution-updated', onDistributionUpdated);
+            Livewire.on('chartDataUpdated', onDistributionUpdated);
         });
     })();
 </script>
