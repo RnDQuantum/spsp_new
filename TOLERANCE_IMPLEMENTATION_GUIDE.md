@@ -5,12 +5,12 @@
 Fitur toleransi memungkinkan pengguna untuk menyesuaikan standar penilaian dengan mengurangi nilai standar secara persentase. Toleransi diterapkan secara real-time tanpa mengubah data di database.
 
 **Status Implementasi:**
-- ✅ **GeneralMapping** - Fully implemented
-- ✅ **GeneralPsyMapping** - Fully implemented
-- ⏳ **GeneralMcMapping** - Pending
-- ⏳ **GeneralMatching** - Pending
-- ⏳ **SpiderPlot** - Pending
-- ⏳ **RingkasanAssessment** - Pending
+
+-   ✅ **GeneralMapping** - Fully implemented
+-   ✅ **GeneralPsyMapping** - Fully implemented
+-   ✅ **GeneralMcMapping** - Fully implemented
+-   ⏳ **SpiderPlot** - Pending
+-   ✅ **RingkasanAssessment** - Fully implemented
 
 ---
 
@@ -18,11 +18,11 @@ Fitur toleransi memungkinkan pengguna untuk menyesuaikan standar penilaian denga
 
 ### 1. **Data Storage vs Display**
 
-| Layer | Original Standard | Adjusted Standard | Notes |
-|-------|-------------------|-------------------|-------|
-| **Database** | ✅ Stored | ❌ Not stored | Original values never change |
-| **Backend (Livewire)** | ✅ Calculated | ✅ Calculated | Both available in component |
-| **Frontend (View)** | Depends on context | ✅ Displayed | Table shows adjusted, chart shows both |
+| Layer                  | Original Standard  | Adjusted Standard | Notes                                  |
+| ---------------------- | ------------------ | ----------------- | -------------------------------------- |
+| **Database**           | ✅ Stored          | ❌ Not stored     | Original values never change           |
+| **Backend (Livewire)** | ✅ Calculated      | ✅ Calculated     | Both available in component            |
+| **Frontend (View)**    | Depends on context | ✅ Displayed      | Table shows adjusted, chart shows both |
 
 ### 2. **Tolerance Calculation Formula**
 
@@ -32,9 +32,10 @@ $adjustedStandard = $originalStandard * $toleranceFactor;
 ```
 
 **Examples:**
-- Tolerance 0% → Factor 1.0 → Adjusted = Original × 1.0 (no change)
-- Tolerance 10% → Factor 0.9 → Adjusted = Original × 0.9 (90% of original)
-- Tolerance 20% → Factor 0.8 → Adjusted = Original × 0.8 (80% of original)
+
+-   Tolerance 0% → Factor 1.0 → Adjusted = Original × 1.0 (no change)
+-   Tolerance 10% → Factor 0.9 → Adjusted = Original × 0.9 (90% of original)
+-   Tolerance 20% → Factor 0.8 → Adjusted = Original × 0.8 (80% of original)
 
 ### 3. **Gap Calculation**
 
@@ -376,17 +377,17 @@ Livewire.on('chartDataUpdated', function(data) {
 
 ### **Chart Styling**
 
-| Element | Color | Style | Width |
-|---------|-------|-------|-------|
-| **Standar Original** | `#000000` (Black) | Solid | 2px |
-| **Standar Adjusted** | `#6B7280` (Gray) | Dashed [5,5] | 1.5px |
-| **Individual** | `#DC2626` (Red) | Solid | 2px |
+| Element              | Color             | Style        | Width |
+| -------------------- | ----------------- | ------------ | ----- |
+| **Standar Original** | `#000000` (Black) | Solid        | 2px   |
+| **Standar Adjusted** | `#6B7280` (Gray)  | Dashed [5,5] | 1.5px |
+| **Individual**       | `#DC2626` (Red)   | Solid        | 2px   |
 
 ### **Table Header Dynamic Text**
 
-- Tolerance 0%: `"Standard"`
-- Tolerance 10%: `"Standard (-10%)"`
-- Tolerance 20%: `"Standard (-20%)"`
+-   Tolerance 0%: `"Standard"`
+-   Tolerance 10%: `"Standard (-10%)"`
+-   Tolerance 20%: `"Standard (-20%)"`
 
 ---
 
@@ -399,6 +400,7 @@ Livewire.on('chartDataUpdated', function(data) {
 **Cause:** Forgot to reset totals before recalculating.
 
 **Solution:**
+
 ```php
 private function calculateTotals(): void
 {
@@ -421,6 +423,7 @@ private function calculateTotals(): void
 **Cause:** Forgot to reset chart arrays.
 
 **Solution:**
+
 ```php
 private function prepareChartData(): void
 {
@@ -443,6 +446,7 @@ private function prepareChartData(): void
 **Cause:** Using gap instead of percentage for conclusion.
 
 **Solution:**
+
 ```php
 // ❌ WRONG - using gap
 if ($gapRating >= 0) {
@@ -462,6 +466,7 @@ if ($percentageScore >= 100) {
 **Cause:** Not storing/passing original standard values.
 
 **Solution:**
+
 ```php
 // ✅ Store both original and adjusted
 return [
@@ -477,83 +482,90 @@ return [
 
 When implementing tolerance on a new component, verify:
 
-- [ ] **Tolerance 0%**: Values match database exactly
-- [ ] **Tolerance 10%**: Standard values reduced to 90%
-- [ ] **Tolerance 20%**: Standard values reduced to 80%
-- [ ] **Total Individual**: Never changes when tolerance changes
-- [ ] **Total Standard**: Decreases as tolerance increases
-- [ ] **Total Gap**: Changes based on adjusted standard
-- [ ] **Percentage**: Increases as tolerance increases (denominator decreases)
-- [ ] **Conclusion**: Updates correctly based on percentage thresholds
-- [ ] **Chart**: Shows 3 lines (original, adjusted, individual)
-- [ ] **Chart Legend**: Labels update dynamically
-- [ ] **Table Header**: Shows tolerance indicator
-- [ ] **Session Persistence**: Tolerance value persists across page reloads
+-   [ ] **Tolerance 0%**: Values match database exactly
+-   [ ] **Tolerance 10%**: Standard values reduced to 90%
+-   [ ] **Tolerance 20%**: Standard values reduced to 80%
+-   [ ] **Total Individual**: Never changes when tolerance changes
+-   [ ] **Total Standard**: Decreases as tolerance increases
+-   [ ] **Total Gap**: Changes based on adjusted standard
+-   [ ] **Percentage**: Increases as tolerance increases (denominator decreases)
+-   [ ] **Conclusion**: Updates correctly based on percentage thresholds
+-   [ ] **Chart**: Shows 3 lines (original, adjusted, individual)
+-   [ ] **Chart Legend**: Labels update dynamically
+-   [ ] **Table Header**: Shows tolerance indicator
+-   [ ] **Session Persistence**: Tolerance value persists across page reloads
 
 ---
 
 ## Example Calculation Walkthrough
 
 **Given:**
-- Original Standard Score: 65.80
-- Individual Score: 62.86
-- Tolerance: 10%
+
+-   Original Standard Score: 65.80
+-   Individual Score: 62.86
+-   Tolerance: 10%
 
 **Step-by-step:**
 
 1. **Calculate tolerance factor:**
-   ```
-   Factor = 1 - (10 / 100) = 0.9
-   ```
+
+    ```
+    Factor = 1 - (10 / 100) = 0.9
+    ```
 
 2. **Calculate adjusted standard:**
-   ```
-   Adjusted = 65.80 × 0.9 = 59.22
-   ```
+
+    ```
+    Adjusted = 65.80 × 0.9 = 59.22
+    ```
 
 3. **Calculate gap:**
-   ```
-   Gap = 62.86 - 59.22 = +3.64
-   ```
+
+    ```
+    Gap = 62.86 - 59.22 = +3.64
+    ```
 
 4. **Calculate percentage:**
-   ```
-   Percentage = (62.86 / 59.22) × 100 = 106.15%
-   ```
+
+    ```
+    Percentage = (62.86 / 59.22) × 100 = 106.15%
+    ```
 
 5. **Determine conclusion:**
-   ```
-   106.15% >= 100 → "Memenuhi/Meet Requirement" ✅
-   ```
+    ```
+    106.15% >= 100 → "Memenuhi/Meet Requirement" ✅
+    ```
 
 **Comparison:**
 
-| Tolerance | Adjusted Std | Gap | % | Conclusion |
-|-----------|--------------|-----|---|------------|
-| 0% | 65.80 | -2.94 | 95.53% | Kurang Memenuhi |
-| 10% | 59.22 | +3.64 | 106.15% | Memenuhi ✅ |
-| 20% | 52.64 | +10.22 | 119.40% | Lebih Memenuhi |
+| Tolerance | Adjusted Std | Gap    | %       | Conclusion      |
+| --------- | ------------ | ------ | ------- | --------------- |
+| 0%        | 65.80        | -2.94  | 95.53%  | Kurang Memenuhi |
+| 10%       | 59.22        | +3.64  | 106.15% | Memenuhi ✅     |
+| 20%       | 52.64        | +10.22 | 119.40% | Lebih Memenuhi  |
 
 ---
 
 ## Files Modified in GeneralMapping
 
 ### Backend
-- `app/Livewire/Pages/IndividualReport/GeneralMapping.php`
-  - Added `$tolerancePercentage` property
-  - Added original standard fields to chart data
-  - Updated `loadCategoryAspects()` to calculate adjusted values
-  - Updated `calculateTotals()` to reset before recalculating
-  - Updated `prepareChartData()` to include original values
-  - Updated `getConclusionText()` to use percentage logic
-  - Updated `handleToleranceUpdate()` to dispatch chart data
+
+-   `app/Livewire/Pages/IndividualReport/GeneralMapping.php`
+    -   Added `$tolerancePercentage` property
+    -   Added original standard fields to chart data
+    -   Updated `loadCategoryAspects()` to calculate adjusted values
+    -   Updated `calculateTotals()` to reset before recalculating
+    -   Updated `prepareChartData()` to include original values
+    -   Updated `getConclusionText()` to use percentage logic
+    -   Updated `handleToleranceUpdate()` to dispatch chart data
 
 ### Frontend
-- `resources/views/livewire/pages/individual-report/general-mapping.blade.php`
-  - Updated table header to show tolerance indicator
-  - Updated chart initialization to include 3 datasets
-  - Updated chart legend to show all 3 lines
-  - Updated chart data listener to handle original values
+
+-   `resources/views/livewire/pages/individual-report/general-mapping.blade.php`
+    -   Updated table header to show tolerance indicator
+    -   Updated chart initialization to include 3 datasets
+    -   Updated chart legend to show all 3 lines
+    -   Updated chart data listener to handle original values
 
 ---
 
@@ -572,6 +584,7 @@ The following components also use tolerance and should follow the same pattern:
 ## Session Storage
 
 Tolerance value is stored in session:
+
 ```php
 session(['individual_report.tolerance' => $value]);
 $tolerance = session('individual_report.tolerance', 10); // default 10%
@@ -595,19 +608,20 @@ When implementing on other components, consider:
 
 ## Maintenance Notes
 
-- **Database schema**: No changes needed - all calculations are runtime only
-- **Performance**: Tolerance calculations are lightweight (simple multiplication)
-- **Backwards compatibility**: Setting tolerance to 0% gives exact original behavior
-- **Future enhancements**: Could add tolerance presets, per-aspect tolerance, etc.
+-   **Database schema**: No changes needed - all calculations are runtime only
+-   **Performance**: Tolerance calculations are lightweight (simple multiplication)
+-   **Backwards compatibility**: Setting tolerance to 0% gives exact original behavior
+-   **Future enhancements**: Could add tolerance presets, per-aspect tolerance, etc.
 
 ---
 
 ## Contact & Support
 
 For questions about this implementation, refer to chat history with context about:
-- Original bug: Total values increasing on tolerance change
-- Design decision: Use percentage (not gap) for conclusions
-- Visual design: 3-line charts with proper legends
-- Calculation formulas: Adjusted standard, gap, percentage
 
-Last updated: 2025-01-13 (GeneralMapping, GeneralPsyMapping completed)
+-   Original bug: Total values increasing on tolerance change
+-   Design decision: Use percentage (not gap) for conclusions
+-   Visual design: 3-line charts with proper legends
+-   Calculation formulas: Adjusted standard, gap, percentage
+
+Last updated: 2025-01-14 (GeneralMapping, GeneralPsyMapping, GeneralMcMapping, RingkasanAssessment completed)

@@ -30,6 +30,26 @@ class RingkasanAssessment extends Component
     // Tolerance percentage (default 10%)
     public int $tolerancePercentage = 10;
 
+    /**
+     * Get adjusted standard score for a category
+     */
+    private function getAdjustedStandardScore(float $originalStandardScore): float
+    {
+        $toleranceFactor = 1 - ($this->tolerancePercentage / 100);
+
+        return $originalStandardScore * $toleranceFactor;
+    }
+
+    /**
+     * Get adjusted gap score
+     */
+    private function getAdjustedGap(float $individualScore, float $originalStandardScore): float
+    {
+        $adjustedStandard = $this->getAdjustedStandardScore($originalStandardScore);
+
+        return $individualScore - $adjustedStandard;
+    }
+
     public function mount($eventCode, $testNumber): void
     {
         // Load tolerance from session (same as GeneralPsyMapping)
@@ -82,30 +102,26 @@ class RingkasanAssessment extends Component
             return 'Tidak Ikut Assessment';
         }
 
-        // R17 = Gap Score (Potensi)
-        $gapScore = $this->potensiAssessment->gap_score;
+        // Get original values
+        $individualScore = $this->potensiAssessment->total_individual_score;
+        $originalStandardScore = $this->potensiAssessment->total_standard_score;
+        $originalGapScore = $this->potensiAssessment->gap_score;
 
-        // N17 = Standard Score (Potensi)
-        $standardScore = $this->potensiAssessment->total_standard_score;
-
-        // Tolerance (e.g., 10% = 0.1)
-        $tolerance = $this->tolerancePercentage / 100;
-
-        // Check if not participating: R17 = N17-(N17*2) atau R17 = -N17
-        if ($gapScore == -$standardScore) {
+        // Check if not participating: original gap = -standard (individual is 0)
+        if ($originalGapScore == -$originalStandardScore) {
             return 'Tidak Ikut Assessment';
         }
 
-        // R17 > 0: Di Atas Standar
-        if ($gapScore > 0) {
+        // Calculate adjusted gap based on tolerance
+        $adjustedGap = $this->getAdjustedGap($individualScore, $originalStandardScore);
+
+        // Adjusted gap > 0: Di Atas Standar
+        if ($adjustedGap > 0) {
             return 'Di Atas Standar';
         }
 
-        // R17 >= (N17*(1-tolerance) - N17): Memenuhi Standar
-        // Simplified: R17 >= -N17*tolerance
-        $minGapForStandard = -($standardScore * $tolerance);
-
-        if ($gapScore >= $minGapForStandard) {
+        // Adjusted gap >= 0: Memenuhi Standar (within tolerance)
+        if ($adjustedGap >= 0) {
             return 'Memenuhi Standar';
         }
 
@@ -119,30 +135,26 @@ class RingkasanAssessment extends Component
             return 'Tidak Ikut Assessment';
         }
 
-        // R18 = Gap Score (Kompetensi)
-        $gapScore = $this->kompetensiAssessment->gap_score;
+        // Get original values
+        $individualScore = $this->kompetensiAssessment->total_individual_score;
+        $originalStandardScore = $this->kompetensiAssessment->total_standard_score;
+        $originalGapScore = $this->kompetensiAssessment->gap_score;
 
-        // N18 = Standard Score (Kompetensi)
-        $standardScore = $this->kompetensiAssessment->total_standard_score;
-
-        // Tolerance (e.g., 10% = 0.1)
-        $tolerance = $this->tolerancePercentage / 100;
-
-        // Check if not participating: R18 = N18-(N18*2) atau R18 = -N18
-        if ($gapScore == -$standardScore) {
+        // Check if not participating: original gap = -standard (individual is 0)
+        if ($originalGapScore == -$originalStandardScore) {
             return 'Tidak Ikut Assessment';
         }
 
-        // R18 > 0: Sangat Kompeten
-        if ($gapScore > 0) {
+        // Calculate adjusted gap based on tolerance
+        $adjustedGap = $this->getAdjustedGap($individualScore, $originalStandardScore);
+
+        // Adjusted gap > 0: Sangat Kompeten
+        if ($adjustedGap > 0) {
             return 'Sangat Kompeten';
         }
 
-        // R18 >= (N18*(1-tolerance) - N18): Kompeten
-        // Simplified: R18 >= -N18*tolerance
-        $minGapForStandard = -($standardScore * $tolerance);
-
-        if ($gapScore >= $minGapForStandard) {
+        // Adjusted gap >= 0: Kompeten (within tolerance)
+        if ($adjustedGap >= 0) {
             return 'Kompeten';
         }
 
@@ -191,30 +203,26 @@ class RingkasanAssessment extends Component
             return 'Tidak Ikut Assessment';
         }
 
-        // R20 = Total Gap Score
-        $totalGapScore = $this->finalAssessment->total_individual_score - $this->finalAssessment->total_standard_score;
+        // Get original values
+        $totalIndividualScore = (float) $this->finalAssessment->total_individual_score;
+        $originalTotalStandardScore = (float) $this->finalAssessment->total_standard_score;
+        $originalTotalGapScore = $totalIndividualScore - $originalTotalStandardScore;
 
-        // N20 = Total Standard Score
-        $totalStandardScore = $this->finalAssessment->total_standard_score;
-
-        // Tolerance (e.g., 10% = 0.1)
-        $tolerance = $this->tolerancePercentage / 100;
-
-        // Check if not participating: R20 = N20-(N20*2) atau R20 = -N20
-        if ($totalGapScore == -$totalStandardScore) {
+        // Check if not participating: original gap = -standard (individual is 0)
+        if ($originalTotalGapScore == -$originalTotalStandardScore) {
             return 'Tidak Ikut Assessment';
         }
 
-        // R20 > 0: Di Atas Standar
-        if ($totalGapScore > 0) {
+        // Calculate adjusted gap based on tolerance
+        $adjustedTotalGap = $this->getAdjustedGap($totalIndividualScore, $originalTotalStandardScore);
+
+        // Adjusted gap > 0: Di Atas Standar
+        if ($adjustedTotalGap > 0) {
             return 'Di Atas Standar';
         }
 
-        // R20 >= (N20*(1-tolerance) - N20): Memenuhi Standar
-        // Simplified: R20 >= -N20*tolerance
-        $minGapForStandard = -($totalStandardScore * $tolerance);
-
-        if ($totalGapScore >= $minGapForStandard) {
+        // Adjusted gap >= 0: Memenuhi Standar (within tolerance)
+        if ($adjustedTotalGap >= 0) {
             return 'Memenuhi Standar';
         }
 
@@ -288,6 +296,72 @@ class RingkasanAssessment extends Component
             'total' => $summary['total'],
             'percentage' => $summary['percentage'],
         ]);
+    }
+
+    /**
+     * Public methods to get adjusted values for view
+     */
+    public function getAdjustedPotensiStandardScore(): float
+    {
+        if (! $this->potensiAssessment) {
+            return 0;
+        }
+
+        return $this->getAdjustedStandardScore((float) $this->potensiAssessment->total_standard_score);
+    }
+
+    public function getAdjustedPotensiGap(): float
+    {
+        if (! $this->potensiAssessment) {
+            return 0;
+        }
+
+        return $this->getAdjustedGap(
+            (float) $this->potensiAssessment->total_individual_score,
+            (float) $this->potensiAssessment->total_standard_score
+        );
+    }
+
+    public function getAdjustedKompetensiStandardScore(): float
+    {
+        if (! $this->kompetensiAssessment) {
+            return 0;
+        }
+
+        return $this->getAdjustedStandardScore((float) $this->kompetensiAssessment->total_standard_score);
+    }
+
+    public function getAdjustedKompetensiGap(): float
+    {
+        if (! $this->kompetensiAssessment) {
+            return 0;
+        }
+
+        return $this->getAdjustedGap(
+            (float) $this->kompetensiAssessment->total_individual_score,
+            (float) $this->kompetensiAssessment->total_standard_score
+        );
+    }
+
+    public function getAdjustedTotalStandardScore(): float
+    {
+        if (! $this->finalAssessment) {
+            return 0;
+        }
+
+        return $this->getAdjustedStandardScore((float) $this->finalAssessment->total_standard_score);
+    }
+
+    public function getAdjustedTotalGap(): float
+    {
+        if (! $this->finalAssessment) {
+            return 0;
+        }
+
+        return $this->getAdjustedGap(
+            (float) $this->finalAssessment->total_individual_score,
+            (float) $this->finalAssessment->total_standard_score
+        );
     }
 
     /**

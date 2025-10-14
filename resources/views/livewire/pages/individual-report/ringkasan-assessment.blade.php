@@ -80,7 +80,7 @@
                         Bobot Penilaian
                     </th>
                     <th class="border-2 border-black px-3 py-3 font-bold text-center" style="width: 100px;">
-                        Standar Skor Akhir
+                        <span x-data x-text="$wire.tolerancePercentage > 0 ? 'Standar Skor Akhir (-' + $wire.tolerancePercentage + '%)' : 'Standar Skor Akhir'"></span>
                     </th>
                     <th class="border-2 border-black px-3 py-3 font-bold text-center" style="width: 100px;">
                         Skor Individu Akhir
@@ -109,13 +109,13 @@
                             {{ $potensiCategory->weight_percentage }}%
                         </td>
                         <td class="border-2 border-black px-3 py-3 text-center bg-white">
-                            {{ number_format($potensiAssessment->total_standard_score, 2, ',', '.') }}
+                            {{ number_format($this->getAdjustedPotensiStandardScore(), 2, ',', '.') }}
                         </td>
                         <td class="border-2 border-black px-3 py-3 text-center bg-white">
                             {{ number_format($potensiAssessment->total_individual_score, 2, ',', '.') }}
                         </td>
                         <td class="border-2 border-black px-3 py-3 text-center bg-white">
-                            {{ number_format($potensiAssessment->gap_score, 2, ',', '.') }}
+                            {{ number_format($this->getAdjustedPotensiGap(), 2, ',', '.') }}
                         </td>
                         <td class="border-2 border-black px-3 py-3 text-center font-bold {{ $this->getConclusionColorClass($this->getPotensiConclusion()) }}">
                             {{ $this->getPotensiConclusion() }}
@@ -138,13 +138,13 @@
                             {{ $kompetensiCategory->weight_percentage }}%
                         </td>
                         <td class="border-2 border-black px-3 py-3 text-center bg-white">
-                            {{ number_format($kompetensiAssessment->total_standard_score, 2, ',', '.') }}
+                            {{ number_format($this->getAdjustedKompetensiStandardScore(), 2, ',', '.') }}
                         </td>
                         <td class="border-2 border-black px-3 py-3 text-center bg-white">
                             {{ number_format($kompetensiAssessment->total_individual_score, 2, ',', '.') }}
                         </td>
                         <td class="border-2 border-black px-3 py-3 text-center bg-white">
-                            {{ number_format($kompetensiAssessment->gap_score, 2, ',', '.') }}
+                            {{ number_format($this->getAdjustedKompetensiGap(), 2, ',', '.') }}
                         </td>
                         <td class="border-2 border-black px-3 py-3 text-center font-bold {{ $this->getConclusionColorClass($this->getKompetensiConclusion()) }}">
                             {{ $this->getKompetensiConclusion() }}
@@ -169,14 +169,14 @@
                         </td>
                         <td class="border-2 border-black px-3 py-3 text-center"><strong>100%</strong></td>
                         <td class="border-2 border-black px-3 py-3 text-center">
-                            <strong>{{ number_format($finalAssessment->total_standard_score, 2, ',', '.') }}</strong>
+                            <strong>{{ number_format($this->getAdjustedTotalStandardScore(), 2, ',', '.') }}</strong>
                         </td>
                         <td class="border-2 border-black px-3 py-3 text-center">
                             <strong>{{ number_format($finalAssessment->total_individual_score, 2, ',', '.') }}</strong>
                         </td>
                         <td class="border-2 border-black px-3 py-3 text-center">
                             <strong>
-                                {{ number_format($finalAssessment->total_individual_score - $finalAssessment->total_standard_score, 2, ',', '.') }}
+                                {{ number_format($this->getAdjustedTotalGap(), 2, ',', '.') }}
                             </strong>
                         </td>
                         <td class="border-2 border-black px-3 py-3 text-center font-bold {{ $this->getTotalConclusionColorClass() }}">
