@@ -260,12 +260,79 @@ class RankingPsyMapping extends Component
         ];
     }
 
+    public function getConclusionSummary(): array
+    {
+        // Get conclusion summary for all participants in current event
+        if (! $this->eventCode) {
+            return [];
+        }
+
+        $event = AssessmentEvent::where('code', $this->eventCode)->first();
+        if (! $event) {
+            return [];
+        }
+
+        $potensiCategory = CategoryType::query()
+            ->where('template_id', $event->template_id)
+            ->where('code', 'potensi')
+            ->first();
+
+        if (! $potensiCategory) {
+            return [];
+        }
+
+        $potensiAspectIds = Aspect::query()
+            ->where('category_type_id', $potensiCategory->id)
+            ->pluck('id')
+            ->all();
+
+        if (empty($potensiAspectIds)) {
+            return [];
+        }
+
+        $aggregates = AspectAssessment::query()
+            ->selectRaw('participant_id, SUM(standard_score) as sum_original_standard_score, SUM(individual_score) as sum_individual_score')
+            ->where('event_id', $event->id)
+            ->whereIn('aspect_id', $potensiAspectIds)
+            ->groupBy('participant_id')
+            ->get();
+
+        $conclusions = [
+            'Lebih Memenuhi/More Requirement' => 0,
+            'Memenuhi/Meet Requirement' => 0,
+            'Kurang Memenuhi/Below Requirement' => 0,
+            'Belum Memenuhi/Under Perform' => 0,
+        ];
+
+        foreach ($aggregates as $r) {
+            $originalStandardScore = (float) $r->sum_original_standard_score;
+            $individualScore = (float) $r->sum_individual_score;
+
+            // Calculate adjusted standard based on tolerance
+            $toleranceFactor = 1 - ($this->tolerancePercentage / 100);
+            $adjustedStandardScore = $originalStandardScore * $toleranceFactor;
+
+            // Calculate percentage based on adjusted standard
+            $adjustedPercentage = $adjustedStandardScore > 0
+                ? ($individualScore / $adjustedStandardScore) * 100
+                : 0;
+
+            // Determine conclusion
+            $conclusion = $this->getConclusionText($adjustedPercentage);
+            $conclusions[$conclusion]++;
+        }
+
+        return $conclusions;
+    }
+
     public function render()
     {
         $rankings = $this->buildRankings();
+        $conclusionSummary = $this->getConclusionSummary();
 
         return view('livewire.pages.general-report.ranking-psy-mapping', [
             'rankings' => $rankings,
+            'conclusionSummary' => $conclusionSummary,
         ]);
     }
 }
