@@ -62,3 +62,7 @@ Route::get('/standard-mc', function () {
 Route::get('/standard-psikometrik', function () {
     return view('livewire.pages.general-report.standard-psikometrik');
 })->name('standard-psikometrik');
+
+Route::get('/tkmi', function () {
+    return view('livewire.pages.general-report.tkmi');
+})->name('tkmi');
