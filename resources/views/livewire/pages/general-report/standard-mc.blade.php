@@ -253,7 +253,6 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         // Radar Chart 1 (Rating)
         const ctx1 = document.getElementById('chartRating');

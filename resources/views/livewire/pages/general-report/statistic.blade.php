@@ -88,9 +88,6 @@
     </div>
 </div>
 
-<!-- Chart.js CDN & Script -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
 <script>
     (function() {
         if (window.__statisticChartSetup) return;
@@ -166,7 +163,8 @@
                             callbacks: {
                                 label: function(context) {
                                     const value = context.parsed.y;
-                                    const percentage = total === 0 ? '0,00' : (value / total * 100).toFixed(2).replace('.', ',');
+                                    const percentage = total === 0 ? '0,00' : (value / total * 100)
+                                        .toFixed(2).replace('.', ',');
                                     return `Jumlah: ${value} (${percentage}%)`;
                                 }
                             }

@@ -28,7 +28,8 @@
                         <th class="border border-black px-3 py-2 font-semibold">Atribut/Attribute</th>
                         <th class="border border-black px-3 py-2 font-semibold">Bobot %<br>100</th>
                         <th class="border border-black px-3 py-2 font-semibold" colspan="2">
-                            <span x-data x-text="$wire.tolerancePercentage > 0 ? 'Standard (-' + $wire.tolerancePercentage + '%)' : 'Standard'"></span>
+                            <span x-data
+                                x-text="$wire.tolerancePercentage > 0 ? 'Standard (-' + $wire.tolerancePercentage + '%)' : 'Standard'"></span>
                         </th>
                         <th class="border border-black px-3 py-2 font-semibold" colspan="2">Individu</th>
                         <th class="border border-black px-3 py-2 font-semibold" colspan="2">Gap</th>
@@ -437,7 +438,4 @@
             </script>
         </div>
     </div>
-
-    <!-- Include Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 </div>

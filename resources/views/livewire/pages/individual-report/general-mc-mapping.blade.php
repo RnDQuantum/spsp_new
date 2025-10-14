@@ -28,7 +28,8 @@
                         <th class="border border-black px-3 py-2 font-semibold">Atribut/Attribute</th>
                         <th class="border border-black px-3 py-2 font-semibold">Bobot %<br>100</th>
                         <th class="border border-black px-3 py-2 font-semibold" colspan="2">
-                            <span x-data x-text="$wire.tolerancePercentage > 0 ? 'Standard (-' + $wire.tolerancePercentage + '%)' : 'Standard'"></span>
+                            <span x-data
+                                x-text="$wire.tolerancePercentage > 0 ? 'Standard (-' + $wire.tolerancePercentage + '%)' : 'Standard'"></span>
                         </th>
                         <th class="border border-black px-3 py-2 font-semibold" colspan="2">Individu</th>
                         <th class="border border-black px-3 py-2 font-semibold" colspan="2">Gap</th>
@@ -258,10 +259,12 @@
                                     standardRatings = chartData.standardRatings;
 
                                     // Update all three datasets
-                                    window.ratingChart_{{ $chartId }}.data.datasets[0].data = chartData.originalStandardRatings;
+                                    window.ratingChart_{{ $chartId }}.data.datasets[0].data = chartData
+                                        .originalStandardRatings;
                                     window.ratingChart_{{ $chartId }}.data.datasets[1].label =
                                         `Toleransi ${tolerancePercentage}%`;
-                                    window.ratingChart_{{ $chartId }}.data.datasets[1].data = chartData.standardRatings;
+                                    window.ratingChart_{{ $chartId }}.data.datasets[1].data = chartData
+                                        .standardRatings;
                                     // Dataset[2] (individual) doesn't change
                                     window.ratingChart_{{ $chartId }}.update('active');
                                 }
@@ -415,10 +418,12 @@
                                     standardScores = chartData.standardScores;
 
                                     // Update all three datasets
-                                    window.scoreChart_{{ $chartId }}.data.datasets[0].data = chartData.originalStandardScores;
+                                    window.scoreChart_{{ $chartId }}.data.datasets[0].data = chartData
+                                        .originalStandardScores;
                                     window.scoreChart_{{ $chartId }}.data.datasets[1].label =
                                         `Toleransi ${tolerancePercentage}%`;
-                                    window.scoreChart_{{ $chartId }}.data.datasets[1].data = chartData.standardScores;
+                                    window.scoreChart_{{ $chartId }}.data.datasets[1].data = chartData
+                                        .standardScores;
                                     // Dataset[2] (individual) doesn't change
                                     window.scoreChart_{{ $chartId }}.update('active');
                                 }
@@ -431,7 +436,4 @@
             </script>
         </div>
     </div>
-
-    <!-- Include Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 </div>
