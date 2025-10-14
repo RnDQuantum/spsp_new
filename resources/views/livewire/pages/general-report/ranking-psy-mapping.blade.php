@@ -30,9 +30,28 @@
                         <th class="border-2 border-black px-3 py-3 text-center">NIP</th>
                         <th class="border-2 border-black px-3 py-3 text-center">Nama</th>
                         <th class="border-2 border-black px-3 py-3 text-center">Jabatan</th>
-                        <th class="border-2 border-black px-3 py-3 text-center">Rating</th>
-                        <th class="border-2 border-black px-3 py-3 text-center">Skor</th>
-                        <th class="border-2 border-black px-3 py-3 text-center">Keterangan</th>
+                        <th class="border-2 border-black px-3 py-3 text-center" colspan="2">
+                            <span x-data
+                                x-text="$wire.tolerancePercentage > 0 ? 'Standard (-' + $wire.tolerancePercentage + '%)' : 'Standard'"></span>
+                        </th>
+                        <th class="border-2 border-black px-3 py-3 text-center" colspan="2">Individu</th>
+                        <th class="border-2 border-black px-3 py-3 text-center" colspan="2">Gap</th>
+                        <th class="border-2 border-black px-3 py-3 text-center">Prosentase<br>Kesesuaian</th>
+                        <th class="border-2 border-black px-3 py-3 text-center">Kesimpulan/Conclusion</th>
+                    </tr>
+                    <tr class="bg-gray-200">
+                        <th class="border-2 border-black px-3 py-1"></th>
+                        <th class="border-2 border-black px-3 py-1"></th>
+                        <th class="border-2 border-black px-3 py-1"></th>
+                        <th class="border-2 border-black px-3 py-1"></th>
+                        <th class="border-2 border-black px-3 py-1 font-semibold">Rating/<br>Level</th>
+                        <th class="border-2 border-black px-3 py-1 font-semibold">Score</th>
+                        <th class="border-2 border-black px-3 py-1 font-semibold">Rating/<br>Level</th>
+                        <th class="border-2 border-black px-3 py-1 font-semibold">Score</th>
+                        <th class="border-2 border-black px-3 py-1 font-semibold">Rating/<br>Level</th>
+                        <th class="border-2 border-black px-3 py-1 font-semibold">Score</th>
+                        <th class="border-2 border-black px-3 py-1"></th>
+                        <th class="border-2 border-black px-3 py-1"></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -43,9 +62,19 @@
                             <td class="border-2 border-black px-3 py-2">{{ $row['name'] }}</td>
                             <td class="border-2 border-black px-3 py-2">{{ $row['position'] }}</td>
                             <td class="border-2 border-black px-3 py-2 text-center">
-                                {{ number_format($row['rating'], 2) }}</td>
+                                {{ number_format($row['standard_rating'], 2) }}</td>
                             <td class="border-2 border-black px-3 py-2 text-center">
-                                {{ number_format($row['score'], 2) }}</td>
+                                {{ number_format($row['standard_score'], 2) }}</td>
+                            <td class="border-2 border-black px-3 py-2 text-center">
+                                {{ number_format($row['individual_rating'], 2) }}</td>
+                            <td class="border-2 border-black px-3 py-2 text-center">
+                                {{ number_format($row['individual_score'], 2) }}</td>
+                            <td class="border-2 border-black px-3 py-2 text-center">
+                                {{ number_format($row['gap_rating'], 2) }}</td>
+                            <td class="border-2 border-black px-3 py-2 text-center">
+                                {{ number_format($row['gap_score'], 2) }}</td>
+                            <td class="border-2 border-black px-3 py-2 text-center">
+                                {{ number_format($row['percentage_score'], 2) }}%</td>
                             <td class="border-2 border-black px-3 py-2 text-center">{{ $row['conclusion'] }}</td>
                         </tr>
                     @endforeach

@@ -30,6 +30,7 @@ class RankingPsyMapping extends Component
 
     public function mount(): void
     {
+        // Load tolerance from session
         $this->tolerancePercentage = session('individual_report.tolerance', 10);
 
         $this->availableEvents = AssessmentEvent::query()
@@ -57,7 +58,10 @@ class RankingPsyMapping extends Component
     {
         $this->tolerancePercentage = $tolerance;
 
+        // Get updated summary statistics
         $summary = $this->getPassingSummary();
+
+        // Dispatch event to update summary statistics in ToleranceSelector
         $this->dispatch('summary-updated', [
             'passing' => $summary['passing'],
             'total' => $summary['total'],
@@ -101,7 +105,7 @@ class RankingPsyMapping extends Component
 
         // Aggregate by participant in DB and paginate
         $query = AspectAssessment::query()
-            ->selectRaw('participant_id, SUM(standard_rating) as sum_standard_rating, SUM(standard_score) as sum_standard_score, SUM(individual_rating) as sum_individual_rating, SUM(individual_score) as sum_individual_score, SUM(gap_score) as sum_gap_score')
+            ->selectRaw('participant_id, SUM(standard_rating) as sum_original_standard_rating, SUM(standard_score) as sum_original_standard_score, SUM(individual_rating) as sum_individual_rating, SUM(individual_score) as sum_individual_score')
             ->where('event_id', $event->id)
             ->whereIn('aspect_id', $potensiAspectIds)
             ->groupBy('participant_id')
@@ -117,16 +121,42 @@ class RankingPsyMapping extends Component
 
         $items = collect($paginator->items())->values()->map(function ($row, int $index) use ($startRank): array {
             $participant = Participant::with('positionFormation')->find($row->participant_id);
-            $totalGapScore = (float) $row->sum_gap_score;
+
+            // Get original values from database
+            $originalStandardRating = (float) $row->sum_original_standard_rating;
+            $originalStandardScore = (float) $row->sum_original_standard_score;
+            $individualRating = (float) $row->sum_individual_rating;
+            $individualScore = (float) $row->sum_individual_score;
+
+            // Calculate adjusted standard based on tolerance
+            $toleranceFactor = 1 - ($this->tolerancePercentage / 100);
+            $adjustedStandardRating = $originalStandardRating * $toleranceFactor;
+            $adjustedStandardScore = $originalStandardScore * $toleranceFactor;
+
+            // Calculate gap based on adjusted standard
+            $adjustedGapRating = $individualRating - $adjustedStandardRating;
+            $adjustedGapScore = $individualScore - $adjustedStandardScore;
+
+            // Calculate percentage based on adjusted standard
+            $adjustedPercentage = $adjustedStandardScore > 0
+                ? ($individualScore / $adjustedStandardScore) * 100
+                : 0;
 
             return [
                 'rank' => $startRank + $index + 1,
                 'nip' => $participant?->skb_number ?? $participant?->test_number ?? '-',
                 'name' => $participant?->name ?? '-',
                 'position' => $participant?->positionFormation?->name ?? '-',
-                'rating' => round((float) $row->sum_individual_rating, 2),
-                'score' => round((float) $row->sum_individual_score, 2),
-                'conclusion' => $this->overallConclusionText($totalGapScore),
+                'original_standard_rating' => round($originalStandardRating, 2),
+                'original_standard_score' => round($originalStandardScore, 2),
+                'standard_rating' => round($adjustedStandardRating, 2),
+                'standard_score' => round($adjustedStandardScore, 2),
+                'individual_rating' => round($individualRating, 2),
+                'individual_score' => round($individualScore, 2),
+                'gap_rating' => round($adjustedGapRating, 2),
+                'gap_score' => round($adjustedGapScore, 2),
+                'percentage_score' => round($adjustedPercentage, 2),
+                'conclusion' => $this->getConclusionText($adjustedPercentage),
                 'matrix' => 1,
             ];
         })->all();
@@ -138,6 +168,20 @@ class RankingPsyMapping extends Component
             $paginator->currentPage(),
             ['path' => $paginator->path(), 'query' => request()->query()]
         );
+    }
+
+    private function getConclusionText(float $percentageScore): string
+    {
+        // Conclusion based on percentage score relative to adjusted standard
+        if ($percentageScore >= 110) {
+            return 'Lebih Memenuhi/More Requirement';
+        } elseif ($percentageScore >= 100) {
+            return 'Memenuhi/Meet Requirement';
+        } elseif ($percentageScore >= 90) {
+            return 'Kurang Memenuhi/Below Requirement';
+        } else {
+            return 'Belum Memenuhi/Under Perform';
+        }
     }
 
     private function overallConclusionText(float $totalGapScore): string
@@ -183,14 +227,31 @@ class RankingPsyMapping extends Component
         }
 
         $aggregates = AspectAssessment::query()
-            ->selectRaw('participant_id, SUM(gap_score) as sum_gap_score')
+            ->selectRaw('participant_id, SUM(standard_score) as sum_original_standard_score, SUM(individual_score) as sum_individual_score')
             ->where('event_id', $event->id)
             ->whereIn('aspect_id', $potensiAspectIds)
             ->groupBy('participant_id')
             ->get();
 
         $total = $aggregates->count();
-        $passing = $aggregates->filter(fn ($r) => (float) $r->sum_gap_score >= 0)->count();
+
+        // Calculate passing based on adjusted percentage
+        $passing = $aggregates->filter(function ($r) {
+            $originalStandardScore = (float) $r->sum_original_standard_score;
+            $individualScore = (float) $r->sum_individual_score;
+
+            // Calculate adjusted standard based on tolerance
+            $toleranceFactor = 1 - ($this->tolerancePercentage / 100);
+            $adjustedStandardScore = $originalStandardScore * $toleranceFactor;
+
+            // Calculate percentage based on adjusted standard
+            $adjustedPercentage = $adjustedStandardScore > 0
+                ? ($individualScore / $adjustedStandardScore) * 100
+                : 0;
+
+            // Count as passing if percentage >= 100% (Memenuhi or Lebih Memenuhi)
+            return $adjustedPercentage >= 100;
+        })->count();
 
         return [
             'total' => $total,
