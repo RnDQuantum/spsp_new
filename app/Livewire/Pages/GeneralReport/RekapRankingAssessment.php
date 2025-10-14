@@ -179,11 +179,14 @@ class RekapRankingAssessment extends Component
             }
         }
 
+        $conclusionSummary = $this->getConclusionSummary();
+
         return view('livewire.pages.general-report.rekap-ranking-assessment', [
             'availableEvents' => $this->availableEvents,
             'potensiWeight' => $this->potensiWeight,
             'kompetensiWeight' => $this->kompetensiWeight,
             'rows' => $rows,
+            'conclusionSummary' => $conclusionSummary,
         ]);
     }
 
@@ -247,5 +250,76 @@ class RekapRankingAssessment extends Component
             'passing' => $passing,
             'percentage' => $total > 0 ? (int) round(($passing / $total) * 100) : 0,
         ];
+    }
+
+    public function getConclusionSummary(): array
+    {
+        // Get conclusion summary for all participants in current event
+        if (! $this->eventCode || ($this->potensiWeight + $this->kompetensiWeight) === 0) {
+            return [];
+        }
+
+        $event = AssessmentEvent::where('code', $this->eventCode)->first();
+        if (! $event) {
+            return [];
+        }
+
+        $potensi = CategoryType::where('template_id', $event->template_id)->where('code', 'potensi')->first();
+        $kompetensi = CategoryType::where('template_id', $event->template_id)->where('code', 'kompetensi')->first();
+        if (! $potensi || ! $kompetensi) {
+            return [];
+        }
+
+        $potensiId = (int) $potensi->id;
+        $kompetensiId = (int) $kompetensi->id;
+
+        $baseQuery = DB::table('aspect_assessments as aa')
+            ->join('aspects as a', 'a.id', '=', 'aa.aspect_id')
+            ->where('aa.event_id', $event->id)
+            ->groupBy('aa.participant_id')
+            ->selectRaw('aa.participant_id as participant_id')
+            ->selectRaw('SUM(CASE WHEN a.category_type_id = ? THEN aa.individual_score ELSE 0 END) as potensi_individual_score', [$potensiId])
+            ->selectRaw('SUM(CASE WHEN a.category_type_id = ? THEN aa.standard_score ELSE 0 END) as potensi_standard_score', [$potensiId])
+            ->selectRaw('SUM(CASE WHEN a.category_type_id = ? THEN aa.individual_score ELSE 0 END) as kompetensi_individual_score', [$kompetensiId])
+            ->selectRaw('SUM(CASE WHEN a.category_type_id = ? THEN aa.standard_score ELSE 0 END) as kompetensi_standard_score', [$kompetensiId]);
+
+        $all = $baseQuery->get();
+
+        $conclusions = [
+            'Di Atas Standar' => 0,
+            'Memenuhi Standar' => 0,
+            'Di Bawah Standar' => 0,
+        ];
+
+        foreach ($all as $row) {
+            $potInd = (float) $row->potensi_individual_score;
+            $potStd = (float) $row->potensi_standard_score;
+            $komInd = (float) $row->kompetensi_individual_score;
+            $komStd = (float) $row->kompetensi_standard_score;
+
+            $weightedPot = $potInd * ($this->potensiWeight / 100);
+            $weightedKom = $komInd * ($this->kompetensiWeight / 100);
+            $totalWeightedInd = $weightedPot + $weightedKom;
+
+            $weightedPotStd = $potStd * ($this->potensiWeight / 100);
+            $weightedKomStd = $komStd * ($this->kompetensiWeight / 100);
+            $totalWeightedStd = $weightedPotStd + $weightedKomStd;
+
+            $gap = $totalWeightedInd - $totalWeightedStd;
+            $threshold = -$totalWeightedStd * ($this->tolerancePercentage / 100);
+
+            // Determine conclusion based on gap and tolerance threshold
+            if ($gap > 0) {
+                $conclusion = 'Di Atas Standar';
+            } elseif ($gap >= $threshold) {
+                $conclusion = 'Memenuhi Standar';
+            } else {
+                $conclusion = 'Di Bawah Standar';
+            }
+
+            $conclusions[$conclusion]++;
+        }
+
+        return $conclusions;
     }
 }

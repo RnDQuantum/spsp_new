@@ -77,4 +77,91 @@
                 </div>
             @endif
         </div>
+
+        <!-- Summary Statistics Section -->
+        @if (!empty($conclusionSummary))
+            <div class="px-6 pb-6 bg-gray-50 border-t-2 border-black">
+                <h3 class="text-lg font-bold text-gray-900 mb-4 mt-4">Ringkasan Kesimpulan</h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    @foreach ($conclusionSummary as $conclusion => $count)
+                        @php
+                            $totalParticipants = array_sum($conclusionSummary);
+                            $percentage = $totalParticipants > 0 ? round(($count / $totalParticipants) * 100, 1) : 0;
+
+                            // Determine color based on conclusion
+                            $bgColor = match ($conclusion) {
+                                'Di Atas Standar' => 'bg-green-100 border-green-300',
+                                'Memenuhi Standar' => 'bg-blue-100 border-blue-300',
+                                'Di Bawah Standar' => 'bg-red-100 border-red-300',
+                                default => 'bg-gray-100 border-gray-300',
+                            };
+                        @endphp
+
+                        <div class="border-2 {{ $bgColor }} rounded-lg p-4 text-center">
+                            <div class="text-3xl font-bold text-gray-900">{{ $count }}</div>
+                            <div class="text-sm text-gray-600 mb-2">{{ $percentage }}%</div>
+                            <div class="text-sm text-gray-700 font-semibold leading-tight mb-2">{{ $conclusion }}</div>
+                            <div class="text-xs text-gray-500 font-medium">
+                                @switch($conclusion)
+                                    @case('Di Atas Standar')
+                                        Gap > 0
+                                    @break
+
+                                    @case('Memenuhi Standar')
+                                        Gap ≥ Threshold
+                                    @break
+
+                                    @case('Di Bawah Standar')
+                                        Gap < Threshold
+                                @break @endswitch </div>
+                        </div>
+                    @endforeach
+                </div>
+
+                <!-- Overall Statistics -->
+                @php
+                    $totalParticipants = array_sum($conclusionSummary);
+                    $passingCount =
+                        ($conclusionSummary['Di Atas Standar'] ?? 0) + ($conclusionSummary['Memenuhi Standar'] ?? 0);
+                    $passingPercentage = $totalParticipants > 0 ? round(($passingCount / $totalParticipants) * 100, 1) : 0;
+                @endphp
+
+                <div class="bg-white border-2 border-black rounded-lg p-4">
+                    <div class="grid grid-cols-3 gap-4 text-center">
+                        <div>
+                            <div class="text-lg font-bold text-gray-900">{{ $totalParticipants }}</div>
+                            <div class="text-sm text-gray-600">Total Peserta</div>
+                        </div>
+                        <div>
+                            <div class="text-lg font-bold text-green-600">{{ $passingCount }}</div>
+                            <div class="text-sm text-gray-600">Memenuhi Standar</div>
+                        </div>
+                        <div>
+                            <div class="text-lg font-bold text-blue-600">{{ $passingPercentage }}%</div>
+                            <div class="text-sm text-gray-600">Tingkat Kelulusan</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Keterangan Rentang Nilai -->
+                <div class="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
+                    <div class="text-sm text-blue-800">
+                        <strong>Keterangan:</strong> Kesimpulan berdasarkan Gap (Total Weighted Individual - Total
+                        Weighted Standard) dan threshold toleransi
+                        <span x-data
+                            x-text="$wire.tolerancePercentage > 0 ? '(' + $wire.tolerancePercentage + '%)' : '(0%)'"></span>.
+                        <br>
+                        <strong>Rumus:</strong>
+                        <ul class="list-disc ml-6 mt-1">
+                            <li>Gap = Total Weighted Individual - Total Weighted Standard</li>
+                            <li>Threshold = -Total Weighted Standard × (Tolerance / 100)</li>
+                            <li><strong>Di Atas Standar:</strong> Gap > 0</li>
+                            <li><strong>Memenuhi Standar:</strong> Gap ≥ Threshold (dalam range toleransi)</li>
+                            <li><strong>Di Bawah Standar:</strong> Gap < Threshold</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        @endif
     </div>
