@@ -36,6 +36,8 @@ class SpiderPlot extends Component
     // Potensi Chart Data (5 aspects)
     public $potensiLabels = [];
 
+    public $potensiOriginalStandardRatings = [];
+
     public $potensiStandardRatings = [];
 
     public $potensiIndividualRatings = [];
@@ -43,12 +45,16 @@ class SpiderPlot extends Component
     // Kompetensi Chart Data (9 aspects)
     public $kompetensiLabels = [];
 
+    public $kompetensiOriginalStandardRatings = [];
+
     public $kompetensiStandardRatings = [];
 
     public $kompetensiIndividualRatings = [];
 
     // General Chart Data (all 13+ aspects)
     public $generalLabels = [];
+
+    public $generalOriginalStandardRatings = [];
 
     public $generalStandardRatings = [];
 
@@ -143,31 +149,46 @@ class SpiderPlot extends Component
             ->orderBy('aspect_id')
             ->get();
 
-        return $aspectAssessments->map(fn ($assessment) => [
-            'name' => $assessment->aspect->name,
-            'standard_rating' => $assessment->standard_rating,
-            'individual_rating' => $assessment->individual_rating,
-        ])->toArray();
+        return $aspectAssessments->map(function ($assessment) {
+            // 1. Get original values from database
+            $originalStandardRating = (float) $assessment->standard_rating;
+            $individualRating = (float) $assessment->individual_rating;
+
+            // 2. Calculate adjusted standard based on tolerance
+            $toleranceFactor = 1 - ($this->tolerancePercentage / 100);
+            $adjustedStandardRating = $originalStandardRating * $toleranceFactor;
+
+            return [
+                'name' => $assessment->aspect->name,
+                'original_standard_rating' => $originalStandardRating,
+                'standard_rating' => $adjustedStandardRating,
+                'individual_rating' => $individualRating,
+            ];
+        })->toArray();
     }
 
     private function prepareChartData(): void
     {
         // Clear previous data
         $this->potensiLabels = [];
+        $this->potensiOriginalStandardRatings = [];
         $this->potensiStandardRatings = [];
         $this->potensiIndividualRatings = [];
 
         $this->kompetensiLabels = [];
+        $this->kompetensiOriginalStandardRatings = [];
         $this->kompetensiStandardRatings = [];
         $this->kompetensiIndividualRatings = [];
 
         $this->generalLabels = [];
+        $this->generalOriginalStandardRatings = [];
         $this->generalStandardRatings = [];
         $this->generalIndividualRatings = [];
 
         // Prepare Potensi chart data
         foreach ($this->potensiAspectsData as $aspect) {
             $this->potensiLabels[] = $aspect['name'];
+            $this->potensiOriginalStandardRatings[] = round($aspect['original_standard_rating'], 2);
             $this->potensiStandardRatings[] = round($aspect['standard_rating'], 2);
             $this->potensiIndividualRatings[] = round($aspect['individual_rating'], 2);
         }
@@ -175,6 +196,7 @@ class SpiderPlot extends Component
         // Prepare Kompetensi chart data
         foreach ($this->kompetensiAspectsData as $aspect) {
             $this->kompetensiLabels[] = $aspect['name'];
+            $this->kompetensiOriginalStandardRatings[] = round($aspect['original_standard_rating'], 2);
             $this->kompetensiStandardRatings[] = round($aspect['standard_rating'], 2);
             $this->kompetensiIndividualRatings[] = round($aspect['individual_rating'], 2);
         }
@@ -182,6 +204,7 @@ class SpiderPlot extends Component
         // Prepare General chart data (all aspects)
         foreach ($this->allAspectsData as $aspect) {
             $this->generalLabels[] = $aspect['name'];
+            $this->generalOriginalStandardRatings[] = round($aspect['original_standard_rating'], 2);
             $this->generalStandardRatings[] = round($aspect['standard_rating'], 2);
             $this->generalIndividualRatings[] = round($aspect['individual_rating'], 2);
         }
@@ -214,16 +237,19 @@ class SpiderPlot extends Component
             'tolerance' => $tolerance,
             'potensi' => [
                 'labels' => $this->potensiLabels,
+                'originalStandardRatings' => $this->potensiOriginalStandardRatings,
                 'standardRatings' => $this->potensiStandardRatings,
                 'individualRatings' => $this->potensiIndividualRatings,
             ],
             'kompetensi' => [
                 'labels' => $this->kompetensiLabels,
+                'originalStandardRatings' => $this->kompetensiOriginalStandardRatings,
                 'standardRatings' => $this->kompetensiStandardRatings,
                 'individualRatings' => $this->kompetensiIndividualRatings,
             ],
             'general' => [
                 'labels' => $this->generalLabels,
+                'originalStandardRatings' => $this->generalOriginalStandardRatings,
                 'standardRatings' => $this->generalStandardRatings,
                 'individualRatings' => $this->generalIndividualRatings,
             ],
@@ -246,12 +272,15 @@ class SpiderPlot extends Component
         $passingAspects = 0;
 
         foreach ($this->allAspectsData as $aspect) {
-            // Calculate tolerance threshold based on standard rating
-            $toleranceThreshold = -($aspect['standard_rating'] * ($this->tolerancePercentage / 100));
-            $gapRating = $aspect['individual_rating'] - $aspect['standard_rating'];
+            // Calculate percentage based on adjusted standard (already calculated in aspect data)
+            $adjustedStandard = $aspect['standard_rating'];
+            $individual = $aspect['individual_rating'];
 
-            // Count as passing if meets or exceeds standard (with tolerance)
-            if ($gapRating >= $toleranceThreshold) {
+            // Calculate percentage: (individual / adjusted) * 100
+            $percentage = $adjustedStandard > 0 ? ($individual / $adjustedStandard) * 100 : 0;
+
+            // Count as passing if percentage >= 100% (meets or exceeds adjusted standard)
+            if ($percentage >= 100) {
                 $passingAspects++;
             }
         }

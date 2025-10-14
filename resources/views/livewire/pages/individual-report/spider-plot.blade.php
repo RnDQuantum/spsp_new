@@ -106,7 +106,7 @@
                     labels: @js($potensiLabels),
                     datasets: [{
                         label: 'Standard',
-                        data: @js($potensiStandardRatings),
+                        data: @js($potensiOriginalStandardRatings),
                         fill: true,
                         backgroundColor: 'rgba(0, 0, 0, 0.1)',
                         borderColor: '#000000',
@@ -116,8 +116,7 @@
                         pointHoverBorderColor: '#000000'
                     }, {
                         label: 'Tolerance {{ $tolerancePercentage }}%',
-                        data: calculateToleranceValues(@js($potensiStandardRatings),
-                            {{ $tolerancePercentage }}),
+                        data: @js($potensiStandardRatings),
                         borderColor: '#6B7280',
                         backgroundColor: 'transparent',
                         borderWidth: 1.5,
@@ -187,7 +186,7 @@
                     labels: @js($kompetensiLabels),
                     datasets: [{
                         label: 'Standard',
-                        data: @js($kompetensiStandardRatings),
+                        data: @js($kompetensiOriginalStandardRatings),
                         fill: true,
                         backgroundColor: 'rgba(0, 0, 0, 0.1)',
                         borderColor: '#000000',
@@ -197,8 +196,7 @@
                         pointHoverBorderColor: '#000000'
                     }, {
                         label: 'Tolerance {{ $tolerancePercentage }}%',
-                        data: calculateToleranceValues(@js($kompetensiStandardRatings),
-                            {{ $tolerancePercentage }}),
+                        data: @js($kompetensiStandardRatings),
                         borderColor: '#6B7280',
                         backgroundColor: 'transparent',
                         borderWidth: 1.5,
@@ -268,7 +266,7 @@
                     labels: @js($generalLabels),
                     datasets: [{
                         label: 'Standard',
-                        data: @js($generalStandardRatings),
+                        data: @js($generalOriginalStandardRatings),
                         fill: true,
                         backgroundColor: 'rgba(0, 0, 0, 0.1)',
                         borderColor: '#000000',
@@ -278,8 +276,7 @@
                         pointHoverBorderColor: '#000000'
                     }, {
                         label: 'Tolerance {{ $tolerancePercentage }}%',
-                        data: calculateToleranceValues(@js($generalStandardRatings),
-                            {{ $tolerancePercentage }}),
+                        data: @js($generalStandardRatings),
                         borderColor: '#6B7280',
                         backgroundColor: 'transparent',
                         borderWidth: 1.5,
@@ -334,11 +331,6 @@
             });
         }
 
-        function calculateToleranceValues(standardRatings, tolerancePercentage) {
-            const factor = 1 - (tolerancePercentage / 100);
-            return standardRatings.map(val => val * factor);
-        }
-
         function setupLivewireListeners() {
             // Wait for Livewire to be available
             function waitForLivewire(callback) {
@@ -351,58 +343,45 @@
                     let chartData = Array.isArray(data) && data.length > 0 ? data[0] : data;
                     if (!chartData) return;
 
-                    const tolerance = chartData.tolerance;
-                    const tolerancePercentage = tolerance;
+                    const tolerancePercentage = chartData.tolerance;
 
                     // Update Potensi Chart
                     if (chartData.potensi && window.potensiChart_{{ $potensiChartId }}) {
-                        const newToleranceRatings = calculateToleranceValues(chartData.potensi
-                            .standardRatings, tolerancePercentage);
-
                         window.potensiChart_{{ $potensiChartId }}.data.labels = chartData.potensi.labels;
                         window.potensiChart_{{ $potensiChartId }}.data.datasets[0].data = chartData.potensi
-                            .standardRatings;
+                            .originalStandardRatings;
                         window.potensiChart_{{ $potensiChartId }}.data.datasets[1].label =
                             `Tolerance ${tolerancePercentage}%`;
-                        window.potensiChart_{{ $potensiChartId }}.data.datasets[1].data =
-                            newToleranceRatings;
-                        window.potensiChart_{{ $potensiChartId }}.data.datasets[2].data = chartData.potensi
-                            .individualRatings;
+                        window.potensiChart_{{ $potensiChartId }}.data.datasets[1].data = chartData.potensi
+                            .standardRatings;
+                        // Dataset[2] (individual) doesn't change
                         window.potensiChart_{{ $potensiChartId }}.update('active');
                     }
 
                     // Update Kompetensi Chart
                     if (chartData.kompetensi && window.kompetensiChart_{{ $kompetensiChartId }}) {
-                        const newToleranceRatings = calculateToleranceValues(chartData.kompetensi
-                            .standardRatings, tolerancePercentage);
-
                         window.kompetensiChart_{{ $kompetensiChartId }}.data.labels = chartData.kompetensi
                             .labels;
                         window.kompetensiChart_{{ $kompetensiChartId }}.data.datasets[0].data = chartData
-                            .kompetensi.standardRatings;
+                            .kompetensi.originalStandardRatings;
                         window.kompetensiChart_{{ $kompetensiChartId }}.data.datasets[1].label =
                             `Tolerance ${tolerancePercentage}%`;
-                        window.kompetensiChart_{{ $kompetensiChartId }}.data.datasets[1].data =
-                            newToleranceRatings;
-                        window.kompetensiChart_{{ $kompetensiChartId }}.data.datasets[2].data = chartData
-                            .kompetensi.individualRatings;
+                        window.kompetensiChart_{{ $kompetensiChartId }}.data.datasets[1].data = chartData
+                            .kompetensi.standardRatings;
+                        // Dataset[2] (individual) doesn't change
                         window.kompetensiChart_{{ $kompetensiChartId }}.update('active');
                     }
 
                     // Update General Chart
                     if (chartData.general && window.generalChart_{{ $generalChartId }}) {
-                        const newToleranceRatings = calculateToleranceValues(chartData.general
-                            .standardRatings, tolerancePercentage);
-
                         window.generalChart_{{ $generalChartId }}.data.labels = chartData.general.labels;
                         window.generalChart_{{ $generalChartId }}.data.datasets[0].data = chartData.general
-                            .standardRatings;
+                            .originalStandardRatings;
                         window.generalChart_{{ $generalChartId }}.data.datasets[1].label =
                             `Tolerance ${tolerancePercentage}%`;
-                        window.generalChart_{{ $generalChartId }}.data.datasets[1].data =
-                            newToleranceRatings;
-                        window.generalChart_{{ $generalChartId }}.data.datasets[2].data = chartData.general
-                            .individualRatings;
+                        window.generalChart_{{ $generalChartId }}.data.datasets[1].data = chartData.general
+                            .standardRatings;
+                        // Dataset[2] (individual) doesn't change
                         window.generalChart_{{ $generalChartId }}.update('active');
                     }
                 });
