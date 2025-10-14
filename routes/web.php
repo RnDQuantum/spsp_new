@@ -35,10 +35,6 @@ Route::get('/spider-plot/{eventCode}/{testNumber}', App\Livewire\Pages\Individua
 // Individual Report Route - Ringkasan MC Mapping (Kompetensi Summary)
 Route::get('/ringkasan-mc-mapping/{eventCode}/{testNumber}', App\Livewire\Pages\IndividualReport\RingkasanMcMapping::class)->name('ringkasan_mc_mapping');
 
-Route::get('/gambaran_ringkasan', function () {
-    return view('livewire.pages.individual-report.gambaran_ringkasan');
-})->name('gambaran_ringkasan');
-
 // Individual Report Route - Ringkasan Assessment
 Route::get('/ringkasan-assessment/{eventCode}/{testNumber}', App\Livewire\Pages\IndividualReport\RingkasanAssessment::class)->name('ringkasan_assessment');
 
