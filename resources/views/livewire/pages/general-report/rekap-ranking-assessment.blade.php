@@ -78,6 +78,56 @@
             @endif
         </div>
 
+        <!-- Standard & Threshold Info Box -->
+        @if ($standardInfo)
+            <div class="px-6 pb-6 bg-white">
+                <div
+                    class="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-300 rounded-lg p-4 shadow-sm">
+                    <h3 class="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z">
+                            </path>
+                        </svg>
+                        Informasi Standar
+                        <span x-data
+                            x-text="$wire.tolerancePercentage > 0 ? '(Toleransi -' + $wire.tolerancePercentage + '%)' : '(Tanpa Toleransi)'"
+                            class="text-sm font-normal text-blue-600"></span>
+                    </h3>
+
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <!-- Psychology Standard -->
+                        <div class="bg-white border border-blue-200 rounded-lg p-3">
+                            <div class="text-xs text-gray-500 mb-1">Standar Psychology {{ $potensiWeight }}%</div>
+                            <div class="text-2xl font-bold text-gray-900">
+                                {{ number_format($standardInfo['psy_standard'], 2) }}</div>
+                        </div>
+
+                        <!-- Management Competency Standard -->
+                        <div class="bg-white border border-blue-200 rounded-lg p-3">
+                            <div class="text-xs text-gray-500 mb-1">Standar Kompetensi {{ $kompetensiWeight }}%</div>
+                            <div class="text-2xl font-bold text-gray-900">
+                                {{ number_format($standardInfo['mc_standard'], 2) }}</div>
+                        </div>
+
+                        <!-- Total Standard -->
+                        <div class="bg-white border border-indigo-300 rounded-lg p-3">
+                            <div class="text-xs text-gray-500 mb-1">Total Standar</div>
+                            <div class="text-2xl font-bold text-indigo-600">
+                                {{ number_format($standardInfo['total_standard'], 2) }}</div>
+                        </div>
+
+                        <!-- Threshold -->
+                        <div class="bg-white border border-orange-300 rounded-lg p-3">
+                            <div class="text-xs text-gray-500 mb-1">Threshold (Batas Toleransi)</div>
+                            <div class="text-2xl font-bold text-orange-600">
+                                {{ number_format($standardInfo['threshold'], 2) }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
+
         <!-- Summary Statistics Section -->
         @if (!empty($conclusionSummary))
             <div class="px-6 pb-6 bg-gray-50 border-t-2 border-black">
@@ -101,7 +151,8 @@
                         <div class="border-2 {{ $bgColor }} rounded-lg p-4 text-center">
                             <div class="text-3xl font-bold text-gray-900">{{ $count }}</div>
                             <div class="text-sm text-gray-600 mb-2">{{ $percentage }}%</div>
-                            <div class="text-sm text-gray-700 font-semibold leading-tight mb-2">{{ $conclusion }}</div>
+                            <div class="text-sm text-gray-700 font-semibold leading-tight mb-2">{{ $conclusion }}
+                            </div>
                             <div class="text-xs text-gray-500 font-medium">
                                 @switch($conclusion)
                                     @case('Di Atas Standar')
@@ -113,9 +164,8 @@
                                     @break
 
                                     @case('Di Bawah Standar')
-                                        Gap < Threshold
-                                @break @endswitch </div>
-                        </div>
+                                Gap < Threshold @break @endswitch </div>
+                            </div>
                     @endforeach
                 </div>
 
@@ -124,7 +174,8 @@
                     $totalParticipants = array_sum($conclusionSummary);
                     $passingCount =
                         ($conclusionSummary['Di Atas Standar'] ?? 0) + ($conclusionSummary['Memenuhi Standar'] ?? 0);
-                    $passingPercentage = $totalParticipants > 0 ? round(($passingCount / $totalParticipants) * 100, 1) : 0;
+                    $passingPercentage =
+                        $totalParticipants > 0 ? round(($passingCount / $totalParticipants) * 100, 1) : 0;
                 @endphp
 
                 <div class="bg-white border-2 border-black rounded-lg p-4">

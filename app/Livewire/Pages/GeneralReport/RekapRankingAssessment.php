@@ -50,6 +50,63 @@ class RekapRankingAssessment extends Component
         $this->resetPage();
     }
 
+    private function getStandardInfo(): ?array
+    {
+        if (! $this->eventCode || ($this->potensiWeight + $this->kompetensiWeight) === 0) {
+            return null;
+        }
+
+        $event = AssessmentEvent::where('code', $this->eventCode)->first();
+        if (! $event) {
+            return null;
+        }
+
+        $potensi = CategoryType::where('template_id', $event->template_id)->where('code', 'potensi')->first();
+        $kompetensi = CategoryType::where('template_id', $event->template_id)->where('code', 'kompetensi')->first();
+        if (! $potensi || ! $kompetensi) {
+            return null;
+        }
+
+        $potensiId = (int) $potensi->id;
+        $kompetensiId = (int) $kompetensi->id;
+
+        // Get average standard scores (they should be same for all participants, but we take first one)
+        $firstParticipant = DB::table('aspect_assessments as aa')
+            ->join('aspects as a', 'a.id', '=', 'aa.aspect_id')
+            ->where('aa.event_id', $event->id)
+            ->groupBy('aa.participant_id')
+            ->selectRaw('SUM(CASE WHEN a.category_type_id = ? THEN aa.standard_score ELSE 0 END) as potensi_standard_score', [$potensiId])
+            ->selectRaw('SUM(CASE WHEN a.category_type_id = ? THEN aa.standard_score ELSE 0 END) as kompetensi_standard_score', [$kompetensiId])
+            ->first();
+
+        if (! $firstParticipant) {
+            return null;
+        }
+
+        $potStd = (float) $firstParticipant->potensi_standard_score;
+        $komStd = (float) $firstParticipant->kompetensi_standard_score;
+
+        // Calculate adjusted standard based on tolerance
+        $toleranceFactor = 1 - $this->tolerancePercentage / 100;
+        $adjustedPotStd = $potStd * $toleranceFactor;
+        $adjustedKomStd = $komStd * $toleranceFactor;
+
+        // Weighted standard
+        $weightedPotStd = $adjustedPotStd * ($this->potensiWeight / 100);
+        $weightedKomStd = $adjustedKomStd * ($this->kompetensiWeight / 100);
+        $totalWeightedStd = $weightedPotStd + $weightedKomStd;
+
+        // Threshold calculation
+        $threshold = -$totalWeightedStd * ($this->tolerancePercentage / 100);
+
+        return [
+            'psy_standard' => round($weightedPotStd, 2),
+            'mc_standard' => round($weightedKomStd, 2),
+            'total_standard' => round($totalWeightedStd, 2),
+            'threshold' => round($threshold, 2),
+        ];
+    }
+
     public function handleToleranceUpdate(int $tolerance): void
     {
         $this->tolerancePercentage = $tolerance;
@@ -96,6 +153,7 @@ class RekapRankingAssessment extends Component
     public function render()
     {
         $rows = null;
+        $standardInfo = $this->getStandardInfo();
 
         if ($this->eventCode && ($this->potensiWeight + $this->kompetensiWeight) > 0) {
             $event = AssessmentEvent::where('code', $this->eventCode)->first();
@@ -136,20 +194,29 @@ class RekapRankingAssessment extends Component
                     $items = collect($paginator->items())->values()->map(function ($row, int $index) use ($startRank) {
                         $participant = DB::table('participants')->where('id', $row->participant_id)->first();
 
+                        // Get original values from database
                         $potInd = (float) $row->potensi_individual_score;
                         $potStd = (float) $row->potensi_standard_score;
                         $komInd = (float) $row->kompetensi_individual_score;
                         $komStd = (float) $row->kompetensi_standard_score;
 
+                        // Calculate adjusted standard based on tolerance
+                        $toleranceFactor = 1 - ($this->tolerancePercentage / 100);
+                        $adjustedPotStd = $potStd * $toleranceFactor;
+                        $adjustedKomStd = $komStd * $toleranceFactor;
+
+                        // Individual scores
                         $totalInd = $potInd + $komInd;
                         $weightedPot = $potInd * ($this->potensiWeight / 100);
                         $weightedKom = $komInd * ($this->kompetensiWeight / 100);
                         $totalWeightedInd = $weightedPot + $weightedKom;
 
-                        $weightedPotStd = $potStd * ($this->potensiWeight / 100);
-                        $weightedKomStd = $komStd * ($this->kompetensiWeight / 100);
+                        // Adjusted standard scores
+                        $weightedPotStd = $adjustedPotStd * ($this->potensiWeight / 100);
+                        $weightedKomStd = $adjustedKomStd * ($this->kompetensiWeight / 100);
                         $totalWeightedStd = $weightedPotStd + $weightedKomStd;
 
+                        // Gap calculation based on adjusted standard
                         $gap = $totalWeightedInd - $totalWeightedStd;
                         $threshold = -$totalWeightedStd * ($this->tolerancePercentage / 100);
                         $conclusion = $gap > 0 ? 'Di Atas Standar' : ($gap >= $threshold ? 'Memenuhi Standar' : 'Di Bawah Standar');
@@ -186,6 +253,7 @@ class RekapRankingAssessment extends Component
             'potensiWeight' => $this->potensiWeight,
             'kompetensiWeight' => $this->kompetensiWeight,
             'rows' => $rows,
+            'standardInfo' => $standardInfo,
             'conclusionSummary' => $conclusionSummary,
         ]);
     }
@@ -230,12 +298,17 @@ class RekapRankingAssessment extends Component
             $komInd = (float) $row->kompetensi_individual_score;
             $komStd = (float) $row->kompetensi_standard_score;
 
+            // Calculate adjusted standard based on tolerance
+            $toleranceFactor = 1 - ($this->tolerancePercentage / 100);
+            $adjustedPotStd = $potStd * $toleranceFactor;
+            $adjustedKomStd = $komStd * $toleranceFactor;
+
             $weightedPot = $potInd * ($this->potensiWeight / 100);
             $weightedKom = $komInd * ($this->kompetensiWeight / 100);
             $totalWeightedInd = $weightedPot + $weightedKom;
 
-            $weightedPotStd = $potStd * ($this->potensiWeight / 100);
-            $weightedKomStd = $komStd * ($this->kompetensiWeight / 100);
+            $weightedPotStd = $adjustedPotStd * ($this->potensiWeight / 100);
+            $weightedKomStd = $adjustedKomStd * ($this->kompetensiWeight / 100);
             $totalWeightedStd = $weightedPotStd + $weightedKomStd;
 
             $gap = $totalWeightedInd - $totalWeightedStd;
@@ -297,12 +370,17 @@ class RekapRankingAssessment extends Component
             $komInd = (float) $row->kompetensi_individual_score;
             $komStd = (float) $row->kompetensi_standard_score;
 
+            // Calculate adjusted standard based on tolerance
+            $toleranceFactor = 1 - ($this->tolerancePercentage / 100);
+            $adjustedPotStd = $potStd * $toleranceFactor;
+            $adjustedKomStd = $komStd * $toleranceFactor;
+
             $weightedPot = $potInd * ($this->potensiWeight / 100);
             $weightedKom = $komInd * ($this->kompetensiWeight / 100);
             $totalWeightedInd = $weightedPot + $weightedKom;
 
-            $weightedPotStd = $potStd * ($this->potensiWeight / 100);
-            $weightedKomStd = $komStd * ($this->kompetensiWeight / 100);
+            $weightedPotStd = $adjustedPotStd * ($this->potensiWeight / 100);
+            $weightedKomStd = $adjustedKomStd * ($this->kompetensiWeight / 100);
             $totalWeightedStd = $weightedPotStd + $weightedKomStd;
 
             $gap = $totalWeightedInd - $totalWeightedStd;
