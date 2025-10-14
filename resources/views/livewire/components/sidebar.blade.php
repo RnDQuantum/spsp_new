@@ -179,7 +179,7 @@
                             class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
                             Standar Managerial Competency Mapping
                         </a>
-                        <a href="#" role="menuitem"
+                        <a href="{{ route('standard-psikometrik') }}" role="menuitem"
                             class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
                             Standar Potential Mapping
                         </a>

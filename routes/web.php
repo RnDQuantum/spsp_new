@@ -58,3 +58,7 @@ Route::get('/training-recomendation', function () {
 Route::get('/standard-mc', function () {
     return view('livewire.pages.general-report.standard-mc');
 })->name('standard-mc');
+
+Route::get('/standard-psikometrik', function () {
+    return view('livewire.pages.general-report.standard-psikometrik');
+})->name('standard-psikometrik');
