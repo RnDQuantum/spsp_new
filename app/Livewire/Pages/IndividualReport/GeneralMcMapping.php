@@ -44,9 +44,13 @@ class GeneralMcMapping extends Component
     // Data for charts
     public $chartLabels = [];
 
+    public $chartOriginalStandardRatings = [];
+
     public $chartStandardRatings = [];
 
     public $chartIndividualRatings = [];
+
+    public $chartOriginalStandardScores = [];
 
     public $chartStandardScores = [];
 
@@ -122,25 +126,54 @@ class GeneralMcMapping extends Component
             ->orderBy('aspect_id')
             ->get();
 
-        return $aspectAssessments->map(fn ($assessment) => [
-            'name' => $assessment->aspect->name,
-            'weight_percentage' => $assessment->aspect->weight_percentage,
-            'standard_rating' => $assessment->standard_rating,
-            'standard_score' => $assessment->standard_score,
-            'individual_rating' => $assessment->individual_rating,
-            'individual_score' => $assessment->individual_score,
-            'gap_rating' => $assessment->gap_rating,
-            'gap_score' => $assessment->gap_score,
-            'percentage_score' => $assessment->percentage_score,
-            'conclusion_text' => $this->getConclusionText(
-                (float) $assessment->gap_rating,
-                (float) $assessment->standard_rating
-            ),
-        ])->toArray();
+        return $aspectAssessments->map(function ($assessment) {
+            // 1. Get original values from database
+            $originalStandardRating = (float) $assessment->standard_rating;
+            $originalStandardScore = (float) $assessment->standard_score;
+            $individualRating = (float) $assessment->individual_rating;
+            $individualScore = (float) $assessment->individual_score;
+
+            // 2. Calculate adjusted standard based on tolerance
+            $toleranceFactor = 1 - ($this->tolerancePercentage / 100);
+            $adjustedStandardRating = $originalStandardRating * $toleranceFactor;
+            $adjustedStandardScore = $originalStandardScore * $toleranceFactor;
+
+            // 3. Recalculate gap based on adjusted standard
+            $adjustedGapRating = $individualRating - $adjustedStandardRating;
+            $adjustedGapScore = $individualScore - $adjustedStandardScore;
+
+            // 4. Calculate percentage based on adjusted standard
+            $adjustedPercentage = $adjustedStandardScore > 0
+                ? ($individualScore / $adjustedStandardScore) * 100
+                : 0;
+
+            return [
+                'name' => $assessment->aspect->name,
+                'weight_percentage' => $assessment->aspect->weight_percentage,
+                'original_standard_rating' => $originalStandardRating,
+                'original_standard_score' => $originalStandardScore,
+                'standard_rating' => $adjustedStandardRating,
+                'standard_score' => $adjustedStandardScore,
+                'individual_rating' => $individualRating,
+                'individual_score' => $individualScore,
+                'gap_rating' => $adjustedGapRating,
+                'gap_score' => $adjustedGapScore,
+                'percentage_score' => $adjustedPercentage,
+                'conclusion_text' => $this->getConclusionText($adjustedPercentage),
+            ];
+        })->toArray();
     }
 
     private function calculateTotals(): void
     {
+        // ⚠️ CRITICAL: Reset totals before recalculating
+        $this->totalStandardRating = 0;
+        $this->totalStandardScore = 0;
+        $this->totalIndividualRating = 0;
+        $this->totalIndividualScore = 0;
+        $this->totalGapRating = 0;
+        $this->totalGapScore = 0;
+
         foreach ($this->aspectsData as $aspect) {
             $this->totalStandardRating += $aspect['standard_rating'];
             $this->totalStandardScore += $aspect['standard_score'];
@@ -156,25 +189,34 @@ class GeneralMcMapping extends Component
 
     private function prepareChartData(): void
     {
+        // Reset chart data arrays before repopulating
+        $this->chartLabels = [];
+        $this->chartOriginalStandardRatings = [];
+        $this->chartStandardRatings = [];
+        $this->chartIndividualRatings = [];
+        $this->chartOriginalStandardScores = [];
+        $this->chartStandardScores = [];
+        $this->chartIndividualScores = [];
+
         foreach ($this->aspectsData as $aspect) {
             $this->chartLabels[] = $aspect['name'];
+            $this->chartOriginalStandardRatings[] = round($aspect['original_standard_rating'], 2);
             $this->chartStandardRatings[] = round($aspect['standard_rating'], 2);
             $this->chartIndividualRatings[] = round($aspect['individual_rating'], 2);
+            $this->chartOriginalStandardScores[] = round($aspect['original_standard_score'], 2);
             $this->chartStandardScores[] = round($aspect['standard_score'], 2);
             $this->chartIndividualScores[] = round($aspect['individual_score'], 2);
         }
     }
 
-    private function getConclusionText(float $gapRating, float $standardRating): string
+    private function getConclusionText(float $percentageScore): string
     {
-        // Calculate tolerance threshold based on standard rating
-        $toleranceThreshold = -($standardRating * ($this->tolerancePercentage / 100));
-
-        if ($gapRating >= 0) {
+        // Conclusion based on percentage score relative to adjusted standard
+        if ($percentageScore >= 110) {
             return 'Lebih Memenuhi/More Requirement';
-        } elseif ($gapRating >= $toleranceThreshold) {
+        } elseif ($percentageScore >= 100) {
             return 'Memenuhi/Meet Requirement';
-        } elseif ($gapRating >= ($toleranceThreshold * 2)) {
+        } elseif ($percentageScore >= 90) {
             return 'Kurang Memenuhi/Below Requirement';
         } else {
             return 'Belum Memenuhi/Under Perform';
@@ -227,8 +269,10 @@ class GeneralMcMapping extends Component
         $this->dispatch('chartDataUpdated', [
             'tolerance' => $tolerance,
             'labels' => $this->chartLabels,
+            'originalStandardRatings' => $this->chartOriginalStandardRatings,
             'standardRatings' => $this->chartStandardRatings,
             'individualRatings' => $this->chartIndividualRatings,
+            'originalStandardScores' => $this->chartOriginalStandardScores,
             'standardScores' => $this->chartStandardScores,
             'individualScores' => $this->chartIndividualScores,
         ]);
