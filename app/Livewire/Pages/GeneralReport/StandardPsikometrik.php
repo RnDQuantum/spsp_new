@@ -38,8 +38,14 @@ class StandardPsikometrik extends Component
         'scores' => [],
     ];
 
+    // Unique chart ID
+    public string $chartId = '';
+
     public function mount(): void
     {
+        // Generate unique chart ID
+        $this->chartId = 'standardPsikometrik'.uniqid();
+
         $this->loadAvailableEvents();
 
         if (! $this->eventCode && count($this->availableEvents) > 0) {
@@ -52,6 +58,14 @@ class StandardPsikometrik extends Component
     public function updatedEventCode(): void
     {
         $this->loadStandardData();
+
+        // Dispatch event to update charts
+        $this->dispatch('chartDataUpdated', [
+            'labels' => $this->chartData['labels'],
+            'ratings' => $this->chartData['ratings'],
+            'scores' => $this->chartData['scores'],
+            'templateName' => $this->selectedTemplate?->name ?? 'Standard',
+        ]);
     }
 
     private function loadAvailableEvents(): void

@@ -135,12 +135,12 @@
 
         {{-- CHART SATU - Rating --}}
         @if(count($chartData['labels']) > 0)
-        <div class="border border-black mb-6 mt-6 p-4 bg-gray-50">
+        <div class="border border-black mb-6 mt-6 p-4 bg-gray-50" wire:ignore id="chart-rating-{{ $chartId }}">
             <div class="text-center text-xs font-bold mb-4">
                 Gambar Rating Standar Atribut Potensi Mapping Static Pribadi Spider Plot
             </div>
             <div class="flex justify-center">
-                <canvas id="chartRating" style="max-width:600px; max-height:400px;"></canvas>
+                <canvas id="chartRating-{{ $chartId }}" style="max-width:600px; max-height:400px;"></canvas>
             </div>
         </div>
 
@@ -185,12 +185,12 @@
         </table>
 
         {{-- CHART DUA - Skor --}}
-        <div class="border border-black mb-8 mt-6 p-4 bg-gray-50">
+        <div class="border border-black mb-8 mt-6 p-4 bg-gray-50" wire:ignore id="chart-skor-{{ $chartId }}">
             <div class="text-center text-xs font-bold mb-4">
                 Gambar Skor Standar Atribut Potensi Mapping Static Pribadi Spider Plot
             </div>
             <div class="flex justify-center">
-                <canvas id="chartSkor" style="max-width:600px; max-height:400px;"></canvas>
+                <canvas id="chartSkor-{{ $chartId }}" style="max-width:600px; max-height:400px;"></canvas>
             </div>
         </div>
         @endif
@@ -216,137 +216,210 @@
     </div>
 
     @if(count($chartData['labels']) > 0)
-    @script
     <script>
-        let chartRating = null;
-        let chartSkor = null;
+        (function() {
+            if (window['ratingChartSetup_{{ $chartId }}']) return;
+            window['ratingChartSetup_{{ $chartId }}'] = true;
 
-        function initCharts() {
-            const labels = @js($chartData['labels']);
-            const ratings = @js($chartData['ratings']);
-            const scores = @js($chartData['scores']);
-            const templateName = @js($selectedTemplate?->name ?? 'Standard');
+            function setupRatingChart() {
+                if (window.ratingChart_{{ $chartId }}) {
+                    window.ratingChart_{{ $chartId }}.destroy();
+                }
 
-            // Destroy existing charts if they exist
-            if (chartRating) {
-                chartRating.destroy();
-            }
-            if (chartSkor) {
-                chartSkor.destroy();
-            }
+                let chartInstance = null;
+                let chartLabels = @js($chartData['labels']);
+                let chartRatings = @js($chartData['ratings']);
+                let templateName = @js($selectedTemplate?->name ?? 'Standard');
 
-            // Radar Chart 1 (Rating)
-            const ctx1 = document.getElementById('chartRating');
-            if (ctx1) {
-                chartRating = new Chart(ctx1, {
-                    type: 'radar',
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            label: templateName,
-                            data: ratings,
-                            borderColor: '#1e40af',
-                            backgroundColor: 'rgba(30,64,175,0.2)',
-                            pointBackgroundColor: '#1e40af',
-                            pointBorderColor: '#1e40af',
-                            pointRadius: 4,
-                            borderWidth: 2
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: true,
-                        plugins: {
-                            legend: {
-                                display: true,
-                                position: 'bottom',
-                                labels: {
-                                    font: {
-                                        size: 11
+                function initChart() {
+                    const canvas = document.getElementById('chartRating-{{ $chartId }}');
+                    if (!canvas) return;
+
+                    const ctx = canvas.getContext('2d');
+
+                    chartInstance = new Chart(ctx, {
+                        type: 'radar',
+                        data: {
+                            labels: chartLabels,
+                            datasets: [{
+                                label: templateName,
+                                data: chartRatings,
+                                borderColor: '#1e40af',
+                                backgroundColor: 'rgba(30,64,175,0.2)',
+                                pointBackgroundColor: '#1e40af',
+                                pointBorderColor: '#1e40af',
+                                pointRadius: 4,
+                                borderWidth: 2
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: true,
+                            plugins: {
+                                legend: {
+                                    display: true,
+                                    position: 'bottom',
+                                    labels: {
+                                        font: {
+                                            size: 11
+                                        }
                                     }
                                 }
-                            }
-                        },
-                        scales: {
-                            r: {
-                                beginAtZero: true,
-                                min: 0,
-                                max: 5,
-                                ticks: {
-                                    stepSize: 0.5,
-                                    font: {
-                                        size: 10
-                                    }
-                                },
-                                pointLabels: {
-                                    font: {
-                                        size: 10
+                            },
+                            scales: {
+                                r: {
+                                    beginAtZero: true,
+                                    min: 0,
+                                    max: 5,
+                                    ticks: {
+                                        stepSize: 0.5,
+                                        font: {
+                                            size: 10
+                                        }
+                                    },
+                                    pointLabels: {
+                                        font: {
+                                            size: 10
+                                        }
                                     }
                                 }
                             }
                         }
-                    }
-                });
-            }
+                    });
 
-            // Radar Chart 2 (Skor)
-            const ctx2 = document.getElementById('chartSkor');
-            if (ctx2) {
-                chartSkor = new Chart(ctx2, {
-                    type: 'radar',
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            label: templateName,
-                            data: scores,
-                            borderColor: '#dc2626',
-                            backgroundColor: 'rgba(220,38,38,0.15)',
-                            pointBackgroundColor: '#dc2626',
-                            pointBorderColor: '#dc2626',
-                            pointRadius: 4,
-                            borderWidth: 2
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: true,
-                        plugins: {
-                            legend: {
-                                display: true,
-                                position: 'bottom',
-                                labels: {
-                                    font: {
-                                        size: 11
-                                    }
-                                }
-                            }
-                        },
-                        scales: {
-                            r: {
-                                beginAtZero: true,
-                                min: 0,
-                                max: 100,
-                                ticks: {
-                                    stepSize: 10,
-                                    font: {
-                                        size: 10
-                                    }
-                                },
-                                pointLabels: {
-                                    font: {
-                                        size: 10
-                                    }
-                                }
-                            }
+                    window.ratingChart_{{ $chartId }} = chartInstance;
+                }
+
+                function waitForLivewire(callback) {
+                    if (window.Livewire) callback();
+                    else setTimeout(() => waitForLivewire(callback), 100);
+                }
+
+                waitForLivewire(function() {
+                    initChart();
+
+                    Livewire.on('chartDataUpdated', function(data) {
+                        let chartData = Array.isArray(data) && data.length > 0 ? data[0] : data;
+                        if (window.ratingChart_{{ $chartId }} && chartData) {
+                            chartLabels = chartData.labels;
+                            chartRatings = chartData.ratings;
+                            templateName = chartData.templateName || 'Standard';
+
+                            // Update chart data
+                            window.ratingChart_{{ $chartId }}.data.labels = chartLabels;
+                            window.ratingChart_{{ $chartId }}.data.datasets[0].label = templateName;
+                            window.ratingChart_{{ $chartId }}.data.datasets[0].data = chartRatings;
+                            window.ratingChart_{{ $chartId }}.update('active');
                         }
-                    }
+                    });
                 });
             }
-        }
 
-        // Initialize charts on page load
-        initCharts();
+            setupRatingChart();
+        })();
     </script>
-    @endscript
+
+    <script>
+        (function() {
+            if (window['skorChartSetup_{{ $chartId }}']) return;
+            window['skorChartSetup_{{ $chartId }}'] = true;
+
+            function setupSkorChart() {
+                if (window.skorChart_{{ $chartId }}) {
+                    window.skorChart_{{ $chartId }}.destroy();
+                }
+
+                let chartInstance = null;
+                let chartLabels = @js($chartData['labels']);
+                let chartScores = @js($chartData['scores']);
+                let templateName = @js($selectedTemplate?->name ?? 'Standard');
+
+                function initChart() {
+                    const canvas = document.getElementById('chartSkor-{{ $chartId }}');
+                    if (!canvas) return;
+
+                    const ctx = canvas.getContext('2d');
+
+                    chartInstance = new Chart(ctx, {
+                        type: 'radar',
+                        data: {
+                            labels: chartLabels,
+                            datasets: [{
+                                label: templateName,
+                                data: chartScores,
+                                borderColor: '#dc2626',
+                                backgroundColor: 'rgba(220,38,38,0.15)',
+                                pointBackgroundColor: '#dc2626',
+                                pointBorderColor: '#dc2626',
+                                pointRadius: 4,
+                                borderWidth: 2
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: true,
+                            plugins: {
+                                legend: {
+                                    display: true,
+                                    position: 'bottom',
+                                    labels: {
+                                        font: {
+                                            size: 11
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                r: {
+                                    beginAtZero: true,
+                                    min: 0,
+                                    max: 100,
+                                    ticks: {
+                                        stepSize: 10,
+                                        font: {
+                                            size: 10
+                                        }
+                                    },
+                                    pointLabels: {
+                                        font: {
+                                            size: 10
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+
+                    window.skorChart_{{ $chartId }} = chartInstance;
+                }
+
+                function waitForLivewire(callback) {
+                    if (window.Livewire) callback();
+                    else setTimeout(() => waitForLivewire(callback), 100);
+                }
+
+                waitForLivewire(function() {
+                    initChart();
+
+                    Livewire.on('chartDataUpdated', function(data) {
+                        let chartData = Array.isArray(data) && data.length > 0 ? data[0] : data;
+                        if (window.skorChart_{{ $chartId }} && chartData) {
+                            chartLabels = chartData.labels;
+                            chartScores = chartData.scores;
+                            templateName = chartData.templateName || 'Standard';
+
+                            // Update chart data
+                            window.skorChart_{{ $chartId }}.data.labels = chartLabels;
+                            window.skorChart_{{ $chartId }}.data.datasets[0].label = templateName;
+                            window.skorChart_{{ $chartId }}.data.datasets[0].data = chartScores;
+                            window.skorChart_{{ $chartId }}.update('active');
+                        }
+                    });
+                });
+            }
+
+            setupSkorChart();
+        })();
+    </script>
     @endif
 </div>
