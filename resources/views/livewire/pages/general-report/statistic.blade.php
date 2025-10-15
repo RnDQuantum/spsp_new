@@ -1,25 +1,25 @@
-<div class="max-w-3xl mx-auto mt-10 bg-white p-6 rounded shadow text-gray-900">
+<div class="max-w-6xl mx-auto mt-10 bg-white p-8 rounded shadow text-gray-900">
 
     <!-- Dropdown Event & Aspek -->
-    <div class="flex items-center mb-4 gap-3">
-        <label class="font-semibold">Event:</label>
+    <div class="flex items-center mb-6 gap-4">
+        <label class="font-semibold text-base">Event:</label>
         <select wire:model.live="eventCode"
-            class="border border-black rounded px-2 py-1 bg-cyan-100 font-mono w-60 text-gray-900">
+            class="border border-black rounded px-3 py-2 bg-cyan-100 font-mono w-72 text-gray-900">
             @foreach ($availableEvents as $e)
                 <option value="{{ $e['code'] }}">{{ $e['name'] }}</option>
             @endforeach
         </select>
 
-        <label class="font-semibold ml-4">Aspek:</label>
+        <label class="font-semibold text-base ml-6">Aspek:</label>
         <select wire:model.live="aspectId"
-            class="border border-black rounded px-2 py-1 bg-cyan-100 font-mono w-72 text-gray-900">
+            class="border border-black rounded px-3 py-2 bg-cyan-100 font-mono w-96 text-gray-900">
             @foreach ($availableAspects as $a)
                 <option value="{{ $a['id'] }}">{{ strtoupper($a['category']) }} — {{ $a['name'] }}</option>
             @endforeach
         </select>
 
         <div wire:loading wire:target="eventCode, aspectId" class="text-center">
-            <svg class="inline w-4 h-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none"
+            <svg class="inline w-5 h-5 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none"
                 viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
                 </circle>
@@ -31,59 +31,62 @@
     </div>
 
     <!-- Judul Kurva -->
-    <div class="mb-1 text-center font-bold text-lg uppercase">KURVA DISTRIBUSI FREKUENSI</div>
-    <div class="mb-1 text-center text-sm font-semibold text-red-800">
+    <div class="mb-2 text-center font-bold text-2xl uppercase">KURVA DISTRIBUSI FREKUENSI</div>
+    <div class="mb-4 text-center text-lg font-semibold text-red-800">
         {{ collect($availableAspects)->firstWhere('id', (int) $aspectId)['name'] ?? '—' }}
     </div>
 
-    <!-- Area Chart -->
-    <div class="px-4 pb-1" wire:ignore id="distribution-chart-{{ $chartId }}">
-        <canvas id="frekuensiChart-{{ $chartId }}" style="max-height: 270px;"></canvas>
-    </div>
-
-    <!-- Tabel Kelas dan Rentang Nilai -->
-    <div class="flex justify-end mt-3 text-xs">
-        <table class="border border-black text-gray-900">
-            <thead>
-                <tr style="background-color: #eee;">
-                    <th class="border border-black px-2 py-1">Kelas</th>
-                    <th class="border border-black px-2 py-1">Rentang Nilai</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td class="border border-black px-2 py-1">I</td>
-                    <td class="border border-black px-2 py-1">1.00 - 1.80</td>
-                </tr>
-                <tr>
-                    <td class="border border-black px-2 py-1">II</td>
-                    <td class="border border-black px-2 py-1">1.80 - 2.60</td>
-                </tr>
-                <tr>
-                    <td class="border border-black px-2 py-1">III</td>
-                    <td class="border border-black px-2 py-1">2.60 - 3.40</td>
-                </tr>
-                <tr>
-                    <td class="border border-black px-2 py-1">IV</td>
-                    <td class="border border-black px-2 py-1">3.40 - 4.20</td>
-                </tr>
-                <tr>
-                    <td class="border border-black px-2 py-1">V</td>
-                    <td class="border border-black px-2 py-1">4.20 - 5.00</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-
-    <!-- Area Standar & Rata-rata Rating -->
-    <div class="flex justify-center gap-4 mt-4">
-        <div class="bg-cyan-200 p-4 rounded text-center min-w-[120px]">
-            <div class="text-xs font-semibold">Standar Rating</div>
-            <div class="text-2xl font-bold text-orange-900 mt-2">{{ number_format($standardRating, 2) }}</div>
+    <!-- Chart dan Tabel Layout -->
+    <div class="flex gap-6">
+        <!-- Area Chart -->
+        <div class="flex-1 px-6 pb-2" wire:ignore id="distribution-chart-{{ $chartId }}">
+            <canvas id="frekuensiChart-{{ $chartId }}" style="max-height: 400px;"></canvas>
         </div>
-        <div class="bg-orange-200 p-4 rounded text-center min-w-[120px]">
-            <div class="text-xs font-semibold">Rata-rata Rating</div>
-            <div class="text-2xl font-bold text-cyan-900 mt-2">{{ number_format($averageRating, 2) }}</div>
+
+        <!-- Tabel Kelas dan Rentang Nilai - di sebelah kanan chart -->
+        <div class="flex-shrink-0 text-sm self-center">
+            <table class="border border-black text-gray-900">
+                <thead>
+                    <tr style="background-color: #eee;">
+                        <th class="border border-black px-3 py-2 font-semibold">Kelas</th>
+                        <th class="border border-black px-3 py-2 font-semibold">Rentang Nilai</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="border border-black px-3 py-2 text-center">I</td>
+                        <td class="border border-black px-3 py-2">1.00 - 1.80</td>
+                    </tr>
+                    <tr>
+                        <td class="border border-black px-3 py-2 text-center">II</td>
+                        <td class="border border-black px-3 py-2">1.80 - 2.60</td>
+                    </tr>
+                    <tr>
+                        <td class="border border-black px-3 py-2 text-center">III</td>
+                        <td class="border border-black px-3 py-2">2.60 - 3.40</td>
+                    </tr>
+                    <tr>
+                        <td class="border border-black px-3 py-2 text-center">IV</td>
+                        <td class="border border-black px-3 py-2">3.40 - 4.20</td>
+                    </tr>
+                    <tr>
+                        <td class="border border-black px-3 py-2 text-center">V</td>
+                        <td class="border border-black px-3 py-2">4.20 - 5.00</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Area Standar & Rata-rata Rating - tepat di bawah chart -->
+    <div class="flex justify-center gap-6 mt-6 px-6">
+        <div class="bg-cyan-200 p-6 rounded-lg text-center min-w-[160px]">
+            <div class="text-sm font-semibold">Standar Rating</div>
+            <div class="text-3xl font-bold text-orange-900 mt-3">{{ number_format($standardRating, 2) }}</div>
+        </div>
+        <div class="bg-orange-200 p-6 rounded-lg text-center min-w-[160px]">
+            <div class="text-sm font-semibold">Rata-rata Rating</div>
+            <div class="text-3xl font-bold text-cyan-900 mt-3">{{ number_format($averageRating, 2) }}</div>
         </div>
     </div>
 </div>
@@ -120,19 +123,20 @@
                         datasets: [{
                             label: label,
                             data: coerced,
-                            borderColor: 'brown',
-                            backgroundColor: 'rgba(200,0,0,0.08)',
-                            tension: 0.5,
-                            fill: false,
-                            pointRadius: 5,
-                            pointHoverRadius: 6,
-                            pointBorderWidth: 2,
-                            pointBackgroundColor: 'brown',
-                            pointBorderColor: '#5a2a2a',
+                            borderColor: 'rgb(185, 28, 28)',
+                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                            tension: 0.4,
+                            fill: true,
+                            pointRadius: 6,
+                            pointHoverRadius: 8,
+                            pointBorderWidth: 3,
+                            pointBackgroundColor: 'rgb(185, 28, 28)',
+                            pointBorderColor: '#fff',
+                            borderWidth: 3,
                             datalabels: {
                                 align: 'top',
                                 anchor: 'end',
-                                offset: 4,
+                                offset: 6,
                                 formatter: function(value) {
                                     if (total === 0) return '0,00%';
                                     const percentage = (value / total * 100).toFixed(2);
@@ -145,10 +149,10 @@
                         responsive: true,
                         layout: {
                             padding: {
-                                top: 32,
-                                right: 16,
-                                bottom: 16,
-                                left: 8
+                                top: 40,
+                                right: 20,
+                                bottom: 20,
+                                left: 12
                             }
                         },
                         plugins: {
@@ -167,36 +171,53 @@
                                 }
                             },
                             datalabels: {
-                                backgroundColor: 'rgba(139, 69, 19, 0.85)',
-                                borderRadius: 4,
+                                backgroundColor: 'rgba(185, 28, 28, 0.9)',
+                                borderRadius: 5,
                                 color: 'white',
                                 font: {
                                     weight: 'bold',
-                                    size: 11
+                                    size: 13
                                 },
-                                padding: 6
+                                padding: 8
                             }
                         },
                         scales: {
                             x: {
                                 border: {
-                                    display: false
+                                    display: true,
+                                    width: 2
                                 },
                                 offset: true,
                                 grid: {
-                                    offset: true
+                                    offset: true,
+                                    display: true,
+                                    color: 'rgba(0, 0, 0, 0.05)'
+                                },
+                                ticks: {
+                                    font: {
+                                        size: 14,
+                                        weight: 'bold'
+                                    }
                                 }
                             },
                             y: {
                                 min: 0,
                                 suggestedMax: allZero ? 1 : undefined,
                                 border: {
-                                    display: false
+                                    display: true,
+                                    width: 2
+                                },
+                                grid: {
+                                    display: true,
+                                    color: 'rgba(0, 0, 0, 0.05)'
                                 },
                                 ticks: {
                                     stepSize: 1,
+                                    font: {
+                                        size: 13
+                                    },
                                     callback: function(value) {
-                                        return value + '%';
+                                        return value;
                                     }
                                 }
                             }
