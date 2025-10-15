@@ -51,9 +51,10 @@ Route::get('/training-recomendation', function () {
     return view('livewire.pages.general-report.training-recomendation');
 })->name('training-recomendation');
 
-Route::get('/standard-mc', function () {
-    return view('livewire.pages.general-report.standard-mc');
-})->name('standard-mc');
+Route::get('/standard-mc', App\Livewire\Pages\GeneralReport\StandardMc::class)->name('standard-mc');
+Route::get('/standard-mc-copy', function () {
+    return view('livewire.pages.general-report.standard-mc-copy');
+})->name('standard-mc-copy');
 
 Route::get('/standard-psikometrik', App\Livewire\Pages\GeneralReport\StandardPsikometrik::class)->name('standard-psikometrik');
 
