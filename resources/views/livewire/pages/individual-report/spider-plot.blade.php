@@ -23,8 +23,8 @@
         <div class="p-6">
             <h1 class="text-3xl text-center font-bold text-gray-800 mb-8">Static Pribadi Spider Plot (SPSP)</h1>
 
-            <!-- Charts -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+            <!-- Charts - Vertical Layout -->
+            <div class="space-y-6 mt-8">
                 <!-- Chart Potensi (Pentagon) -->
                 <div class="bg-white p-6 rounded-lg shadow border border-gray-200" wire:ignore>
                     <h3 class="text-lg text-center font-semibold text-gray-800 mb-4">Potential Mapping (Rating)</h3>
@@ -41,16 +41,12 @@
                         <canvas id="kompetensiChart-{{ $kompetensiChartId }}"></canvas>
                     </div>
                 </div>
-            </div>
 
-            <!-- Chart General (Tetradecagon) di tengah dengan ukuran lebih besar -->
-            <div class="flex justify-center mt-6">
-                <div class="w-full lg:w-2/3">
-                    <div class="bg-white p-6 rounded-lg shadow border border-gray-200" wire:ignore>
-                        <h3 class="text-lg text-center font-semibold text-gray-800 mb-4">General Mapping (Rating)</h3>
-                        <div class="relative h-96">
-                            <canvas id="generalChart-{{ $generalChartId }}"></canvas>
-                        </div>
+                <!-- Chart General (Tetradecagon) -->
+                <div class="bg-white p-6 rounded-lg shadow border border-gray-200" wire:ignore>
+                    <h3 class="text-lg text-center font-semibold text-gray-800 mb-4">General Mapping (Rating)</h3>
+                    <div class="relative h-96">
+                        <canvas id="generalChart-{{ $generalChartId }}"></canvas>
                     </div>
                 </div>
             </div>
@@ -104,35 +100,39 @@
                         label: 'Standard',
                         data: @js($potensiOriginalStandardRatings),
                         fill: true,
-                        backgroundColor: 'rgba(107, 114, 128, 0.05)',
-                        borderColor: 'rgba(107, 114, 128, 0.7)',
-                        pointBackgroundColor: 'rgba(107, 114, 128, 0.7)',
+                        backgroundColor: 'rgba(99, 102, 241, 0.08)',
+                        borderColor: 'rgba(99, 102, 241, 0.9)',
+                        pointBackgroundColor: 'rgba(99, 102, 241, 1)',
                         pointBorderColor: '#fff',
                         pointHoverBackgroundColor: '#fff',
-                        pointHoverBorderColor: 'rgba(107, 114, 128, 0.7)',
-                        borderWidth: 2,
-                        pointRadius: 3
+                        pointHoverBorderColor: 'rgba(99, 102, 241, 1)',
+                        borderWidth: 2.5,
+                        pointRadius: 4,
+                        pointBorderWidth: 2
                     }, {
                         label: 'Tolerance {{ $tolerancePercentage }}%',
                         data: @js($potensiStandardRatings),
-                        borderColor: 'rgba(156, 163, 175, 0.6)',
+                        borderColor: 'rgba(16, 185, 129, 0.8)',
                         backgroundColor: 'transparent',
-                        borderWidth: 1.5,
-                        borderDash: [5, 5],
-                        pointRadius: 2,
-                        pointBackgroundColor: 'rgba(156, 163, 175, 0.6)'
+                        borderWidth: 2,
+                        borderDash: [8, 4],
+                        pointRadius: 3,
+                        pointBackgroundColor: 'rgba(16, 185, 129, 0.9)',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2
                     }, {
                         label: '{{ $participant->name }}',
                         data: @js($potensiIndividualRatings),
                         fill: true,
-                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                        borderColor: 'rgba(239, 68, 68, 0.8)',
-                        pointBackgroundColor: 'rgba(239, 68, 68, 0.8)',
+                        backgroundColor: 'rgba(236, 72, 153, 0.12)',
+                        borderColor: 'rgba(236, 72, 153, 1)',
+                        pointBackgroundColor: 'rgba(236, 72, 153, 1)',
                         pointBorderColor: '#fff',
                         pointHoverBackgroundColor: '#fff',
-                        pointHoverBorderColor: 'rgba(239, 68, 68, 0.8)',
-                        borderWidth: 2,
-                        pointRadius: 3
+                        pointHoverBorderColor: 'rgba(236, 72, 153, 1)',
+                        borderWidth: 2.5,
+                        pointRadius: 4,
+                        pointBorderWidth: 2
                     }]
                 },
                 options: {
@@ -188,35 +188,39 @@
                         label: 'Standard',
                         data: @js($kompetensiOriginalStandardRatings),
                         fill: true,
-                        backgroundColor: 'rgba(107, 114, 128, 0.05)',
-                        borderColor: 'rgba(107, 114, 128, 0.7)',
-                        pointBackgroundColor: 'rgba(107, 114, 128, 0.7)',
+                        backgroundColor: 'rgba(6, 182, 212, 0.08)',
+                        borderColor: 'rgba(6, 182, 212, 0.9)',
+                        pointBackgroundColor: 'rgba(6, 182, 212, 1)',
                         pointBorderColor: '#fff',
                         pointHoverBackgroundColor: '#fff',
-                        pointHoverBorderColor: 'rgba(107, 114, 128, 0.7)',
-                        borderWidth: 2,
-                        pointRadius: 3
+                        pointHoverBorderColor: 'rgba(6, 182, 212, 1)',
+                        borderWidth: 2.5,
+                        pointRadius: 4,
+                        pointBorderWidth: 2
                     }, {
                         label: 'Tolerance {{ $tolerancePercentage }}%',
                         data: @js($kompetensiStandardRatings),
-                        borderColor: 'rgba(156, 163, 175, 0.6)',
+                        borderColor: 'rgba(251, 146, 60, 0.8)',
                         backgroundColor: 'transparent',
-                        borderWidth: 1.5,
-                        borderDash: [5, 5],
-                        pointRadius: 2,
-                        pointBackgroundColor: 'rgba(156, 163, 175, 0.6)'
+                        borderWidth: 2,
+                        borderDash: [8, 4],
+                        pointRadius: 3,
+                        pointBackgroundColor: 'rgba(251, 146, 60, 0.9)',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2
                     }, {
                         label: '{{ $participant->name }}',
                         data: @js($kompetensiIndividualRatings),
                         fill: true,
-                        backgroundColor: 'rgba(249, 115, 22, 0.1)',
-                        borderColor: 'rgba(249, 115, 22, 0.8)',
-                        pointBackgroundColor: 'rgba(249, 115, 22, 0.8)',
+                        backgroundColor: 'rgba(245, 158, 11, 0.12)',
+                        borderColor: 'rgba(245, 158, 11, 1)',
+                        pointBackgroundColor: 'rgba(245, 158, 11, 1)',
                         pointBorderColor: '#fff',
                         pointHoverBackgroundColor: '#fff',
-                        pointHoverBorderColor: 'rgba(249, 115, 22, 0.8)',
-                        borderWidth: 2,
-                        pointRadius: 3
+                        pointHoverBorderColor: 'rgba(245, 158, 11, 1)',
+                        borderWidth: 2.5,
+                        pointRadius: 4,
+                        pointBorderWidth: 2
                     }]
                 },
                 options: {
@@ -272,35 +276,39 @@
                         label: 'Standard',
                         data: @js($generalOriginalStandardRatings),
                         fill: true,
-                        backgroundColor: 'rgba(107, 114, 128, 0.05)',
-                        borderColor: 'rgba(107, 114, 128, 0.7)',
-                        pointBackgroundColor: 'rgba(107, 114, 128, 0.7)',
+                        backgroundColor: 'rgba(16, 185, 129, 0.08)',
+                        borderColor: 'rgba(16, 185, 129, 0.9)',
+                        pointBackgroundColor: 'rgba(16, 185, 129, 1)',
                         pointBorderColor: '#fff',
                         pointHoverBackgroundColor: '#fff',
-                        pointHoverBorderColor: 'rgba(107, 114, 128, 0.7)',
-                        borderWidth: 2,
-                        pointRadius: 3
+                        pointHoverBorderColor: 'rgba(16, 185, 129, 1)',
+                        borderWidth: 2.5,
+                        pointRadius: 4,
+                        pointBorderWidth: 2
                     }, {
                         label: 'Tolerance {{ $tolerancePercentage }}%',
                         data: @js($generalStandardRatings),
-                        borderColor: 'rgba(156, 163, 175, 0.6)',
+                        borderColor: 'rgba(239, 68, 68, 0.8)',
                         backgroundColor: 'transparent',
-                        borderWidth: 1.5,
-                        borderDash: [5, 5],
-                        pointRadius: 2,
-                        pointBackgroundColor: 'rgba(156, 163, 175, 0.6)'
+                        borderWidth: 2,
+                        borderDash: [8, 4],
+                        pointRadius: 3,
+                        pointBackgroundColor: 'rgba(239, 68, 68, 0.9)',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2
                     }, {
                         label: '{{ $participant->name }}',
                         data: @js($generalIndividualRatings),
                         fill: true,
-                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                        borderColor: 'rgba(59, 130, 246, 0.8)',
-                        pointBackgroundColor: 'rgba(59, 130, 246, 0.8)',
+                        backgroundColor: 'rgba(168, 85, 247, 0.12)',
+                        borderColor: 'rgba(168, 85, 247, 1)',
+                        pointBackgroundColor: 'rgba(168, 85, 247, 1)',
                         pointBorderColor: '#fff',
                         pointHoverBackgroundColor: '#fff',
-                        pointHoverBorderColor: 'rgba(59, 130, 246, 0.8)',
-                        borderWidth: 2,
-                        pointRadius: 3
+                        pointHoverBorderColor: 'rgba(168, 85, 247, 1)',
+                        borderWidth: 2.5,
+                        pointRadius: 4,
+                        pointBorderWidth: 2
                     }]
                 },
                 options: {
