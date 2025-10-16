@@ -26,6 +26,13 @@ class RankingMcMapping extends Component
 
     public int $perPage = 10;
 
+    // Pie chart data
+    public array $chartLabels = [];
+
+    public array $chartData = [];
+
+    public array $chartColors = [];
+
     protected $listeners = ['tolerance-updated' => 'handleToleranceUpdate'];
 
     public function mount(): void
@@ -39,11 +46,17 @@ class RankingMcMapping extends Component
             ->all();
 
         $this->eventCode = $this->availableEvents[0]['code'] ?? null;
+
+        // Prepare chart data
+        $this->prepareChartData();
     }
 
     public function updatedEventCode(): void
     {
         $this->resetPage();
+
+        // Refresh chart data
+        $this->prepareChartData();
 
         $summary = $this->getPassingSummary();
         $this->dispatch('summary-updated', [
@@ -51,17 +64,34 @@ class RankingMcMapping extends Component
             'total' => $summary['total'],
             'percentage' => $summary['percentage'],
         ]);
+
+        // Dispatch chart update event
+        $this->dispatch('pieChartDataUpdated', [
+            'labels' => $this->chartLabels,
+            'data' => $this->chartData,
+            'colors' => $this->chartColors,
+        ]);
     }
 
     public function handleToleranceUpdate(int $tolerance): void
     {
         $this->tolerancePercentage = $tolerance;
 
+        // Refresh chart data with new tolerance
+        $this->prepareChartData();
+
         $summary = $this->getPassingSummary();
         $this->dispatch('summary-updated', [
             'passing' => $summary['passing'],
             'total' => $summary['total'],
             'percentage' => $summary['percentage'],
+        ]);
+
+        // Dispatch chart update event
+        $this->dispatch('pieChartDataUpdated', [
+            'labels' => $this->chartLabels,
+            'data' => $this->chartData,
+            'colors' => $this->chartColors,
         ]);
     }
 
@@ -320,6 +350,41 @@ class RankingMcMapping extends Component
         }
 
         return $conclusions;
+    }
+
+    private function prepareChartData(): void
+    {
+        $conclusionSummary = $this->getConclusionSummary();
+
+        if (empty($conclusionSummary)) {
+            $this->chartLabels = [];
+            $this->chartData = [];
+            $this->chartColors = [];
+
+            return;
+        }
+
+        // Map conclusions to chart labels and colors
+        $this->chartLabels = [
+            'Lebih Memenuhi/More Requirement',
+            'Memenuhi/Meet Requirement',
+            'Kurang Memenuhi/Below Requirement',
+            'Belum Memenuhi/Under Perform',
+        ];
+
+        $this->chartData = [
+            $conclusionSummary['Lebih Memenuhi/More Requirement'] ?? 0,
+            $conclusionSummary['Memenuhi/Meet Requirement'] ?? 0,
+            $conclusionSummary['Kurang Memenuhi/Below Requirement'] ?? 0,
+            $conclusionSummary['Belum Memenuhi/Under Perform'] ?? 0,
+        ];
+
+        $this->chartColors = [
+            '#10b981', // Green for Lebih Memenuhi
+            '#3b82f6', // Blue for Memenuhi
+            '#fbbf24', // Yellow for Kurang Memenuhi
+            '#ef4444', // Red for Belum Memenuhi
+        ];
     }
 
     public function render()
