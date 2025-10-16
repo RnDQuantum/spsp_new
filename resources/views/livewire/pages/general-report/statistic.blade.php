@@ -149,7 +149,7 @@
                         responsive: true,
                         layout: {
                             padding: {
-                                top: 40,
+                                top: 60,
                                 right: 20,
                                 bottom: 20,
                                 left: 12
