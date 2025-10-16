@@ -11,10 +11,6 @@
                         <option value="{{ $ev['code'] }}">{{ $ev['name'] }}</option>
                     @endforeach
                 </select>
-                <a href="{{ route('cb-psy') }}"
-                    class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-1 border border-black rounded transition-colors inline-block">
-                    Lihat Capacity Building
-                </a>
             </div>
         </div>
 
