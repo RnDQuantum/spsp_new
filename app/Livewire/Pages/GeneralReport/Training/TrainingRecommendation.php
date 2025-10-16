@@ -302,12 +302,85 @@ class TrainingRecommendation extends Component
             : 0;
     }
 
+    /**
+     * Build aspect priority data with gap analysis
+     */
+    private function buildAspectPriorityData(): ?\Illuminate\Support\Collection
+    {
+        if (! $this->selectedEvent) {
+            return null;
+        }
+
+        // Calculate tolerance factor
+        $toleranceFactor = 1 - ($this->tolerancePercentage / 100);
+
+        // Get all aspects for the selected event
+        $aspects = Aspect::where('template_id', $this->selectedEvent->template_id)
+            ->with('categoryType')
+            ->orderBy('category_type_id', 'asc')
+            ->orderBy('order', 'asc')
+            ->get();
+
+        $aspectData = [];
+
+        foreach ($aspects as $aspect) {
+            // Get all assessments for this aspect in this event
+            $assessments = AspectAssessment::where('event_id', $this->selectedEvent->id)
+                ->where('aspect_id', $aspect->id)
+                ->get();
+
+            if ($assessments->isEmpty()) {
+                continue;
+            }
+
+            // Calculate average rating for this aspect
+            $totalRating = 0;
+            foreach ($assessments as $assessment) {
+                $totalRating += (float) $assessment->individual_rating;
+            }
+            $averageRating = $totalRating / $assessments->count();
+
+            // Get original standard rating
+            $originalStandardRating = (float) $aspect->standard_rating;
+
+            // Apply tolerance to standard rating
+            $adjustedStandardRating = $originalStandardRating * $toleranceFactor;
+
+            // Calculate gap using adjusted standard
+            $gap = $averageRating - $adjustedStandardRating;
+
+            // Determine action (Pelatihan if gap < 0, Dipertahankan if gap >= 0)
+            $action = $gap < 0 ? 'Pelatihan' : 'Dipertahankan';
+
+            $aspectData[] = [
+                'aspect_name' => $aspect->name,
+                'original_standard_rating' => $originalStandardRating,
+                'adjusted_standard_rating' => round($adjustedStandardRating, 2),
+                'average_rating' => round($averageRating, 2),
+                'gap' => round($gap, 2),
+                'action' => $action,
+            ];
+        }
+
+        // Sort by gap (ascending - most negative first)
+        $collection = collect($aspectData)->sortBy('gap')->values();
+
+        // Add priority number
+        return $collection->map(function ($item, $index) {
+            $item['priority'] = $index + 1;
+
+            return $item;
+        });
+    }
+
     public function render()
     {
         $participants = $this->buildParticipantsPaginated();
+        $aspectPriorities = $this->buildAspectPriorityData();
 
         return view('livewire.pages.general-report.training.training-recommendation', [
             'participants' => $participants,
+            'aspectPriorities' => $aspectPriorities,
         ]);
     }
 }

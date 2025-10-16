@@ -55,7 +55,6 @@
         <!-- SECTION 1: Summary -->
         <table class="w-full border border-black text-gray-900 text-sm">
             <tr>
-                <td class="border border-black font-bold text-center bg-gray-200 w-16 px-2 py-2" rowspan="3">1</td>
                 <td class="border border-black font-semibold px-4 py-2 bg-white" colspan="3">
                     {{ $selectedEvent->name }}
                 </td>
@@ -86,9 +85,6 @@
         <!-- SECTION 2: Selected Aspect Info -->
         <table class="w-full border border-black text-gray-900 text-sm mt-4">
             <tr>
-                <td class="border border-black font-bold text-center bg-gray-200 w-16 px-2 py-2 align-middle">
-                    2
-                </td>
                 <td class="border border-black font-normal px-4 py-2 align-middle bg-white" colspan="2">
                     Training recommended : <span class="font-bold underline ml-2">{{ $selectedAspect->name }}</span>
                 </td>
@@ -205,143 +201,77 @@
         </div>
     @endif
 
-    <div class="max-w-7xl mx-auto mt-10 bg-white p-6 rounded-lg shadow-lg">
-        <!-- Header Section -->
-        <div class="border-b-4 border-blue-800 pb-3 mb-6">
-            <h1 class="text-xl font-bold text-gray-900 uppercase">
-                PRIORITAS PERBAIKAN ATRIBUT MAPPING
-            </h1>
-        </div>
+    @if ($selectedEvent && $aspectPriorities && $aspectPriorities->isNotEmpty())
+        <div class="max-w-7xl mx-auto mt-10 bg-white p-6 rounded-lg shadow-lg">
+            <!-- Header Section -->
+            <div class="border-b-4 border-blue-800 pb-3 mb-6">
+                <h1 class="text-xl font-bold text-gray-900 uppercase">
+                    PRIORITAS PERBAIKAN ATRIBUT MAPPING
+                </h1>
+                <p class="text-sm text-gray-600 mt-1">{{ $selectedEvent->name }} ({{ $selectedEvent->year }})</p>
+            </div>
 
-        <!-- Table Section -->
-        <div class="overflow-x-auto">
-            <table class="w-full border-2 border-gray-900 text-sm text-gray-900">
-                <thead>
-                    <tr class="bg-cyan-100">
-                        <th class="border-2 border-gray-900 px-4 py-3 text-center font-bold">PRIORITAS</th>
-                        <th class="border-2 border-gray-900 px-4 py-3 text-center font-bold">ATRIBUT</th>
-                        <th class="border-2 border-gray-900 px-4 py-3 text-center font-bold">STD RATING</th>
-                        <th class="border-2 border-gray-900 px-4 py-3 text-center font-bold">RATA-2 RATING</th>
-                        <th class="border-2 border-gray-900 px-4 py-3 text-center font-bold">GAP</th>
-                        <th class="border-2 border-gray-900 px-4 py-3 text-center font-bold">TINDAK LANJUT</th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white">
-                    <tr>
-                        <td class="border-2 border-gray-900 px-4 py-2 text-center">1</td>
-                        <td class="border-2 border-gray-900 px-4 py-2">Kecerdasan</td>
-                        <td class="border-2 border-gray-900 px-4 py-2 text-center">3.50</td>
-                        <td class="border-2 border-gray-900 px-4 py-2 text-center">3.20</td>
-                        <td class="border-2 border-gray-900 px-4 py-2 text-center">-0.30</td>
-                        <td class="border-2 border-gray-900 px-4 py-2 text-center">Pelatihan</td>
-                    </tr>
-                    <tr>
-                        <td class="border-2 border-gray-900 px-4 py-2 text-center">2</td>
-                        <td class="border-2 border-gray-900 px-4 py-2">Cara Kerja</td>
-                        <td class="border-2 border-gray-900 px-4 py-2 text-center">3.40</td>
-                        <td class="border-2 border-gray-900 px-4 py-2 text-center">3.56</td>
-                        <td class="border-2 border-gray-900 px-4 py-2 text-center">0.16</td>
-                        <td class="border-2 border-gray-900 px-4 py-2 text-center">Dipertahankan</td>
-                    </tr>
-                    <tr>
-                        <td class="border-2 border-gray-900 px-4 py-2 text-center">3</td>
-                        <td class="border-2 border-gray-900 px-4 py-2">Potensi Kerja</td>
-                        <td class="border-2 border-gray-900 px-4 py-2 text-center">3.25</td>
-                        <td class="border-2 border-gray-900 px-4 py-2 text-center">3.50</td>
-                        <td class="border-2 border-gray-900 px-4 py-2 text-center">0.25</td>
-                        <td class="border-2 border-gray-900 px-4 py-2 text-center">Dipertahankan</td>
-                    </tr>
-                    <tr>
-                        <td class="border-2 border-gray-900 px-4 py-2 text-center">4</td>
-                        <td class="border-2 border-gray-900 px-4 py-2">Hubungan Sosial</td>
-                        <td class="border-2 border-gray-900 px-4 py-2 text-center">3.00</td>
-                        <td class="border-2 border-gray-900 px-4 py-2 text-center">2.95</td>
-                        <td class="border-2 border-gray-900 px-4 py-2 text-center">-0.05</td>
-                        <td class="border-2 border-gray-900 px-4 py-2 text-center">Pelatihan</td>
-                    </tr>
-                    <tr>
-                        <td class="border-2 border-gray-900 px-4 py-2 text-center">5</td>
-                        <td class="border-2 border-gray-900 px-4 py-2">Kepribadian</td>
-                        <td class="border-2 border-gray-900 px-4 py-2 text-center">3.25</td>
-                        <td class="border-2 border-gray-900 px-4 py-2 text-center">2.95</td>
-                        <td class="border-2 border-gray-900 px-4 py-2 text-center">-0.30</td>
-                        <td class="border-2 border-gray-900 px-4 py-2 text-center">Pelatihan</td>
-                    </tr>
-                    <tr>
-                        <td class="border-2 border-gray-900 px-4 py-2 text-center">6</td>
-                        <td class="border-2 border-gray-900 px-4 py-2">Integritas</td>
-                        <td class="border-2 border-gray-900 px-4 py-2 text-center">4.00</td>
-                        <td class="border-2 border-gray-900 px-4 py-2 text-center">3.60</td>
-                        <td class="border-2 border-gray-900 px-4 py-2 text-center">-0.40</td>
-                        <td class="border-2 border-gray-900 px-4 py-2 text-center">Pelatihan</td>
-                    </tr>
-                    <tr>
-                        <td class="border-2 border-gray-900 px-4 py-2 text-center">7</td>
-                        <td class="border-2 border-gray-900 px-4 py-2">Kerjasama</td>
-                        <td class="border-2 border-gray-900 px-4 py-2 text-center">4.00</td>
-                        <td class="border-2 border-gray-900 px-4 py-2 text-center">3.20</td>
-                        <td class="border-2 border-gray-900 px-4 py-2 text-center">-0.80</td>
-                        <td class="border-2 border-gray-900 px-4 py-2 text-center">Pelatihan</td>
-                    </tr>
-                    <tr>
-                        <td class="border-2 border-gray-900 px-4 py-2 text-center">8</td>
-                        <td class="border-2 border-gray-900 px-4 py-2">Komunikasi</td>
-                        <td class="border-2 border-gray-900 px-4 py-2 text-center">4.00</td>
-                        <td class="border-2 border-gray-900 px-4 py-2 text-center">3.20</td>
-                        <td class="border-2 border-gray-900 px-4 py-2 text-center">-0.80</td>
-                        <td class="border-2 border-gray-900 px-4 py-2 text-center">Pelatihan</td>
-                    </tr>
-                    <tr>
-                        <td class="border-2 border-gray-900 px-4 py-2 text-center">9</td>
-                        <td class="border-2 border-gray-900 px-4 py-2">Orientasi pada Hasil</td>
-                        <td class="border-2 border-gray-900 px-4 py-2 text-center">4.00</td>
-                        <td class="border-2 border-gray-900 px-4 py-2 text-center">3.00</td>
-                        <td class="border-2 border-gray-900 px-4 py-2 text-center">-1.00</td>
-                        <td class="border-2 border-gray-900 px-4 py-2 text-center">Pelatihan</td>
-                    </tr>
-                    <tr>
-                        <td class="border-2 border-gray-900 px-4 py-2 text-center">10</td>
-                        <td class="border-2 border-gray-900 px-4 py-2">Pelayanan Publik</td>
-                        <td class="border-2 border-gray-900 px-4 py-2 text-center">4.00</td>
-                        <td class="border-2 border-gray-900 px-4 py-2 text-center">3.40</td>
-                        <td class="border-2 border-gray-900 px-4 py-2 text-center">-0.60</td>
-                        <td class="border-2 border-gray-900 px-4 py-2 text-center">Pelatihan</td>
-                    </tr>
-                    <tr>
-                        <td class="border-2 border-gray-900 px-4 py-2 text-center">11</td>
-                        <td class="border-2 border-gray-900 px-4 py-2">Pengembangan Diri dan Orang Lain</td>
-                        <td class="border-2 border-gray-900 px-4 py-2 text-center">4.00</td>
-                        <td class="border-2 border-gray-900 px-4 py-2 text-center">3.60</td>
-                        <td class="border-2 border-gray-900 px-4 py-2 text-center">-0.40</td>
-                        <td class="border-2 border-gray-900 px-4 py-2 text-center">Pelatihan</td>
-                    </tr>
-                    <tr>
-                        <td class="border-2 border-gray-900 px-4 py-2 text-center">12</td>
-                        <td class="border-2 border-gray-900 px-4 py-2">Mengelola Perubahan</td>
-                        <td class="border-2 border-gray-900 px-4 py-2 text-center">4.00</td>
-                        <td class="border-2 border-gray-900 px-4 py-2 text-center">3.20</td>
-                        <td class="border-2 border-gray-900 px-4 py-2 text-center">-0.80</td>
-                        <td class="border-2 border-gray-900 px-4 py-2 text-center">Pelatihan</td>
-                    </tr>
-                    <tr>
-                        <td class="border-2 border-gray-900 px-4 py-2 text-center">13</td>
-                        <td class="border-2 border-gray-900 px-4 py-2">Pengambilan Keputusan</td>
-                        <td class="border-2 border-gray-900 px-4 py-2 text-center">4.00</td>
-                        <td class="border-2 border-gray-900 px-4 py-2 text-center">2.80</td>
-                        <td class="border-2 border-gray-900 px-4 py-2 text-center">-1.20</td>
-                        <td class="border-2 border-gray-900 px-4 py-2 text-center">Pelatihan</td>
-                    </tr>
-                    <tr>
-                        <td class="border-2 border-gray-900 px-4 py-2 text-center">14</td>
-                        <td class="border-2 border-gray-900 px-4 py-2">Perekat Bangsa</td>
-                        <td class="border-2 border-gray-900 px-4 py-2 text-center">4.00</td>
-                        <td class="border-2 border-gray-900 px-4 py-2 text-center">3.40</td>
-                        <td class="border-2 border-gray-900 px-4 py-2 text-center">-0.60</td>
-                        <td class="border-2 border-gray-900 px-4 py-2 text-center">Pelatihan</td>
-                    </tr>
-                </tbody>
-            </table>
+            <!-- Table Section -->
+            <div class="overflow-x-auto">
+                <table class="w-full border-2 border-gray-900 text-sm text-gray-900">
+                    <thead>
+                        <tr class="bg-cyan-100">
+                            <th class="border-2 border-gray-900 px-4 py-3 text-center font-bold">PRIORITAS</th>
+                            <th class="border-2 border-gray-900 px-4 py-3 text-center font-bold">ATRIBUT</th>
+                            <th class="border-2 border-gray-900 px-4 py-3 text-center font-bold">STD RATING</th>
+                            <th class="border-2 border-gray-900 px-4 py-3 text-center font-bold">RATA-2 RATING</th>
+                            <th class="border-2 border-gray-900 px-4 py-3 text-center font-bold">GAP</th>
+                            <th class="border-2 border-gray-900 px-4 py-3 text-center font-bold">TINDAK LANJUT</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white">
+                        @foreach ($aspectPriorities as $priority)
+                            <tr class="{{ $priority['gap'] < 0 ? 'bg-red-50' : 'bg-green-50' }}">
+                                <td class="border-2 border-gray-900 px-4 py-2 text-center font-semibold">
+                                    {{ $priority['priority'] }}
+                                </td>
+                                <td class="border-2 border-gray-900 px-4 py-2">{{ $priority['aspect_name'] }}</td>
+                                <td class="border-2 border-gray-900 px-4 py-2 text-center">
+                                    {{ number_format($priority['adjusted_standard_rating'], 2, ',', '.') }}
+                                </td>
+                                <td class="border-2 border-gray-900 px-4 py-2 text-center">
+                                    {{ number_format($priority['average_rating'], 2, ',', '.') }}
+                                </td>
+                                <td
+                                    class="border-2 border-gray-900 px-4 py-2 text-center font-bold {{ $priority['gap'] < 0 ? 'text-red-700' : 'text-green-700' }}">
+                                    {{ number_format($priority['gap'], 2, ',', '.') }}
+                                </td>
+                                <td class="border-2 border-gray-900 px-4 py-2 text-center">
+                                    <span
+                                        class="px-2 py-1 rounded font-semibold {{ $priority['action'] === 'Pelatihan' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700' }}">
+                                        {{ $priority['action'] }}
+                                    </span>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Summary Info -->
+            <div class="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <h4 class="font-semibold text-gray-700 mb-2">Keterangan:</h4>
+                <ul class="list-disc list-inside text-sm text-gray-600 space-y-1">
+                    <li><strong>Gap:</strong> Selisih antara rata-rata rating dengan standar rating (Rata-rata - Standar)
+                    </li>
+                    <li><strong>Tindak Lanjut:</strong>
+                        <ul class="ml-6 mt-1 space-y-1">
+                            <li><span class="px-2 py-1 rounded bg-red-100 text-red-700 font-semibold">Pelatihan:</span>
+                                Gap negatif, perlu pelatihan untuk meningkatkan kompetensi</li>
+                            <li><span class="px-2 py-1 rounded bg-green-100 text-green-700 font-semibold">Dipertahankan:</span>
+                                Gap positif atau nol, kompetensi sudah memenuhi atau melebihi standar</li>
+                        </ul>
+                    </li>
+                    <li><strong>Prioritas:</strong> Diurutkan berdasarkan gap terkecil (paling negatif) sebagai prioritas
+                        tertinggi</li>
+                </ul>
+            </div>
         </div>
-    </div>
+    @endif
 
 </div>
