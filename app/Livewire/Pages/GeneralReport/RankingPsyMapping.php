@@ -36,7 +36,7 @@ class RankingPsyMapping extends Component
         $this->availableEvents = AssessmentEvent::query()
             ->orderByDesc('start_date')
             ->get(['code', 'name'])
-            ->map(fn ($e) => ['code' => $e->code, 'name' => $e->name])
+            ->map(fn($e) => ['code' => $e->code, 'name' => $e->name])
             ->all();
 
         $this->eventCode = $this->availableEvents[0]['code'] ?? null;
@@ -330,7 +330,7 @@ class RankingPsyMapping extends Component
         $rankings = $this->buildRankings();
         $conclusionSummary = $this->getConclusionSummary();
 
-        return view('livewire.pages.general-report.ranking-psy-mapping', [
+        return view('livewire.pages.general-report.ranking.ranking-psy-mapping', [
             'rankings' => $rankings,
             'conclusionSummary' => $conclusionSummary,
         ]);

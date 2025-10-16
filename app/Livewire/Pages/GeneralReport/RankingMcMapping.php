@@ -35,7 +35,7 @@ class RankingMcMapping extends Component
         $this->availableEvents = AssessmentEvent::query()
             ->orderByDesc('start_date')
             ->get(['code', 'name'])
-            ->map(fn ($e) => ['code' => $e->code, 'name' => $e->name])
+            ->map(fn($e) => ['code' => $e->code, 'name' => $e->name])
             ->all();
 
         $this->eventCode = $this->availableEvents[0]['code'] ?? null;
@@ -327,7 +327,7 @@ class RankingMcMapping extends Component
         $rankings = $this->buildRankings();
         $conclusionSummary = $this->getConclusionSummary();
 
-        return view('livewire.pages.general-report.ranking-mc-mapping', [
+        return view('livewire.pages.general-report.ranking.ranking-mc-mapping', [
             'rankings' => $rankings,
             'conclusionSummary' => $conclusionSummary,
         ]);
