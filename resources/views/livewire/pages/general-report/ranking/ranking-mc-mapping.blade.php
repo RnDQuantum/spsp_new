@@ -187,7 +187,7 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
                 <!-- Chart Section -->
                 <div class="border border-gray-300 p-6 rounded-lg bg-gray-50" wire:ignore>
-                    <canvas id="conclusionPieChart" class="w-full" style="max-height: 400px;"></canvas>
+                    <canvas id="conclusionPieChart" class="w-full"></canvas>
                 </div>
 
                 <!-- Table Section -->
@@ -209,9 +209,18 @@
                                 @php
                                     $percentage =
                                         $totalParticipants > 0 ? round(($count / $totalParticipants) * 100, 2) : 0;
+
+                                    $bgColor = match ($conclusion) {
+                                        'Lebih Memenuhi/More Requirement' => 'bg-green-100 border-green-300',
+                                        'Memenuhi/Meet Requirement' => 'bg-blue-100 border-blue-300',
+                                        'Kurang Memenuhi/Below Requirement' => 'bg-yellow-100 border-yellow-300',
+                                        'Belum Memenuhi/Under Perform' => 'bg-red-100 border-red-300',
+                                        default => 'bg-gray-100 border-gray-300',
+                                    };
                                 @endphp
                                 <tr>
-                                    <td class="border-2 border-gray-400 px-4 py-3">{{ $conclusion }}</td>
+                                    <td class="border-2 border-gray-400 px-4 py-3 {{ $bgColor }}">
+                                        {{ $conclusion }}</td>
                                     <td class="border-2 border-gray-400 px-4 py-3 text-center">{{ $count }}
                                         orang
                                     </td>
@@ -269,27 +278,19 @@
             options: {
                 responsive: true,
                 maintainAspectRatio: true,
+                // Add padding to prevent label clipping
+                layout: {
+                    padding: {
+                        top: 60,
+                        bottom: 60,
+                        left: 60,
+                        right: 60
+                    }
+                },
                 plugins: {
                     legend: {
-                        display: true,
-                        position: 'right',
-                        labels: {
-                            font: {
-                                size: 12
-                            },
-                            padding: 15,
-                            generateLabels: function(chart) {
-                                const data = chart.data;
-                                return data.labels.map((label, i) => {
-                                    return {
-                                        text: label,
-                                        fillStyle: data.datasets[0].backgroundColor[i],
-                                        hidden: false,
-                                        index: i
-                                    };
-                                });
-                            }
-                        }
+                        display: false,
+
                     },
                     tooltip: {
                         callbacks: {
@@ -301,41 +302,64 @@
                                 return `${label}: ${value} orang (${percentage}%)`;
                             }
                         }
+                    },
+                    // Menggunakan chartjs-plugin-datalabels untuk label yang lebih jelas
+                    datalabels: {
+                        // Posisikan label di luar chart
+                        anchor: 'end',
+                        align: 'end',
+                        offset: 10,
+
+                        // Style untuk background label
+                        backgroundColor: function(context) {
+                            return 'rgba(255, 255, 255, 0.95)';
+                        },
+                        borderColor: function(context) {
+                            return context.dataset.backgroundColor[context.dataIndex];
+                        },
+                        borderWidth: 2,
+                        borderRadius: 4,
+
+                        // Style text
+                        color: '#000',
+                        font: {
+                            weight: 'bold',
+                            size: 13
+                        },
+
+                        // Padding di dalam box label
+                        padding: 6,
+
+                        // Formatter untuk menampilkan nilai dan persentase
+                        formatter: function(value, context) {
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = total > 0 ? ((value / total) * 100).toFixed(2) : '0.00';
+
+                            // Skip label jika value = 0 (kecuali index pertama)
+                            if (value === 0 && context.dataIndex !== 0) {
+                                return '';
+                            }
+
+                            return `${value} orang\n${percentage}%`;
+                        },
+
+                        // Tampilkan hanya jika value > 0 atau index pertama
+                        display: function(context) {
+                            return context.dataset.data[context.dataIndex] > 0 || context.dataIndex === 0;
+                        },
+
+                        // Style text alignment
+                        textAlign: 'center',
+
+                        // Tambahkan line connector dari chart ke label
+                        listeners: {
+                            enter: function(context) {
+                                // Optional: bisa tambahkan interaktivitas
+                            }
+                        }
                     }
                 }
-            },
-            plugins: [{
-                id: 'customLabels',
-                afterDatasetsDraw: function(chart) {
-                    const ctx = chart.ctx;
-                    const dataset = chart.data.datasets[0];
-                    const meta = chart.getDatasetMeta(0);
-
-                    meta.data.forEach((element, index) => {
-                        const value = dataset.data[index];
-                        const total = dataset.data.reduce((a, b) => a + b, 0);
-                        const percentage = total > 0 ? ((value / total) * 100).toFixed(2) :
-                            '0.00';
-
-                        const label = `${value} orang; ${percentage}%`;
-
-                        ctx.fillStyle = '#000';
-                        ctx.font = 'bold 12px Arial';
-                        ctx.textAlign = 'center';
-                        ctx.textBaseline = 'middle';
-
-                        // Position label outside the slice
-                        const angle = (element.startAngle + element.endAngle) / 2;
-                        const radius = element.outerRadius + 30;
-                        const x = element.x + Math.cos(angle) * radius;
-                        const y = element.y + Math.sin(angle) * radius;
-
-                        if (value > 0 || index === 0) {
-                            ctx.fillText(label, x, y);
-                        }
-                    });
-                }
-            }]
+            }
         };
 
         conclusionPieChart = new Chart(canvas, config);
