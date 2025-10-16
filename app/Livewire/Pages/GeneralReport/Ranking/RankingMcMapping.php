@@ -33,6 +33,38 @@ class RankingMcMapping extends Component
 
     public array $chartColors = [];
 
+    // Conclusion configuration - single source of truth
+    public array $conclusionConfig = [
+        'Lebih Memenuhi/More Requirement' => [
+            'min' => 110,
+            'max' => null,
+            'chartColor' => '#10b981',
+            'tailwindClass' => 'bg-green-100 border-green-300',
+            'rangeText' => '≥ 110%',
+        ],
+        'Memenuhi/Meet Requirement' => [
+            'min' => 100,
+            'max' => 109,
+            'chartColor' => '#3b82f6',
+            'tailwindClass' => 'bg-blue-100 border-blue-300',
+            'rangeText' => '100% - 109%',
+        ],
+        'Kurang Memenuhi/Below Requirement' => [
+            'min' => 90,
+            'max' => 99,
+            'chartColor' => '#fbbf24',
+            'tailwindClass' => 'bg-yellow-100 border-yellow-300',
+            'rangeText' => '90% - 99%',
+        ],
+        'Belum Memenuhi/Under Perform' => [
+            'min' => 0,
+            'max' => 89,
+            'chartColor' => '#ef4444',
+            'tailwindClass' => 'bg-red-100 border-red-300',
+            'rangeText' => '< 90%',
+        ],
+    ];
+
     protected $listeners = ['tolerance-updated' => 'handleToleranceUpdate'];
 
     public function mount(): void
@@ -97,16 +129,20 @@ class RankingMcMapping extends Component
 
     private function getConclusionText(float $percentageScore): string
     {
-        // Conclusion based on percentage score relative to adjusted standard
-        if ($percentageScore >= 110) {
-            return 'Lebih Memenuhi/More Requirement';
-        } elseif ($percentageScore >= 100) {
-            return 'Memenuhi/Meet Requirement';
-        } elseif ($percentageScore >= 90) {
-            return 'Kurang Memenuhi/Below Requirement';
-        } else {
-            return 'Belum Memenuhi/Under Perform';
+        // Use conclusionConfig to determine conclusion
+        foreach ($this->conclusionConfig as $conclusion => $config) {
+            $min = $config['min'];
+            $max = $config['max'];
+
+            if ($max === null && $percentageScore >= $min) {
+                return $conclusion;
+            } elseif ($max !== null && $percentageScore >= $min && $percentageScore <= $max) {
+                return $conclusion;
+            }
         }
+
+        // Fallback (should not happen with proper config)
+        return 'Belum Memenuhi/Under Perform';
     }
 
     private function overallConclusionText(float $totalGapScore): string
@@ -324,12 +360,8 @@ class RankingMcMapping extends Component
             ->groupBy('participant_id')
             ->get();
 
-        $conclusions = [
-            'Lebih Memenuhi/More Requirement' => 0,
-            'Memenuhi/Meet Requirement' => 0,
-            'Kurang Memenuhi/Below Requirement' => 0,
-            'Belum Memenuhi/Under Perform' => 0,
-        ];
+        // Initialize conclusions from config
+        $conclusions = array_fill_keys(array_keys($this->conclusionConfig), 0);
 
         foreach ($aggregates as $r) {
             $originalStandardScore = (float) $r->sum_original_standard_score;
@@ -364,27 +396,10 @@ class RankingMcMapping extends Component
             return;
         }
 
-        // Map conclusions to chart labels and colors
-        $this->chartLabels = [
-            'Lebih Memenuhi/More Requirement',
-            'Memenuhi/Meet Requirement',
-            'Kurang Memenuhi/Below Requirement',
-            'Belum Memenuhi/Under Perform',
-        ];
-
-        $this->chartData = [
-            $conclusionSummary['Lebih Memenuhi/More Requirement'] ?? 0,
-            $conclusionSummary['Memenuhi/Meet Requirement'] ?? 0,
-            $conclusionSummary['Kurang Memenuhi/Below Requirement'] ?? 0,
-            $conclusionSummary['Belum Memenuhi/Under Perform'] ?? 0,
-        ];
-
-        $this->chartColors = [
-            '#10b981', // Green for Lebih Memenuhi
-            '#3b82f6', // Blue for Memenuhi
-            '#fbbf24', // Yellow for Kurang Memenuhi
-            '#ef4444', // Red for Belum Memenuhi
-        ];
+        // Build chart data from conclusionConfig
+        $this->chartLabels = array_keys($this->conclusionConfig);
+        $this->chartData = array_values($conclusionSummary);
+        $this->chartColors = array_column($this->conclusionConfig, 'chartColor');
     }
 
     public function render()

@@ -102,36 +102,17 @@
                         $totalParticipants = array_sum($conclusionSummary);
                         $percentage = $totalParticipants > 0 ? round(($count / $totalParticipants) * 100, 1) : 0;
 
-                        // Determine color based on conclusion
-                        $bgColor = match ($conclusion) {
-                            'Lebih Memenuhi/More Requirement' => 'bg-green-100 border-green-300',
-                            'Memenuhi/Meet Requirement' => 'bg-blue-100 border-blue-300',
-                            'Kurang Memenuhi/Below Requirement' => 'bg-yellow-100 border-yellow-300',
-                            'Belum Memenuhi/Under Perform' => 'bg-red-100 border-red-300',
-                            default => 'bg-gray-100 border-gray-300',
-                        };
+                        // Get color and range from conclusionConfig
+                        $config = $this->conclusionConfig[$conclusion] ?? null;
+                        $bgColor = $config['tailwindClass'] ?? 'bg-gray-100 border-gray-300';
+                        $rangeText = $config['rangeText'] ?? '-';
                     @endphp
 
                     <div class="border-2 {{ $bgColor }} rounded-lg p-3 text-center">
                         <div class="text-2xl font-bold text-gray-900">{{ $count }}</div>
                         <div class="text-sm text-gray-600 mb-1">{{ $percentage }}%</div>
                         <div class="text-xs text-gray-700 leading-tight mb-2">{{ $conclusion }}</div>
-                        <div class="text-xs text-gray-500 font-medium">
-                            @switch($conclusion)
-                                @case('Lebih Memenuhi/More Requirement')
-                                    ≥ 110%
-                                @break
-
-                                @case('Memenuhi/Meet Requirement')
-                                    100% - 109%
-                                @break
-
-                                @case('Kurang Memenuhi/Below Requirement')
-                                    90% - 99%
-                                @break
-
-                                @case('Belum Memenuhi/Under Perform')
-                        < 90% @break @default - @endswitch </div>
+                        <div class="text-xs text-gray-500 font-medium">{{ $rangeText }}</div>
                     </div>
             @endforeach
         </div>
@@ -186,8 +167,8 @@
             <!-- Content Grid -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
                 <!-- Chart Section -->
-                <div class="border border-gray-300 p-6 rounded-lg bg-gray-50" wire:ignore>
-                    <canvas id="conclusionPieChart" class="w-full"></canvas>
+                <div class="border border-gray-300 p-6 rounded-lg bg-gray-50 transition-shadow duration-300 hover:shadow-xl" wire:ignore>
+                    <canvas id="conclusionPieChart" class="w-full h-full"></canvas>
                 </div>
 
                 <!-- Table Section -->
@@ -210,13 +191,9 @@
                                     $percentage =
                                         $totalParticipants > 0 ? round(($count / $totalParticipants) * 100, 2) : 0;
 
-                                    $bgColor = match ($conclusion) {
-                                        'Lebih Memenuhi/More Requirement' => 'bg-green-100 border-green-300',
-                                        'Memenuhi/Meet Requirement' => 'bg-blue-100 border-blue-300',
-                                        'Kurang Memenuhi/Below Requirement' => 'bg-yellow-100 border-yellow-300',
-                                        'Belum Memenuhi/Under Perform' => 'bg-red-100 border-red-300',
-                                        default => 'bg-gray-100 border-gray-300',
-                                    };
+                                    // Get color from conclusionConfig
+                                    $config = $this->conclusionConfig[$conclusion] ?? null;
+                                    $bgColor = $config['tailwindClass'] ?? 'bg-gray-100 border-gray-300';
                                 @endphp
                                 <tr>
                                     <td class="border-2 border-gray-400 px-4 py-3 {{ $bgColor }}">
@@ -268,7 +245,15 @@
                 data: data,
                 backgroundColor: colors,
                 borderColor: '#ffffff',
-                borderWidth: 2
+                borderWidth: 2,
+                // Hover effects
+                hoverBackgroundColor: colors.map(color => {
+                    // Lighten color on hover
+                    return color + 'dd'; // Add transparency
+                }),
+                hoverBorderColor: '#333',
+                hoverBorderWidth: 3,
+                hoverOffset: 25 // Push slice out on hover
             }]
         };
 
@@ -281,11 +266,28 @@
                 // Add padding to prevent label clipping
                 layout: {
                     padding: {
-                        top: 60,
-                        bottom: 60,
-                        left: 60,
-                        right: 60
+                        top: 50,
+                        bottom: 50,
+                        left: 100,
+                        right: 100
                     }
+                },
+                // Smooth animations
+                animation: {
+                    animateRotate: true,
+                    animateScale: true,
+                    duration: 800,
+                    easing: 'easeInOutQuart'
+                },
+                // Hover mode settings
+                hover: {
+                    mode: 'nearest',
+                    intersect: true,
+                    animationDuration: 400
+                },
+                // Cursor pointer on hover
+                onHover: (event, activeElements) => {
+                    event.native.target.style.cursor = activeElements.length > 0 ? 'pointer' : 'default';
                 },
                 plugins: {
                     legend: {
@@ -293,6 +295,22 @@
 
                     },
                     tooltip: {
+                        enabled: true,
+                        backgroundColor: 'rgba(0, 0, 0, 0.85)',
+                        padding: 14,
+                        cornerRadius: 8,
+                        titleFont: {
+                            size: 15,
+                            weight: 'bold'
+                        },
+                        bodyFont: {
+                            size: 14
+                        },
+                        displayColors: true,
+                        boxWidth: 20,
+                        boxHeight: 20,
+                        boxPadding: 8,
+                        caretSize: 8,
                         callbacks: {
                             label: function(context) {
                                 const label = context.label || '';
