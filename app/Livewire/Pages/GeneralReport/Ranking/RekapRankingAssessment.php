@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Pages\GeneralReport;
+namespace App\Livewire\Pages\GeneralReport\Ranking;
 
 use App\Models\AssessmentEvent;
 use App\Models\CategoryType;
