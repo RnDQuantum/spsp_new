@@ -59,21 +59,26 @@
                 <td class="border border-black font-semibold px-4 py-2 bg-white" colspan="3">
                     {{ $selectedEvent->name }}
                 </td>
-                <td class="border border-black font-normal px-4 py-2 bg-white text-right">
-                    (Rating Rata-rata: {{ number_format($averageRating, 2, ',', '.') }})
+                <td class="border border-black px-4 py-2 bg-blue-50 text-right">
+                    <span
+                        class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
+                        Rating Rata-rata: {{ number_format($averageRating, 2, ',', '.') }}
+                    </span>
                 </td>
             </tr>
             <tr>
-                <td class="border border-black px-4 py-2 bg-white">Recommended</td>
-                <td class="border border-black px-4 py-2 bg-white text-center w-20">{{ $recommendedCount }}</td>
-                <td class="border border-black px-4 py-2 bg-white text-right w-24">
+                <td class="border border-black px-4 py-2 bg-red-50 font-semibold text-red-800">Recommended</td>
+                <td class="border border-black px-4 py-2 bg-red-50 text-center w-20 font-bold text-red-900">
+                    {{ $recommendedCount }}</td>
+                <td class="border border-black px-4 py-2 bg-red-50 text-right w-24 font-bold text-red-900">
                     {{ number_format($this->recommendedPercentage, 2, ',', '.') }}%</td>
                 <td class="border border-black px-4 py-2 bg-white" rowspan="2"></td>
             </tr>
             <tr>
-                <td class="border border-black px-4 py-2 bg-white">Not Recommended</td>
-                <td class="border border-black px-4 py-2 bg-white text-center">{{ $notRecommendedCount }}</td>
-                <td class="border border-black px-4 py-2 bg-white text-right">
+                <td class="border border-black px-4 py-2 bg-green-50 font-semibold text-green-800">Not Recommended</td>
+                <td class="border border-black px-4 py-2 bg-green-50 text-center font-bold text-green-900">
+                    {{ $notRecommendedCount }}</td>
+                <td class="border border-black px-4 py-2 bg-green-50 text-right font-bold text-green-900">
                     {{ number_format($this->notRecommendedPercentage, 2, ',', '.') }}%</td>
             </tr>
         </table>
@@ -87,9 +92,18 @@
                 <td class="border border-black font-normal px-4 py-2 align-middle bg-white" colspan="2">
                     Training recommended : <span class="font-bold underline ml-2">{{ $selectedAspect->name }}</span>
                 </td>
-                <td class="border border-black px-4 py-2 text-right bg-yellow-100 align-middle">
-                    <span x-data
-                        x-text="$wire.tolerancePercentage > 0 ? '(Std. Rating: {{ number_format($selectedAspect->standard_rating, 2, ',', '.') }} → ' + {{ number_format($standardRating, 2) }} + ' dengan toleransi ' + $wire.tolerancePercentage + '%)' : '(Std. Rating: {{ number_format($standardRating, 2, ',', '.') }})'"></span>
+                <td class="border border-black px-4 py-2 text-right bg-yellow-50 align-middle">
+                    <div class="inline-flex items-center gap-2">
+                        <span class="px-3 py-1 rounded-full text-sm font-semibold bg-yellow-200 text-yellow-900">
+                            Std. Rating: {{ number_format($selectedAspect->standard_rating, 2, ',', '.') }}
+                        </span>
+                        <span x-show="$wire.tolerancePercentage > 0" class="text-xs text-gray-600">
+                            → <span
+                                class="font-bold text-yellow-800">{{ number_format($standardRating, 2, ',', '.') }}</span>
+                            <span class="text-xs italic">(toleransi <span
+                                    x-text="$wire.tolerancePercentage"></span>%)</span>
+                        </span>
+                    </div>
                 </td>
             </tr>
         </table>
@@ -141,7 +155,7 @@
                                 </td>
                                 <td class="border border-black px-3 py-2 text-center">
                                     <span
-                                        class="px-2 py-1 rounded {{ $participant['is_recommended'] ? 'bg-red-100 text-red-700 font-semibold' : 'bg-green-100 text-green-700' }}">
+                                        class="px-2 py-1 rounded {{ $participant['is_recommended'] ? 'bg-red-100 text-red-700 font-semibold' : 'bg-green-100 font-semibold text-green-700' }}">
                                         {{ $participant['statement'] }}
                                     </span>
                                 </td>
@@ -168,16 +182,18 @@
         <!-- Legend -->
         <div class="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
             <h4 class="font-semibold text-gray-700 mb-2">Keterangan:</h4>
-            <ul class="text-sm text-gray-600 space-y-1">
-                <li><span
-                        class="inline-block w-4 h-4 bg-red-50 border border-red-200 mr-2"></span><strong>Recommended:</strong>
-                    Peserta dengan rating di bawah standar (setelah toleransi), direkomendasikan untuk mengikuti
-                    pelatihan</li>
-                <li><span class="inline-block w-4 h-4 bg-white border border-gray-200 mr-2"></span><strong>Not
-                        Recommended:</strong> Peserta dengan rating memenuhi atau melebihi standar</li>
-                <li><span
-                        class="inline-block w-4 h-4 bg-yellow-100 border border-yellow-300 mr-2"></span><strong>Priority:</strong>
-                    Urutan berdasarkan rating terendah (prioritas tertinggi)</li>
+            <ul class="list-disc list-inside text-sm text-gray-600 space-y-1">
+                <li><strong>Statement:</strong>
+                    <ul class="ml-6 mt-1 space-y-1">
+                        <li><span class="px-2 py-1 rounded bg-red-100 text-red-700 font-semibold">Recommended:</span>
+                            Peserta dengan rating di bawah standar, direkomendasikan untuk mengikuti
+                            pelatihan</li>
+                        <li><span class="px-2 py-1 rounded bg-green-100 text-green-700 font-semibold">Not
+                                Recommended:</span>
+                            Recommended:</strong> Peserta dengan rating memenuhi atau melebihi standar</li>
+                    </ul>
+                </li>
+                <li><strong>Priority:</strong> Urutan berdasarkan rating terendah (prioritas tertinggi)</li>
             </ul>
         </div>
     @else
