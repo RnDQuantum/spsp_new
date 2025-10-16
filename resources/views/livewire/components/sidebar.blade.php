@@ -167,7 +167,7 @@
                             class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
                             Statistik
                         </a>
-                        <a href="{{ route('training-recomendation') }}" role="menuitem"
+                        <a href="{{ route('training-recommendation') }}" role="menuitem"
                             class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
                             Training Recommendation
                         </a>

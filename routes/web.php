@@ -47,9 +47,7 @@ Route::get('/rekap-ranking-assessment', App\Livewire\Pages\GeneralReport\RekapRa
 
 Route::get('/statistic', App\Livewire\Pages\GeneralReport\Statistic::class)->name('statistic');
 
-Route::get('/training-recomendation', function () {
-    return view('livewire.pages.general-report.training.training-recomendation');
-})->name('training-recomendation');
+Route::get('/training-recommendation', App\Livewire\Pages\GeneralReport\Training\TrainingRecommendation::class)->name('training-recommendation');
 
 Route::get('/standard-mc', App\Livewire\Pages\GeneralReport\StandardMc::class)->name('standard-mc');
 Route::get('/standard-mc-copy', function () {
