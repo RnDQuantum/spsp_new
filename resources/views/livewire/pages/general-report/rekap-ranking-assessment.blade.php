@@ -215,4 +215,254 @@
                 </div>
             </div>
         @endif
+
+        <!-- Pie Chart Section -->
+        @if (!empty($conclusionSummary))
+            <div class="mt-8 border-t-2 border-black pt-6 bg-white">
+                <div class="px-6 pb-6">
+                    <h3 class="text-xl font-bold text-gray-900 mb-6 text-center">Capacity Building Rekap Assessment</h3>
+
+                    <!-- Content Grid -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                        <!-- Chart Section -->
+                        <div class="border border-gray-300 p-6 rounded-lg bg-gray-50 transition-shadow duration-300 hover:shadow-xl"
+                            wire:ignore>
+                            <canvas id="conclusionPieChart" class="w-full h-full"></canvas>
+                        </div>
+
+                        <!-- Table Section -->
+                        <div class="border-2 border-gray-300 rounded-lg overflow-hidden">
+                            <table class="w-full text-sm text-gray-900">
+                                <thead>
+                                    <tr class="bg-gray-200">
+                                        <th class="border-2 border-gray-400 px-4 py-3 text-center font-bold">KETERANGAN</th>
+                                        <th class="border-2 border-gray-400 px-4 py-3 text-center font-bold">JUMLAH</th>
+                                        <th class="border-2 border-gray-400 px-4 py-3 text-center font-bold">PROSENTASE
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white">
+                                    @php
+                                        $totalParticipants = array_sum($conclusionSummary);
+                                    @endphp
+                                    @foreach ($conclusionSummary as $conclusion => $count)
+                                        @php
+                                            $percentage =
+                                                $totalParticipants > 0 ? round(($count / $totalParticipants) * 100, 2) : 0;
+
+                                            // Determine color based on conclusion
+                                            $bgColor = match ($conclusion) {
+                                                'Di Atas Standar' => 'bg-green-100 border-green-300',
+                                                'Memenuhi Standar' => 'bg-blue-100 border-blue-300',
+                                                'Di Bawah Standar' => 'bg-red-100 border-red-300',
+                                                default => 'bg-gray-100 border-gray-300',
+                                            };
+                                        @endphp
+                                        <tr>
+                                            <td class="border-2 border-gray-400 px-4 py-3 {{ $bgColor }}">
+                                                {{ $conclusion }}</td>
+                                            <td class="border-2 border-gray-400 px-4 py-3 text-center">{{ $count }}
+                                                orang
+                                            </td>
+                                            <td class="border-2 border-gray-400 px-4 py-3 text-center">{{ $percentage }}%
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                    <tr class="bg-gray-100 font-semibold">
+                                        <td class="border-2 border-gray-400 px-4 py-3">Jumlah Responden</td>
+                                        <td class="border-2 border-gray-400 px-4 py-3 text-center">
+                                            {{ $totalParticipants }} orang</td>
+                                        <td class="border-2 border-gray-400 px-4 py-3 text-center">100.00%</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
     </div>
+
+    <script>
+        let conclusionPieChart = null;
+
+        function createConclusionChart(labels, data, colors) {
+            const canvas = document.getElementById('conclusionPieChart');
+            if (!canvas) return;
+
+            // Destroy existing chart if exists to prevent cropping issues
+            if (conclusionPieChart) {
+                conclusionPieChart.destroy();
+                conclusionPieChart = null;
+            }
+
+            // Reset canvas dimensions to ensure proper sizing
+            canvas.style.width = '';
+            canvas.style.height = '';
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+
+            const chartData = {
+                labels: labels,
+                datasets: [{
+                    data: data,
+                    backgroundColor: colors,
+                    borderColor: '#ffffff',
+                    borderWidth: 2,
+                    // Hover effects
+                    hoverBackgroundColor: colors.map(color => {
+                        // Lighten color on hover
+                        return color + 'dd'; // Add transparency
+                    }),
+                    hoverBorderColor: '#333',
+                    hoverBorderWidth: 3,
+                    hoverOffset: 25 // Push slice out on hover
+                }]
+            };
+
+            const config = {
+                type: 'pie',
+                data: chartData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    // Add padding to prevent label clipping
+                    layout: {
+                        padding: {
+                            top: 50,
+                            bottom: 50,
+                            left: 100,
+                            right: 100
+                        }
+                    },
+                    // Smooth animations
+                    animation: {
+                        animateRotate: true,
+                        animateScale: true,
+                        duration: 800,
+                        easing: 'easeInOutQuart'
+                    },
+                    // Hover mode settings
+                    hover: {
+                        mode: 'nearest',
+                        intersect: true,
+                        animationDuration: 400
+                    },
+                    // Cursor pointer on hover
+                    onHover: (event, activeElements) => {
+                        event.native.target.style.cursor = activeElements.length > 0 ? 'pointer' : 'default';
+                    },
+                    plugins: {
+                        legend: {
+                            display: false,
+
+                        },
+                        tooltip: {
+                            enabled: true,
+                            backgroundColor: 'rgba(0, 0, 0, 0.85)',
+                            padding: 14,
+                            cornerRadius: 8,
+                            titleFont: {
+                                size: 15,
+                                weight: 'bold'
+                            },
+                            bodyFont: {
+                                size: 14
+                            },
+                            displayColors: true,
+                            boxWidth: 20,
+                            boxHeight: 20,
+                            boxPadding: 8,
+                            caretSize: 8,
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.parsed;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = total > 0 ? ((value / total) * 100).toFixed(2) : 0;
+                                    return `${label}: ${value} orang (${percentage}%)`;
+                                }
+                            }
+                        },
+                        // Menggunakan chartjs-plugin-datalabels untuk label yang lebih jelas
+                        datalabels: {
+                            // Posisikan label di luar chart
+                            anchor: 'end',
+                            align: 'end',
+                            offset: 10,
+
+                            // Style untuk background label
+                            backgroundColor: function(context) {
+                                return 'rgba(255, 255, 255, 0.95)';
+                            },
+                            borderColor: function(context) {
+                                return context.dataset.backgroundColor[context.dataIndex];
+                            },
+                            borderWidth: 2,
+                            borderRadius: 4,
+
+                            // Style text
+                            color: '#000',
+                            font: {
+                                weight: 'bold',
+                                size: 13
+                            },
+
+                            // Padding di dalam box label
+                            padding: 6,
+
+                            // Formatter untuk menampilkan nilai dan persentase
+                            formatter: function(value, context) {
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = total > 0 ? ((value / total) * 100).toFixed(2) : '0.00';
+
+                                // Skip label jika value = 0 (kecuali index pertama)
+                                if (value === 0 && context.dataIndex !== 0) {
+                                    return '';
+                                }
+
+                                return `${value} orang\n${percentage}%`;
+                            },
+
+                            // Tampilkan hanya jika value > 0 atau index pertama
+                            display: function(context) {
+                                return context.dataset.data[context.dataIndex] > 0 || context.dataIndex === 0;
+                            },
+
+                            // Style text alignment
+                            textAlign: 'center',
+
+                            // Tambahkan line connector dari chart ke label
+                            listeners: {
+                                enter: function(context) {
+                                    // Optional: bisa tambahkan interaktivitas
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+
+            conclusionPieChart = new Chart(canvas, config);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initial data from Livewire
+            const chartLabels = @js($chartLabels);
+            const chartData = @js($chartData);
+            const chartColors = @js($chartColors);
+
+            // Create initial chart
+            createConclusionChart(chartLabels, chartData, chartColors);
+
+            // Listen for Livewire events to recreate chart
+            Livewire.on('pieChartDataUpdated', function(data) {
+                let chartData = Array.isArray(data) && data.length > 0 ? data[0] : data;
+
+                if (chartData) {
+                    // Recreate chart completely to avoid cropping issues
+                    createConclusionChart(chartData.labels, chartData.data, chartData.colors);
+                }
+            });
+        });
+    </script>

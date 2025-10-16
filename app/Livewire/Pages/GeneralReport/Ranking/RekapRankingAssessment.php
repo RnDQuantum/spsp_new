@@ -28,6 +28,32 @@ class RekapRankingAssessment extends Component
 
     public int $tolerancePercentage = 10;
 
+    // Pie chart data
+    public array $chartLabels = [];
+
+    public array $chartData = [];
+
+    public array $chartColors = [];
+
+    // Conclusion configuration - single source of truth
+    public array $conclusionConfig = [
+        'Di Atas Standar' => [
+            'chartColor' => '#10b981',
+            'tailwindClass' => 'bg-green-100 border-green-300',
+            'rangeText' => 'Gap > 0',
+        ],
+        'Memenuhi Standar' => [
+            'chartColor' => '#3b82f6',
+            'tailwindClass' => 'bg-blue-100 border-blue-300',
+            'rangeText' => 'Gap ≥ Threshold',
+        ],
+        'Di Bawah Standar' => [
+            'chartColor' => '#ef4444',
+            'tailwindClass' => 'bg-red-100 border-red-300',
+            'rangeText' => 'Gap < Threshold',
+        ],
+    ];
+
     protected $listeners = ['tolerance-updated' => 'handleToleranceUpdate'];
 
     public function mount(): void
@@ -42,12 +68,32 @@ class RekapRankingAssessment extends Component
         $this->eventCode = $this->availableEvents[0]['code'] ?? null;
 
         $this->loadWeights();
+
+        // Prepare chart data
+        $this->prepareChartData();
     }
 
     public function updatedEventCode(): void
     {
         $this->loadWeights();
         $this->resetPage();
+
+        // Refresh chart data
+        $this->prepareChartData();
+
+        $summary = $this->getPassingSummary();
+        $this->dispatch('summary-updated', [
+            'passing' => $summary['passing'],
+            'total' => $summary['total'],
+            'percentage' => $summary['percentage'],
+        ]);
+
+        // Dispatch chart update event
+        $this->dispatch('pieChartDataUpdated', [
+            'labels' => $this->chartLabels,
+            'data' => $this->chartData,
+            'colors' => $this->chartColors,
+        ]);
     }
 
     private function getStandardInfo(): ?array
@@ -110,11 +156,22 @@ class RekapRankingAssessment extends Component
     public function handleToleranceUpdate(int $tolerance): void
     {
         $this->tolerancePercentage = $tolerance;
+
+        // Refresh chart data with new tolerance
+        $this->prepareChartData();
+
         $summary = $this->getPassingSummary();
         $this->dispatch('summary-updated', [
             'passing' => $summary['passing'],
             'total' => $summary['total'],
             'percentage' => $summary['percentage'],
+        ]);
+
+        // Dispatch chart update event
+        $this->dispatch('pieChartDataUpdated', [
+            'labels' => $this->chartLabels,
+            'data' => $this->chartData,
+            'colors' => $this->chartColors,
         ]);
     }
 
@@ -148,6 +205,24 @@ class RekapRankingAssessment extends Component
 
         $this->potensiWeight = (int) ($potensi?->weight_percentage ?? 0);
         $this->kompetensiWeight = (int) ($kompetensi?->weight_percentage ?? 0);
+    }
+
+    private function prepareChartData(): void
+    {
+        $conclusionSummary = $this->getConclusionSummary();
+
+        if (empty($conclusionSummary)) {
+            $this->chartLabels = [];
+            $this->chartData = [];
+            $this->chartColors = [];
+
+            return;
+        }
+
+        // Build chart data from conclusionConfig
+        $this->chartLabels = array_keys($this->conclusionConfig);
+        $this->chartData = array_values($conclusionSummary);
+        $this->chartColors = array_column($this->conclusionConfig, 'chartColor');
     }
 
     public function render()
