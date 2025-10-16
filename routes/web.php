@@ -56,6 +56,14 @@ Route::get('/standard-mc-copy', function () {
     return view('livewire.pages.general-report.standard-mc-copy');
 })->name('standard-mc-copy');
 
+Route::get('/cb-mc', function () {
+    return view('livewire.pages.general-report.ranking.capacitybuilding-mc');
+})->name('cb-mc');
+
+Route::get('/cb-psy', function () {
+    return view('livewire.pages.general-report.ranking.capacitybuilding-psy');
+})->name('cb-psy');
+
 Route::get('/standard-psikometrik', App\Livewire\Pages\GeneralReport\StandardPsikometrik::class)->name('standard-psikometrik');
 
 Route::get('/tkmi', function () {
