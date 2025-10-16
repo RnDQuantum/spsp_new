@@ -91,12 +91,57 @@
         @endif
     </div>
 
+    <!-- Standard & Threshold Info Box -->
+    @if ($standardInfo)
+        <div class="px-6 pb-6 bg-white">
+            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-300 rounded-lg p-4 shadow-sm">
+                <h3 class="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z">
+                        </path>
+                    </svg>
+                    Informasi Standar
+                    <span x-data
+                        x-text="$wire.tolerancePercentage > 0 ? '(Toleransi -' + $wire.tolerancePercentage + '%)' : '(Tanpa Toleransi)'"
+                        class="text-sm font-normal text-blue-600"></span>
+                </h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- Original Standard -->
+                    <div class="bg-white border border-blue-200 rounded-lg p-3">
+                        <div class="text-xs text-gray-500 mb-1">Standar Original (100%)</div>
+                        <div class="text-2xl font-bold text-gray-900">
+                            {{ number_format($standardInfo['original_standard'], 2) }}</div>
+                    </div>
+
+                    <!-- Adjusted Standard -->
+                    <div class="bg-white border border-indigo-300 rounded-lg p-3">
+                        <div class="text-xs text-gray-500 mb-1">Standar Adjusted
+                            <span x-data
+                                x-text="$wire.tolerancePercentage > 0 ? '(-' + $wire.tolerancePercentage + '%)' : ''"></span>
+                        </div>
+                        <div class="text-2xl font-bold text-indigo-600">
+                            {{ number_format($standardInfo['adjusted_standard'], 2) }}</div>
+                    </div>
+
+                    <!-- Threshold -->
+                    <div class="bg-white border border-orange-300 rounded-lg p-3">
+                        <div class="text-xs text-gray-500 mb-1">Threshold (Batas Toleransi)</div>
+                        <div class="text-2xl font-bold text-orange-600">
+                            {{ number_format($standardInfo['threshold'], 2) }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
     <!-- Summary Statistics Section -->
     @if (!empty($conclusionSummary))
         <div class="px-6 pb-6 bg-gray-50 border-t-2 border-black">
             <h3 class="text-lg font-bold text-gray-900 mb-4 mt-4">Ringkasan Kesimpulan</h3>
 
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                 @foreach ($conclusionSummary as $conclusion => $count)
                     @php
                         $totalParticipants = array_sum($conclusionSummary);
@@ -108,21 +153,21 @@
                         $rangeText = $config['rangeText'] ?? '-';
                     @endphp
 
-                    <div class="border-2 {{ $bgColor }} rounded-lg p-3 text-center">
-                        <div class="text-2xl font-bold text-gray-900">{{ $count }}</div>
-                        <div class="text-sm text-gray-600 mb-1">{{ $percentage }}%</div>
-                        <div class="text-xs text-gray-700 leading-tight mb-2">{{ $conclusion }}</div>
+                    <div class="border-2 {{ $bgColor }} rounded-lg p-4 text-center">
+                        <div class="text-3xl font-bold text-gray-900">{{ $count }}</div>
+                        <div class="text-sm text-gray-600 mb-2">{{ $percentage }}%</div>
+                        <div class="text-sm text-gray-700 font-semibold leading-tight mb-2">{{ $conclusion }}</div>
                         <div class="text-xs text-gray-500 font-medium">{{ $rangeText }}</div>
                     </div>
-            @endforeach
-        </div>
+                @endforeach
+            </div>
 
         <!-- Overall Statistics -->
         @php
             $totalParticipants = array_sum($conclusionSummary);
             $passingCount =
-                ($conclusionSummary['Lebih Memenuhi/More Requirement'] ?? 0) +
-                ($conclusionSummary['Memenuhi/Meet Requirement'] ?? 0);
+                ($conclusionSummary['Sangat Kompeten'] ?? 0) +
+                ($conclusionSummary['Kompeten'] ?? 0);
             $passingPercentage = $totalParticipants > 0 ? round(($passingCount / $totalParticipants) * 100, 1) : 0;
         @endphp
 
@@ -146,12 +191,19 @@
         <!-- Keterangan Rentang Nilai -->
         <div class="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
             <div class="text-sm text-blue-800">
-                <strong>Keterangan:</strong> Rentang nilai di atas berdasarkan persentase skor individu terhadap
-                standar yang disesuaikan dengan toleransi
+                <strong>Keterangan:</strong> Kesimpulan berdasarkan Gap (Individual Score - Adjusted Standard) dan
+                threshold toleransi
                 <span x-data
                     x-text="$wire.tolerancePercentage > 0 ? '(' + $wire.tolerancePercentage + '%)' : '(0%)'"></span>.
                 <br>
-                <strong>Rumus:</strong> Persentase = (Skor Individu ÷ Standar Adjusted) × 100%
+                <strong>Rumus:</strong>
+                <ul class="list-disc ml-6 mt-1">
+                    <li>Gap = Individual Score - Adjusted Standard</li>
+                    <li>Threshold = -Adjusted Standard × (Tolerance / 100)</li>
+                    <li><strong>Sangat Kompeten:</strong> Gap > 0</li>
+                    <li><strong>Kompeten:</strong> Gap ≥ Threshold (dalam range toleransi)</li>
+                    <li><strong>Belum Kompeten:</strong> Gap < Threshold</li>
+                </ul>
             </div>
         </div>
     </div>

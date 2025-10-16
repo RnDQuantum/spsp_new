@@ -35,33 +35,20 @@ class RankingMcMapping extends Component
 
     // Conclusion configuration - single source of truth
     public array $conclusionConfig = [
-        'Lebih Memenuhi/More Requirement' => [
-            'min' => 110,
-            'max' => null,
+        'Sangat Kompeten' => [
             'chartColor' => '#10b981',
             'tailwindClass' => 'bg-green-100 border-green-300',
-            'rangeText' => '≥ 110%',
+            'rangeText' => 'Gap > 0',
         ],
-        'Memenuhi/Meet Requirement' => [
-            'min' => 100,
-            'max' => 109,
+        'Kompeten' => [
             'chartColor' => '#3b82f6',
             'tailwindClass' => 'bg-blue-100 border-blue-300',
-            'rangeText' => '100% - 109%',
+            'rangeText' => 'Gap ≥ Threshold',
         ],
-        'Kurang Memenuhi/Below Requirement' => [
-            'min' => 90,
-            'max' => 99,
-            'chartColor' => '#fbbf24',
-            'tailwindClass' => 'bg-yellow-100 border-yellow-300',
-            'rangeText' => '90% - 99%',
-        ],
-        'Belum Memenuhi/Under Perform' => [
-            'min' => 0,
-            'max' => 89,
+        'Belum Kompeten' => [
             'chartColor' => '#ef4444',
             'tailwindClass' => 'bg-red-100 border-red-300',
-            'rangeText' => '< 90%',
+            'rangeText' => 'Gap < Threshold',
         ],
     ];
 
@@ -127,22 +114,16 @@ class RankingMcMapping extends Component
         ]);
     }
 
-    private function getConclusionText(float $percentageScore): string
+    private function getConclusionText(float $gap, float $threshold): string
     {
-        // Use conclusionConfig to determine conclusion
-        foreach ($this->conclusionConfig as $conclusion => $config) {
-            $min = $config['min'];
-            $max = $config['max'];
-
-            if ($max === null && $percentageScore >= $min) {
-                return $conclusion;
-            } elseif ($max !== null && $percentageScore >= $min && $percentageScore <= $max) {
-                return $conclusion;
-            }
+        // Logic sama dengan RekapRankingAssessment
+        if ($gap > 0) {
+            return 'Sangat Kompeten';
+        } elseif ($gap >= $threshold) {
+            return 'Kompeten';
+        } else {
+            return 'Belum Kompeten';
         }
-
-        // Fallback (should not happen with proper config)
-        return 'Belum Memenuhi/Under Perform';
     }
 
     private function overallConclusionText(float $totalGapScore): string
@@ -231,6 +212,9 @@ class RankingMcMapping extends Component
                 ? ($individualScore / $adjustedStandardScore) * 100
                 : 0;
 
+            // Calculate threshold: -(Adjusted Standard × Tolerance%)
+            $threshold = -$adjustedStandardScore * ($this->tolerancePercentage / 100);
+
             return [
                 'rank' => $startRank + $index + 1,
                 'nip' => $participant?->skb_number ?? $participant?->test_number ?? '-',
@@ -245,7 +229,7 @@ class RankingMcMapping extends Component
                 'gap_rating' => round($adjustedGapRating, 2),
                 'gap_score' => round($adjustedGapScore, 2),
                 'percentage_score' => round($adjustedPercentage, 2),
-                'conclusion' => $this->getConclusionText($adjustedPercentage),
+                'conclusion' => $this->getConclusionText($adjustedGapScore, $threshold),
                 'matrix' => 1,
             ];
         })->all();
@@ -298,7 +282,7 @@ class RankingMcMapping extends Component
 
         $total = $aggregates->count();
 
-        // Calculate passing based on adjusted percentage
+        // Calculate passing based on gap and threshold (Sangat Kompeten or Kompeten)
         $passing = $aggregates->filter(function ($r) {
             $originalStandardScore = (float) $r->sum_original_standard_score;
             $individualScore = (float) $r->sum_individual_score;
@@ -307,19 +291,77 @@ class RankingMcMapping extends Component
             $toleranceFactor = 1 - ($this->tolerancePercentage / 100);
             $adjustedStandardScore = $originalStandardScore * $toleranceFactor;
 
-            // Calculate percentage based on adjusted standard
-            $adjustedPercentage = $adjustedStandardScore > 0
-                ? ($individualScore / $adjustedStandardScore) * 100
-                : 0;
+            // Calculate gap
+            $gap = $individualScore - $adjustedStandardScore;
 
-            // Count as passing if percentage >= 100% (Memenuhi or Lebih Memenuhi)
-            return $adjustedPercentage >= 100;
+            // Calculate threshold
+            $threshold = -$adjustedStandardScore * ($this->tolerancePercentage / 100);
+
+            // Count as passing if gap > 0 OR gap >= threshold (Sangat Kompeten or Kompeten)
+            return $gap > 0 || $gap >= $threshold;
         })->count();
 
         return [
             'total' => $total,
             'passing' => $passing,
             'percentage' => $total > 0 ? (int) round(($passing / $total) * 100) : 0,
+        ];
+    }
+
+    public function getStandardInfo(): ?array
+    {
+        if (! $this->eventCode) {
+            return null;
+        }
+
+        $event = AssessmentEvent::where('code', $this->eventCode)->first();
+        if (! $event) {
+            return null;
+        }
+
+        $kompetensiCategory = CategoryType::query()
+            ->where('template_id', $event->template_id)
+            ->where('code', 'kompetensi')
+            ->first();
+
+        if (! $kompetensiCategory) {
+            return null;
+        }
+
+        $kompetensiAspectIds = Aspect::query()
+            ->where('category_type_id', $kompetensiCategory->id)
+            ->pluck('id')
+            ->all();
+
+        if (empty($kompetensiAspectIds)) {
+            return null;
+        }
+
+        // Get standard scores (they should be same for all participants, but we take first one)
+        $firstParticipant = AspectAssessment::query()
+            ->selectRaw('SUM(standard_score) as total_standard_score')
+            ->where('event_id', $event->id)
+            ->whereIn('aspect_id', $kompetensiAspectIds)
+            ->groupBy('participant_id')
+            ->first();
+
+        if (! $firstParticipant) {
+            return null;
+        }
+
+        $originalStandardScore = (float) $firstParticipant->total_standard_score;
+
+        // Calculate adjusted standard based on tolerance
+        $toleranceFactor = 1 - $this->tolerancePercentage / 100;
+        $adjustedStandardScore = $originalStandardScore * $toleranceFactor;
+
+        // Threshold calculation
+        $threshold = -$adjustedStandardScore * ($this->tolerancePercentage / 100);
+
+        return [
+            'original_standard' => round($originalStandardScore, 2),
+            'adjusted_standard' => round($adjustedStandardScore, 2),
+            'threshold' => round($threshold, 2),
         ];
     }
 
@@ -371,13 +413,14 @@ class RankingMcMapping extends Component
             $toleranceFactor = 1 - ($this->tolerancePercentage / 100);
             $adjustedStandardScore = $originalStandardScore * $toleranceFactor;
 
-            // Calculate percentage based on adjusted standard
-            $adjustedPercentage = $adjustedStandardScore > 0
-                ? ($individualScore / $adjustedStandardScore) * 100
-                : 0;
+            // Calculate gap based on adjusted standard
+            $gap = $individualScore - $adjustedStandardScore;
+
+            // Calculate threshold: -(Adjusted Standard × Tolerance%)
+            $threshold = -$adjustedStandardScore * ($this->tolerancePercentage / 100);
 
             // Determine conclusion
-            $conclusion = $this->getConclusionText($adjustedPercentage);
+            $conclusion = $this->getConclusionText($gap, $threshold);
             $conclusions[$conclusion]++;
         }
 
@@ -406,10 +449,12 @@ class RankingMcMapping extends Component
     {
         $rankings = $this->buildRankings();
         $conclusionSummary = $this->getConclusionSummary();
+        $standardInfo = $this->getStandardInfo();
 
         return view('livewire.pages.general-report.ranking.ranking-mc-mapping', [
             'rankings' => $rankings,
             'conclusionSummary' => $conclusionSummary,
+            'standardInfo' => $standardInfo,
         ]);
     }
 }
