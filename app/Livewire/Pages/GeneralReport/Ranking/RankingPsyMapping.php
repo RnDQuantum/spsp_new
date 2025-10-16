@@ -26,11 +26,36 @@ class RankingPsyMapping extends Component
 
     public int $perPage = 10;
 
+    // Pie chart data
+    public array $chartLabels = [];
+
+    public array $chartData = [];
+
+    public array $chartColors = [];
+
+    // Conclusion configuration - single source of truth
+    public array $conclusionConfig = [
+        'Di Atas Standar' => [
+            'chartColor' => '#10b981',
+            'tailwindClass' => 'bg-green-100 border-green-300',
+            'rangeText' => 'Gap > 0',
+        ],
+        'Memenuhi Standar' => [
+            'chartColor' => '#3b82f6',
+            'tailwindClass' => 'bg-blue-100 border-blue-300',
+            'rangeText' => 'Gap ≥ Threshold',
+        ],
+        'Di Bawah Standar' => [
+            'chartColor' => '#ef4444',
+            'tailwindClass' => 'bg-red-100 border-red-300',
+            'rangeText' => 'Gap < Threshold',
+        ],
+    ];
+
     protected $listeners = ['tolerance-updated' => 'handleToleranceUpdate'];
 
     public function mount(): void
     {
-        // Load tolerance from session
         $this->tolerancePercentage = session('individual_report.tolerance', 10);
 
         $this->availableEvents = AssessmentEvent::query()
@@ -40,11 +65,17 @@ class RankingPsyMapping extends Component
             ->all();
 
         $this->eventCode = $this->availableEvents[0]['code'] ?? null;
+
+        // Prepare chart data
+        $this->prepareChartData();
     }
 
     public function updatedEventCode(): void
     {
         $this->resetPage();
+
+        // Refresh chart data
+        $this->prepareChartData();
 
         $summary = $this->getPassingSummary();
         $this->dispatch('summary-updated', [
@@ -52,20 +83,34 @@ class RankingPsyMapping extends Component
             'total' => $summary['total'],
             'percentage' => $summary['percentage'],
         ]);
+
+        // Dispatch chart update event
+        $this->dispatch('pieChartDataUpdated', [
+            'labels' => $this->chartLabels,
+            'data' => $this->chartData,
+            'colors' => $this->chartColors,
+        ]);
     }
 
     public function handleToleranceUpdate(int $tolerance): void
     {
         $this->tolerancePercentage = $tolerance;
 
-        // Get updated summary statistics
-        $summary = $this->getPassingSummary();
+        // Refresh chart data with new tolerance
+        $this->prepareChartData();
 
-        // Dispatch event to update summary statistics in ToleranceSelector
+        $summary = $this->getPassingSummary();
         $this->dispatch('summary-updated', [
             'passing' => $summary['passing'],
             'total' => $summary['total'],
             'percentage' => $summary['percentage'],
+        ]);
+
+        // Dispatch chart update event
+        $this->dispatch('pieChartDataUpdated', [
+            'labels' => $this->chartLabels,
+            'data' => $this->chartData,
+            'colors' => $this->chartColors,
         ]);
     }
 
@@ -142,6 +187,9 @@ class RankingPsyMapping extends Component
                 ? ($individualScore / $adjustedStandardScore) * 100
                 : 0;
 
+            // Calculate threshold: -(Adjusted Standard × Tolerance%)
+            $threshold = -$adjustedStandardScore * ($this->tolerancePercentage / 100);
+
             return [
                 'rank' => $startRank + $index + 1,
                 'nip' => $participant?->skb_number ?? $participant?->test_number ?? '-',
@@ -156,7 +204,7 @@ class RankingPsyMapping extends Component
                 'gap_rating' => round($adjustedGapRating, 2),
                 'gap_score' => round($adjustedGapScore, 2),
                 'percentage_score' => round($adjustedPercentage, 2),
-                'conclusion' => $this->getConclusionText($adjustedPercentage),
+                'conclusion' => $this->getConclusionText($adjustedGapScore, $threshold),
                 'matrix' => 1,
             ];
         })->all();
@@ -170,17 +218,15 @@ class RankingPsyMapping extends Component
         );
     }
 
-    private function getConclusionText(float $percentageScore): string
+    private function getConclusionText(float $gap, float $threshold): string
     {
-        // Conclusion based on percentage score relative to adjusted standard
-        if ($percentageScore >= 110) {
-            return 'Lebih Memenuhi/More Requirement';
-        } elseif ($percentageScore >= 100) {
-            return 'Memenuhi/Meet Requirement';
-        } elseif ($percentageScore >= 90) {
-            return 'Kurang Memenuhi/Below Requirement';
+        // Logic sama dengan RekapRankingAssessment
+        if ($gap > 0) {
+            return 'Di Atas Standar';
+        } elseif ($gap >= $threshold) {
+            return 'Memenuhi Standar';
         } else {
-            return 'Belum Memenuhi/Under Perform';
+            return 'Di Bawah Standar';
         }
     }
 
@@ -235,7 +281,7 @@ class RankingPsyMapping extends Component
 
         $total = $aggregates->count();
 
-        // Calculate passing based on adjusted percentage
+        // Calculate passing based on gap and threshold (Di Atas Standar or Memenuhi Standar)
         $passing = $aggregates->filter(function ($r) {
             $originalStandardScore = (float) $r->sum_original_standard_score;
             $individualScore = (float) $r->sum_individual_score;
@@ -244,19 +290,77 @@ class RankingPsyMapping extends Component
             $toleranceFactor = 1 - ($this->tolerancePercentage / 100);
             $adjustedStandardScore = $originalStandardScore * $toleranceFactor;
 
-            // Calculate percentage based on adjusted standard
-            $adjustedPercentage = $adjustedStandardScore > 0
-                ? ($individualScore / $adjustedStandardScore) * 100
-                : 0;
+            // Calculate gap
+            $gap = $individualScore - $adjustedStandardScore;
 
-            // Count as passing if percentage >= 100% (Memenuhi or Lebih Memenuhi)
-            return $adjustedPercentage >= 100;
+            // Calculate threshold
+            $threshold = -$adjustedStandardScore * ($this->tolerancePercentage / 100);
+
+            // Count as passing if gap > 0 OR gap >= threshold (Di Atas Standar or Memenuhi Standar)
+            return $gap > 0 || $gap >= $threshold;
         })->count();
 
         return [
             'total' => $total,
             'passing' => $passing,
             'percentage' => $total > 0 ? (int) round(($passing / $total) * 100) : 0,
+        ];
+    }
+
+    public function getStandardInfo(): ?array
+    {
+        if (! $this->eventCode) {
+            return null;
+        }
+
+        $event = AssessmentEvent::where('code', $this->eventCode)->first();
+        if (! $event) {
+            return null;
+        }
+
+        $potensiCategory = CategoryType::query()
+            ->where('template_id', $event->template_id)
+            ->where('code', 'potensi')
+            ->first();
+
+        if (! $potensiCategory) {
+            return null;
+        }
+
+        $potensiAspectIds = Aspect::query()
+            ->where('category_type_id', $potensiCategory->id)
+            ->pluck('id')
+            ->all();
+
+        if (empty($potensiAspectIds)) {
+            return null;
+        }
+
+        // Get standard scores (they should be same for all participants, but we take first one)
+        $firstParticipant = AspectAssessment::query()
+            ->selectRaw('SUM(standard_score) as total_standard_score')
+            ->where('event_id', $event->id)
+            ->whereIn('aspect_id', $potensiAspectIds)
+            ->groupBy('participant_id')
+            ->first();
+
+        if (! $firstParticipant) {
+            return null;
+        }
+
+        $originalStandardScore = (float) $firstParticipant->total_standard_score;
+
+        // Calculate adjusted standard based on tolerance
+        $toleranceFactor = 1 - $this->tolerancePercentage / 100;
+        $adjustedStandardScore = $originalStandardScore * $toleranceFactor;
+
+        // Threshold calculation
+        $threshold = -$adjustedStandardScore * ($this->tolerancePercentage / 100);
+
+        return [
+            'original_standard' => round($originalStandardScore, 2),
+            'adjusted_standard' => round($adjustedStandardScore, 2),
+            'threshold' => round($threshold, 2),
         ];
     }
 
@@ -297,12 +401,8 @@ class RankingPsyMapping extends Component
             ->groupBy('participant_id')
             ->get();
 
-        $conclusions = [
-            'Lebih Memenuhi/More Requirement' => 0,
-            'Memenuhi/Meet Requirement' => 0,
-            'Kurang Memenuhi/Below Requirement' => 0,
-            'Belum Memenuhi/Under Perform' => 0,
-        ];
+        // Initialize conclusions from config
+        $conclusions = array_fill_keys(array_keys($this->conclusionConfig), 0);
 
         foreach ($aggregates as $r) {
             $originalStandardScore = (float) $r->sum_original_standard_score;
@@ -312,27 +412,48 @@ class RankingPsyMapping extends Component
             $toleranceFactor = 1 - ($this->tolerancePercentage / 100);
             $adjustedStandardScore = $originalStandardScore * $toleranceFactor;
 
-            // Calculate percentage based on adjusted standard
-            $adjustedPercentage = $adjustedStandardScore > 0
-                ? ($individualScore / $adjustedStandardScore) * 100
-                : 0;
+            // Calculate gap based on adjusted standard
+            $gap = $individualScore - $adjustedStandardScore;
+
+            // Calculate threshold: -(Adjusted Standard × Tolerance%)
+            $threshold = -$adjustedStandardScore * ($this->tolerancePercentage / 100);
 
             // Determine conclusion
-            $conclusion = $this->getConclusionText($adjustedPercentage);
+            $conclusion = $this->getConclusionText($gap, $threshold);
             $conclusions[$conclusion]++;
         }
 
         return $conclusions;
     }
 
+    private function prepareChartData(): void
+    {
+        $conclusionSummary = $this->getConclusionSummary();
+
+        if (empty($conclusionSummary)) {
+            $this->chartLabels = [];
+            $this->chartData = [];
+            $this->chartColors = [];
+
+            return;
+        }
+
+        // Build chart data from conclusionConfig
+        $this->chartLabels = array_keys($this->conclusionConfig);
+        $this->chartData = array_values($conclusionSummary);
+        $this->chartColors = array_column($this->conclusionConfig, 'chartColor');
+    }
+
     public function render()
     {
         $rankings = $this->buildRankings();
         $conclusionSummary = $this->getConclusionSummary();
+        $standardInfo = $this->getStandardInfo();
 
         return view('livewire.pages.general-report.ranking.ranking-psy-mapping', [
             'rankings' => $rankings,
             'conclusionSummary' => $conclusionSummary,
+            'standardInfo' => $standardInfo,
         ]);
     }
 }
