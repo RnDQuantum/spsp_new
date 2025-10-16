@@ -39,9 +39,9 @@ Route::get('/ringkasan-mc-mapping/{eventCode}/{testNumber}', App\Livewire\Pages\
 Route::get('/ringkasan-assessment/{eventCode}/{testNumber}', App\Livewire\Pages\IndividualReport\RingkasanAssessment::class)->name('ringkasan_assessment');
 
 // General report Routes
-Route::get('/ranking-psy-mapping', App\Livewire\Pages\GeneralReport\RankingPsyMapping::class)->name('ranking-psy-mapping');
+Route::get('/ranking-psy-mapping', App\Livewire\Pages\GeneralReport\Ranking\RankingPsyMapping::class)->name('ranking-psy-mapping');
 
-Route::get('/ranking-mc-mapping', App\Livewire\Pages\GeneralReport\RankingMcMapping::class)->name('ranking-mc-mapping');
+Route::get('/ranking-mc-mapping', App\Livewire\Pages\GeneralReport\Ranking\RankingMcMapping::class)->name('ranking-mc-mapping');
 
 Route::get('/rekap-ranking-assessment', App\Livewire\Pages\GeneralReport\RekapRankingAssessment::class)->name('rekap-ranking-assessment');
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Pages\GeneralReport;
+namespace App\Livewire\Pages\GeneralReport\Ranking;
 
 use App\Models\Aspect;
 use App\Models\AspectAssessment;
@@ -35,7 +35,7 @@ class RankingMcMapping extends Component
         $this->availableEvents = AssessmentEvent::query()
             ->orderByDesc('start_date')
             ->get(['code', 'name'])
-            ->map(fn($e) => ['code' => $e->code, 'name' => $e->name])
+            ->map(fn ($e) => ['code' => $e->code, 'name' => $e->name])
             ->all();
 
         $this->eventCode = $this->availableEvents[0]['code'] ?? null;
