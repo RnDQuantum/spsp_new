@@ -263,7 +263,8 @@ class TrainingRecommendation extends Component
 
         return Aspect::where('template_id', $this->selectedEvent->template_id)
             ->with('categoryType')
-            ->orderBy('order')
+            ->orderBy('category_type_id', 'asc')
+            ->orderBy('order', 'asc')
             ->get();
     }
 
