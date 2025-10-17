@@ -5,12 +5,10 @@
                 RANKING REKAP SKOR PENILAIAN AKHIR ASSESSMENT
             </h1>
             <div class="flex justify-center items-center gap-4 mt-3">
-                <label for="eventCode" class="text-black font-semibold">Event</label>
-                <select id="eventCode" wire:model.live="eventCode" class="border border-black px-2 py-1 text-black">
-                    @foreach ($availableEvents as $ev)
-                        <option value="{{ $ev['code'] }}">{{ $ev['name'] }}</option>
-                    @endforeach
-                </select>
+                <div class="w-full max-w-md">
+                    <x-mary-choices-offline wire:model.live="eventCode" :options="$availableEvents" option-value="code"
+                        option-label="name" placeholder="Cari event..." single searchable />
+                </div>
             </div>
         </div>
         <!-- Toleransi Section -->
@@ -235,8 +233,10 @@
                             <table class="w-full text-sm text-gray-900">
                                 <thead>
                                     <tr class="bg-gray-200">
-                                        <th class="border-2 border-gray-400 px-4 py-3 text-center font-bold">KETERANGAN</th>
-                                        <th class="border-2 border-gray-400 px-4 py-3 text-center font-bold">JUMLAH</th>
+                                        <th class="border-2 border-gray-400 px-4 py-3 text-center font-bold">KETERANGAN
+                                        </th>
+                                        <th class="border-2 border-gray-400 px-4 py-3 text-center font-bold">JUMLAH
+                                        </th>
                                         <th class="border-2 border-gray-400 px-4 py-3 text-center font-bold">PROSENTASE
                                         </th>
                                     </tr>
@@ -248,7 +248,9 @@
                                     @foreach ($conclusionSummary as $conclusion => $count)
                                         @php
                                             $percentage =
-                                                $totalParticipants > 0 ? round(($count / $totalParticipants) * 100, 2) : 0;
+                                                $totalParticipants > 0
+                                                    ? round(($count / $totalParticipants) * 100, 2)
+                                                    : 0;
 
                                             // Determine color based on conclusion
                                             $bgColor = match ($conclusion) {
@@ -261,10 +263,12 @@
                                         <tr>
                                             <td class="border-2 border-gray-400 px-4 py-3 {{ $bgColor }}">
                                                 {{ $conclusion }}</td>
-                                            <td class="border-2 border-gray-400 px-4 py-3 text-center">{{ $count }}
+                                            <td class="border-2 border-gray-400 px-4 py-3 text-center">
+                                                {{ $count }}
                                                 orang
                                             </td>
-                                            <td class="border-2 border-gray-400 px-4 py-3 text-center">{{ $percentage }}%
+                                            <td class="border-2 border-gray-400 px-4 py-3 text-center">
+                                                {{ $percentage }}%
                                             </td>
                                         </tr>
                                     @endforeach

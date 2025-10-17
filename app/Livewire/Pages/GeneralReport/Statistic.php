@@ -114,9 +114,11 @@ class Statistic extends Component
         $categoryIdToCode = $categoryTypes->pluck('code', 'id');
 
         $aspects = Aspect::query()
-            ->where('template_id', $event->template_id)
-            ->orderBy('order')
-            ->get(['id', 'name', 'category_type_id']);
+            ->join('category_types', 'aspects.category_type_id', '=', 'category_types.id')
+            ->where('aspects.template_id', $event->template_id)
+            ->orderByRaw("CASE WHEN LOWER(category_types.code) = 'potensi' THEN 0 ELSE 1 END")
+            ->orderBy('aspects.order')
+            ->get(['aspects.id', 'aspects.name', 'aspects.category_type_id']);
 
         $this->availableAspects = $aspects->map(function ($a) use ($categoryIdToCode) {
             return [

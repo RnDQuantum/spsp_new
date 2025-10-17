@@ -1,24 +1,33 @@
 <div class="max-w-6xl mx-auto mt-10 bg-white p-8 rounded shadow text-gray-900">
 
     <!-- Dropdown Event & Aspek -->
-    <div class="flex items-center mb-6 gap-4">
-        <label class="font-semibold text-base">Event:</label>
-        <select wire:model.live="eventCode"
-            class="border border-black rounded px-3 py-2 bg-cyan-100 font-mono w-72 text-gray-900">
-            @foreach ($availableEvents as $e)
-                <option value="{{ $e['code'] }}">{{ $e['name'] }}</option>
-            @endforeach
-        </select>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <div>
+            <x-mary-choices-offline label="Event" wire:model.live="eventCode" :options="$availableEvents" option-value="code"
+                option-label="name" placeholder="Cari event..." single searchable />
+        </div>
 
-        <label class="font-semibold text-base ml-6">Aspek:</label>
-        <select wire:model.live="aspectId"
-            class="border border-black rounded px-3 py-2 bg-cyan-100 font-mono w-96 text-gray-900">
-            @foreach ($availableAspects as $a)
-                <option value="{{ $a['id'] }}">{{ strtoupper($a['category']) }} — {{ $a['name'] }}</option>
-            @endforeach
-        </select>
+        <div>
+            <x-mary-choices-offline label="Aspek" wire:model.live="aspectId" :options="$availableAspects" option-value="id"
+                placeholder="Cari aspek..." single searchable>
+                @scope('item', $aspect)
+                    <div class="flex items-center gap-3 py-1 font-semibold">
+                        @php
+                            $colorClass =
+                                strtolower($aspect['category']) === 'potensi'
+                                    ? 'bg-blue-50 text-blue-600'
+                                    : 'bg-red-50 text-red-600';
+                        @endphp
+                        <span class="px-2 mx-2 py-1 rounded rou text-xs {{ $colorClass }}">
+                            {{ strtoupper($aspect['category']) }}
+                        </span>
+                        <span class="text-gray-900">{{ $aspect['name'] }}</span>
+                    </div>
+                @endscope
+            </x-mary-choices-offline>
+        </div>
 
-        <div wire:loading wire:target="eventCode, aspectId" class="text-center">
+        <div wire:loading wire:target="eventCode, aspectId" class="col-span-full text-center">
             <svg class="inline w-5 h-5 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none"
                 viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">

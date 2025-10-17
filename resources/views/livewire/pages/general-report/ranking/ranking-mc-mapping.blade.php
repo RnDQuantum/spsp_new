@@ -5,12 +5,10 @@
             RANKING SKOR GENERAL COMPETENCY MAPPING
         </h1>
         <div class="flex justify-center items-center gap-4 mt-3">
-            <label for="eventCode" class="text-black font-semibold">Event</label>
-            <select id="eventCode" wire:model.live="eventCode" class="border border-black px-2 py-1 text-black">
-                @foreach ($availableEvents as $ev)
-                    <option value="{{ $ev['code'] }}">{{ $ev['name'] }}</option>
-                @endforeach
-            </select>
+            <div class="w-full max-w-md">
+                <x-mary-choices-offline wire:model.live="eventCode" :options="$availableEvents" option-value="code"
+                    option-label="name" placeholder="Cari event..." single searchable />
+            </div>
         </div>
     </div>
 
@@ -158,114 +156,115 @@
                 @endforeach
             </div>
 
-        <!-- Overall Statistics -->
-        @php
-            $totalParticipants = array_sum($conclusionSummary);
-            $passingCount =
-                ($conclusionSummary['Sangat Kompeten'] ?? 0) +
-                ($conclusionSummary['Kompeten'] ?? 0);
-            $passingPercentage = $totalParticipants > 0 ? round(($passingCount / $totalParticipants) * 100, 1) : 0;
-        @endphp
+            <!-- Overall Statistics -->
+            @php
+                $totalParticipants = array_sum($conclusionSummary);
+                $passingCount = ($conclusionSummary['Sangat Kompeten'] ?? 0) + ($conclusionSummary['Kompeten'] ?? 0);
+                $passingPercentage = $totalParticipants > 0 ? round(($passingCount / $totalParticipants) * 100, 1) : 0;
+            @endphp
 
-        <div class="bg-white border-2 border-black rounded-lg p-4">
-            <div class="grid grid-cols-3 gap-4 text-center">
-                <div>
-                    <div class="text-lg font-bold text-gray-900">{{ $totalParticipants }}</div>
-                    <div class="text-sm text-gray-600">Total Peserta</div>
+            <div class="bg-white border-2 border-black rounded-lg p-4">
+                <div class="grid grid-cols-3 gap-4 text-center">
+                    <div>
+                        <div class="text-lg font-bold text-gray-900">{{ $totalParticipants }}</div>
+                        <div class="text-sm text-gray-600">Total Peserta</div>
+                    </div>
+                    <div>
+                        <div class="text-lg font-bold text-green-600">{{ $passingCount }}</div>
+                        <div class="text-sm text-gray-600">Memenuhi Standar</div>
+                    </div>
+                    <div>
+                        <div class="text-lg font-bold text-blue-600">{{ $passingPercentage }}%</div>
+                        <div class="text-sm text-gray-600">Tingkat Kelulusan</div>
+                    </div>
                 </div>
-                <div>
-                    <div class="text-lg font-bold text-green-600">{{ $passingCount }}</div>
-                    <div class="text-sm text-gray-600">Memenuhi Standar</div>
-                </div>
-                <div>
-                    <div class="text-lg font-bold text-blue-600">{{ $passingPercentage }}%</div>
-                    <div class="text-sm text-gray-600">Tingkat Kelulusan</div>
+            </div>
+
+            <!-- Keterangan Rentang Nilai -->
+            <div class="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
+                <div class="text-sm text-blue-800">
+                    <strong>Keterangan:</strong> Kesimpulan berdasarkan Gap (Individual Score - Adjusted Standard) dan
+                    threshold toleransi
+                    <span x-data
+                        x-text="$wire.tolerancePercentage > 0 ? '(' + $wire.tolerancePercentage + '%)' : '(0%)'"></span>.
+                    <br>
+                    <strong>Rumus:</strong>
+                    <ul class="list-disc ml-6 mt-1">
+                        <li>Gap = Individual Score - Adjusted Standard</li>
+                        <li>Threshold = -Adjusted Standard × (Tolerance / 100)</li>
+                        <li><strong>Sangat Kompeten:</strong> Gap > 0</li>
+                        <li><strong>Kompeten:</strong> Gap ≥ Threshold (dalam range toleransi)</li>
+                        <li><strong>Belum Kompeten:</strong> Gap < Threshold</li>
+                    </ul>
                 </div>
             </div>
         </div>
+    @endif
 
-        <!-- Keterangan Rentang Nilai -->
-        <div class="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
-            <div class="text-sm text-blue-800">
-                <strong>Keterangan:</strong> Kesimpulan berdasarkan Gap (Individual Score - Adjusted Standard) dan
-                threshold toleransi
-                <span x-data
-                    x-text="$wire.tolerancePercentage > 0 ? '(' + $wire.tolerancePercentage + '%)' : '(0%)'"></span>.
-                <br>
-                <strong>Rumus:</strong>
-                <ul class="list-disc ml-6 mt-1">
-                    <li>Gap = Individual Score - Adjusted Standard</li>
-                    <li>Threshold = -Adjusted Standard × (Tolerance / 100)</li>
-                    <li><strong>Sangat Kompeten:</strong> Gap > 0</li>
-                    <li><strong>Kompeten:</strong> Gap ≥ Threshold (dalam range toleransi)</li>
-                    <li><strong>Belum Kompeten:</strong> Gap < Threshold</li>
-                </ul>
-            </div>
-        </div>
-    </div>
-@endif
+    <!-- Pie Chart Section -->
+    @if (!empty($conclusionSummary))
+        <div class="mt-8 border-t-2 border-black pt-6 bg-white">
+            <div class="px-6 pb-6">
+                <h3 class="text-xl font-bold text-gray-900 mb-6 text-center">Capacity Building General Competency
+                    Mapping</h3>
 
-<!-- Pie Chart Section -->
-@if (!empty($conclusionSummary))
-    <div class="mt-8 border-t-2 border-black pt-6 bg-white">
-        <div class="px-6 pb-6">
-            <h3 class="text-xl font-bold text-gray-900 mb-6 text-center">Capacity Building General Competency
-                Mapping</h3>
+                <!-- Content Grid -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                    <!-- Chart Section -->
+                    <div class="border border-gray-300 p-6 rounded-lg bg-gray-50 transition-shadow duration-300 hover:shadow-xl"
+                        wire:ignore>
+                        <canvas id="conclusionPieChart" class="w-full h-full"></canvas>
+                    </div>
 
-            <!-- Content Grid -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-                <!-- Chart Section -->
-                <div class="border border-gray-300 p-6 rounded-lg bg-gray-50 transition-shadow duration-300 hover:shadow-xl" wire:ignore>
-                    <canvas id="conclusionPieChart" class="w-full h-full"></canvas>
-                </div>
-
-                <!-- Table Section -->
-                <div class="border-2 border-gray-300 rounded-lg overflow-hidden">
-                    <table class="w-full text-sm text-gray-900">
-                        <thead>
-                            <tr class="bg-gray-200">
-                                <th class="border-2 border-gray-400 px-4 py-3 text-center font-bold">KETERANGAN</th>
-                                <th class="border-2 border-gray-400 px-4 py-3 text-center font-bold">JUMLAH</th>
-                                <th class="border-2 border-gray-400 px-4 py-3 text-center font-bold">PROSENTASE
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white">
-                            @php
-                                $totalParticipants = array_sum($conclusionSummary);
-                            @endphp
-                            @foreach ($conclusionSummary as $conclusion => $count)
-                                @php
-                                    $percentage =
-                                        $totalParticipants > 0 ? round(($count / $totalParticipants) * 100, 2) : 0;
-
-                                    // Get color from conclusionConfig
-                                    $config = $this->conclusionConfig[$conclusion] ?? null;
-                                    $bgColor = $config['tailwindClass'] ?? 'bg-gray-100 border-gray-300';
-                                @endphp
-                                <tr>
-                                    <td class="border-2 border-gray-400 px-4 py-3 {{ $bgColor }}">
-                                        {{ $conclusion }}</td>
-                                    <td class="border-2 border-gray-400 px-4 py-3 text-center">{{ $count }}
-                                        orang
-                                    </td>
-                                    <td class="border-2 border-gray-400 px-4 py-3 text-center">{{ $percentage }}%
-                                    </td>
+                    <!-- Table Section -->
+                    <div class="border-2 border-gray-300 rounded-lg overflow-hidden">
+                        <table class="w-full text-sm text-gray-900">
+                            <thead>
+                                <tr class="bg-gray-200">
+                                    <th class="border-2 border-gray-400 px-4 py-3 text-center font-bold">KETERANGAN
+                                    </th>
+                                    <th class="border-2 border-gray-400 px-4 py-3 text-center font-bold">JUMLAH</th>
+                                    <th class="border-2 border-gray-400 px-4 py-3 text-center font-bold">PROSENTASE
+                                    </th>
                                 </tr>
-                            @endforeach
-                            <tr class="bg-gray-100 font-semibold">
-                                <td class="border-2 border-gray-400 px-4 py-3">Jumlah Responden</td>
-                                <td class="border-2 border-gray-400 px-4 py-3 text-center">
-                                    {{ $totalParticipants }} orang</td>
-                                <td class="border-2 border-gray-400 px-4 py-3 text-center">100.00%</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody class="bg-white">
+                                @php
+                                    $totalParticipants = array_sum($conclusionSummary);
+                                @endphp
+                                @foreach ($conclusionSummary as $conclusion => $count)
+                                    @php
+                                        $percentage =
+                                            $totalParticipants > 0 ? round(($count / $totalParticipants) * 100, 2) : 0;
+
+                                        // Get color from conclusionConfig
+                                        $config = $this->conclusionConfig[$conclusion] ?? null;
+                                        $bgColor = $config['tailwindClass'] ?? 'bg-gray-100 border-gray-300';
+                                    @endphp
+                                    <tr>
+                                        <td class="border-2 border-gray-400 px-4 py-3 {{ $bgColor }}">
+                                            {{ $conclusion }}</td>
+                                        <td class="border-2 border-gray-400 px-4 py-3 text-center">{{ $count }}
+                                            orang
+                                        </td>
+                                        <td class="border-2 border-gray-400 px-4 py-3 text-center">
+                                            {{ $percentage }}%
+                                        </td>
+                                    </tr>
+                                @endforeach
+                                <tr class="bg-gray-100 font-semibold">
+                                    <td class="border-2 border-gray-400 px-4 py-3">Jumlah Responden</td>
+                                    <td class="border-2 border-gray-400 px-4 py-3 text-center">
+                                        {{ $totalParticipants }} orang</td>
+                                    <td class="border-2 border-gray-400 px-4 py-3 text-center">100.00%</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-@endif
+    @endif
 </div>
 
 <script>
