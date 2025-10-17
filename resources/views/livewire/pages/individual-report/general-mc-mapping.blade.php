@@ -178,7 +178,26 @@
                                         backgroundColor: 'rgba(0, 0, 0, 0.05)',
                                         borderWidth: 2,
                                         pointRadius: 3,
-                                        pointBackgroundColor: '#000000'
+                                        pointBackgroundColor: '#000000',
+                                        datalabels: {
+                                            color: '#FFFFFF',
+                                            backgroundColor: '#000000',
+                                            borderRadius: 4,
+                                            padding: {
+                                                top: 4,
+                                                bottom: 4,
+                                                left: 6,
+                                                right: 6
+                                            },
+                                            font: {
+                                                weight: 'bold',
+                                                size: 9
+                                            },
+                                            anchor: 'end',
+                                            align: 'end',
+                                            offset: 6,
+                                            formatter: (value) => value.toFixed(2)
+                                        }
                                     }, {
                                         label: `Toleransi ${tolerancePercentage}%`,
                                         data: standardRatings,
@@ -187,7 +206,26 @@
                                         borderWidth: 1.5,
                                         borderDash: [5, 5],
                                         pointRadius: 2,
-                                        pointBackgroundColor: '#6B7280'
+                                        pointBackgroundColor: '#6B7280',
+                                        datalabels: {
+                                            color: '#FFFFFF',
+                                            backgroundColor: '#6B7280',
+                                            borderRadius: 4,
+                                            padding: {
+                                                top: 4,
+                                                bottom: 4,
+                                                left: 6,
+                                                right: 6
+                                            },
+                                            font: {
+                                                weight: 'bold',
+                                                size: 9
+                                            },
+                                            anchor: 'center',
+                                            align: 'center',
+                                            offset: 0,
+                                            formatter: (value) => value.toFixed(2)
+                                        }
                                     }, {
                                         label: participantName,
                                         data: individualRatings,
@@ -195,7 +233,26 @@
                                         backgroundColor: 'rgba(220, 38, 38, 0.05)',
                                         borderWidth: 2,
                                         pointRadius: 3,
-                                        pointBackgroundColor: '#DC2626'
+                                        pointBackgroundColor: '#DC2626',
+                                        datalabels: {
+                                            color: '#FFFFFF',
+                                            backgroundColor: '#DC2626',
+                                            borderRadius: 4,
+                                            padding: {
+                                                top: 4,
+                                                bottom: 4,
+                                                left: 6,
+                                                right: 6
+                                            },
+                                            font: {
+                                                weight: 'bold',
+                                                size: 9
+                                            },
+                                            anchor: 'end',
+                                            align: 'start',
+                                            offset: 6,
+                                            formatter: (value) => value.toFixed(2)
+                                        }
                                     }]
                                 },
                                 options: {
@@ -207,6 +264,9 @@
                                         },
                                         tooltip: {
                                             enabled: true
+                                        },
+                                        datalabels: {
+                                            display: true
                                         }
                                     },
                                     scales: {
@@ -337,7 +397,26 @@
                                         backgroundColor: 'rgba(0, 0, 0, 0.05)',
                                         borderWidth: 2,
                                         pointRadius: 3,
-                                        pointBackgroundColor: '#000000'
+                                        pointBackgroundColor: '#000000',
+                                        datalabels: {
+                                            color: '#FFFFFF',
+                                            backgroundColor: '#000000',
+                                            borderRadius: 4,
+                                            padding: {
+                                                top: 4,
+                                                bottom: 4,
+                                                left: 6,
+                                                right: 6
+                                            },
+                                            font: {
+                                                weight: 'bold',
+                                                size: 9
+                                            },
+                                            anchor: 'end',
+                                            align: 'end',
+                                            offset: 6,
+                                            formatter: (value) => value.toFixed(2)
+                                        }
                                     }, {
                                         label: `Toleransi ${tolerancePercentage}%`,
                                         data: standardScores,
@@ -346,7 +425,26 @@
                                         borderWidth: 1.5,
                                         borderDash: [5, 5],
                                         pointRadius: 2,
-                                        pointBackgroundColor: '#6B7280'
+                                        pointBackgroundColor: '#6B7280',
+                                        datalabels: {
+                                            color: '#FFFFFF',
+                                            backgroundColor: '#6B7280',
+                                            borderRadius: 4,
+                                            padding: {
+                                                top: 4,
+                                                bottom: 4,
+                                                left: 6,
+                                                right: 6
+                                            },
+                                            font: {
+                                                weight: 'bold',
+                                                size: 9
+                                            },
+                                            anchor: 'center',
+                                            align: 'center',
+                                            offset: 0,
+                                            formatter: (value) => value.toFixed(2)
+                                        }
                                     }, {
                                         label: participantName,
                                         data: individualScores,
@@ -354,7 +452,26 @@
                                         backgroundColor: 'rgba(220, 38, 38, 0.05)',
                                         borderWidth: 2,
                                         pointRadius: 3,
-                                        pointBackgroundColor: '#DC2626'
+                                        pointBackgroundColor: '#DC2626',
+                                        datalabels: {
+                                            color: '#FFFFFF',
+                                            backgroundColor: '#DC2626',
+                                            borderRadius: 4,
+                                            padding: {
+                                                top: 4,
+                                                bottom: 4,
+                                                left: 6,
+                                                right: 6
+                                            },
+                                            font: {
+                                                weight: 'bold',
+                                                size: 9
+                                            },
+                                            anchor: 'end',
+                                            align: 'start',
+                                            offset: 6,
+                                            formatter: (value) => value.toFixed(2)
+                                        }
                                     }]
                                 },
                                 options: {
@@ -366,6 +483,9 @@
                                         },
                                         tooltip: {
                                             enabled: true
+                                        },
+                                        datalabels: {
+                                            display: true
                                         }
                                     },
                                     scales: {

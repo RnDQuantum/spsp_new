@@ -28,7 +28,7 @@
                 <!-- Chart Potensi (Pentagon) -->
                 <div class="bg-white p-6 rounded-lg shadow border border-gray-200" wire:ignore>
                     <h3 class="text-lg text-center font-semibold text-gray-800 mb-4">Potential Mapping (Rating)</h3>
-                    <div class="relative h-96">
+                    <div class="relative" style="height: 600px;">
                         <canvas id="potensiChart-{{ $potensiChartId }}"></canvas>
                     </div>
                 </div>
@@ -37,7 +37,7 @@
                 <div class="bg-white p-6 rounded-lg shadow border border-gray-200" wire:ignore>
                     <h3 class="text-lg text-center font-semibold text-gray-800 mb-4">Managerial Potency Mapping (Rating)
                     </h3>
-                    <div class="relative h-96">
+                    <div class="relative" style="height: 600px;">
                         <canvas id="kompetensiChart-{{ $kompetensiChartId }}"></canvas>
                     </div>
                 </div>
@@ -45,7 +45,7 @@
                 <!-- Chart General (Tetradecagon) -->
                 <div class="bg-white p-6 rounded-lg shadow border border-gray-200" wire:ignore>
                     <h3 class="text-lg text-center font-semibold text-gray-800 mb-4">General Mapping (Rating)</h3>
-                    <div class="relative h-96">
+                    <div class="relative" style="height: 600px;">
                         <canvas id="generalChart-{{ $generalChartId }}"></canvas>
                     </div>
                 </div>
@@ -108,7 +108,26 @@
                         pointHoverBorderColor: 'rgba(99, 102, 241, 1)',
                         borderWidth: 2.5,
                         pointRadius: 4,
-                        pointBorderWidth: 2
+                        pointBorderWidth: 2,
+                        datalabels: {
+                            color: '#FFFFFF',
+                            backgroundColor: 'rgba(99, 102, 241, 1)',
+                            borderRadius: 4,
+                            padding: {
+                                top: 4,
+                                bottom: 4,
+                                left: 6,
+                                right: 6
+                            },
+                            font: {
+                                weight: 'bold',
+                                size: 10
+                            },
+                            anchor: 'end',
+                            align: 'end',
+                            offset: 6,
+                            formatter: (value) => value.toFixed(2)
+                        }
                     }, {
                         label: 'Tolerance {{ $tolerancePercentage }}%',
                         data: @js($potensiStandardRatings),
@@ -119,7 +138,26 @@
                         pointRadius: 3,
                         pointBackgroundColor: 'rgba(16, 185, 129, 0.9)',
                         pointBorderColor: '#fff',
-                        pointBorderWidth: 2
+                        pointBorderWidth: 2,
+                        datalabels: {
+                            color: '#FFFFFF',
+                            backgroundColor: 'rgba(16, 185, 129, 0.9)',
+                            borderRadius: 4,
+                            padding: {
+                                top: 4,
+                                bottom: 4,
+                                left: 6,
+                                right: 6
+                            },
+                            font: {
+                                weight: 'bold',
+                                size: 9
+                            },
+                            anchor: 'center',
+                            align: 'center',
+                            offset: 0,
+                            formatter: (value) => value.toFixed(2)
+                        }
                     }, {
                         label: '{{ $participant->name }}',
                         data: @js($potensiIndividualRatings),
@@ -132,7 +170,26 @@
                         pointHoverBorderColor: 'rgba(236, 72, 153, 1)',
                         borderWidth: 2.5,
                         pointRadius: 4,
-                        pointBorderWidth: 2
+                        pointBorderWidth: 2,
+                        datalabels: {
+                            color: '#FFFFFF',
+                            backgroundColor: 'rgba(236, 72, 153, 1)',
+                            borderRadius: 4,
+                            padding: {
+                                top: 4,
+                                bottom: 4,
+                                left: 6,
+                                right: 6
+                            },
+                            font: {
+                                weight: 'bold',
+                                size: 10
+                            },
+                            anchor: 'end',
+                            align: 'start',
+                            offset: 6,
+                            formatter: (value) => value.toFixed(2)
+                        }
                     }]
                 },
                 options: {
@@ -163,6 +220,9 @@
                                     size: 16
                                 }
                             }
+                        },
+                        datalabels: {
+                            display: true
                         }
                     },
                     responsive: true,
@@ -196,7 +256,26 @@
                         pointHoverBorderColor: 'rgba(6, 182, 212, 1)',
                         borderWidth: 2.5,
                         pointRadius: 4,
-                        pointBorderWidth: 2
+                        pointBorderWidth: 2,
+                        datalabels: {
+                            color: '#FFFFFF',
+                            backgroundColor: 'rgba(6, 182, 212, 1)',
+                            borderRadius: 4,
+                            padding: {
+                                top: 4,
+                                bottom: 4,
+                                left: 6,
+                                right: 6
+                            },
+                            font: {
+                                weight: 'bold',
+                                size: 10
+                            },
+                            anchor: 'end',
+                            align: 'end',
+                            offset: 6,
+                            formatter: (value) => value.toFixed(2)
+                        }
                     }, {
                         label: 'Tolerance {{ $tolerancePercentage }}%',
                         data: @js($kompetensiStandardRatings),
@@ -207,7 +286,26 @@
                         pointRadius: 3,
                         pointBackgroundColor: 'rgba(251, 146, 60, 0.9)',
                         pointBorderColor: '#fff',
-                        pointBorderWidth: 2
+                        pointBorderWidth: 2,
+                        datalabels: {
+                            color: '#FFFFFF',
+                            backgroundColor: 'rgba(251, 146, 60, 0.9)',
+                            borderRadius: 4,
+                            padding: {
+                                top: 4,
+                                bottom: 4,
+                                left: 6,
+                                right: 6
+                            },
+                            font: {
+                                weight: 'bold',
+                                size: 9
+                            },
+                            anchor: 'center',
+                            align: 'center',
+                            offset: 0,
+                            formatter: (value) => value.toFixed(2)
+                        }
                     }, {
                         label: '{{ $participant->name }}',
                         data: @js($kompetensiIndividualRatings),
@@ -220,7 +318,26 @@
                         pointHoverBorderColor: 'rgba(245, 158, 11, 1)',
                         borderWidth: 2.5,
                         pointRadius: 4,
-                        pointBorderWidth: 2
+                        pointBorderWidth: 2,
+                        datalabels: {
+                            color: '#FFFFFF',
+                            backgroundColor: 'rgba(245, 158, 11, 1)',
+                            borderRadius: 4,
+                            padding: {
+                                top: 4,
+                                bottom: 4,
+                                left: 6,
+                                right: 6
+                            },
+                            font: {
+                                weight: 'bold',
+                                size: 10
+                            },
+                            anchor: 'end',
+                            align: 'start',
+                            offset: 6,
+                            formatter: (value) => value.toFixed(2)
+                        }
                     }]
                 },
                 options: {
@@ -251,6 +368,9 @@
                                     size: 16
                                 }
                             }
+                        },
+                        datalabels: {
+                            display: true
                         }
                     },
                     responsive: true,
@@ -284,7 +404,26 @@
                         pointHoverBorderColor: 'rgba(16, 185, 129, 1)',
                         borderWidth: 2.5,
                         pointRadius: 4,
-                        pointBorderWidth: 2
+                        pointBorderWidth: 2,
+                        datalabels: {
+                            color: '#FFFFFF',
+                            backgroundColor: 'rgba(16, 185, 129, 1)',
+                            borderRadius: 4,
+                            padding: {
+                                top: 4,
+                                bottom: 4,
+                                left: 6,
+                                right: 6
+                            },
+                            font: {
+                                weight: 'bold',
+                                size: 10
+                            },
+                            anchor: 'end',
+                            align: 'end',
+                            offset: 6,
+                            formatter: (value) => value.toFixed(2)
+                        }
                     }, {
                         label: 'Tolerance {{ $tolerancePercentage }}%',
                         data: @js($generalStandardRatings),
@@ -295,7 +434,26 @@
                         pointRadius: 3,
                         pointBackgroundColor: 'rgba(239, 68, 68, 0.9)',
                         pointBorderColor: '#fff',
-                        pointBorderWidth: 2
+                        pointBorderWidth: 2,
+                        datalabels: {
+                            color: '#FFFFFF',
+                            backgroundColor: 'rgba(239, 68, 68, 0.9)',
+                            borderRadius: 4,
+                            padding: {
+                                top: 4,
+                                bottom: 4,
+                                left: 6,
+                                right: 6
+                            },
+                            font: {
+                                weight: 'bold',
+                                size: 9
+                            },
+                            anchor: 'center',
+                            align: 'center',
+                            offset: 0,
+                            formatter: (value) => value.toFixed(2)
+                        }
                     }, {
                         label: '{{ $participant->name }}',
                         data: @js($generalIndividualRatings),
@@ -308,7 +466,26 @@
                         pointHoverBorderColor: 'rgba(168, 85, 247, 1)',
                         borderWidth: 2.5,
                         pointRadius: 4,
-                        pointBorderWidth: 2
+                        pointBorderWidth: 2,
+                        datalabels: {
+                            color: '#FFFFFF',
+                            backgroundColor: 'rgba(168, 85, 247, 1)',
+                            borderRadius: 4,
+                            padding: {
+                                top: 4,
+                                bottom: 4,
+                                left: 6,
+                                right: 6
+                            },
+                            font: {
+                                weight: 'bold',
+                                size: 10
+                            },
+                            anchor: 'end',
+                            align: 'start',
+                            offset: 6,
+                            formatter: (value) => value.toFixed(2)
+                        }
                     }]
                 },
                 options: {
@@ -339,6 +516,9 @@
                                     size: 16
                                 }
                             }
+                        },
+                        datalabels: {
+                            display: true
                         }
                     },
                     responsive: true,
