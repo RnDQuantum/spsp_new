@@ -86,35 +86,35 @@
                             class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
                             General Matching
                         </a> --}}
-                        <a href="#" role="menuitem"
+                        <a href="{{ route('shortlist') }}" role="menuitem"
                             class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
                             General Mapping
                         </a>
-                        <a href="#" role="menuitem"
+                        <a href="{{ route('shortlist') }}" role="menuitem"
                             class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
                             General Potency Mapping
                         </a>
-                        <a href="#" role="menuitem"
+                        <a href="{{ route('shortlist') }}" role="menuitem"
                             class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
                             General Psychology Mapping
                         </a>
-                        <a href="#" role="menuitem"
+                        <a href="{{ route('shortlist') }}" role="menuitem"
                             class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
                             Managerial Potency Mapping
                         </a>
-                        <a href="#" role="menuitem"
+                        <a href="{{ route('shortlist') }}" role="menuitem"
                             class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
                             Ringkasan Managerial Potency Mapping
                         </a>
-                        <a href="#" role="menuitem"
+                        <a href="{{ route('shortlist') }}" role="menuitem"
                             class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
                             Gambaran Individu & Deskripsi Kompetensi
                         </a>
-                        <a href="#" role="menuitem"
+                        <a href="{{ route('shortlist') }}" role="menuitem"
                             class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
                             Ringkasan Hasil Assessment Individu
                         </a>
-                        <a href="#" role="menuitem"
+                        <a href="{{ route('shortlist') }}" role="menuitem"
                             class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
                             Hasil Emotional Quotient (EQ)
                         </a>
