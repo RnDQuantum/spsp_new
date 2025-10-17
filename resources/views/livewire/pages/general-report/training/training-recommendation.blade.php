@@ -8,7 +8,7 @@
         @livewire('components.tolerance-selector', [
             'passing' => $summary['passing'],
             'total' => $summary['total'],
-            'showSummary' => true,
+            'showSummary' => false,
         ])
     @endif
 
@@ -257,17 +257,20 @@
             <div class="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
                 <h4 class="font-semibold text-gray-700 mb-2">Keterangan:</h4>
                 <ul class="list-disc list-inside text-sm text-gray-600 space-y-1">
-                    <li><strong>Gap:</strong> Selisih antara rata-rata rating dengan standar rating (Rata-rata - Standar)
+                    <li><strong>Gap:</strong> Selisih antara rata-rata rating dengan standar rating (Rata-rata -
+                        Standar)
                     </li>
                     <li><strong>Tindak Lanjut:</strong>
                         <ul class="ml-6 mt-1 space-y-1">
                             <li><span class="px-2 py-1 rounded bg-red-100 text-red-700 font-semibold">Pelatihan:</span>
                                 Gap negatif, perlu pelatihan untuk meningkatkan kompetensi</li>
-                            <li><span class="px-2 py-1 rounded bg-green-100 text-green-700 font-semibold">Dipertahankan:</span>
+                            <li><span
+                                    class="px-2 py-1 rounded bg-green-100 text-green-700 font-semibold">Dipertahankan:</span>
                                 Gap positif atau nol, kompetensi sudah memenuhi atau melebihi standar</li>
                         </ul>
                     </li>
-                    <li><strong>Prioritas:</strong> Diurutkan berdasarkan gap terkecil (paling negatif) sebagai prioritas
+                    <li><strong>Prioritas:</strong> Diurutkan berdasarkan gap terkecil (paling negatif) sebagai
+                        prioritas
                         tertinggi</li>
                 </ul>
             </div>
