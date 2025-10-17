@@ -14,12 +14,14 @@ return new class extends Migration
         Schema::create('position_formations', function (Blueprint $table) {
             $table->id();
             $table->foreignId('event_id')->constrained('assessment_events')->cascadeOnDelete();
+            $table->foreignId('template_id')->constrained('assessment_templates')->cascadeOnDelete();
             $table->string('code');
             $table->string('name');
             $table->integer('quota')->nullable();
             $table->timestamps();
 
             $table->index('event_id');
+            $table->index('template_id');
             $table->unique(['event_id', 'code']);
         });
     }

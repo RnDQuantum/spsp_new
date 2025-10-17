@@ -18,8 +18,8 @@ class AssessmentTemplate extends Model
         return $this->hasMany(CategoryType::class, 'template_id');
     }
 
-    public function assessmentEvents(): HasMany
+    public function positionFormations(): HasMany
     {
-        return $this->hasMany(AssessmentEvent::class, 'template_id');
+        return $this->hasMany(PositionFormation::class, 'template_id');
     }
 }

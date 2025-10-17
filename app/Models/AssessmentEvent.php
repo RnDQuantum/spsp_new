@@ -10,7 +10,6 @@ class AssessmentEvent extends Model
 {
     protected $fillable = [
         'institution_id',
-        'template_id',
         'code',
         'name',
         'description',
@@ -34,11 +33,6 @@ class AssessmentEvent extends Model
     public function institution(): BelongsTo
     {
         return $this->belongsTo(Institution::class);
-    }
-
-    public function template(): BelongsTo
-    {
-        return $this->belongsTo(AssessmentTemplate::class, 'template_id');
     }
 
     public function batches(): HasMany

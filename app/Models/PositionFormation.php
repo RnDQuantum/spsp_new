@@ -10,6 +10,7 @@ class PositionFormation extends Model
 {
     protected $fillable = [
         'event_id',
+        'template_id',
         'code',
         'name',
         'quota',
@@ -25,6 +26,11 @@ class PositionFormation extends Model
     public function assessmentEvent(): BelongsTo
     {
         return $this->belongsTo(AssessmentEvent::class, 'event_id');
+    }
+
+    public function template(): BelongsTo
+    {
+        return $this->belongsTo(AssessmentTemplate::class);
     }
 
     public function participants(): HasMany

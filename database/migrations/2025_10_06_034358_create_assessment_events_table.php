@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('assessment_events', function (Blueprint $table) {
             $table->id();
             $table->foreignId('institution_id')->constrained('institutions')->cascadeOnDelete();
-            $table->foreignId('template_id')->constrained('assessment_templates')->cascadeOnDelete();
             $table->string('code')->unique();
             $table->string('name');
             $table->text('description')->nullable();
