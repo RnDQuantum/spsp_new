@@ -16,7 +16,7 @@
                             $colorClass =
                                 strtolower($aspect['category']) === 'potensi'
                                     ? 'bg-blue-50 text-blue-600'
-                                    : 'bg-red-50 text-red-600';
+                                    : 'bg-green-50 text-green-600';
                         @endphp
                         <span class="px-2 mx-2 py-1 rounded rou text-xs {{ $colorClass }}">
                             {{ strtoupper($aspect['category']) }}
