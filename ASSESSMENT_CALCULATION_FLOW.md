@@ -2,9 +2,10 @@
 
 **Project:** SPSP Analytics Dashboard
 **Purpose:** Document complete calculation logic from raw data to final score
-**Last Updated:** 2025-10-09
+**Last Updated:** 2025-10-17
 
 **Recent Updates:**
+- ✅ **ARCHITECTURE CHANGE (2025-10-17):** Templates now per position, weights are dynamic per position
 - ✅ **CRITICAL FIX:** Corrected score calculation formula to `rating × weight_percentage` (not `(rating/5) × 100 × weight%`)
 - ✅ Fixed `percentage_score` formula: now uses `(individual_rating / 5) × 100` instead of `(score / standardScore) × 100`
 - ✅ Clarified Kompetensi `individual_rating` MUST be INTEGER 1-5 (not decimal)
@@ -436,23 +437,42 @@ class FinalAssessmentService
 {
     /**
      * Calculate final assessment from category assessments
+     *
+     * IMPORTANT (2025-10-17): Weights are now DYNAMIC per position!
+     * Each position has its own template with different category weights.
      */
     public function calculateFinal(Participant $participant): FinalAssessment
     {
-        // 1. Get category assessments
+        // 1. Load participant with position and template relationship
+        $participant->loadMissing('positionFormation.template');
+
+        // 2. Get template from participant's position
+        $template = $participant->positionFormation->template;
+
+        // 3. Get category types for this template (DYNAMIC WEIGHTS!)
+        $potensiCategory = CategoryType::where('template_id', $template->id)
+            ->where('code', 'potensi')
+            ->firstOrFail();
+
+        $kompetensiCategory = CategoryType::where('template_id', $template->id)
+            ->where('code', 'kompetensi')
+            ->firstOrFail();
+
+        // 4. Get category assessments
         $potensiAssessment = CategoryAssessment::where('participant_id', $participant->id)
-            ->where('category_type_id', 1) // Potensi
+            ->where('category_type_id', $potensiCategory->id)
             ->first();
 
         $kompetensiAssessment = CategoryAssessment::where('participant_id', $participant->id)
-            ->where('category_type_id', 2) // Kompetensi
+            ->where('category_type_id', $kompetensiCategory->id)
             ->first();
 
-        // 2. Get weights from template (via category_types)
-        $potensiWeight = 40; // From template
-        $kompetensiWeight = 60; // From template
+        // 5. Get weights from template (DYNAMIC - not hardcoded!)
+        // Could be 30/70, 40/60, 50/50, etc. depending on position's template
+        $potensiWeight = $potensiCategory->weight_percentage; // e.g., 30, 40, 50
+        $kompetensiWeight = $kompetensiCategory->weight_percentage; // e.g., 70, 60, 50
 
-        // 3. Calculate weighted scores
+        // 6. Calculate weighted scores
         $totalStandardScore =
             ($potensiAssessment->total_standard_score * ($potensiWeight / 100)) +
             ($kompetensiAssessment->total_standard_score * ($kompetensiWeight / 100));
@@ -461,20 +481,20 @@ class FinalAssessmentService
             ($potensiAssessment->total_individual_score * ($potensiWeight / 100)) +
             ($kompetensiAssessment->total_individual_score * ($kompetensiWeight / 100));
 
-        // 4. Calculate achievement percentage
+        // 7. Calculate achievement percentage
         $achievementPercentage = ($totalIndividualScore / $totalStandardScore) * 100;
 
-        // 5. Determine final conclusion
+        // 8. Determine final conclusion
         $conclusionCode = $this->determineFinalConclusion($achievementPercentage);
 
-        // 6. Create or update final assessment
+        // 9. Create or update final assessment (with dynamic weights!)
         return FinalAssessment::updateOrCreate(
             ['participant_id' => $participant->id],
             [
-                'potensi_weight' => $potensiWeight,
+                'potensi_weight' => $potensiWeight, // DYNAMIC from template
                 'potensi_standard_score' => round($potensiAssessment->total_standard_score, 2),
                 'potensi_individual_score' => round($potensiAssessment->total_individual_score, 2),
-                'kompetensi_weight' => $kompetensiWeight,
+                'kompetensi_weight' => $kompetensiWeight, // DYNAMIC from template
                 'kompetensi_standard_score' => round($kompetensiAssessment->total_standard_score, 2),
                 'kompetensi_individual_score' => round($kompetensiAssessment->total_individual_score, 2),
                 'total_standard_score' => round($totalStandardScore, 2),
@@ -510,42 +530,99 @@ class FinalAssessmentService
 
 ### **Example Data:**
 
+**Example 1: Staff Position (Balanced Weights)**
+
 ```
 Participant: ANDI WIJAYA, S.KOM
+Position: Analis Kebijakan
+Template: "Staff Standard v1"
 
-POTENSI (40%):
+POTENSI (50% - from template):
 ├─ Standard Score: 354.10
 ├─ Individual Score: 411.43
-└─ Weighted: 411.43 × 40% = 164.57
+└─ Weighted: 411.43 × 50% = 205.72
 
-KOMPETENSI (60%):
+KOMPETENSI (50% - from template):
 ├─ Standard Score: 348.00
 ├─ Individual Score: 362.05
-└─ Weighted: 362.05 × 60% = 217.23
+└─ Weighted: 362.05 × 50% = 181.03
 
 FINAL CALCULATION:
-├─ Total Standard Score: (354.10 × 0.40) + (348.00 × 0.60) = 350.44
-├─ Total Individual Score: 164.57 + 217.23 = 381.80
-├─ Achievement Percentage: (381.80 / 350.44) × 100 = 108.95%
-├─ Threshold: 108.95% >= 90%
+├─ Total Standard Score: (354.10 × 0.50) + (348.00 × 0.50) = 351.05
+├─ Total Individual Score: 205.72 + 181.03 = 386.75
+├─ Achievement Percentage: (386.75 / 351.05) × 100 = 110.17%
+├─ Threshold: 110.17% >= 90%
+└─ Conclusion: "MEMENUHI SYARAT (MS)"
+```
+
+**Example 2: Supervisor Position (Competency-Heavy Weights)**
+
+```
+Participant: BUDI SANTOSO, S.E.
+Position: Auditor
+Template: "Supervisor Standard v1"
+
+POTENSI (30% - from template):
+├─ Standard Score: 354.10
+├─ Individual Score: 411.43
+└─ Weighted: 411.43 × 30% = 123.43
+
+KOMPETENSI (70% - from template):
+├─ Standard Score: 348.00
+├─ Individual Score: 362.05
+└─ Weighted: 362.05 × 70% = 253.44
+
+FINAL CALCULATION:
+├─ Total Standard Score: (354.10 × 0.30) + (348.00 × 0.70) = 349.83
+├─ Total Individual Score: 123.43 + 253.44 = 376.87
+├─ Achievement Percentage: (376.87 / 349.83) × 100 = 107.73%
+├─ Threshold: 107.73% >= 90%
 └─ Conclusion: "MEMENUHI SYARAT (MS)"
 
-NOTE: Achievement percentage > 100% adalah NORMAL dan menunjukkan
-      peserta EXCEED standard (melebihi standar yang ditetapkan).
+NOTE: Different position (Auditor vs Analis) = different template = different weights!
 ```
+
+**Key Takeaways:**
+- ✅ Achievement percentage > 100% adalah NORMAL dan menunjukkan peserta EXCEED standard
+- ✅ Weights are DYNAMIC per position (not always 40/60)
+- ✅ Same participant data, different position = different final score due to different weights
 
 ---
 
 ## 🔄 TEMPLATE STANDARD ROLE & SNAPSHOT PATTERN
 
+### **Architecture: Template Per Position (Updated 2025-10-17)**
+
+```
+Event: P3K Kejaksaan 2025
+│
+├─ Position: Auditor
+│   └─ Template: "Supervisor Standard v1"
+│       ├─ Potensi: 30% weight (different from other positions!)
+│       └─ Kompetensi: 70% weight
+│
+├─ Position: Analis Kebijakan
+│   └─ Template: "Staff Standard v1"
+│       ├─ Potensi: 50% weight (balanced)
+│       └─ Kompetensi: 50% weight
+│
+└─ Position: Fisikawan Medis
+    └─ Template: "Professional Standard v1"
+        ├─ Potensi: 45% weight
+        └─ Kompetensi: 55% weight
+
+Participant inherits template from their position:
+Participant → Position → Template
+```
+
 ### **Template Defines Standards at EACH Level:**
 
 ```
-Template: "P3K Standard 2025"
+Template: "Supervisor Standard v1"
 │
-├─ Category Types:
-│   ├─ Potensi: 40% weight
-│   └─ Kompetensi: 60% weight
+├─ Category Types (DYNAMIC WEIGHTS!):
+│   ├─ Potensi: 30% weight (not always 40%!)
+│   └─ Kompetensi: 70% weight (not always 60%!)
 │
 ├─ Aspects (with standard_rating & weight):
 │   ├─ Kecerdasan: 30% weight, standard_rating: 3.20
@@ -609,48 +686,72 @@ Jan 2025: Template "P3K 2025" created
 
 ## 🎨 DYNAMIC TEMPLATE STRUCTURE
 
-### **Key Concept:**
+### **Key Concept (Updated 2025-10-17):**
 
-Template structure is **DYNAMIC** - different templates can have:
+Template structure is **DYNAMIC** and **PER POSITION** - different templates can have:
 - Different number of aspects
 - Different aspect weights
 - Different standard ratings
 - Different sub-aspects structure
+- **Different category weights (Potensi/Kompetensi ratios)**
 
 ### **Examples:**
 
 ```
-Template A: "P3K Standard 2025"
-├─ Potensi (40%)
+Template: "Staff Standard v1" (for entry-level positions)
+├─ Potensi (50%) ← BALANCED
 │   ├─ Kecerdasan (30%) ← 6 sub-aspects
 │   ├─ Sikap Kerja (20%) ← 7 sub-aspects
 │   ├─ Hubungan Sosial (20%) ← 4 sub-aspects
 │   └─ Kepribadian (30%) ← 6 sub-aspects
-└─ Kompetensi (60%)
+└─ Kompetensi (50%) ← BALANCED
     └─ 9 aspects (no sub-aspects)
 
-Template B: "CPNS JPT Pratama 2025" (DIFFERENT!)
-├─ Potensi (40%)
-│   ├─ Kecerdasan (50%) ← DIFFERENT WEIGHT! 10 sub-aspects
-│   └─ Kepribadian (50%) ← DIFFERENT WEIGHT! 8 sub-aspects
-└─ Kompetensi (60%)
-    ├─ Kepemimpinan (20%) ← NEW ASPECT! 5 sub-aspects
-    └─ 7 aspects (different from Template A)
+Template: "Supervisor Standard v1" (for supervisory positions)
+├─ Potensi (30%) ← LOWER emphasis on potential
+│   ├─ Kecerdasan (40%) ← DIFFERENT WEIGHT! Same aspects
+│   ├─ Sikap Kerja (20%)
+│   ├─ Hubungan Sosial (20%)
+│   └─ Kepribadian (20%) ← DIFFERENT WEIGHT!
+└─ Kompetensi (70%) ← HIGHER emphasis on competency
+    └─ 9 aspects (same as Staff, different weights possible)
 
-Template C: "Administrator 2025" (TOTALLY DIFFERENT!)
-├─ Potensi (30%) ← DIFFERENT CATEGORY WEIGHT!
-│   └─ 2 aspects only
-└─ Kompetensi (70%) ← DIFFERENT CATEGORY WEIGHT!
-    └─ 5 aspects
+Template: "Professional Standard v1" (for specialized positions)
+├─ Potensi (45%) ← MODERATE
+│   └─ 4 aspects with different weights
+└─ Kompetensi (55%) ← MODERATE
+    └─ 9 aspects
+
+Usage in Event:
+Event: P3K Kejaksaan 2025
+├─ Position: Auditor → uses "Supervisor Standard v1" (30/70)
+├─ Position: Analis Kebijakan → uses "Staff Standard v1" (50/50)
+└─ Position: Fisikawan Medis → uses "Professional Standard v1" (45/55)
 ```
 
 ### **Database Support:**
 
+- ✅ `position_formations.template_id` (NEW 2025-10-17: positions link to templates)
+- ✅ `category_types.template_id` (category weights per template)
 - ✅ `aspects.template_id` (DUAL FK for multi-template support)
 - ✅ `aspects.weight_percentage` (per template dapat berbeda)
 - ✅ UNIQUE constraint: `(template_id, category_type_id, code)`
 
-This design allows same aspect code (e.g., "Kecerdasan") to have different weights in different templates.
+### **Key Architecture Change:**
+
+```
+BEFORE (v1.1):
+Event → Template (1 template for entire event)
+
+AFTER (v1.2):
+Event → Positions → Templates (each position has its own template)
+Participant → Position → Template (participant inherits from position)
+```
+
+This design allows:
+- ✅ Same aspect code (e.g., "Kecerdasan") with different weights per template
+- ✅ Different positions in same event with different assessment standards
+- ✅ Template reusability across events and institutions
 
 ---
 
@@ -805,25 +906,43 @@ gap_score = total_individual_score - total_standard_score
 
 ### **LEVEL 4: Final Assessment**
 ```
+// Get weights from participant's position template (DYNAMIC!)
+$potensiWeight = $participant->positionFormation->template
+    ->categoryTypes->where('code', 'potensi')->weight_percentage;
+$kompetensiWeight = $participant->positionFormation->template
+    ->categoryTypes->where('code', 'kompetensi')->weight_percentage;
+
+// Calculate weighted scores using DYNAMIC weights
 total_standard_score =
-    (potensi_standard_score × 40%) +
-    (kompetensi_standard_score × 60%)
+    (potensi_standard_score × ($potensiWeight / 100)) +
+    (kompetensi_standard_score × ($kompetensiWeight / 100))
 
 total_individual_score =
-    (potensi_individual_score × 40%) +
-    (kompetensi_individual_score × 60%)
+    (potensi_individual_score × ($potensiWeight / 100)) +
+    (kompetensi_individual_score × ($kompetensiWeight / 100))
 
 achievement_percentage =
     (total_individual_score / total_standard_score) × 100
+
+Examples:
+  Staff Position: (score × 50%) + (score × 50%)  // Balanced
+  Supervisor Position: (score × 30%) + (score × 70%)  // Competency-heavy
+  Professional Position: (score × 45%) + (score × 55%)  // Moderate
 ```
 
 **IMPORTANT NOTES:**
 - ✅ Achievement percentage > 100% adalah **NORMAL** jika peserta exceed standard
 - ✅ Score = rating × weight (BUKAN rating × weight% / 100)
 - ✅ Percentage score untuk chart menggunakan rating (1-5), bukan score
+- ✅ **Weights are DYNAMIC per position** (not hardcoded 40/60)
 
 ---
 
-**Version:** 1.1
+**Version:** 1.2
 **Status:** ✅ Complete & Production-Ready
-**Last Updated:** 2025-10-09
+**Last Updated:** 2025-10-17
+
+**Breaking Changes from v1.1:**
+- ✅ Category weights (Potensi/Kompetensi) now DYNAMIC per position template
+- ✅ Template accessed via `participant->positionFormation->template` (not `event->template`)
+- ✅ Each position in an event can have different assessment standards
