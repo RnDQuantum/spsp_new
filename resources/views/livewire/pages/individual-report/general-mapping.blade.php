@@ -211,6 +211,9 @@
                                         },
                                         tooltip: {
                                             enabled: true
+                                        },
+                                        datalabels: {
+                                            display: false
                                         }
                                     },
                                     scales: {
@@ -369,6 +372,9 @@
                                         },
                                         tooltip: {
                                             enabled: true
+                                        },
+                                        datalabels: {
+                                            display: false
                                         }
                                     },
                                     scales: {
