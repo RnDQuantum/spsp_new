@@ -16,14 +16,14 @@ class FinalAssessmentService
      */
     public function calculateFinal(Participant $participant): FinalAssessment
     {
-        $participant->loadMissing('event');
+        $participant->loadMissing('positionFormation.template');
 
-        // 1. Get category types from template (DYNAMIC - no hard-coding!)
-        $potensiCategory = CategoryType::where('template_id', $participant->event->template_id)
+        // 1. Get category types from template (DYNAMIC - template from position, not event!)
+        $potensiCategory = CategoryType::where('template_id', $participant->positionFormation->template_id)
             ->where('code', 'potensi')
             ->firstOrFail();
 
-        $kompetensiCategory = CategoryType::where('template_id', $participant->event->template_id)
+        $kompetensiCategory = CategoryType::where('template_id', $participant->positionFormation->template_id)
             ->where('code', 'kompetensi')
             ->firstOrFail();
 

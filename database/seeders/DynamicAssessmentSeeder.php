@@ -36,7 +36,6 @@ class DynamicAssessmentSeeder extends Seeder
             // Configuration 1: Kejaksaan - 100 participants
             [
                 'institution_code' => 'kejaksaan',
-                'template_code' => 'p3k_standard_2025',
                 'event' => [
                     'code' => 'P3K-KEJAKSAAN-2025',
                     'name' => 'Seleksi P3K Kejaksaan 2025',
@@ -52,10 +51,10 @@ class DynamicAssessmentSeeder extends Seeder
                     ['code' => 'BATCH-3-JAKARTA', 'name' => 'Gelombang 3 - Jakarta', 'location' => 'Jakarta', 'batch_number' => 3, 'start_date' => '2025-11-05', 'end_date' => '2025-11-06'],
                 ],
                 'positions' => [
-                    ['code' => 'fisikawan_medis', 'name' => 'Fisikawan Medis', 'quota' => 20],
-                    ['code' => 'analis_kebijakan', 'name' => 'Analis Kebijakan', 'quota' => 30],
-                    ['code' => 'auditor', 'name' => 'Auditor', 'quota' => 25],
-                    ['code' => 'pranata_komputer', 'name' => 'Pranata Komputer', 'quota' => 25],
+                    ['code' => 'fisikawan_medis', 'name' => 'Fisikawan Medis', 'quota' => 20, 'template_code' => 'professional_standard_v1'],
+                    ['code' => 'analis_kebijakan', 'name' => 'Analis Kebijakan', 'quota' => 30, 'template_code' => 'staff_standard_v1'],
+                    ['code' => 'auditor', 'name' => 'Auditor', 'quota' => 25, 'template_code' => 'supervisor_standard_v1'],
+                    ['code' => 'pranata_komputer', 'name' => 'Pranata Komputer', 'quota' => 25, 'template_code' => 'staff_standard_v1'],
                 ],
                 'participants_count' => 100, // JUMLAH PESERTA
                 'performance_distribution' => [
@@ -68,7 +67,6 @@ class DynamicAssessmentSeeder extends Seeder
             // Configuration 2: Uncomment untuk tambah event kedua
             // [
             //     'institution_code' => 'kementerian_kesehatan',
-            //     'template_code' => 'p3k_standard_2025',
             //     'event' => [
             //         'code' => 'P3K-KEMENKES-2025',
             //         'name' => 'Seleksi P3K Kementerian Kesehatan 2025',
@@ -118,17 +116,14 @@ class DynamicAssessmentSeeder extends Seeder
     private function seedEvent(array $config): void
     {
         DB::transaction(function () use ($config) {
-            // 1. Get institution & template
+            // 1. Get institution
             $institution = Institution::where('code', $config['institution_code'])->firstOrFail();
-            $template = AssessmentTemplate::where('code', $config['template_code'])->firstOrFail();
 
             $this->info("  📋 Institution: {$institution->name}");
-            $this->info("  📝 Template: {$template->name}");
 
-            // 2. Create event
+            // 2. Create event (no template_id - template is per position now)
             $event = AssessmentEvent::create([
                 'institution_id' => $institution->id,
-                'template_id' => $template->id,
                 ...$config['event'],
             ]);
 
@@ -144,26 +139,26 @@ class DynamicAssessmentSeeder extends Seeder
             }
             $this->info("  📦 Batches created: ".count($batches));
 
-            // 4. Create positions
+            // 4. Create positions with their templates
             $positions = [];
             foreach ($config['positions'] as $positionData) {
-                $positions[] = PositionFormation::create([
+                $positionTemplate = AssessmentTemplate::where('code', $positionData['template_code'])->firstOrFail();
+
+                $position = PositionFormation::create([
                     'event_id' => $event->id,
-                    ...$positionData,
+                    'template_id' => $positionTemplate->id,
+                    'code' => $positionData['code'],
+                    'name' => $positionData['name'],
+                    'quota' => $positionData['quota'],
                 ]);
+
+                // Eager load the template relationship immediately
+                $position->load('template');
+                $positions[] = $position;
             }
             $this->info("  💼 Positions created: ".count($positions));
 
-            // 5. Get category types
-            $potensiCategory = CategoryType::where('template_id', $template->id)
-                ->where('code', 'potensi')
-                ->firstOrFail();
-
-            $kompetensiCategory = CategoryType::where('template_id', $template->id)
-                ->where('code', 'kompetensi')
-                ->firstOrFail();
-
-            // 6. Generate participants with calculated assessments
+            // 5. Generate participants with calculated assessments
             $this->info("  👥 Creating {$config['participants_count']} participants...");
 
             $progressBar = $this->command->getOutput()->createProgressBar($config['participants_count']);
@@ -183,6 +178,18 @@ class DynamicAssessmentSeeder extends Seeder
                     ->forBatch($batch)
                     ->forPosition($position)
                     ->create();
+
+                // Get template from position (not from event!)
+                $template = $position->template;
+
+                // Get category types from position's template
+                $potensiCategory = CategoryType::where('template_id', $template->id)
+                    ->where('code', 'potensi')
+                    ->firstOrFail();
+
+                $kompetensiCategory = CategoryType::where('template_id', $template->id)
+                    ->where('code', 'kompetensi')
+                    ->firstOrFail();
 
                 // Generate assessment data (RAW DATA like API)
                 $assessmentsData = $this->generateAssessmentsData(

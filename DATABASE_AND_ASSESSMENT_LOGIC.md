@@ -3,8 +3,15 @@
 **Project:** Dashboard Analytics Asesmen SPSP
 **Database:** MySQL/MariaDB
 **Total Tables:** 16
-**Last Updated:** 2025-10-09
+**Last Updated:** 2025-10-17
 **Status:** ✅ Production-Ready + Performance Optimized
+
+**Recent Major Changes (2025-10-17):**
+- ✅ **Architecture Change:** Templates now per position, not per event
+- ✅ Removed `template_id` from `assessment_events` table
+- ✅ Added `template_id` to `position_formations` table
+- ✅ Each position in an event can now have different assessment standards
+- ✅ Templates are reusable across multiple events and institutions
 
 **Recent Updates:**
 - ✅ Corrected score calculation formula to `rating × weight_percentage`
@@ -119,25 +126,42 @@ Template "CPNS JPT Pratama" (contoh):
 │ ✓ Defines assessment structure              │
 │   (categories, aspects, sub-aspects)        │
 │ ✓ Defines weights & standard ratings        │
-│ ✓ Reusable across multiple events           │
+│ ✓ Reusable across multiple positions        │
 │ ✓ Template-specific structure               │
+│ ✓ One template per position (jabatan)       │
+└─────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────┐
+│ Position = "WHAT to Assess" (Standard)      │
+├─────────────────────────────────────────────┤
+│ ✓ Links to specific template                │
+│ ✓ Each position can have different standard │
+│ ✓ Different positions = different templates │
+│ ✓ Template defines position requirements    │
 └─────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────┐
 │ Event = "WHO to Assess" (Execution)         │
 ├─────────────────────────────────────────────┤
-│ ✓ Uses specific template                    │
+│ ✓ Contains multiple positions                │
 │ ✓ Belongs to specific institution           │
 │ ✓ Has specific participants                 │
-│ ✓ Has specific batches & positions          │
+│ ✓ Has specific batches                      │
 │ ✓ Execution instance with real data         │
 └─────────────────────────────────────────────┘
 ```
 
 **Example:**
-- **Template P3K Standard 2025** (HOW): Defines 13 aspects with specific weights
-- **Event "P3K Kejaksaan 2025"** (WHO): Uses that template, has 2000 participants
-- **Event "P3K BKN 2025"** (WHO): Uses same template, has 1500 participants
+- **Template "Supervisor Standard v1"** (HOW): Defines 13 aspects with Potensi 30%, Kompetensi 70%
+- **Template "Staff Standard v1"** (HOW): Defines 13 aspects with Potensi 50%, Kompetensi 50%
+- **Event "P3K Kejaksaan 2025"** (WHO):
+  - Position: Auditor → uses "Supervisor Standard v1"
+  - Position: Analis Kebijakan → uses "Staff Standard v1"
+  - Position: Fisikawan Medis → uses "Professional Standard v1"
+  - Total: 2000 participants across different positions
+- **Event "Asesmen MPR 2025"** (WHO):
+  - Position: Supervisor → uses "Supervisor Standard v1" (reused!)
+  - Total: 1500 participants
 
 ### **2. Snapshot Pattern**
 
@@ -264,7 +288,7 @@ INDEX: code
 
 ```sql
 ├─ id (PK, bigint unsigned)
-├─ code (string, UNIQUE) - 'p3k_standard_2025'
+├─ code (string, UNIQUE) - 'supervisor_standard_v1', 'staff_standard_v1'
 ├─ name (string)
 ├─ description (text, nullable)
 └─ timestamps
@@ -272,8 +296,9 @@ INDEX: code
 INDEX: code
 ```
 
-**Purpose:** Define assessment structure blueprints
-**Relationship:** 1 template → N category_types, N aspects, N assessment_events
+**Purpose:** Define assessment structure blueprints per position type
+**Relationship:** 1 template → N category_types, N aspects, N position_formations
+**Key Change (2025-10-17):** Templates now linked to positions, not events!
 
 ---
 
@@ -357,7 +382,6 @@ CASCADE DELETE: aspect deleted → sub_aspects deleted
 ```sql
 ├─ id (PK, bigint unsigned)
 ├─ institution_id (FK → institutions)
-├─ template_id (FK → assessment_templates)
 ├─ code (string, UNIQUE) - 'P3K-KEJAKSAAN-2025'
 ├─ name (string)
 ├─ description (text, nullable)
@@ -370,11 +394,12 @@ CASCADE DELETE: aspect deleted → sub_aspects deleted
 
 INDEX: institution_id, code, status
 UNIQUE: code
-CASCADE DELETE: institution/template deleted → events deleted
+CASCADE DELETE: institution deleted → events deleted
 ```
 
 **Purpose:** Store assessment event/execution data
-**Key Concept:** Event CHOOSES which template to use
+**Key Change (2025-10-17):** NO LONGER has template_id - templates are per position!
+**Architecture:** 1 event → N positions → each position has its own template
 
 ---
 
@@ -406,23 +431,33 @@ CASCADE DELETE: event deleted → batches deleted
 ```sql
 ├─ id (PK, bigint unsigned)
 ├─ event_id (FK → assessment_events)
-├─ code (string) - 'fisikawan_medis'
+├─ template_id (FK → assessment_templates) ← ADDED 2025-10-17
+├─ code (string) - 'fisikawan_medis', 'auditor'
 ├─ name (string)
 ├─ quota (integer, nullable)
 └─ timestamps
 
-INDEX: event_id
+INDEX: event_id, template_id
 UNIQUE: event_id + code
-CASCADE DELETE: event deleted → positions deleted
+CASCADE DELETE: event/template deleted → positions deleted
 ```
 
-**Purpose:** Define job positions for assessment
-**Design Decision:** Event-specific (not template-specific)
+**Purpose:** Define job positions with assessment standards
+**Key Change (2025-10-17):** NOW has template_id - each position has its own standard!
 
-**Rationale:**
-- Different events need different positions
+**Architecture:**
+- Different positions in same event can have different templates
+- Template is reusable across events and institutions
 - Quota specific per event
-- Template defines "HOW", Event defines "WHO"
+- Position defines "WHAT standard", Event defines "WHO to assess"
+
+**Example:**
+```
+Event: P3K Kejaksaan 2025
+├─ Position: Auditor (template: supervisor_standard_v1 - Potensi 30%, Kompetensi 70%)
+├─ Position: Analis Kebijakan (template: staff_standard_v1 - Potensi 50%, Kompetensi 50%)
+└─ Position: Fisikawan Medis (template: professional_standard_v1 - Potensi 45%, Kompetensi 55%)
+```
 
 ---
 
@@ -660,7 +695,7 @@ INDEX: email
 
 ```
 Institution (1) ──< (N) AssessmentEvent
-AssessmentTemplate (1) ──< (N) AssessmentEvent
+AssessmentTemplate (1) ──< (N) PositionFormation ← CHANGED 2025-10-17
 AssessmentTemplate (1) ──< (N) CategoryType
 AssessmentTemplate (1) ──< (N) Aspect ← DUAL FK (direct relation)
 CategoryType (1) ──< (N) Aspect ← DUAL FK (grouping)
@@ -671,7 +706,8 @@ Aspect (1) ──< (N) SubAspect (0-N, optional)
 
 ```
 AssessmentEvent (1) ──< (N) Batch
-AssessmentEvent (1) ──< (N) PositionFormation
+AssessmentEvent (1) ──< (N) PositionFormation ← Position now links to Template
+PositionFormation (N) ──> (1) AssessmentTemplate ← ADDED 2025-10-17
 AssessmentEvent (1) ──< (N) Participant
 ```
 

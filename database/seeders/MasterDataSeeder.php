@@ -15,17 +15,30 @@ class MasterDataSeeder extends Seeder
      */
     public function run(): void
     {
-        // Get template P3K Standard 2025
-        $template = AssessmentTemplate::where('code', 'p3k_standard_2025')->first();
+        // Seed all templates with different category weights
+        $this->seedTemplate('staff_standard_v1', 50, 50);         // Staff: balanced
+        $this->seedTemplate('supervisor_standard_v1', 30, 70);    // Supervisor: competency-heavy
+        $this->seedTemplate('manager_standard_v1', 40, 60);       // Manager: standard
+        $this->seedTemplate('professional_standard_v1', 45, 55);  // Professional
+        $this->seedTemplate('p3k_standard_2025', 40, 60);         // Legacy: standard
+    }
+
+    /**
+     * Seed single template with custom category weights
+     */
+    private function seedTemplate(string $templateCode, int $potensiWeight, int $kompetensiWeight): void
+    {
+        // Get template
+        $template = AssessmentTemplate::where('code', $templateCode)->firstOrFail();
 
         // ==========================================
-        // CATEGORY: POTENSI (40%)
+        // CATEGORY: POTENSI (dynamic weight)
         // ==========================================
         $categoryPotensi = CategoryType::create([
             'template_id' => $template->id,
             'code' => 'potensi',
             'name' => 'Potensi',
-            'weight_percentage' => 40,
+            'weight_percentage' => $potensiWeight,
             'order' => 1,
         ]);
 
@@ -169,13 +182,13 @@ class MasterDataSeeder extends Seeder
         }
 
         // ==========================================
-        // CATEGORY: KOMPETENSI (60%)
+        // CATEGORY: KOMPETENSI (dynamic weight)
         // ==========================================
         $categoryKompetensi = CategoryType::create([
             'template_id' => $template->id,
             'code' => 'kompetensi',
             'name' => 'Kompetensi',
-            'weight_percentage' => 60,
+            'weight_percentage' => $kompetensiWeight,
             'order' => 2,
         ]);
 

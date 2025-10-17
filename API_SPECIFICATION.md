@@ -2,8 +2,13 @@
 
 **Project:** SPSP Analytics Dashboard
 **Purpose:** API contract between CI3 Application (source) and Laravel Dashboard (analytics)
-**Version:** 1.1
-**Last Updated:** 2025-10-09
+**Version:** 1.2
+**Last Updated:** 2025-10-17
+
+**Breaking Changes in v1.2:**
+- ✅ Templates now assigned per position, not per event
+- ✅ Each position must include `template_code` field
+- ✅ Event no longer requires template selection
 
 ---
 
@@ -135,37 +140,39 @@ Content-Type: application/json
     "name": "string",
     "logo_path": "string|null"
   },
-  "template": {
-    "code": "string",
-    "name": "string",
-    "description": "string|null",
-    "category_types": [
-      {
-        "code": "string",
-        "name": "string",
-        "weight_percentage": "integer",
-        "order": "integer",
-        "aspects": [
-          {
-            "code": "string",
-            "name": "string",
-            "weight_percentage": "integer",
-            "standard_rating": "decimal",
-            "order": "integer",
-            "sub_aspects": [
-              {
-                "code": "string",
-                "name": "string",
-                "standard_rating": "integer",
-                "description": "string|null",
-                "order": "integer"
-              }
-            ]
-          }
-        ]
-      }
-    ]
-  },
+  "templates": [
+    {
+      "code": "string",
+      "name": "string",
+      "description": "string|null",
+      "category_types": [
+        {
+          "code": "string",
+          "name": "string",
+          "weight_percentage": "integer",
+          "order": "integer",
+          "aspects": [
+            {
+              "code": "string",
+              "name": "string",
+              "weight_percentage": "integer",
+              "standard_rating": "decimal",
+              "order": "integer",
+              "sub_aspects": [
+                {
+                  "code": "string",
+                  "name": "string",
+                  "standard_rating": "integer",
+                  "description": "string|null",
+                  "order": "integer"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
   "event": {
     "code": "string",
     "name": "string",
@@ -189,7 +196,8 @@ Content-Type: application/json
     {
       "code": "string",
       "name": "string",
-      "quota": "integer|null"
+      "quota": "integer|null",
+      "template_code": "string"
     }
   ],
   "participants": [
@@ -266,22 +274,36 @@ Content-Type: application/json
 
 ---
 
-### **2. Template Object**
+### **2. Templates Array**
+
+**BREAKING CHANGE v1.2:** Changed from single `template` object to `templates` array since multiple templates may be used in one event!
 
 ```json
-{
-  "code": "p3k_standard_2025",  // UNIQUE identifier
-  "name": "P3K Standard 2025",
-  "description": "Template standar untuk P3K tahun 2025",  // Optional
-  "category_types": [...]  // Array of category types
-}
+[
+  {
+    "code": "supervisor_standard_v1",  // UNIQUE identifier
+    "name": "Standar Asesmen Supervisor",
+    "description": "Template untuk posisi supervisor dengan fokus kompetensi",
+    "category_types": [...]  // Array of category types
+  },
+  {
+    "code": "staff_standard_v1",
+    "name": "Standar Asesmen Staff",
+    "description": "Template untuk posisi staff dengan bobot seimbang",
+    "category_types": [...]
+  }
+]
 ```
 
 **Validation Rules:**
-- `code`: required, string, unique, max:100
-- `name`: required, string, max:255
-- `description`: nullable, text
-- `category_types`: required, array, min:1
+- `templates`: required, array, min:1
+- Each template:
+  - `code`: required, string, unique, max:100
+  - `name`: required, string, max:255
+  - `description`: nullable, text
+  - `category_types`: required, array, min:1
+
+**Note:** Send all templates that will be used by positions in this event
 
 ---
 
@@ -446,18 +468,45 @@ Content-Type: application/json
 
 ### **8. Position Formations Array**
 
+**BREAKING CHANGE v1.2:** Added `template_code` field - REQUIRED!
+
 ```json
 {
   "code": "fisikawan_medis",      // UNIQUE per event
   "name": "Fisikawan Medis",
-  "quota": 5                      // Optional, nullable
+  "quota": 5,                     // Optional, nullable
+  "template_code": "professional_standard_v1"  // REQUIRED - links to template
 }
+```
+
+**Architecture:**
+- Each position MUST specify which template to use
+- Different positions in same event can use different templates
+- Template code must exist in the `templates` array
+
+**Example - Multiple Positions with Different Templates:**
+```json
+[
+  {
+    "code": "auditor",
+    "name": "Auditor",
+    "quota": 25,
+    "template_code": "supervisor_standard_v1"  // Potensi 30%, Kompetensi 70%
+  },
+  {
+    "code": "analis_kebijakan",
+    "name": "Analis Kebijakan",
+    "quota": 30,
+    "template_code": "staff_standard_v1"  // Potensi 50%, Kompetensi 50%
+  }
+]
 ```
 
 **Validation Rules:**
 - `code`: required, string, max:100, unique per event
 - `name`: required, string, max:255
 - `quota`: nullable, integer, min:0
+- `template_code`: **REQUIRED**, string, must exist in templates array
 
 ---
 
@@ -640,11 +689,12 @@ The term `individual_rating` appears in BOTH sub-aspects and aspects, but they h
     "name": "Kejaksaan Republik Indonesia",
     "logo_path": "/uploads/logos/kejaksaan.png"
   },
-  "template": {
-    "code": "p3k_standard_2025",
-    "name": "P3K Standard 2025",
-    "description": "Template standar untuk P3K tahun 2025",
-    "category_types": [
+  "templates": [
+    {
+      "code": "p3k_standard_2025",
+      "name": "P3K Standard 2025",
+      "description": "Template standar untuk P3K tahun 2025",
+      "category_types": [
       {
         "code": "potensi",
         "name": "POTENSI",
@@ -914,7 +964,8 @@ The term `individual_rating` appears in BOTH sub-aspects and aspects, but they h
         ]
       }
     ]
-  },
+    }
+  ],
   "event": {
     "code": "P3K-KEJAKSAAN-2025",
     "name": "Seleksi P3K Kejaksaan 2025",
@@ -946,12 +997,14 @@ The term `individual_rating` appears in BOTH sub-aspects and aspects, but they h
     {
       "code": "fisikawan_medis",
       "name": "Fisikawan Medis",
-      "quota": 5
+      "quota": 5,
+      "template_code": "p3k_standard_2025"
     },
     {
       "code": "analis_kesehatan",
       "name": "Analis Kesehatan",
-      "quota": 10
+      "quota": 10,
+      "template_code": "p3k_standard_2025"
     }
   ],
   "participants": [
@@ -1223,9 +1276,10 @@ Before sending data, please verify:
 
 - [ ] batch_code exists in batches array
 - [ ] position_formation_code exists in position_formations array
-- [ ] aspect_code exists in template aspects
-- [ ] sub_aspect_code exists in template sub_aspects
-- [ ] category_type_code exists in template categories
+- [ ] position template_code exists in templates array
+- [ ] aspect_code exists in corresponding template aspects
+- [ ] sub_aspect_code exists in corresponding template sub_aspects
+- [ ] category_type_code exists in corresponding template categories
 
 ### **Unique Identifiers**
 
@@ -1245,21 +1299,25 @@ Before sending data, please verify:
 1. **Validate** incoming data (structure, relationships, constraints)
 2. **Upsert Master Data:**
    - Institution
-   - Template structure (categories, aspects, sub-aspects)
+   - All templates (multiple templates can be sent)
+   - Template structures (categories, aspects, sub-aspects) for each template
 3. **Upsert Event Data:**
-   - Event, batches, position formations
+   - Event (no longer has template_id)
+   - Batches
+   - Position formations (each linked to its template via template_code)
 4. **Upsert Participants:**
    - Participant basic info
+   - Each participant inherits template from their position
 5. **Store Raw Assessments:**
    - Sub-aspect assessments (Potensi)
    - Aspect assessments (Kompetensi - direct)
 6. **Calculate Derived Values:**
    - Aspect ratings for Potensi (AVG from sub-aspects)
-   - All scores (`rating × weight_percentage`)
+   - All scores (`rating × weight_percentage`) using position's template weights
    - All gaps (individual - standard)
    - All percentages
    - Category totals (SUM from aspects)
-   - Final assessment (weighted: Potensi × weight% + Kompetensi × weight%)
+   - Final assessment (weighted using position's template: Potensi × weight% + Kompetensi × weight%)
 7. **Store Psychological Tests & Interpretations**
 8. **Return Success Response**
 
@@ -1275,6 +1333,13 @@ If you have questions about this API specification:
 
 ---
 
-**Version:** 1.1
+**Version:** 1.2
 **Status:** ✅ Complete & Ready for Implementation
-**Last Updated:** 2025-10-09
+**Last Updated:** 2025-10-17
+
+**Breaking Changes from v1.1:**
+- Changed `template` (single object) → `templates` (array)
+- Added `template_code` field to `position_formations` (REQUIRED)
+- Event no longer has template relationship
+- Each position now specifies its own template
+- Multiple templates can be used within one event

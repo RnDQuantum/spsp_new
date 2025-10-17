@@ -60,9 +60,9 @@ class CategoryService
         Participant $participant,
         string $categoryCode
     ): CategoryAssessment {
-        // 1. Find category type from master
-        $participant->loadMissing('event');
-        $categoryType = CategoryType::where('template_id', $participant->event->template_id)
+        // 1. Find category type from master (template is from position, not event!)
+        $participant->loadMissing('positionFormation.template');
+        $categoryType = CategoryType::where('template_id', $participant->positionFormation->template_id)
             ->where('code', $categoryCode)
             ->firstOrFail();
 
