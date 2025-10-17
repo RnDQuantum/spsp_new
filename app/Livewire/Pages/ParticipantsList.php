@@ -2,13 +2,12 @@
 
 namespace App\Livewire\Pages;
 
-use Livewire\Component;
-use App\Models\Participant;
-use Livewire\WithPagination;
 use App\Models\AssessmentEvent;
-use Livewire\Attributes\Layout;
+use App\Models\Participant;
 use Livewire\Attributes\Computed;
-
+use Livewire\Attributes\Layout;
+use Livewire\Component;
+use Livewire\WithPagination;
 
 #[Layout('components.layouts.app', ['title' => 'Shortlist Peserta'])]
 class ParticipantsList extends Component
@@ -16,15 +15,23 @@ class ParticipantsList extends Component
     use WithPagination;
 
     public string $selectedEventId = '';
+
     public string $search = '';
+
+    public array $assessmentEventsSearchable = [];
+
+    public bool $readyToLoad = false;
 
     public function mount(): void
     {
-        // Set default to first assessment event if available
-        $firstEvent = AssessmentEvent::first();
-        if ($firstEvent) {
-            $this->selectedEventId = $firstEvent->id;
-        }
+        // Don't set default event - let user choose
+        // Initialize searchable events with "Show All" option
+        $this->searchEvents();
+    }
+
+    public function loadParticipants(): void
+    {
+        $this->readyToLoad = true;
     }
 
     #[Computed]
@@ -35,13 +42,55 @@ class ParticipantsList extends Component
             ->get();
     }
 
+    public function searchEvents(string $value = ''): void
+    {
+        // Get currently selected event if exists
+        $selectedEvent = $this->selectedEventId
+            ? AssessmentEvent::where('id', $this->selectedEventId)->get()
+            : collect();
+
+        // Search events
+        $events = AssessmentEvent::query()
+            ->select('id', 'code', 'name')
+            ->when($value, function ($query) use ($value) {
+                $query->where(function ($q) use ($value) {
+                    $q->where('code', 'like', "%{$value}%")
+                        ->orWhere('name', 'like', "%{$value}%");
+                });
+            })
+            ->orderBy('code')
+            ->take(10)
+            ->get()
+            ->merge($selectedEvent)
+            ->unique('id')
+            ->map(function ($event) {
+                return [
+                    'id' => $event->id,
+                    'name' => "{$event->code} - {$event->name}",
+                ];
+            })
+            ->values();
+
+        // Prepend "Tampilkan Semua" option
+        $this->assessmentEventsSearchable = collect([
+            [
+                'id' => '',
+                'name' => '🔍 Tampilkan Semua Proyek',
+            ],
+        ])->merge($events)->toArray();
+    }
+
     #[Computed]
     public function participants()
     {
+        if (! $this->readyToLoad) {
+            return new \Illuminate\Pagination\LengthAwarePaginator([], 0, 10);
+        }
+
         $query = Participant::with([
             'assessmentEvent:id,code,name',
             'batch:id,name',
-            'positionFormation:id,name,code'
+            'positionFormation:id,name,code',
         ]);
 
         // Filter berdasarkan assessment event yang dipilih
@@ -52,9 +101,9 @@ class ParticipantsList extends Component
         // Filter berdasarkan search (nama, NIP jika ada)
         if ($this->search) {
             $query->where(function ($q) {
-                $q->where('name', 'like', '%' . $this->search . '%')
-                  ->orWhere('test_number', 'like', '%' . $this->search . '%')
-                  ->orWhere('skb_number', 'like', '%' . $this->search . '%');
+                $q->where('name', 'like', '%'.$this->search.'%')
+                    ->orWhere('test_number', 'like', '%'.$this->search.'%')
+                    ->orWhere('skb_number', 'like', '%'.$this->search.'%');
             });
         }
 
@@ -75,6 +124,7 @@ class ParticipantsList extends Component
     {
         $this->selectedEventId = '';
         $this->search = '';
+        $this->searchEvents();
         $this->resetPage();
     }
 
