@@ -145,7 +145,7 @@ class RankingMcMapping extends Component
         }
 
         $event = AssessmentEvent::query()
-            ->with('template')
+            ->with('positionFormations.template')
             ->where('code', $this->eventCode)
             ->first();
 
@@ -153,9 +153,15 @@ class RankingMcMapping extends Component
             return null;
         }
 
+        // Get all unique template IDs used by positions in this event
+        $templateIds = $event->positionFormations->pluck('template_id')->unique()->all();
+        if (empty($templateIds)) {
+            return null;
+        }
+
         // Ambil kategori kompetensi
         $kompetensiCategory = CategoryType::query()
-            ->where('template_id', $event->template_id)
+            ->whereIn('template_id', $templateIds)
             ->where('code', 'kompetensi')
             ->first();
 
@@ -250,13 +256,19 @@ class RankingMcMapping extends Component
             return ['total' => 0, 'passing' => 0, 'percentage' => 0];
         }
 
-        $event = AssessmentEvent::where('code', $this->eventCode)->first();
+        $event = AssessmentEvent::with('positionFormations.template')->where('code', $this->eventCode)->first();
         if (! $event) {
             return ['total' => 0, 'passing' => 0, 'percentage' => 0];
         }
 
+        // Get all unique template IDs used by positions in this event
+        $templateIds = $event->positionFormations->pluck('template_id')->unique()->all();
+        if (empty($templateIds)) {
+            return ['total' => 0, 'passing' => 0, 'percentage' => 0];
+        }
+
         $kompetensiCategory = CategoryType::query()
-            ->where('template_id', $event->template_id)
+            ->whereIn('template_id', $templateIds)
             ->where('code', 'kompetensi')
             ->first();
 
@@ -314,13 +326,19 @@ class RankingMcMapping extends Component
             return null;
         }
 
-        $event = AssessmentEvent::where('code', $this->eventCode)->first();
+        $event = AssessmentEvent::with('positionFormations.template')->where('code', $this->eventCode)->first();
         if (! $event) {
             return null;
         }
 
+        // Get all unique template IDs used by positions in this event
+        $templateIds = $event->positionFormations->pluck('template_id')->unique()->all();
+        if (empty($templateIds)) {
+            return null;
+        }
+
         $kompetensiCategory = CategoryType::query()
-            ->where('template_id', $event->template_id)
+            ->whereIn('template_id', $templateIds)
             ->where('code', 'kompetensi')
             ->first();
 
@@ -372,13 +390,19 @@ class RankingMcMapping extends Component
             return [];
         }
 
-        $event = AssessmentEvent::where('code', $this->eventCode)->first();
+        $event = AssessmentEvent::with('positionFormations.template')->where('code', $this->eventCode)->first();
         if (! $event) {
             return [];
         }
 
+        // Get all unique template IDs used by positions in this event
+        $templateIds = $event->positionFormations->pluck('template_id')->unique()->all();
+        if (empty($templateIds)) {
+            return [];
+        }
+
         $kompetensiCategory = CategoryType::query()
-            ->where('template_id', $event->template_id)
+            ->whereIn('template_id', $templateIds)
             ->where('code', 'kompetensi')
             ->first();
 

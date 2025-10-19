@@ -102,13 +102,19 @@ class RekapRankingAssessment extends Component
             return null;
         }
 
-        $event = AssessmentEvent::where('code', $this->eventCode)->first();
+        $event = AssessmentEvent::with('positionFormations.template')->where('code', $this->eventCode)->first();
         if (! $event) {
             return null;
         }
 
-        $potensi = CategoryType::where('template_id', $event->template_id)->where('code', 'potensi')->first();
-        $kompetensi = CategoryType::where('template_id', $event->template_id)->where('code', 'kompetensi')->first();
+        // Get all unique template IDs used by positions in this event
+        $templateIds = $event->positionFormations->pluck('template_id')->unique()->all();
+        if (empty($templateIds)) {
+            return null;
+        }
+
+        $potensi = CategoryType::whereIn('template_id', $templateIds)->where('code', 'potensi')->first();
+        $kompetensi = CategoryType::whereIn('template_id', $templateIds)->where('code', 'kompetensi')->first();
         if (! $potensi || ! $kompetensi) {
             return null;
         }
@@ -185,7 +191,7 @@ class RekapRankingAssessment extends Component
         }
 
         $event = AssessmentEvent::query()
-            ->with('template')
+            ->with('positionFormations.template')
             ->where('code', $this->eventCode)
             ->first();
 
@@ -193,13 +199,19 @@ class RekapRankingAssessment extends Component
             return;
         }
 
+        // Get all unique template IDs used by positions in this event
+        $templateIds = $event->positionFormations->pluck('template_id')->unique()->all();
+        if (empty($templateIds)) {
+            return;
+        }
+
         $potensi = CategoryType::query()
-            ->where('template_id', $event->template_id)
+            ->whereIn('template_id', $templateIds)
             ->where('code', 'potensi')
             ->first();
 
         $kompetensi = CategoryType::query()
-            ->where('template_id', $event->template_id)
+            ->whereIn('template_id', $templateIds)
             ->where('code', 'kompetensi')
             ->first();
 
@@ -234,9 +246,13 @@ class RekapRankingAssessment extends Component
             $event = AssessmentEvent::where('code', $this->eventCode)->first();
 
             if ($event) {
-                // Ambil id kategori
-                $potensi = CategoryType::where('template_id', $event->template_id)->where('code', 'potensi')->first();
-                $kompetensi = CategoryType::where('template_id', $event->template_id)->where('code', 'kompetensi')->first();
+                // Get all unique template IDs used by positions in this event
+                $templateIds = $event->positionFormations()->pluck('template_id')->unique()->all();
+
+                if (! empty($templateIds)) {
+                    // Ambil id kategori
+                    $potensi = CategoryType::whereIn('template_id', $templateIds)->where('code', 'potensi')->first();
+                    $kompetensi = CategoryType::whereIn('template_id', $templateIds)->where('code', 'kompetensi')->first();
 
                 if ($potensi && $kompetensi) {
                     $potensiId = (int) $potensi->id;
@@ -318,6 +334,7 @@ class RekapRankingAssessment extends Component
                         ['path' => $paginator->path(), 'query' => request()->query()]
                     );
                 }
+                }
             }
         }
 
@@ -339,13 +356,19 @@ class RekapRankingAssessment extends Component
             return ['total' => 0, 'passing' => 0, 'percentage' => 0];
         }
 
-        $event = AssessmentEvent::where('code', $this->eventCode)->first();
+        $event = AssessmentEvent::with('positionFormations.template')->where('code', $this->eventCode)->first();
         if (! $event) {
             return ['total' => 0, 'passing' => 0, 'percentage' => 0];
         }
 
-        $potensi = CategoryType::where('template_id', $event->template_id)->where('code', 'potensi')->first();
-        $kompetensi = CategoryType::where('template_id', $event->template_id)->where('code', 'kompetensi')->first();
+        // Get all unique template IDs used by positions in this event
+        $templateIds = $event->positionFormations->pluck('template_id')->unique()->all();
+        if (empty($templateIds)) {
+            return ['total' => 0, 'passing' => 0, 'percentage' => 0];
+        }
+
+        $potensi = CategoryType::whereIn('template_id', $templateIds)->where('code', 'potensi')->first();
+        $kompetensi = CategoryType::whereIn('template_id', $templateIds)->where('code', 'kompetensi')->first();
         if (! $potensi || ! $kompetensi) {
             return ['total' => 0, 'passing' => 0, 'percentage' => 0];
         }
@@ -407,13 +430,19 @@ class RekapRankingAssessment extends Component
             return [];
         }
 
-        $event = AssessmentEvent::where('code', $this->eventCode)->first();
+        $event = AssessmentEvent::with('positionFormations.template')->where('code', $this->eventCode)->first();
         if (! $event) {
             return [];
         }
 
-        $potensi = CategoryType::where('template_id', $event->template_id)->where('code', 'potensi')->first();
-        $kompetensi = CategoryType::where('template_id', $event->template_id)->where('code', 'kompetensi')->first();
+        // Get all unique template IDs used by positions in this event
+        $templateIds = $event->positionFormations->pluck('template_id')->unique()->all();
+        if (empty($templateIds)) {
+            return [];
+        }
+
+        $potensi = CategoryType::whereIn('template_id', $templateIds)->where('code', 'potensi')->first();
+        $kompetensi = CategoryType::whereIn('template_id', $templateIds)->where('code', 'kompetensi')->first();
         if (! $potensi || ! $kompetensi) {
             return [];
         }

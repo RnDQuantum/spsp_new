@@ -125,14 +125,17 @@ class TrainingRecommendation extends Component
     private function loadEventAndAspect(): void
     {
         if ($this->eventCode) {
-            $this->selectedEvent = AssessmentEvent::with('template')
+            $this->selectedEvent = AssessmentEvent::with('positionFormations.template')
                 ->where('code', $this->eventCode)
                 ->first();
         }
 
         if ($this->aspectId && $this->selectedEvent) {
+            // Get all template IDs used in this event
+            $templateIds = $this->selectedEvent->positionFormations->pluck('template_id')->unique()->all();
+
             $this->selectedAspect = Aspect::where('id', $this->aspectId)
-                ->where('template_id', $this->selectedEvent->template_id)
+                ->whereIn('template_id', $templateIds)
                 ->first();
         }
     }
@@ -246,7 +249,7 @@ class TrainingRecommendation extends Component
      */
     public function getEventsProperty(): \Illuminate\Support\Collection
     {
-        return AssessmentEvent::with('template')
+        return AssessmentEvent::with('positionFormations.template')
             ->orderBy('year', 'desc')
             ->orderBy('name')
             ->get();
@@ -261,7 +264,14 @@ class TrainingRecommendation extends Component
             return collect([]);
         }
 
-        return Aspect::where('template_id', $this->selectedEvent->template_id)
+        // Get all template IDs used in this event
+        $templateIds = $this->selectedEvent->positionFormations->pluck('template_id')->unique()->all();
+
+        if (empty($templateIds)) {
+            return collect([]);
+        }
+
+        return Aspect::whereIn('template_id', $templateIds)
             ->with('categoryType')
             ->orderBy('category_type_id', 'asc')
             ->orderBy('order', 'asc')
@@ -314,8 +324,15 @@ class TrainingRecommendation extends Component
         // Calculate tolerance factor
         $toleranceFactor = 1 - ($this->tolerancePercentage / 100);
 
-        // Get all aspects for the selected event
-        $aspects = Aspect::where('template_id', $this->selectedEvent->template_id)
+        // Get all template IDs used in this event
+        $templateIds = $this->selectedEvent->positionFormations->pluck('template_id')->unique()->all();
+
+        if (empty($templateIds)) {
+            return collect([]);
+        }
+
+        // Get all aspects for the selected event (from all templates used)
+        $aspects = Aspect::whereIn('template_id', $templateIds)
             ->with('categoryType')
             ->orderBy('category_type_id', 'asc')
             ->orderBy('order', 'asc')

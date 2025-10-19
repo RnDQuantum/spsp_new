@@ -107,15 +107,27 @@ class Statistic extends Component
             return;
         }
 
+        // Get all unique template IDs used by positions in this event
+        $templateIds = $event->positionFormations()
+            ->distinct()
+            ->pluck('template_id')
+            ->all();
+
+        if (empty($templateIds)) {
+            return;
+        }
+
+        // Get category types from all templates used in this event
         $categoryTypes = CategoryType::query()
-            ->where('template_id', $event->template_id)
+            ->whereIn('template_id', $templateIds)
             ->get(['id', 'code']);
 
         $categoryIdToCode = $categoryTypes->pluck('code', 'id');
 
+        // Get aspects from all templates used in this event
         $aspects = Aspect::query()
             ->join('category_types', 'aspects.category_type_id', '=', 'category_types.id')
-            ->where('aspects.template_id', $event->template_id)
+            ->whereIn('aspects.template_id', $templateIds)
             ->orderByRaw("CASE WHEN LOWER(category_types.code) = 'potensi' THEN 0 ELSE 1 END")
             ->orderBy('aspects.order')
             ->get(['aspects.id', 'aspects.name', 'aspects.category_type_id']);

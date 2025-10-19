@@ -102,7 +102,7 @@ class StandardPsikometrik extends Component
         }
 
         $this->selectedEvent = AssessmentEvent::query()
-            ->with('institution', 'template')
+            ->with('institution', 'positionFormations.template')
             ->where('code', $this->eventCode)
             ->first();
 
@@ -110,13 +110,22 @@ class StandardPsikometrik extends Component
             return;
         }
 
-        $this->selectedTemplate = $this->selectedEvent->template;
+        // Get all unique template IDs used by positions in this event
+        $templateIds = $this->selectedEvent->positionFormations->pluck('template_id')->unique()->all();
+
+        if (empty($templateIds)) {
+            return;
+        }
+
+        // For now, use the first template (or you can aggregate from all templates)
+        $this->selectedTemplate = $this->selectedEvent->positionFormations->first()?->template;
 
         if (! $this->selectedTemplate) {
             return;
         }
 
         // Load ONLY Potensi category type with aspects and sub-aspects
+        // Note: If event has multiple templates, this will only show the first template's data
         $categories = CategoryType::query()
             ->where('template_id', $this->selectedTemplate->id)
             ->where('code', 'potensi')
