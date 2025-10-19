@@ -68,7 +68,7 @@
                 <tr>
                     <td class="py-1 font-semibold">Standar Penilaian</td>
                     <td class="py-1">:</td>
-                    <td class="py-1">{{ $participant->assessmentEvent->template->name ?? '-' }}
+                    <td class="py-1">{{ $participant->positionFormation->template->name ?? '-' }}
                     </td>
                 </tr>
                 <tr>

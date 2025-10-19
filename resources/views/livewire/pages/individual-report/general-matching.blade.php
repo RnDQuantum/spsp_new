@@ -176,7 +176,7 @@
         <div class="flex flex-col">
             <div class="grid grid-cols-2 border-b border-gray-300">
                 <div class="px-4 py-2 text-sm text-black">Standar/Standard</div>
-                <div class="px-4 py-2 text-sm text-black">: {{ $participant->assessmentEvent->template->name }}</div>
+                <div class="px-4 py-2 text-sm text-black">: {{ $participant->positionFormation->template->name }}</div>
             </div>
             <div class="grid grid-cols-2 border-b border-gray-300">
                 <div class="px-4 py-2 text-sm text-black">Event</div>

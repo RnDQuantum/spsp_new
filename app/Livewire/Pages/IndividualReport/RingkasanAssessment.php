@@ -57,9 +57,9 @@ class RingkasanAssessment extends Component
 
         // Load participant with relations based on event code and test number
         $this->participant = Participant::with([
-            'assessmentEvent.template',
+            'assessmentEvent',
             'batch',
-            'positionFormation',
+            'positionFormation.template',
         ])
             ->whereHas('assessmentEvent', function ($query) use ($eventCode) {
                 $query->where('code', $eventCode);
@@ -67,8 +67,8 @@ class RingkasanAssessment extends Component
             ->where('test_number', $testNumber)
             ->firstOrFail();
 
-        // Get template from event
-        $template = $this->participant->assessmentEvent->template;
+        // Get template from position
+        $template = $this->participant->positionFormation->template;
 
         // Get category types for this template
         $this->potensiCategory = CategoryType::where('template_id', $template->id)

@@ -51,7 +51,7 @@
             <tr>
                 <td class="py-2 font-semibold" style="width: 150px;">Standar Penilaian</td>
                 <td class="py-2" style="width: 20px;">:</td>
-                <td class="py-2">{{ $participant->assessmentEvent->template->name }}</td>
+                <td class="py-2">{{ $participant->positionFormation->template->name }}</td>
             </tr>
             <tr>
                 <td class="py-2 font-semibold">Tanggal Tes</td>

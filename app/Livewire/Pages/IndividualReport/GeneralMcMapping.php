@@ -66,9 +66,9 @@ class GeneralMcMapping extends Component
 
         // Load participant
         $this->participant = Participant::with([
-            'assessmentEvent.template',
+            'assessmentEvent',
             'batch',
-            'positionFormation',
+            'positionFormation.template',
         ])
             ->whereHas('assessmentEvent', function ($query) use ($eventCode) {
                 $query->where('code', $eventCode);
@@ -76,7 +76,7 @@ class GeneralMcMapping extends Component
             ->where('test_number', $testNumber)
             ->firstOrFail();
 
-        $template = $this->participant->assessmentEvent->template;
+        $template = $this->participant->positionFormation->template;
 
         // Get kompetensi category type only
         $this->kompetensiCategory = CategoryType::where('template_id', $template->id)

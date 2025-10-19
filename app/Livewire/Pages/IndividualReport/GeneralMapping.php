@@ -70,9 +70,9 @@ class GeneralMapping extends Component
 
         // Load participant
         $this->participant = Participant::with([
-            'assessmentEvent.template',
+            'assessmentEvent',
             'batch',
-            'positionFormation',
+            'positionFormation.template',
         ])
             ->whereHas('assessmentEvent', function ($query) use ($eventCode) {
                 $query->where('code', $eventCode);
@@ -80,7 +80,7 @@ class GeneralMapping extends Component
             ->where('test_number', $testNumber)
             ->firstOrFail();
 
-        $template = $this->participant->assessmentEvent->template;
+        $template = $this->participant->positionFormation->template;
 
         // Get category types
         $this->potensiCategory = CategoryType::where('template_id', $template->id)

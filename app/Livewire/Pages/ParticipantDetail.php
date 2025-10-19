@@ -15,9 +15,9 @@ class ParticipantDetail extends Component
     {
         // Load participant dengan semua relasi yang diperlukan
         $this->participant = Participant::with([
-            'assessmentEvent.template',
+            'assessmentEvent',
             'batch',
-            'positionFormation',
+            'positionFormation.template',
         ])
             ->whereHas('assessmentEvent', function ($query) use ($eventCode) {
                 $query->where('code', $eventCode);
