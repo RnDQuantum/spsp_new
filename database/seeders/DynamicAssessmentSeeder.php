@@ -32,48 +32,48 @@ class DynamicAssessmentSeeder extends Seeder
     {
         return [
             // Configuration 1: Kejaksaan - 100 participants
-            [
-                'institution_code' => 'kejaksaan',
-                'event' => [
-                    'code' => 'P3K-KEJAKSAAN-2025',
-                    'name' => 'Seleksi P3K Kejaksaan 2025',
-                    'description' => 'Assessment P3K untuk Kejaksaan RI tahun 2025',
-                    'year' => 2025,
-                    'start_date' => '2025-09-01',
-                    'end_date' => '2025-12-31',
-                    'status' => 'completed',
-                ],
-                'batches' => [['code' => 'BATCH-1-MOJOKERTO', 'name' => 'Gelombang 1 - Mojokerto', 'location' => 'Mojokerto', 'batch_number' => 1, 'start_date' => '2025-09-27', 'end_date' => '2025-09-28'], ['code' => 'BATCH-2-SURABAYA', 'name' => 'Gelombang 2 - Surabaya', 'location' => 'Surabaya', 'batch_number' => 2, 'start_date' => '2025-10-15', 'end_date' => '2025-10-16'], ['code' => 'BATCH-3-JAKARTA', 'name' => 'Gelombang 3 - Jakarta', 'location' => 'Jakarta', 'batch_number' => 3, 'start_date' => '2025-11-05', 'end_date' => '2025-11-06']],
-                'positions' => [['code' => 'fisikawan_medis', 'name' => 'Fisikawan Medis', 'quota' => 20, 'template_code' => 'professional_standard_v1'], ['code' => 'analis_kebijakan', 'name' => 'Analis Kebijakan', 'quota' => 30, 'template_code' => 'staff_standard_v1'], ['code' => 'auditor', 'name' => 'Auditor', 'quota' => 25, 'template_code' => 'supervisor_standard_v1'], ['code' => 'pranata_komputer', 'name' => 'Pranata Komputer', 'quota' => 25, 'template_code' => 'staff_standard_v1']],
-                'participants_count' => 100, // JUMLAH PESERTA
-                'performance_distribution' => [
-                    'high' => 25, // 25% high performers (exceed standard)
-                    'medium' => 60, // 60% medium performers (around standard)
-                    'low' => 15, // 15% low performers (below standard)
-                ],
-            ],
-
-            // Configuration 2: Kementerian Kesehatan - 200 participants
             // [
-            //     'institution_code' => 'kemenkes',
+            //     'institution_code' => 'kejaksaan',
             //     'event' => [
-            //         'code' => 'P3K-KEMENKES-2025',
-            //         'name' => 'Seleksi P3K Kementerian Kesehatan 2025',
-            //         'description' => 'Assessment P3K untuk Kemenkes tahun 2025',
+            //         'code' => 'P3K-KEJAKSAAN-2025',
+            //         'name' => 'Seleksi P3K Kejaksaan 2025',
+            //         'description' => 'Assessment P3K untuk Kejaksaan RI tahun 2025',
             //         'year' => 2025,
-            //         'start_date' => '2025-10-01',
+            //         'start_date' => '2025-09-01',
             //         'end_date' => '2025-12-31',
-            //         'status' => 'ongoing',
+            //         'status' => 'completed',
             //     ],
-            //     'batches' => [['code' => 'BATCH-1-BANDUNG', 'name' => 'Gelombang 1 - Bandung', 'location' => 'Bandung', 'batch_number' => 1, 'start_date' => '2025-10-10', 'end_date' => '2025-10-11'], ['code' => 'BATCH-2-YOGYAKARTA', 'name' => 'Gelombang 2 - Yogyakarta', 'location' => 'Yogyakarta', 'batch_number' => 2, 'start_date' => '2025-11-10', 'end_date' => '2025-11-11']],
-            //     'positions' => [['code' => 'dokter_umum', 'name' => 'Dokter Umum', 'quota' => 50, 'template_code' => 'professional_standard_v1'], ['code' => 'perawat', 'name' => 'Perawat', 'quota' => 100, 'template_code' => 'staff_standard_v1'], ['code' => 'apoteker', 'name' => 'Apoteker', 'quota' => 50, 'template_code' => 'professional_standard_v1']],
-            //     'participants_count' => 200, // JUMLAH PESERTA
+            //     'batches' => [['code' => 'BATCH-1-MOJOKERTO', 'name' => 'Gelombang 1 - Mojokerto', 'location' => 'Mojokerto', 'batch_number' => 1, 'start_date' => '2025-09-27', 'end_date' => '2025-09-28'], ['code' => 'BATCH-2-SURABAYA', 'name' => 'Gelombang 2 - Surabaya', 'location' => 'Surabaya', 'batch_number' => 2, 'start_date' => '2025-10-15', 'end_date' => '2025-10-16'], ['code' => 'BATCH-3-JAKARTA', 'name' => 'Gelombang 3 - Jakarta', 'location' => 'Jakarta', 'batch_number' => 3, 'start_date' => '2025-11-05', 'end_date' => '2025-11-06']],
+            //     'positions' => [['code' => 'fisikawan_medis', 'name' => 'Fisikawan Medis', 'quota' => 20, 'template_code' => 'professional_standard_v1'], ['code' => 'analis_kebijakan', 'name' => 'Analis Kebijakan', 'quota' => 30, 'template_code' => 'staff_standard_v1'], ['code' => 'auditor', 'name' => 'Auditor', 'quota' => 25, 'template_code' => 'supervisor_standard_v1'], ['code' => 'pranata_komputer', 'name' => 'Pranata Komputer', 'quota' => 25, 'template_code' => 'staff_standard_v1']],
+            //     'participants_count' => 100, // JUMLAH PESERTA
             //     'performance_distribution' => [
             //         'high' => 25, // 25% high performers (exceed standard)
             //         'medium' => 60, // 60% medium performers (around standard)
             //         'low' => 15, // 15% low performers (below standard)
             //     ],
             // ],
+
+            // Configuration 2: Kementerian Kesehatan - 200 participants
+            [
+                'institution_code' => 'kemenkes',
+                'event' => [
+                    'code' => 'P3K-KEMENKES-2025',
+                    'name' => 'Seleksi P3K Kementerian Kesehatan 2025',
+                    'description' => 'Assessment P3K untuk Kemenkes tahun 2025',
+                    'year' => 2025,
+                    'start_date' => '2025-10-01',
+                    'end_date' => '2025-12-31',
+                    'status' => 'ongoing',
+                ],
+                'batches' => [['code' => 'BATCH-1-BANDUNG', 'name' => 'Gelombang 1 - Bandung', 'location' => 'Bandung', 'batch_number' => 1, 'start_date' => '2025-10-10', 'end_date' => '2025-10-11'], ['code' => 'BATCH-2-YOGYAKARTA', 'name' => 'Gelombang 2 - Yogyakarta', 'location' => 'Yogyakarta', 'batch_number' => 2, 'start_date' => '2025-11-10', 'end_date' => '2025-11-11']],
+                'positions' => [['code' => 'dokter_umum', 'name' => 'Dokter Umum', 'quota' => 50, 'template_code' => 'professional_standard_v1'], ['code' => 'perawat', 'name' => 'Perawat', 'quota' => 100, 'template_code' => 'staff_standard_v1'], ['code' => 'apoteker', 'name' => 'Apoteker', 'quota' => 50, 'template_code' => 'supervisor_standard_v1']],
+                'participants_count' => 200, // JUMLAH PESERTA
+                'performance_distribution' => [
+                    'high' => 25, // 25% high performers (exceed standard)
+                    'medium' => 60, // 60% medium performers (around standard)
+                    'low' => 15, // 15% low performers (below standard)
+                ],
+            ],
         ];
     }
 

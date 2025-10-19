@@ -38,10 +38,11 @@ class MasterDataSeeder extends Seeder
     /**
      * Initialize Potensi Aspect Library
      * Contains all available Potensi aspects with their sub-aspects
+     * Based on realistic assessment bank data
      */
     private function initializePotensiLibrary(): void
     {
-        // KECERDASAN - Basic intelligence aspects
+        // KECERDASAN - Basic (4 sub-aspects, rating 3)
         $this->potensiAspectLibrary['kecerdasan_basic'] = [
             'code' => 'kecerdasan',
             'name' => 'Kecerdasan',
@@ -49,80 +50,89 @@ class MasterDataSeeder extends Seeder
             'sub_aspects' => [
                 ['code' => 'kecerdasan_umum', 'name' => 'Kecerdasan Umum', 'description' => 'Kemampuan intelektual secara umum', 'standard_rating' => 3],
                 ['code' => 'daya_tangkap', 'name' => 'Daya Tangkap', 'description' => 'Kemampuan memahami informasi dengan cepat', 'standard_rating' => 3],
-                ['code' => 'kemampuan_analisa', 'name' => 'Kemampuan Analisa', 'description' => 'Kemampuan menganalisa masalah', 'standard_rating' => 3],
-                ['code' => 'logika_berpikir', 'name' => 'Logika Berpikir', 'description' => 'Kemampuan berpikir logis dan sistematis', 'standard_rating' => 3],
+                ['code' => 'daya_analisa', 'name' => 'Daya Analisa', 'description' => 'Kemampuan menganalisa dan memecahkan masalah', 'standard_rating' => 3],
+                ['code' => 'kemampuan_logika', 'name' => 'Kemampuan Logika', 'description' => 'Kemampuan berpikir logis dan sistematis', 'standard_rating' => 3],
             ],
         ];
 
-        // KECERDASAN - Advanced (for higher positions)
+        // KECERDASAN - Advanced (6 sub-aspects, rating 4)
         $this->potensiAspectLibrary['kecerdasan_advanced'] = [
             'code' => 'kecerdasan',
             'name' => 'Kecerdasan',
-            'description' => 'Mengukur kemampuan kognitif tingkat tinggi untuk analisis kompleks, pemikiran strategis, dan pengambilan keputusan berbasis data.',
+            'description' => 'Mengukur kemampuan kognitif tingkat tinggi untuk analisis kompleks, pemikiran strategis, dan kreativitas dalam pemecahan masalah.',
             'sub_aspects' => [
                 ['code' => 'kecerdasan_umum', 'name' => 'Kecerdasan Umum', 'description' => 'Kemampuan intelektual secara umum', 'standard_rating' => 4],
-                ['code' => 'daya_tangkap', 'name' => 'Daya Tangkap', 'description' => 'Kemampuan memahami informasi dengan cepat', 'standard_rating' => 4],
-                ['code' => 'kemampuan_analisa', 'name' => 'Kemampuan Analisa', 'description' => 'Kemampuan menganalisa masalah kompleks', 'standard_rating' => 4],
+                ['code' => 'daya_tangkap', 'name' => 'Daya Tangkap', 'description' => 'Kemampuan memahami informasi dengan cepat dan akurat', 'standard_rating' => 4],
+                ['code' => 'daya_analisa', 'name' => 'Daya Analisa', 'description' => 'Kemampuan menganalisa masalah kompleks secara mendalam', 'standard_rating' => 4],
                 ['code' => 'berpikir_konseptual', 'name' => 'Berpikir Konseptual', 'description' => 'Kemampuan berpikir secara konseptual dan strategis', 'standard_rating' => 4],
-                ['code' => 'logika_berpikir', 'name' => 'Logika Berpikir', 'description' => 'Kemampuan berpikir logis dan sistematis', 'standard_rating' => 4],
-                ['code' => 'kemampuan_numerik', 'name' => 'Kemampuan Numerik', 'description' => 'Kemampuan dalam hal angka dan perhitungan', 'standard_rating' => 4],
+                ['code' => 'kemampuan_logika', 'name' => 'Kemampuan Logika', 'description' => 'Kemampuan berpikir logis dan sistematis tingkat tinggi', 'standard_rating' => 4],
+                ['code' => 'kreativitas', 'name' => 'Kreativitas', 'description' => 'Kemampuan berpikir kreatif dan inovatif dalam pemecahan masalah', 'standard_rating' => 4],
             ],
         ];
 
-        // SIKAP KERJA
-        $this->potensiAspectLibrary['sikap_kerja'] = [
-            'code' => 'sikap_kerja',
-            'name' => 'Sikap Kerja',
-            'description' => 'Menilai perilaku dan etos kerja yang mencakup sistematika, ketelitian, ketekunan, kerjasama, tanggung jawab, dan dorongan berprestasi.',
+        // CARA KERJA (Work Style)
+        $this->potensiAspectLibrary['cara_kerja'] = [
+            'code' => 'cara_kerja',
+            'name' => 'Cara Kerja',
+            'description' => 'Menilai pendekatan dan gaya individu dalam melaksanakan tugas dan pekerjaan sehari-hari.',
             'sub_aspects' => [
-                ['code' => 'sistematika_kerja', 'name' => 'Sistematika Kerja', 'description' => 'Kemampuan bekerja secara sistematis', 'standard_rating' => 3],
-                ['code' => 'perhatian_terhadap_detail', 'name' => 'Perhatian Terhadap Detail', 'description' => 'Ketelitian dalam bekerja', 'standard_rating' => 3],
-                ['code' => 'ketekunan_kerja', 'name' => 'Ketekunan Kerja', 'description' => 'Konsistensi dan ketekunan dalam bekerja', 'standard_rating' => 3],
-                ['code' => 'kerjasama', 'name' => 'Kerjasama', 'description' => 'Kemampuan bekerja dalam tim', 'standard_rating' => 4],
-                ['code' => 'tanggung_jawab', 'name' => 'Tanggung Jawab', 'description' => 'Rasa tanggung jawab terhadap tugas', 'standard_rating' => 4],
-                ['code' => 'dorongan_berprestasi', 'name' => 'Dorongan Berprestasi', 'description' => 'Motivasi untuk berprestasi', 'standard_rating' => 3],
-                ['code' => 'inisiatif', 'name' => 'Inisiatif', 'description' => 'Kemampuan mengambil inisiatif', 'standard_rating' => 3],
+                ['code' => 'sistematika_kerja', 'name' => 'Sistematika Kerja', 'description' => 'Kemampuan bekerja secara teratur dan sistematis', 'standard_rating' => 3],
+                ['code' => 'ketekunan', 'name' => 'Ketekunan', 'description' => 'Ketekunan dan konsistensi dalam menyelesaikan pekerjaan', 'standard_rating' => 3],
+                ['code' => 'kerjasama', 'name' => 'Kerjasama', 'description' => 'Kemampuan bekerja sama dengan orang lain', 'standard_rating' => 4],
+                ['code' => 'kedisiplinan', 'name' => 'Kedisiplinan', 'description' => 'Ketaatan terhadap aturan dan prosedur kerja', 'standard_rating' => 4],
+                ['code' => 'tanggung_jawab', 'name' => 'Tanggung Jawab', 'description' => 'Rasa tanggung jawab terhadap tugas dan kewajiban', 'standard_rating' => 4],
             ],
         ];
 
-        // HUBUNGAN SOSIAL
+        // POTENSI KERJA (Work Potential)
+        $this->potensiAspectLibrary['potensi_kerja'] = [
+            'code' => 'potensi_kerja',
+            'name' => 'Potensi Kerja',
+            'description' => 'Mengukur dorongan internal dan motivasi individu dalam mengembangkan diri dan mencapai prestasi kerja.',
+            'sub_aspects' => [
+                ['code' => 'motivasi_berprestasi', 'name' => 'Motivasi Berprestasi', 'description' => 'Dorongan untuk mencapai prestasi dan keunggulan', 'standard_rating' => 3],
+                ['code' => 'inisiatif', 'name' => 'Inisiatif', 'description' => 'Kemampuan mengambil prakarsa dan bertindak proaktif', 'standard_rating' => 3],
+                ['code' => 'semangat_kerja', 'name' => 'Semangat Kerja', 'description' => 'Antusiasme dan energi dalam melaksanakan tugas', 'standard_rating' => 3],
+                ['code' => 'kestabilan_kerja', 'name' => 'Kestabilan Kerja', 'description' => 'Konsistensi dan stabilitas dalam performa kerja', 'standard_rating' => 3],
+            ],
+        ];
+
+        // HUBUNGAN SOSIAL (Social Relations)
         $this->potensiAspectLibrary['hubungan_sosial'] = [
             'code' => 'hubungan_sosial',
             'name' => 'Hubungan Sosial',
-            'description' => 'Mengukur kemampuan berinteraksi, berkomunikasi, dan menjalin hubungan interpersonal yang efektif dengan berbagai pihak.',
+            'description' => 'Mengukur kemampuan berinteraksi, berkomunikasi, dan menjalin hubungan interpersonal yang efektif.',
             'sub_aspects' => [
-                ['code' => 'kepekaan_interpersonal', 'name' => 'Kepekaan Interpersonal', 'description' => 'Kepekaan terhadap hubungan antar pribadi', 'standard_rating' => 4],
-                ['code' => 'komunikasi', 'name' => 'Komunikasi', 'description' => 'Kemampuan berkomunikasi efektif', 'standard_rating' => 4],
-                ['code' => 'hubungan_interpersonal', 'name' => 'Hubungan Interpersonal', 'description' => 'Kemampuan menjalin hubungan dengan orang lain', 'standard_rating' => 3],
-                ['code' => 'penyesuaian_diri', 'name' => 'Penyesuaian Diri', 'description' => 'Kemampuan menyesuaikan diri dengan lingkungan', 'standard_rating' => 4],
+                ['code' => 'kepekaan_interpersonal', 'name' => 'Kepekaan Interpersonal', 'description' => 'Kepekaan terhadap perasaan dan kebutuhan orang lain', 'standard_rating' => 4],
+                ['code' => 'komunikasi', 'name' => 'Komunikasi', 'description' => 'Kemampuan menyampaikan dan menerima informasi secara efektif', 'standard_rating' => 4],
+                ['code' => 'kontak_sosial', 'name' => 'Kontak Sosial', 'description' => 'Kemampuan menjalin dan mempertahankan hubungan sosial', 'standard_rating' => 3],
+                ['code' => 'penyesuaian_diri', 'name' => 'Penyesuaian Diri', 'description' => 'Kemampuan beradaptasi dengan lingkungan sosial yang berbeda', 'standard_rating' => 4],
             ],
         ];
 
-        // KEPRIBADIAN - Basic
+        // KEPRIBADIAN - Basic (4 sub-aspects, rating 3)
         $this->potensiAspectLibrary['kepribadian_basic'] = [
             'code' => 'kepribadian',
             'name' => 'Kepribadian',
-            'description' => 'Menilai karakteristik pribadi yang mencakup stabilitas emosi, kepercayaan diri, dan daya tahan terhadap stress.',
+            'description' => 'Menilai karakteristik pribadi yang mencakup kepercayaan diri, stabilitas emosi, dan daya tahan terhadap tekanan.',
             'sub_aspects' => [
-                ['code' => 'stabilitas_kematangan_emosi', 'name' => 'Stabilitas/Kematangan Emosi', 'description' => 'Kemampuan mengelola emosi', 'standard_rating' => 3],
-                ['code' => 'agility', 'name' => 'Agility', 'description' => 'Kelincahan dalam beradaptasi', 'standard_rating' => 3],
-                ['code' => 'kepercayaan_diri', 'name' => 'Kepercayaan Diri', 'description' => 'Tingkat kepercayaan diri', 'standard_rating' => 3],
-                ['code' => 'daya_tahan_stress', 'name' => 'Daya Tahan Stress', 'description' => 'Kemampuan mengelola tekanan', 'standard_rating' => 3],
+                ['code' => 'kepercayaan_diri', 'name' => 'Kepercayaan Diri', 'description' => 'Keyakinan terhadap kemampuan diri sendiri', 'standard_rating' => 3],
+                ['code' => 'stabilitas_emosi', 'name' => 'Stabilitas Emosi', 'description' => 'Kestabilan emosi dalam berbagai situasi', 'standard_rating' => 3],
+                ['code' => 'daya_tahan_stress', 'name' => 'Daya Tahan Stress', 'description' => 'Kemampuan mengelola tekanan dan stress', 'standard_rating' => 3],
+                ['code' => 'kepemimpinan', 'name' => 'Kepemimpinan', 'description' => 'Kemampuan dasar dalam memimpin dan mempengaruhi orang lain', 'standard_rating' => 3],
             ],
         ];
 
-        // KEPRIBADIAN - Leadership (for supervisory roles)
+        // KEPRIBADIAN - Leadership (4 sub-aspects, rating 4 - for supervisory roles)
         $this->potensiAspectLibrary['kepribadian_leadership'] = [
             'code' => 'kepribadian',
             'name' => 'Kepribadian',
-            'description' => 'Menilai karakteristik pribadi dengan penekanan pada kepemimpinan, stabilitas emosi, kepercayaan diri, dan daya tahan terhadap stress.',
+            'description' => 'Menilai karakteristik pribadi dengan penekanan pada kepemimpinan, kematangan emosi, dan kemampuan menghadapi tantangan tingkat tinggi.',
             'sub_aspects' => [
-                ['code' => 'stabilitas_kematangan_emosi', 'name' => 'Stabilitas/Kematangan Emosi', 'description' => 'Kemampuan mengelola emosi', 'standard_rating' => 4],
-                ['code' => 'agility', 'name' => 'Agility', 'description' => 'Kelincahan dalam beradaptasi', 'standard_rating' => 4],
-                ['code' => 'kepercayaan_diri', 'name' => 'Kepercayaan Diri', 'description' => 'Tingkat kepercayaan diri', 'standard_rating' => 4],
-                ['code' => 'daya_tahan_stress', 'name' => 'Daya Tahan Stress', 'description' => 'Kemampuan mengelola tekanan tinggi', 'standard_rating' => 4],
-                ['code' => 'kepemimpinan', 'name' => 'Kepemimpinan', 'description' => 'Kemampuan memimpin dan memotivasi tim', 'standard_rating' => 4],
-                ['code' => 'loyalitas', 'name' => 'Loyalitas', 'description' => 'Kesetiaan terhadap organisasi', 'standard_rating' => 4],
+                ['code' => 'kepercayaan_diri', 'name' => 'Kepercayaan Diri', 'description' => 'Keyakinan kuat terhadap kemampuan diri dalam situasi kompleks', 'standard_rating' => 4],
+                ['code' => 'stabilitas_emosi', 'name' => 'Stabilitas Emosi', 'description' => 'Kematangan emosi dalam menghadapi berbagai tekanan', 'standard_rating' => 4],
+                ['code' => 'daya_tahan_stress', 'name' => 'Daya Tahan Stress', 'description' => 'Ketahanan mental dalam menghadapi tekanan kerja tinggi', 'standard_rating' => 4],
+                ['code' => 'kepemimpinan', 'name' => 'Kepemimpinan', 'description' => 'Kemampuan memimpin, memotivasi, dan menginspirasi tim', 'standard_rating' => 4],
             ],
         ];
     }
@@ -183,12 +193,14 @@ class MasterDataSeeder extends Seeder
             'order' => 2,
         ]);
 
-        // Potensi aspects: Basic level, balanced weights
+        // Potensi aspects: 5 aspects - Basic level for entry positions (Total: 100%)
         $potensiAspects = [
-            ['library_key' => 'kecerdasan_basic', 'weight' => 30],
-            ['library_key' => 'sikap_kerja', 'weight' => 40],
-            ['library_key' => 'hubungan_sosial', 'weight' => 30],
-        ];
+            ['library_key' => 'kecerdasan_basic', 'weight' => 25],      // 25%
+            ['library_key' => 'cara_kerja', 'weight' => 20],            // 20%
+            ['library_key' => 'potensi_kerja', 'weight' => 20],         // 20%
+            ['library_key' => 'hubungan_sosial', 'weight' => 20],       // 20%
+            ['library_key' => 'kepribadian_basic', 'weight' => 15],     // 15%
+        ];                                                               // TOTAL = 100%
 
         $this->seedPotensiAspects($template->id, $potensiCategory->id, $potensiAspects);
 
@@ -229,12 +241,13 @@ class MasterDataSeeder extends Seeder
             'order' => 2,
         ]);
 
-        // Potensi aspects: Advanced intelligence + leadership personality
+        // Potensi aspects: 4 aspects - Advanced with leadership focus (Total: 100%)
         $potensiAspects = [
-            ['library_key' => 'kecerdasan_advanced', 'weight' => 40],
-            ['library_key' => 'hubungan_sosial', 'weight' => 25],
-            ['library_key' => 'kepribadian_leadership', 'weight' => 35],
-        ];
+            ['library_key' => 'kecerdasan_advanced', 'weight' => 30],      // 30%
+            ['library_key' => 'cara_kerja', 'weight' => 25],               // 25%
+            ['library_key' => 'hubungan_sosial', 'weight' => 20],          // 20%
+            ['library_key' => 'kepribadian_leadership', 'weight' => 25],   // 25%
+        ];                                                                  // TOTAL = 100%
 
         $this->seedPotensiAspects($template->id, $potensiCategory->id, $potensiAspects);
 
@@ -277,11 +290,13 @@ class MasterDataSeeder extends Seeder
             'order' => 2,
         ]);
 
-        // Potensi aspects: Advanced intelligence + leadership
+        // Potensi aspects: 4 aspects - Strategic thinking emphasis (Total: 100%)
         $potensiAspects = [
-            ['library_key' => 'kecerdasan_advanced', 'weight' => 50],
-            ['library_key' => 'kepribadian_leadership', 'weight' => 50],
-        ];
+            ['library_key' => 'kecerdasan_advanced', 'weight' => 35],      // 35%
+            ['library_key' => 'potensi_kerja', 'weight' => 20],            // 20%
+            ['library_key' => 'hubungan_sosial', 'weight' => 20],          // 20%
+            ['library_key' => 'kepribadian_leadership', 'weight' => 25],   // 25%
+        ];                                                                  // TOTAL = 100%
 
         $this->seedPotensiAspects($template->id, $potensiCategory->id, $potensiAspects);
 
@@ -324,12 +339,14 @@ class MasterDataSeeder extends Seeder
             'order' => 2,
         ]);
 
-        // Potensi aspects: Advanced intelligence, basic personality, social skills
+        // Potensi aspects: 5 aspects - Professional with technical focus (Total: 100%)
         $potensiAspects = [
-            ['library_key' => 'kecerdasan_advanced', 'weight' => 40],
-            ['library_key' => 'sikap_kerja', 'weight' => 30],
-            ['library_key' => 'hubungan_sosial', 'weight' => 30],
-        ];
+            ['library_key' => 'kecerdasan_advanced', 'weight' => 30],   // 30%
+            ['library_key' => 'cara_kerja', 'weight' => 25],            // 25%
+            ['library_key' => 'potensi_kerja', 'weight' => 15],         // 15%
+            ['library_key' => 'hubungan_sosial', 'weight' => 20],       // 20%
+            ['library_key' => 'kepribadian_basic', 'weight' => 10],     // 10%
+        ];                                                               // TOTAL = 100%
 
         $this->seedPotensiAspects($template->id, $potensiCategory->id, $potensiAspects);
 
@@ -371,13 +388,14 @@ class MasterDataSeeder extends Seeder
             'order' => 2,
         ]);
 
-        // Potensi aspects: Balanced approach
+        // Potensi aspects: 5 aspects - Balanced government standard (Total: 100%)
         $potensiAspects = [
-            ['library_key' => 'kecerdasan_basic', 'weight' => 30],
-            ['library_key' => 'sikap_kerja', 'weight' => 20],
-            ['library_key' => 'hubungan_sosial', 'weight' => 20],
-            ['library_key' => 'kepribadian_basic', 'weight' => 30],
-        ];
+            ['library_key' => 'kecerdasan_basic', 'weight' => 20],      // 20%
+            ['library_key' => 'cara_kerja', 'weight' => 25],            // 25%
+            ['library_key' => 'potensi_kerja', 'weight' => 20],         // 20%
+            ['library_key' => 'hubungan_sosial', 'weight' => 20],       // 20%
+            ['library_key' => 'kepribadian_basic', 'weight' => 15],     // 15%
+        ];                                                               // TOTAL = 100%
 
         $this->seedPotensiAspects($template->id, $potensiCategory->id, $potensiAspects);
 
