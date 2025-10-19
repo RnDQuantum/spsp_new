@@ -21,9 +21,7 @@ use Illuminate\Support\Facades\DB;
 
 class DynamicAssessmentSeeder extends Seeder
 {
-    public function __construct(
-        private readonly AssessmentCalculationService $assessmentService
-    ) {}
+    public function __construct(private readonly AssessmentCalculationService $assessmentService) {}
 
     /**
      * KONFIGURASI SEEDER DINAMIS
@@ -45,28 +43,19 @@ class DynamicAssessmentSeeder extends Seeder
                     'end_date' => '2025-12-31',
                     'status' => 'completed',
                 ],
-                'batches' => [
-                    ['code' => 'BATCH-1-MOJOKERTO', 'name' => 'Gelombang 1 - Mojokerto', 'location' => 'Mojokerto', 'batch_number' => 1, 'start_date' => '2025-09-27', 'end_date' => '2025-09-28'],
-                    ['code' => 'BATCH-2-SURABAYA', 'name' => 'Gelombang 2 - Surabaya', 'location' => 'Surabaya', 'batch_number' => 2, 'start_date' => '2025-10-15', 'end_date' => '2025-10-16'],
-                    ['code' => 'BATCH-3-JAKARTA', 'name' => 'Gelombang 3 - Jakarta', 'location' => 'Jakarta', 'batch_number' => 3, 'start_date' => '2025-11-05', 'end_date' => '2025-11-06'],
-                ],
-                'positions' => [
-                    ['code' => 'fisikawan_medis', 'name' => 'Fisikawan Medis', 'quota' => 20, 'template_code' => 'professional_standard_v1'],
-                    ['code' => 'analis_kebijakan', 'name' => 'Analis Kebijakan', 'quota' => 30, 'template_code' => 'staff_standard_v1'],
-                    ['code' => 'auditor', 'name' => 'Auditor', 'quota' => 25, 'template_code' => 'supervisor_standard_v1'],
-                    ['code' => 'pranata_komputer', 'name' => 'Pranata Komputer', 'quota' => 25, 'template_code' => 'staff_standard_v1'],
-                ],
+                'batches' => [['code' => 'BATCH-1-MOJOKERTO', 'name' => 'Gelombang 1 - Mojokerto', 'location' => 'Mojokerto', 'batch_number' => 1, 'start_date' => '2025-09-27', 'end_date' => '2025-09-28'], ['code' => 'BATCH-2-SURABAYA', 'name' => 'Gelombang 2 - Surabaya', 'location' => 'Surabaya', 'batch_number' => 2, 'start_date' => '2025-10-15', 'end_date' => '2025-10-16'], ['code' => 'BATCH-3-JAKARTA', 'name' => 'Gelombang 3 - Jakarta', 'location' => 'Jakarta', 'batch_number' => 3, 'start_date' => '2025-11-05', 'end_date' => '2025-11-06']],
+                'positions' => [['code' => 'fisikawan_medis', 'name' => 'Fisikawan Medis', 'quota' => 20, 'template_code' => 'professional_standard_v1'], ['code' => 'analis_kebijakan', 'name' => 'Analis Kebijakan', 'quota' => 30, 'template_code' => 'staff_standard_v1'], ['code' => 'auditor', 'name' => 'Auditor', 'quota' => 25, 'template_code' => 'supervisor_standard_v1'], ['code' => 'pranata_komputer', 'name' => 'Pranata Komputer', 'quota' => 25, 'template_code' => 'staff_standard_v1']],
                 'participants_count' => 100, // JUMLAH PESERTA
                 'performance_distribution' => [
-                    'high' => 25,      // 25% high performers (exceed standard)
-                    'medium' => 60,    // 60% medium performers (around standard)
-                    'low' => 15,       // 15% low performers (below standard)
+                    'high' => 25, // 25% high performers (exceed standard)
+                    'medium' => 60, // 60% medium performers (around standard)
+                    'low' => 15, // 15% low performers (below standard)
                 ],
             ],
 
-            // Configuration 2: Uncomment untuk tambah event kedua
+            // Configuration 2: Kementerian Kesehatan - 200 participants
             // [
-            //     'institution_code' => 'kementerian_kesehatan',
+            //     'institution_code' => 'kemenkes',
             //     'event' => [
             //         'code' => 'P3K-KEMENKES-2025',
             //         'name' => 'Seleksi P3K Kementerian Kesehatan 2025',
@@ -76,20 +65,13 @@ class DynamicAssessmentSeeder extends Seeder
             //         'end_date' => '2025-12-31',
             //         'status' => 'ongoing',
             //     ],
-            //     'batches' => [
-            //         ['code' => 'BATCH-1-BANDUNG', 'name' => 'Gelombang 1 - Bandung', 'location' => 'Bandung', 'batch_number' => 1, 'start_date' => '2025-10-10', 'end_date' => '2025-10-11'],
-            //         ['code' => 'BATCH-2-YOGYAKARTA', 'name' => 'Gelombang 2 - Yogyakarta', 'location' => 'Yogyakarta', 'batch_number' => 2, 'start_date' => '2025-11-10', 'end_date' => '2025-11-11'],
-            //     ],
-            //     'positions' => [
-            //         ['code' => 'dokter_umum', 'name' => 'Dokter Umum', 'quota' => 50],
-            //         ['code' => 'perawat', 'name' => 'Perawat', 'quota' => 100],
-            //         ['code' => 'apoteker', 'name' => 'Apoteker', 'quota' => 50],
-            //     ],
-            //     'participants_count' => 200,
+            //     'batches' => [['code' => 'BATCH-1-BANDUNG', 'name' => 'Gelombang 1 - Bandung', 'location' => 'Bandung', 'batch_number' => 1, 'start_date' => '2025-10-10', 'end_date' => '2025-10-11'], ['code' => 'BATCH-2-YOGYAKARTA', 'name' => 'Gelombang 2 - Yogyakarta', 'location' => 'Yogyakarta', 'batch_number' => 2, 'start_date' => '2025-11-10', 'end_date' => '2025-11-11']],
+            //     'positions' => [['code' => 'dokter_umum', 'name' => 'Dokter Umum', 'quota' => 50, 'template_code' => 'professional_standard_v1'], ['code' => 'perawat', 'name' => 'Perawat', 'quota' => 100, 'template_code' => 'staff_standard_v1'], ['code' => 'apoteker', 'name' => 'Apoteker', 'quota' => 50, 'template_code' => 'professional_standard_v1']],
+            //     'participants_count' => 200, // JUMLAH PESERTA
             //     'performance_distribution' => [
-            //         'high' => 25,
-            //         'medium' => 60,
-            //         'low' => 15,
+            //         'high' => 25, // 25% high performers (exceed standard)
+            //         'medium' => 60, // 60% medium performers (around standard)
+            //         'low' => 15, // 15% low performers (below standard)
             //     ],
             // ],
         ];
@@ -137,7 +119,7 @@ class DynamicAssessmentSeeder extends Seeder
                     ...$batchData,
                 ]);
             }
-            $this->info("  📦 Batches created: ".count($batches));
+            $this->info('  📦 Batches created: ' . count($batches));
 
             // 4. Create positions with their templates
             $positions = [];
@@ -156,7 +138,7 @@ class DynamicAssessmentSeeder extends Seeder
                 $position->load('template');
                 $positions[] = $position;
             }
-            $this->info("  💼 Positions created: ".count($positions));
+            $this->info('  💼 Positions created: ' . count($positions));
 
             // 5. Generate participants with calculated assessments
             $this->info("  👥 Creating {$config['participants_count']} participants...");
@@ -173,38 +155,24 @@ class DynamicAssessmentSeeder extends Seeder
                 $position = fake()->randomElement($positions);
 
                 // Create participant
-                $participant = Participant::factory()
-                    ->forEvent($event)
-                    ->forBatch($batch)
-                    ->forPosition($position)
-                    ->create();
+                $participant = Participant::factory()->forEvent($event)->forBatch($batch)->forPosition($position)->create();
 
                 // Get template from position (not from event!)
                 $template = $position->template;
 
                 // Get category types from position's template
-                $potensiCategory = CategoryType::where('template_id', $template->id)
-                    ->where('code', 'potensi')
-                    ->firstOrFail();
+                $potensiCategory = CategoryType::where('template_id', $template->id)->where('code', 'potensi')->firstOrFail();
 
-                $kompetensiCategory = CategoryType::where('template_id', $template->id)
-                    ->where('code', 'kompetensi')
-                    ->firstOrFail();
+                $kompetensiCategory = CategoryType::where('template_id', $template->id)->where('code', 'kompetensi')->firstOrFail();
 
                 // Generate assessment data (RAW DATA like API)
-                $assessmentsData = $this->generateAssessmentsData(
-                    $template,
-                    $potensiCategory,
-                    $kompetensiCategory,
-                    $performanceLevel
-                );
+                $assessmentsData = $this->generateAssessmentsData($template, $potensiCategory, $kompetensiCategory, $performanceLevel);
 
                 // Calculate assessments using SERVICE
                 $this->assessmentService->calculateParticipant($participant, $assessmentsData);
 
                 // Create psychological test
-                $psychTestFactory = PsychologicalTest::factory()
-                    ->forParticipant($participant);
+                $psychTestFactory = PsychologicalTest::factory()->forParticipant($participant);
 
                 match ($performanceLevel) {
                     'high' => $psychTestFactory->highPerformance()->create(),
@@ -213,17 +181,9 @@ class DynamicAssessmentSeeder extends Seeder
                 };
 
                 // Create interpretations
-                Interpretation::factory()
-                    ->forParticipant($participant)
-                    ->forCategoryType($potensiCategory)
-                    ->potensi($performanceLevel)
-                    ->create();
+                Interpretation::factory()->forParticipant($participant)->forCategoryType($potensiCategory)->potensi($performanceLevel)->create();
 
-                Interpretation::factory()
-                    ->forParticipant($participant)
-                    ->forCategoryType($kompetensiCategory)
-                    ->kompetensi($performanceLevel)
-                    ->create();
+                Interpretation::factory()->forParticipant($participant)->forCategoryType($kompetensiCategory)->kompetensi($performanceLevel)->create();
 
                 $progressBar->advance();
             }
@@ -236,17 +196,13 @@ class DynamicAssessmentSeeder extends Seeder
     /**
      * Generate assessments data (RAW DATA like from API)
      */
-    private function generateAssessmentsData(
-        AssessmentTemplate $template,
-        CategoryType $potensiCategory,
-        CategoryType $kompetensiCategory,
-        string $performanceLevel
-    ): array {
+    private function generateAssessmentsData(AssessmentTemplate $template, CategoryType $potensiCategory, CategoryType $kompetensiCategory, string $performanceLevel): array
+    {
         // Base performance multiplier range by level
         [$minMultiplier, $maxMultiplier] = match ($performanceLevel) {
-            'high' => [1.05, 1.25],    // Exceed standard significantly
-            'medium' => [0.85, 1.10],  // Around standard (more variation)
-            'low' => [0.65, 0.85],     // Below standard
+            'high' => [1.05, 1.25], // Exceed standard significantly
+            'medium' => [0.85, 1.1], // Around standard (more variation)
+            'low' => [0.65, 0.85], // Below standard
         };
 
         $assessmentsData = [
@@ -255,10 +211,7 @@ class DynamicAssessmentSeeder extends Seeder
         ];
 
         // POTENSI: Generate sub-aspect ratings (API sends INTEGER 1-5)
-        $potensiAspects = Aspect::where('category_type_id', $potensiCategory->id)
-            ->with('subAspects')
-            ->orderBy('order')
-            ->get();
+        $potensiAspects = Aspect::where('category_type_id', $potensiCategory->id)->with('subAspects')->orderBy('order')->get();
 
         foreach ($potensiAspects as $aspect) {
             $subAspectsData = [];
@@ -268,7 +221,7 @@ class DynamicAssessmentSeeder extends Seeder
                 $variance = fake()->randomFloat(2, -0.3, 0.3);
                 $performanceMultiplier = fake()->randomFloat(2, $minMultiplier, $maxMultiplier);
 
-                $baseRating = ($subAspect->standard_rating * $performanceMultiplier) + $variance;
+                $baseRating = $subAspect->standard_rating * $performanceMultiplier + $variance;
                 $individualRating = (int) max(1, min(5, round($baseRating)));
 
                 $subAspectsData[] = [
@@ -284,16 +237,14 @@ class DynamicAssessmentSeeder extends Seeder
         }
 
         // KOMPETENSI: Generate aspect ratings (API sends INTEGER 1-5)
-        $kompetensiAspects = Aspect::where('category_type_id', $kompetensiCategory->id)
-            ->orderBy('order')
-            ->get();
+        $kompetensiAspects = Aspect::where('category_type_id', $kompetensiCategory->id)->orderBy('order')->get();
 
         foreach ($kompetensiAspects as $aspect) {
             // Add random variation per aspect (±0.3 variance)
             $variance = fake()->randomFloat(2, -0.3, 0.3);
             $performanceMultiplier = fake()->randomFloat(2, $minMultiplier, $maxMultiplier);
 
-            $baseRating = ($aspect->standard_rating * $performanceMultiplier) + $variance;
+            $baseRating = $aspect->standard_rating * $performanceMultiplier + $variance;
             $individualRating = (int) max(1, min(5, round($baseRating)));
 
             $assessmentsData['kompetensi'][] = [
