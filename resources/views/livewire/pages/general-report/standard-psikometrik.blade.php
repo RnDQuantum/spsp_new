@@ -3,7 +3,7 @@
 
         {{-- Filter Section --}}
         <div class="mb-6 bg-gray-50 p-4 rounded-lg border border-gray-300">
-            <div class="flex items-center gap-4">
+            <div class="flex items-center gap-4 mb-3">
                 <label class="text-sm font-semibold text-gray-700 min-w-[120px]">
                     Pilih Event:
                 </label>
@@ -13,6 +13,23 @@
                     @endforeach
                 </select>
             </div>
+
+            {{-- Position Filter --}}
+            @if (count($availablePositions) > 0)
+                <div class="flex items-center gap-4">
+                    <label class="text-sm font-semibold text-gray-700 min-w-[120px]">
+                        Pilih Jabatan:
+                    </label>
+                    <select wire:model.live="positionCode"
+                        class="flex-1 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        @foreach ($availablePositions as $pos)
+                            <option value="{{ $pos['code'] }}">
+                                {{ $pos['name'] }} ({{ $pos['template_name'] }})
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+            @endif
 
             {{-- Template Info (Display Only) --}}
             @if($selectedTemplate)

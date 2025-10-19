@@ -15,8 +15,14 @@ class StandardPsikometrik extends Component
     #[Url(as: 'event')]
     public ?string $eventCode = null;
 
+    #[Url(as: 'position')]
+    public ?string $positionCode = null;
+
     /** @var array<int, array{code:string,name:string,institution:string}> */
     public array $availableEvents = [];
+
+    /** @var array<int, array{code:string,name:string,template_name:string}> */
+    public array $availablePositions = [];
 
     public ?AssessmentEvent $selectedEvent = null;
 
@@ -52,10 +58,37 @@ class StandardPsikometrik extends Component
             $this->eventCode = $this->availableEvents[0]['code'] ?? null;
         }
 
+        $this->loadAvailablePositions();
+
+        if (! $this->positionCode && count($this->availablePositions) > 0) {
+            $this->positionCode = $this->availablePositions[0]['code'] ?? null;
+        }
+
         $this->loadStandardData();
     }
 
     public function updatedEventCode(): void
+    {
+        // Reset position when event changes
+        $this->positionCode = null;
+        $this->loadAvailablePositions();
+
+        if (! $this->positionCode && count($this->availablePositions) > 0) {
+            $this->positionCode = $this->availablePositions[0]['code'] ?? null;
+        }
+
+        $this->loadStandardData();
+
+        // Dispatch event to update charts
+        $this->dispatch('chartDataUpdated', [
+            'labels' => $this->chartData['labels'],
+            'ratings' => $this->chartData['ratings'],
+            'scores' => $this->chartData['scores'],
+            'templateName' => $this->selectedTemplate?->name ?? 'Standard',
+        ]);
+    }
+
+    public function updatedPositionCode(): void
     {
         $this->loadStandardData();
 
@@ -82,6 +115,34 @@ class StandardPsikometrik extends Component
             ->all();
     }
 
+    private function loadAvailablePositions(): void
+    {
+        $this->availablePositions = [];
+
+        if (! $this->eventCode) {
+            return;
+        }
+
+        $event = AssessmentEvent::query()
+            ->where('code', $this->eventCode)
+            ->first();
+
+        if (! $event) {
+            return;
+        }
+
+        $this->availablePositions = $event->positionFormations()
+            ->with('template')
+            ->orderBy('name')
+            ->get()
+            ->map(fn ($p) => [
+                'code' => $p->code,
+                'name' => $p->name,
+                'template_name' => $p->template?->name ?? 'No Template',
+            ])
+            ->all();
+    }
+
     private function loadStandardData(): void
     {
         $this->categoryData = [];
@@ -97,7 +158,7 @@ class StandardPsikometrik extends Component
             'scores' => [],
         ];
 
-        if (! $this->eventCode) {
+        if (! $this->eventCode || ! $this->positionCode) {
             return;
         }
 
@@ -110,22 +171,23 @@ class StandardPsikometrik extends Component
             return;
         }
 
-        // Get all unique template IDs used by positions in this event
-        $templateIds = $this->selectedEvent->positionFormations->pluck('template_id')->unique()->all();
+        // Get the selected position formation
+        $selectedPosition = $this->selectedEvent->positionFormations
+            ->where('code', $this->positionCode)
+            ->first();
 
-        if (empty($templateIds)) {
+        if (! $selectedPosition) {
             return;
         }
 
-        // For now, use the first template (or you can aggregate from all templates)
-        $this->selectedTemplate = $this->selectedEvent->positionFormations->first()?->template;
+        // Get template from the selected position
+        $this->selectedTemplate = $selectedPosition->template;
 
         if (! $this->selectedTemplate) {
             return;
         }
 
-        // Load ONLY Potensi category type with aspects and sub-aspects
-        // Note: If event has multiple templates, this will only show the first template's data
+        // Load ONLY Potensi category type with aspects and sub-aspects from selected position's template
         $categories = CategoryType::query()
             ->where('template_id', $this->selectedTemplate->id)
             ->where('code', 'potensi')
