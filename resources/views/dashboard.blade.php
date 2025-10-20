@@ -98,7 +98,12 @@
                                 }
                             },
                             pointLabels: {
-                                display: false
+                                color: textColor,
+                                font: {
+                                    size: 15,
+                                    weight: 'bold',
+                                    family: 'Arial'
+                                }
                             },
                             grid: {
                                 color: gridColor,
@@ -123,6 +128,9 @@
                                 },
                                 padding: 15
                             }
+                        },
+                        tooltip: {
+                            enabled: true
                         }
                     },
                     responsive: true,
@@ -169,7 +177,12 @@
                                 }
                             },
                             pointLabels: {
-                                display: false
+                                color: textColor,
+                                font: {
+                                    size: 15,
+                                    weight: 'bold',
+                                    family: 'Arial'
+                                }
                             },
                             grid: {
                                 color: gridColor,
@@ -194,6 +207,9 @@
                                 },
                                 padding: 15
                             }
+                        },
+                        tooltip: {
+                            enabled: true
                         }
                     },
                     responsive: true,
@@ -242,7 +258,12 @@
                                 }
                             },
                             pointLabels: {
-                                display: false
+                                color: textColor,
+                                font: {
+                                    size: 15,
+                                    weight: 'bold',
+                                    family: 'Arial'
+                                }
                             },
                             grid: {
                                 color: gridColor,
@@ -267,6 +288,9 @@
                                 },
                                 padding: 15
                             }
+                        },
+                        tooltip: {
+                            enabled: true
                         }
                     },
                     responsive: true,
