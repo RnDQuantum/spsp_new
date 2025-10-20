@@ -81,9 +81,6 @@
 
 <script>
     (function() {
-        if (window.__statisticChartSetup) return;
-        window.__statisticChartSetup = true;
-
         let chartInstances = {};
 
         function coerceNumbers(arr) {
@@ -270,9 +267,27 @@
             }
         }
 
+        // Initialize chart on page load
         waitForLivewire(function() {
             initialRenderFromServer();
             Livewire.on('chartDataUpdated', onDistributionUpdated);
+        });
+
+        // Handle Livewire navigate events
+        document.addEventListener('livewire:navigated', function() {
+            // Re-render chart after navigation
+            waitForLivewire(function() {
+                initialRenderFromServer();
+            });
+        });
+
+        // Cleanup chart on navigate away
+        document.addEventListener('livewire:navigating', function() {
+            const chartId = `{{ $chartId }}`;
+            if (chartInstances[chartId]) {
+                chartInstances[chartId].destroy();
+                delete chartInstances[chartId];
+            }
         });
     })();
 </script>

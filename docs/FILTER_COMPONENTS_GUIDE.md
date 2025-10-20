@@ -476,7 +476,7 @@ function refreshChart() {
 ### ✅ BENAR: Check data sebelum create chart
 
 ```javascript
-// CORRECT - Check dulu sebelum create
+// CORRECT - Check dulu sebelum create chart
 function refreshChart() {
     const labels = @js($chartLabels);
     const data = @js($chartData);
@@ -517,6 +517,76 @@ function refreshChart() {
 ### Problem: Error "foreach() argument must be of type array|object, null given"
 
 **Solution**: Tambahkan check `@if ($data && $data->count() > 0)` sebelum foreach
+
+### Problem: Chart tidak muncul setelah wire:navigate (navigasi antar halaman)
+
+**Symptom**: Chart muncul saat pertama load, tapi tidak muncul saat kembali ke halaman via `wire:navigate`
+
+**Root Cause**: Script JavaScript hanya dijalankan sekali dan tidak re-execute saat navigasi dengan `wire:navigate`
+
+**Solution**: Tambahkan Livewire navigate event listeners untuk cleanup dan re-initialization
+
+```javascript
+<script>
+(function() {
+    let chartInstances = {};
+
+    function renderChart(chartId, labels, data, colors) {
+        const canvas = document.getElementById(`myChart-${chartId}`);
+        if (!canvas) return;
+
+        // Destroy existing chart if exists
+        if (chartInstances[chartId]) {
+            chartInstances[chartId].destroy();
+            chartInstances[chartId] = null;
+        }
+
+        // Create new chart
+        chartInstances[chartId] = new Chart(canvas, {
+            // ... chart config
+        });
+    }
+
+    function initialRenderFromServer() {
+        const labels = @js($chartLabels);
+        const data = @js($chartData);
+
+        if (labels.length > 0 && data.length > 0) {
+            renderChart(`{{ $chartId }}`, labels, data);
+        }
+    }
+
+    // ✅ Initialize chart on page load
+    waitForLivewire(function() {
+        initialRenderFromServer();
+    });
+
+    // ✅ Handle Livewire navigate events (PENTING untuk wire:navigate!)
+    document.addEventListener('livewire:navigated', function() {
+        waitForLivewire(function() {
+            initialRenderFromServer();
+        });
+    });
+
+    // ✅ Cleanup chart on navigate away (prevent memory leaks)
+    document.addEventListener('livewire:navigating', function() {
+        const chartId = `{{ $chartId }}`;
+        if (chartInstances[chartId]) {
+            chartInstances[chartId].destroy();
+            delete chartInstances[chartId];
+        }
+    });
+})();
+</script>
+```
+
+**Key Points**:
+- ✅ `livewire:navigated` - Dipanggil **setelah** navigasi selesai, gunakan untuk re-render chart
+- ✅ `livewire:navigating` - Dipanggil **sebelum** navigasi, gunakan untuk cleanup/destroy chart
+- ✅ Jangan gunakan `window.__myChartSetup` flag yang mencegah re-initialization
+- ✅ Store chart instances dalam object untuk bisa di-destroy saat cleanup
+
+**Reference**: Lihat implementasi di `statistic.blade.php` untuk contoh lengkap
 
 ---
 
