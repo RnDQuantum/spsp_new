@@ -19,6 +19,12 @@ class Statistic extends Component
     /** @var array<int, array{code:string,name:string}> */
     public array $availableEvents = [];
 
+    #[Url(as: 'position')]
+    public ?int $positionFormationId = null;
+
+    /** @var array<int, array{id:int,name:string}> */
+    public array $availablePositions = [];
+
     #[Url(as: 'aspect')]
     public $aspectId = null; // cast to int internally
 
@@ -47,6 +53,9 @@ class Statistic extends Component
             $this->eventCode = $this->availableEvents[0]['code'] ?? null;
         }
 
+        // Load positions for initial event
+        $this->loadAvailablePositions();
+
         $this->loadAspects();
 
         if (! $this->aspectId && isset($this->availableAspects[0]['id'])) {
@@ -59,6 +68,11 @@ class Statistic extends Component
     public function updatedEventCode(): void
     {
         $previousAspectId = (int) $this->aspectId;
+
+        // Reset position selection when event changes
+        $this->positionFormationId = null;
+        $this->loadAvailablePositions();
+
         $this->loadAspects();
 
         // Preserve aspect if still available for the new event/template; otherwise choose first
@@ -80,6 +94,59 @@ class Statistic extends Component
         ]);
     }
 
+    public function updatedPositionFormationId(): void
+    {
+        $previousAspectId = (int) $this->aspectId;
+
+        $this->loadAspects();
+
+        // Preserve aspect if still available for the new position/template; otherwise choose first
+        $availableIds = collect($this->availableAspects)->pluck('id')->all();
+        if (! in_array($previousAspectId, $availableIds, true)) {
+            $this->aspectId = isset($this->availableAspects[0]['id']) ? (int) $this->availableAspects[0]['id'] : null;
+        } else {
+            $this->aspectId = $previousAspectId;
+        }
+
+        $this->refreshStatistics();
+        $this->dispatch('chartDataUpdated', [
+            'chartId' => $this->chartId,
+            'labels' => ['I', 'II', 'III', 'IV', 'V'],
+            'data' => array_values($this->distribution),
+            'standardRating' => $this->standardRating,
+            'averageRating' => $this->averageRating,
+            'aspectName' => $this->getCurrentAspectName(),
+        ]);
+    }
+
+    private function loadAvailablePositions(): void
+    {
+        if (! $this->eventCode) {
+            $this->availablePositions = [];
+            $this->positionFormationId = null;
+
+            return;
+        }
+
+        $event = AssessmentEvent::where('code', $this->eventCode)->first();
+
+        if (! $event) {
+            $this->availablePositions = [];
+            $this->positionFormationId = null;
+
+            return;
+        }
+
+        $this->availablePositions = $event->positionFormations()
+            ->orderBy('name')
+            ->get(['id', 'name'])
+            ->map(fn ($p) => ['id' => $p->id, 'name' => $p->name])
+            ->all();
+
+        // Auto-select first position if available
+        $this->positionFormationId = $this->availablePositions[0]['id'] ?? null;
+    }
+
     public function updatedAspectId(): void
     {
         $this->aspectId = (int) $this->aspectId;
@@ -98,7 +165,7 @@ class Statistic extends Component
     {
         $this->availableAspects = [];
 
-        if (! $this->eventCode) {
+        if (! $this->eventCode || ! $this->positionFormationId) {
             return;
         }
 
@@ -107,27 +174,26 @@ class Statistic extends Component
             return;
         }
 
-        // Get all unique template IDs used by positions in this event
-        $templateIds = $event->positionFormations()
-            ->distinct()
-            ->pluck('template_id')
-            ->all();
+        // Get selected position with template
+        $position = $event->positionFormations()
+            ->with('template')
+            ->find($this->positionFormationId);
 
-        if (empty($templateIds)) {
+        if (! $position || ! $position->template) {
             return;
         }
 
-        // Get category types from all templates used in this event
+        // Get category types from selected position's template
         $categoryTypes = CategoryType::query()
-            ->whereIn('template_id', $templateIds)
+            ->where('template_id', $position->template_id)
             ->get(['id', 'code']);
 
         $categoryIdToCode = $categoryTypes->pluck('code', 'id');
 
-        // Get aspects from all templates used in this event
+        // Get aspects from selected position's template
         $aspects = Aspect::query()
             ->join('category_types', 'aspects.category_type_id', '=', 'category_types.id')
-            ->whereIn('aspects.template_id', $templateIds)
+            ->where('aspects.template_id', $position->template_id)
             ->orderByRaw("CASE WHEN LOWER(category_types.code) = 'potensi' THEN 0 ELSE 1 END")
             ->orderBy('aspects.order')
             ->get(['aspects.id', 'aspects.name', 'aspects.category_type_id']);
@@ -147,7 +213,7 @@ class Statistic extends Component
         $this->standardRating = 0.0;
         $this->averageRating = 0.0;
 
-        if (! $this->eventCode || ! $this->aspectId) {
+        if (! $this->eventCode || ! $this->positionFormationId || ! $this->aspectId) {
             return;
         }
 
@@ -162,9 +228,10 @@ class Statistic extends Component
         $aspect = Aspect::query()->where('id', $aspectId)->first();
         $this->standardRating = (float) ($aspect?->standard_rating ?? 0.0);
 
-        // Build distribution (bucket 1..5)
+        // Build distribution (bucket 1..5) - FILTER by position
         $rows = DB::table('aspect_assessments as aa')
             ->where('aa.event_id', $event->id)
+            ->where('aa.position_formation_id', $this->positionFormationId)
             ->where('aa.aspect_id', $aspectId)
             ->selectRaw('ROUND(aa.individual_rating) as bucket, COUNT(*) as total')
             ->groupBy('bucket')
@@ -177,9 +244,10 @@ class Statistic extends Component
             }
         }
 
-        // Compute average aspect rating for this event/aspect
+        // Compute average aspect rating for this event/aspect/position
         $avg = DB::table('aspect_assessments as aa')
             ->where('aa.event_id', $event->id)
+            ->where('aa.position_formation_id', $this->positionFormationId)
             ->where('aa.aspect_id', $aspectId)
             ->avg('aa.individual_rating');
 
