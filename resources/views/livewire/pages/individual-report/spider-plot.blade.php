@@ -110,7 +110,7 @@
                                 label: '{{ $participant->name }}',
                                 data: @js($potensiIndividualRatings),
                                 fill: true,
-                                backgroundColor: '#abf707', // HIJAU SOLID
+                                backgroundColor: '#5db010', // HIJAU SOLID
                                 borderColor: '#8fd006',
                                 pointBackgroundColor: '#8fd006',
                                 pointBorderColor: '#fff',
@@ -146,7 +146,7 @@
                                 borderColor: '#b50505', // MERAH SOLID
                                 backgroundColor: '#b50505',
                                 borderWidth: 2,
-                                borderDash: [8, 4],
+                                // borderDash: [8, 4],,
                                 pointRadius: 3,
                                 pointBackgroundColor: '#9a0404',
                                 pointBorderColor: '#fff',
@@ -177,7 +177,7 @@
                                 label: 'Standard',
                                 data: @js($potensiOriginalStandardRatings),
                                 fill: true,
-                                backgroundColor: '#faea05', // KUNING SOLID
+                                backgroundColor: '#fafa05', // KUNING SOLID
                                 borderColor: '#e6d105',
                                 pointBackgroundColor: '#e6d105',
                                 pointBorderColor: '#fff',
@@ -268,7 +268,7 @@
                                 label: '{{ $participant->name }}',
                                 data: @js($kompetensiIndividualRatings),
                                 fill: true,
-                                backgroundColor: '#abf707', // HIJAU SOLID
+                                backgroundColor: '#5db010', // HIJAU SOLID
                                 borderColor: '#8fd006',
                                 pointBackgroundColor: '#8fd006',
                                 pointBorderColor: '#fff',
@@ -304,7 +304,7 @@
                                 borderColor: '#b50505', // MERAH SOLID
                                 backgroundColor: '#b50505',
                                 borderWidth: 2,
-                                borderDash: [8, 4],
+                                // borderDash: [8, 4],,
                                 pointRadius: 3,
                                 pointBackgroundColor: '#9a0404',
                                 pointBorderColor: '#fff',
@@ -335,7 +335,7 @@
                                 label: 'Standard',
                                 data: @js($kompetensiOriginalStandardRatings),
                                 fill: true,
-                                backgroundColor: '#faea05', // KUNING SOLID
+                                backgroundColor: '#fafa05', // KUNING SOLID
                                 borderColor: '#e6d105',
                                 pointBackgroundColor: '#e6d105',
                                 pointBorderColor: '#fff',
@@ -426,7 +426,7 @@
                                 label: '{{ $participant->name }}',
                                 data: @js($generalIndividualRatings),
                                 fill: true,
-                                backgroundColor: '#abf707', // HIJAU SOLID
+                                backgroundColor: '#5db010', // HIJAU SOLID
                                 borderColor: '#8fd006',
                                 pointBackgroundColor: '#8fd006',
                                 pointBorderColor: '#fff',
@@ -462,7 +462,7 @@
                                 borderColor: '#b50505', // MERAH SOLID
                                 backgroundColor: '#b50505',
                                 borderWidth: 2,
-                                borderDash: [8, 4],
+                                // borderDash: [8, 4],,
                                 pointRadius: 3,
                                 pointBackgroundColor: '#9a0404',
                                 pointBorderColor: '#fff',
@@ -493,7 +493,7 @@
                                 label: 'Standard',
                                 data: @js($generalOriginalStandardRatings),
                                 fill: true,
-                                backgroundColor: '#faea05', // KUNING SOLID
+                                backgroundColor: '#fafa05', // KUNING SOLID
                                 borderColor: '#e6d105',
                                 pointBackgroundColor: '#e6d105',
                                 pointBorderColor: '#fff',
@@ -584,11 +584,11 @@
                         if (chartData.potensi && window.potensiChart_{{ $potensiChartId }}) {
                             const chart = window.potensiChart_{{ $potensiChartId }};
                             chart.data.datasets[1].label =
-                            `Tolerance ${tolerancePercentage}%`; // TOLERANSI
+                                `Tolerance ${tolerancePercentage}%`; // TOLERANSI
                             chart.data.datasets[1].data = chartData.potensi
-                            .standardRatings; // TOLERANSI
+                                .standardRatings; // TOLERANSI
                             chart.data.datasets[2].data = chartData.potensi
-                            .originalStandardRatings; // STANDARD
+                                .originalStandardRatings; // STANDARD
                             chart.update('active');
                         }
 
@@ -596,11 +596,11 @@
                         if (chartData.kompetensi && window.kompetensiChart_{{ $kompetensiChartId }}) {
                             const chart = window.kompetensiChart_{{ $kompetensiChartId }};
                             chart.data.datasets[1].label =
-                            `Tolerance ${tolerancePercentage}%`; // TOLERANSI
+                                `Tolerance ${tolerancePercentage}%`; // TOLERANSI
                             chart.data.datasets[1].data = chartData.kompetensi
-                            .standardRatings; // TOLERANSI
+                                .standardRatings; // TOLERANSI
                             chart.data.datasets[2].data = chartData.kompetensi
-                            .originalStandardRatings; // STANDARD
+                                .originalStandardRatings; // STANDARD
                             chart.update('active');
                         }
 
@@ -608,11 +608,11 @@
                         if (chartData.general && window.generalChart_{{ $generalChartId }}) {
                             const chart = window.generalChart_{{ $generalChartId }};
                             chart.data.datasets[1].label =
-                            `Tolerance ${tolerancePercentage}%`; // TOLERANSI
+                                `Tolerance ${tolerancePercentage}%`; // TOLERANSI
                             chart.data.datasets[1].data = chartData.general
-                            .standardRatings; // TOLERANSI
+                                .standardRatings; // TOLERANSI
                             chart.data.datasets[2].data = chartData.general
-                            .originalStandardRatings; // STANDARD
+                                .originalStandardRatings; // STANDARD
                             chart.update('active');
                         }
                     });
