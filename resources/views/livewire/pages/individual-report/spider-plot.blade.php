@@ -121,7 +121,7 @@
                                 pointBorderWidth: 2,
                                 datalabels: {
                                     color: '#000000',
-                                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                                    backgroundColor: '#5db010',
                                     borderRadius: 4,
                                     padding: {
                                         top: 4,
@@ -134,7 +134,7 @@
                                         size: 10
                                     },
                                     anchor: 'end',
-                                    align: 'start',
+                                    align: 'end',
                                     offset: 6,
                                     formatter: (value) => value.toFixed(2)
                                 }
@@ -154,7 +154,7 @@
                                 fill: true,
                                 datalabels: {
                                     color: '#FFFFFF',
-                                    backgroundColor: 'rgba(181, 5, 5, 0.9)',
+                                    backgroundColor: '#b50505',
                                     borderRadius: 4,
                                     padding: {
                                         top: 4,
@@ -166,8 +166,8 @@
                                         weight: 'bold',
                                         size: 9
                                     },
-                                    anchor: 'center',
-                                    align: 'center',
+                                    anchor: 'end',
+                                    align: 'start',
                                     offset: 0,
                                     formatter: (value) => value.toFixed(2)
                                 }
@@ -188,7 +188,7 @@
                                 pointBorderWidth: 2,
                                 datalabels: {
                                     color: '#000000',
-                                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                                    backgroundColor: '#fafa05',
                                     borderRadius: 4,
                                     padding: {
                                         top: 4,
@@ -200,8 +200,8 @@
                                         weight: 'bold',
                                         size: 10
                                     },
-                                    anchor: 'end',
-                                    align: 'end',
+                                    anchor: 'center',
+                                    align: 'center',
                                     offset: 6,
                                     formatter: (value) => value.toFixed(2)
                                 }
@@ -279,7 +279,7 @@
                                 pointBorderWidth: 2,
                                 datalabels: {
                                     color: '#000000',
-                                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                                    backgroundColor: '#5db010',
                                     borderRadius: 4,
                                     padding: {
                                         top: 4,
@@ -292,7 +292,7 @@
                                         size: 10
                                     },
                                     anchor: 'end',
-                                    align: 'start',
+                                    align: 'end',
                                     offset: 6,
                                     formatter: (value) => value.toFixed(2)
                                 }
@@ -312,7 +312,7 @@
                                 fill: true,
                                 datalabels: {
                                     color: '#FFFFFF',
-                                    backgroundColor: 'rgba(181, 5, 5, 0.9)',
+                                    backgroundColor: '#b50505',
                                     borderRadius: 4,
                                     padding: {
                                         top: 4,
@@ -324,8 +324,8 @@
                                         weight: 'bold',
                                         size: 9
                                     },
-                                    anchor: 'center',
-                                    align: 'center',
+                                    anchor: 'end',
+                                    align: 'start',
                                     offset: 0,
                                     formatter: (value) => value.toFixed(2)
                                 }
@@ -346,7 +346,7 @@
                                 pointBorderWidth: 2,
                                 datalabels: {
                                     color: '#000000',
-                                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                                    backgroundColor: '#fafa05',
                                     borderRadius: 4,
                                     padding: {
                                         top: 4,
@@ -358,8 +358,8 @@
                                         weight: 'bold',
                                         size: 10
                                     },
-                                    anchor: 'end',
-                                    align: 'end',
+                                    anchor: 'center',
+                                    align: 'center',
                                     offset: 6,
                                     formatter: (value) => value.toFixed(2)
                                 }
@@ -437,7 +437,7 @@
                                 pointBorderWidth: 2,
                                 datalabels: {
                                     color: '#000000',
-                                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                                    backgroundColor: '#5db010',
                                     borderRadius: 4,
                                     padding: {
                                         top: 4,
@@ -450,7 +450,7 @@
                                         size: 10
                                     },
                                     anchor: 'end',
-                                    align: 'start',
+                                    align: 'end',
                                     offset: 6,
                                     formatter: (value) => value.toFixed(2)
                                 }
@@ -470,7 +470,7 @@
                                 fill: true,
                                 datalabels: {
                                     color: '#FFFFFF',
-                                    backgroundColor: 'rgba(181, 5, 5, 0.9)',
+                                    backgroundColor: '#b50505',
                                     borderRadius: 4,
                                     padding: {
                                         top: 4,
@@ -482,8 +482,8 @@
                                         weight: 'bold',
                                         size: 9
                                     },
-                                    anchor: 'center',
-                                    align: 'center',
+                                    anchor: 'end',
+                                    align: 'start',
                                     offset: 0,
                                     formatter: (value) => value.toFixed(2)
                                 }
@@ -504,7 +504,7 @@
                                 pointBorderWidth: 2,
                                 datalabels: {
                                     color: '#000000',
-                                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                                    backgroundColor: '#fafa05',
                                     borderRadius: 4,
                                     padding: {
                                         top: 4,
@@ -516,8 +516,8 @@
                                         weight: 'bold',
                                         size: 10
                                     },
-                                    anchor: 'end',
-                                    align: 'end',
+                                    anchor: 'center',
+                                    align: 'center',
                                     offset: 6,
                                     formatter: (value) => value.toFixed(2)
                                 }
