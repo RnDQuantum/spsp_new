@@ -6,14 +6,12 @@
             </h1>
             <div class="flex justify-center items-center gap-4 mt-3 px-6">
                 <div class="w-full max-w-md">
-                    <x-mary-choices-offline wire:model.live="eventCode" :options="$availableEvents" option-value="code"
-                        option-label="name" placeholder="Cari event..." single searchable />
+                    @livewire('components.event-selector', ['showLabel' => false])
                 </div>
             </div>
             <div class="flex justify-center items-center gap-4 mt-3 px-6">
                 <div class="w-full max-w-md">
-                    <x-mary-choices-offline wire:model.live="positionFormationId" :options="$availablePositions"
-                        option-value="id" option-label="name" placeholder="Pilih jabatan..." single searchable />
+                    @livewire('components.position-selector', ['showLabel' => false])
                 </div>
             </div>
         </div>
@@ -59,32 +57,40 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($rankings as $row)
+                    @if ($rankings && $rankings->count() > 0)
+                        @foreach ($rankings as $row)
+                            <tr>
+                                <td class="border-2 border-black px-3 py-2 text-center">{{ $row['rank'] }}</td>
+                                <td class="border-2 border-black px-3 py-2 text-center">{{ $row['nip'] }}</td>
+                                <td class="border-2 border-black px-3 py-2">{{ $row['name'] }}</td>
+                                <td class="border-2 border-black px-3 py-2">{{ $row['position'] }}</td>
+                                <td class="border-2 border-black px-3 py-2 text-center">
+                                    {{ number_format($row['standard_rating'], 2) }}</td>
+                                <td class="border-2 border-black px-3 py-2 text-center">
+                                    {{ number_format($row['standard_score'], 2) }}</td>
+                                <td class="border-2 border-black px-3 py-2 text-center">
+                                    {{ number_format($row['individual_rating'], 2) }}</td>
+                                <td class="border-2 border-black px-3 py-2 text-center">
+                                    {{ number_format($row['individual_score'], 2) }}</td>
+                                <td class="border-2 border-black px-3 py-2 text-center">
+                                    {{ number_format($row['gap_rating'], 2) }}</td>
+                                <td class="border-2 border-black px-3 py-2 text-center">
+                                    {{ number_format($row['gap_score'], 2) }}</td>
+                                <td class="border-2 border-black px-3 py-2 text-center">
+                                    {{ number_format($row['percentage_score'], 2) }}%</td>
+                                <td class="border-2 border-black px-3 py-2 text-center">{{ $row['conclusion'] }}</td>
+                            </tr>
+                        @endforeach
+                    @else
                         <tr>
-                            <td class="border-2 border-black px-3 py-2 text-center">{{ $row['rank'] }}</td>
-                            <td class="border-2 border-black px-3 py-2 text-center">{{ $row['nip'] }}</td>
-                            <td class="border-2 border-black px-3 py-2">{{ $row['name'] }}</td>
-                            <td class="border-2 border-black px-3 py-2">{{ $row['position'] }}</td>
-                            <td class="border-2 border-black px-3 py-2 text-center">
-                                {{ number_format($row['standard_rating'], 2) }}</td>
-                            <td class="border-2 border-black px-3 py-2 text-center">
-                                {{ number_format($row['standard_score'], 2) }}</td>
-                            <td class="border-2 border-black px-3 py-2 text-center">
-                                {{ number_format($row['individual_rating'], 2) }}</td>
-                            <td class="border-2 border-black px-3 py-2 text-center">
-                                {{ number_format($row['individual_score'], 2) }}</td>
-                            <td class="border-2 border-black px-3 py-2 text-center">
-                                {{ number_format($row['gap_rating'], 2) }}</td>
-                            <td class="border-2 border-black px-3 py-2 text-center">
-                                {{ number_format($row['gap_score'], 2) }}</td>
-                            <td class="border-2 border-black px-3 py-2 text-center">
-                                {{ number_format($row['percentage_score'], 2) }}%</td>
-                            <td class="border-2 border-black px-3 py-2 text-center">{{ $row['conclusion'] }}</td>
+                            <td colspan="12" class="border-2 border-black px-3 py-4 text-center text-gray-500">
+                                Tidak ada data untuk ditampilkan. Silakan pilih event dan jabatan.
+                            </td>
                         </tr>
-                    @endforeach
+                    @endif
                 </tbody>
             </table>
-            @if ($rankings && $rankings->hasPages())
+            @if ($rankings?->hasPages())
                 <div class="mt-4">
                     {{ $rankings->links(data: ['scrollTo' => false]) }}
                 </div>
@@ -214,7 +220,16 @@
 
         <!-- Pie Chart Section -->
         @if (!empty($conclusionSummary))
-            <div class="mt-8 border-t-2 border-black pt-6 bg-white">
+            <div class="mt-8 border-t-2 border-black pt-6 bg-white" x-data="{
+                refreshChart() {
+                    const labels = @js($chartLabels);
+                    const data = @js($chartData);
+                    const colors = @js($chartColors);
+                    if (labels.length > 0 && data.length > 0) {
+                        createConclusionChart(labels, data, colors);
+                    }
+                }
+            }" x-init="$nextTick(() => refreshChart())">
                 <div class="px-6 pb-6">
                     <h3 class="text-xl font-bold text-gray-900 mb-6 text-center">Capacity Building Psychology Mapping
                     </h3>
@@ -445,20 +460,15 @@
             conclusionPieChart = new Chart(canvas, config);
         }
 
+        // Listen for Livewire events to recreate chart
+        // This listener is set up once and will work for all updates
         document.addEventListener('DOMContentLoaded', function() {
-            // Initial data from Livewire
-            const chartLabels = @js($chartLabels);
-            const chartData = @js($chartData);
-            const chartColors = @js($chartColors);
-
-            // Create initial chart
-            createConclusionChart(chartLabels, chartData, chartColors);
-
-            // Listen for Livewire events to recreate chart
             Livewire.on('pieChartDataUpdated', function(data) {
                 let chartData = Array.isArray(data) && data.length > 0 ? data[0] : data;
 
-                if (chartData) {
+                // Only recreate chart if we have valid data (not empty)
+                if (chartData && chartData.labels && chartData.data &&
+                    chartData.labels.length > 0 && chartData.data.length > 0) {
                     // Recreate chart completely to avoid cropping issues
                     createConclusionChart(chartData.labels, chartData.data, chartData.colors);
                 }
