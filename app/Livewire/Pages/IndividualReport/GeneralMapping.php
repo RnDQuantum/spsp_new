@@ -169,6 +169,7 @@ class GeneralMapping extends Component
 
             return [
                 'name' => $assessment->aspect->name,
+                'order' => $assessment->aspect->order,
                 'weight_percentage' => $assessment->aspect->weight_percentage,
                 'original_standard_rating' => $originalStandardRating,
                 'original_standard_score' => $originalStandardScore,
