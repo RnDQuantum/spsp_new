@@ -183,9 +183,9 @@
                             class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
                             Standar Potential Mapping
                         </a>
-                        <a href="{{ route('tkmi') }}" role="menuitem"
+                        <a href="{{ route('general-report.mmpi') }}" role="menuitem"
                             class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
-                            Tes Kesehatan Mental Indonesia (TKMI)
+                            MMPI
                         </a>
                     </div>
                 </div>

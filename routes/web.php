@@ -64,6 +64,4 @@ Route::get('/cb-psy', function () {
 
 Route::get('/standard-psikometrik', App\Livewire\Pages\GeneralReport\StandardPsikometrik::class)->name('standard-psikometrik');
 
-Route::get('/tkmi', function () {
-    return view('livewire.pages.general-report.tkmi');
-})->name('tkmi');
+Route::get('/general-report/mmpi', App\Livewire\Pages\GeneralReport\MmpiResultsReport::class)->name('general-report.mmpi');
