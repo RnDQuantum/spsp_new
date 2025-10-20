@@ -92,15 +92,16 @@
         }
 
         // Function untuk update charts dengan tolerance
+        // Function untuk update charts dengan tolerance
         function updateChartsWithTolerance() {
             if (currentTolerance === 0) {
-                // Hanya dataset standar (kuning)
+                // Hanya dataset standar (kuning SOLID #faea05)
                 pentagonChart.data.datasets = [{
                     label: 'Rating',
                     data: originalData.pentagon,
                     fill: true,
-                    backgroundColor: 'rgb(250, 204, 21)',
-                    borderColor: 'rgb(234, 179, 8)',
+                    backgroundColor: '#faea05', // KUNING SOLID
+                    borderColor: '#e6d105',
                     borderWidth: 3,
                     pointRadius: 0,
                     pointHoverRadius: 0
@@ -110,8 +111,8 @@
                     label: 'Rating',
                     data: originalData.nonagon,
                     fill: true,
-                    backgroundColor: 'rgb(250, 204, 21)',
-                    borderColor: 'rgb(234, 179, 8)',
+                    backgroundColor: '#faea05', // KUNING SOLID
+                    borderColor: '#e6d105',
                     borderWidth: 3,
                     pointRadius: 0,
                     pointHoverRadius: 0
@@ -121,82 +122,82 @@
                     label: 'Rating',
                     data: originalData.tetradecagon,
                     fill: true,
-                    backgroundColor: 'rgb(250, 204, 21)',
-                    borderColor: 'rgb(234, 179, 8)',
+                    backgroundColor: '#faea05', // KUNING SOLID
+                    borderColor: '#e6d105',
                     borderWidth: 3,
                     pointRadius: 0,
                     pointHoverRadius: 0
                 }];
             } else {
-                // Tambahkan dataset toleransi (merah)
+                // Rating kuning SOLID + Toleransi merah solid (layered)
                 const toleranceDataPentagon = calculateToleranceData(originalData.pentagon, currentTolerance);
                 const toleranceDataNonagon = calculateToleranceData(originalData.nonagon, currentTolerance);
                 const toleranceDataTetradecagon = calculateToleranceData(originalData.tetradecagon, currentTolerance);
 
+                // **PENTAGON**: Rating kuning solid di atas, toleransi merah di bawah
                 pentagonChart.data.datasets = [{
-                        label: 'Rating',
-                        data: originalData.pentagon,
-                        fill: true,
-                        backgroundColor: 'rgba(250, 204, 21, 0.4)',
-                        borderColor: 'rgb(234, 179, 8)',
-                        borderWidth: 3,
-                        pointRadius: 0,
-                        pointHoverRadius: 0,
-                        datalabels: {
-                            display: false
-                        }
-                    },
-                    {
                         label: `Toleransi ${currentTolerance}%`,
                         data: toleranceDataPentagon,
                         fill: true,
-                        backgroundColor: 'rgb(220, 38, 38)',
-                        borderColor: 'rgb(185, 28, 28)',
-                        borderWidth: 3,
+                        backgroundColor: '#b50505', // MERAH SOLID (layer bawah)
+                        borderColor: '#9a0404',
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        pointHoverRadius: 0
+                    },
+                    {
+                        label: 'Rating',
+                        data: originalData.pentagon,
+                        fill: true,
+                        backgroundColor: '#faea05', // KUNING SOLID (layer atas)
+                        borderColor: '#e6d105',
+                        borderWidth: 4, // Border tebal untuk highlight
                         pointRadius: 0,
                         pointHoverRadius: 0
                     }
                 ];
 
+                // **NONAGON**: Rating kuning solid di atas, toleransi merah di bawah
                 nonagonChart.data.datasets = [{
-                        label: 'Rating',
-                        data: originalData.nonagon,
-                        fill: true,
-                        backgroundColor: 'rgb(250, 204, 21)',
-                        borderColor: 'rgb(234, 179, 8)',
-                        borderWidth: 3,
-                        pointRadius: 0,
-                        pointHoverRadius: 0
-                    },
-                    {
                         label: `Toleransi ${currentTolerance}%`,
                         data: toleranceDataNonagon,
                         fill: true,
-                        backgroundColor: 'rgb(220, 38, 38)',
-                        borderColor: 'rgb(185, 28, 28)',
-                        borderWidth: 3,
+                        backgroundColor: '#b50505', // MERAH SOLID (layer bawah)
+                        borderColor: '#9a0404',
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        pointHoverRadius: 0
+                    },
+                    {
+                        label: 'Rating',
+                        data: originalData.nonagon,
+                        fill: true,
+                        backgroundColor: '#faea05', // KUNING SOLID (layer atas)
+                        borderColor: '#e6d105',
+                        borderWidth: 4,
                         pointRadius: 0,
                         pointHoverRadius: 0
                     }
                 ];
 
+                // **TETRADECAGON**: Rating kuning solid di atas, toleransi merah di bawah
                 tetradecagonChart.data.datasets = [{
-                        label: 'Rating',
-                        data: originalData.tetradecagon,
+                        label: `Toleransi ${currentTolerance}%`,
+                        data: toleranceDataTetradecagon,
                         fill: true,
-                        backgroundColor: 'rgb(250, 204, 21)',
-                        borderColor: 'rgb(234, 179, 8)',
-                        borderWidth: 3,
+                        backgroundColor: '#b50505', // MERAH SOLID (layer bawah)
+                        borderColor: '#9a0404',
+                        borderWidth: 2,
                         pointRadius: 0,
                         pointHoverRadius: 0
                     },
                     {
-                        label: `Toleransi ${currentTolerance}%`,
-                        data: toleranceDataTetradecagon,
+                        label: 'Rating',
+                        data: originalData.tetradecagon,
                         fill: true,
-                        backgroundColor: 'rgb(220, 38, 38)',
-                        borderColor: 'rgb(185, 28, 28)',
-                        borderWidth: 3,
+                        backgroundColor: '#faea05', // KUNING SOLID (layer atas)
+                        borderColor: '#e6d105',
+                        borderWidth: 4,
                         pointRadius: 0,
                         pointHoverRadius: 0
                     }
@@ -207,7 +208,6 @@
             nonagonChart.update();
             tetradecagonChart.update();
         }
-
         // Function untuk update warna chart berdasarkan dark mode
         function updateChartsColor() {
             const isDarkMode = document.documentElement.classList.contains('dark');
@@ -245,8 +245,8 @@
                         label: 'Rating',
                         data: originalData.pentagon,
                         fill: true,
-                        backgroundColor: 'rgba(250, 204, 21, 0.4)',
-                        borderColor: 'rgb(234, 179, 8)',
+                        backgroundColor: '#faea05', // KUNING SOLID
+                        borderColor: '#e6d105',
                         borderWidth: 3,
                         pointRadius: 0,
                         pointHoverRadius: 0
@@ -317,14 +317,11 @@
                         label: 'Rating',
                         data: originalData.nonagon,
                         fill: true,
-                        backgroundColor: 'rgb(250, 204, 21)',
-                        borderColor: 'rgb(234, 179, 8)',
+                        backgroundColor: '#faea05', // KUNING SOLID
+                        borderColor: '#e6d105',
                         borderWidth: 3,
                         pointRadius: 0,
-                        pointHoverRadius: 0,
-                        datalabels: {
-                            display: false
-                        }
+                        pointHoverRadius: 0
                     }]
                 },
                 options: {
@@ -393,14 +390,11 @@
                         label: 'Rating',
                         data: originalData.tetradecagon,
                         fill: true,
-                        backgroundColor: 'rgb(250, 204, 21)',
-                        borderColor: 'rgb(234, 179, 8)',
+                        backgroundColor: '#faea05', // KUNING SOLID
+                        borderColor: '#e6d105',
                         borderWidth: 3,
                         pointRadius: 0,
-                        pointHoverRadius: 0,
-                        datalabels: {
-                            display: false
-                        }
+                        pointHoverRadius: 0
                     }]
                 },
                 options: {
