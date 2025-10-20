@@ -38,14 +38,14 @@
             <!-- Menu -->
             <nav class="space-y-2">
                 <!-- Dashboard -->
-                <a href="/dashboard" :class="minimized ? 'justify-center' : ''"
+                <a wire:navigate href="/dashboard" :class="minimized ? 'justify-center' : ''"
                     class="flex items-center px-4 py-3 text-white" title="Dashboard">
                     <i class="fa-solid fa-house mr-3"></i>
                     <span x-show="!minimized">Dashboard</span>
                 </a>
 
                 <!-- Shortlist Peserta -->
-                <a href="{{ route('shortlist') }}" :class="minimized ? 'justify-center' : ''"
+                <a wire:navigate href="{{ route('shortlist') }}" :class="minimized ? 'justify-center' : ''"
                     class="flex items-center px-4 py-3 text-white" title="Shortlist Peserta">
                     <i class="fa-solid fa-users mr-3"></i>
                     <span x-show="!minimized">Shortlist Peserta</span>
@@ -86,35 +86,35 @@
                             class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
                             General Matching
                         </a> --}}
-                        <a href="{{ route('shortlist') }}" role="menuitem"
+                        <a wire:navigate href="{{ route('shortlist') }}" role="menuitem"
                             class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
                             General Mapping
                         </a>
-                        <a href="{{ route('shortlist') }}" role="menuitem"
+                        <a wire:navigate href="{{ route('shortlist') }}" role="menuitem"
                             class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
                             General Potency Mapping
                         </a>
-                        <a href="{{ route('shortlist') }}" role="menuitem"
+                        <a wire:navigate href="{{ route('shortlist') }}" role="menuitem"
                             class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
                             General Psychology Mapping
                         </a>
-                        <a href="{{ route('shortlist') }}" role="menuitem"
+                        <a wire:navigate href="{{ route('shortlist') }}" role="menuitem"
                             class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
                             Managerial Potency Mapping
                         </a>
-                        <a href="{{ route('shortlist') }}" role="menuitem"
+                        <a wire:navigate href="{{ route('shortlist') }}" role="menuitem"
                             class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
                             Ringkasan Managerial Potency Mapping
                         </a>
-                        <a href="{{ route('shortlist') }}" role="menuitem"
+                        <a wire:navigate href="{{ route('shortlist') }}" role="menuitem"
                             class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
                             Gambaran Individu & Deskripsi Kompetensi
                         </a>
-                        <a href="{{ route('shortlist') }}" role="menuitem"
+                        <a wire:navigate href="{{ route('shortlist') }}" role="menuitem"
                             class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
                             Ringkasan Hasil Assessment Individu
                         </a>
-                        <a href="{{ route('shortlist') }}" role="menuitem"
+                        <a wire:navigate href="{{ route('shortlist') }}" role="menuitem"
                             class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
                             Hasil Emotional Quotient (EQ)
                         </a>
@@ -151,39 +151,39 @@
                     <!-- Sub Menu General Report -->
                     <div x-show="generalOpen" x-cloak id="submenu-general" class="ml-4 mt-2 space-y-1"
                         role="menu" aria-labelledby="btn-general">
-                        <a href="{{ route('ranking-psy-mapping') }}" role="menuitem"
+                        <a wire:navigate href="{{ route('ranking-psy-mapping') }}" role="menuitem"
                             class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
                             Ranking Psychology Mapping
                         </a>
-                        <a href="{{ route('ranking-mc-mapping') }}" role="menuitem"
+                        <a wire:navigate href="{{ route('ranking-mc-mapping') }}" role="menuitem"
                             class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
                             Ranking Managerial Competency Mapping
                         </a>
-                        <a href="{{ route('rekap-ranking-assessment') }}" role="menuitem"
+                        <a wire:navigate href="{{ route('rekap-ranking-assessment') }}" role="menuitem"
                             class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
                             Rekap Ranking Assessment
                         </a>
-                        <a href="{{ route('statistic') }}" role="menuitem"
+                        <a wire:navigate href="{{ route('statistic') }}" role="menuitem"
                             class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
                             Statistik
                         </a>
-                        <a href="{{ route('training-recommendation') }}" role="menuitem"
+                        <a wire:navigate href="{{ route('training-recommendation') }}" role="menuitem"
                             class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
                             Training Recommendation
                         </a>
-                        {{-- <a href="#" role="menuitem"
+                        {{-- <a wire:navigate href="#" role="menuitem"
                             class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
                             Ranking & Analytics
                         </a> --}}
-                        <a href="{{ route('standard-mc') }}" role="menuitem"
+                        <a wire:navigate href="{{ route('standard-mc') }}" role="menuitem"
                             class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
                             Standar Managerial Competency Mapping
                         </a>
-                        <a href="{{ route('standard-psikometrik') }}" role="menuitem"
+                        <a wire:navigate href="{{ route('standard-psikometrik') }}" role="menuitem"
                             class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
                             Standar Potential Mapping
                         </a>
-                        <a href="{{ route('general-report.mmpi') }}" role="menuitem"
+                        <a wire:navigate href="{{ route('general-report.mmpi') }}" role="menuitem"
                             class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
                             MMPI
                         </a>
