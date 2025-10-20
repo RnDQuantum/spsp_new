@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Interpretation extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'participant_id',
         'event_id',

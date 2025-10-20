@@ -8,6 +8,13 @@
             <p class="text-center text-sm font-semibold text-gray-700 mt-1">
                 {{ $participant->name }}
             </p>
+            <p class="text-center text-sm font-semibold text-gray-700 mt-1">
+                {{ $participant->event->name }}
+            </p>
+            <p class="text-center text-sm font-semibold text-gray-700 mt-1">
+                {{ $participant->positionFormation->name }} - {{ $participant->positionFormation->template->name }}
+            </p>
+
         </div>
 
         <!-- Tolerance Selector Component -->
@@ -51,14 +58,10 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($aspectsData as $index => $aspect)
+                    @foreach ($aspectsData as $aspect)
                         <tr>
                             <td class="border border-black px-3 py-2 text-center">
-                                @if ($index < 4)
-                                    {{ ['I', 'II', 'III', 'IV', 'V'][$index] }}
-                                @else
-                                    {{ ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX'][$index - 4] }}
-                                @endif
+                                {{ $aspect['order'] }}
                             </td>
                             <td class="border border-black px-3 py-2">{{ $aspect['name'] }}</td>
                             <td class="border border-black px-3 py-2 text-center">{{ $aspect['weight_percentage'] }}

@@ -4,10 +4,16 @@
         <h1 class="text-center text-2xl font-bold uppercase tracking-wide text-black">
             RANKING SKOR GENERAL COMPETENCY MAPPING
         </h1>
-        <div class="flex justify-center items-center gap-4 mt-3">
+        <div class="flex justify-center items-center gap-4 mt-3 px-6">
             <div class="w-full max-w-md">
                 <x-mary-choices-offline wire:model.live="eventCode" :options="$availableEvents" option-value="code"
                     option-label="name" placeholder="Cari event..." single searchable />
+            </div>
+        </div>
+        <div class="flex justify-center items-center gap-4 mt-3 px-6">
+            <div class="w-full max-w-md">
+                <x-mary-choices-offline wire:model.live="positionFormationId" :options="$availablePositions"
+                    option-value="id" option-label="name" placeholder="Pilih jabatan..." single searchable />
             </div>
         </div>
     </div>

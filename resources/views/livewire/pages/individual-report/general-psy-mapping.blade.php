@@ -8,6 +8,12 @@
             <p class="text-center text-sm font-semibold text-gray-700 mt-1">
                 {{ $participant->name }}
             </p>
+            <p class="text-center text-sm font-semibold text-gray-700 mt-1">
+                {{ $participant->event->name }}
+            </p>
+            <p class="text-center text-sm font-semibold text-gray-700 mt-1">
+                {{ $participant->positionFormation->name }} - {{ $participant->positionFormation->template->name }}
+            </p>
         </div>
 
         <!-- Tolerance Selector Component -->

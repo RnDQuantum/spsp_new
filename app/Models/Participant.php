@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 class Participant extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'event_id',
         'batch_id',

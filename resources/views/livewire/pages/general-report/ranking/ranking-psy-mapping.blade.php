@@ -10,6 +10,12 @@
                         option-label="name" placeholder="Cari event..." single searchable />
                 </div>
             </div>
+            <div class="flex justify-center items-center gap-4 mt-3 px-6">
+                <div class="w-full max-w-md">
+                    <x-mary-choices-offline wire:model.live="positionFormationId" :options="$availablePositions"
+                        option-value="id" option-label="name" placeholder="Pilih jabatan..." single searchable />
+                </div>
+            </div>
         </div>
 
         @php $summary = $this->getPassingSummary(); @endphp

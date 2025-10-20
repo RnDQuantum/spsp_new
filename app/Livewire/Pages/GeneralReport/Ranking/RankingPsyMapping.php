@@ -21,8 +21,13 @@ class RankingPsyMapping extends Component
 
     public ?string $eventCode = null;
 
+    public ?int $positionFormationId = null;
+
     /** @var array<int, array{code:string,name:string}> */
     public array $availableEvents = [];
+
+    /** @var array<int, array{id:int,name:string}> */
+    public array $availablePositions = [];
 
     public int $perPage = 10;
 
@@ -66,11 +71,40 @@ class RankingPsyMapping extends Component
 
         $this->eventCode = $this->availableEvents[0]['code'] ?? null;
 
+        // Load positions for initial event
+        $this->loadAvailablePositions();
+
         // Prepare chart data
         $this->prepareChartData();
     }
 
     public function updatedEventCode(): void
+    {
+        $this->resetPage();
+
+        // Reset position selection when event changes
+        $this->positionFormationId = null;
+        $this->loadAvailablePositions();
+
+        // Refresh chart data
+        $this->prepareChartData();
+
+        $summary = $this->getPassingSummary();
+        $this->dispatch('summary-updated', [
+            'passing' => $summary['passing'],
+            'total' => $summary['total'],
+            'percentage' => $summary['percentage'],
+        ]);
+
+        // Dispatch chart update event
+        $this->dispatch('pieChartDataUpdated', [
+            'labels' => $this->chartLabels,
+            'data' => $this->chartData,
+            'colors' => $this->chartColors,
+        ]);
+    }
+
+    public function updatedPositionFormationId(): void
     {
         $this->resetPage();
 
@@ -90,6 +124,34 @@ class RankingPsyMapping extends Component
             'data' => $this->chartData,
             'colors' => $this->chartColors,
         ]);
+    }
+
+    private function loadAvailablePositions(): void
+    {
+        if (! $this->eventCode) {
+            $this->availablePositions = [];
+            $this->positionFormationId = null;
+
+            return;
+        }
+
+        $event = AssessmentEvent::where('code', $this->eventCode)->first();
+
+        if (! $event) {
+            $this->availablePositions = [];
+            $this->positionFormationId = null;
+
+            return;
+        }
+
+        $this->availablePositions = $event->positionFormations()
+            ->orderBy('name')
+            ->get(['id', 'name'])
+            ->map(fn ($p) => ['id' => $p->id, 'name' => $p->name])
+            ->all();
+
+        // Auto-select first position if available
+        $this->positionFormationId = $this->availablePositions[0]['id'] ?? null;
     }
 
     public function handleToleranceUpdate(int $tolerance): void
@@ -116,12 +178,11 @@ class RankingPsyMapping extends Component
 
     private function buildRankings(): ?LengthAwarePaginator
     {
-        if (! $this->eventCode) {
+        if (! $this->eventCode || ! $this->positionFormationId) {
             return null;
         }
 
         $event = AssessmentEvent::query()
-            ->with('positionFormations.template')
             ->where('code', $this->eventCode)
             ->first();
 
@@ -129,14 +190,18 @@ class RankingPsyMapping extends Component
             return null;
         }
 
-        // Get all unique template IDs used by positions in this event
-        $templateIds = $event->positionFormations->pluck('template_id')->unique()->all();
-        if (empty($templateIds)) {
+        // Get selected position with template
+        $position = $event->positionFormations()
+            ->with('template')
+            ->find($this->positionFormationId);
+
+        if (! $position || ! $position->template) {
             return null;
         }
 
+        // Get Potensi category from selected position's template
         $potensiCategory = CategoryType::query()
-            ->whereIn('template_id', $templateIds)
+            ->where('template_id', $position->template_id)
             ->where('code', 'potensi')
             ->first();
 
@@ -154,10 +219,11 @@ class RankingPsyMapping extends Component
             return null;
         }
 
-        // Aggregate by participant in DB and paginate
+        // Aggregate by participant in DB and paginate - FILTER by position
         $query = AspectAssessment::query()
             ->selectRaw('participant_id, SUM(standard_rating) as sum_original_standard_rating, SUM(standard_score) as sum_original_standard_score, SUM(individual_rating) as sum_individual_rating, SUM(individual_score) as sum_individual_score')
             ->where('event_id', $event->id)
+            ->where('position_formation_id', $this->positionFormationId)
             ->whereIn('aspect_id', $potensiAspectIds)
             ->groupBy('participant_id')
             ->orderByDesc('sum_individual_score')
@@ -250,24 +316,28 @@ class RankingPsyMapping extends Component
 
     public function getPassingSummary(): array
     {
-        // Summary across all participants for current event (not only current page)
-        if (! $this->eventCode) {
+        // Summary across all participants for current event + position (not only current page)
+        if (! $this->eventCode || ! $this->positionFormationId) {
             return ['total' => 0, 'passing' => 0, 'percentage' => 0];
         }
 
-        $event = AssessmentEvent::with('positionFormations.template')->where('code', $this->eventCode)->first();
+        $event = AssessmentEvent::where('code', $this->eventCode)->first();
         if (! $event) {
             return ['total' => 0, 'passing' => 0, 'percentage' => 0];
         }
 
-        // Get all unique template IDs used by positions in this event
-        $templateIds = $event->positionFormations->pluck('template_id')->unique()->all();
-        if (empty($templateIds)) {
+        // Get selected position with template
+        $position = $event->positionFormations()
+            ->with('template')
+            ->find($this->positionFormationId);
+
+        if (! $position || ! $position->template) {
             return ['total' => 0, 'passing' => 0, 'percentage' => 0];
         }
 
+        // Get Potensi category from selected position's template
         $potensiCategory = CategoryType::query()
-            ->whereIn('template_id', $templateIds)
+            ->where('template_id', $position->template_id)
             ->where('code', 'potensi')
             ->first();
 
@@ -287,6 +357,7 @@ class RankingPsyMapping extends Component
         $aggregates = AspectAssessment::query()
             ->selectRaw('participant_id, SUM(standard_score) as sum_original_standard_score, SUM(individual_score) as sum_individual_score')
             ->where('event_id', $event->id)
+            ->where('position_formation_id', $this->positionFormationId)
             ->whereIn('aspect_id', $potensiAspectIds)
             ->groupBy('participant_id')
             ->get();
@@ -321,23 +392,27 @@ class RankingPsyMapping extends Component
 
     public function getStandardInfo(): ?array
     {
-        if (! $this->eventCode) {
+        if (! $this->eventCode || ! $this->positionFormationId) {
             return null;
         }
 
-        $event = AssessmentEvent::with('positionFormations.template')->where('code', $this->eventCode)->first();
+        $event = AssessmentEvent::where('code', $this->eventCode)->first();
         if (! $event) {
             return null;
         }
 
-        // Get all unique template IDs used by positions in this event
-        $templateIds = $event->positionFormations->pluck('template_id')->unique()->all();
-        if (empty($templateIds)) {
+        // Get selected position with template
+        $position = $event->positionFormations()
+            ->with('template')
+            ->find($this->positionFormationId);
+
+        if (! $position || ! $position->template) {
             return null;
         }
 
+        // Get Potensi category from selected position's template
         $potensiCategory = CategoryType::query()
-            ->whereIn('template_id', $templateIds)
+            ->where('template_id', $position->template_id)
             ->where('code', 'potensi')
             ->first();
 
@@ -354,10 +429,11 @@ class RankingPsyMapping extends Component
             return null;
         }
 
-        // Get standard scores (they should be same for all participants, but we take first one)
+        // Get standard scores (they should be same for all participants in this position, but we take first one)
         $firstParticipant = AspectAssessment::query()
             ->selectRaw('SUM(standard_score) as total_standard_score')
             ->where('event_id', $event->id)
+            ->where('position_formation_id', $this->positionFormationId)
             ->whereIn('aspect_id', $potensiAspectIds)
             ->groupBy('participant_id')
             ->first();
@@ -384,24 +460,28 @@ class RankingPsyMapping extends Component
 
     public function getConclusionSummary(): array
     {
-        // Get conclusion summary for all participants in current event
-        if (! $this->eventCode) {
+        // Get conclusion summary for all participants in current event + position
+        if (! $this->eventCode || ! $this->positionFormationId) {
             return [];
         }
 
-        $event = AssessmentEvent::with('positionFormations.template')->where('code', $this->eventCode)->first();
+        $event = AssessmentEvent::where('code', $this->eventCode)->first();
         if (! $event) {
             return [];
         }
 
-        // Get all unique template IDs used by positions in this event
-        $templateIds = $event->positionFormations->pluck('template_id')->unique()->all();
-        if (empty($templateIds)) {
+        // Get selected position with template
+        $position = $event->positionFormations()
+            ->with('template')
+            ->find($this->positionFormationId);
+
+        if (! $position || ! $position->template) {
             return [];
         }
 
+        // Get Potensi category from selected position's template
         $potensiCategory = CategoryType::query()
-            ->whereIn('template_id', $templateIds)
+            ->where('template_id', $position->template_id)
             ->where('code', 'potensi')
             ->first();
 
@@ -421,6 +501,7 @@ class RankingPsyMapping extends Component
         $aggregates = AspectAssessment::query()
             ->selectRaw('participant_id, SUM(standard_score) as sum_original_standard_score, SUM(individual_score) as sum_individual_score')
             ->where('event_id', $event->id)
+            ->where('position_formation_id', $this->positionFormationId)
             ->whereIn('aspect_id', $potensiAspectIds)
             ->groupBy('participant_id')
             ->get();

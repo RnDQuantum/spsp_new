@@ -14,7 +14,6 @@ use App\Models\Interpretation;
 use App\Models\Participant;
 use App\Models\PositionFormation;
 use App\Models\PsychologicalTest;
-use App\Models\SubAspect;
 use App\Services\Assessment\AssessmentCalculationService;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -119,7 +118,7 @@ class DynamicAssessmentSeeder extends Seeder
                     ...$batchData,
                 ]);
             }
-            $this->info('  📦 Batches created: ' . count($batches));
+            $this->info('  📦 Batches created: '.count($batches));
 
             // 4. Create positions with their templates
             $positions = [];
@@ -138,7 +137,7 @@ class DynamicAssessmentSeeder extends Seeder
                 $position->load('template');
                 $positions[] = $position;
             }
-            $this->info('  💼 Positions created: ' . count($positions));
+            $this->info('  💼 Positions created: '.count($positions));
 
             // 5. Generate participants with calculated assessments
             $this->info("  👥 Creating {$config['participants_count']} participants...");

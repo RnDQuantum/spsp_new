@@ -1,10 +1,15 @@
 <div class="max-w-6xl mx-auto mt-10 bg-white p-8 rounded shadow text-gray-900">
 
-    <!-- Dropdown Event & Aspek -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+    <!-- Dropdown Event, Position & Aspek -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
         <div>
             <x-mary-choices-offline label="Event" wire:model.live="eventCode" :options="$availableEvents" option-value="code"
                 option-label="name" placeholder="Cari event..." single searchable />
+        </div>
+
+        <div>
+            <x-mary-choices-offline label="Jabatan" wire:model.live="positionFormationId" :options="$availablePositions"
+                option-value="id" option-label="name" placeholder="Pilih jabatan..." single searchable />
         </div>
 
         <div>
@@ -27,7 +32,7 @@
             </x-mary-choices-offline>
         </div>
 
-        <div wire:loading wire:target="eventCode, aspectId" class="col-span-full text-center">
+        <div wire:loading wire:target="eventCode, positionFormationId, aspectId" class="col-span-full text-center">
             <svg class="inline w-5 h-5 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none"
                 viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
