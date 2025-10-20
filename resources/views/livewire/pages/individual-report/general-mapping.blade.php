@@ -9,10 +9,10 @@
                 {{ $participant->name }}
             </p>
             <p class="text-center text-sm font-semibold text-gray-700 mt-1">
-                {{ $participant->positionFormation->name }}
+                {{ $participant->event->name }}
             </p>
             <p class="text-center text-sm font-semibold text-gray-700 mt-1">
-                {{ $participant->positionFormation->template->name }}
+                {{ $participant->positionFormation->name }} - {{ $participant->positionFormation->template->name }}
             </p>
 
         </div>
