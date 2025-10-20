@@ -6,14 +6,12 @@
             </h1>
             <div class="flex justify-center items-center gap-4 mt-3 px-6">
                 <div class="w-full max-w-md">
-                    <x-mary-choices-offline wire:model.live="eventCode" :options="$availableEvents" option-value="code"
-                        option-label="name" placeholder="Cari event..." single searchable />
+                    @livewire('components.event-selector', ['showLabel' => false])
                 </div>
             </div>
             <div class="flex justify-center items-center gap-4 mt-3 px-6">
                 <div class="w-full max-w-md">
-                    <x-mary-choices-offline wire:model.live="positionFormationId" :options="$availablePositions"
-                        option-value="id" option-label="name" placeholder="Pilih jabatan..." single searchable />
+                    @livewire('components.position-selector', ['showLabel' => false])
                 </div>
             </div>
         </div>
@@ -59,29 +57,37 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($rankings as $row)
+                    @if ($rankings && $rankings->count() > 0)
+                        @foreach ($rankings as $row)
+                            <tr>
+                                <td class="border-2 border-black px-3 py-2 text-center">{{ $row['rank'] }}</td>
+                                <td class="border-2 border-black px-3 py-2 text-center">{{ $row['nip'] }}</td>
+                                <td class="border-2 border-black px-3 py-2">{{ $row['name'] }}</td>
+                                <td class="border-2 border-black px-3 py-2">{{ $row['position'] }}</td>
+                                <td class="border-2 border-black px-3 py-2 text-center">
+                                    {{ number_format($row['standard_rating'], 2) }}</td>
+                                <td class="border-2 border-black px-3 py-2 text-center">
+                                    {{ number_format($row['standard_score'], 2) }}</td>
+                                <td class="border-2 border-black px-3 py-2 text-center">
+                                    {{ number_format($row['individual_rating'], 2) }}</td>
+                                <td class="border-2 border-black px-3 py-2 text-center">
+                                    {{ number_format($row['individual_score'], 2) }}</td>
+                                <td class="border-2 border-black px-3 py-2 text-center">
+                                    {{ number_format($row['gap_rating'], 2) }}</td>
+                                <td class="border-2 border-black px-3 py-2 text-center">
+                                    {{ number_format($row['gap_score'], 2) }}</td>
+                                <td class="border-2 border-black px-3 py-2 text-center">
+                                    {{ number_format($row['percentage_score'], 2) }}%</td>
+                                <td class="border-2 border-black px-3 py-2 text-center">{{ $row['conclusion'] }}</td>
+                            </tr>
+                        @endforeach
+                    @else
                         <tr>
-                            <td class="border-2 border-black px-3 py-2 text-center">{{ $row['rank'] }}</td>
-                            <td class="border-2 border-black px-3 py-2 text-center">{{ $row['nip'] }}</td>
-                            <td class="border-2 border-black px-3 py-2">{{ $row['name'] }}</td>
-                            <td class="border-2 border-black px-3 py-2">{{ $row['position'] }}</td>
-                            <td class="border-2 border-black px-3 py-2 text-center">
-                                {{ number_format($row['standard_rating'], 2) }}</td>
-                            <td class="border-2 border-black px-3 py-2 text-center">
-                                {{ number_format($row['standard_score'], 2) }}</td>
-                            <td class="border-2 border-black px-3 py-2 text-center">
-                                {{ number_format($row['individual_rating'], 2) }}</td>
-                            <td class="border-2 border-black px-3 py-2 text-center">
-                                {{ number_format($row['individual_score'], 2) }}</td>
-                            <td class="border-2 border-black px-3 py-2 text-center">
-                                {{ number_format($row['gap_rating'], 2) }}</td>
-                            <td class="border-2 border-black px-3 py-2 text-center">
-                                {{ number_format($row['gap_score'], 2) }}</td>
-                            <td class="border-2 border-black px-3 py-2 text-center">
-                                {{ number_format($row['percentage_score'], 2) }}%</td>
-                            <td class="border-2 border-black px-3 py-2 text-center">{{ $row['conclusion'] }}</td>
+                            <td colspan="12" class="border-2 border-black px-3 py-4 text-center text-gray-500">
+                                Tidak ada data untuk ditampilkan. Silakan pilih event dan jabatan.
+                            </td>
                         </tr>
-                    @endforeach
+                    @endif
                 </tbody>
             </table>
             @if ($rankings && $rankings->hasPages())
