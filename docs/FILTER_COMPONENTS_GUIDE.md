@@ -31,7 +31,16 @@ Gunakan pattern ini ketika user meminta:
 **Event Dispatched**: `position-selected` dengan parameter `positionFormationId`
 **Event Listened**: `event-selected` (auto-reset ketika event berubah)
 
-### 3. ToleranceSelector
+### 3. AspectSelector
+**Path**: `app/Livewire/Components/AspectSelector.php`
+
+**Fungsi**: Dropdown untuk memilih Aspect (Aspek penilaian)
+**Session Key**: `filter.aspect_id` (int)
+**Event Dispatched**: `aspect-selected` dengan parameter `aspectId`
+**Event Listened**: `event-selected`, `position-selected` (auto-reset ketika event/position berubah)
+**Features**: Menampilkan badge kategori (Potensi/Kompetensi) dengan warna berbeda
+
+### 4. ToleranceSelector
 **Path**: `app/Livewire/Components/ToleranceSelector.php`
 
 **Fungsi**: Dropdown untuk memilih tolerance percentage (0%, 5%, 10%, 15%, 20%)
@@ -44,6 +53,7 @@ Gunakan pattern ini ketika user meminta:
 
 ### Step 1: Tambahkan Komponen di Blade View
 
+**Contoh A: Event + Position + Tolerance**
 ```blade
 <div class="border-b-4 border-black py-4 bg-white">
     <h1 class="text-center text-2xl font-bold uppercase tracking-wide text-black">
@@ -74,6 +84,26 @@ Gunakan pattern ini ketika user meminta:
 ])
 ```
 
+**Contoh B: Event + Position + Aspect (untuk Statistic page)**
+```blade
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+    <!-- Event Filter -->
+    <div>
+        @livewire('components.event-selector', ['showLabel' => true])
+    </div>
+
+    <!-- Position Filter -->
+    <div>
+        @livewire('components.position-selector', ['showLabel' => true])
+    </div>
+
+    <!-- Aspect Filter -->
+    <div>
+        @livewire('components.aspect-selector', ['showLabel' => true])
+    </div>
+</div>
+```
+
 ### Step 2: Setup Listeners di Component
 
 ```php
@@ -88,10 +118,18 @@ class YourComponent extends Component
 {
     use WithPagination;
 
+    // Untuk halaman dengan Event + Position + Tolerance
     protected $listeners = [
         'event-selected' => 'handleEventSelected',
         'position-selected' => 'handlePositionSelected',
         'tolerance-updated' => 'handleToleranceUpdate', // optional
+    ];
+
+    // Untuk halaman dengan Event + Position + Aspect (seperti Statistic)
+    protected $listeners = [
+        'event-selected' => 'handleEventSelected',
+        'position-selected' => 'handlePositionSelected',
+        'aspect-selected' => 'handleAspectSelected',
     ];
 
     public function handleEventSelected(?string $eventCode): void
@@ -108,6 +146,12 @@ class YourComponent extends Component
 
         // Refresh data di sini
         // Karena event dan position sudah keduanya valid
+    }
+
+    public function handleAspectSelected(?int $aspectId): void
+    {
+        // Refresh data dengan aspect yang baru dipilih
+        // Aspect auto-reset ketika position berubah
     }
 
     public function handleToleranceUpdate(int $tolerance): void
@@ -320,6 +364,43 @@ class YourComponent extends Component
 
 ---
 
+### ❌ SALAH: Menggunakan URL Query Parameters
+
+```php
+// WRONG - Tidak perlu lagi!
+use Livewire\Attributes\Url;
+
+class YourComponent extends Component
+{
+    #[Url(as: 'event')]
+    public ?string $eventCode = null;
+
+    #[Url(as: 'position')]
+    public ?int $positionFormationId = null;
+}
+```
+
+**Alasan**:
+- Filter sudah disimpan di session oleh filter components
+- URL query parameters membuat URL panjang dan tidak konsisten
+- Session lebih reliable untuk persistence antar halaman
+
+### ✅ BENAR: Tidak perlu URL attributes
+
+```php
+// CORRECT - Tidak perlu #[Url] attribute!
+class YourComponent extends Component
+{
+    // Filter disimpan di session, tidak perlu property
+    protected $listeners = [
+        'event-selected' => 'handleEventSelected',
+        'position-selected' => 'handlePositionSelected',
+    ];
+}
+```
+
+---
+
 ### ❌ SALAH: Update data di handleEventSelected
 
 ```php
@@ -443,15 +524,27 @@ function refreshChart() {
 
 **PENTING**: Gunakan file ini sebagai reference utama ketika implement halaman baru:
 
+### Reference A: Event + Position + Tolerance
 **Component**: `app/Livewire/Pages/GeneralReport/Ranking/RankingPsyMapping.php`
 **View**: `resources/views/livewire/pages/general-report/ranking/ranking-psy-mapping.blade.php`
 
 File ini sudah implement semua pattern dengan benar:
 - ✅ EventSelector + PositionSelector + ToleranceSelector
-- ✅ Chart dengan Alpine.js auto-refresh
+- ✅ Chart dengan Alpine.js auto-refresh + Livewire event listener
 - ✅ Empty state handling
 - ✅ Pagination
 - ✅ Session-based filter reading
+
+### Reference B: Event + Position + Aspect
+**Component**: `app/Livewire/Pages/GeneralReport/Statistic.php`
+**View**: `resources/views/livewire/pages/general-report/statistic.blade.php`
+
+File ini sudah implement pattern untuk aspect selector:
+- ✅ EventSelector + PositionSelector + AspectSelector
+- ✅ Chart dengan Livewire event listener
+- ✅ Aspect auto-reset ketika event/position berubah
+- ✅ Session-based filter reading
+- ✅ Badge kategori dengan warna berbeda (Potensi/Kompetensi)
 
 **COPY pattern dari file ini untuk consistency!**
 

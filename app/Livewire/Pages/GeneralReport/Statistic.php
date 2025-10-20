@@ -4,32 +4,14 @@ namespace App\Livewire\Pages\GeneralReport;
 
 use App\Models\Aspect;
 use App\Models\AssessmentEvent;
-use App\Models\CategoryType;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Layout;
-use Livewire\Attributes\Url;
 use Livewire\Component;
 
 #[Layout('components.layouts.app', ['title' => 'Kurva Distribusi Frekuensi'])]
 class Statistic extends Component
 {
-    #[Url(as: 'event')]
-    public ?string $eventCode = null;
-
-    /** @var array<int, array{code:string,name:string}> */
-    public array $availableEvents = [];
-
-    #[Url(as: 'position')]
-    public ?int $positionFormationId = null;
-
-    /** @var array<int, array{id:int,name:string}> */
-    public array $availablePositions = [];
-
-    #[Url(as: 'aspect')]
-    public $aspectId = null; // cast to int internally
-
-    /** @var array<int, array{id:int,name:string,category:string}> */
-    public array $availableAspects = [];
+    public ?int $aspectId = null;
 
     /** @var array<int,int> */
     public array $distribution = [1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0];
@@ -40,49 +22,35 @@ class Statistic extends Component
 
     public string $chartId = '';
 
+    protected $listeners = [
+        'event-selected' => 'handleEventSelected',
+        'position-selected' => 'handlePositionSelected',
+        'aspect-selected' => 'handleAspectSelected',
+    ];
+
     public function mount(): void
     {
         $this->chartId = 'statistic'.uniqid();
-        $this->availableEvents = AssessmentEvent::query()
-            ->orderByDesc('start_date')
-            ->get(['code', 'name'])
-            ->map(fn ($e) => ['code' => $e->code, 'name' => $e->name])
-            ->all();
 
-        if (! $this->eventCode) {
-            $this->eventCode = $this->availableEvents[0]['code'] ?? null;
-        }
-
-        // Load positions for initial event
-        $this->loadAvailablePositions();
-
-        $this->loadAspects();
-
-        if (! $this->aspectId && isset($this->availableAspects[0]['id'])) {
-            $this->aspectId = (int) $this->availableAspects[0]['id'];
-        }
+        // Load aspect from session if available
+        $this->aspectId = session('filter.aspect_id');
 
         $this->refreshStatistics();
     }
 
-    public function updatedEventCode(): void
+    public function handleEventSelected(?string $eventCode): void
     {
-        $previousAspectId = (int) $this->aspectId;
+        // Position will auto-reset, wait for position-selected event
+    }
 
-        // Reset position selection when event changes
-        $this->positionFormationId = null;
-        $this->loadAvailablePositions();
+    public function handlePositionSelected(?int $positionFormationId): void
+    {
+        // Aspect will auto-reset, wait for aspect-selected event
+    }
 
-        $this->loadAspects();
-
-        // Preserve aspect if still available for the new event/template; otherwise choose first
-        $availableIds = collect($this->availableAspects)->pluck('id')->all();
-        if (! in_array($previousAspectId, $availableIds, true)) {
-            $this->aspectId = isset($this->availableAspects[0]['id']) ? (int) $this->availableAspects[0]['id'] : null;
-        } else {
-            $this->aspectId = $previousAspectId;
-        }
-
+    public function handleAspectSelected(?int $aspectId): void
+    {
+        $this->aspectId = $aspectId;
         $this->refreshStatistics();
         $this->dispatch('chartDataUpdated', [
             'chartId' => $this->chartId,
@@ -92,119 +60,6 @@ class Statistic extends Component
             'averageRating' => $this->averageRating,
             'aspectName' => $this->getCurrentAspectName(),
         ]);
-    }
-
-    public function updatedPositionFormationId(): void
-    {
-        $previousAspectId = (int) $this->aspectId;
-
-        $this->loadAspects();
-
-        // Preserve aspect if still available for the new position/template; otherwise choose first
-        $availableIds = collect($this->availableAspects)->pluck('id')->all();
-        if (! in_array($previousAspectId, $availableIds, true)) {
-            $this->aspectId = isset($this->availableAspects[0]['id']) ? (int) $this->availableAspects[0]['id'] : null;
-        } else {
-            $this->aspectId = $previousAspectId;
-        }
-
-        $this->refreshStatistics();
-        $this->dispatch('chartDataUpdated', [
-            'chartId' => $this->chartId,
-            'labels' => ['I', 'II', 'III', 'IV', 'V'],
-            'data' => array_values($this->distribution),
-            'standardRating' => $this->standardRating,
-            'averageRating' => $this->averageRating,
-            'aspectName' => $this->getCurrentAspectName(),
-        ]);
-    }
-
-    private function loadAvailablePositions(): void
-    {
-        if (! $this->eventCode) {
-            $this->availablePositions = [];
-            $this->positionFormationId = null;
-
-            return;
-        }
-
-        $event = AssessmentEvent::where('code', $this->eventCode)->first();
-
-        if (! $event) {
-            $this->availablePositions = [];
-            $this->positionFormationId = null;
-
-            return;
-        }
-
-        $this->availablePositions = $event->positionFormations()
-            ->orderBy('name')
-            ->get(['id', 'name'])
-            ->map(fn ($p) => ['id' => $p->id, 'name' => $p->name])
-            ->all();
-
-        // Auto-select first position if available
-        $this->positionFormationId = $this->availablePositions[0]['id'] ?? null;
-    }
-
-    public function updatedAspectId(): void
-    {
-        $this->aspectId = (int) $this->aspectId;
-        $this->refreshStatistics();
-        $this->dispatch('chartDataUpdated', [
-            'chartId' => $this->chartId,
-            'labels' => ['I', 'II', 'III', 'IV', 'V'],
-            'data' => array_values($this->distribution),
-            'standardRating' => $this->standardRating,
-            'averageRating' => $this->averageRating,
-            'aspectName' => $this->getCurrentAspectName(),
-        ]);
-    }
-
-    private function loadAspects(): void
-    {
-        $this->availableAspects = [];
-
-        if (! $this->eventCode || ! $this->positionFormationId) {
-            return;
-        }
-
-        $event = AssessmentEvent::query()->where('code', $this->eventCode)->first();
-        if (! $event) {
-            return;
-        }
-
-        // Get selected position with template
-        $position = $event->positionFormations()
-            ->with('template')
-            ->find($this->positionFormationId);
-
-        if (! $position || ! $position->template) {
-            return;
-        }
-
-        // Get category types from selected position's template
-        $categoryTypes = CategoryType::query()
-            ->where('template_id', $position->template_id)
-            ->get(['id', 'code']);
-
-        $categoryIdToCode = $categoryTypes->pluck('code', 'id');
-
-        // Get aspects from selected position's template
-        $aspects = Aspect::query()
-            ->join('category_types', 'aspects.category_type_id', '=', 'category_types.id')
-            ->where('aspects.template_id', $position->template_id)
-            ->orderByRaw("CASE WHEN LOWER(category_types.code) = 'potensi' THEN 0 ELSE 1 END")
-            ->orderBy('aspects.order')
-            ->get(['aspects.id', 'aspects.name', 'aspects.category_type_id']);
-
-        $this->availableAspects = $aspects->map(function ($a) use ($categoryIdToCode) {
-            return [
-                'id' => (int) $a->id,
-                'name' => (string) $a->name,
-                'category' => (string) ($categoryIdToCode[$a->category_type_id] ?? ''),
-            ];
-        })->all();
     }
 
     private function refreshStatistics(): void
@@ -213,11 +68,14 @@ class Statistic extends Component
         $this->standardRating = 0.0;
         $this->averageRating = 0.0;
 
-        if (! $this->eventCode || ! $this->positionFormationId || ! $this->aspectId) {
+        $eventCode = session('filter.event_code');
+        $positionFormationId = session('filter.position_formation_id');
+
+        if (! $eventCode || ! $positionFormationId || ! $this->aspectId) {
             return;
         }
 
-        $event = AssessmentEvent::query()->where('code', $this->eventCode)->first();
+        $event = AssessmentEvent::query()->where('code', $eventCode)->first();
         if (! $event) {
             return;
         }
@@ -231,7 +89,7 @@ class Statistic extends Component
         // Build distribution (bucket 1..5) - FILTER by position
         $rows = DB::table('aspect_assessments as aa')
             ->where('aa.event_id', $event->id)
-            ->where('aa.position_formation_id', $this->positionFormationId)
+            ->where('aa.position_formation_id', $positionFormationId)
             ->where('aa.aspect_id', $aspectId)
             ->selectRaw('ROUND(aa.individual_rating) as bucket, COUNT(*) as total')
             ->groupBy('bucket')
@@ -247,7 +105,7 @@ class Statistic extends Component
         // Compute average aspect rating for this event/aspect/position
         $avg = DB::table('aspect_assessments as aa')
             ->where('aa.event_id', $event->id)
-            ->where('aa.position_formation_id', $this->positionFormationId)
+            ->where('aa.position_formation_id', $positionFormationId)
             ->where('aa.aspect_id', $aspectId)
             ->avg('aa.individual_rating');
 
@@ -256,20 +114,23 @@ class Statistic extends Component
 
     private function getCurrentAspectName(): string
     {
-        $current = collect($this->availableAspects)->firstWhere('id', (int) $this->aspectId);
+        if (! $this->aspectId) {
+            return '';
+        }
 
-        return $current['name'] ?? '';
+        $aspect = Aspect::query()->find((int) $this->aspectId);
+
+        return $aspect?->name ?? '';
     }
 
     public function render()
     {
         return view('livewire.pages.general-report.statistic', [
-            'availableEvents' => $this->availableEvents,
-            'availableAspects' => $this->availableAspects,
             'distribution' => $this->distribution,
             'standardRating' => $this->standardRating,
             'averageRating' => $this->averageRating,
             'chartId' => $this->chartId,
+            'aspectName' => $this->getCurrentAspectName(),
         ]);
     }
 }
