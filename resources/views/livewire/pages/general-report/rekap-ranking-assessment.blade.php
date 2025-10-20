@@ -4,16 +4,18 @@
             <h1 class="text-center text-2xl font-bold uppercase tracking-wide text-black">
                 RANKING REKAP SKOR PENILAIAN AKHIR ASSESSMENT
             </h1>
+
+            <!-- Event Filter -->
             <div class="flex justify-center items-center gap-4 mt-3 px-6">
                 <div class="w-full max-w-md">
-                    <x-mary-choices-offline wire:model.live="eventCode" :options="$availableEvents" option-value="code"
-                        option-label="name" placeholder="Cari event..." single searchable />
+                    @livewire('components.event-selector', ['showLabel' => false])
                 </div>
             </div>
+
+            <!-- Position Filter -->
             <div class="flex justify-center items-center gap-4 mt-3 px-6">
                 <div class="w-full max-w-md">
-                    <x-mary-choices-offline wire:model.live="positionFormationId" :options="$availablePositions"
-                        option-value="id" option-label="name" placeholder="Pilih jabatan..." single searchable />
+                    @livewire('components.position-selector', ['showLabel' => false])
                 </div>
             </div>
         </div>
@@ -229,9 +231,20 @@
                     <!-- Content Grid -->
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
                         <!-- Chart Section -->
-                        <div class="border border-gray-300 p-6 rounded-lg bg-gray-50 transition-shadow duration-300 hover:shadow-xl"
-                            wire:ignore>
-                            <canvas id="conclusionPieChart" class="w-full h-full"></canvas>
+                        <div x-data="{
+                            refreshChart() {
+                                const labels = @js($chartLabels);
+                                const data = @js($chartData);
+                                const colors = @js($chartColors);
+                                if (labels.length > 0 && data.length > 0) {
+                                    createConclusionChart(labels, data, colors);
+                                }
+                            }
+                        }" x-init="$nextTick(() => refreshChart())"
+                            class="border border-gray-300 p-6 rounded-lg bg-gray-50 transition-shadow duration-300 hover:shadow-xl">
+                            <div wire:ignore>
+                                <canvas id="conclusionPieChart" class="w-full h-full"></canvas>
+                            </div>
                         </div>
 
                         <!-- Table Section -->
@@ -456,20 +469,15 @@
             conclusionPieChart = new Chart(canvas, config);
         }
 
+        // Listen for Livewire events to recreate chart
+        // This listener is set up once and will work for all updates
         document.addEventListener('DOMContentLoaded', function() {
-            // Initial data from Livewire
-            const chartLabels = @js($chartLabels);
-            const chartData = @js($chartData);
-            const chartColors = @js($chartColors);
-
-            // Create initial chart
-            createConclusionChart(chartLabels, chartData, chartColors);
-
-            // Listen for Livewire events to recreate chart
             Livewire.on('pieChartDataUpdated', function(data) {
                 let chartData = Array.isArray(data) && data.length > 0 ? data[0] : data;
 
-                if (chartData) {
+                // Only recreate chart if we have valid data (not empty)
+                if (chartData && chartData.labels && chartData.data &&
+                    chartData.labels.length > 0 && chartData.data.length > 0) {
                     // Recreate chart completely to avoid cropping issues
                     createConclusionChart(chartData.labels, chartData.data, chartData.colors);
                 }

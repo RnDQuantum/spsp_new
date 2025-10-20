@@ -15,16 +15,6 @@ class RekapRankingAssessment extends Component
 {
     use WithPagination;
 
-    public ?string $eventCode = null;
-
-    public ?int $positionFormationId = null;
-
-    /** @var array<int, array{code:string,name:string}> */
-    public array $availableEvents = [];
-
-    /** @var array<int, array{id:int,name:string}> */
-    public array $availablePositions = [];
-
     public int $potensiWeight = 0;
 
     public int $kompetensiWeight = 0;
@@ -59,21 +49,15 @@ class RekapRankingAssessment extends Component
         ],
     ];
 
-    protected $listeners = ['tolerance-updated' => 'handleToleranceUpdate'];
+    protected $listeners = [
+        'event-selected' => 'handleEventSelected',
+        'position-selected' => 'handlePositionSelected',
+        'tolerance-updated' => 'handleToleranceUpdate',
+    ];
 
     public function mount(): void
     {
         $this->tolerancePercentage = session('individual_report.tolerance', 10);
-        $this->availableEvents = AssessmentEvent::query()
-            ->orderByDesc('start_date')
-            ->get(['code', 'name'])
-            ->map(fn ($e) => ['code' => $e->code, 'name' => $e->name])
-            ->all();
-
-        $this->eventCode = $this->availableEvents[0]['code'] ?? null;
-
-        // Load positions for initial event
-        $this->loadAvailablePositions();
 
         $this->loadWeights();
 
@@ -81,16 +65,20 @@ class RekapRankingAssessment extends Component
         $this->prepareChartData();
     }
 
-    public function updatedEventCode(): void
+    public function handleEventSelected(?string $eventCode): void
     {
-        // Reset position selection when event changes
-        $this->positionFormationId = null;
-        $this->loadAvailablePositions();
-
-        $this->loadWeights();
         $this->resetPage();
 
-        // Refresh chart data
+        // JANGAN refresh data di sini!
+        // Position akan auto-reset dan trigger handlePositionSelected
+    }
+
+    public function handlePositionSelected(?int $positionFormationId): void
+    {
+        $this->resetPage();
+
+        // Refresh data di sini
+        $this->loadWeights();
         $this->prepareChartData();
 
         $summary = $this->getPassingSummary();
@@ -106,66 +94,18 @@ class RekapRankingAssessment extends Component
             'data' => $this->chartData,
             'colors' => $this->chartColors,
         ]);
-    }
-
-    public function updatedPositionFormationId(): void
-    {
-        $this->loadWeights();
-        $this->resetPage();
-
-        // Refresh chart data
-        $this->prepareChartData();
-
-        $summary = $this->getPassingSummary();
-        $this->dispatch('summary-updated', [
-            'passing' => $summary['passing'],
-            'total' => $summary['total'],
-            'percentage' => $summary['percentage'],
-        ]);
-
-        // Dispatch chart update event
-        $this->dispatch('pieChartDataUpdated', [
-            'labels' => $this->chartLabels,
-            'data' => $this->chartData,
-            'colors' => $this->chartColors,
-        ]);
-    }
-
-    private function loadAvailablePositions(): void
-    {
-        if (! $this->eventCode) {
-            $this->availablePositions = [];
-            $this->positionFormationId = null;
-
-            return;
-        }
-
-        $event = AssessmentEvent::where('code', $this->eventCode)->first();
-
-        if (! $event) {
-            $this->availablePositions = [];
-            $this->positionFormationId = null;
-
-            return;
-        }
-
-        $this->availablePositions = $event->positionFormations()
-            ->orderBy('name')
-            ->get(['id', 'name'])
-            ->map(fn ($p) => ['id' => $p->id, 'name' => $p->name])
-            ->all();
-
-        // Auto-select first position if available
-        $this->positionFormationId = $this->availablePositions[0]['id'] ?? null;
     }
 
     private function getStandardInfo(): ?array
     {
-        if (! $this->eventCode || ! $this->positionFormationId || ($this->potensiWeight + $this->kompetensiWeight) === 0) {
+        $eventCode = session('filter.event_code');
+        $positionFormationId = session('filter.position_formation_id');
+
+        if (! $eventCode || ! $positionFormationId || ($this->potensiWeight + $this->kompetensiWeight) === 0) {
             return null;
         }
 
-        $event = AssessmentEvent::where('code', $this->eventCode)->first();
+        $event = AssessmentEvent::where('code', $eventCode)->first();
         if (! $event) {
             return null;
         }
@@ -173,7 +113,7 @@ class RekapRankingAssessment extends Component
         // Get selected position with template
         $position = $event->positionFormations()
             ->with('template')
-            ->find($this->positionFormationId);
+            ->find($positionFormationId);
 
         if (! $position || ! $position->template) {
             return null;
@@ -193,7 +133,7 @@ class RekapRankingAssessment extends Component
         $firstParticipant = DB::table('aspect_assessments as aa')
             ->join('aspects as a', 'a.id', '=', 'aa.aspect_id')
             ->where('aa.event_id', $event->id)
-            ->where('aa.position_formation_id', $this->positionFormationId)
+            ->where('aa.position_formation_id', $positionFormationId)
             ->groupBy('aa.participant_id')
             ->selectRaw('SUM(CASE WHEN a.category_type_id = ? THEN aa.standard_score ELSE 0 END) as potensi_standard_score', [$potensiId])
             ->selectRaw('SUM(CASE WHEN a.category_type_id = ? THEN aa.standard_score ELSE 0 END) as kompetensi_standard_score', [$kompetensiId])
@@ -254,12 +194,15 @@ class RekapRankingAssessment extends Component
         $this->potensiWeight = 0;
         $this->kompetensiWeight = 0;
 
-        if (! $this->eventCode || ! $this->positionFormationId) {
+        $eventCode = session('filter.event_code');
+        $positionFormationId = session('filter.position_formation_id');
+
+        if (! $eventCode || ! $positionFormationId) {
             return;
         }
 
         $event = AssessmentEvent::query()
-            ->where('code', $this->eventCode)
+            ->where('code', $eventCode)
             ->first();
 
         if (! $event) {
@@ -269,7 +212,7 @@ class RekapRankingAssessment extends Component
         // Get selected position with template
         $position = $event->positionFormations()
             ->with('template')
-            ->find($this->positionFormationId);
+            ->find($positionFormationId);
 
         if (! $position || ! $position->template) {
             return;
@@ -313,14 +256,17 @@ class RekapRankingAssessment extends Component
         $rows = null;
         $standardInfo = $this->getStandardInfo();
 
-        if ($this->eventCode && $this->positionFormationId && ($this->potensiWeight + $this->kompetensiWeight) > 0) {
-            $event = AssessmentEvent::where('code', $this->eventCode)->first();
+        $eventCode = session('filter.event_code');
+        $positionFormationId = session('filter.position_formation_id');
+
+        if ($eventCode && $positionFormationId && ($this->potensiWeight + $this->kompetensiWeight) > 0) {
+            $event = AssessmentEvent::where('code', $eventCode)->first();
 
             if ($event) {
                 // Get selected position with template
                 $position = $event->positionFormations()
                     ->with('template')
-                    ->find($this->positionFormationId);
+                    ->find($positionFormationId);
 
                 if ($position?->template) {
                     // Get categories from selected position's template
@@ -335,7 +281,7 @@ class RekapRankingAssessment extends Component
                         $baseQuery = DB::table('aspect_assessments as aa')
                             ->join('aspects as a', 'a.id', '=', 'aa.aspect_id')
                             ->where('aa.event_id', $event->id)
-                            ->where('aa.position_formation_id', $this->positionFormationId)
+                            ->where('aa.position_formation_id', $positionFormationId)
                             ->groupBy('aa.participant_id')
                             ->selectRaw('aa.participant_id as participant_id')
                             ->selectRaw('SUM(CASE WHEN a.category_type_id = ? THEN aa.individual_score ELSE 0 END) as potensi_individual_score', [$potensiId])
@@ -415,7 +361,6 @@ class RekapRankingAssessment extends Component
         $conclusionSummary = $this->getConclusionSummary();
 
         return view('livewire.pages.general-report.rekap-ranking-assessment', [
-            'availableEvents' => $this->availableEvents,
             'potensiWeight' => $this->potensiWeight,
             'kompetensiWeight' => $this->kompetensiWeight,
             'rows' => $rows,
@@ -426,11 +371,14 @@ class RekapRankingAssessment extends Component
 
     public function getPassingSummary(): array
     {
-        if (! $this->eventCode || ! $this->positionFormationId || ($this->potensiWeight + $this->kompetensiWeight) === 0) {
+        $eventCode = session('filter.event_code');
+        $positionFormationId = session('filter.position_formation_id');
+
+        if (! $eventCode || ! $positionFormationId || ($this->potensiWeight + $this->kompetensiWeight) === 0) {
             return ['total' => 0, 'passing' => 0, 'percentage' => 0];
         }
 
-        $event = AssessmentEvent::where('code', $this->eventCode)->first();
+        $event = AssessmentEvent::where('code', $eventCode)->first();
         if (! $event) {
             return ['total' => 0, 'passing' => 0, 'percentage' => 0];
         }
@@ -438,7 +386,7 @@ class RekapRankingAssessment extends Component
         // Get selected position with template
         $position = $event->positionFormations()
             ->with('template')
-            ->find($this->positionFormationId);
+            ->find($positionFormationId);
 
         if (! $position?->template) {
             return ['total' => 0, 'passing' => 0, 'percentage' => 0];
@@ -457,7 +405,7 @@ class RekapRankingAssessment extends Component
         $baseQuery = DB::table('aspect_assessments as aa')
             ->join('aspects as a', 'a.id', '=', 'aa.aspect_id')
             ->where('aa.event_id', $event->id)
-            ->where('aa.position_formation_id', $this->positionFormationId)
+            ->where('aa.position_formation_id', $positionFormationId)
             ->groupBy('aa.participant_id')
             ->selectRaw('aa.participant_id as participant_id')
             ->selectRaw('SUM(CASE WHEN a.category_type_id = ? THEN aa.individual_score ELSE 0 END) as potensi_individual_score', [$potensiId])
@@ -505,11 +453,14 @@ class RekapRankingAssessment extends Component
     public function getConclusionSummary(): array
     {
         // Get conclusion summary for all participants in current event + position
-        if (! $this->eventCode || ! $this->positionFormationId || ($this->potensiWeight + $this->kompetensiWeight) === 0) {
+        $eventCode = session('filter.event_code');
+        $positionFormationId = session('filter.position_formation_id');
+
+        if (! $eventCode || ! $positionFormationId || ($this->potensiWeight + $this->kompetensiWeight) === 0) {
             return [];
         }
 
-        $event = AssessmentEvent::where('code', $this->eventCode)->first();
+        $event = AssessmentEvent::where('code', $eventCode)->first();
         if (! $event) {
             return [];
         }
@@ -517,7 +468,7 @@ class RekapRankingAssessment extends Component
         // Get selected position with template
         $position = $event->positionFormations()
             ->with('template')
-            ->find($this->positionFormationId);
+            ->find($positionFormationId);
 
         if (! $position?->template) {
             return [];
@@ -536,7 +487,7 @@ class RekapRankingAssessment extends Component
         $baseQuery = DB::table('aspect_assessments as aa')
             ->join('aspects as a', 'a.id', '=', 'aa.aspect_id')
             ->where('aa.event_id', $event->id)
-            ->where('aa.position_formation_id', $this->positionFormationId)
+            ->where('aa.position_formation_id', $positionFormationId)
             ->groupBy('aa.participant_id')
             ->selectRaw('aa.participant_id as participant_id')
             ->selectRaw('SUM(CASE WHEN a.category_type_id = ? THEN aa.individual_score ELSE 0 END) as potensi_individual_score', [$potensiId])
