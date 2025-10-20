@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class PsychologicalTest extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'participant_id',
         'event_id',

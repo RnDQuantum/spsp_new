@@ -2,9 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
 use App\Models\Institution;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 
 class InstitutionSeeder extends Seeder
