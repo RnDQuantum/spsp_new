@@ -38,7 +38,7 @@
             <!-- Menu -->
             <nav class="space-y-2">
                 <!-- Dashboard -->
-                <a href="/" :class="minimized ? 'justify-center' : ''"
+                <a href="/dashboard" :class="minimized ? 'justify-center' : ''"
                     class="flex items-center px-4 py-3 text-white" title="Dashboard">
                     <i class="fa-solid fa-house mr-3"></i>
                     <span x-show="!minimized">Dashboard</span>
