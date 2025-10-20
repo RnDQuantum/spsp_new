@@ -134,18 +134,19 @@
                     <canvas id="spiderRatingChart-{{ $chartId }}"></canvas>
                 </div>
             </div>
+            <!-- Legend dengan warna konsisten -->
             <div class="flex justify-center text-sm gap-8 text-gray-900 mb-8">
                 <span class="flex items-center gap-2">
-                    <span class="inline-block w-10 border-b-2 border-black"></span>
-                    <span class="font-semibold">Standar</span>
+                    <span class="inline-block w-10" style="background-color: #fafa05; height: 4px;"></span>
+                    <span class="font-semibold">Standard</span>
                 </span>
                 <span class="flex items-center gap-2">
-                    <span class="inline-block w-10 border-b-2 border-red-600"></span>
-                    <span class="text-red-600 font-bold">{{ $participant->name }}</span>
+                    <span class="inline-block w-10" style="background-color: #5db010; height: 4px;"></span>
+                    <span class="font-semibold" style="color: #5db010;">{{ $participant->name }}</span>
                 </span>
                 <span class="flex items-center gap-2">
-                    <span class="inline-block w-10" style="border-bottom: 1px dashed #6B7280;"></span>
-                    <span x-data x-text="'Toleransi ' + $wire.tolerancePercentage + '%'"></span>
+                    <span class="inline-block w-10" style="background-color: #b50505; height: 4px;"></span>
+                    <span x-data x-text="'Tolerance ' + $wire.tolerancePercentage + '%'"></span>
                 </span>
             </div>
 
@@ -178,92 +179,110 @@
                                 data: {
                                     labels: chartLabels,
                                     datasets: [{
-                                        label: 'Standar',
-                                        data: originalStandardRatings,
-                                        borderColor: '#000000',
-                                        backgroundColor: 'rgba(0, 0, 0, 0.05)',
-                                        borderWidth: 2,
-                                        pointRadius: 3,
-                                        pointBackgroundColor: '#000000',
-                                        datalabels: {
-                                            color: '#FFFFFF',
-                                            backgroundColor: '#000000',
-                                            borderRadius: 4,
-                                            padding: {
-                                                top: 4,
-                                                bottom: 4,
-                                                left: 6,
-                                                right: 6
-                                            },
-                                            font: {
-                                                weight: 'bold',
-                                                size: 9
-                                            },
-                                            anchor: 'end',
-                                            align: 'end',
-                                            offset: 6,
-                                            formatter: (value) => value.toFixed(2)
+                                            // === LAYER 1: PESERTA (HIJAU #5db010) ===
+                                            label: participantName,
+                                            data: individualRatings,
+                                            fill: true,
+                                            backgroundColor: '#5db010',
+                                            borderColor: '#8fd006',
+                                            pointBackgroundColor: '#8fd006',
+                                            pointBorderColor: '#fff',
+                                            pointHoverBackgroundColor: '#fff',
+                                            pointHoverBorderColor: '#8fd006',
+                                            borderWidth: 2.5,
+                                            pointRadius: 4,
+                                            pointBorderWidth: 2,
+                                            datalabels: {
+                                                color: '#000000',
+                                                backgroundColor: '#5db010',
+                                                borderRadius: 4,
+                                                padding: {
+                                                    top: 4,
+                                                    bottom: 4,
+                                                    left: 6,
+                                                    right: 6
+                                                },
+                                                font: {
+                                                    weight: 'bold',
+                                                    size: 10
+                                                },
+                                                anchor: 'end',
+                                                align: 'end',
+                                                offset: 6,
+                                                formatter: (value) => value.toFixed(2)
+                                            }
+                                        },
+                                        {
+                                            // === LAYER 2: TOLERANSI (MERAH #b50505) ===
+                                            label: `Tolerance ${tolerancePercentage}%`,
+                                            data: standardRatings,
+                                            fill: true,
+                                            backgroundColor: '#b50505',
+                                            borderColor: '#b50505',
+                                            borderWidth: 2,
+                                            pointRadius: 3,
+                                            pointBackgroundColor: '#9a0404',
+                                            pointBorderColor: '#fff',
+                                            pointBorderWidth: 2,
+                                            datalabels: {
+                                                color: '#FFFFFF',
+                                                backgroundColor: '#b50505',
+                                                borderRadius: 4,
+                                                padding: {
+                                                    top: 4,
+                                                    bottom: 4,
+                                                    left: 6,
+                                                    right: 6
+                                                },
+                                                font: {
+                                                    weight: 'bold',
+                                                    size: 9
+                                                },
+                                                anchor: 'start',
+                                                align: 'start',
+                                                offset: 0,
+                                                formatter: (value) => value.toFixed(2)
+                                            }
+                                        },
+                                        {
+                                            // === LAYER 3: STANDARD (KUNING #fafa05) ===
+                                            label: 'Standard',
+                                            data: originalStandardRatings,
+                                            fill: true,
+                                            backgroundColor: '#fafa05',
+                                            borderColor: '#e6d105',
+                                            pointBackgroundColor: '#e6d105',
+                                            pointBorderColor: '#fff',
+                                            pointHoverBackgroundColor: '#fff',
+                                            pointHoverBorderColor: '#e6d105',
+                                            borderWidth: 2.5,
+                                            pointRadius: 4,
+                                            pointBorderWidth: 2,
+                                            datalabels: {
+                                                color: '#000000',
+                                                backgroundColor: '#fafa05',
+                                                borderRadius: 4,
+                                                padding: {
+                                                    top: 4,
+                                                    bottom: 4,
+                                                    left: 6,
+                                                    right: 6
+                                                },
+                                                font: {
+                                                    weight: 'bold',
+                                                    size: 10
+                                                },
+                                                anchor: 'center',
+                                                align: 'center',
+                                                offset: 6,
+                                                formatter: (value) => value.toFixed(2)
+                                            }
                                         }
-                                    }, {
-                                        label: `Toleransi ${tolerancePercentage}%`,
-                                        data: standardRatings,
-                                        borderColor: '#6B7280',
-                                        backgroundColor: 'transparent',
-                                        borderWidth: 1.5,
-                                        borderDash: [5, 5],
-                                        pointRadius: 2,
-                                        pointBackgroundColor: '#6B7280',
-                                        datalabels: {
-                                            color: '#FFFFFF',
-                                            backgroundColor: '#6B7280',
-                                            borderRadius: 4,
-                                            padding: {
-                                                top: 4,
-                                                bottom: 4,
-                                                left: 6,
-                                                right: 6
-                                            },
-                                            font: {
-                                                weight: 'bold',
-                                                size: 9
-                                            },
-                                            anchor: 'center',
-                                            align: 'center',
-                                            offset: 0,
-                                            formatter: (value) => value.toFixed(2)
-                                        }
-                                    }, {
-                                        label: participantName,
-                                        data: individualRatings,
-                                        borderColor: '#DC2626',
-                                        backgroundColor: 'rgba(220, 38, 38, 0.05)',
-                                        borderWidth: 2,
-                                        pointRadius: 3,
-                                        pointBackgroundColor: '#DC2626',
-                                        datalabels: {
-                                            color: '#FFFFFF',
-                                            backgroundColor: '#DC2626',
-                                            borderRadius: 4,
-                                            padding: {
-                                                top: 4,
-                                                bottom: 4,
-                                                left: 6,
-                                                right: 6
-                                            },
-                                            font: {
-                                                weight: 'bold',
-                                                size: 9
-                                            },
-                                            anchor: 'end',
-                                            align: 'start',
-                                            offset: 6,
-                                            formatter: (value) => value.toFixed(2)
-                                        }
-                                    }]
+                                    ]
                                 },
                                 options: {
                                     responsive: true,
-                                    maintainAspectRatio: true,
+                                    maintainAspectRatio: false,
                                     plugins: {
                                         legend: {
                                             display: false
@@ -325,14 +344,13 @@
                                     originalStandardRatings = chartData.originalStandardRatings;
                                     standardRatings = chartData.standardRatings;
 
-                                    // Update all three datasets
-                                    window.ratingChart_{{ $chartId }}.data.datasets[0].data = chartData
-                                        .originalStandardRatings;
+                                    // Update dengan urutan baru: [0=PESERTA, 1=TOLERANSI, 2=STANDARD]
                                     window.ratingChart_{{ $chartId }}.data.datasets[1].label =
-                                        `Toleransi ${tolerancePercentage}%`;
+                                        `Tolerance ${tolerancePercentage}%`;
                                     window.ratingChart_{{ $chartId }}.data.datasets[1].data = chartData
                                         .standardRatings;
-                                    // Dataset[2] (individual) doesn't change
+                                    window.ratingChart_{{ $chartId }}.data.datasets[2].data = chartData
+                                        .originalStandardRatings;
                                     window.ratingChart_{{ $chartId }}.update('active');
                                 }
                             });
@@ -353,18 +371,19 @@
                     <canvas id="spiderScoreChart-{{ $chartId }}"></canvas>
                 </div>
             </div>
+            <!-- Legend dengan warna konsisten -->
             <div class="flex justify-center text-sm gap-8 text-gray-900 mb-8">
                 <span class="flex items-center gap-2">
-                    <span class="inline-block w-10 border-b-2 border-black"></span>
-                    <span class="font-semibold">Standar</span>
+                    <span class="inline-block w-10" style="background-color: #fafa05; height: 4px;"></span>
+                    <span class="font-semibold">Standard</span>
                 </span>
                 <span class="flex items-center gap-2">
-                    <span class="inline-block w-10 border-b-2 border-red-600"></span>
-                    <span class="text-red-600 font-bold">{{ $participant->name }}</span>
+                    <span class="inline-block w-10" style="background-color: #5db010; height: 4px;"></span>
+                    <span class="font-semibold" style="color: #5db010;">{{ $participant->name }}</span>
                 </span>
                 <span class="flex items-center gap-2">
-                    <span class="inline-block w-10" style="border-bottom: 1px dashed #6B7280;"></span>
-                    <span x-data x-text="'Toleransi ' + $wire.tolerancePercentage + '%'"></span>
+                    <span class="inline-block w-10" style="background-color: #b50505; height: 4px;"></span>
+                    <span x-data x-text="'Tolerance ' + $wire.tolerancePercentage + '%'"></span>
                 </span>
             </div>
 
@@ -398,92 +417,110 @@
                                 data: {
                                     labels: chartLabels,
                                     datasets: [{
-                                        label: 'Standar',
-                                        data: originalStandardScores,
-                                        borderColor: '#000000',
-                                        backgroundColor: 'rgba(0, 0, 0, 0.05)',
-                                        borderWidth: 2,
-                                        pointRadius: 3,
-                                        pointBackgroundColor: '#000000',
-                                        datalabels: {
-                                            color: '#FFFFFF',
-                                            backgroundColor: '#000000',
-                                            borderRadius: 4,
-                                            padding: {
-                                                top: 4,
-                                                bottom: 4,
-                                                left: 6,
-                                                right: 6
-                                            },
-                                            font: {
-                                                weight: 'bold',
-                                                size: 9
-                                            },
-                                            anchor: 'end',
-                                            align: 'end',
-                                            offset: 6,
-                                            formatter: (value) => value.toFixed(2)
+                                            // === LAYER 1: PESERTA (HIJAU #5db010) ===
+                                            label: participantName,
+                                            data: individualScores,
+                                            fill: true,
+                                            backgroundColor: '#5db010',
+                                            borderColor: '#8fd006',
+                                            pointBackgroundColor: '#8fd006',
+                                            pointBorderColor: '#fff',
+                                            pointHoverBackgroundColor: '#fff',
+                                            pointHoverBorderColor: '#8fd006',
+                                            borderWidth: 2.5,
+                                            pointRadius: 4,
+                                            pointBorderWidth: 2,
+                                            datalabels: {
+                                                color: '#000000',
+                                                backgroundColor: '#5db010',
+                                                borderRadius: 4,
+                                                padding: {
+                                                    top: 4,
+                                                    bottom: 4,
+                                                    left: 6,
+                                                    right: 6
+                                                },
+                                                font: {
+                                                    weight: 'bold',
+                                                    size: 10
+                                                },
+                                                anchor: 'end',
+                                                align: 'end',
+                                                offset: 6,
+                                                formatter: (value) => value.toFixed(2)
+                                            }
+                                        },
+                                        {
+                                            // === LAYER 2: TOLERANSI (MERAH #b50505) ===
+                                            label: `Tolerance ${tolerancePercentage}%`,
+                                            data: standardScores,
+                                            fill: true,
+                                            backgroundColor: '#b50505',
+                                            borderColor: '#b50505',
+                                            borderWidth: 2,
+                                            pointRadius: 3,
+                                            pointBackgroundColor: '#9a0404',
+                                            pointBorderColor: '#fff',
+                                            pointBorderWidth: 2,
+                                            datalabels: {
+                                                color: '#FFFFFF',
+                                                backgroundColor: '#b50505',
+                                                borderRadius: 4,
+                                                padding: {
+                                                    top: 4,
+                                                    bottom: 4,
+                                                    left: 6,
+                                                    right: 6
+                                                },
+                                                font: {
+                                                    weight: 'bold',
+                                                    size: 9
+                                                },
+                                                anchor: 'start',
+                                                align: 'start',
+                                                offset: 0,
+                                                formatter: (value) => value.toFixed(2)
+                                            }
+                                        },
+                                        {
+                                            // === LAYER 3: STANDARD (KUNING #fafa05) ===
+                                            label: 'Standard',
+                                            data: originalStandardScores,
+                                            fill: true,
+                                            backgroundColor: '#fafa05',
+                                            borderColor: '#e6d105',
+                                            pointBackgroundColor: '#e6d105',
+                                            pointBorderColor: '#fff',
+                                            pointHoverBackgroundColor: '#fff',
+                                            pointHoverBorderColor: '#e6d105',
+                                            borderWidth: 2.5,
+                                            pointRadius: 4,
+                                            pointBorderWidth: 2,
+                                            datalabels: {
+                                                color: '#000000',
+                                                backgroundColor: '#fafa05',
+                                                borderRadius: 4,
+                                                padding: {
+                                                    top: 4,
+                                                    bottom: 4,
+                                                    left: 6,
+                                                    right: 6
+                                                },
+                                                font: {
+                                                    weight: 'bold',
+                                                    size: 10
+                                                },
+                                                anchor: 'center',
+                                                align: 'center',
+                                                offset: 6,
+                                                formatter: (value) => value.toFixed(2)
+                                            }
                                         }
-                                    }, {
-                                        label: `Toleransi ${tolerancePercentage}%`,
-                                        data: standardScores,
-                                        borderColor: '#6B7280',
-                                        backgroundColor: 'transparent',
-                                        borderWidth: 1.5,
-                                        borderDash: [5, 5],
-                                        pointRadius: 2,
-                                        pointBackgroundColor: '#6B7280',
-                                        datalabels: {
-                                            color: '#FFFFFF',
-                                            backgroundColor: '#6B7280',
-                                            borderRadius: 4,
-                                            padding: {
-                                                top: 4,
-                                                bottom: 4,
-                                                left: 6,
-                                                right: 6
-                                            },
-                                            font: {
-                                                weight: 'bold',
-                                                size: 9
-                                            },
-                                            anchor: 'center',
-                                            align: 'center',
-                                            offset: 0,
-                                            formatter: (value) => value.toFixed(2)
-                                        }
-                                    }, {
-                                        label: participantName,
-                                        data: individualScores,
-                                        borderColor: '#DC2626',
-                                        backgroundColor: 'rgba(220, 38, 38, 0.05)',
-                                        borderWidth: 2,
-                                        pointRadius: 3,
-                                        pointBackgroundColor: '#DC2626',
-                                        datalabels: {
-                                            color: '#FFFFFF',
-                                            backgroundColor: '#DC2626',
-                                            borderRadius: 4,
-                                            padding: {
-                                                top: 4,
-                                                bottom: 4,
-                                                left: 6,
-                                                right: 6
-                                            },
-                                            font: {
-                                                weight: 'bold',
-                                                size: 9
-                                            },
-                                            anchor: 'end',
-                                            align: 'start',
-                                            offset: 6,
-                                            formatter: (value) => value.toFixed(2)
-                                        }
-                                    }]
+                                    ]
                                 },
                                 options: {
                                     responsive: true,
-                                    maintainAspectRatio: true,
+                                    maintainAspectRatio: false,
                                     plugins: {
                                         legend: {
                                             display: false
@@ -545,14 +582,13 @@
                                     originalStandardScores = chartData.originalStandardScores;
                                     standardScores = chartData.standardScores;
 
-                                    // Update all three datasets
-                                    window.scoreChart_{{ $chartId }}.data.datasets[0].data = chartData
-                                        .originalStandardScores;
+                                    // Update dengan urutan baru: [0=PESERTA, 1=TOLERANSI, 2=STANDARD]
                                     window.scoreChart_{{ $chartId }}.data.datasets[1].label =
-                                        `Toleransi ${tolerancePercentage}%`;
+                                        `Tolerance ${tolerancePercentage}%`;
                                     window.scoreChart_{{ $chartId }}.data.datasets[1].data = chartData
                                         .standardScores;
-                                    // Dataset[2] (individual) doesn't change
+                                    window.scoreChart_{{ $chartId }}.data.datasets[2].data = chartData
+                                        .originalStandardScores;
                                     window.scoreChart_{{ $chartId }}.update('active');
                                 }
                             });
