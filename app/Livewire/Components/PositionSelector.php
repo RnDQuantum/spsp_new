@@ -9,7 +9,7 @@ class PositionSelector extends Component
 {
     public ?int $positionFormationId = null;
 
-    /** @var array<int, array{id:int,name:string}> */
+    /** @var array<int, \stdClass> */
     public array $availablePositions = [];
 
     public bool $showLabel = true;
@@ -38,6 +38,15 @@ class PositionSelector extends Component
      */
     public function updatedPositionFormationId(?int $value): void
     {
+        // Validate position ID is in available positions
+        if ($value && ! $this->isValidPositionId($value)) {
+            $this->positionFormationId = null;
+            session()->forget('filter.position_formation_id');
+            $this->dispatch('position-selected', positionFormationId: null);
+
+            return;
+        }
+
         // Persist to session
         if ($value) {
             session(['filter.position_formation_id' => $value]);
@@ -91,7 +100,7 @@ class PositionSelector extends Component
         $this->availablePositions = $event->positionFormations()
             ->orderBy('name')
             ->get(['id', 'name'])
-            ->map(fn ($p) => ['id' => $p->id, 'name' => $p->name])
+            ->map(fn ($p) => (object) ['id' => $p->id, 'name' => $p->name])
             ->all();
 
         // Load position from session or use first available
@@ -100,7 +109,7 @@ class PositionSelector extends Component
         if ($sessionPositionId && $this->isValidPositionId($sessionPositionId)) {
             $this->positionFormationId = $sessionPositionId;
         } else {
-            $this->positionFormationId = $this->availablePositions[0]['id'] ?? null;
+            $this->positionFormationId = $this->availablePositions[0]->id ?? null;
 
             // Save to session if we have a default
             if ($this->positionFormationId) {
