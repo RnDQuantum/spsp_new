@@ -15,56 +15,28 @@
     <!-- Event, Position, and Aspect Selection -->
     <div class="mb-6 bg-gray-50 p-4 rounded-lg border border-gray-200">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <!-- Event Dropdown -->
+            <!-- Event Filter -->
             <div>
-                <label for="eventSelect" class="block text-sm font-semibold text-gray-700 mb-2">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
                     📅 Pilih Event Assessment
                 </label>
-                <select wire:model.live="eventCode" id="eventSelect"
-                    class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                    <option value="">-- Pilih Event --</option>
-                    @foreach ($this->events as $event)
-                        <option value="{{ $event->code }}">{{ $event->name }} ({{ $event->year }})</option>
-                    @endforeach
-                </select>
+                @livewire('components.event-selector', ['showLabel' => false])
             </div>
 
-            <!-- Position Dropdown -->
+            <!-- Position Filter -->
             <div>
-                <label for="positionSelect" class="block text-sm font-semibold text-gray-700 mb-2">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
                     💼 Pilih Jabatan
                 </label>
-                <select wire:model.live="positionFormationId" id="positionSelect"
-                    class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                    @if (!$selectedEvent) disabled @endif>
-                    <option value="">-- Pilih Jabatan --</option>
-                    @foreach ($this->positions as $position)
-                        <option value="{{ $position->id }}">{{ $position->name }}</option>
-                    @endforeach
-                </select>
-                @if (!$selectedEvent)
-                    <p class="text-xs text-gray-500 mt-1">Pilih event terlebih dahulu</p>
-                @endif
+                @livewire('components.position-selector', ['showLabel' => false])
             </div>
 
-            <!-- Aspect Dropdown -->
+            <!-- Aspect Filter -->
             <div>
-                <label for="aspectSelect" class="block text-sm font-semibold text-gray-700 mb-2">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
                     🎯 Pilih Aspek untuk Analisis Training
                 </label>
-                <select wire:model.live="aspectId" id="aspectSelect"
-                    class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                    @if (!$selectedEvent || !$positionFormationId) disabled @endif>
-                    <option value="">-- Pilih Aspek --</option>
-                    @foreach ($this->aspects as $aspect)
-                        <option value="{{ $aspect->id }}">
-                            {{ $aspect->categoryType->name }} - {{ $aspect->name }}
-                        </option>
-                    @endforeach
-                </select>
-                @if (!$selectedEvent || !$positionFormationId)
-                    <p class="text-xs text-gray-500 mt-1">Pilih event & jabatan terlebih dahulu</p>
-                @endif
+                @livewire('components.aspect-selector', ['showLabel' => false])
             </div>
         </div>
     </div>
