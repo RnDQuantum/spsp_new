@@ -6,12 +6,12 @@
             </h1>
             <div class="flex justify-center items-center gap-4 mt-3 px-6">
                 <div class="w-full max-w-md">
-                    @livewire('components.event-selector', ['showLabel' => false])
+                    @livewire('components.event-selector', ['showLabel' => true])
                 </div>
             </div>
             <div class="flex justify-center items-center gap-4 mt-3 px-6">
                 <div class="w-full max-w-md">
-                    @livewire('components.position-selector', ['showLabel' => false])
+                    @livewire('components.position-selector', ['showLabel' => true])
                 </div>
             </div>
         </div>
