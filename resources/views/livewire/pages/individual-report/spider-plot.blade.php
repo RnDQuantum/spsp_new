@@ -58,6 +58,7 @@
             </div>
         </div>
     </div>
+
     <!-- Chart Scripts -->
     <script>
         (function() {
@@ -87,507 +88,536 @@
             } else {
                 waitForChartJs(init);
             }
-        })();
 
-        function initializePotensiChart() {
-            // Destroy existing chart if exists
-            if (window.potensiChart_{{ $potensiChartId }}) {
-                window.potensiChart_{{ $potensiChartId }}.destroy();
-            }
+            // ========================================
+            // POTENSI CHART - URUTAN: PESERTA → TOLERANSI → STANDARD
+            // ========================================
+            function initializePotensiChart() {
+                // Destroy existing chart if exists
+                if (window.potensiChart_{{ $potensiChartId }}) {
+                    window.potensiChart_{{ $potensiChartId }}.destroy();
+                }
 
-            const ctxPotensi = document.getElementById('potensiChart-{{ $potensiChartId }}');
-            if (!ctxPotensi) return;
+                const ctxPotensi = document.getElementById('potensiChart-{{ $potensiChartId }}');
+                if (!ctxPotensi) return;
 
-            window.potensiChart_{{ $potensiChartId }} = new Chart(ctxPotensi.getContext('2d'), {
-                type: 'radar',
-                data: {
-                    labels: @js($potensiLabels),
-                    datasets: [{
-                        label: 'Standard',
-                        data: @js($potensiOriginalStandardRatings),
-                        fill: true,
-                        backgroundColor: 'rgba(99, 102, 241, 0.08)',
-                        borderColor: 'rgba(99, 102, 241, 0.9)',
-                        pointBackgroundColor: 'rgba(99, 102, 241, 1)',
-                        pointBorderColor: '#fff',
-                        pointHoverBackgroundColor: '#fff',
-                        pointHoverBorderColor: 'rgba(99, 102, 241, 1)',
-                        borderWidth: 2.5,
-                        pointRadius: 4,
-                        pointBorderWidth: 2,
-                        datalabels: {
-                            color: '#FFFFFF',
-                            backgroundColor: 'rgba(99, 102, 241, 1)',
-                            borderRadius: 4,
-                            padding: {
-                                top: 4,
-                                bottom: 4,
-                                left: 6,
-                                right: 6
-                            },
-                            font: {
-                                weight: 'bold',
-                                size: 10
-                            },
-                            anchor: 'end',
-                            align: 'end',
-                            offset: 6,
-                            formatter: (value) => value.toFixed(2)
-                        }
-                    }, {
-                        label: 'Tolerance {{ $tolerancePercentage }}%',
-                        data: @js($potensiStandardRatings),
-                        borderColor: 'rgba(16, 185, 129, 0.8)',
-                        backgroundColor: 'transparent',
-                        borderWidth: 2,
-                        borderDash: [8, 4],
-                        pointRadius: 3,
-                        pointBackgroundColor: 'rgba(16, 185, 129, 0.9)',
-                        pointBorderColor: '#fff',
-                        pointBorderWidth: 2,
-                        datalabels: {
-                            color: '#FFFFFF',
-                            backgroundColor: 'rgba(16, 185, 129, 0.9)',
-                            borderRadius: 4,
-                            padding: {
-                                top: 4,
-                                bottom: 4,
-                                left: 6,
-                                right: 6
-                            },
-                            font: {
-                                weight: 'bold',
-                                size: 9
-                            },
-                            anchor: 'center',
-                            align: 'center',
-                            offset: 0,
-                            formatter: (value) => value.toFixed(2)
-                        }
-                    }, {
-                        label: '{{ $participant->name }}',
-                        data: @js($potensiIndividualRatings),
-                        fill: true,
-                        backgroundColor: 'rgba(236, 72, 153, 0.12)',
-                        borderColor: 'rgba(236, 72, 153, 1)',
-                        pointBackgroundColor: 'rgba(236, 72, 153, 1)',
-                        pointBorderColor: '#fff',
-                        pointHoverBackgroundColor: '#fff',
-                        pointHoverBorderColor: 'rgba(236, 72, 153, 1)',
-                        borderWidth: 2.5,
-                        pointRadius: 4,
-                        pointBorderWidth: 2,
-                        datalabels: {
-                            color: '#FFFFFF',
-                            backgroundColor: 'rgba(236, 72, 153, 1)',
-                            borderRadius: 4,
-                            padding: {
-                                top: 4,
-                                bottom: 4,
-                                left: 6,
-                                right: 6
-                            },
-                            font: {
-                                weight: 'bold',
-                                size: 10
-                            },
-                            anchor: 'end',
-                            align: 'start',
-                            offset: 6,
-                            formatter: (value) => value.toFixed(2)
-                        }
-                    }]
-                },
-                options: {
-                    scales: {
-                        r: {
-                            beginAtZero: true,
-                            min: 0,
-                            max: 5,
-                            ticks: {
-                                stepSize: 1,
-                                font: {
-                                    size: 16
+                window.potensiChart_{{ $potensiChartId }} = new Chart(ctxPotensi.getContext('2d'), {
+                    type: 'radar',
+                    data: {
+                        labels: @js($potensiLabels),
+                        datasets: [{
+                                // === LAYER 1: PESERTA (PASTi BAWAH) ===
+                                label: '{{ $participant->name }}',
+                                data: @js($potensiIndividualRatings),
+                                fill: true,
+                                backgroundColor: '#abf707', // HIJAU SOLID
+                                borderColor: '#8fd006',
+                                pointBackgroundColor: '#8fd006',
+                                pointBorderColor: '#fff',
+                                pointHoverBackgroundColor: '#fff',
+                                pointHoverBorderColor: '#8fd006',
+                                borderWidth: 2.5,
+                                pointRadius: 4,
+                                pointBorderWidth: 2,
+                                datalabels: {
+                                    color: '#000000',
+                                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                                    borderRadius: 4,
+                                    padding: {
+                                        top: 4,
+                                        bottom: 4,
+                                        left: 6,
+                                        right: 6
+                                    },
+                                    font: {
+                                        weight: 'bold',
+                                        size: 10
+                                    },
+                                    anchor: 'end',
+                                    align: 'start',
+                                    offset: 6,
+                                    formatter: (value) => value.toFixed(2)
                                 }
                             },
-                            pointLabels: {
-                                font: {
-                                    size: 16
+                            {
+                                // === LAYER 2: TOLERANSI (TENGAH) ===
+                                label: 'Tolerance {{ $tolerancePercentage }}%',
+                                data: @js($potensiStandardRatings),
+                                borderColor: '#b50505', // MERAH SOLID
+                                backgroundColor: '#b50505',
+                                borderWidth: 2,
+                                borderDash: [8, 4],
+                                pointRadius: 3,
+                                pointBackgroundColor: '#9a0404',
+                                pointBorderColor: '#fff',
+                                pointBorderWidth: 2,
+                                fill: true,
+                                datalabels: {
+                                    color: '#FFFFFF',
+                                    backgroundColor: 'rgba(181, 5, 5, 0.9)',
+                                    borderRadius: 4,
+                                    padding: {
+                                        top: 4,
+                                        bottom: 4,
+                                        left: 6,
+                                        right: 6
+                                    },
+                                    font: {
+                                        weight: 'bold',
+                                        size: 9
+                                    },
+                                    anchor: 'center',
+                                    align: 'center',
+                                    offset: 0,
+                                    formatter: (value) => value.toFixed(2)
+                                }
+                            },
+                            {
+                                // === LAYER 3: STANDARD (PASTi ATAS) ===
+                                label: 'Standard',
+                                data: @js($potensiOriginalStandardRatings),
+                                fill: true,
+                                backgroundColor: '#faea05', // KUNING SOLID
+                                borderColor: '#e6d105',
+                                pointBackgroundColor: '#e6d105',
+                                pointBorderColor: '#fff',
+                                pointHoverBackgroundColor: '#fff',
+                                pointHoverBorderColor: '#e6d105',
+                                borderWidth: 2.5,
+                                pointRadius: 4,
+                                pointBorderWidth: 2,
+                                datalabels: {
+                                    color: '#000000',
+                                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                                    borderRadius: 4,
+                                    padding: {
+                                        top: 4,
+                                        bottom: 4,
+                                        left: 6,
+                                        right: 6
+                                    },
+                                    font: {
+                                        weight: 'bold',
+                                        size: 10
+                                    },
+                                    anchor: 'end',
+                                    align: 'end',
+                                    offset: 6,
+                                    formatter: (value) => value.toFixed(2)
                                 }
                             }
-                        }
+                        ]
                     },
-                    plugins: {
-                        legend: {
-                            display: true,
-                            position: 'top',
-                            labels: {
-                                font: {
-                                    size: 16
+                    options: {
+                        scales: {
+                            r: {
+                                beginAtZero: true,
+                                min: 0,
+                                max: 5,
+                                ticks: {
+                                    stepSize: 1,
+                                    font: {
+                                        size: 16
+                                    }
+                                },
+                                pointLabels: {
+                                    font: {
+                                        size: 16
+                                    }
                                 }
                             }
                         },
-                        datalabels: {
-                            display: true
-                        }
-                    },
-                    responsive: true,
-                    maintainAspectRatio: false
-                }
-            });
-        }
-
-        function initializeKompetensiChart() {
-            // Destroy existing chart if exists
-            if (window.kompetensiChart_{{ $kompetensiChartId }}) {
-                window.kompetensiChart_{{ $kompetensiChartId }}.destroy();
-            }
-
-            const ctxKompetensi = document.getElementById('kompetensiChart-{{ $kompetensiChartId }}');
-            if (!ctxKompetensi) return;
-
-            window.kompetensiChart_{{ $kompetensiChartId }} = new Chart(ctxKompetensi.getContext('2d'), {
-                type: 'radar',
-                data: {
-                    labels: @js($kompetensiLabels),
-                    datasets: [{
-                        label: 'Standard',
-                        data: @js($kompetensiOriginalStandardRatings),
-                        fill: true,
-                        backgroundColor: 'rgba(6, 182, 212, 0.08)',
-                        borderColor: 'rgba(6, 182, 212, 0.9)',
-                        pointBackgroundColor: 'rgba(6, 182, 212, 1)',
-                        pointBorderColor: '#fff',
-                        pointHoverBackgroundColor: '#fff',
-                        pointHoverBorderColor: 'rgba(6, 182, 212, 1)',
-                        borderWidth: 2.5,
-                        pointRadius: 4,
-                        pointBorderWidth: 2,
-                        datalabels: {
-                            color: '#FFFFFF',
-                            backgroundColor: 'rgba(6, 182, 212, 1)',
-                            borderRadius: 4,
-                            padding: {
-                                top: 4,
-                                bottom: 4,
-                                left: 6,
-                                right: 6
-                            },
-                            font: {
-                                weight: 'bold',
-                                size: 10
-                            },
-                            anchor: 'end',
-                            align: 'end',
-                            offset: 6,
-                            formatter: (value) => value.toFixed(2)
-                        }
-                    }, {
-                        label: 'Tolerance {{ $tolerancePercentage }}%',
-                        data: @js($kompetensiStandardRatings),
-                        borderColor: 'rgba(251, 146, 60, 0.8)',
-                        backgroundColor: 'transparent',
-                        borderWidth: 2,
-                        borderDash: [8, 4],
-                        pointRadius: 3,
-                        pointBackgroundColor: 'rgba(251, 146, 60, 0.9)',
-                        pointBorderColor: '#fff',
-                        pointBorderWidth: 2,
-                        datalabels: {
-                            color: '#FFFFFF',
-                            backgroundColor: 'rgba(251, 146, 60, 0.9)',
-                            borderRadius: 4,
-                            padding: {
-                                top: 4,
-                                bottom: 4,
-                                left: 6,
-                                right: 6
-                            },
-                            font: {
-                                weight: 'bold',
-                                size: 9
-                            },
-                            anchor: 'center',
-                            align: 'center',
-                            offset: 0,
-                            formatter: (value) => value.toFixed(2)
-                        }
-                    }, {
-                        label: '{{ $participant->name }}',
-                        data: @js($kompetensiIndividualRatings),
-                        fill: true,
-                        backgroundColor: 'rgba(245, 158, 11, 0.12)',
-                        borderColor: 'rgba(245, 158, 11, 1)',
-                        pointBackgroundColor: 'rgba(245, 158, 11, 1)',
-                        pointBorderColor: '#fff',
-                        pointHoverBackgroundColor: '#fff',
-                        pointHoverBorderColor: 'rgba(245, 158, 11, 1)',
-                        borderWidth: 2.5,
-                        pointRadius: 4,
-                        pointBorderWidth: 2,
-                        datalabels: {
-                            color: '#FFFFFF',
-                            backgroundColor: 'rgba(245, 158, 11, 1)',
-                            borderRadius: 4,
-                            padding: {
-                                top: 4,
-                                bottom: 4,
-                                left: 6,
-                                right: 6
-                            },
-                            font: {
-                                weight: 'bold',
-                                size: 10
-                            },
-                            anchor: 'end',
-                            align: 'start',
-                            offset: 6,
-                            formatter: (value) => value.toFixed(2)
-                        }
-                    }]
-                },
-                options: {
-                    scales: {
-                        r: {
-                            beginAtZero: true,
-                            min: 0,
-                            max: 5,
-                            ticks: {
-                                stepSize: 1,
-                                font: {
-                                    size: 16
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top',
+                                labels: {
+                                    font: {
+                                        size: 16
+                                    }
                                 }
                             },
-                            pointLabels: {
-                                font: {
-                                    size: 16
-                                }
-                            }
-                        }
-                    },
-                    plugins: {
-                        legend: {
-                            display: true,
-                            position: 'top',
-                            labels: {
-                                font: {
-                                    size: 16
-                                }
+                            datalabels: {
+                                display: true
                             }
                         },
-                        datalabels: {
-                            display: true
-                        }
-                    },
-                    responsive: true,
-                    maintainAspectRatio: false
-                }
-            });
-        }
-
-        function initializeGeneralChart() {
-            // Destroy existing chart if exists
-            if (window.generalChart_{{ $generalChartId }}) {
-                window.generalChart_{{ $generalChartId }}.destroy();
-            }
-
-            const ctxGeneral = document.getElementById('generalChart-{{ $generalChartId }}');
-            if (!ctxGeneral) return;
-
-            window.generalChart_{{ $generalChartId }} = new Chart(ctxGeneral.getContext('2d'), {
-                type: 'radar',
-                data: {
-                    labels: @js($generalLabels),
-                    datasets: [{
-                        label: 'Standard',
-                        data: @js($generalOriginalStandardRatings),
-                        fill: true,
-                        backgroundColor: 'rgba(16, 185, 129, 0.08)',
-                        borderColor: 'rgba(16, 185, 129, 0.9)',
-                        pointBackgroundColor: 'rgba(16, 185, 129, 1)',
-                        pointBorderColor: '#fff',
-                        pointHoverBackgroundColor: '#fff',
-                        pointHoverBorderColor: 'rgba(16, 185, 129, 1)',
-                        borderWidth: 2.5,
-                        pointRadius: 4,
-                        pointBorderWidth: 2,
-                        datalabels: {
-                            color: '#FFFFFF',
-                            backgroundColor: 'rgba(16, 185, 129, 1)',
-                            borderRadius: 4,
-                            padding: {
-                                top: 4,
-                                bottom: 4,
-                                left: 6,
-                                right: 6
-                            },
-                            font: {
-                                weight: 'bold',
-                                size: 10
-                            },
-                            anchor: 'end',
-                            align: 'end',
-                            offset: 6,
-                            formatter: (value) => value.toFixed(2)
-                        }
-                    }, {
-                        label: 'Tolerance {{ $tolerancePercentage }}%',
-                        data: @js($generalStandardRatings),
-                        borderColor: 'rgba(239, 68, 68, 0.8)',
-                        backgroundColor: 'transparent',
-                        borderWidth: 2,
-                        borderDash: [8, 4],
-                        pointRadius: 3,
-                        pointBackgroundColor: 'rgba(239, 68, 68, 0.9)',
-                        pointBorderColor: '#fff',
-                        pointBorderWidth: 2,
-                        datalabels: {
-                            color: '#FFFFFF',
-                            backgroundColor: 'rgba(239, 68, 68, 0.9)',
-                            borderRadius: 4,
-                            padding: {
-                                top: 4,
-                                bottom: 4,
-                                left: 6,
-                                right: 6
-                            },
-                            font: {
-                                weight: 'bold',
-                                size: 9
-                            },
-                            anchor: 'center',
-                            align: 'center',
-                            offset: 0,
-                            formatter: (value) => value.toFixed(2)
-                        }
-                    }, {
-                        label: '{{ $participant->name }}',
-                        data: @js($generalIndividualRatings),
-                        fill: true,
-                        backgroundColor: 'rgba(168, 85, 247, 0.12)',
-                        borderColor: 'rgba(168, 85, 247, 1)',
-                        pointBackgroundColor: 'rgba(168, 85, 247, 1)',
-                        pointBorderColor: '#fff',
-                        pointHoverBackgroundColor: '#fff',
-                        pointHoverBorderColor: 'rgba(168, 85, 247, 1)',
-                        borderWidth: 2.5,
-                        pointRadius: 4,
-                        pointBorderWidth: 2,
-                        datalabels: {
-                            color: '#FFFFFF',
-                            backgroundColor: 'rgba(168, 85, 247, 1)',
-                            borderRadius: 4,
-                            padding: {
-                                top: 4,
-                                bottom: 4,
-                                left: 6,
-                                right: 6
-                            },
-                            font: {
-                                weight: 'bold',
-                                size: 10
-                            },
-                            anchor: 'end',
-                            align: 'start',
-                            offset: 6,
-                            formatter: (value) => value.toFixed(2)
-                        }
-                    }]
-                },
-                options: {
-                    scales: {
-                        r: {
-                            beginAtZero: true,
-                            min: 0,
-                            max: 5,
-                            ticks: {
-                                stepSize: 1,
-                                font: {
-                                    size: 16
-                                }
-                            },
-                            pointLabels: {
-                                font: {
-                                    size: 16
-                                }
-                            }
-                        }
-                    },
-                    plugins: {
-                        legend: {
-                            display: true,
-                            position: 'top',
-                            labels: {
-                                font: {
-                                    size: 16
-                                }
-                            }
-                        },
-                        datalabels: {
-                            display: true
-                        }
-                    },
-                    responsive: true,
-                    maintainAspectRatio: false
-                }
-            });
-        }
-
-        function setupLivewireListeners() {
-            // Wait for Livewire to be available
-            function waitForLivewire(callback) {
-                if (window.Livewire) callback();
-                else setTimeout(() => waitForLivewire(callback), 100);
-            }
-
-            waitForLivewire(function() {
-                Livewire.on('chartDataUpdated', function(data) {
-                    let chartData = Array.isArray(data) && data.length > 0 ? data[0] : data;
-                    if (!chartData) return;
-
-                    const tolerancePercentage = chartData.tolerance;
-
-                    // Update Potensi Chart
-                    if (chartData.potensi && window.potensiChart_{{ $potensiChartId }}) {
-                        window.potensiChart_{{ $potensiChartId }}.data.labels = chartData.potensi.labels;
-                        window.potensiChart_{{ $potensiChartId }}.data.datasets[0].data = chartData.potensi
-                            .originalStandardRatings;
-                        window.potensiChart_{{ $potensiChartId }}.data.datasets[1].label =
-                            `Tolerance ${tolerancePercentage}%`;
-                        window.potensiChart_{{ $potensiChartId }}.data.datasets[1].data = chartData.potensi
-                            .standardRatings;
-                        // Dataset[2] (individual) doesn't change
-                        window.potensiChart_{{ $potensiChartId }}.update('active');
-                    }
-
-                    // Update Kompetensi Chart
-                    if (chartData.kompetensi && window.kompetensiChart_{{ $kompetensiChartId }}) {
-                        window.kompetensiChart_{{ $kompetensiChartId }}.data.labels = chartData.kompetensi
-                            .labels;
-                        window.kompetensiChart_{{ $kompetensiChartId }}.data.datasets[0].data = chartData
-                            .kompetensi.originalStandardRatings;
-                        window.kompetensiChart_{{ $kompetensiChartId }}.data.datasets[1].label =
-                            `Tolerance ${tolerancePercentage}%`;
-                        window.kompetensiChart_{{ $kompetensiChartId }}.data.datasets[1].data = chartData
-                            .kompetensi.standardRatings;
-                        // Dataset[2] (individual) doesn't change
-                        window.kompetensiChart_{{ $kompetensiChartId }}.update('active');
-                    }
-
-                    // Update General Chart
-                    if (chartData.general && window.generalChart_{{ $generalChartId }}) {
-                        window.generalChart_{{ $generalChartId }}.data.labels = chartData.general.labels;
-                        window.generalChart_{{ $generalChartId }}.data.datasets[0].data = chartData.general
-                            .originalStandardRatings;
-                        window.generalChart_{{ $generalChartId }}.data.datasets[1].label =
-                            `Tolerance ${tolerancePercentage}%`;
-                        window.generalChart_{{ $generalChartId }}.data.datasets[1].data = chartData.general
-                            .standardRatings;
-                        // Dataset[2] (individual) doesn't change
-                        window.generalChart_{{ $generalChartId }}.update('active');
+                        responsive: true,
+                        maintainAspectRatio: false
                     }
                 });
-            });
-        }
+            }
+
+            // ========================================
+            // KOMPETENSI CHART - URUTAN SAMA
+            // ========================================
+            function initializeKompetensiChart() {
+                // Destroy existing chart if exists
+                if (window.kompetensiChart_{{ $kompetensiChartId }}) {
+                    window.kompetensiChart_{{ $kompetensiChartId }}.destroy();
+                }
+
+                const ctxKompetensi = document.getElementById('kompetensiChart-{{ $kompetensiChartId }}');
+                if (!ctxKompetensi) return;
+
+                window.kompetensiChart_{{ $kompetensiChartId }} = new Chart(ctxKompetensi.getContext('2d'), {
+                    type: 'radar',
+                    data: {
+                        labels: @js($kompetensiLabels),
+                        datasets: [{
+                                // === LAYER 1: PESERTA (PASTi BAWAH) ===
+                                label: '{{ $participant->name }}',
+                                data: @js($kompetensiIndividualRatings),
+                                fill: true,
+                                backgroundColor: '#abf707', // HIJAU SOLID
+                                borderColor: '#8fd006',
+                                pointBackgroundColor: '#8fd006',
+                                pointBorderColor: '#fff',
+                                pointHoverBackgroundColor: '#fff',
+                                pointHoverBorderColor: '#8fd006',
+                                borderWidth: 2.5,
+                                pointRadius: 4,
+                                pointBorderWidth: 2,
+                                datalabels: {
+                                    color: '#000000',
+                                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                                    borderRadius: 4,
+                                    padding: {
+                                        top: 4,
+                                        bottom: 4,
+                                        left: 6,
+                                        right: 6
+                                    },
+                                    font: {
+                                        weight: 'bold',
+                                        size: 10
+                                    },
+                                    anchor: 'end',
+                                    align: 'start',
+                                    offset: 6,
+                                    formatter: (value) => value.toFixed(2)
+                                }
+                            },
+                            {
+                                // === LAYER 2: TOLERANSI (TENGAH) ===
+                                label: 'Tolerance {{ $tolerancePercentage }}%',
+                                data: @js($kompetensiStandardRatings),
+                                borderColor: '#b50505', // MERAH SOLID
+                                backgroundColor: '#b50505',
+                                borderWidth: 2,
+                                borderDash: [8, 4],
+                                pointRadius: 3,
+                                pointBackgroundColor: '#9a0404',
+                                pointBorderColor: '#fff',
+                                pointBorderWidth: 2,
+                                fill: true,
+                                datalabels: {
+                                    color: '#FFFFFF',
+                                    backgroundColor: 'rgba(181, 5, 5, 0.9)',
+                                    borderRadius: 4,
+                                    padding: {
+                                        top: 4,
+                                        bottom: 4,
+                                        left: 6,
+                                        right: 6
+                                    },
+                                    font: {
+                                        weight: 'bold',
+                                        size: 9
+                                    },
+                                    anchor: 'center',
+                                    align: 'center',
+                                    offset: 0,
+                                    formatter: (value) => value.toFixed(2)
+                                }
+                            },
+                            {
+                                // === LAYER 3: STANDARD (PASTi ATAS) ===
+                                label: 'Standard',
+                                data: @js($kompetensiOriginalStandardRatings),
+                                fill: true,
+                                backgroundColor: '#faea05', // KUNING SOLID
+                                borderColor: '#e6d105',
+                                pointBackgroundColor: '#e6d105',
+                                pointBorderColor: '#fff',
+                                pointHoverBackgroundColor: '#fff',
+                                pointHoverBorderColor: '#e6d105',
+                                borderWidth: 2.5,
+                                pointRadius: 4,
+                                pointBorderWidth: 2,
+                                datalabels: {
+                                    color: '#000000',
+                                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                                    borderRadius: 4,
+                                    padding: {
+                                        top: 4,
+                                        bottom: 4,
+                                        left: 6,
+                                        right: 6
+                                    },
+                                    font: {
+                                        weight: 'bold',
+                                        size: 10
+                                    },
+                                    anchor: 'end',
+                                    align: 'end',
+                                    offset: 6,
+                                    formatter: (value) => value.toFixed(2)
+                                }
+                            }
+                        ]
+                    },
+                    options: {
+                        scales: {
+                            r: {
+                                beginAtZero: true,
+                                min: 0,
+                                max: 5,
+                                ticks: {
+                                    stepSize: 1,
+                                    font: {
+                                        size: 16
+                                    }
+                                },
+                                pointLabels: {
+                                    font: {
+                                        size: 16
+                                    }
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top',
+                                labels: {
+                                    font: {
+                                        size: 16
+                                    }
+                                }
+                            },
+                            datalabels: {
+                                display: true
+                            }
+                        },
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+            }
+
+            // ========================================
+            // GENERAL CHART - URUTAN SAMA
+            // ========================================
+            function initializeGeneralChart() {
+                // Destroy existing chart if exists
+                if (window.generalChart_{{ $generalChartId }}) {
+                    window.generalChart_{{ $generalChartId }}.destroy();
+                }
+
+                const ctxGeneral = document.getElementById('generalChart-{{ $generalChartId }}');
+                if (!ctxGeneral) return;
+
+                window.generalChart_{{ $generalChartId }} = new Chart(ctxGeneral.getContext('2d'), {
+                    type: 'radar',
+                    data: {
+                        labels: @js($generalLabels),
+                        datasets: [{
+                                // === LAYER 1: PESERTA (PASTi BAWAH) ===
+                                label: '{{ $participant->name }}',
+                                data: @js($generalIndividualRatings),
+                                fill: true,
+                                backgroundColor: '#abf707', // HIJAU SOLID
+                                borderColor: '#8fd006',
+                                pointBackgroundColor: '#8fd006',
+                                pointBorderColor: '#fff',
+                                pointHoverBackgroundColor: '#fff',
+                                pointHoverBorderColor: '#8fd006',
+                                borderWidth: 2.5,
+                                pointRadius: 4,
+                                pointBorderWidth: 2,
+                                datalabels: {
+                                    color: '#000000',
+                                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                                    borderRadius: 4,
+                                    padding: {
+                                        top: 4,
+                                        bottom: 4,
+                                        left: 6,
+                                        right: 6
+                                    },
+                                    font: {
+                                        weight: 'bold',
+                                        size: 10
+                                    },
+                                    anchor: 'end',
+                                    align: 'start',
+                                    offset: 6,
+                                    formatter: (value) => value.toFixed(2)
+                                }
+                            },
+                            {
+                                // === LAYER 2: TOLERANSI (TENGAH) ===
+                                label: 'Tolerance {{ $tolerancePercentage }}%',
+                                data: @js($generalStandardRatings),
+                                borderColor: '#b50505', // MERAH SOLID
+                                backgroundColor: '#b50505',
+                                borderWidth: 2,
+                                borderDash: [8, 4],
+                                pointRadius: 3,
+                                pointBackgroundColor: '#9a0404',
+                                pointBorderColor: '#fff',
+                                pointBorderWidth: 2,
+                                fill: true,
+                                datalabels: {
+                                    color: '#FFFFFF',
+                                    backgroundColor: 'rgba(181, 5, 5, 0.9)',
+                                    borderRadius: 4,
+                                    padding: {
+                                        top: 4,
+                                        bottom: 4,
+                                        left: 6,
+                                        right: 6
+                                    },
+                                    font: {
+                                        weight: 'bold',
+                                        size: 9
+                                    },
+                                    anchor: 'center',
+                                    align: 'center',
+                                    offset: 0,
+                                    formatter: (value) => value.toFixed(2)
+                                }
+                            },
+                            {
+                                // === LAYER 3: STANDARD (PASTi ATAS) ===
+                                label: 'Standard',
+                                data: @js($generalOriginalStandardRatings),
+                                fill: true,
+                                backgroundColor: '#faea05', // KUNING SOLID
+                                borderColor: '#e6d105',
+                                pointBackgroundColor: '#e6d105',
+                                pointBorderColor: '#fff',
+                                pointHoverBackgroundColor: '#fff',
+                                pointHoverBorderColor: '#e6d105',
+                                borderWidth: 2.5,
+                                pointRadius: 4,
+                                pointBorderWidth: 2,
+                                datalabels: {
+                                    color: '#000000',
+                                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                                    borderRadius: 4,
+                                    padding: {
+                                        top: 4,
+                                        bottom: 4,
+                                        left: 6,
+                                        right: 6
+                                    },
+                                    font: {
+                                        weight: 'bold',
+                                        size: 10
+                                    },
+                                    anchor: 'end',
+                                    align: 'end',
+                                    offset: 6,
+                                    formatter: (value) => value.toFixed(2)
+                                }
+                            }
+                        ]
+                    },
+                    options: {
+                        scales: {
+                            r: {
+                                beginAtZero: true,
+                                min: 0,
+                                max: 5,
+                                ticks: {
+                                    stepSize: 1,
+                                    font: {
+                                        size: 16
+                                    }
+                                },
+                                pointLabels: {
+                                    font: {
+                                        size: 16
+                                    }
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top',
+                                labels: {
+                                    font: {
+                                        size: 16
+                                    }
+                                }
+                            },
+                            datalabels: {
+                                display: true
+                            }
+                        },
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+            }
+
+            // ========================================
+            // LIVEWIRE LISTENERS - UPDATE TOLERANSI
+            // ========================================
+            function setupLivewireListeners() {
+                // Wait for Livewire to be available
+                function waitForLivewire(callback) {
+                    if (window.Livewire) callback();
+                    else setTimeout(() => waitForLivewire(callback), 100);
+                }
+
+                waitForLivewire(function() {
+                    Livewire.on('chartDataUpdated', function(data) {
+                        let chartData = Array.isArray(data) && data.length > 0 ? data[0] : data;
+                        if (!chartData) return;
+
+                        const tolerancePercentage = chartData.tolerance;
+
+                        // **POTENSI CHART**: [0=PESERTA, 1=TOLERANSI, 2=STANDARD]
+                        if (chartData.potensi && window.potensiChart_{{ $potensiChartId }}) {
+                            const chart = window.potensiChart_{{ $potensiChartId }};
+                            chart.data.datasets[1].label =
+                            `Tolerance ${tolerancePercentage}%`; // TOLERANSI
+                            chart.data.datasets[1].data = chartData.potensi
+                            .standardRatings; // TOLERANSI
+                            chart.data.datasets[2].data = chartData.potensi
+                            .originalStandardRatings; // STANDARD
+                            chart.update('active');
+                        }
+
+                        // **KOMPETENSI CHART**: [0=PESERTA, 1=TOLERANSI, 2=STANDARD]
+                        if (chartData.kompetensi && window.kompetensiChart_{{ $kompetensiChartId }}) {
+                            const chart = window.kompetensiChart_{{ $kompetensiChartId }};
+                            chart.data.datasets[1].label =
+                            `Tolerance ${tolerancePercentage}%`; // TOLERANSI
+                            chart.data.datasets[1].data = chartData.kompetensi
+                            .standardRatings; // TOLERANSI
+                            chart.data.datasets[2].data = chartData.kompetensi
+                            .originalStandardRatings; // STANDARD
+                            chart.update('active');
+                        }
+
+                        // **GENERAL CHART**: [0=PESERTA, 1=TOLERANSI, 2=STANDARD]
+                        if (chartData.general && window.generalChart_{{ $generalChartId }}) {
+                            const chart = window.generalChart_{{ $generalChartId }};
+                            chart.data.datasets[1].label =
+                            `Tolerance ${tolerancePercentage}%`; // TOLERANSI
+                            chart.data.datasets[1].data = chartData.general
+                            .standardRatings; // TOLERANSI
+                            chart.data.datasets[2].data = chartData.general
+                            .originalStandardRatings; // STANDARD
+                            chart.update('active');
+                        }
+                    });
+                });
+            }
+        })();
     </script>
 </div>
