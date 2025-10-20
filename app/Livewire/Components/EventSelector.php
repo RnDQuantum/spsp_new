@@ -9,7 +9,7 @@ class EventSelector extends Component
 {
     public ?string $eventCode = null;
 
-    /** @var array<int, array{code:string,name:string}> */
+    /** @var array<int, array{code: string, name: string}> */
     public array $availableEvents = [];
 
     public bool $showLabel = true;
@@ -51,6 +51,15 @@ class EventSelector extends Component
      */
     public function updatedEventCode(?string $value): void
     {
+        // Validate event code is in available events
+        if ($value && ! $this->isValidEventCode($value)) {
+            $this->eventCode = null;
+            session()->forget('filter.event_code');
+            $this->dispatch('event-selected', eventCode: null);
+
+            return;
+        }
+
         // Persist to session
         if ($value) {
             session(['filter.event_code' => $value]);
