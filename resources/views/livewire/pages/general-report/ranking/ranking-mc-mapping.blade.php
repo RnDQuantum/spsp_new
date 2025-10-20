@@ -456,4 +456,19 @@
 
         conclusionPieChart = new Chart(canvas, config);
     }
+
+    // Listen for Livewire events to recreate chart
+    // This listener is set up once and will work for all updates
+    document.addEventListener('DOMContentLoaded', function() {
+        Livewire.on('pieChartDataUpdated', function(data) {
+            let chartData = Array.isArray(data) && data.length > 0 ? data[0] : data;
+
+            // Only recreate chart if we have valid data (not empty)
+            if (chartData && chartData.labels && chartData.data &&
+                chartData.labels.length > 0 && chartData.data.length > 0) {
+                // Recreate chart completely to avoid cropping issues
+                createConclusionChart(chartData.labels, chartData.data, chartData.colors);
+            }
+        });
+    });
 </script>
