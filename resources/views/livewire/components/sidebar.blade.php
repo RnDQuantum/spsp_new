@@ -38,7 +38,7 @@
             <!-- Menu -->
             <nav class="space-y-2">
                 <!-- Dashboard -->
-                <a href="/" :class="minimized ? 'justify-center' : ''"
+                <a href="/dashboard" :class="minimized ? 'justify-center' : ''"
                     class="flex items-center px-4 py-3 text-white" title="Dashboard">
                     <i class="fa-solid fa-house mr-3"></i>
                     <span x-show="!minimized">Dashboard</span>
@@ -183,9 +183,9 @@
                             class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
                             Standar Potential Mapping
                         </a>
-                        <a href="{{ route('tkmi') }}" role="menuitem"
+                        <a href="{{ route('general-report.mmpi') }}" role="menuitem"
                             class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
-                            Tes Kesehatan Mental Indonesia (TKMI)
+                            MMPI
                         </a>
                     </div>
                 </div>

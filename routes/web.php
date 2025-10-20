@@ -5,6 +5,9 @@ use App\Livewire\Welcome;
 use Illuminate\Support\Facades\Route;
 
 // Route::get('/', Welcome::class);
+Route::get('/', function () {
+    return view('welcome');
+})->name('welcome');
 
 // Authentication Routes
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
@@ -13,7 +16,7 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 // Protected Routes
 Route::middleware(['auth'])->group(function () {
-    Route::get('/', function () {
+    Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
 
@@ -68,6 +71,7 @@ Route::middleware(['auth'])->group(function () {
     })->name('cb-psy');
 
     Route::get('/standard-psikometrik', App\Livewire\Pages\GeneralReport\StandardPsikometrik::class)->name('standard-psikometrik');
+    Route::get('/general-report/mmpi', App\Livewire\Pages\GeneralReport\MmpiResultsReport::class)->name('general-report.mmpi');
 
     Route::get('/tkmi', function () {
         return view('livewire.pages.general-report.tkmi');
