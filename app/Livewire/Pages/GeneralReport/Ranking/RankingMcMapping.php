@@ -19,16 +19,6 @@ class RankingMcMapping extends Component
 
     public int $tolerancePercentage = 10;
 
-    public ?string $eventCode = null;
-
-    public ?int $positionFormationId = null;
-
-    /** @var array<int, array{code:string,name:string}> */
-    public array $availableEvents = [];
-
-    /** @var array<int, array{id:int,name:string}> */
-    public array $availablePositions = [];
-
     public int $perPage = 10;
 
     // Pie chart data
@@ -57,54 +47,29 @@ class RankingMcMapping extends Component
         ],
     ];
 
-    protected $listeners = ['tolerance-updated' => 'handleToleranceUpdate'];
+    protected $listeners = [
+        'tolerance-updated' => 'handleToleranceUpdate',
+        'event-selected' => 'handleEventSelected',
+        'position-selected' => 'handlePositionSelected',
+    ];
 
     public function mount(): void
     {
         $this->tolerancePercentage = session('individual_report.tolerance', 10);
 
-        $this->availableEvents = AssessmentEvent::query()
-            ->orderByDesc('start_date')
-            ->get(['code', 'name'])
-            ->map(fn ($e) => ['code' => $e->code, 'name' => $e->name])
-            ->all();
-
-        $this->eventCode = $this->availableEvents[0]['code'] ?? null;
-
-        // Load positions for initial event
-        $this->loadAvailablePositions();
-
         // Prepare chart data
         $this->prepareChartData();
     }
 
-    public function updatedEventCode(): void
+    public function handleEventSelected(?string $eventCode): void
     {
         $this->resetPage();
 
-        // Reset position selection when event changes
-        $this->positionFormationId = null;
-        $this->loadAvailablePositions();
-
-        // Refresh chart data
-        $this->prepareChartData();
-
-        $summary = $this->getPassingSummary();
-        $this->dispatch('summary-updated', [
-            'passing' => $summary['passing'],
-            'total' => $summary['total'],
-            'percentage' => $summary['percentage'],
-        ]);
-
-        // Dispatch chart update event
-        $this->dispatch('pieChartDataUpdated', [
-            'labels' => $this->chartLabels,
-            'data' => $this->chartData,
-            'colors' => $this->chartColors,
-        ]);
+        // JANGAN refresh data di sini!
+        // PositionSelector akan auto-reset dan trigger handlePositionSelected
     }
 
-    public function updatedPositionFormationId(): void
+    public function handlePositionSelected(?int $positionFormationId): void
     {
         $this->resetPage();
 
@@ -124,34 +89,6 @@ class RankingMcMapping extends Component
             'data' => $this->chartData,
             'colors' => $this->chartColors,
         ]);
-    }
-
-    private function loadAvailablePositions(): void
-    {
-        if (! $this->eventCode) {
-            $this->availablePositions = [];
-            $this->positionFormationId = null;
-
-            return;
-        }
-
-        $event = AssessmentEvent::where('code', $this->eventCode)->first();
-
-        if (! $event) {
-            $this->availablePositions = [];
-            $this->positionFormationId = null;
-
-            return;
-        }
-
-        $this->availablePositions = $event->positionFormations()
-            ->orderBy('name')
-            ->get(['id', 'name'])
-            ->map(fn ($p) => ['id' => $p->id, 'name' => $p->name])
-            ->all();
-
-        // Auto-select first position if available
-        $this->positionFormationId = $this->availablePositions[0]['id'] ?? null;
     }
 
     public function handleToleranceUpdate(int $tolerance): void
@@ -202,12 +139,15 @@ class RankingMcMapping extends Component
 
     private function buildRankings(): ?LengthAwarePaginator
     {
-        if (! $this->eventCode || ! $this->positionFormationId) {
+        $eventCode = session('filter.event_code');
+        $positionFormationId = session('filter.position_formation_id');
+
+        if (! $eventCode || ! $positionFormationId) {
             return null;
         }
 
         $event = AssessmentEvent::query()
-            ->where('code', $this->eventCode)
+            ->where('code', $eventCode)
             ->first();
 
         if (! $event) {
@@ -217,7 +157,7 @@ class RankingMcMapping extends Component
         // Get selected position with template
         $position = $event->positionFormations()
             ->with('template')
-            ->find($this->positionFormationId);
+            ->find($positionFormationId);
 
         if (! $position || ! $position->template) {
             return null;
@@ -247,7 +187,7 @@ class RankingMcMapping extends Component
         $query = AspectAssessment::query()
             ->selectRaw('participant_id, SUM(standard_rating) as sum_original_standard_rating, SUM(standard_score) as sum_original_standard_score, SUM(individual_rating) as sum_individual_rating, SUM(individual_score) as sum_individual_score')
             ->where('event_id', $event->id)
-            ->where('position_formation_id', $this->positionFormationId)
+            ->where('position_formation_id', $positionFormationId)
             ->whereIn('aspect_id', $kompetensiAspectIds)
             ->groupBy('participant_id')
             ->orderByDesc('sum_individual_score')
@@ -317,11 +257,14 @@ class RankingMcMapping extends Component
     public function getPassingSummary(): array
     {
         // Summary across all participants for current event + position (not only current page)
-        if (! $this->eventCode || ! $this->positionFormationId) {
+        $eventCode = session('filter.event_code');
+        $positionFormationId = session('filter.position_formation_id');
+
+        if (! $eventCode || ! $positionFormationId) {
             return ['total' => 0, 'passing' => 0, 'percentage' => 0];
         }
 
-        $event = AssessmentEvent::where('code', $this->eventCode)->first();
+        $event = AssessmentEvent::where('code', $eventCode)->first();
         if (! $event) {
             return ['total' => 0, 'passing' => 0, 'percentage' => 0];
         }
@@ -329,7 +272,7 @@ class RankingMcMapping extends Component
         // Get selected position with template
         $position = $event->positionFormations()
             ->with('template')
-            ->find($this->positionFormationId);
+            ->find($positionFormationId);
 
         if (! $position || ! $position->template) {
             return ['total' => 0, 'passing' => 0, 'percentage' => 0];
@@ -357,7 +300,7 @@ class RankingMcMapping extends Component
         $aggregates = AspectAssessment::query()
             ->selectRaw('participant_id, SUM(standard_score) as sum_original_standard_score, SUM(individual_score) as sum_individual_score')
             ->where('event_id', $event->id)
-            ->where('position_formation_id', $this->positionFormationId)
+            ->where('position_formation_id', $positionFormationId)
             ->whereIn('aspect_id', $kompetensiAspectIds)
             ->groupBy('participant_id')
             ->get();
@@ -392,11 +335,14 @@ class RankingMcMapping extends Component
 
     public function getStandardInfo(): ?array
     {
-        if (! $this->eventCode || ! $this->positionFormationId) {
+        $eventCode = session('filter.event_code');
+        $positionFormationId = session('filter.position_formation_id');
+
+        if (! $eventCode || ! $positionFormationId) {
             return null;
         }
 
-        $event = AssessmentEvent::where('code', $this->eventCode)->first();
+        $event = AssessmentEvent::where('code', $eventCode)->first();
         if (! $event) {
             return null;
         }
@@ -404,7 +350,7 @@ class RankingMcMapping extends Component
         // Get selected position with template
         $position = $event->positionFormations()
             ->with('template')
-            ->find($this->positionFormationId);
+            ->find($positionFormationId);
 
         if (! $position || ! $position->template) {
             return null;
@@ -433,7 +379,7 @@ class RankingMcMapping extends Component
         $firstParticipant = AspectAssessment::query()
             ->selectRaw('SUM(standard_score) as total_standard_score')
             ->where('event_id', $event->id)
-            ->where('position_formation_id', $this->positionFormationId)
+            ->where('position_formation_id', $positionFormationId)
             ->whereIn('aspect_id', $kompetensiAspectIds)
             ->groupBy('participant_id')
             ->first();
@@ -461,11 +407,14 @@ class RankingMcMapping extends Component
     public function getConclusionSummary(): array
     {
         // Get conclusion summary for all participants in current event + position
-        if (! $this->eventCode || ! $this->positionFormationId) {
+        $eventCode = session('filter.event_code');
+        $positionFormationId = session('filter.position_formation_id');
+
+        if (! $eventCode || ! $positionFormationId) {
             return [];
         }
 
-        $event = AssessmentEvent::where('code', $this->eventCode)->first();
+        $event = AssessmentEvent::where('code', $eventCode)->first();
         if (! $event) {
             return [];
         }
@@ -473,7 +422,7 @@ class RankingMcMapping extends Component
         // Get selected position with template
         $position = $event->positionFormations()
             ->with('template')
-            ->find($this->positionFormationId);
+            ->find($positionFormationId);
 
         if (! $position || ! $position->template) {
             return [];
@@ -501,7 +450,7 @@ class RankingMcMapping extends Component
         $aggregates = AspectAssessment::query()
             ->selectRaw('participant_id, SUM(standard_score) as sum_original_standard_score, SUM(individual_score) as sum_individual_score')
             ->where('event_id', $event->id)
-            ->where('position_formation_id', $this->positionFormationId)
+            ->where('position_formation_id', $positionFormationId)
             ->whereIn('aspect_id', $kompetensiAspectIds)
             ->groupBy('participant_id')
             ->get();
