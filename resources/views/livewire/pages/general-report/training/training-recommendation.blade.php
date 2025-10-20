@@ -12,9 +12,9 @@
         ])
     @endif
 
-    <!-- Event and Aspect Selection -->
+    <!-- Event, Position, and Aspect Selection -->
     <div class="mb-6 bg-gray-50 p-4 rounded-lg border border-gray-200">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <!-- Event Dropdown -->
             <div>
                 <label for="eventSelect" class="block text-sm font-semibold text-gray-700 mb-2">
@@ -29,6 +29,24 @@
                 </select>
             </div>
 
+            <!-- Position Dropdown -->
+            <div>
+                <label for="positionSelect" class="block text-sm font-semibold text-gray-700 mb-2">
+                    💼 Pilih Jabatan
+                </label>
+                <select wire:model.live="positionFormationId" id="positionSelect"
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    @if (!$selectedEvent) disabled @endif>
+                    <option value="">-- Pilih Jabatan --</option>
+                    @foreach ($this->positions as $position)
+                        <option value="{{ $position->id }}">{{ $position->name }}</option>
+                    @endforeach
+                </select>
+                @if (!$selectedEvent)
+                    <p class="text-xs text-gray-500 mt-1">Pilih event terlebih dahulu</p>
+                @endif
+            </div>
+
             <!-- Aspect Dropdown -->
             <div>
                 <label for="aspectSelect" class="block text-sm font-semibold text-gray-700 mb-2">
@@ -36,7 +54,7 @@
                 </label>
                 <select wire:model.live="aspectId" id="aspectSelect"
                     class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                    @if (!$selectedEvent) disabled @endif>
+                    @if (!$selectedEvent || !$positionFormationId) disabled @endif>
                     <option value="">-- Pilih Aspek --</option>
                     @foreach ($this->aspects as $aspect)
                         <option value="{{ $aspect->id }}">
@@ -44,8 +62,8 @@
                         </option>
                     @endforeach
                 </select>
-                @if (!$selectedEvent)
-                    <p class="text-xs text-gray-500 mt-1">Pilih event terlebih dahulu</p>
+                @if (!$selectedEvent || !$positionFormationId)
+                    <p class="text-xs text-gray-500 mt-1">Pilih event & jabatan terlebih dahulu</p>
                 @endif
             </div>
         </div>

@@ -21,6 +21,8 @@ class TrainingRecommendation extends Component
 
     public ?string $eventCode = null;
 
+    public ?int $positionFormationId = null;
+
     public ?int $aspectId = null;
 
     // Tolerance percentage (loaded from session)
@@ -45,17 +47,18 @@ class TrainingRecommendation extends Component
      */
     protected $listeners = ['tolerance-updated' => 'handleToleranceUpdate'];
 
-    public function mount(?string $eventCode = null, ?int $aspectId = null): void
+    public function mount(?string $eventCode = null, ?int $positionFormationId = null, ?int $aspectId = null): void
     {
         // Load tolerance from session
         $this->tolerancePercentage = session('training_recommendation.tolerance', 10);
 
         // Set initial values
         $this->eventCode = $eventCode;
+        $this->positionFormationId = $positionFormationId;
         $this->aspectId = $aspectId;
 
-        // Load data if both event and aspect are provided
-        if ($this->eventCode && $this->aspectId) {
+        // Load data if event, position, and aspect are provided
+        if ($this->eventCode && $this->positionFormationId && $this->aspectId) {
             $this->loadEventAndAspect();
             $this->calculateSummaryData();
         }
@@ -67,7 +70,7 @@ class TrainingRecommendation extends Component
     public function updatedEventCode(?string $value): void
     {
         if (! $value) {
-            $this->reset(['selectedEvent', 'aspectId', 'selectedAspect', 'totalParticipants', 'recommendedCount', 'notRecommendedCount', 'averageRating', 'standardRating']);
+            $this->reset(['selectedEvent', 'positionFormationId', 'aspectId', 'selectedAspect', 'totalParticipants', 'recommendedCount', 'notRecommendedCount', 'averageRating', 'standardRating']);
 
             return;
         }
@@ -76,7 +79,25 @@ class TrainingRecommendation extends Component
         $this->loadEventAndAspect();
         $this->resetPage();
 
-        // Reset aspect selection when event changes
+        // Reset position and aspect selection when event changes
+        $this->reset(['positionFormationId', 'aspectId', 'selectedAspect', 'totalParticipants', 'recommendedCount', 'notRecommendedCount', 'averageRating', 'standardRating']);
+    }
+
+    /**
+     * Update position selection
+     */
+    public function updatedPositionFormationId(?int $value): void
+    {
+        if (! $value || ! $this->eventCode) {
+            $this->reset(['selectedAspect', 'aspectId', 'totalParticipants', 'recommendedCount', 'notRecommendedCount', 'averageRating', 'standardRating']);
+
+            return;
+        }
+
+        $this->positionFormationId = $value;
+        $this->resetPage();
+
+        // Reset aspect selection when position changes
         $this->reset(['aspectId', 'selectedAspect', 'totalParticipants', 'recommendedCount', 'notRecommendedCount', 'averageRating', 'standardRating']);
     }
 
@@ -85,7 +106,7 @@ class TrainingRecommendation extends Component
      */
     public function updatedAspectId(?int $value): void
     {
-        if (! $value || ! $this->eventCode) {
+        if (! $value || ! $this->eventCode || ! $this->positionFormationId) {
             $this->reset(['selectedAspect', 'totalParticipants', 'recommendedCount', 'notRecommendedCount', 'averageRating', 'standardRating']);
 
             return;
@@ -130,13 +151,17 @@ class TrainingRecommendation extends Component
                 ->first();
         }
 
-        if ($this->aspectId && $this->selectedEvent) {
-            // Get all template IDs used in this event
-            $templateIds = $this->selectedEvent->positionFormations->pluck('template_id')->unique()->all();
+        if ($this->aspectId && $this->selectedEvent && $this->positionFormationId) {
+            // Get selected position with template
+            $position = $this->selectedEvent->positionFormations()
+                ->with('template')
+                ->find($this->positionFormationId);
 
-            $this->selectedAspect = Aspect::where('id', $this->aspectId)
-                ->whereIn('template_id', $templateIds)
-                ->first();
+            if ($position?->template) {
+                $this->selectedAspect = Aspect::where('id', $this->aspectId)
+                    ->where('template_id', $position->template_id)
+                    ->first();
+            }
         }
     }
 
@@ -145,7 +170,7 @@ class TrainingRecommendation extends Component
      */
     private function calculateSummaryData(): void
     {
-        if (! $this->selectedEvent || ! $this->selectedAspect) {
+        if (! $this->selectedEvent || ! $this->selectedAspect || ! $this->positionFormationId) {
             return;
         }
 
@@ -158,8 +183,9 @@ class TrainingRecommendation extends Component
 
         $this->standardRating = $adjustedStandardRating;
 
-        // Get all aspect assessments for this event and aspect
+        // Get all aspect assessments for this event, position, and aspect
         $assessments = AspectAssessment::where('event_id', $this->selectedEvent->id)
+            ->where('position_formation_id', $this->positionFormationId)
             ->where('aspect_id', $this->selectedAspect->id)
             ->get();
 
@@ -192,7 +218,7 @@ class TrainingRecommendation extends Component
      */
     private function buildParticipantsPaginated()
     {
-        if (! $this->selectedEvent || ! $this->selectedAspect) {
+        if (! $this->selectedEvent || ! $this->selectedAspect || ! $this->positionFormationId) {
             return null;
         }
 
@@ -203,10 +229,11 @@ class TrainingRecommendation extends Component
         $toleranceFactor = 1 - ($this->tolerancePercentage / 100);
         $adjustedStandardRating = $originalStandardRating * $toleranceFactor;
 
-        // Query with pagination, sorted by rating (lowest first)
+        // Query with pagination, sorted by rating (lowest first) - FILTER by position
         $query = AspectAssessment::query()
             ->with(['participant.positionFormation'])
             ->where('event_id', $this->selectedEvent->id)
+            ->where('position_formation_id', $this->positionFormationId)
             ->where('aspect_id', $this->selectedAspect->id)
             ->orderBy('individual_rating', 'asc');
 
@@ -256,25 +283,41 @@ class TrainingRecommendation extends Component
     }
 
     /**
-     * Get all available aspects for selected event
+     * Get all available aspects for selected event and position
      */
     public function getAspectsProperty(): \Illuminate\Support\Collection
+    {
+        if (! $this->selectedEvent || ! $this->positionFormationId) {
+            return collect([]);
+        }
+
+        // Get selected position with template
+        $position = $this->selectedEvent->positionFormations()
+            ->with('template')
+            ->find($this->positionFormationId);
+
+        if (! $position?->template) {
+            return collect([]);
+        }
+
+        return Aspect::where('template_id', $position->template_id)
+            ->with('categoryType')
+            ->orderBy('category_type_id', 'asc')
+            ->orderBy('order', 'asc')
+            ->get();
+    }
+
+    /**
+     * Get all available positions for selected event
+     */
+    public function getPositionsProperty(): \Illuminate\Support\Collection
     {
         if (! $this->selectedEvent) {
             return collect([]);
         }
 
-        // Get all template IDs used in this event
-        $templateIds = $this->selectedEvent->positionFormations->pluck('template_id')->unique()->all();
-
-        if (empty($templateIds)) {
-            return collect([]);
-        }
-
-        return Aspect::whereIn('template_id', $templateIds)
-            ->with('categoryType')
-            ->orderBy('category_type_id', 'asc')
-            ->orderBy('order', 'asc')
+        return $this->selectedEvent->positionFormations()
+            ->orderBy('name')
             ->get();
     }
 
@@ -317,22 +360,24 @@ class TrainingRecommendation extends Component
      */
     private function buildAspectPriorityData(): ?\Illuminate\Support\Collection
     {
-        if (! $this->selectedEvent) {
+        if (! $this->selectedEvent || ! $this->positionFormationId) {
             return null;
         }
 
         // Calculate tolerance factor
         $toleranceFactor = 1 - ($this->tolerancePercentage / 100);
 
-        // Get all template IDs used in this event
-        $templateIds = $this->selectedEvent->positionFormations->pluck('template_id')->unique()->all();
+        // Get selected position with template
+        $position = $this->selectedEvent->positionFormations()
+            ->with('template')
+            ->find($this->positionFormationId);
 
-        if (empty($templateIds)) {
+        if (! $position?->template) {
             return collect([]);
         }
 
-        // Get all aspects for the selected event (from all templates used)
-        $aspects = Aspect::whereIn('template_id', $templateIds)
+        // Get all aspects for the selected position's template
+        $aspects = Aspect::where('template_id', $position->template_id)
             ->with('categoryType')
             ->orderBy('category_type_id', 'asc')
             ->orderBy('order', 'asc')
@@ -341,8 +386,9 @@ class TrainingRecommendation extends Component
         $aspectData = [];
 
         foreach ($aspects as $aspect) {
-            // Get all assessments for this aspect in this event
+            // Get all assessments for this aspect in this event and position
             $assessments = AspectAssessment::where('event_id', $this->selectedEvent->id)
+                ->where('position_formation_id', $this->positionFormationId)
                 ->where('aspect_id', $aspect->id)
                 ->get();
 
