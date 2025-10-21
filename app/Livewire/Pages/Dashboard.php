@@ -112,16 +112,15 @@ class Dashboard extends Component
     {
         \Log::info('Dashboard: handleEventSelected called', ['eventCode' => $eventCode]);
 
-        // Position will auto-reset, wait for position-selected event
-        $this->showLoading('Memuat data event dan mereset filter...');
-
         // Check if participant was selected before
         $previousParticipantId = session('filter.participant_id');
 
         if ($previousParticipantId !== null) {
-            // Participant will be reset to null, trigger smooth reload
+            // Case 2: We had a participant selected, will be reset to null
+            $this->showLoading('Memuat data event dan mereset filter...');
             $this->js('setTimeout(() => window.location.reload(), 800)');
         }
+        // Case 1: No participant was selected, just load silently
     }
 
     /**
@@ -131,16 +130,15 @@ class Dashboard extends Component
     {
         \Log::info('Dashboard: handlePositionSelected called', ['positionFormationId' => $positionFormationId]);
 
-        // Participant will auto-reset, wait for participant-selected event
-        $this->showLoading('Memuat data jabatan dan mereset filter...');
-
         // Check if participant was selected before
         $previousParticipantId = session('filter.participant_id');
 
         if ($previousParticipantId !== null) {
-            // Participant will be reset to null, trigger smooth reload
+            // Case 2: We had a participant selected, will be reset to null
+            $this->showLoading('Memuat data jabatan dan mereset filter...');
             $this->js('setTimeout(() => window.location.reload(), 800)');
         }
+        // Case 1: No participant was selected, just load silently
     }
 
     /**
