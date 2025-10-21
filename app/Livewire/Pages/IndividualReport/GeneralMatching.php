@@ -49,10 +49,6 @@ class GeneralMatching extends Component
         // Load final assessment
         $this->finalAssessment = FinalAssessment::where('participant_id', $this->participant->id)->first();
 
-        if ($this->finalAssessment) {
-            $this->jobMatchPercentage = round((float) $this->finalAssessment->achievement_percentage);
-        }
-
         // Get template from position
         $template = $this->participant->positionFormation->template;
 
@@ -73,6 +69,35 @@ class GeneralMatching extends Component
         // Load aspect assessments for Kompetensi
         if ($this->kompetensiCategory) {
             $this->loadAspectsForCategory($this->kompetensiCategory->id, 'kompetensiAspects');
+        }
+
+        // Calculate overall job match percentage
+        $this->calculateJobMatchPercentage();
+    }
+
+    private function calculateJobMatchPercentage(): void
+    {
+        $allPercentages = [];
+
+        // Collect percentages from potensi aspects
+        foreach ($this->potensiAspects as $aspect) {
+            // Calculate percentage same way as in loadAspectsForCategory
+            $percentage = min(($aspect['individual_rating'] / $aspect['standard_rating']) * 100, 100);
+            $allPercentages[] = $percentage;
+        }
+
+        // Collect percentages from kompetensi aspects
+        foreach ($this->kompetensiAspects as $aspect) {
+            // Calculate percentage same way as in loadAspectsForCategory
+            $percentage = min(($aspect['individual_rating'] / $aspect['standard_rating']) * 100, 100);
+            $allPercentages[] = $percentage;
+        }
+
+        // Calculate average if there are any aspects
+        if (count($allPercentages) > 0) {
+            $this->jobMatchPercentage = round(array_sum($allPercentages) / count($allPercentages));
+        } else {
+            $this->jobMatchPercentage = 0;
         }
     }
 
@@ -95,10 +120,13 @@ class GeneralMatching extends Component
 
         // Process each aspect
         $this->$propertyName = $aspectAssessments->map(function ($assessment) {
+            // Calculate percentage based on individual vs standard rating, capped at 100%
+            $percentage = min(($assessment->individual_rating / $assessment->standard_rating) * 100, 100);
+
             return [
                 'name' => $assessment->aspect->name,
                 'code' => $assessment->aspect->code,
-                'percentage' => $assessment->percentage_score,
+                'percentage' => round($percentage), // Round to remove decimal places
                 'individual_rating' => $assessment->individual_rating,
                 'standard_rating' => $assessment->standard_rating,
                 'description' => $assessment->aspect->description,
