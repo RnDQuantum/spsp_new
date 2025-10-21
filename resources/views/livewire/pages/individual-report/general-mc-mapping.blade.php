@@ -134,18 +134,30 @@
                     <canvas id="spiderRatingChart-{{ $chartId }}"></canvas>
                 </div>
             </div>
-            <div class="flex justify-center text-sm gap-8 text-gray-900 mb-8">
-                <span class="flex items-center gap-2">
-                    <span class="inline-block w-10 border-b-2 border-black"></span>
-                    <span class="font-semibold">Standar</span>
+
+            <!-- Legend dengan klik functionality -->
+            <div class="flex justify-center text-sm gap-8 text-gray-900 mb-8" id="rating-legend-{{ $chartId }}">
+                <!-- Standard (Index 2 - KUNING) -->
+                <span
+                    class="legend-item flex items-center gap-2 cursor-pointer select-none hover:bg-gray-100 px-3 py-2 rounded-lg transition-all duration-200 border border-gray-300 shadow-sm"
+                    data-chart="rating" data-dataset="2">
+                    <span class="inline-block w-12 h-3 rounded-sm" style="background-color: #fafa05;"></span>
+                    <span class="font-semibold text-gray-800">Standard</span>
                 </span>
-                <span class="flex items-center gap-2">
-                    <span class="inline-block w-10 border-b-2 border-red-600"></span>
-                    <span class="text-red-600 font-bold">{{ $participant->name }}</span>
+                <!-- Participant (Index 0 - HIJAU) -->
+                <span
+                    class="legend-item flex items-center gap-2 cursor-pointer select-none hover:bg-gray-100 px-3 py-2 rounded-lg transition-all duration-200 border border-gray-300 shadow-sm"
+                    data-chart="rating" data-dataset="0">
+                    <span class="inline-block w-12 h-3 rounded-sm" style="background-color: #5db010;"></span>
+                    <span class="font-semibold text-gray-800" style="color: #5db010;">{{ $participant->name }}</span>
                 </span>
-                <span class="flex items-center gap-2">
-                    <span class="inline-block w-10" style="border-bottom: 1px dashed #6B7280;"></span>
-                    <span x-data x-text="'Toleransi ' + $wire.tolerancePercentage + '%'"></span>
+                <!-- Tolerance (Index 1 - MERAH) -->
+                <span
+                    class="legend-item flex items-center gap-2 cursor-pointer select-none hover:bg-gray-100 px-3 py-2 rounded-lg transition-all duration-200 border border-gray-300 shadow-sm"
+                    data-chart="rating" data-dataset="1">
+                    <span class="inline-block w-12 h-3 rounded-sm" style="background-color: #b50505;"></span>
+                    <span class="font-semibold text-gray-800" x-data
+                        x-text="'Tolerance ' + $wire.tolerancePercentage + '%'"></span>
                 </span>
             </div>
 
@@ -154,12 +166,96 @@
                     if (window['ratingChartSetup_{{ $chartId }}']) return;
                     window['ratingChartSetup_{{ $chartId }}'] = true;
 
+                    // Initialize visibility state
+                    window.ratingVisibility_{{ $chartId }} = {
+                        0: false,
+                        1: false,
+                        2: false
+                    }; // false = visible
+
+                    // Toggle dataset function
+                    window.toggleDataset_{{ $chartId }} = function(chartType, datasetIndex) {
+                        console.log(`🔄 Toggling ${chartType} dataset ${datasetIndex}`);
+
+                        const chart = window[`${chartType}Chart_{{ $chartId }}`];
+                        if (!chart) {
+                            console.error('❌ Chart not found:', chartType);
+                            return;
+                        }
+
+                        const dataset = chart.data.datasets[datasetIndex];
+                        if (!dataset) {
+                            console.error('❌ Dataset not found:', datasetIndex);
+                            return;
+                        }
+
+                        // Toggle hidden state
+                        const wasHidden = dataset.hidden || false;
+                        dataset.hidden = !wasHidden;
+                        window[`${chartType}Visibility_{{ $chartId }}`][datasetIndex] = !wasHidden;
+
+                        console.log(`✅ ${chartType} dataset ${datasetIndex} ${wasHidden ? 'shown' : 'hidden'}`);
+
+                        chart.update('active');
+                        updateLegendVisual(chartType);
+                    };
+
+                    // Update legend visual state
+                    function updateLegendVisual(chartType) {
+                        const legendContainer = document.getElementById(`${chartType}-legend-{{ $chartId }}`);
+                        if (!legendContainer) return;
+
+                        const chart = window[`${chartType}Chart_{{ $chartId }}`];
+                        if (!chart) return;
+
+                        const legendItems = legendContainer.querySelectorAll('.legend-item');
+                        legendItems.forEach(item => {
+                            const datasetIndex = parseInt(item.dataset.dataset);
+                            const isHidden = chart.data.datasets[datasetIndex]?.hidden || false;
+
+                            if (isHidden) {
+                                item.classList.add('opacity-50', 'line-through');
+                                item.classList.remove('bg-white', 'shadow-sm');
+                                item.classList.add('bg-gray-50');
+                            } else {
+                                item.classList.remove('opacity-50', 'line-through', 'bg-gray-50');
+                                item.classList.add('bg-white', 'shadow-sm');
+                            }
+                        });
+                    }
+
+                    // Setup legend click listeners
+                    function setupLegendListeners(chartType) {
+                        const legendContainer = document.getElementById(`${chartType}-legend-{{ $chartId }}`);
+                        if (!legendContainer) {
+                            console.warn(`⚠️ Legend container not found: ${chartType}-legend-{{ $chartId }}`);
+                            return;
+                        }
+
+                        // Remove existing listeners to prevent duplicates
+                        const newHandler = function(e) {
+                            const legendItem = e.target.closest('.legend-item');
+                            if (!legendItem) return;
+
+                            e.stopPropagation();
+                            const datasetIndex = parseInt(legendItem.dataset.dataset);
+                            const chartTypeAttr = legendItem.dataset.chart;
+
+                            console.log(`🖱️ Legend clicked: ${chartTypeAttr} dataset ${datasetIndex}`);
+                            window.toggleDataset_{{ $chartId }}(chartTypeAttr, datasetIndex);
+                        };
+
+                        legendContainer.removeEventListener('click', newHandler);
+                        legendContainer.addEventListener('click', newHandler);
+
+                        console.log(`✅ ${chartType} legend listeners setup`);
+                    }
+
                     function setupRatingChart() {
                         if (window.ratingChart_{{ $chartId }}) {
                             window.ratingChart_{{ $chartId }}.destroy();
                         }
 
-                        let chartInstance = null;
                         const chartLabels = @js($chartLabels);
                         let originalStandardRatings = @js($chartOriginalStandardRatings);
                         let standardRatings = @js($chartStandardRatings);
@@ -169,101 +265,127 @@
 
                         function initChart() {
                             const canvas = document.getElementById('spiderRatingChart-{{ $chartId }}');
-                            if (!canvas) return;
+                            if (!canvas) {
+                                console.error('❌ Canvas not found: spiderRatingChart-{{ $chartId }}');
+                                return;
+                            }
 
                             const ctx = canvas.getContext('2d');
 
-                            chartInstance = new Chart(ctx, {
+                            const datasets = [{
+                                    // === LAYER 1: PESERTA (HIJAU #5db010) ===
+                                    label: participantName,
+                                    data: individualRatings,
+                                    fill: true,
+                                    backgroundColor: '#5db010',
+                                    borderColor: '#8fd006',
+                                    pointBackgroundColor: '#8fd006',
+                                    pointBorderColor: '#fff',
+                                    pointHoverBackgroundColor: '#fff',
+                                    pointHoverBorderColor: '#8fd006',
+                                    borderWidth: 2.5,
+                                    pointRadius: 4,
+                                    pointBorderWidth: 2,
+                                    hidden: window.ratingVisibility_{{ $chartId }}[0],
+                                    datalabels: {
+                                        color: '#000000',
+                                        backgroundColor: '#5db010',
+                                        borderRadius: 4,
+                                        padding: {
+                                            top: 4,
+                                            bottom: 4,
+                                            left: 6,
+                                            right: 6
+                                        },
+                                        font: {
+                                            weight: 'bold',
+                                            size: 10
+                                        },
+                                        anchor: 'end',
+                                        align: 'end',
+                                        offset: 6,
+                                        formatter: (value) => value.toFixed(2)
+                                    }
+                                },
+                                {
+                                    // === LAYER 2: TOLERANSI (MERAH #b50505) ===
+                                    label: `Tolerance ${tolerancePercentage}%`,
+                                    data: standardRatings,
+                                    fill: true,
+                                    backgroundColor: '#b50505',
+                                    borderColor: '#b50505',
+                                    borderWidth: 2,
+                                    pointRadius: 3,
+                                    pointBackgroundColor: '#9a0404',
+                                    pointBorderColor: '#fff',
+                                    pointBorderWidth: 2,
+                                    hidden: window.ratingVisibility_{{ $chartId }}[1],
+                                    datalabels: {
+                                        color: '#FFFFFF',
+                                        backgroundColor: '#b50505',
+                                        borderRadius: 4,
+                                        padding: {
+                                            top: 4,
+                                            bottom: 4,
+                                            left: 6,
+                                            right: 6
+                                        },
+                                        font: {
+                                            weight: 'bold',
+                                            size: 9
+                                        },
+                                        anchor: 'end',
+                                        align: 'start',
+                                        offset: 0,
+                                        formatter: (value) => value.toFixed(2)
+                                    }
+                                },
+                                {
+                                    // === LAYER 3: STANDARD (KUNING #fafa05) ===
+                                    label: 'Standard',
+                                    data: originalStandardRatings,
+                                    fill: true,
+                                    backgroundColor: '#fafa05',
+                                    borderColor: '#e6d105',
+                                    pointBackgroundColor: '#e6d105',
+                                    pointBorderColor: '#fff',
+                                    pointHoverBackgroundColor: '#fff',
+                                    pointHoverBorderColor: '#e6d105',
+                                    borderWidth: 2.5,
+                                    pointRadius: 4,
+                                    pointBorderWidth: 2,
+                                    hidden: window.ratingVisibility_{{ $chartId }}[2],
+                                    datalabels: {
+                                        color: '#000000',
+                                        backgroundColor: '#fafa05',
+                                        borderRadius: 4,
+                                        padding: {
+                                            top: 4,
+                                            bottom: 4,
+                                            left: 6,
+                                            right: 6
+                                        },
+                                        font: {
+                                            weight: 'bold',
+                                            size: 10
+                                        },
+                                        anchor: 'center',
+                                        align: 'center',
+                                        offset: 6,
+                                        formatter: (value) => value.toFixed(2)
+                                    }
+                                }
+                            ];
+
+                            const chartInstance = new Chart(ctx, {
                                 type: 'radar',
                                 data: {
                                     labels: chartLabels,
-                                    datasets: [{
-                                        label: 'Standar',
-                                        data: originalStandardRatings,
-                                        borderColor: '#000000',
-                                        backgroundColor: 'rgba(0, 0, 0, 0.05)',
-                                        borderWidth: 2,
-                                        pointRadius: 3,
-                                        pointBackgroundColor: '#000000',
-                                        datalabels: {
-                                            color: '#FFFFFF',
-                                            backgroundColor: '#000000',
-                                            borderRadius: 4,
-                                            padding: {
-                                                top: 4,
-                                                bottom: 4,
-                                                left: 6,
-                                                right: 6
-                                            },
-                                            font: {
-                                                weight: 'bold',
-                                                size: 9
-                                            },
-                                            anchor: 'end',
-                                            align: 'end',
-                                            offset: 6,
-                                            formatter: (value) => value.toFixed(2)
-                                        }
-                                    }, {
-                                        label: `Toleransi ${tolerancePercentage}%`,
-                                        data: standardRatings,
-                                        borderColor: '#6B7280',
-                                        backgroundColor: 'transparent',
-                                        borderWidth: 1.5,
-                                        borderDash: [5, 5],
-                                        pointRadius: 2,
-                                        pointBackgroundColor: '#6B7280',
-                                        datalabels: {
-                                            color: '#FFFFFF',
-                                            backgroundColor: '#6B7280',
-                                            borderRadius: 4,
-                                            padding: {
-                                                top: 4,
-                                                bottom: 4,
-                                                left: 6,
-                                                right: 6
-                                            },
-                                            font: {
-                                                weight: 'bold',
-                                                size: 9
-                                            },
-                                            anchor: 'center',
-                                            align: 'center',
-                                            offset: 0,
-                                            formatter: (value) => value.toFixed(2)
-                                        }
-                                    }, {
-                                        label: participantName,
-                                        data: individualRatings,
-                                        borderColor: '#DC2626',
-                                        backgroundColor: 'rgba(220, 38, 38, 0.05)',
-                                        borderWidth: 2,
-                                        pointRadius: 3,
-                                        pointBackgroundColor: '#DC2626',
-                                        datalabels: {
-                                            color: '#FFFFFF',
-                                            backgroundColor: '#DC2626',
-                                            borderRadius: 4,
-                                            padding: {
-                                                top: 4,
-                                                bottom: 4,
-                                                left: 6,
-                                                right: 6
-                                            },
-                                            font: {
-                                                weight: 'bold',
-                                                size: 9
-                                            },
-                                            anchor: 'end',
-                                            align: 'start',
-                                            offset: 6,
-                                            formatter: (value) => value.toFixed(2)
-                                        }
-                                    }]
+                                    datasets: datasets
                                 },
                                 options: {
                                     responsive: true,
-                                    maintainAspectRatio: true,
+                                    maintainAspectRatio: false,
                                     plugins: {
                                         legend: {
                                             display: false
@@ -272,7 +394,9 @@
                                             enabled: true
                                         },
                                         datalabels: {
-                                            display: true
+                                            display: function(context) {
+                                                return context.dataset.hidden !== true;
+                                            }
                                         }
                                     },
                                     scales: {
@@ -307,11 +431,21 @@
                             });
 
                             window.ratingChart_{{ $chartId }} = chartInstance;
+                            console.log('✅ Managerial Rating chart initialized');
+
+                            // Setup legend listeners after chart is ready
+                            setTimeout(() => {
+                                setupLegendListeners('rating');
+                                updateLegendVisual('rating');
+                            }, 200);
                         }
 
                         function waitForLivewire(callback) {
-                            if (window.Livewire) callback();
-                            else setTimeout(() => waitForLivewire(callback), 100);
+                            if (window.Livewire) {
+                                callback();
+                            } else {
+                                setTimeout(() => waitForLivewire(callback), 100);
+                            }
                         }
 
                         waitForLivewire(function() {
@@ -320,19 +454,26 @@
                             Livewire.on('chartDataUpdated', function(data) {
                                 let chartData = Array.isArray(data) && data.length > 0 ? data[0] : data;
                                 if (window.ratingChart_{{ $chartId }} && chartData) {
+                                    console.log('📊 Updating managerial rating chart data');
                                     tolerancePercentage = chartData.tolerance;
                                     originalStandardRatings = chartData.originalStandardRatings;
                                     standardRatings = chartData.standardRatings;
 
-                                    // Update all three datasets
-                                    window.ratingChart_{{ $chartId }}.data.datasets[0].data = chartData
-                                        .originalStandardRatings;
-                                    window.ratingChart_{{ $chartId }}.data.datasets[1].label =
-                                        `Toleransi ${tolerancePercentage}%`;
-                                    window.ratingChart_{{ $chartId }}.data.datasets[1].data = chartData
-                                        .standardRatings;
-                                    // Dataset[2] (individual) doesn't change
-                                    window.ratingChart_{{ $chartId }}.update('active');
+                                    const chart = window.ratingChart_{{ $chartId }};
+                                    chart.data.datasets[1].label = `Tolerance ${tolerancePercentage}%`;
+                                    chart.data.datasets[1].data = chartData.standardRatings;
+                                    chart.data.datasets[2].data = chartData.originalStandardRatings;
+
+                                    // Preserve visibility state
+                                    chart.data.datasets[0].hidden = window
+                                        .ratingVisibility_{{ $chartId }}[0];
+                                    chart.data.datasets[1].hidden = window
+                                        .ratingVisibility_{{ $chartId }}[1];
+                                    chart.data.datasets[2].hidden = window
+                                        .ratingVisibility_{{ $chartId }}[2];
+
+                                    chart.update('active');
+                                    setTimeout(() => updateLegendVisual('rating'), 100);
                                 }
                             });
                         });
@@ -352,18 +493,30 @@
                     <canvas id="spiderScoreChart-{{ $chartId }}"></canvas>
                 </div>
             </div>
-            <div class="flex justify-center text-sm gap-8 text-gray-900 mb-8">
-                <span class="flex items-center gap-2">
-                    <span class="inline-block w-10 border-b-2 border-black"></span>
-                    <span class="font-semibold">Standar</span>
+
+            <!-- Legend dengan klik functionality -->
+            <div class="flex justify-center text-sm gap-8 text-gray-900 mb-8" id="score-legend-{{ $chartId }}">
+                <!-- Standard (Index 2 - KUNING) -->
+                <span
+                    class="legend-item flex items-center gap-2 cursor-pointer select-none hover:bg-gray-100 px-3 py-2 rounded-lg transition-all duration-200 border border-gray-300 shadow-sm"
+                    data-chart="score" data-dataset="2">
+                    <span class="inline-block w-12 h-3 rounded-sm" style="background-color: #fafa05;"></span>
+                    <span class="font-semibold text-gray-800">Standard</span>
                 </span>
-                <span class="flex items-center gap-2">
-                    <span class="inline-block w-10 border-b-2 border-red-600"></span>
-                    <span class="text-red-600 font-bold">{{ $participant->name }}</span>
+                <!-- Participant (Index 0 - HIJAU) -->
+                <span
+                    class="legend-item flex items-center gap-2 cursor-pointer select-none hover:bg-gray-100 px-3 py-2 rounded-lg transition-all duration-200 border border-gray-300 shadow-sm"
+                    data-chart="score" data-dataset="0">
+                    <span class="inline-block w-12 h-3 rounded-sm" style="background-color: #5db010;"></span>
+                    <span class="font-semibold text-gray-800" style="color: #5db010;">{{ $participant->name }}</span>
                 </span>
-                <span class="flex items-center gap-2">
-                    <span class="inline-block w-10" style="border-bottom: 1px dashed #6B7280;"></span>
-                    <span x-data x-text="'Toleransi ' + $wire.tolerancePercentage + '%'"></span>
+                <!-- Tolerance (Index 1 - MERAH) -->
+                <span
+                    class="legend-item flex items-center gap-2 cursor-pointer select-none hover:bg-gray-100 px-3 py-2 rounded-lg transition-all duration-200 border border-gray-300 shadow-sm"
+                    data-chart="score" data-dataset="1">
+                    <span class="inline-block w-12 h-3 rounded-sm" style="background-color: #b50505;"></span>
+                    <span class="font-semibold text-gray-800" x-data
+                        x-text="'Tolerance ' + $wire.tolerancePercentage + '%'"></span>
                 </span>
             </div>
 
@@ -372,12 +525,103 @@
                     if (window['scoreChartSetup_{{ $chartId }}']) return;
                     window['scoreChartSetup_{{ $chartId }}'] = true;
 
+                    // Initialize visibility state
+                    window.scoreVisibility_{{ $chartId }} = {
+                        0: false,
+                        1: false,
+                        2: false
+                    }; // false = visible
+
+                    // Toggle dataset function (shared with rating)
+                    window.toggleDataset_{{ $chartId }} = window.toggleDataset_{{ $chartId }} || function(chartType,
+                        datasetIndex) {
+                        console.log(`🔄 Toggling ${chartType} dataset ${datasetIndex}`);
+
+                        const chart = window[`${chartType}Chart_{{ $chartId }}`];
+                        if (!chart) {
+                            console.error('❌ Chart not found:', chartType);
+                            return;
+                        }
+
+                        const dataset = chart.data.datasets[datasetIndex];
+                        if (!dataset) {
+                            console.error('❌ Dataset not found:', datasetIndex);
+                            return;
+                        }
+
+                        // Toggle hidden state
+                        const wasHidden = dataset.hidden || false;
+                        dataset.hidden = !wasHidden;
+
+                        // Update visibility state
+                        if (chartType === 'rating') {
+                            window.ratingVisibility_{{ $chartId }}[datasetIndex] = !wasHidden;
+                        } else if (chartType === 'score') {
+                            window.scoreVisibility_{{ $chartId }}[datasetIndex] = !wasHidden;
+                        }
+
+                        console.log(`✅ ${chartType} dataset ${datasetIndex} ${wasHidden ? 'shown' : 'hidden'}`);
+
+                        chart.update('active');
+                        updateLegendVisual(chartType);
+                    };
+
+                    // Update legend visual state (shared function)
+                    function updateLegendVisual(chartType) {
+                        const legendContainer = document.getElementById(`${chartType}-legend-{{ $chartId }}`);
+                        if (!legendContainer) return;
+
+                        const chart = window[`${chartType}Chart_{{ $chartId }}`];
+                        if (!chart) return;
+
+                        const legendItems = legendContainer.querySelectorAll('.legend-item');
+                        legendItems.forEach(item => {
+                            const datasetIndex = parseInt(item.dataset.dataset);
+                            const isHidden = chart.data.datasets[datasetIndex]?.hidden || false;
+
+                            if (isHidden) {
+                                item.classList.add('opacity-50', 'line-through');
+                                item.classList.remove('bg-white', 'shadow-sm');
+                                item.classList.add('bg-gray-50');
+                            } else {
+                                item.classList.remove('opacity-50', 'line-through', 'bg-gray-50');
+                                item.classList.add('bg-white', 'shadow-sm');
+                            }
+                        });
+                    }
+
+                    // Setup legend click listeners
+                    function setupLegendListeners(chartType) {
+                        const legendContainer = document.getElementById(`${chartType}-legend-{{ $chartId }}`);
+                        if (!legendContainer) {
+                            console.warn(`⚠️ Legend container not found: ${chartType}-legend-{{ $chartId }}`);
+                            return;
+                        }
+
+                        // Remove existing listeners to prevent duplicates
+                        const newHandler = function(e) {
+                            const legendItem = e.target.closest('.legend-item');
+                            if (!legendItem) return;
+
+                            e.stopPropagation();
+                            const datasetIndex = parseInt(legendItem.dataset.dataset);
+                            const chartTypeAttr = legendItem.dataset.chart;
+
+                            console.log(`🖱️ Legend clicked: ${chartTypeAttr} dataset ${datasetIndex}`);
+                            window.toggleDataset_{{ $chartId }}(chartTypeAttr, datasetIndex);
+                        };
+
+                        legendContainer.removeEventListener('click', newHandler);
+                        legendContainer.addEventListener('click', newHandler);
+
+                        console.log(`✅ ${chartType} legend listeners setup`);
+                    }
+
                     function setupScoreChart() {
                         if (window.scoreChart_{{ $chartId }}) {
                             window.scoreChart_{{ $chartId }}.destroy();
                         }
 
-                        let chartInstance = null;
                         const chartLabels = @js($chartLabels);
                         let originalStandardScores = @js($chartOriginalStandardScores);
                         let standardScores = @js($chartStandardScores);
@@ -387,102 +631,128 @@
 
                         function initChart() {
                             const canvas = document.getElementById('spiderScoreChart-{{ $chartId }}');
-                            if (!canvas) return;
+                            if (!canvas) {
+                                console.error('❌ Canvas not found: spiderScoreChart-{{ $chartId }}');
+                                return;
+                            }
 
                             const ctx = canvas.getContext('2d');
-                            const maxScore = Math.max(...originalStandardScores, ...individualScores) * 1.2;
+                            const maxScore = Math.max(...originalStandardScores, ...individualScores, ...standardScores) * 1.2;
 
-                            chartInstance = new Chart(ctx, {
+                            const datasets = [{
+                                    // === LAYER 1: PESERTA (HIJAU #5db010) ===
+                                    label: participantName,
+                                    data: individualScores,
+                                    fill: true,
+                                    backgroundColor: '#5db010',
+                                    borderColor: '#8fd006',
+                                    pointBackgroundColor: '#8fd006',
+                                    pointBorderColor: '#fff',
+                                    pointHoverBackgroundColor: '#fff',
+                                    pointHoverBorderColor: '#8fd006',
+                                    borderWidth: 2.5,
+                                    pointRadius: 4,
+                                    pointBorderWidth: 2,
+                                    hidden: window.scoreVisibility_{{ $chartId }}[0],
+                                    datalabels: {
+                                        color: '#000000',
+                                        backgroundColor: '#5db010',
+                                        borderRadius: 4,
+                                        padding: {
+                                            top: 4,
+                                            bottom: 4,
+                                            left: 6,
+                                            right: 6
+                                        },
+                                        font: {
+                                            weight: 'bold',
+                                            size: 10
+                                        },
+                                        anchor: 'end',
+                                        align: 'end',
+                                        offset: 6,
+                                        formatter: (value) => value.toFixed(2)
+                                    }
+                                },
+                                {
+                                    // === LAYER 2: TOLERANSI (MERAH #b50505) ===
+                                    label: `Tolerance ${tolerancePercentage}%`,
+                                    data: standardScores,
+                                    fill: true,
+                                    backgroundColor: '#b50505',
+                                    borderColor: '#b50505',
+                                    borderWidth: 2,
+                                    pointRadius: 3,
+                                    pointBackgroundColor: '#9a0404',
+                                    pointBorderColor: '#fff',
+                                    pointBorderWidth: 2,
+                                    hidden: window.scoreVisibility_{{ $chartId }}[1],
+                                    datalabels: {
+                                        color: '#FFFFFF',
+                                        backgroundColor: '#b50505',
+                                        borderRadius: 4,
+                                        padding: {
+                                            top: 4,
+                                            bottom: 4,
+                                            left: 6,
+                                            right: 6
+                                        },
+                                        font: {
+                                            weight: 'bold',
+                                            size: 9
+                                        },
+                                        anchor: 'end',
+                                        align: 'start',
+                                        offset: 0,
+                                        formatter: (value) => value.toFixed(2)
+                                    }
+                                },
+                                {
+                                    // === LAYER 3: STANDARD (KUNING #fafa05) ===
+                                    label: 'Standard',
+                                    data: originalStandardScores,
+                                    fill: true,
+                                    backgroundColor: '#fafa05',
+                                    borderColor: '#e6d105',
+                                    pointBackgroundColor: '#e6d105',
+                                    pointBorderColor: '#fff',
+                                    pointHoverBackgroundColor: '#fff',
+                                    pointHoverBorderColor: '#e6d105',
+                                    borderWidth: 2.5,
+                                    pointRadius: 4,
+                                    pointBorderWidth: 2,
+                                    hidden: window.scoreVisibility_{{ $chartId }}[2],
+                                    datalabels: {
+                                        color: '#000000',
+                                        backgroundColor: '#fafa05',
+                                        borderRadius: 4,
+                                        padding: {
+                                            top: 4,
+                                            bottom: 4,
+                                            left: 6,
+                                            right: 6
+                                        },
+                                        font: {
+                                            weight: 'bold',
+                                            size: 10
+                                        },
+                                        anchor: 'center',
+                                        align: 'center',
+                                        offset: 6,
+                                        formatter: (value) => value.toFixed(2)
+                                    }
+                                }
+                            ];
+
+                            const chartInstance = new Chart(ctx, {
                                 type: 'radar',
                                 data: {
                                     labels: chartLabels,
-                                    datasets: [{
-                                        label: 'Standar',
-                                        data: originalStandardScores,
-                                        borderColor: '#000000',
-                                        backgroundColor: 'rgba(0, 0, 0, 0.05)',
-                                        borderWidth: 2,
-                                        pointRadius: 3,
-                                        pointBackgroundColor: '#000000',
-                                        datalabels: {
-                                            color: '#FFFFFF',
-                                            backgroundColor: '#000000',
-                                            borderRadius: 4,
-                                            padding: {
-                                                top: 4,
-                                                bottom: 4,
-                                                left: 6,
-                                                right: 6
-                                            },
-                                            font: {
-                                                weight: 'bold',
-                                                size: 9
-                                            },
-                                            anchor: 'end',
-                                            align: 'end',
-                                            offset: 6,
-                                            formatter: (value) => value.toFixed(2)
-                                        }
-                                    }, {
-                                        label: `Toleransi ${tolerancePercentage}%`,
-                                        data: standardScores,
-                                        borderColor: '#6B7280',
-                                        backgroundColor: 'transparent',
-                                        borderWidth: 1.5,
-                                        borderDash: [5, 5],
-                                        pointRadius: 2,
-                                        pointBackgroundColor: '#6B7280',
-                                        datalabels: {
-                                            color: '#FFFFFF',
-                                            backgroundColor: '#6B7280',
-                                            borderRadius: 4,
-                                            padding: {
-                                                top: 4,
-                                                bottom: 4,
-                                                left: 6,
-                                                right: 6
-                                            },
-                                            font: {
-                                                weight: 'bold',
-                                                size: 9
-                                            },
-                                            anchor: 'center',
-                                            align: 'center',
-                                            offset: 0,
-                                            formatter: (value) => value.toFixed(2)
-                                        }
-                                    }, {
-                                        label: participantName,
-                                        data: individualScores,
-                                        borderColor: '#DC2626',
-                                        backgroundColor: 'rgba(220, 38, 38, 0.05)',
-                                        borderWidth: 2,
-                                        pointRadius: 3,
-                                        pointBackgroundColor: '#DC2626',
-                                        datalabels: {
-                                            color: '#FFFFFF',
-                                            backgroundColor: '#DC2626',
-                                            borderRadius: 4,
-                                            padding: {
-                                                top: 4,
-                                                bottom: 4,
-                                                left: 6,
-                                                right: 6
-                                            },
-                                            font: {
-                                                weight: 'bold',
-                                                size: 9
-                                            },
-                                            anchor: 'end',
-                                            align: 'start',
-                                            offset: 6,
-                                            formatter: (value) => value.toFixed(2)
-                                        }
-                                    }]
+                                    datasets: datasets
                                 },
                                 options: {
                                     responsive: true,
-                                    maintainAspectRatio: true,
+                                    maintainAspectRatio: false,
                                     plugins: {
                                         legend: {
                                             display: false
@@ -491,7 +761,9 @@
                                             enabled: true
                                         },
                                         datalabels: {
-                                            display: true
+                                            display: function(context) {
+                                                return context.dataset.hidden !== true;
+                                            }
                                         }
                                     },
                                     scales: {
@@ -526,11 +798,21 @@
                             });
 
                             window.scoreChart_{{ $chartId }} = chartInstance;
+                            console.log('✅ Managerial Score chart initialized');
+
+                            // Setup legend listeners after chart is ready
+                            setTimeout(() => {
+                                setupLegendListeners('score');
+                                updateLegendVisual('score');
+                            }, 200);
                         }
 
                         function waitForLivewire(callback) {
-                            if (window.Livewire) callback();
-                            else setTimeout(() => waitForLivewire(callback), 100);
+                            if (window.Livewire) {
+                                callback();
+                            } else {
+                                setTimeout(() => waitForLivewire(callback), 100);
+                            }
                         }
 
                         waitForLivewire(function() {
@@ -539,19 +821,26 @@
                             Livewire.on('chartDataUpdated', function(data) {
                                 let chartData = Array.isArray(data) && data.length > 0 ? data[0] : data;
                                 if (window.scoreChart_{{ $chartId }} && chartData) {
+                                    console.log('📊 Updating managerial score chart data');
                                     tolerancePercentage = chartData.tolerance;
                                     originalStandardScores = chartData.originalStandardScores;
                                     standardScores = chartData.standardScores;
 
-                                    // Update all three datasets
-                                    window.scoreChart_{{ $chartId }}.data.datasets[0].data = chartData
-                                        .originalStandardScores;
-                                    window.scoreChart_{{ $chartId }}.data.datasets[1].label =
-                                        `Toleransi ${tolerancePercentage}%`;
-                                    window.scoreChart_{{ $chartId }}.data.datasets[1].data = chartData
-                                        .standardScores;
-                                    // Dataset[2] (individual) doesn't change
-                                    window.scoreChart_{{ $chartId }}.update('active');
+                                    const chart = window.scoreChart_{{ $chartId }};
+                                    chart.data.datasets[1].label = `Tolerance ${tolerancePercentage}%`;
+                                    chart.data.datasets[1].data = chartData.standardScores;
+                                    chart.data.datasets[2].data = chartData.originalStandardScores;
+
+                                    // Preserve visibility state
+                                    chart.data.datasets[0].hidden = window.scoreVisibility_{{ $chartId }}[
+                                        0];
+                                    chart.data.datasets[1].hidden = window.scoreVisibility_{{ $chartId }}[
+                                        1];
+                                    chart.data.datasets[2].hidden = window.scoreVisibility_{{ $chartId }}[
+                                        2];
+
+                                    chart.update('active');
+                                    setTimeout(() => updateLegendVisual('score'), 100);
                                 }
                             });
                         });
