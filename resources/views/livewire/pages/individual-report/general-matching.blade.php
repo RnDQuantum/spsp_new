@@ -204,8 +204,7 @@
                 <tr class="bg-blue-100">
                     <th class="border border-gray-300 px-4 py-2 text-center text-sm font-bold text-black col-number"
                         rowspan="2">NO.</th>
-                    <th class="border border-gray-300 px-4 py-2 text-center text-sm font-bold text-black"
-                        rowspan="2">
+                    <th class="border border-gray-300 px-4 py-2 text-center text-sm font-bold text-black" rowspan="2">
                         ASPEK</th>
                     <th class="border border-gray-300 px-2 py-2 text-center text-sm font-bold text-black">STANDARD</th>
                     <th class="border border-gray-300 px-2 py-2 text-center text-xs font-bold text-black range-scale"
@@ -238,141 +237,136 @@
             <tbody>
                 <!-- ASPEK PSIKOLOGI (POTENSI) -->
                 @if ($potensiCategory && count($potensiAspects) > 0)
-                    <tr class="bg-gray-100">
-                        <td class="border border-gray-300 px-4 py-2 font-bold text-sm text-black uppercase"
-                            colspan="8">
-                            {{ $potensiCategory->name }}</td>
-                    </tr>
+                <tr class="bg-gray-100">
+                    <td class="border border-gray-300 px-4 py-2 font-bold text-sm text-black uppercase" colspan="8">
+                        {{ $potensiCategory->name }}</td>
+                </tr>
 
-                    @foreach ($potensiAspects as $index => $aspect)
-                        <!-- Aspect Header with Progress Bar -->
-                        <tr class="bg-gray-100">
-                            <td class="border border-gray-300 px-4 py-2 text-sm font-bold text-black text-center">
-                                {{ $loop->iteration }}.</td>
-                            <td class="border border-gray-300 px-4 py-2 text-sm font-bold text-black">
-                                {{ $aspect['name'] }}</td>
-                            <td class="border border-gray-300 px-2 py-2 text-sm font-bold text-black text-center">
-                                {{ number_format($aspect['standard_rating'], 2, ',', '.') }}</td>
-                            <td class="border border-gray-300 range-scale" colspan="5">
-                                <div class="progress-container">
-                                    <div class="h-full rounded {{ $aspect['percentage'] <= 40 ? 'gradient-bar-low' : ($aspect['percentage'] <= 70 ? 'gradient-bar-medium' : 'gradient-bar-high') }}"
-                                        style="width: {{ $aspect['percentage'] }}%;"></div>
-                                    <div class="absolute right-0 top-0 bottom-0 flex items-center pr-2">
-                                        <div class="rating-display text-right">
-                                            <div class="percentage">{{ $aspect['percentage'] }}%</div>
-                                            <div
-                                                class="rating-comparison {{ round($aspect['individual_rating']) >= $aspect['standard_rating'] ? 'above-standard' : 'below-standard' }}">
-                                                <span></span>
-                                                {{ number_format($aspect['individual_rating'], 2, ',', '.') }} /
-                                                {{ number_format($aspect['standard_rating'], 2, ',', '.') }}
-                                            </div>
-                                        </div>
+                @foreach ($potensiAspects as $index => $aspect)
+                <!-- Aspect Header with Progress Bar -->
+                <tr class="bg-gray-100">
+                    <td class="border border-gray-300 px-4 py-2 text-sm font-bold text-black text-center">
+                        {{ $loop->iteration }}.</td>
+                    <td class="border border-gray-300 px-4 py-2 text-sm font-bold text-black">
+                        {{ $aspect['name'] }}</td>
+                    <td class="border border-gray-300 px-2 py-2 text-sm font-bold text-black text-center">
+                        {{ number_format($aspect['standard_rating'], 2, ',', '.') }}</td>
+                    <td class="border border-gray-300 range-scale" colspan="5">
+                        <div class="progress-container">
+                            <div class="h-full rounded {{ $aspect['percentage'] <= 40 ? 'gradient-bar-low' : ($aspect['percentage'] <= 70 ? 'gradient-bar-medium' : 'gradient-bar-high') }}"
+                                style="width: {{ $aspect['percentage'] }}%;"></div>
+                            <div class="absolute right-0 top-0 bottom-0 flex items-center pr-2">
+                                <div class="rating-display text-right">
+                                    <div class="percentage">{{ $aspect['percentage'] }}%</div>
+                                    <div
+                                        class="rating-comparison {{ $aspect['individual_rating'] >= $aspect['standard_rating'] ? 'above-standard' : 'below-standard' }}">
+                                        <span></span>
+                                        {{ number_format($aspect['individual_rating'], 2, ',', '.') }} /
+                                        {{ number_format($aspect['standard_rating'], 2, ',', '.') }}
                                     </div>
                                 </div>
-                            </td>
-                        </tr>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
 
-                        <!-- Sub-Aspects -->
-                        @foreach ($aspect['sub_aspects'] as $subIndex => $subAspect)
-                            <tr class="bg-gray-50">
-                                <td class="border border-gray-300 px-4 py-1 text-xs text-black col-number text-center">
-                                    {{ $subIndex + 1 }}.</td>
-                                <td class="border border-gray-300 px-4 py-1 text-xs text-black">
-                                    {{ $subAspect['name'] }}</td>
-                                <td class="border border-gray-300 px-2 py-1 text-xs text-black text-center">
-                                    {{ $subAspect['standard_rating'] }}</td>
-                                @for ($i = 1; $i <= 5; $i++)
-                                    <td
-                                        class="border border-gray-300 range-scale text-center {{ $subAspect['standard_rating'] == $i ? 'rating-cell-standard-' . $i : 'rating-cell-empty text-black' }}">
-                                        @if ($subAspect['individual_rating'] == $i)
-                                            <span
-                                                class="rating-x {{ $subAspect['individual_rating'] >= $subAspect['standard_rating'] ? 'above-standard' : 'below-standard' }}">
-                                                X
-                                            </span>
-                                        @endif
-                                    </td>
-                                @endfor
-                            </tr>
-                        @endforeach
-                    @endforeach
+                <!-- Sub-Aspects -->
+                @foreach ($aspect['sub_aspects'] as $subIndex => $subAspect)
+                <tr class="bg-gray-50">
+                    <td class="border border-gray-300 px-4 py-1 text-xs text-black col-number text-center">
+                        {{ $subIndex + 1 }}.</td>
+                    <td class="border border-gray-300 px-4 py-1 text-xs text-black">
+                        {{ $subAspect['name'] }}</td>
+                    <td class="border border-gray-300 px-2 py-1 text-xs text-black text-center">
+                        {{ $subAspect['standard_rating'] }}</td>
+                    @for ($i = 1; $i <= 5; $i++) <td
+                        class="border border-gray-300 range-scale text-center {{ $subAspect['standard_rating'] == $i ? 'rating-cell-standard-' . $i : 'rating-cell-empty text-black' }}">
+                        @if ($subAspect['individual_rating'] == $i)
+                        <span
+                            class="rating-x {{ $subAspect['individual_rating'] >= $subAspect['standard_rating'] ? 'above-standard' : 'below-standard' }}">
+                            X
+                        </span>
+                        @endif
+                        </td>
+                        @endfor
+                </tr>
+                @endforeach
+                @endforeach
                 @endif
 
                 <!-- ASPEK KOMPETENSI -->
                 @if ($kompetensiCategory && count($kompetensiAspects) > 0)
-                    <tr class="bg-gray-100">
-                        <td class="border border-gray-300 px-4 py-2 font-bold text-sm text-black uppercase"
-                            colspan="8">
-                            {{ $kompetensiCategory->name }}</td>
-                    </tr>
+                <tr class="bg-gray-100">
+                    <td class="border border-gray-300 px-4 py-2 font-bold text-sm text-black uppercase" colspan="8">
+                        {{ $kompetensiCategory->name }}</td>
+                </tr>
 
-                    @foreach ($kompetensiAspects as $index => $aspect)
-                        <!-- Aspect Header with Progress Bar -->
-                        <tr class="bg-gray-100">
-                            <td class="border border-gray-300 px-4 py-2 text-sm font-bold text-black text-center">
-                                {{ $loop->iteration }}.</td>
-                            <td class="border border-gray-300 px-4 py-2 text-sm font-bold text-black">
-                                {{ $aspect['name'] }}</td>
-                            <td class="border border-gray-300 px-2 py-2 text-sm font-bold text-black text-center">
-                                {{ number_format($aspect['standard_rating'], 2, ',', '.') }}</td>
-                            <td class="border border-gray-300 range-scale" colspan="5">
-                                <div class="progress-container">
-                                    <div class="h-full rounded {{ $aspect['percentage'] <= 40 ? 'gradient-bar-low' : ($aspect['percentage'] <= 70 ? 'gradient-bar-medium' : 'gradient-bar-high') }}"
-                                        style="width: {{ $aspect['percentage'] }}%;"></div>
-                                    <div class="absolute right-0 top-0 bottom-0 flex items-center pr-2">
-                                        <div class="rating-display text-right">
-                                            <div class="percentage">{{ $aspect['percentage'] }}%</div>
-                                            <div
-                                                class="rating-comparison {{ round($aspect['individual_rating']) >= $aspect['standard_rating'] ? 'above-standard' : 'below-standard' }}">
-                                                {{ number_format($aspect['individual_rating'], 2, ',', '.') }} /
-                                                {{ number_format($aspect['standard_rating'], 2, ',', '.') }}
-                                            </div>
-                                        </div>
+                @foreach ($kompetensiAspects as $index => $aspect)
+                <!-- Aspect Header with Progress Bar -->
+                <tr class="bg-gray-100">
+                    <td class="border border-gray-300 px-4 py-2 text-sm font-bold text-black text-center">
+                        {{ $loop->iteration }}.</td>
+                    <td class="border border-gray-300 px-4 py-2 text-sm font-bold text-black">
+                        {{ $aspect['name'] }}</td>
+                    <td class="border border-gray-300 px-2 py-2 text-sm font-bold text-black text-center">
+                        {{ number_format($aspect['standard_rating'], 2, ',', '.') }}</td>
+                    <td class="border border-gray-300 range-scale" colspan="5">
+                        <div class="progress-container">
+                            <div class="h-full rounded {{ $aspect['percentage'] <= 40 ? 'gradient-bar-low' : ($aspect['percentage'] <= 70 ? 'gradient-bar-medium' : 'gradient-bar-high') }}"
+                                style="width: {{ $aspect['percentage'] }}%;"></div>
+                            <div class="absolute right-0 top-0 bottom-0 flex items-center pr-2">
+                                <div class="rating-display text-right">
+                                    <div class="percentage">{{ $aspect['percentage'] }}%</div>
+                                    <div
+                                        class="rating-comparison {{ $aspect['individual_rating'] >= $aspect['standard_rating'] ? 'above-standard' : 'below-standard' }}">
+                                        {{ number_format($aspect['individual_rating'], 2, ',', '.') }} /
+                                        {{ number_format($aspect['standard_rating'], 2, ',', '.') }}
                                     </div>
                                 </div>
-                            </td>
-                        </tr>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
 
-                        <!-- Kompetensi Description (no sub-aspects, just description) -->
-                        @if (isset($aspect['description']) && $aspect['description'])
-                            <tr class="bg-gray-50">
-                                <td class="border border-gray-300 px-4 py-1 text-xs text-black text-center">1.</td>
-                                <td class="border border-gray-300 px-4 py-1 text-xs text-black">
-                                    {{ $aspect['description'] }}</td>
-                                <td class="border border-gray-300 px-2 py-1 text-xs text-black text-center">
-                                    {{ $aspect['standard_rating'] }}</td>
-                                @for ($i = 1; $i <= 5; $i++)
-                                    <td
-                                        class="border border-gray-300 range-scale text-center {{ $aspect['standard_rating'] == $i ? 'rating-cell-standard-' . $i : 'rating-cell-empty text-black' }}">
-                                        @if (round($aspect['individual_rating']) == $i)
-                                            <span
-                                                class="rating-x {{ round($aspect['individual_rating']) >= $aspect['standard_rating'] ? 'above-standard' : 'below-standard' }}">
-                                                X
-                                            </span>
-                                        @endif
-                                    </td>
-                                @endfor
-                            </tr>
-                        @else
-                            <!-- If no description, show rating directly -->
-                            <tr class="bg-gray-50">
-                                <td class="border border-gray-300 px-4 py-1 text-xs text-black text-center">1.</td>
-                                <td class="border border-gray-300 px-4 py-1 text-xs text-black">Rating Level</td>
-                                <td class="border border-gray-300 px-2 py-1 text-xs text-black text-center">
-                                    {{ $aspect['standard_rating'] }}</td>
-                                @for ($i = 1; $i <= 5; $i++)
-                                    <td
-                                        class="border border-gray-300 range-scale text-center {{ $aspect['standard_rating'] == $i ? 'rating-cell-standard-' . $i : 'rating-cell-empty text-black' }}">
-                                        @if (round($aspect['individual_rating']) == $i)
-                                            <span
-                                                class="rating-x {{ round($aspect['individual_rating']) >= $aspect['standard_rating'] ? 'above-standard' : 'below-standard' }}">
-                                                X
-                                            </span>
-                                        @endif
-                                    </td>
-                                @endfor
-                            </tr>
+                <!-- Kompetensi Description (no sub-aspects, just description) -->
+                @if (isset($aspect['description']) && $aspect['description'])
+                <tr class="bg-gray-50">
+                    <td class="border border-gray-300 px-4 py-1 text-xs text-black text-center">1.</td>
+                    <td class="border border-gray-300 px-4 py-1 text-xs text-black">
+                        {{ $aspect['description'] }}</td>
+                    <td class="border border-gray-300 px-2 py-1 text-xs text-black text-center">
+                        {{ $aspect['standard_rating'] }}</td>
+                    @for ($i = 1; $i <= 5; $i++) <td
+                        class="border border-gray-300 range-scale text-center {{ $aspect['standard_rating'] == $i ? 'rating-cell-standard-' . $i : 'rating-cell-empty text-black' }}">
+                        @if (round($aspect['individual_rating']) == $i)
+                        <span
+                            class="rating-x {{ round($aspect['individual_rating']) >= $aspect['standard_rating'] ? 'above-standard' : 'below-standard' }}">
+                            X
+                        </span>
                         @endif
-                    @endforeach
+                        </td>
+                        @endfor
+                </tr>
+                @else
+                <!-- If no description, show rating directly -->
+                <tr class="bg-gray-50">
+                    <td class="border border-gray-300 px-4 py-1 text-xs text-black text-center">1.</td>
+                    <td class="border border-gray-300 px-4 py-1 text-xs text-black">Rating Level</td>
+                    <td class="border border-gray-300 px-2 py-1 text-xs text-black text-center">
+                        {{ $aspect['standard_rating'] }}</td>
+                    @for ($i = 1; $i <= 5; $i++) <td
+                        class="border border-gray-300 range-scale text-center {{ $aspect['standard_rating'] == $i ? 'rating-cell-standard-' . $i : 'rating-cell-empty text-black' }}">
+                        @if (round($aspect['individual_rating']) == $i)
+                        <span
+                            class="rating-x {{ round($aspect['individual_rating']) >= $aspect['standard_rating'] ? 'above-standard' : 'below-standard' }}">
+                            X
+                        </span>
+                        @endif
+                        </td>
+                        @endfor
+                </tr>
+                @endif
+                @endforeach
                 @endif
             </tbody>
         </table>
