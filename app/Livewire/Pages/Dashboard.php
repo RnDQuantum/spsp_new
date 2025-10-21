@@ -205,6 +205,7 @@ class Dashboard extends Component
 
         $this->dispatch('chartDataUpdated', [
             'hasParticipant' => $hasParticipant,
+            'participantName' => $this->participant?->name ?? '',
             'tolerancePercentage' => $this->tolerancePercentage,
             'potensi' => [
                 'labels' => $this->potensiLabels,

@@ -710,6 +710,7 @@
                             console.log('Chart data updated:', chartData);
 
                             const hasParticipant = chartData.hasParticipant;
+                            const participantName = chartData.participantName;
                             const tolerancePercentage = chartData.tolerancePercentage;
 
                             // Update Potensi Chart
@@ -718,7 +719,8 @@
                                     window.potensiChart_{{ $potensiChartId }},
                                     chartData.potensi,
                                     hasParticipant,
-                                    tolerancePercentage
+                                    tolerancePercentage,
+                                    participantName
                                 );
                             }
 
@@ -728,7 +730,8 @@
                                     window.kompetensiChart_{{ $kompetensiChartId }},
                                     chartData.kompetensi,
                                     hasParticipant,
-                                    tolerancePercentage
+                                    tolerancePercentage,
+                                    participantName
                                 );
                             }
 
@@ -738,7 +741,8 @@
                                     window.generalChart_{{ $generalChartId }},
                                     chartData.general,
                                     hasParticipant,
-                                    tolerancePercentage
+                                    tolerancePercentage,
+                                    participantName
                                 );
                             }
                         } catch (e) {
@@ -748,11 +752,12 @@
                 }
 
                 // Helper function to update chart in-place
-                function updateChart(chart, data, hasParticipant, tolerancePercentage) {
+                function updateChart(chart, data, hasParticipant, tolerancePercentage, participantName) {
                     chart.data.labels = data.labels;
 
                     if (hasParticipant) {
                         // Update all 3 datasets (participant, tolerance, standard)
+                        chart.data.datasets[0].label = participantName || 'Peserta';
                         chart.data.datasets[0].data = data.individualRatings;
                         chart.data.datasets[1].label = `Tolerance ${tolerancePercentage}%`;
                         chart.data.datasets[1].data = data.standardRatings;
