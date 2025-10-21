@@ -1,4 +1,4 @@
-<div x-data="{ mobileOpen: false, minimized: false, individualOpen: false, generalOpen: false }" @sidebar-toggled.window="minimized = $event.detail.minimized">
+<div x-data="{ mobileOpen: false, minimized: true, individualOpen: false, generalOpen: false }" @sidebar-toggled.window="minimized = $event.detail.minimized">
     <!-- Mobile Toggle Button -->
     <button @click="mobileOpen = !mobileOpen"
         class="fixed top-4 left-4 z-50 p-2 bg-gray-800 text-white rounded-lg md:hidden">
