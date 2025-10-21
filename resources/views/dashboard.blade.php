@@ -1,4 +1,9 @@
 <x-layouts.app title="Dashboard Overview">
+    @if (session('force_reload'))
+        <script>
+            window.location.reload();
+        </script>
+    @endif
 
     <h1 class="text-3xl text-center font-bold text-gray-900 dark:text-gray-100">Static Pribadi Spider Plot (SPSP)</h1>
     <p class="text-center text-gray-700 dark:text-gray-300 mt-2">Selamat Datang!</p>

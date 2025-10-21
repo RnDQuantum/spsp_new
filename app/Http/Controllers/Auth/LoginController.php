@@ -32,6 +32,7 @@ class LoginController extends Controller
 
         if (Auth::attempt($credentials, $remember)) {
             $request->session()->regenerate();
+            session()->flash('force_reload', true);
 
             return redirect()->intended(route('dashboard'));
         }
