@@ -56,10 +56,10 @@
                 <div class="space-y-6 mt-8">
                     <!-- Chart Potensi (Pentagon) -->
                     @if (count($potensiLabels) > 0)
-                        <div class="bg-white p-6 rounded-lg shadow border border-gray-200" wire:ignore>
+                        <div class="bg-white p-6 rounded-lg shadow border border-gray-200">
                             <h3 class="text-lg text-center font-semibold text-gray-800 mb-4">Potential Mapping (Rating)
                             </h3>
-                            <div class="relative" style="height: 600px;">
+                            <div class="relative" style="height: 600px;" wire:ignore>
                                 <canvas id="potensiChart-{{ $potensiChartId }}"></canvas>
                             </div>
                         </div>
@@ -67,11 +67,11 @@
 
                     <!-- Chart Kompetensi (Nonagon) -->
                     @if (count($kompetensiLabels) > 0)
-                        <div class="bg-white p-6 rounded-lg shadow border border-gray-200" wire:ignore>
+                        <div class="bg-white p-6 rounded-lg shadow border border-gray-200">
                             <h3 class="text-lg text-center font-semibold text-gray-800 mb-4">Managerial Potency Mapping
                                 (Rating)
                             </h3>
-                            <div class="relative" style="height: 600px;">
+                            <div class="relative" style="height: 600px;" wire:ignore>
                                 <canvas id="kompetensiChart-{{ $kompetensiChartId }}"></canvas>
                             </div>
                         </div>
@@ -79,9 +79,9 @@
 
                     <!-- Chart General (Tetradecagon) -->
                     @if (count($generalLabels) > 0)
-                        <div class="bg-white p-6 rounded-lg shadow border border-gray-200" wire:ignore>
+                        <div class="bg-white p-6 rounded-lg shadow border border-gray-200">
                             <h3 class="text-lg text-center font-semibold text-gray-800 mb-4">General Mapping (Rating)</h3>
-                            <div class="relative" style="height: 600px;">
+                            <div class="relative" style="height: 600px;" wire:ignore>
                                 <canvas id="generalChart-{{ $generalChartId }}"></canvas>
                             </div>
                         </div>
@@ -100,12 +100,9 @@
 
     <!-- Chart Scripts -->
     @if (count($allAspectsData) > 0)
+        @push('scripts')
         <script>
             (function() {
-                // Prevent multiple initializations
-                if (window['spiderChartSetup_{{ $potensiChartId }}']) return;
-                window['spiderChartSetup_{{ $potensiChartId }}'] = true;
-
                 // Wait for Chart.js to be available
                 function waitForChartJs(callback) {
                     if (typeof Chart !== 'undefined') {
@@ -115,19 +112,29 @@
                     }
                 }
 
-                // Wait for DOM and Chart.js
-                function init() {
+                // Initialize all charts
+                function initCharts() {
+                    console.log('Initializing charts...');
                     initializePotensiChart();
                     initializeKompetensiChart();
                     initializeGeneralChart();
-                    setupLivewireListeners();
                 }
 
-                if (document.readyState === 'loading') {
-                    document.addEventListener('DOMContentLoaded', () => waitForChartJs(init));
-                } else {
-                    waitForChartJs(init);
+                function waitForLivewire(callback) {
+                    if (window.Livewire) {
+                        callback();
+                    } else {
+                        setTimeout(() => waitForLivewire(callback), 100);
+                    }
                 }
+
+                // Initialize charts on page load
+                waitForChartJs(initCharts);
+
+                // Setup Livewire event listeners
+                waitForLivewire(function() {
+                    setupLivewireListeners();
+                });
 
                 // ========================================
                 // POTENSI CHART - URUTAN: PESERTA → TOLERANSI → STANDARD
@@ -692,51 +699,73 @@
                 }
 
                 // ========================================
-                // LIVEWIRE LISTENERS - UPDATE TOLERANSI
+                // LIVEWIRE LISTENERS - UPDATE CHARTS
                 // ========================================
                 function setupLivewireListeners() {
-                    function waitForLivewire(callback) {
-                        if (window.Livewire) callback();
-                        else setTimeout(() => waitForLivewire(callback), 100);
-                    }
-
-                    waitForLivewire(function() {
-                        Livewire.on('chartDataUpdated', function(data) {
-                            let chartData = Array.isArray(data) && data.length > 0 ? data[0] : data;
+                    Livewire.on('chartDataUpdated', function(eventData) {
+                        try {
+                            const chartData = Array.isArray(eventData) && eventData.length > 0 ? eventData[0] : eventData;
                             if (!chartData) return;
 
-                            const tolerancePercentage = chartData.tolerance;
+                            console.log('Chart data updated:', chartData);
 
-                            // **POTENSI CHART**: [0=PESERTA, 1=TOLERANSI, 2=STANDARD]
-                            if (chartData.potensi && window.potensiChart_{{ $potensiChartId }}) {
-                                const chart = window.potensiChart_{{ $potensiChartId }};
-                                chart.data.datasets[1].label = `Tolerance ${tolerancePercentage}%`;
-                                chart.data.datasets[1].data = chartData.potensi.standardRatings;
-                                chart.data.datasets[2].data = chartData.potensi.originalStandardRatings;
-                                chart.update('active');
+                            const hasParticipant = chartData.hasParticipant;
+                            const tolerancePercentage = chartData.tolerancePercentage;
+
+                            // Update Potensi Chart
+                            if (window.potensiChart_{{ $potensiChartId }} && chartData.potensi) {
+                                updateChart(
+                                    window.potensiChart_{{ $potensiChartId }},
+                                    chartData.potensi,
+                                    hasParticipant,
+                                    tolerancePercentage
+                                );
                             }
 
-                            // **KOMPETENSI CHART**: [0=PESERTA, 1=TOLERANSI, 2=STANDARD]
-                            if (chartData.kompetensi && window.kompetensiChart_{{ $kompetensiChartId }}) {
-                                const chart = window.kompetensiChart_{{ $kompetensiChartId }};
-                                chart.data.datasets[1].label = `Tolerance ${tolerancePercentage}%`;
-                                chart.data.datasets[1].data = chartData.kompetensi.standardRatings;
-                                chart.data.datasets[2].data = chartData.kompetensi.originalStandardRatings;
-                                chart.update('active');
+                            // Update Kompetensi Chart
+                            if (window.kompetensiChart_{{ $kompetensiChartId }} && chartData.kompetensi) {
+                                updateChart(
+                                    window.kompetensiChart_{{ $kompetensiChartId }},
+                                    chartData.kompetensi,
+                                    hasParticipant,
+                                    tolerancePercentage
+                                );
                             }
 
-                            // **GENERAL CHART**: [0=PESERTA, 1=TOLERANSI, 2=STANDARD]
-                            if (chartData.general && window.generalChart_{{ $generalChartId }}) {
-                                const chart = window.generalChart_{{ $generalChartId }};
-                                chart.data.datasets[1].label = `Tolerance ${tolerancePercentage}%`;
-                                chart.data.datasets[1].data = chartData.general.standardRatings;
-                                chart.data.datasets[2].data = chartData.general.originalStandardRatings;
-                                chart.update('active');
+                            // Update General Chart
+                            if (window.generalChart_{{ $generalChartId }} && chartData.general) {
+                                updateChart(
+                                    window.generalChart_{{ $generalChartId }},
+                                    chartData.general,
+                                    hasParticipant,
+                                    tolerancePercentage
+                                );
                             }
-                        });
+                        } catch (e) {
+                            console.error('Chart update error:', e, eventData);
+                        }
                     });
+                }
+
+                // Helper function to update chart in-place
+                function updateChart(chart, data, hasParticipant, tolerancePercentage) {
+                    chart.data.labels = data.labels;
+
+                    if (hasParticipant) {
+                        // Update all 3 datasets (participant, tolerance, standard)
+                        chart.data.datasets[0].data = data.individualRatings;
+                        chart.data.datasets[1].label = `Tolerance ${tolerancePercentage}%`;
+                        chart.data.datasets[1].data = data.standardRatings;
+                        chart.data.datasets[2].data = data.originalStandardRatings;
+                    } else {
+                        // Update only standard dataset
+                        chart.data.datasets[0].data = data.originalStandardRatings;
+                    }
+
+                    chart.update('active');
                 }
             })();
         </script>
+        @endpush
     @endif
 </div>

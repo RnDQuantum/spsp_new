@@ -79,7 +79,7 @@ class Dashboard extends Component
 
     public function mount(): void
     {
-        // Generate unique chart IDs
+        // Generate static chart IDs (same across re-renders)
         $this->potensiChartId = 'potensiSpider'.uniqid();
         $this->kompetensiChartId = 'kompetensiSpider'.uniqid();
         $this->generalChartId = 'generalSpider'.uniqid();
@@ -107,9 +107,7 @@ class Dashboard extends Component
     {
         \Log::info('Dashboard: handleEventSelected called', ['eventCode' => $eventCode]);
 
-        // Reset participant and reload data
-        $this->participant = null;
-        $this->loadDashboardData();
+        // Position will auto-reset, wait for position-selected event
     }
 
     /**
@@ -119,9 +117,7 @@ class Dashboard extends Component
     {
         \Log::info('Dashboard: handlePositionSelected called', ['positionFormationId' => $positionFormationId]);
 
-        // Position changed, reload data (participant might be reset)
-        $this->participant = null;
-        $this->loadDashboardData();
+        // Participant will auto-reset, wait for participant-selected event
     }
 
     /**
@@ -132,6 +128,7 @@ class Dashboard extends Component
         \Log::info('Dashboard: handleParticipantSelected called', ['participantId' => $participantId]);
 
         $this->loadDashboardData();
+        $this->dispatchChartUpdate();
     }
 
     /**
@@ -196,6 +193,38 @@ class Dashboard extends Component
                 'totalAspectsCount' => count($this->allAspectsData),
             ]);
         }
+
+    }
+
+    /**
+     * Dispatch chart update event to JavaScript
+     */
+    private function dispatchChartUpdate(): void
+    {
+        $hasParticipant = $this->participant !== null;
+
+        $this->dispatch('chartDataUpdated', [
+            'hasParticipant' => $hasParticipant,
+            'tolerancePercentage' => $this->tolerancePercentage,
+            'potensi' => [
+                'labels' => $this->potensiLabels,
+                'originalStandardRatings' => $this->potensiOriginalStandardRatings,
+                'standardRatings' => $this->potensiStandardRatings,
+                'individualRatings' => $this->potensiIndividualRatings,
+            ],
+            'kompetensi' => [
+                'labels' => $this->kompetensiLabels,
+                'originalStandardRatings' => $this->kompetensiOriginalStandardRatings,
+                'standardRatings' => $this->kompetensiStandardRatings,
+                'individualRatings' => $this->kompetensiIndividualRatings,
+            ],
+            'general' => [
+                'labels' => $this->generalLabels,
+                'originalStandardRatings' => $this->generalOriginalStandardRatings,
+                'standardRatings' => $this->generalStandardRatings,
+                'individualRatings' => $this->generalIndividualRatings,
+            ],
+        ]);
     }
 
     /**
