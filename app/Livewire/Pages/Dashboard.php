@@ -85,7 +85,7 @@ class Dashboard extends Component
         $this->generalChartId = 'generalSpider'.uniqid();
 
         // Load tolerance from session
-        $this->tolerancePercentage = session('dashboard.tolerance', 10);
+        $this->tolerancePercentage = session('individual_report.tolerance', 10);
 
         // Load data if session already has filters set (e.g., after refresh)
         $eventCode = session('filter.event_code');
@@ -278,6 +278,7 @@ class Dashboard extends Component
             'participantId' => $this->participant?->id,
             'potensiCategoryId' => $this->potensiCategory?->id,
             'kompetensiCategoryId' => $this->kompetensiCategory?->id,
+            'tolerancePercentage' => $this->tolerancePercentage,
         ]);
 
         // Load Potensi aspects
@@ -347,6 +348,10 @@ class Dashboard extends Component
      */
     private function loadStandardAspectsData(): void
     {
+        \Log::info('Dashboard: loadStandardAspectsData called', [
+            'tolerancePercentage' => $this->tolerancePercentage,
+        ]);
+
         // Load Potensi aspects
         if ($this->potensiCategory) {
             $this->potensiAspectsData = $this->loadStandardCategoryAspects($this->potensiCategory->id);
@@ -530,16 +535,23 @@ class Dashboard extends Component
     {
         $this->tolerancePercentage = $tolerance;
 
-        // Reload data with new tolerance
-        $this->loadDashboardData();
+        // Reload aspects data with new tolerance
+        if ($this->participant) {
+            $this->loadAspectsData();
+            $this->prepareChartData();
+        } else {
+            $this->loadStandardAspectsData();
+            $this->prepareStandardChartData();
+        }
 
         // Get updated summary statistics
         $summary = $this->getPassingSummary();
 
         // Dispatch events to update all charts
         $this->dispatch('chartDataUpdated', [
-            'chartType' => 'all',
-            'tolerance' => $tolerance,
+            'hasParticipant' => $this->participant !== null,
+            'participantName' => $this->participant?->name ?? '',
+            'tolerancePercentage' => $tolerance,
             'potensi' => [
                 'labels' => $this->potensiLabels,
                 'originalStandardRatings' => $this->potensiOriginalStandardRatings,
