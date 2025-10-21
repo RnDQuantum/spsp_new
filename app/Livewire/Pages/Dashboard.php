@@ -3,12 +3,13 @@
 namespace App\Livewire\Pages;
 
 use App\Models\Aspect;
+use Livewire\Component;
+use App\Models\Participant;
+use App\Models\CategoryType;
+use Livewire\Attributes\Layout;
 use App\Models\AspectAssessment;
 use App\Models\CategoryAssessment;
-use App\Models\CategoryType;
-use App\Models\Participant;
-use Livewire\Attributes\Layout;
-use Livewire\Component;
+use Illuminate\Support\Facades\Log;
 
 #[Layout('components.layouts.app', ['title' => 'Dashboard'])]
 class Dashboard extends Component
@@ -85,9 +86,9 @@ class Dashboard extends Component
     public function mount(): void
     {
         // Generate static chart IDs (same across re-renders)
-        $this->potensiChartId = 'potensiSpider'.uniqid();
-        $this->kompetensiChartId = 'kompetensiSpider'.uniqid();
-        $this->generalChartId = 'generalSpider'.uniqid();
+        $this->potensiChartId = 'potensiSpider' . uniqid();
+        $this->kompetensiChartId = 'kompetensiSpider' . uniqid();
+        $this->generalChartId = 'generalSpider' . uniqid();
 
         // Load tolerance from session
         $this->tolerancePercentage = session('individual_report.tolerance', 10);
@@ -97,7 +98,7 @@ class Dashboard extends Component
         $positionFormationId = session('filter.position_formation_id');
 
         if ($eventCode && $positionFormationId) {
-            \Log::info('Dashboard: mount() - loading data from session', [
+            Log::info('Dashboard: mount() - loading data from session', [
                 'eventCode' => $eventCode,
                 'positionFormationId' => $positionFormationId,
             ]);
@@ -110,7 +111,7 @@ class Dashboard extends Component
      */
     public function handleEventSelected(?string $eventCode): void
     {
-        \Log::info('Dashboard: handleEventSelected called', ['eventCode' => $eventCode]);
+        Log::info('Dashboard: handleEventSelected called', ['eventCode' => $eventCode]);
 
         // Check if participant was selected before
         $previousParticipantId = session('filter.participant_id');
@@ -128,7 +129,7 @@ class Dashboard extends Component
      */
     public function handlePositionSelected(?int $positionFormationId): void
     {
-        \Log::info('Dashboard: handlePositionSelected called', ['positionFormationId' => $positionFormationId]);
+        Log::info('Dashboard: handlePositionSelected called', ['positionFormationId' => $positionFormationId]);
 
         // Check if participant was selected before
         $previousParticipantId = session('filter.participant_id');
@@ -146,13 +147,13 @@ class Dashboard extends Component
      */
     public function handleParticipantSelected(?int $participantId): void
     {
-        \Log::info('Dashboard: handleParticipantSelected called', ['participantId' => $participantId]);
+        Log::info('Dashboard: handleParticipantSelected called', ['participantId' => $participantId]);
 
         // Check if we're transitioning from null to selected
         $wasNull = $this->participant === null;
         $willBeSelected = $participantId !== null;
 
-        \Log::info('Dashboard: Participant transition check', [
+        Log::info('Dashboard: Participant transition check', [
             'wasNull' => $wasNull,
             'willBeSelected' => $willBeSelected,
             'participantId' => $participantId,
@@ -178,7 +179,7 @@ class Dashboard extends Component
         $positionFormationId = session('filter.position_formation_id');
         $participantId = session('filter.participant_id');
 
-        \Log::info('Dashboard: loadDashboardData called', [
+        Log::info('Dashboard: loadDashboardData called', [
             'eventCode' => $eventCode,
             'positionFormationId' => $positionFormationId,
             'participantId' => $participantId,
@@ -189,7 +190,7 @@ class Dashboard extends Component
 
         // If no event or position, show nothing
         if (! $eventCode || ! $positionFormationId) {
-            \Log::warning('Dashboard: Missing event or position, aborting data load');
+            Log::warning('Dashboard: Missing event or position, aborting data load');
 
             return;
         }
@@ -197,7 +198,7 @@ class Dashboard extends Component
         // Load template and categories for the position
         $this->loadTemplateAndCategories($positionFormationId);
 
-        \Log::info('Dashboard: Categories loaded', [
+        Log::info('Dashboard: Categories loaded', [
             'potensiCategory' => $this->potensiCategory?->id,
             'kompetensiCategory' => $this->kompetensiCategory?->id,
         ]);
@@ -225,13 +226,12 @@ class Dashboard extends Component
             $this->loadStandardAspectsData();
             $this->prepareStandardChartData();
 
-            \Log::info('Dashboard: Standard data loaded', [
+            Log::info('Dashboard: Standard data loaded', [
                 'potensiAspectsCount' => count($this->potensiAspectsData),
                 'kompetensiAspectsCount' => count($this->kompetensiAspectsData),
                 'totalAspectsCount' => count($this->allAspectsData),
             ]);
         }
-
     }
 
     /**
@@ -312,7 +312,7 @@ class Dashboard extends Component
      */
     private function loadAspectsData(): void
     {
-        \Log::info('Dashboard: loadAspectsData called', [
+        Log::info('Dashboard: loadAspectsData called', [
             'participantId' => $this->participant?->id,
             'potensiCategoryId' => $this->potensiCategory?->id,
             'kompetensiCategoryId' => $this->kompetensiCategory?->id,
@@ -322,18 +322,18 @@ class Dashboard extends Component
         // Load Potensi aspects
         if ($this->potensiCategory) {
             $this->potensiAspectsData = $this->loadCategoryAspects($this->potensiCategory->id);
-            \Log::info('Dashboard: Potensi aspects loaded (participant)', ['count' => count($this->potensiAspectsData)]);
+            Log::info('Dashboard: Potensi aspects loaded (participant)', ['count' => count($this->potensiAspectsData)]);
         }
 
         // Load Kompetensi aspects
         if ($this->kompetensiCategory) {
             $this->kompetensiAspectsData = $this->loadCategoryAspects($this->kompetensiCategory->id);
-            \Log::info('Dashboard: Kompetensi aspects loaded (participant)', ['count' => count($this->kompetensiAspectsData)]);
+            Log::info('Dashboard: Kompetensi aspects loaded (participant)', ['count' => count($this->kompetensiAspectsData)]);
         }
 
         // Combine all aspects
         $this->allAspectsData = array_merge($this->potensiAspectsData, $this->kompetensiAspectsData);
-        \Log::info('Dashboard: All aspects merged (participant)', ['count' => count($this->allAspectsData)]);
+        Log::info('Dashboard: All aspects merged (participant)', ['count' => count($this->allAspectsData)]);
     }
 
     /**
@@ -346,7 +346,7 @@ class Dashboard extends Component
             ->pluck('id')
             ->toArray();
 
-        \Log::info('Dashboard: loadCategoryAspects - aspects found', [
+        Log::info('Dashboard: loadCategoryAspects - aspects found', [
             'categoryTypeId' => $categoryTypeId,
             'aspectIdsCount' => count($aspectIds),
             'participantId' => $this->participant->id,
@@ -358,7 +358,7 @@ class Dashboard extends Component
             ->orderBy('aspect_id')
             ->get();
 
-        \Log::info('Dashboard: loadCategoryAspects - assessments found', [
+        Log::info('Dashboard: loadCategoryAspects - assessments found', [
             'categoryTypeId' => $categoryTypeId,
             'assessmentsCount' => $aspectAssessments->count(),
         ]);
@@ -386,25 +386,25 @@ class Dashboard extends Component
      */
     private function loadStandardAspectsData(): void
     {
-        \Log::info('Dashboard: loadStandardAspectsData called', [
+        Log::info('Dashboard: loadStandardAspectsData called', [
             'tolerancePercentage' => $this->tolerancePercentage,
         ]);
 
         // Load Potensi aspects
         if ($this->potensiCategory) {
             $this->potensiAspectsData = $this->loadStandardCategoryAspects($this->potensiCategory->id);
-            \Log::info('Dashboard: Potensi aspects loaded', ['count' => count($this->potensiAspectsData)]);
+            Log::info('Dashboard: Potensi aspects loaded', ['count' => count($this->potensiAspectsData)]);
         }
 
         // Load Kompetensi aspects
         if ($this->kompetensiCategory) {
             $this->kompetensiAspectsData = $this->loadStandardCategoryAspects($this->kompetensiCategory->id);
-            \Log::info('Dashboard: Kompetensi aspects loaded', ['count' => count($this->kompetensiAspectsData)]);
+            Log::info('Dashboard: Kompetensi aspects loaded', ['count' => count($this->kompetensiAspectsData)]);
         }
 
         // Combine all aspects
         $this->allAspectsData = array_merge($this->potensiAspectsData, $this->kompetensiAspectsData);
-        \Log::info('Dashboard: All aspects merged', ['count' => count($this->allAspectsData)]);
+        Log::info('Dashboard: All aspects merged', ['count' => count($this->allAspectsData)]);
     }
 
     /**
@@ -416,7 +416,7 @@ class Dashboard extends Component
             ->orderBy('order')
             ->get(['id', 'name', 'standard_rating']);
 
-        \Log::info('Dashboard: loadStandardCategoryAspects', [
+        Log::info('Dashboard: loadStandardCategoryAspects', [
             'categoryTypeId' => $categoryTypeId,
             'aspectsCount' => $aspects->count(),
         ]);
@@ -442,7 +442,7 @@ class Dashboard extends Component
      */
     private function prepareChartData(): void
     {
-        \Log::info('Dashboard: prepareChartData called', [
+        Log::info('Dashboard: prepareChartData called', [
             'potensiAspectsCount' => count($this->potensiAspectsData),
             'kompetensiAspectsCount' => count($this->kompetensiAspectsData),
             'allAspectsCount' => count($this->allAspectsData),
@@ -488,7 +488,7 @@ class Dashboard extends Component
             $this->generalIndividualRatings[] = round($aspect['individual_rating'], 2);
         }
 
-        \Log::info('Dashboard: Chart data prepared (participant)', [
+        Log::info('Dashboard: Chart data prepared (participant)', [
             'potensiLabelsCount' => count($this->potensiLabels),
             'kompetensiLabelsCount' => count($this->kompetensiLabels),
             'generalLabelsCount' => count($this->generalLabels),
