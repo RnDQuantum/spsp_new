@@ -1,4 +1,5 @@
-<div x-data="{ mobileOpen: false, minimized: true, individualOpen: false, generalOpen: false }" @sidebar-toggled.window="minimized = $event.detail.minimized">
+<!-- Sidebar -->
+<div x-data="{ mobileOpen: false, minimized: true, individualOpen: false, generalOpen: false }" x-init="$dispatch('sidebar-toggled', { minimized: minimized })" @sidebar-toggled.window="minimized = $event.detail.minimized">
     <!-- Mobile Toggle Button -->
     <button @click="mobileOpen = !mobileOpen"
         class="fixed top-4 left-4 z-50 p-2 bg-gray-800 text-white rounded-lg md:hidden">
@@ -15,13 +16,12 @@
     <aside
         :class="[
             mobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0',
-            minimized ? 'w-20' : 'w-64'
+            minimized ? 'w-20' : 'w-64 sm:w-full md:w-64'
         ]"
         class="fixed top-0 left-0 z-40 h-screen bg-gray-800 transition-all duration-300">
-
         <!-- Toggle Button Desktop -->
         <button
-            @click="minimized = !minimized; if (minimized) { individualOpen = false; generalOpen = false } ; $dispatch('sidebar-toggled', { minimized: minimized })"
+            @click="minimized = !minimized; if (minimized) { individualOpen = false; generalOpen = false }; $dispatch('sidebar-toggled', { minimized: minimized })"
             class="hidden md:block absolute -right-3 top-6 bg-gray-800 text-white rounded-full p-1 border-2 border-gray-600 hover:bg-gray-700">
             <svg :class="minimized ? 'rotate-180' : ''" class="w-4 h-4 transition-transform" fill="none"
                 stroke="currentColor" viewBox="0 0 24 24">
@@ -32,8 +32,7 @@
         <div class="h-full px-4 py-6 overflow-y-auto">
             <!-- Logo/Brand -->
             <h2 :class="minimized ? 'text-center' : ''" class="text-white text-xl font-bold mb-6"
-                x-text="minimized ? 'MD' : 'My Dashboard'">
-            </h2>
+                x-text="minimized ? 'MD' : 'My Dashboard'"></h2>
 
             <!-- Menu -->
             <nav class="space-y-2">
@@ -81,11 +80,6 @@
                     <!-- Sub Menu Individual Report -->
                     <div x-show="individualOpen" x-cloak id="submenu-individual" class="ml-4 mt-2 space-y-1"
                         role="menu" aria-labelledby="btn-individual">
-                        {{-- General Matching requires participant context, access via participant list --}}
-                        {{-- <a href="{{ Route('general_matching') }}" role="menuitem"
-                            class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
-                            General Matching
-                        </a> --}}
                         <a wire:navigate href="{{ route('shortlist') }}" role="menuitem"
                             class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
                             General Mapping
@@ -171,10 +165,6 @@
                             class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
                             Training Recommendation
                         </a>
-                        {{-- <a wire:navigate href="#" role="menuitem"
-                            class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
-                            Ranking & Analytics
-                        </a> --}}
                         <a wire:navigate href="{{ route('standard-mc') }}" role="menuitem"
                             class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
                             Standar Managerial Competency Mapping
