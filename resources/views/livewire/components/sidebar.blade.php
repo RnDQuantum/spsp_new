@@ -81,11 +81,35 @@
                     <div x-show="individualOpen" x-cloak id="submenu-individual" class="ml-4 mt-2 space-y-1" role="menu"
                         aria-labelledby="btn-individual">
                         @if(!$this->canShowIndividualReports())
-                        <div class="px-4 py-2 text-sm text-yellow-500">
-                            Pilih event dan peserta terlebih dahulu
+                        <div class="mx-4 my-3 p-3 bg-yellow-900/30 border border-yellow-600/50 rounded-lg">
+                            <div class="flex items-start gap-3">
+                                <div class="flex-1">
+                                    <p class="text-sm font-semibold text-yellow-400 mb-1">Aksi Diperlukan</p>
+                                    <p class="text-xs text-gray-300 leading-relaxed">
+                                        Pilih Proyek dan Peserta terlebih dahulu pada halaman
+                                        <a href="{{ route('dashboard') }}"
+                                            class="text-yellow-400 hover:text-yellow-300 underline font-medium transition-colors">Dashboard</a>
+                                        atau
+                                        <a href="{{ route('shortlist') }}"
+                                            class="text-yellow-400 hover:text-yellow-300 underline font-medium transition-colors">Shortlist
+                                            Peserta</a>
+                                    </p>
+                                </div>
+                            </div>
                         </div>
                         @endif
 
+                        <a wire:navigate
+                            href="{{ $this->canShowIndividualReports() ? route('general_matching', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) : '#' }}"
+                            role="menuitem" @class([ 'block px-4 py-2 text-sm rounded'
+                            , 'text-gray-300 hover:bg-gray-700'=> $this->canShowIndividualReports(),
+                            'text-gray-500 cursor-not-allowed' => !$this->canShowIndividualReports()
+                            ])
+                            @if(!$this->canShowIndividualReports())
+                            title="Pilih event dan peserta terlebih dahulu"
+                            @endif>
+                            General Matching
+                        </a>
                         <a wire:navigate
                             href="{{ $this->canShowIndividualReports() ? route('general_mapping', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) : '#' }}"
                             role="menuitem" @class([ 'block px-4 py-2 text-sm rounded'
