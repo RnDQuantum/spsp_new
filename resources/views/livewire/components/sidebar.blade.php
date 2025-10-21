@@ -1,5 +1,7 @@
 <!-- Sidebar -->
-<div x-data="{ mobileOpen: false, minimized: true, individualOpen: false, generalOpen: false }" x-init="$dispatch('sidebar-toggled', { minimized: minimized })" @sidebar-toggled.window="minimized = $event.detail.minimized">
+<div x-data="{ mobileOpen: false, minimized: true, individualOpen: false, generalOpen: false }"
+    x-init="$dispatch('sidebar-toggled', { minimized: minimized })"
+    @sidebar-toggled.window="minimized = $event.detail.minimized">
     <!-- Mobile Toggle Button -->
     <button @click="mobileOpen = !mobileOpen"
         class="fixed top-4 left-4 z-50 p-2 bg-gray-800 text-white rounded-lg md:hidden">
@@ -13,12 +15,10 @@
     </div>
 
     <!-- Sidebar -->
-    <aside
-        :class="[
+    <aside :class="[
             mobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0',
             minimized ? 'w-20' : 'w-64 sm:w-full md:w-64'
-        ]"
-        class="fixed top-0 left-0 z-40 h-screen bg-gray-800 transition-all duration-300">
+        ]" class="fixed top-0 left-0 z-40 h-screen bg-gray-800 transition-all duration-300">
         <!-- Toggle Button Desktop -->
         <button
             @click="minimized = !minimized; if (minimized) { individualOpen = false; generalOpen = false }; $dispatch('sidebar-toggled', { minimized: minimized })"
@@ -78,39 +78,78 @@
                     </button>
 
                     <!-- Sub Menu Individual Report -->
-                    <div x-show="individualOpen" x-cloak id="submenu-individual" class="ml-4 mt-2 space-y-1"
-                        role="menu" aria-labelledby="btn-individual">
-                        <a wire:navigate href="{{ route('shortlist') }}" role="menuitem"
-                            class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
+                    <div x-show="individualOpen" x-cloak id="submenu-individual" class="ml-4 mt-2 space-y-1" role="menu"
+                        aria-labelledby="btn-individual">
+                        @if(!$this->canShowIndividualReports())
+                        <div class="px-4 py-2 text-sm text-yellow-500">
+                            Pilih event dan peserta terlebih dahulu
+                        </div>
+                        @endif
+
+                        <a wire:navigate
+                            href="{{ $this->canShowIndividualReports() ? route('general_mapping', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) : '#' }}"
+                            role="menuitem" @class([ 'block px-4 py-2 text-sm rounded'
+                            , 'text-gray-300 hover:bg-gray-700'=> $this->canShowIndividualReports(),
+                            'text-gray-500 cursor-not-allowed' => !$this->canShowIndividualReports()
+                            ])
+                            @if(!$this->canShowIndividualReports())
+                            title="Pilih event dan peserta terlebih dahulu"
+                            @endif>
                             General Mapping
                         </a>
-                        <a wire:navigate href="{{ route('shortlist') }}" role="menuitem"
-                            class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
+
+                        <a wire:navigate
+                            href="{{ $this->canShowIndividualReports() ? route('general_mc_mapping', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) : '#' }}"
+                            role="menuitem" @class([ 'block px-4 py-2 text-sm rounded'
+                            , 'text-gray-300 hover:bg-gray-700'=> $this->canShowIndividualReports(),
+                            'text-gray-500 cursor-not-allowed' => !$this->canShowIndividualReports()
+                            ])>
                             General Potency Mapping
                         </a>
-                        <a wire:navigate href="{{ route('shortlist') }}" role="menuitem"
-                            class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
+
+                        <a wire:navigate
+                            href="{{ $this->canShowIndividualReports() ? route('general_psy_mapping', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) : '#' }}"
+                            role="menuitem" @class([ 'block px-4 py-2 text-sm rounded'
+                            , 'text-gray-300 hover:bg-gray-700'=> $this->canShowIndividualReports(),
+                            'text-gray-500 cursor-not-allowed' => !$this->canShowIndividualReports()
+                            ])>
                             General Psychology Mapping
                         </a>
-                        <a wire:navigate href="{{ route('shortlist') }}" role="menuitem"
-                            class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
+
+                        <a wire:navigate
+                            href="{{ $this->canShowIndividualReports() ? route('spider_plot', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) : '#' }}"
+                            role="menuitem" @class([ 'block px-4 py-2 text-sm rounded'
+                            , 'text-gray-300 hover:bg-gray-700'=> $this->canShowIndividualReports(),
+                            'text-gray-500 cursor-not-allowed' => !$this->canShowIndividualReports()
+                            ])>
                             Managerial Potency Mapping
                         </a>
-                        <a wire:navigate href="{{ route('shortlist') }}" role="menuitem"
-                            class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
+
+                        <a wire:navigate
+                            href="{{ $this->canShowIndividualReports() ? route('ringkasan_mc_mapping', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) : '#' }}"
+                            role="menuitem" @class([ 'block px-4 py-2 text-sm rounded'
+                            , 'text-gray-300 hover:bg-gray-700'=> $this->canShowIndividualReports(),
+                            'text-gray-500 cursor-not-allowed' => !$this->canShowIndividualReports()
+                            ])>
                             Ringkasan Managerial Potency Mapping
                         </a>
-                        <a wire:navigate href="{{ route('shortlist') }}" role="menuitem"
-                            class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
+
+                        <a wire:navigate
+                            href="{{ $this->canShowIndividualReports() ? route('general_matching', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) : '#' }}"
+                            role="menuitem" @class([ 'block px-4 py-2 text-sm rounded'
+                            , 'text-gray-300 hover:bg-gray-700'=> $this->canShowIndividualReports(),
+                            'text-gray-500 cursor-not-allowed' => !$this->canShowIndividualReports()
+                            ])>
                             Gambaran Individu & Deskripsi Kompetensi
                         </a>
-                        <a wire:navigate href="{{ route('shortlist') }}" role="menuitem"
-                            class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
+
+                        <a wire:navigate
+                            href="{{ $this->canShowIndividualReports() ? route('ringkasan_assessment', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) : '#' }}"
+                            role="menuitem" @class([ 'block px-4 py-2 text-sm rounded'
+                            , 'text-gray-300 hover:bg-gray-700'=> $this->canShowIndividualReports(),
+                            'text-gray-500 cursor-not-allowed' => !$this->canShowIndividualReports()
+                            ])>
                             Ringkasan Hasil Assessment Individu
-                        </a>
-                        <a wire:navigate href="{{ route('shortlist') }}" role="menuitem"
-                            class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
-                            Hasil Emotional Quotient (EQ)
                         </a>
                     </div>
                 </div>
@@ -143,8 +182,8 @@
                     </button>
 
                     <!-- Sub Menu General Report -->
-                    <div x-show="generalOpen" x-cloak id="submenu-general" class="ml-4 mt-2 space-y-1"
-                        role="menu" aria-labelledby="btn-general">
+                    <div x-show="generalOpen" x-cloak id="submenu-general" class="ml-4 mt-2 space-y-1" role="menu"
+                        aria-labelledby="btn-general">
                         <a wire:navigate href="{{ route('ranking-psy-mapping') }}" role="menuitem"
                             class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded">
                             Ranking Psychology Mapping
