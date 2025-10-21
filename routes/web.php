@@ -18,9 +18,7 @@ Route::middleware(['guest'])->group(function () {
 // Protected Routes
 Route::middleware(['auth'])->group(function () {
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', \App\Livewire\Pages\Dashboard::class)->name('dashboard');
 
     Route::get('/shortlist-peserta', \App\Livewire\Pages\ParticipantsList::class)->name('shortlist');
 
