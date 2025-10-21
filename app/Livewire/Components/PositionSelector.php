@@ -114,6 +114,10 @@ class PositionSelector extends Component
             // Save to session if we have a default
             if ($this->positionFormationId) {
                 session(['filter.position_formation_id' => $this->positionFormationId]);
+
+                // Dispatch event to notify parent that default was selected
+                \Log::info('PositionSelector: Dispatching position-selected', ['positionFormationId' => $this->positionFormationId]);
+                $this->dispatch('position-selected', positionFormationId: $this->positionFormationId);
             }
         }
     }

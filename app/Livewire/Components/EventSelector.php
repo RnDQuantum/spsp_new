@@ -37,6 +37,10 @@ class EventSelector extends Component
             // Save to session if we have a default
             if ($this->eventCode) {
                 session(['filter.event_code' => $this->eventCode]);
+
+                // Dispatch event to notify parent that default was selected
+                \Log::info('EventSelector: Dispatching event-selected', ['eventCode' => $this->eventCode]);
+                $this->dispatch('event-selected', eventCode: $this->eventCode);
             }
         }
 

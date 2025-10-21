@@ -87,8 +87,17 @@ class Dashboard extends Component
         // Load tolerance from session
         $this->tolerancePercentage = session('dashboard.tolerance', 10);
 
-        // Load data if filters are set
-        $this->loadDashboardData();
+        // Load data if session already has filters set (e.g., after refresh)
+        $eventCode = session('filter.event_code');
+        $positionFormationId = session('filter.position_formation_id');
+
+        if ($eventCode && $positionFormationId) {
+            \Log::info('Dashboard: mount() - loading data from session', [
+                'eventCode' => $eventCode,
+                'positionFormationId' => $positionFormationId,
+            ]);
+            $this->loadDashboardData();
+        }
     }
 
     /**
@@ -96,6 +105,8 @@ class Dashboard extends Component
      */
     public function handleEventSelected(?string $eventCode): void
     {
+        \Log::info('Dashboard: handleEventSelected called', ['eventCode' => $eventCode]);
+
         // Reset participant and reload data
         $this->participant = null;
         $this->loadDashboardData();
@@ -106,6 +117,8 @@ class Dashboard extends Component
      */
     public function handlePositionSelected(?int $positionFormationId): void
     {
+        \Log::info('Dashboard: handlePositionSelected called', ['positionFormationId' => $positionFormationId]);
+
         // Position changed, reload data (participant might be reset)
         $this->participant = null;
         $this->loadDashboardData();
@@ -116,6 +129,8 @@ class Dashboard extends Component
      */
     public function handleParticipantSelected(?int $participantId): void
     {
+        \Log::info('Dashboard: handleParticipantSelected called', ['participantId' => $participantId]);
+
         $this->loadDashboardData();
     }
 
@@ -128,16 +143,29 @@ class Dashboard extends Component
         $positionFormationId = session('filter.position_formation_id');
         $participantId = session('filter.participant_id');
 
+        \Log::info('Dashboard: loadDashboardData called', [
+            'eventCode' => $eventCode,
+            'positionFormationId' => $positionFormationId,
+            'participantId' => $participantId,
+        ]);
+
         // Clear all data first
         $this->resetChartData();
 
         // If no event or position, show nothing
         if (! $eventCode || ! $positionFormationId) {
+            \Log::warning('Dashboard: Missing event or position, aborting data load');
+
             return;
         }
 
         // Load template and categories for the position
         $this->loadTemplateAndCategories($positionFormationId);
+
+        \Log::info('Dashboard: Categories loaded', [
+            'potensiCategory' => $this->potensiCategory?->id,
+            'kompetensiCategory' => $this->kompetensiCategory?->id,
+        ]);
 
         // If participant is selected, load participant data
         if ($participantId) {
@@ -161,6 +189,12 @@ class Dashboard extends Component
             // No participant selected, show only standard data
             $this->loadStandardAspectsData();
             $this->prepareStandardChartData();
+
+            \Log::info('Dashboard: Standard data loaded', [
+                'potensiAspectsCount' => count($this->potensiAspectsData),
+                'kompetensiAspectsCount' => count($this->kompetensiAspectsData),
+                'totalAspectsCount' => count($this->allAspectsData),
+            ]);
         }
     }
 
@@ -210,18 +244,27 @@ class Dashboard extends Component
      */
     private function loadAspectsData(): void
     {
+        \Log::info('Dashboard: loadAspectsData called', [
+            'participantId' => $this->participant?->id,
+            'potensiCategoryId' => $this->potensiCategory?->id,
+            'kompetensiCategoryId' => $this->kompetensiCategory?->id,
+        ]);
+
         // Load Potensi aspects
         if ($this->potensiCategory) {
             $this->potensiAspectsData = $this->loadCategoryAspects($this->potensiCategory->id);
+            \Log::info('Dashboard: Potensi aspects loaded (participant)', ['count' => count($this->potensiAspectsData)]);
         }
 
         // Load Kompetensi aspects
         if ($this->kompetensiCategory) {
             $this->kompetensiAspectsData = $this->loadCategoryAspects($this->kompetensiCategory->id);
+            \Log::info('Dashboard: Kompetensi aspects loaded (participant)', ['count' => count($this->kompetensiAspectsData)]);
         }
 
         // Combine all aspects
         $this->allAspectsData = array_merge($this->potensiAspectsData, $this->kompetensiAspectsData);
+        \Log::info('Dashboard: All aspects merged (participant)', ['count' => count($this->allAspectsData)]);
     }
 
     /**
@@ -234,11 +277,22 @@ class Dashboard extends Component
             ->pluck('id')
             ->toArray();
 
+        \Log::info('Dashboard: loadCategoryAspects - aspects found', [
+            'categoryTypeId' => $categoryTypeId,
+            'aspectIdsCount' => count($aspectIds),
+            'participantId' => $this->participant->id,
+        ]);
+
         $aspectAssessments = AspectAssessment::with('aspect')
             ->where('participant_id', $this->participant->id)
             ->whereIn('aspect_id', $aspectIds)
             ->orderBy('aspect_id')
             ->get();
+
+        \Log::info('Dashboard: loadCategoryAspects - assessments found', [
+            'categoryTypeId' => $categoryTypeId,
+            'assessmentsCount' => $aspectAssessments->count(),
+        ]);
 
         return $aspectAssessments->map(function ($assessment) {
             // 1. Get original values from database
@@ -246,7 +300,7 @@ class Dashboard extends Component
             $individualRating = (float) $assessment->individual_rating;
 
             // 2. Calculate adjusted standard based on tolerance
-            $toleranceFactor = 1 - ($this->tolerancePercentage / 100);
+            $toleranceFactor = 1 - $this->tolerancePercentage / 100;
             $adjustedStandardRating = $originalStandardRating * $toleranceFactor;
 
             return [
@@ -266,15 +320,18 @@ class Dashboard extends Component
         // Load Potensi aspects
         if ($this->potensiCategory) {
             $this->potensiAspectsData = $this->loadStandardCategoryAspects($this->potensiCategory->id);
+            \Log::info('Dashboard: Potensi aspects loaded', ['count' => count($this->potensiAspectsData)]);
         }
 
         // Load Kompetensi aspects
         if ($this->kompetensiCategory) {
             $this->kompetensiAspectsData = $this->loadStandardCategoryAspects($this->kompetensiCategory->id);
+            \Log::info('Dashboard: Kompetensi aspects loaded', ['count' => count($this->kompetensiAspectsData)]);
         }
 
         // Combine all aspects
         $this->allAspectsData = array_merge($this->potensiAspectsData, $this->kompetensiAspectsData);
+        \Log::info('Dashboard: All aspects merged', ['count' => count($this->allAspectsData)]);
     }
 
     /**
@@ -285,6 +342,11 @@ class Dashboard extends Component
         $aspects = Aspect::where('category_type_id', $categoryTypeId)
             ->orderBy('order')
             ->get(['id', 'name', 'standard_rating']);
+
+        \Log::info('Dashboard: loadStandardCategoryAspects', [
+            'categoryTypeId' => $categoryTypeId,
+            'aspectsCount' => $aspects->count(),
+        ]);
 
         return $aspects->map(function ($aspect) {
             $originalStandardRating = (float) $aspect->standard_rating;
@@ -307,8 +369,27 @@ class Dashboard extends Component
      */
     private function prepareChartData(): void
     {
-        // Clear previous data
-        $this->resetChartData();
+        \Log::info('Dashboard: prepareChartData called', [
+            'potensiAspectsCount' => count($this->potensiAspectsData),
+            'kompetensiAspectsCount' => count($this->kompetensiAspectsData),
+            'allAspectsCount' => count($this->allAspectsData),
+        ]);
+
+        // Clear previous CHART data only (not aspectsData!)
+        $this->potensiLabels = [];
+        $this->potensiOriginalStandardRatings = [];
+        $this->potensiStandardRatings = [];
+        $this->potensiIndividualRatings = [];
+
+        $this->kompetensiLabels = [];
+        $this->kompetensiOriginalStandardRatings = [];
+        $this->kompetensiStandardRatings = [];
+        $this->kompetensiIndividualRatings = [];
+
+        $this->generalLabels = [];
+        $this->generalOriginalStandardRatings = [];
+        $this->generalStandardRatings = [];
+        $this->generalIndividualRatings = [];
 
         // Prepare Potensi chart data
         foreach ($this->potensiAspectsData as $aspect) {
@@ -333,6 +414,12 @@ class Dashboard extends Component
             $this->generalStandardRatings[] = round($aspect['standard_rating'], 2);
             $this->generalIndividualRatings[] = round($aspect['individual_rating'], 2);
         }
+
+        \Log::info('Dashboard: Chart data prepared (participant)', [
+            'potensiLabelsCount' => count($this->potensiLabels),
+            'kompetensiLabelsCount' => count($this->kompetensiLabels),
+            'generalLabelsCount' => count($this->generalLabels),
+        ]);
     }
 
     /**
@@ -340,8 +427,21 @@ class Dashboard extends Component
      */
     private function prepareStandardChartData(): void
     {
-        // Clear previous data
-        $this->resetChartData();
+        // Clear previous CHART data only (not aspectsData!)
+        $this->potensiLabels = [];
+        $this->potensiOriginalStandardRatings = [];
+        $this->potensiStandardRatings = [];
+        $this->potensiIndividualRatings = [];
+
+        $this->kompetensiLabels = [];
+        $this->kompetensiOriginalStandardRatings = [];
+        $this->kompetensiStandardRatings = [];
+        $this->kompetensiIndividualRatings = [];
+
+        $this->generalLabels = [];
+        $this->generalOriginalStandardRatings = [];
+        $this->generalStandardRatings = [];
+        $this->generalIndividualRatings = [];
 
         // Prepare Potensi chart data
         foreach ($this->potensiAspectsData as $aspect) {
