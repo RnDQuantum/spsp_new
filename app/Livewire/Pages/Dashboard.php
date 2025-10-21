@@ -108,6 +108,14 @@ class Dashboard extends Component
         \Log::info('Dashboard: handleEventSelected called', ['eventCode' => $eventCode]);
 
         // Position will auto-reset, wait for position-selected event
+
+        // Check if participant was selected before
+        $previousParticipantId = session('filter.participant_id');
+
+        if ($previousParticipantId !== null) {
+            // Participant will be reset to null, trigger force reload after a short delay
+            $this->js('setTimeout(() => window.location.reload(), 100)');
+        }
     }
 
     /**
@@ -118,6 +126,14 @@ class Dashboard extends Component
         \Log::info('Dashboard: handlePositionSelected called', ['positionFormationId' => $positionFormationId]);
 
         // Participant will auto-reset, wait for participant-selected event
+
+        // Check if participant was selected before
+        $previousParticipantId = session('filter.participant_id');
+
+        if ($previousParticipantId !== null) {
+            // Participant will be reset to null, trigger force reload after a short delay
+            $this->js('setTimeout(() => window.location.reload(), 100)');
+        }
     }
 
     /**
@@ -127,8 +143,26 @@ class Dashboard extends Component
     {
         \Log::info('Dashboard: handleParticipantSelected called', ['participantId' => $participantId]);
 
+        // Check if we're transitioning from null to selected
+        // Check current state BEFORE loadDashboardData
+        $wasNull = $this->participant === null;
+        $willBeSelected = $participantId !== null;
+
+        \Log::info('Dashboard: Participant transition check', [
+            'wasNull' => $wasNull,
+            'willBeSelected' => $willBeSelected,
+            'participantId' => $participantId,
+        ]);
+
+        // Load data
         $this->loadDashboardData();
         $this->dispatchChartUpdate();
+
+        if ($wasNull && $willBeSelected) {
+            \Log::info('Dashboard: Force reload triggered - participant selected from null');
+            // Trigger force reload
+            $this->js('setTimeout(() => window.location.reload(), 200)');
+        }
     }
 
     /**
