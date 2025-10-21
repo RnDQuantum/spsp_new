@@ -1,9 +1,31 @@
 <div>
-    @if (session('force_reload'))
-        <script>
-            window.location.reload();
-        </script>
+    <!-- Loading Overlay -->
+    @if ($isLoading)
+        <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-lg p-8 shadow-xl max-w-md mx-4">
+                <div class="text-center">
+                    <!-- Animated Spinner -->
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+
+                    <!-- Loading Message -->
+                    <p class="text-lg font-semibold text-gray-800 mb-2">{{ $loadingMessage }}</p>
+                    <p class="text-sm text-gray-600 mb-4">Mohon tunggu sebentar...</p>
+
+                    <!-- Simple Status Indicator -->
+                    <div class="flex items-center justify-center space-x-2">
+                        <div class="flex space-x-1">
+                            <div class="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
+                            <div class="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style="animation-delay: 0.1s">
+                            </div>
+                            <div class="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style="animation-delay: 0.2s">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     @endif
+
     <div class="bg-white mx-auto my-8 shadow overflow-hidden" style="max-width: 1400px;">
         <!-- Header -->
         <div class="border-b-4 border-black py-3 bg-sky-200">
@@ -140,6 +162,31 @@
                     // Setup Livewire event listeners
                     waitForLivewire(function() {
                         setupLivewireListeners();
+                    });
+
+                    // Handle loading states and smooth transitions
+                    document.addEventListener('livewire:init', function() {
+                        Livewire.on('showLoading', function(message) {
+                            console.log('Loading started:', message);
+
+                            // Add smooth transition class to body
+                            document.body.style.transition = 'opacity 0.3s ease-in-out';
+                            document.body.style.opacity = '0.8';
+                        });
+
+                        Livewire.on('hideLoading', function() {
+                            console.log('Loading finished');
+
+                            // Restore body opacity
+                            document.body.style.opacity = '1';
+                        });
+                    });
+
+                    // Smooth page reload without additional loading overlay
+                    window.addEventListener('beforeunload', function() {
+                        // Just add a subtle transition effect
+                        document.body.style.transition = 'opacity 0.2s ease-out';
+                        document.body.style.opacity = '0.7';
                     });
 
                     // ========================================

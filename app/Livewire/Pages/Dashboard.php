@@ -67,6 +67,11 @@ class Dashboard extends Component
 
     public $allAspectsData = [];
 
+    // Loading states
+    public bool $isLoading = false;
+
+    public string $loadingMessage = 'Memuat data...';
+
     /**
      * Listen to filter changes
      */
@@ -108,13 +113,14 @@ class Dashboard extends Component
         \Log::info('Dashboard: handleEventSelected called', ['eventCode' => $eventCode]);
 
         // Position will auto-reset, wait for position-selected event
+        $this->showLoading('Memuat data event dan mereset filter...');
 
         // Check if participant was selected before
         $previousParticipantId = session('filter.participant_id');
 
         if ($previousParticipantId !== null) {
-            // Participant will be reset to null, trigger force reload after a short delay
-            $this->js('setTimeout(() => window.location.reload(), 100)');
+            // Participant will be reset to null, trigger smooth reload
+            $this->js('setTimeout(() => window.location.reload(), 800)');
         }
     }
 
@@ -126,13 +132,14 @@ class Dashboard extends Component
         \Log::info('Dashboard: handlePositionSelected called', ['positionFormationId' => $positionFormationId]);
 
         // Participant will auto-reset, wait for participant-selected event
+        $this->showLoading('Memuat data jabatan dan mereset filter...');
 
         // Check if participant was selected before
         $previousParticipantId = session('filter.participant_id');
 
         if ($previousParticipantId !== null) {
-            // Participant will be reset to null, trigger force reload after a short delay
-            $this->js('setTimeout(() => window.location.reload(), 100)');
+            // Participant will be reset to null, trigger smooth reload
+            $this->js('setTimeout(() => window.location.reload(), 800)');
         }
     }
 
@@ -144,7 +151,6 @@ class Dashboard extends Component
         \Log::info('Dashboard: handleParticipantSelected called', ['participantId' => $participantId]);
 
         // Check if we're transitioning from null to selected
-        // Check current state BEFORE loadDashboardData
         $wasNull = $this->participant === null;
         $willBeSelected = $participantId !== null;
 
@@ -154,14 +160,14 @@ class Dashboard extends Component
             'participantId' => $participantId,
         ]);
 
-        // Load data
-        $this->loadDashboardData();
-        $this->dispatchChartUpdate();
-
         if ($wasNull && $willBeSelected) {
-            \Log::info('Dashboard: Force reload triggered - participant selected from null');
-            // Trigger force reload
-            $this->js('setTimeout(() => window.location.reload(), 200)');
+            $this->showLoading('Memuat data peserta dan menginisialisasi chart...');
+            // Trigger smooth reload for chart initialization
+            $this->js('setTimeout(() => window.location.reload(), 1000)');
+        } else {
+            // Load data normally
+            $this->loadDashboardData();
+            $this->dispatchChartUpdate();
         }
     }
 
@@ -567,6 +573,8 @@ class Dashboard extends Component
      */
     public function handleToleranceUpdate(int $tolerance): void
     {
+        $this->showLoading('Memperbarui toleransi...');
+
         $this->tolerancePercentage = $tolerance;
 
         // Reload aspects data with new tolerance
@@ -612,6 +620,9 @@ class Dashboard extends Component
             'total' => $summary['total'],
             'percentage' => $summary['percentage'],
         ]);
+
+        // Hide loading after everything is done
+        $this->hideLoading();
     }
 
     /**
@@ -641,6 +652,25 @@ class Dashboard extends Component
             'passing' => $passingAspects,
             'percentage' => $totalAspects > 0 ? round(($passingAspects / $totalAspects) * 100) : 0,
         ];
+    }
+
+    /**
+     * Show loading state
+     */
+    private function showLoading(string $message = 'Memuat data...'): void
+    {
+        $this->isLoading = true;
+        $this->loadingMessage = $message;
+        $this->dispatch('showLoading', message: $message);
+    }
+
+    /**
+     * Hide loading state
+     */
+    private function hideLoading(): void
+    {
+        $this->isLoading = false;
+        $this->dispatch('hideLoading');
     }
 
     public function render()
