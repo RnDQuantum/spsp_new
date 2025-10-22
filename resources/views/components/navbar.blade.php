@@ -35,7 +35,7 @@
                                 {{ auth()->user()?->email ?? 'Administrator' }}</p>
                         </div>
                         <div
-                            class="w-10 h-10 bg-blue-500 dark:bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold">
+                            class="w-10 h-10 bg-red-800 dark:bg-white rounded-full flex items-center justify-center text-white dark:text-black font-semibold">
                             {{ strtoupper(substr(auth()->user()?->name ?? 'JD', 0, 2)) }}
                         </div>
                     </button>

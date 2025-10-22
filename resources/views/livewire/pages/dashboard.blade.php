@@ -1,15 +1,16 @@
 <div>
-    <!-- Loading Overlay -->
+    <!-- Loading Overlay - DARK MODE READY -->
     @if ($isLoading)
-        <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div class="bg-white rounded-lg p-8 shadow-xl max-w-md mx-4">
+        <div
+            class="fixed inset-0 bg-black bg-opacity-50 dark:bg-gray-900 dark:bg-opacity-80 flex items-center justify-center z-50">
+            <div class="bg-white dark:bg-gray-800 rounded-lg p-8 shadow-xl max-w-md mx-4">
                 <div class="text-center">
                     <!-- Animated Spinner -->
                     <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
 
                     <!-- Loading Message -->
-                    <p class="text-lg font-semibold text-gray-800 mb-2">{{ $loadingMessage }}</p>
-                    <p class="text-sm text-gray-600 mb-4">Mohon tunggu sebentar...</p>
+                    <p class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">{{ $loadingMessage }}</p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Mohon tunggu sebentar...</p>
 
                     <!-- Simple Status Indicator -->
                     <div class="flex items-center justify-center space-x-2">
@@ -26,31 +27,32 @@
         </div>
     @endif
 
-    <div class="bg-white mx-auto my-8 shadow overflow-hidden" style="max-width: 1400px;">
-        <!-- Header -->
-        <div class="border-b-4 border-black py-3 bg-sky-200">
-            <h1 class="text-center text-lg font-bold uppercase tracking-wide text-gray-900">
+    <div class="bg-white dark:bg-gray-900 mx-auto my-8 shadow-lg dark:shadow-gray-800/50 overflow-hidden"
+        style="max-width: 1400px;">
+        <!-- Header - DARK MODE READY -->
+        <div class="border-b-4 border-black dark:border-gray-300 py-3 bg-sky-200 dark:bg-gray-800">
+            <h1 class="text-center text-lg font-bold uppercase tracking-wide text-gray-900 dark:text-gray-100">
                 SPIDER PLOT ANALYSIS - DASHBOARD
             </h1>
             @if ($participant)
-                <p class="text-center text-sm font-semibold text-gray-700 mt-1">
+                <p class="text-center text-sm font-semibold text-gray-700 dark:text-gray-300 mt-1">
                     {{ $participant->name }}
                 </p>
-                <p class="text-center text-sm font-semibold text-gray-700 mt-1">
+                <p class="text-center text-sm font-semibold text-gray-700 dark:text-gray-300 mt-1">
                     {{ $participant->assessmentEvent->name }}
                 </p>
-                <p class="text-center text-sm font-semibold text-gray-700 mt-1">
+                <p class="text-center text-sm font-semibold text-gray-700 dark:text-gray-300 mt-1">
                     {{ $participant->positionFormation->name }} - {{ $participant->positionFormation->template->name }}
                 </p>
             @else
-                <p class="text-center text-sm font-semibold text-gray-700 mt-1">
+                <p class="text-center text-sm font-semibold text-gray-700 dark:text-gray-300 mt-1">
                     Tampilan Standar Proyek
                 </p>
             @endif
         </div>
 
-        <!-- Filters Section -->
-        <div class="p-6 bg-gray-50 border-b-2 border-gray-200">
+        <!-- Filters Section - DARK MODE READY -->
+        <div class="p-6 bg-gray-50 dark:bg-gray-800 border-b-2 border-gray-200 dark:border-gray-600">
             <div class="max-w-6xl mx-auto space-y-4">
                 <!-- Event Selector -->
                 @livewire('components.event-selector', ['showLabel' => true])
@@ -74,17 +76,20 @@
             ])
         @endif
 
-        <!-- Charts Grid -->
+        <!-- Charts Grid - DARK MODE READY -->
         @if (count($allAspectsData) > 0)
             <div class="p-6">
-                <h1 class="text-3xl text-center font-bold text-gray-800 mb-8">Static Pribadi Spider Plot (SPSP)</h1>
+                <h1 class="text-3xl text-center font-bold text-gray-800 dark:text-gray-100 mb-8">Static Pribadi Spider
+                    Plot (SPSP)</h1>
 
                 <!-- Charts - Vertical Layout -->
                 <div class="space-y-6 mt-8">
                     <!-- Chart Potensi (Pentagon) -->
                     @if (count($potensiLabels) > 0)
-                        <div class="bg-white p-6 rounded-lg shadow border border-gray-200">
-                            <h3 class="text-lg text-center font-semibold text-gray-800 mb-4">Potential Mapping (Rating)
+                        <div
+                            class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg dark:shadow-gray-700/50 border border-gray-200 dark:border-gray-600">
+                            <h3 class="text-lg text-center font-semibold text-gray-800 dark:text-gray-100 mb-4">
+                                Potential Mapping (Rating)
                             </h3>
                             <div class="relative" style="height: 600px;" wire:ignore>
                                 <canvas id="potensiChart-{{ $potensiChartId }}"></canvas>
@@ -94,8 +99,10 @@
 
                     <!-- Chart Kompetensi (Nonagon) -->
                     @if (count($kompetensiLabels) > 0)
-                        <div class="bg-white p-6 rounded-lg shadow border border-gray-200">
-                            <h3 class="text-lg text-center font-semibold text-gray-800 mb-4">Managerial Potency Mapping
+                        <div
+                            class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg dark:shadow-gray-700/50 border border-gray-200 dark:border-gray-600">
+                            <h3 class="text-lg text-center font-semibold text-gray-800 dark:text-gray-100 mb-4">
+                                Managerial Potency Mapping
                                 (Rating)
                             </h3>
                             <div class="relative" style="height: 600px;" wire:ignore>
@@ -106,8 +113,10 @@
 
                     <!-- Chart General (Tetradecagon) -->
                     @if (count($generalLabels) > 0)
-                        <div class="bg-white p-6 rounded-lg shadow border border-gray-200">
-                            <h3 class="text-lg text-center font-semibold text-gray-800 mb-4">General Mapping (Rating)
+                        <div
+                            class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg dark:shadow-gray-700/50 border border-gray-200 dark:border-gray-600">
+                            <h3 class="text-lg text-center font-semibold text-gray-800 dark:text-gray-100 mb-4">General
+                                Mapping (Rating)
                             </h3>
                             <div class="relative" style="height: 600px;" wire:ignore>
                                 <canvas id="generalChart-{{ $generalChartId }}"></canvas>
@@ -118,7 +127,7 @@
             </div>
         @else
             <div class="p-6">
-                <div class="text-center text-gray-500">
+                <div class="text-center text-gray-500 dark:text-gray-400">
                     <p class="text-lg">Silakan pilih Event dan Jabatan untuk melihat data standar.</p>
                     <p class="text-sm mt-2">Pilih Peserta untuk melihat perbandingan dengan standar.</p>
                 </div>
@@ -126,7 +135,7 @@
         @endif
     </div>
 
-    <!-- Chart Scripts -->
+    <!-- Chart Scripts - DARK MODE READY -->
     @if (count($allAspectsData) > 0)
         @push('scripts')
             <script>
@@ -189,6 +198,29 @@
                         document.body.style.opacity = '0.7';
                     });
 
+                    // Dark mode colors
+                    const darkModeColors = {
+                        background: '#1f2937', // gray-800
+                        text: '#f9fafb', // gray-50
+                        grid: '#374151', // gray-600
+                        pointLabels: '#d1d5db', // gray-300
+                        legend: '#f9fafb', // gray-50
+                    };
+
+                    // Light mode colors (default)
+                    const lightModeColors = {
+                        background: '#ffffff',
+                        text: '#111827', // gray-900
+                        grid: '#d1d5db', // gray-300
+                        pointLabels: '#111827', // gray-900
+                        legend: '#111827', // gray-900
+                    };
+
+                    // Get current theme
+                    function getCurrentTheme() {
+                        return document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+                    }
+
                     // ========================================
                     // POTENSI CHART - URUTAN: PESERTA → TOLERANSI → STANDARD
                     // ========================================
@@ -202,6 +234,8 @@
                         if (!ctxPotensi) return;
 
                         const hasParticipantData = @js($participant !== null);
+                        const theme = getCurrentTheme();
+                        const colors = theme === 'dark' ? darkModeColors : lightModeColors;
 
                         window.potensiChart_{{ $potensiChartId }} = new Chart(ctxPotensi.getContext('2d'), {
                             type: 'radar',
@@ -350,14 +384,22 @@
                                         max: 5,
                                         ticks: {
                                             stepSize: 1,
+                                            color: colors.text,
                                             font: {
                                                 size: 16
                                             }
                                         },
+                                        grid: {
+                                            color: colors.grid
+                                        },
                                         pointLabels: {
+                                            color: colors.pointLabels,
                                             font: {
                                                 size: 16
                                             }
+                                        },
+                                        angleLines: {
+                                            color: colors.grid
                                         }
                                     }
                                 },
@@ -366,6 +408,7 @@
                                         display: true,
                                         position: 'top',
                                         labels: {
+                                            color: colors.legend,
                                             font: {
                                                 size: 16
                                             }
@@ -376,7 +419,8 @@
                                     }
                                 },
                                 responsive: true,
-                                maintainAspectRatio: false
+                                maintainAspectRatio: false,
+                                backgroundColor: colors.background
                             }
                         });
                     }
@@ -393,6 +437,8 @@
                         if (!ctxKompetensi) return;
 
                         const hasParticipantData = @js($participant !== null);
+                        const theme = getCurrentTheme();
+                        const colors = theme === 'dark' ? darkModeColors : lightModeColors;
 
                         window.kompetensiChart_{{ $kompetensiChartId }} = new Chart(ctxKompetensi.getContext('2d'), {
                             type: 'radar',
@@ -535,14 +581,22 @@
                                         max: 5,
                                         ticks: {
                                             stepSize: 1,
+                                            color: colors.text,
                                             font: {
                                                 size: 16
                                             }
                                         },
+                                        grid: {
+                                            color: colors.grid
+                                        },
                                         pointLabels: {
+                                            color: colors.pointLabels,
                                             font: {
                                                 size: 16
                                             }
+                                        },
+                                        angleLines: {
+                                            color: colors.grid
                                         }
                                     }
                                 },
@@ -551,6 +605,7 @@
                                         display: true,
                                         position: 'top',
                                         labels: {
+                                            color: colors.legend,
                                             font: {
                                                 size: 16
                                             }
@@ -561,7 +616,8 @@
                                     }
                                 },
                                 responsive: true,
-                                maintainAspectRatio: false
+                                maintainAspectRatio: false,
+                                backgroundColor: colors.background
                             }
                         });
                     }
@@ -578,6 +634,8 @@
                         if (!ctxGeneral) return;
 
                         const hasParticipantData = @js($participant !== null);
+                        const theme = getCurrentTheme();
+                        const colors = theme === 'dark' ? darkModeColors : lightModeColors;
 
                         window.generalChart_{{ $generalChartId }} = new Chart(ctxGeneral.getContext('2d'), {
                             type: 'radar',
@@ -720,14 +778,22 @@
                                         max: 5,
                                         ticks: {
                                             stepSize: 1,
+                                            color: colors.text,
                                             font: {
                                                 size: 16
                                             }
                                         },
+                                        grid: {
+                                            color: colors.grid
+                                        },
                                         pointLabels: {
+                                            color: colors.pointLabels,
                                             font: {
                                                 size: 16
                                             }
+                                        },
+                                        angleLines: {
+                                            color: colors.grid
                                         }
                                     }
                                 },
@@ -736,6 +802,7 @@
                                         display: true,
                                         position: 'top',
                                         labels: {
+                                            color: colors.legend,
                                             font: {
                                                 size: 16
                                             }
@@ -746,7 +813,8 @@
                                     }
                                 },
                                 responsive: true,
-                                maintainAspectRatio: false
+                                maintainAspectRatio: false,
+                                backgroundColor: colors.background
                             }
                         });
                     }
@@ -823,6 +891,30 @@
 
                         chart.update('active');
                     }
+
+                    // DARK MODE TOGGLE LISTENER
+                    function setupDarkModeListener() {
+                        const observer = new MutationObserver(function(mutations) {
+                            mutations.forEach(function(mutation) {
+                                if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                                    const theme = getCurrentTheme();
+                                    console.log('Theme changed to:', theme);
+
+                                    // Reinitialize all charts with new theme
+                                    initializePotensiChart();
+                                    initializeKompetensiChart();
+                                    initializeGeneralChart();
+                                }
+                            });
+                        });
+
+                        observer.observe(document.documentElement, {
+                            attributes: true,
+                            attributeFilter: ['class']
+                        });
+                    }
+
+                    setupDarkModeListener();
                 })();
             </script>
         @endpush

@@ -1,17 +1,17 @@
 <div>
-    <div class="bg-white mx-auto my-8 shadow overflow-hidden" style="max-width: 1400px;">
+    <div class="bg-white dark:bg-gray-800 mx-auto my-8 shadow overflow-hidden" style="max-width: 1400px;">
         <!-- Header -->
-        <div class="border-b-4 border-black py-3 bg-sky-200">
-            <h1 class="text-center text-lg font-bold uppercase tracking-wide text-gray-900">
+        <div class="border-b-4 border-black dark:border-gray-300 py-3 bg-sky-200 dark:bg-gray-700">
+            <h1 class="text-center text-lg font-bold uppercase tracking-wide text-gray-900 dark:text-gray-100">
                 GENERAL MAPPING
             </h1>
-            <p class="text-center text-sm font-semibold text-gray-700 mt-1">
+            <p class="text-center text-sm font-semibold text-gray-700 dark:text-gray-300 mt-1">
                 {{ $participant->name }}
             </p>
-            <p class="text-center text-sm font-semibold text-gray-700 mt-1">
+            <p class="text-center text-sm font-semibold text-gray-700 dark:text-gray-300 mt-1">
                 {{ $participant->event->name }}
             </p>
-            <p class="text-center text-sm font-semibold text-gray-700 mt-1">
+            <p class="text-center text-sm font-semibold text-gray-700 dark:text-gray-300 mt-1">
                 {{ $participant->positionFormation->name }} - {{ $participant->positionFormation->template->name }}
             </p>
         </div>
@@ -27,57 +27,65 @@
 
         <!-- Table Section -->
         <div class="p-4 overflow-x-auto">
-            <table class="min-w-full border border-black text-xs text-gray-900">
+            <table class="min-w-full border border-black dark:border-gray-300 text-xs text-gray-900 dark:text-gray-100">
                 <thead>
-                    <tr class="bg-sky-200 text-gray-900">
-                        <th class="border border-black px-3 py-2 font-semibold">No</th>
-                        <th class="border border-black px-3 py-2 font-semibold">Atribut/Attribute</th>
-                        <th class="border border-black px-3 py-2 font-semibold">Bobot %<br>200</th>
-                        <th class="border border-black px-3 py-2 font-semibold" colspan="2">
+                    <tr class="bg-sky-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                        <th class="border border-black dark:border-gray-300 px-3 py-2 font-semibold">No</th>
+                        <th class="border border-black dark:border-gray-300 px-3 py-2 font-semibold">Atribut/Attribute
+                        </th>
+                        <th class="border border-black dark:border-gray-300 px-3 py-2 font-semibold">Bobot %<br>200</th>
+                        <th class="border border-black dark:border-gray-300 px-3 py-2 font-semibold" colspan="2">
                             <span x-data
                                 x-text="$wire.tolerancePercentage > 0 ? 'Standard (-' + $wire.tolerancePercentage + '%)' : 'Standard'"></span>
                         </th>
-                        <th class="border border-black px-3 py-2 font-semibold" colspan="2">Individu</th>
-                        <th class="border border-black px-3 py-2 font-semibold" colspan="2">Gap</th>
-                        <th class="border border-black px-3 py-2 font-semibold">Prosentase<br>Kesesuaian</th>
-                        <th class="border border-black px-3 py-2 font-semibold">Kesimpulan/Conclusion</th>
+                        <th class="border border-black dark:border-gray-300 px-3 py-2 font-semibold" colspan="2">
+                            Individu</th>
+                        <th class="border border-black dark:border-gray-300 px-3 py-2 font-semibold" colspan="2">Gap
+                        </th>
+                        <th class="border border-black dark:border-gray-300 px-3 py-2 font-semibold">
+                            Prosentase<br>Kesesuaian</th>
+                        <th class="border border-black dark:border-gray-300 px-3 py-2 font-semibold">
+                            Kesimpulan/Conclusion</th>
                     </tr>
-                    <tr class="bg-sky-200 text-gray-900">
-                        <th class="border border-black px-3 py-1"></th>
-                        <th class="border border-black px-3 py-1"></th>
-                        <th class="border border-black px-3 py-1"></th>
-                        <th class="border border-black px-3 py-1 font-semibold">Rating/<br>Level</th>
-                        <th class="border border-black px-3 py-1 font-semibold">Score</th>
-                        <th class="border border-black px-3 py-1 font-semibold">Rating/<br>Level</th>
-                        <th class="border border-black px-3 py-1 font-semibold">Score</th>
-                        <th class="border border-black px-3 py-1 font-semibold">Rating/<br>Level</th>
-                        <th class="border border-black px-3 py-0 font-semibold">Score</th>
-                        <th class="border border-black px-3 py-1"></th>
-                        <th class="border border-black px-3 py-1"></th>
+                    <tr class="bg-sky-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                        <th class="border border-black dark:border-gray-300 px-3 py-1"></th>
+                        <th class="border border-black dark:border-gray-300 px-3 py-1"></th>
+                        <th class="border border-black dark:border-gray-300 px-3 py-1"></th>
+                        <th class="border border-black dark:border-gray-300 px-3 py-1 font-semibold">Rating/<br>Level
+                        </th>
+                        <th class="border border-black dark:border-gray-300 px-3 py-1 font-semibold">Score</th>
+                        <th class="border border-black dark:border-gray-300 px-3 py-1 font-semibold">Rating/<br>Level
+                        </th>
+                        <th class="border border-black dark:border-gray-300 px-3 py-1 font-semibold">Score</th>
+                        <th class="border border-black dark:border-gray-300 px-3 py-1 font-semibold">Rating/<br>Level
+                        </th>
+                        <th class="border border-black dark:border-gray-300 px-3 py-0 font-semibold">Score</th>
+                        <th class="border border-black dark:border-gray-300 px-3 py-1"></th>
+                        <th class="border border-black dark:border-gray-300 px-3 py-1"></th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach ($aspectsData as $aspect)
                         <tr>
-                            <td class="border border-black px-3 py-2 text-center">
+                            <td class="border border-black dark:border-gray-300 px-3 py-2 text-center">
                                 {{ $aspect['order'] }}
                             </td>
-                            <td class="border border-black px-3 py-2">{{ $aspect['name'] }}</td>
-                            <td class="border border-black px-3 py-2 text-center">{{ $aspect['weight_percentage'] }}
-                            </td>
-                            <td class="border border-black px-3 py-2 text-center">
+                            <td class="border border-black dark:border-gray-300 px-3 py-2">{{ $aspect['name'] }}</td>
+                            <td class="border border-black dark:border-gray-300 px-3 py-2 text-center">
+                                {{ $aspect['weight_percentage'] }}</td>
+                            <td class="border border-black dark:border-gray-300 px-3 py-2 text-center">
                                 {{ number_format($aspect['standard_rating'], 2) }}</td>
-                            <td class="border border-black px-3 py-2 text-center">
+                            <td class="border border-black dark:border-gray-300 px-3 py-2 text-center">
                                 {{ number_format($aspect['standard_score'], 2) }}</td>
-                            <td class="border border-black px-3 py-2 text-center">
+                            <td class="border border-black dark:border-gray-300 px-3 py-2 text-center">
                                 {{ number_format($aspect['individual_rating'], 2) }}</td>
-                            <td class="border border-black px-3 py-2 text-center">
+                            <td class="border border-black dark:border-gray-300 px-3 py-2 text-center">
                                 {{ number_format($aspect['individual_score'], 2) }}</td>
-                            <td class="border border-black px-3 py-2 text-center">
+                            <td class="border border-black dark:border-gray-300 px-3 py-2 text-center">
                                 {{ number_format($aspect['gap_rating'], 2) }}</td>
-                            <td class="border border-black px-3 py-2 text-center">
+                            <td class="border border-black dark:border-gray-300 px-3 py-2 text-center">
                                 {{ number_format($aspect['gap_score'], 2) }}</td>
-                            <td class="border border-black px-3 py-2 text-center">
+                            <td class="border border-black dark:border-gray-300 px-3 py-2 text-center">
                                 @php
                                     $percentage =
                                         $aspect['standard_score'] > 0
@@ -86,77 +94,85 @@
                                 @endphp
                                 {{ $percentage }}%
                             </td>
-                            <td class="border border-black px-3 py-2">{{ $aspect['conclusion_text'] }}</td>
+                            <td class="border border-black dark:border-gray-300 px-3 py-2">
+                                {{ $aspect['conclusion_text'] }}</td>
                         </tr>
                     @endforeach
 
                     <!-- Total Rating Row -->
-                    <tr class="font-bold bg-sky-100">
-                        <td class="border border-black px-3 py-2 text-right" colspan="3">Total Rating</td>
-                        <td class="border border-black px-3 py-2 text-center">
+                    <tr class="font-bold bg-sky-100 dark:bg-gray-600">
+                        <td class="border border-black dark:border-gray-300 px-3 py-2 text-right" colspan="3">Total
+                            Rating</td>
+                        <td class="border border-black dark:border-gray-300 px-3 py-2 text-center">
                             {{ number_format($totalStandardRating, 2) }}
                         </td>
-                        <td class="border border-black px-3 py-2"></td>
-                        <td class="border border-black px-3 py-2 text-center">
+                        <td class="border border-black dark:border-gray-300 px-3 py-2"></td>
+                        <td class="border border-black dark:border-gray-300 px-3 py-2 text-center">
                             {{ number_format($totalIndividualRating, 2) }}</td>
-                        <td class="border border-black px-3 py-2"></td>
-                        <td class="border border-black px-3 py-2 text-center">{{ number_format($totalGapRating, 2) }}
-                        </td>
-                        <td class="border border-black px-3 py-2"></td>
-                        <td class="border border-black px-3 py-2" colspan="2">{{ $overallConclusion }}</td>
+                        <td class="border border-black dark:border-gray-300 px-3 py-2"></td>
+                        <td class="border border-black dark:border-gray-300 px-3 py-2 text-center">
+                            {{ number_format($totalGapRating, 2) }}</td>
+                        <td class="border border-black dark:border-gray-300 px-3 py-2"></td>
+                        <td class="border border-black dark:border-gray-300 px-3 py-2" colspan="2">
+                            {{ $overallConclusion }}</td>
                     </tr>
 
                     <!-- Total Score Row -->
-                    <tr class="font-bold bg-sky-100">
-                        <td class="border border-black px-3 py-2 text-right" colspan="3">Total Score</td>
-                        <td class="border border-black px-3 py-2"></td>
-                        <td class="border border-black px-3 py-2 text-center">
+                    <tr class="font-bold bg-sky-100 dark:bg-gray-600">
+                        <td class="border border-black dark:border-gray-300 px-3 py-2 text-right" colspan="3">Total
+                            Score</td>
+                        <td class="border border-black dark:border-gray-300 px-3 py-2"></td>
+                        <td class="border border-black dark:border-gray-300 px-3 py-2 text-center">
                             {{ number_format($totalStandardScore, 2) }}
                         </td>
-                        <td class="border border-black px-3 py-2"></td>
-                        <td class="border border-black px-3 py-2 text-center">
+                        <td class="border border-black dark:border-gray-300 px-3 py-2"></td>
+                        <td class="border border-black dark:border-gray-300 px-3 py-2 text-center">
                             {{ number_format($totalIndividualScore, 2) }}</td>
-                        <td class="border border-black px-3 py-2"></td>
-                        <td class="border border-black px-3 py-2 text-center">{{ number_format($totalGapScore, 2) }}
-                        </td>
-                        <td class="border border-black px-3 py-2" colspan="2">{{ $overallConclusion }}</td>
+                        <td class="border border-black dark:border-gray-300 px-3 py-2"></td>
+                        <td class="border border-black dark:border-gray-300 px-3 py-2 text-center">
+                            {{ number_format($totalGapScore, 2) }}</td>
+                        <td class="border border-black dark:border-gray-300 px-3 py-2" colspan="2">
+                            {{ $overallConclusion }}</td>
                     </tr>
                 </tbody>
             </table>
         </div>
 
         <!-- Chart Section Rating -->
-        <div class="p-6 border-t-2 border-black bg-white" wire:ignore id="chart-rating-{{ $chartId }}">
-            <div class="text-center text-base font-bold mb-6 text-gray-900">Profil Pribadi Spider Plot Chart (Rating)
-            </div>
+        <div class="p-6 border-t-2 border-black dark:border-gray-300 bg-white dark:bg-gray-800" wire:ignore
+            id="chart-rating-{{ $chartId }}">
+            <div class="text-center text-base font-bold mb-6 text-gray-900 dark:text-gray-100">Profil Pribadi Spider
+                Plot Chart (Rating)</div>
             <div class="flex justify-center mb-6">
-                <div style="width: 700px; height: 700px; position: relative;">
+                <div style="width: 900px; height: 900px; position: relative;">
                     <canvas id="spiderRatingChart-{{ $chartId }}"></canvas>
                 </div>
             </div>
 
             <!-- Legend dengan klik functionality -->
-            <div class="flex justify-center text-sm gap-8 text-gray-900 mb-8" id="rating-legend-{{ $chartId }}">
+            <div class="flex justify-center text-sm gap-8 text-gray-900 dark:text-gray-100 mb-8"
+                id="rating-legend-{{ $chartId }}">
                 <!-- Standard (Index 2 - KUNING) -->
                 <span
-                    class="legend-item flex items-center gap-2 cursor-pointer select-none hover:bg-gray-100 px-3 py-2 rounded-lg transition-all duration-200 border border-gray-300 shadow-sm"
+                    class="legend-item flex items-center gap-2 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-700 px-3 py-2 rounded-lg transition-all duration-200 border border-gray-300 dark:border-gray-600 shadow-sm"
                     data-chart="rating" data-dataset="2">
                     <span class="inline-block w-12 h-3 rounded-sm" style="background-color: #fafa05;"></span>
-                    <span class="font-semibold text-gray-800">Standard</span>
+                    <span class="font-semibold text-gray-800 dark:text-gray-200">Standard</span>
                 </span>
                 <!-- Participant (Index 0 - HIJAU) -->
                 <span
-                    class="legend-item flex items-center gap-2 cursor-pointer select-none hover:bg-gray-100 px-3 py-2 rounded-lg transition-all duration-200 border border-gray-300 shadow-sm"
+                    class="legend-item flex items-center gap-2 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-700 px-3 py-2 rounded-lg transition-all duration-200 border border-gray-300 dark:border-gray-600 shadow-sm"
                     data-chart="rating" data-dataset="0">
                     <span class="inline-block w-12 h-3 rounded-sm" style="background-color: #5db010;"></span>
-                    <span class="font-semibold text-gray-800" style="color: #5db010;">{{ $participant->name }}</span>
+                    <span class="font-semibold text-gray-800 dark:text-gray-200"
+                        style="color: #5db010;">{{ $participant->name }}</span>
                 </span>
                 <!-- Tolerance (Index 1 - MERAH) -->
                 <span
-                    class="legend-item flex items-center gap-2 cursor-pointer select-none hover:bg-gray-100 px-3 py-2 rounded-lg transition-all duration-200 border border-gray-300 shadow-sm"
+                    class="legend-item flex items-center gap-2 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-700 px-3 py-2 rounded-lg transition-all duration-200 border border-gray-300 dark:border-gray-600 shadow-sm"
                     data-chart="rating" data-dataset="1">
                     <span class="inline-block w-12 h-3 rounded-sm" style="background-color: #b50505;"></span>
-                    <span class="font-semibold text-gray-800" x-data
+                    <span class="font-semibold text-gray-800 dark:text-gray-200" x-data
                         x-text="'Tolerance ' + $wire.tolerancePercentage + '%'"></span>
                 </span>
             </div>
@@ -216,10 +232,10 @@
                             if (isHidden) {
                                 item.classList.add('opacity-50', 'line-through');
                                 item.classList.remove('bg-white', 'shadow-sm');
-                                item.classList.add('bg-gray-50');
+                                item.classList.add('bg-gray-50', 'dark:bg-gray-600');
                             } else {
-                                item.classList.remove('opacity-50', 'line-through', 'bg-gray-50');
-                                item.classList.add('bg-white', 'shadow-sm');
+                                item.classList.remove('opacity-50', 'line-through', 'bg-gray-50', 'dark:bg-gray-600');
+                                item.classList.add('bg-white', 'dark:bg-gray-800', 'shadow-sm');
                             }
                         });
                     }
@@ -482,37 +498,45 @@
         </div>
 
         <!-- Chart Section Score -->
-        <div class="p-6 border-t-2 border-black bg-white" wire:ignore id="chart-score-{{ $chartId }}">
-            <div class="text-center text-base font-bold mb-6 text-gray-900">Profil Pribadi Spider Plot Chart (Score)
-            </div>
+        <div class="p-6 border-t-2 border-black dark:border-gray-300 bg-white dark:bg-gray-800" wire:ignore
+            id="chart-score-{{ $chartId }}">
+            <div class="text-center text-base font-bold mb-6 text-gray-900 dark:text-gray-100">Profil Pribadi Spider
+                Plot Chart (Score)</div>
             <div class="flex justify-center mb-6">
-                <div style="width: 700px; height: 700px; position: relative;">
+                <div style="width: 900px; height: 900px; position: relative;">
                     <canvas id="spiderScoreChart-{{ $chartId }}"></canvas>
                 </div>
             </div>
 
             <!-- Legend dengan klik functionality -->
-            <div class="flex justify-center text-sm gap-8 text-gray-900 mb-8" id="score-legend-{{ $chartId }}">
+            <div class="flex justify-center text-sm gap-8 text-gray-900 dark:text-gray-100 mb-8"
+                id="score-legend-{{ $chartId }}">
                 <!-- Standard (Index 2 - KUNING) -->
                 <span
-                    class="legend-item flex items-center gap-2 cursor-pointer select-none hover:bg-gray-100 px-3 py-2 rounded-lg transition-all duration-200 border border-gray-300 shadow-sm"
+                    class="legend-item flex items-center gap-2 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-700 px-3 py-2 rounded-lg transition-all duration-200 border border-gray-300 dark:border-gray-600 shadow-sm"
                     data-chart="score" data-dataset="2">
                     <span class="inline-block w-12 h-3 rounded-sm" style="background-color: #fafa05;"></span>
-                    <span class="font-semibold text-gray-800">Standard</span>
+                    <span class="font-semibold text-gray-800 dark:text-gray-200">Standard</span>
                 </span>
+                <!-- Participant (Index 0 - HIხ
+
+System: Apologies, it seems the response was cut off due to length. I'll continue from where it left off, ensuring dark mode support is added without changing the code structure.
+
+```html
                 <!-- Participant (Index 0 - HIJAU) -->
                 <span
-                    class="legend-item flex items-center gap-2 cursor-pointer select-none hover:bg-gray-100 px-3 py-2 rounded-lg transition-all duration-200 border border-gray-300 shadow-sm"
+                    class="legend-item flex items-center gap-2 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-700 px-3 py-2 rounded-lg transition-all duration-200 border border-gray-300 dark:border-gray-600 shadow-sm"
                     data-chart="score" data-dataset="0">
                     <span class="inline-block w-12 h-3 rounded-sm" style="background-color: #5db010;"></span>
-                    <span class="font-semibold text-gray-800" style="color: #5db010;">{{ $participant->name }}</span>
+                    <span class="font-semibold text-gray-800 dark:text-gray-200"
+                        style="color: #5db010;">{{ $participant->name }}</span>
                 </span>
                 <!-- Tolerance (Index 1 - MERAH) -->
                 <span
-                    class="legend-item flex items-center gap-2 cursor-pointer select-none hover:bg-gray-100 px-3 py-2 rounded-lg transition-all duration-200 border border-gray-300 shadow-sm"
+                    class="legend-item flex items-center gap-2 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-700 px-3 py-2 rounded-lg transition-all duration-200 border border-gray-300 dark:border-gray-600 shadow-sm"
                     data-chart="score" data-dataset="1">
                     <span class="inline-block w-12 h-3 rounded-sm" style="background-color: #b50505;"></span>
-                    <span class="font-semibold text-gray-800" x-data
+                    <span class="font-semibold text-gray-800 dark:text-gray-200" x-data
                         x-text="'Tolerance ' + $wire.tolerancePercentage + '%'"></span>
                 </span>
             </div>
@@ -573,10 +597,10 @@
                             if (isHidden) {
                                 item.classList.add('opacity-50', 'line-through');
                                 item.classList.remove('bg-white', 'shadow-sm');
-                                item.classList.add('bg-gray-50');
+                                item.classList.add('bg-gray-50', 'dark:bg-gray-600');
                             } else {
-                                item.classList.remove('opacity-50', 'line-through', 'bg-gray-50');
-                                item.classList.add('bg-white', 'shadow-sm');
+                                item.classList.remove('opacity-50', 'line-through', 'bg-gray-50', 'dark:bg-gray-600');
+                                item.classList.add('bg-white', 'dark:bg-gray-800', 'shadow-sm');
                             }
                         });
                     }
@@ -775,10 +799,10 @@
                                                 color: '#000000'
                                             },
                                             grid: {
-                                                color: 'rgba(0, 0, 0, 0.15)'
+                                                color: 'rgba(255, 255, 255, 0.15)'
                                             },
                                             angleLines: {
-                                                color: 'rgba(0, 0, 0, 0.15)'
+                                                color: 'rgba(255, 255, 255, 0.15)'
                                             }
                                         }
                                     }
@@ -833,7 +857,6 @@
                             });
                         });
                     }
-
                     setupScoreChart();
                 })();
             </script>
