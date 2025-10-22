@@ -15,11 +15,15 @@ class TrainingRecommendation extends Component
 {
     use WithPagination;
 
+
     public ?AssessmentEvent $selectedEvent = null;
 
     public ?Aspect $selectedAspect = null;
 
     public ?int $aspectId = null;
+
+    // Add missing eventCode property
+    public ?string $eventCode = null;
 
     // Tolerance percentage (loaded from session)
     public int $tolerancePercentage = 10;
@@ -56,11 +60,11 @@ class TrainingRecommendation extends Component
         // Load aspect from session
         $this->aspectId = session('filter.aspect_id');
 
-        // Load data if all filters are set
-        $eventCode = session('filter.event_code');
+        // Load eventCode from session
+        $this->eventCode = session('filter.event_code');
         $positionFormationId = session('filter.position_formation_id');
 
-        if ($eventCode && $positionFormationId && $this->aspectId) {
+        if ($this->eventCode && $positionFormationId && $this->aspectId) {
             $this->loadEventAndAspect();
             $this->calculateSummaryData();
         }
@@ -71,6 +75,7 @@ class TrainingRecommendation extends Component
      */
     public function handleEventSelected(?string $eventCode): void
     {
+
         $this->resetPage();
 
         // Reset data
