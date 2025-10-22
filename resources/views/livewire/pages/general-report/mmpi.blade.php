@@ -62,7 +62,7 @@
                             {{ $result->id }}</td>
                         <td
                             class="py-4 px-4 text-center text-sm text-gray-500 dark:text-gray-300 border border-gray-200 dark:border-gray-600 w-32">
-                            {{ $result->kode_proyek }}</td>
+                            {{ $result->event->code }}</td>
                         <td
                             class="py-4 px-4 text-center text-sm text-gray-900 dark:text-gray-200 font-medium border border-gray-200 dark:border-gray-600 w-32">
                             {{ $result->no_test }}</td>
