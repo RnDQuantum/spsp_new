@@ -23,6 +23,9 @@ class ParticipantsList extends Component
 
     public bool $readyToLoad = false;
 
+    // Add perPage property
+    public int $perPage = 10;
+
     public function mount(): void
     {
         // Don't set default event - let user choose
@@ -85,7 +88,7 @@ class ParticipantsList extends Component
     public function participants()
     {
         if (! $this->readyToLoad) {
-            return new \Illuminate\Pagination\LengthAwarePaginator([], 0, 10);
+            return new \Illuminate\Pagination\LengthAwarePaginator([], 0, $this->perPage);
         }
 
         $query = Participant::with([
@@ -108,7 +111,19 @@ class ParticipantsList extends Component
             });
         }
 
-        return $query->orderBy('name')->paginate(10);
+        // Handle "All" option
+        if ($this->perPage === 0) {
+            $results = $query->orderBy('name')->get();
+            return new \Illuminate\Pagination\LengthAwarePaginator(
+                $results,
+                $results->count(),
+                $results->count(),
+                1,
+                ['path' => request()->url()]
+            );
+        }
+
+        return $query->orderBy('name')->paginate($this->perPage);
     }
 
     public function updatedSelectedEventId(): void
@@ -121,24 +136,29 @@ class ParticipantsList extends Component
         $this->resetPage();
     }
 
+    // Add updatedPerPage method
+    public function updatedPerPage(): void
+    {
+        $this->resetPage();
+    }
+
     public function clearFilters(): void
     {
         $this->selectedEventId = '';
         $this->search = '';
+        $this->perPage = 10;
         $this->searchEvents();
         $this->resetPage();
     }
 
     public function handleDetail(Participant $participant): void
     {
-
         // Simpan data ke session untuk sidebar menggunakan session()->put()
         session()->put([
             'filter.event_code' => $participant->assessmentEvent->code,
             'filter.position_formation_id' => $participant->position_formation_id,
             'filter.participant_id' => $participant->id
         ]);
-
 
         // Redirect ke halaman detail dengan eventCode dan testNumber
         $this->redirect(route('participant_detail', [
