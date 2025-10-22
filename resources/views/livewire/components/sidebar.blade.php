@@ -166,7 +166,9 @@
                             Ringkasan Managerial Potency Mapping
                         </a>
 
-                        <a wire:navigate href="#" role="menuitem" @class([ 'block px-4 py-2 text-sm rounded'
+                        <a wire:navigate
+                            href="{{ $this->canShowIndividualReports() ? route('final_report', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) : '#' }}"
+                            role="menuitem" @class([ 'block px-4 py-2 text-sm rounded'
                             , 'text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-700'=>
                             $this->canShowIndividualReports(),
                             'text-gray-500 dark:text-gray-500 cursor-not-allowed' => !$this->canShowIndividualReports(),
