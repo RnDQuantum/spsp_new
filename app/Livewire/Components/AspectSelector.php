@@ -47,6 +47,8 @@ class AspectSelector extends Component
         if ($showLabel !== null) {
             $this->showLabel = $showLabel;
         }
+
+        $this->dispatch('aspect-selected', aspectId: $this->aspectId);
     }
 
     /**
