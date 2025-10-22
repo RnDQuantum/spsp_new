@@ -73,7 +73,5 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/standard-psikometrik', App\Livewire\Pages\GeneralReport\StandardPsikometrik::class)->name('standard-psikometrik');
     Route::get('/general-report/mmpi', App\Livewire\Pages\GeneralReport\MmpiResultsReport::class)->name('general-report.mmpi');
 
-    Route::get('/tkmi', function () {
-        return view('livewire.pages.general-report.tkmi');
-    })->name('tkmi');
+    Route::get('/final-report/{eventCode}/{testNumber}', App\Livewire\Pages\IndividualReport\FinalReport::class)->name('final_report');
 });

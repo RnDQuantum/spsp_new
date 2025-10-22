@@ -31,8 +31,26 @@ class GeneralMatching extends Component
     // Job match percentage (from final assessment)
     public $jobMatchPercentage = 0;
 
+    // ADD: Public properties untuk support child component
+    public $eventCode;
+    public $testNumber;
+
+    // Flag untuk menentukan apakah standalone atau child
+    public $isStandalone = true;
+
     public function mount($eventCode, $testNumber): void
     {
+        // Gunakan parameter jika ada (dari route), atau fallback ke property (dari parent)
+        $this->eventCode = $eventCode ?? $this->eventCode;
+        $this->testNumber = $testNumber ?? $this->testNumber;
+
+        // Tentukan apakah standalone (dari route) atau child (dari parent)
+        $this->isStandalone = $eventCode !== null && $testNumber !== null;
+
+        // Validate
+        if (!$this->eventCode || !$this->testNumber) {
+            abort(404, 'Event code and test number are required');
+        }
 
         // Load participant with relations based on event code and test number
         $this->participant = Participant::with([
@@ -40,10 +58,10 @@ class GeneralMatching extends Component
             'batch',
             'positionFormation.template',
         ])
-            ->whereHas('assessmentEvent', function ($query) use ($eventCode) {
-                $query->where('code', $eventCode);
+            ->whereHas('assessmentEvent', function ($query) {
+                $query->where('code', $this->eventCode);
             })
-            ->where('test_number', $testNumber)
+            ->where('test_number', $this->testNumber)
             ->firstOrFail();
 
         // Load final assessment
@@ -180,6 +198,11 @@ class GeneralMatching extends Component
 
     public function render()
     {
+        // Jika standalone, gunakan layout. Jika child, tidak pakai layout
+        if ($this->isStandalone) {
+            return view('livewire.pages.individual-report.general-matching')
+                ->layout('components.layouts.app', ['title' => 'General Matching']);
+        }
         return view('livewire.pages.individual-report.general-matching');
     }
 }
