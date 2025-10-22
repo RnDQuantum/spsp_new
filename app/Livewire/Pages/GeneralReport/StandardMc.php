@@ -6,23 +6,15 @@ use App\Models\AssessmentEvent;
 use App\Models\AssessmentTemplate;
 use App\Models\CategoryType;
 use Livewire\Attributes\Layout;
-use Livewire\Attributes\Url;
 use Livewire\Component;
 
 #[Layout('components.layouts.app', ['title' => 'Standar Pemetaan Kompetensi Individu'])]
 class StandardMc extends Component
 {
-    #[Url(as: 'event')]
-    public ?string $eventCode = null;
-
-    #[Url(as: 'position')]
-    public ?string $positionCode = null;
-
-    /** @var array<int, array{code:string,name:string,institution:string}> */
-    public array $availableEvents = [];
-
-    /** @var array<int, array{code:string,name:string,template_name:string}> */
-    public array $availablePositions = [];
+    protected $listeners = [
+        'event-selected' => 'handleEventSelected',
+        'position-selected' => 'handlePositionSelected',
+    ];
 
     public ?AssessmentEvent $selectedEvent = null;
 
@@ -52,33 +44,21 @@ class StandardMc extends Component
     public function mount(): void
     {
         // Generate unique chart ID
-        $this->chartId = 'standardMc'.uniqid();
-
-        $this->loadAvailableEvents();
-
-        if (! $this->eventCode && count($this->availableEvents) > 0) {
-            $this->eventCode = $this->availableEvents[0]['code'] ?? null;
-        }
-
-        $this->loadAvailablePositions();
-
-        if (! $this->positionCode && count($this->availablePositions) > 0) {
-            $this->positionCode = $this->availablePositions[0]['code'] ?? null;
-        }
+        $this->chartId = 'standardMc' . uniqid();
 
         $this->loadStandardData();
     }
 
-    public function updatedEventCode(): void
+    public function handleEventSelected(?string $eventCode): void
     {
-        // Reset position when event changes
-        $this->positionCode = null;
-        $this->loadAvailablePositions();
+        // Event changed, position will be auto-reset by PositionSelector
+        // Wait for position to be selected before updating chart
+    }
 
-        if (! $this->positionCode && count($this->availablePositions) > 0) {
-            $this->positionCode = $this->availablePositions[0]['code'] ?? null;
-        }
-
+    public function handlePositionSelected(?int $positionFormationId): void
+    {
+        // Position selected, now we have both event and position
+        // Load data with the new filters
         $this->loadStandardData();
 
         // Dispatch event to update charts
@@ -91,61 +71,7 @@ class StandardMc extends Component
         ]);
     }
 
-    public function updatedPositionCode(): void
-    {
-        $this->loadStandardData();
 
-        // Dispatch event to update charts
-        $this->dispatch('chartDataUpdated', [
-            'labels' => $this->chartData['labels'],
-            'ratings' => $this->chartData['ratings'],
-            'scores' => $this->chartData['scores'],
-            'templateName' => $this->selectedTemplate?->name ?? 'Standard',
-            'maxScore' => $this->maxScore,
-        ]);
-    }
-
-    private function loadAvailableEvents(): void
-    {
-        $this->availableEvents = AssessmentEvent::query()
-            ->with('institution')
-            ->orderByDesc('start_date')
-            ->get()
-            ->map(fn ($e) => [
-                'code' => $e->code,
-                'name' => $e->name,
-                'institution' => $e->institution->name ?? 'N/A',
-            ])
-            ->all();
-    }
-
-    private function loadAvailablePositions(): void
-    {
-        $this->availablePositions = [];
-
-        if (! $this->eventCode) {
-            return;
-        }
-
-        $event = AssessmentEvent::query()
-            ->where('code', $this->eventCode)
-            ->first();
-
-        if (! $event) {
-            return;
-        }
-
-        $this->availablePositions = $event->positionFormations()
-            ->with('template')
-            ->orderBy('name')
-            ->get()
-            ->map(fn ($p) => [
-                'code' => $p->code,
-                'name' => $p->name,
-                'template_name' => $p->template?->name ?? 'No Template',
-            ])
-            ->all();
-    }
 
     private function loadStandardData(): void
     {
@@ -162,32 +88,36 @@ class StandardMc extends Component
             'scores' => [],
         ];
 
-        if (! $this->eventCode || ! $this->positionCode) {
+        // Read filters from session
+        $eventCode = session('filter.event_code');
+        $positionFormationId = session('filter.position_formation_id');
+
+        if (!$eventCode || !$positionFormationId) {
             return;
         }
 
         $this->selectedEvent = AssessmentEvent::query()
             ->with('institution', 'positionFormations.template')
-            ->where('code', $this->eventCode)
+            ->where('code', $eventCode)
             ->first();
 
-        if (! $this->selectedEvent) {
+        if (!$this->selectedEvent) {
             return;
         }
 
         // Get the selected position formation
         $selectedPosition = $this->selectedEvent->positionFormations
-            ->where('code', $this->positionCode)
+            ->where('id', $positionFormationId)
             ->first();
 
-        if (! $selectedPosition) {
+        if (!$selectedPosition) {
             return;
         }
 
         // Get template from the selected position
         $this->selectedTemplate = $selectedPosition->template;
 
-        if (! $this->selectedTemplate) {
+        if (!$this->selectedTemplate) {
             return;
         }
 
@@ -196,7 +126,7 @@ class StandardMc extends Component
             ->where('template_id', $this->selectedTemplate->id)
             ->where('code', 'kompetensi')
             ->with([
-                'aspects' => fn ($q) => $q->orderBy('order'),
+                'aspects' => fn($q) => $q->orderBy('order'),
             ])
             ->orderBy('order')
             ->get();
