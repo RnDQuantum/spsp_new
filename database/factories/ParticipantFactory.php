@@ -27,7 +27,7 @@ class ParticipantFactory extends Factory
         $degree = fake()->randomElement($degrees);
 
         return [
-            'username' => fake()->bothify('???##-###'),
+            'username' => fake()->unique()->bothify('???##-###'),
             'test_number' => $this->generateTestNumber(),
             'skb_number' => fake()->unique()->numerify('244002401200#####'),
             'name' => strtoupper($firstName . ' ' . $lastName) . ', ' . $degree,
