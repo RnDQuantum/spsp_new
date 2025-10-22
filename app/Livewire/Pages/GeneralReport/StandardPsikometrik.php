@@ -50,16 +50,7 @@ class StandardPsikometrik extends Component
     public function handleEventSelected(?string $eventCode): void
     {
         // Event changed, position will be auto-reset by PositionSelector
-        // Just reload data (position will be null, so data will be empty)
-        $this->loadStandardData();
-
-        // Dispatch event to update charts
-        $this->dispatch('chartDataUpdated', [
-            'labels' => $this->chartData['labels'],
-            'ratings' => $this->chartData['ratings'],
-            'scores' => $this->chartData['scores'],
-            'templateName' => $this->selectedTemplate?->name ?? 'Standard',
-        ]);
+        // Wait for position to be selected before updating chart
     }
 
     public function handlePositionSelected(?int $positionFormationId): void
