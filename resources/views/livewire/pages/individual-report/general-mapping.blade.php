@@ -728,6 +728,8 @@ System: Apologies, it seems the response was cut off due to length. I'll continu
                                         ticks: {
                                             stepSize: 1,
                                             color: colors.ticks,
+                                            backdropColor: 'transparent', // tambahkan baris ini
+                                            showLabelBackdrop: false,
                                             font: {
                                                 size: 11,
                                                 weight: 'bold'
@@ -876,6 +878,8 @@ System: Apologies, it seems the response was cut off due to length. I'll continu
                                         ticks: {
                                             stepSize: 20,
                                             color: colors.ticks,
+                                            backdropColor: 'transparent', // tambahkan baris ini
+                                            showLabelBackdrop: false,
                                             font: {
                                                 size: 11,
                                                 weight: 'bold'
