@@ -1,116 +1,102 @@
-<style>
-    /* Standard rating cell styling */
-    .rating-cell-standard {
-        background: linear-gradient(135deg, #fef3c7, #fde68a);
-        color: #92400e;
-        font-weight: bold;
-    }
-
-    /* Rating scale colors */
-    .rating-1 {
-        background-color: #ef4444;
-        color: white;
-    }
-
-    .rating-2 {
-        background-color: #f97316;
-        color: white;
-    }
-
-    .rating-3 {
-        background-color: #f59e0b;
-        color: white;
-    }
-
-    .rating-4 {
-        background-color: #10b981;
-        color: white;
-    }
-
-    .rating-5 {
-        background-color: #059669;
-        color: white;
-    }
-</style>
-
 <div>
-    <div class="bg-white mx-auto my-8 shadow overflow-hidden" style="max-width: 1200px;">
-        <!-- Header -->
-        <div class="border-b-4 border-black py-4 bg-white">
-            <h1 class="text-center text-2xl font-bold uppercase tracking-wide text-black">
+    <div class="mx-auto my-8 shadow overflow-hidden max-w-6xl bg-white dark:bg-gray-800">
+
+        <!-- Header - DARK MODE READY -->
+        <div class="border-b-4 border-black py-4 bg-white dark:bg-gray-700">
+            <h1 class="text-center text-2xl font-bold uppercase tracking-wide text-black dark:text-white">
                 RINGKASAN KOMPETENSI
             </h1>
         </div>
 
-        <!-- Info Section -->
-        <div class="p-6 bg-white">
-            <table class="w-full text-sm text-black">
-                <tr>
-                    <td class="py-1 font-semibold" style="width: 150px;">Nomor Tes</td>
-                    <td class="py-1" style="width: 20px;">:</td>
-                    <td class="py-1">{{ $participant->test_number }}</td>
+        <!-- Info Section - DARK MODE READY -->
+        <div class="p-6 bg-white dark:bg-gray-800">
+            <table class="w-full text-sm">
+                <tr class="dark:text-gray-200">
+                    <td class="py-1 font-semibold text-black dark:text-gray-200 w-36">Nomor Tes</td>
+                    <td class="py-1 text-black dark:text-gray-200 w-4">:</td>
+                    <td class="py-1 text-black dark:text-gray-200">{{ $participant->test_number }}</td>
                 </tr>
-                <tr>
-                    <td class="py-1 font-semibold">NIP</td>
-                    <td class="py-1">:</td>
-                    <td class="py-1">{{ $participant->skb_number ?? '-' }}</td>
+                <tr class="dark:text-gray-200">
+                    <td class="py-1 font-semibold text-black dark:text-gray-200">NIP</td>
+                    <td class="py-1 text-black dark:text-gray-200">:</td>
+                    <td class="py-1 text-black dark:text-gray-200">{{ $participant->skb_number ?? '-' }}</td>
                 </tr>
-                <tr>
-                    <td class="py-1 font-semibold">Nama</td>
-                    <td class="py-1">:</td>
-                    <td class="py-1">{{ $participant->name }}</td>
+                <tr class="dark:text-gray-200">
+                    <td class="py-1 font-semibold text-black dark:text-gray-200">Nama</td>
+                    <td class="py-1 text-black dark:text-gray-200">:</td>
+                    <td class="py-1 text-black dark:text-gray-200">{{ $participant->name }}</td>
                 </tr>
-                <tr>
-                    <td class="py-1 font-semibold">Jabatan Saat Ini</td>
-                    <td class="py-1">:</td>
-                    <td class="py-1">{{ $participant->positionFormation->name ?? '-' }}</td>
-                </tr>
-                <tr>
-                    <td class="py-1 font-semibold">Standar Penilaian</td>
-                    <td class="py-1">:</td>
-                    <td class="py-1">{{ $participant->positionFormation->template->name ?? '-' }}
+                <tr class="dark:text-gray-200">
+                    <td class="py-1 font-semibold text-black dark:text-gray-200">Jabatan Saat Ini</td>
+                    <td class="py-1 text-black dark:text-gray-200">:</td>
+                    <td class="py-1 text-black dark:text-gray-200">{{ $participant->positionFormation->name ?? '-' }}
                     </td>
                 </tr>
-                <tr>
-                    <td class="py-1 font-semibold">Tanggal Tes</td>
-                    <td class="py-1">:</td>
-                    <td class="py-1">{{ $participant->assessmentEvent->start_date?->format('d F Y') ?? '-' }}</td>
+                <tr class="dark:text-gray-200">
+                    <td class="py-1 font-semibold text-black dark:text-gray-200">Standar Penilaian</td>
+                    <td class="py-1 text-black dark:text-gray-200">:</td>
+                    <td class="py-1 text-black dark:text-gray-200">
+                        {{ $participant->positionFormation->template->name ?? '-' }}</td>
+                </tr>
+                <tr class="dark:text-gray-200">
+                    <td class="py-1 font-semibold text-black dark:text-gray-200">Tanggal Tes</td>
+                    <td class="py-1 text-black dark:text-gray-200">:</td>
+                    <td class="py-1 text-black dark:text-gray-200">
+                        {{ $participant->assessmentEvent->start_date?->format('d F Y') ?? '-' }}</td>
                 </tr>
             </table>
         </div>
 
-        <!-- Table Section -->
-        <div class="px-6 pb-6">
-            <table class="min-w-full border-2 border-black text-sm text-gray-900">
+        <!-- Table Section - DARK MODE READY -->
+        <div class="px-6 pb-6 bg-white dark:bg-gray-800">
+            <table class="min-w-full border-2 border-black text-sm">
                 <thead>
-                    <tr class="bg-cyan-200">
-                        <th class="border-2 border-black px-3 py-3 font-bold text-center" style="width: 40px;">NO</th>
-                        <th class="border-2 border-black px-3 py-3 font-bold text-center" style="width: 200px;">
+                    <tr class="bg-cyan-200 dark:bg-gray-700">
+                        <th
+                            class="border-2 border-black px-3 py-3 font-bold text-center text-black dark:text-white w-10">
+                            NO</th>
+                        <th
+                            class="border-2 border-black px-3 py-3 font-bold text-center text-black dark:text-white w-48">
                             AKTIFITAS/KOMPETENSI</th>
-                        <th class="border-2 border-black px-3 py-3 font-bold text-center" colspan="5"
-                            style="width: 250px;">RATING</th>
-                        <th class="border-2 border-black px-3 py-3 font-bold text-center">Kesimpulan</th>
+                        <th class="border-2 border-black px-3 py-3 font-bold text-center text-black dark:text-white"
+                            colspan="5" style="width: 250px;">RATING</th>
+                        <th class="border-2 border-black px-3 py-3 font-bold text-center text-black dark:text-white">
+                            Kesimpulan</th>
                     </tr>
-                    <tr class="bg-cyan-200">
+                    <tr class="bg-cyan-200 dark:bg-gray-700">
                         <th class="border-2 border-black px-3 py-2"></th>
                         <th class="border-2 border-black px-3 py-2"></th>
-                        <th class="border-2 border-black px-3 py-2 font-bold text-center" style="width: 50px;">1</th>
-                        <th class="border-2 border-black px-3 py-2 font-bold text-center" style="width: 50px;">2</th>
-                        <th class="border-2 border-black px-3 py-2 font-bold text-center" style="width: 50px;">3</th>
-                        <th class="border-2 border-black px-3 py-2 font-bold text-center" style="width: 50px;">4</th>
-                        <th class="border-2 border-black px-3 py-2 font-bold text-center" style="width: 50px;">5</th>
+                        <th
+                            class="border-2 border-black px-3 py-2 font-bold text-center text-black dark:text-white w-12">
+                            1</th>
+                        <th
+                            class="border-2 border-black px-3 py-2 font-bold text-center text-black dark:text-white w-12">
+                            2</th>
+                        <th
+                            class="border-2 border-black px-3 py-2 font-bold text-center text-black dark:text-white w-12">
+                            3</th>
+                        <th
+                            class="border-2 border-black px-3 py-2 font-bold text-center text-black dark:text-white w-12">
+                            4</th>
+                        <th
+                            class="border-2 border-black px-3 py-2 font-bold text-center text-black dark:text-white w-12">
+                            5</th>
                         <th class="border-2 border-black px-3 py-2"></th>
                     </tr>
                     <tr>
-                        <td class="border-2 border-black px-3 py-2 font-bold bg-gray-100" colspan="8">Aspek
-                            Kompetensi</td>
+                        <td class="border-2 border-black px-3 py-2 font-bold bg-gray-100 dark:bg-gray-600 text-black dark:text-white"
+                            colspan="8">
+                            Aspek Kompetensi
+                        </td>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach ($aspectsData as $aspect)
-                        <tr>
-                            <td class="border-2 border-black px-3 py-3 text-center">{{ $aspect['number'] }}</td>
-                            <td class="border-2 border-black px-3 py-3">{{ $aspect['name'] }}</td>
+                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                            <td class="border-2 border-black px-3 py-3 text-center text-black dark:text-white">
+                                {{ $aspect['number'] }}</td>
+                            <td class="border-2 border-black px-3 py-3 text-black dark:text-white">{{ $aspect['name'] }}
+                            </td>
                             @php
                                 $roundedIndividualRating = round($aspect['individual_rating']);
                                 $roundedStandardRating = round($aspect['standard_rating']);
@@ -119,13 +105,21 @@
                                 @php
                                     $isStandard = $i == $roundedStandardRating;
                                     $isIndividual = $i == $roundedIndividualRating;
-                                    $ratingClass = "rating-{$i}";
                                 @endphp
                                 <td
-                                    class="border-2 border-black px-3 py-3 text-center relative {{ $isStandard ? 'rating-cell-standard' : '' }} {{ $isIndividual && !$isStandard ? "{$ratingClass} font-bold text-lg" : '' }}">
+                                    class="border-2 border-black px-3 py-3 text-center relative
+                                    @if ($isStandard) bg-gradient-to-r from-amber-200 to-amber-300 text-amber-800 font-bold @endif
+                                    @if ($isIndividual && !$isStandard) @if ($i == 1) bg-red-500 text-white font-bold text-lg
+                                        @elseif($i == 2) bg-orange-500 text-white font-bold text-lg
+                                        @elseif($i == 3) bg-amber-500 text-white font-bold text-lg
+                                        @elseif($i == 4) bg-emerald-500 text-white font-bold text-lg
+                                        @else bg-emerald-700 text-white font-bold text-lg @endif
+                                    @endif">
                                     @if ($isIndividual && $isStandard)
-                                        {{-- Both standard and individual are the same --}}
-                                        <span class="{{ $ratingClass }} font-bold text-lg px-2 py-1 rounded">√</span>
+                                        <span
+                                            class="inline-block px-1 py-0.5 rounded
+                                            @if ($i == 1) bg-red-500 @elseif($i == 2) bg-orange-500 @elseif($i == 3) bg-amber-500 @elseif($i == 4) bg-emerald-500 @else bg-emerald-700 @endif
+                                            text-white font-bold text-lg">√</span>
                                     @elseif ($isIndividual)
                                         √
                                     @elseif ($isStandard)
@@ -133,7 +127,7 @@
                                     @endif
                                 </td>
                             @endfor
-                            <td class="border-2 border-black px-3 py-3 text-xs">
+                            <td class="border-2 border-black px-3 py-3 text-xs text-black dark:text-gray-200">
                                 <strong>{{ $aspect['conclusion']['title'] }}</strong><br>
                                 {{ $aspect['conclusion']['description'] }}
                             </td>
@@ -143,44 +137,45 @@
             </table>
         </div>
 
-        <!-- Legend -->
-        <div class="px-6 pb-6">
-            <div class="text-sm font-bold mb-2 text-gray-900">Note :</div>
-            <div class="grid grid-cols-1 gap-2 text-sm text-gray-900">
+        <!-- Legend - DARK MODE READY -->
+        <div class="px-6 pb-6 bg-white dark:bg-gray-800">
+            <div class="text-sm font-bold mb-2 text-black dark:text-white">Note :</div>
+            <div class="grid grid-cols-1 gap-2 text-sm text-black dark:text-gray-200">
                 <div class="flex items-center gap-3">
                     <div
-                        class="w-8 h-6 rating-cell-standard border border-black flex items-center justify-center font-bold">
-                        S</div>
+                        class="w-8 h-6 bg-gradient-to-r from-amber-200 to-amber-300 border-2 border-black flex items-center justify-center font-bold text-amber-800">
+                        S
+                    </div>
                     <span><em>Standar</em></span>
                 </div>
                 <div class="flex items-center gap-3">
-                    <div class="w-8 h-6 rating-1 border border-black flex items-center justify-center font-bold">
-                        √
-                    </div>
+                    <div
+                        class="w-8 h-6 bg-red-500 border-2 border-black flex items-center justify-center font-bold text-white">
+                        √</div>
                     <span><em>Rating 1 - Rendah</em></span>
                 </div>
                 <div class="flex items-center gap-3">
-                    <div class="w-8 h-6 rating-2 border border-black flex items-center justify-center font-bold">
-                        √
-                    </div>
+                    <div
+                        class="w-8 h-6 bg-orange-500 border-2 border-black flex items-center justify-center font-bold text-white">
+                        √</div>
                     <span><em>Rating 2 - Kurang</em></span>
                 </div>
                 <div class="flex items-center gap-3">
-                    <div class="w-8 h-6 rating-3 border border-black flex items-center justify-center font-bold">
-                        √
-                    </div>
+                    <div
+                        class="w-8 h-6 bg-amber-500 border-2 border-black flex items-center justify-center font-bold text-white">
+                        √</div>
                     <span><em>Rating 3 - Cukup</em></span>
                 </div>
                 <div class="flex items-center gap-3">
-                    <div class="w-8 h-6 rating-4 border border-black flex items-center justify-center font-bold">
-                        √
-                    </div>
+                    <div
+                        class="w-8 h-6 bg-emerald-500 border-2 border-black flex items-center justify-center font-bold text-white">
+                        √</div>
                     <span><em>Rating 4 - Baik</em></span>
                 </div>
                 <div class="flex items-center gap-3">
-                    <div class="w-8 h-6 rating-5 border border-black flex items-center justify-center font-bold">
-                        √
-                    </div>
+                    <div
+                        class="w-8 h-6 bg-emerald-700 border-2 border-black flex items-center justify-center font-bold text-white">
+                        √</div>
                     <span><em>Rating 5 - Baik Sekali</em></span>
                 </div>
             </div>
