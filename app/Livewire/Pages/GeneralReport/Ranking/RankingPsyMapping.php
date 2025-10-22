@@ -33,12 +33,12 @@ class RankingPsyMapping extends Component
         'Di Atas Standar' => [
             'chartColor' => '#10b981',
             'tailwindClass' => 'bg-green-100 border-green-300',
-            'rangeText' => 'Gap > 0',
+            'rangeText' => 'Tolerance = 0 & Gap ≥ 0',
         ],
         'Memenuhi Standar' => [
             'chartColor' => '#3b82f6',
             'tailwindClass' => 'bg-blue-100 border-blue-300',
-            'rangeText' => 'Gap ≥ Threshold',
+            'rangeText' => 'Tolerance > 0 & Gap ≥ Threshold',
         ],
         'Di Bawah Standar' => [
             'chartColor' => '#ef4444',
@@ -208,6 +208,9 @@ class RankingPsyMapping extends Component
             $adjustedGapRating = $individualRating - $adjustedStandardRating;
             $adjustedGapScore = $individualScore - $adjustedStandardScore;
 
+            // Calculate original gap (at tolerance 0)
+            $originalGapScore = $individualScore - $originalStandardScore;
+
             // Calculate percentage based on adjusted standard
             $adjustedPercentage = $adjustedStandardScore > 0
                 ? ($individualScore / $adjustedStandardScore) * 100
@@ -230,7 +233,7 @@ class RankingPsyMapping extends Component
                 'gap_rating' => round($adjustedGapRating, 2),
                 'gap_score' => round($adjustedGapScore, 2),
                 'percentage_score' => round($adjustedPercentage, 2),
-                'conclusion' => $this->getConclusionText($adjustedGapScore, $threshold),
+                'conclusion' => $this->getConclusionText($originalGapScore, $adjustedGapScore, $threshold),
                 'matrix' => 1,
             ];
         })->all();
@@ -244,12 +247,12 @@ class RankingPsyMapping extends Component
         );
     }
 
-    private function getConclusionText(float $gap, float $threshold): string
+    private function getConclusionText(float $originalGap, float $adjustedGap, float $threshold): string
     {
-        // Logic sama dengan RekapRankingAssessment
-        if ($gap > 0) {
+        // New logic: Di Atas Standar is fixed based on original gap (tolerance 0)
+        if ($originalGap >= 0) {
             return 'Di Atas Standar';
-        } elseif ($gap >= $threshold) {
+        } elseif ($this->tolerancePercentage > 0 && $adjustedGap >= $threshold) {
             return 'Memenuhi Standar';
         } else {
             return 'Di Bawah Standar';
@@ -321,23 +324,26 @@ class RankingPsyMapping extends Component
 
         $total = $aggregates->count();
 
-        // Calculate passing based on gap and threshold (Di Atas Standar or Memenuhi Standar)
+        // Calculate passing based on new logic (Di Atas Standar or Memenuhi Standar)
         $passing = $aggregates->filter(function ($r) {
             $originalStandardScore = (float) $r->sum_original_standard_score;
             $individualScore = (float) $r->sum_individual_score;
+
+            // Calculate original gap (at tolerance 0)
+            $originalGap = $individualScore - $originalStandardScore;
 
             // Calculate adjusted standard based on tolerance
             $toleranceFactor = 1 - ($this->tolerancePercentage / 100);
             $adjustedStandardScore = $originalStandardScore * $toleranceFactor;
 
-            // Calculate gap
-            $gap = $individualScore - $adjustedStandardScore;
+            // Calculate adjusted gap
+            $adjustedGap = $individualScore - $adjustedStandardScore;
 
             // Calculate threshold
             $threshold = -$adjustedStandardScore * ($this->tolerancePercentage / 100);
 
-            // Count as passing if gap > 0 OR gap >= threshold (Di Atas Standar or Memenuhi Standar)
-            return $gap > 0 || $gap >= $threshold;
+            // Count as passing if original gap >= 0 OR (tolerance > 0 and adjusted gap >= threshold)
+            return $originalGap >= 0 || ($this->tolerancePercentage > 0 && $adjustedGap >= $threshold);
         })->count();
 
         return [
@@ -487,7 +493,8 @@ class RankingPsyMapping extends Component
             $threshold = -$adjustedStandardScore * ($this->tolerancePercentage / 100);
 
             // Determine conclusion
-            $conclusion = $this->getConclusionText($gap, $threshold);
+            $originalGap = $individualScore - $originalStandardScore;
+            $conclusion = $this->getConclusionText($originalGap, $gap, $threshold);
             $conclusions[$conclusion]++;
         }
 
