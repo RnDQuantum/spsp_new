@@ -31,8 +31,6 @@ class PsychologicalTestFactory extends Factory
             fake()->randomElement(['berat', 'sangat berat']))));
 
         return [
-            'no_test' => fake()->numerify('##-#-#-##-###'),
-            'username' => fake()->bothify('???##-###'),
             'validitas' => $this->generateValiditas($nilaiPq),
             'internal' => $this->generateInternal($nilaiPq),
             'interpersonal' => $this->generateInterpersonal($nilaiPq),
@@ -53,6 +51,8 @@ class PsychologicalTestFactory extends Factory
         return $this->state(fn(array $attributes) => [
             'participant_id' => $participant->id,
             'event_id' => $participant->event_id,
+            'username' => $participant->username,
+            'test_number' => $participant->test_number,
         ]);
     }
 
