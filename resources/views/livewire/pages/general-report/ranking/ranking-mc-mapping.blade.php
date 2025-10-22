@@ -175,7 +175,7 @@
         <!-- Overall Statistics -->
         @php
         $totalParticipants = array_sum($conclusionSummary);
-        $passingCount = ($conclusionSummary['Sangat Kompeten'] ?? 0) + ($conclusionSummary['Kompeten'] ?? 0);
+        $passingCount = ($conclusionSummary['Di Atas Standar'] ?? 0) + ($conclusionSummary['Memenuhi Standar'] ?? 0);
         $passingPercentage = $totalParticipants > 0 ? round(($passingCount / $totalParticipants) * 100, 1) : 0;
         @endphp
 
@@ -187,7 +187,7 @@
                 </div>
                 <div>
                     <div class="text-lg font-bold text-green-600">{{ $passingCount }}</div>
-                    <div class="text-sm text-gray-600">Memenuhi Standar</div>
+                    <div class="text-sm text-gray-600">Lulus</div>
                 </div>
                 <div>
                     <div class="text-lg font-bold text-blue-600">{{ $passingPercentage }}%</div>
