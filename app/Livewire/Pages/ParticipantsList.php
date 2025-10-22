@@ -4,6 +4,7 @@ namespace App\Livewire\Pages;
 
 use App\Models\AssessmentEvent;
 use App\Models\Participant;
+use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -101,9 +102,9 @@ class ParticipantsList extends Component
         // Filter berdasarkan search (nama, NIP jika ada)
         if ($this->search) {
             $query->where(function ($q) {
-                $q->where('name', 'like', '%'.$this->search.'%')
-                    ->orWhere('test_number', 'like', '%'.$this->search.'%')
-                    ->orWhere('skb_number', 'like', '%'.$this->search.'%');
+                $q->where('name', 'like', '%' . $this->search . '%')
+                    ->orWhere('test_number', 'like', '%' . $this->search . '%')
+                    ->orWhere('skb_number', 'like', '%' . $this->search . '%');
             });
         }
 
@@ -126,6 +127,24 @@ class ParticipantsList extends Component
         $this->search = '';
         $this->searchEvents();
         $this->resetPage();
+    }
+
+    public function handleDetail(Participant $participant): void
+    {
+
+        // Simpan data ke session untuk sidebar menggunakan session()->put()
+        session()->put([
+            'filter.event_code' => $participant->assessmentEvent->code,
+            'filter.position_formation_id' => $participant->position_formation_id,
+            'filter.participant_id' => $participant->id
+        ]);
+
+
+        // Redirect ke halaman detail dengan eventCode dan testNumber
+        $this->redirect(route('participant_detail', [
+            'eventCode' => $participant->assessmentEvent->code,
+            'testNumber' => $participant->test_number
+        ]));
     }
 
     public function render()

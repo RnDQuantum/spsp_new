@@ -17,35 +17,29 @@ class PsychologicalTestFactory extends Factory
 
     public function definition(): array
     {
-        $rawScore = fake()->randomFloat(2, 30, 50);
-        $iqScore = fake()->numberBetween(85, 125);
+        $nilaiPq = fake()->randomFloat(2, 35, 85);
 
-        // Determine conclusion based on raw score
-        $isGood = $rawScore >= 45;
-        $isMedium = $rawScore >= 38 && $rawScore < 45;
+        // Determine performance level based on nilai_pq
+        $isExcellent = $nilaiPq >= 80;
+        $isGood = $nilaiPq >= 65 && $nilaiPq < 80;
+        $isMedium = $nilaiPq >= 50 && $nilaiPq < 65;
+        $isPoor = $nilaiPq >= 40 && $nilaiPq < 50;
 
-        $conclusionCode = $isGood ? 'MS' : ($isMedium ? 'MS' : 'TMS');
-        $conclusionText = $isGood
-            ? 'MEMENUHI SYARAT (MS)'
-            : ($isMedium ? 'MEMENUHI SYARAT (MS)' : 'TIDAK MEMENUHI SYARAT (TMS)');
+        // Determine stress level
+        $stressLevels = ['normal', 'ringan', 'sedang', 'berat', 'sangat berat'];
+        $tingkatStres = $isExcellent ? 'normal' : ($isGood ? fake()->randomElement(['normal', 'ringan']) : ($isMedium ? fake()->randomElement(['ringan', 'sedang']) : ($isPoor ? fake()->randomElement(['sedang', 'berat']) :
+            fake()->randomElement(['berat', 'sangat berat']))));
 
         return [
-            'raw_score' => $rawScore,
-            'iq_score' => $iqScore,
-            'validity_status' => $isGood
-                ? 'Hasil tes ini konsisten dan dapat dipercaya'
-                : ($isMedium
-                    ? 'Hasil tes ini cukup konsisten dan cukup dapat dipercaya'
-                    : 'Hasil tes ini kurang konsisten dan kurang dapat dipercaya'),
-            'internal_status' => $isGood ? 'Terbuka' : ($isMedium ? 'Cukup terbuka' : 'Kurang terbuka'),
-            'interpersonal_status' => $isGood ? 'Terbuka' : ($isMedium ? 'Cukup terbuka' : 'Kurang terbuka'),
-            'work_capacity_status' => $isGood ? 'Terbuka' : ($isMedium ? 'Cukup terbuka' : 'Kurang terbuka'),
-            'clinical_status' => $isGood ? 'Normal' : ($isMedium ? 'Cukup normal' : 'Kurang normal'),
-            'conclusion_code' => $conclusionCode,
-            'conclusion_text' => $conclusionText,
-            'notes' => ! $isGood && ! $isMedium
-                ? 'Perlu perhatian khusus pada aspek kejiwaan. Mungkin terdapat psikopatologi yang perlu diwaspadai.'
-                : null,
+            'validitas' => $this->generateValiditas($nilaiPq),
+            'internal' => $this->generateInternal($nilaiPq),
+            'interpersonal' => $this->generateInterpersonal($nilaiPq),
+            'kap_kerja' => $this->generateKapKerja($nilaiPq),
+            'klinik' => $this->generateKlinik($tingkatStres),
+            'kesimpulan' => $this->generateKesimpulan($nilaiPq, $tingkatStres),
+            'psikogram' => $this->generatePsikogram($nilaiPq),
+            'nilai_pq' => $nilaiPq,
+            'tingkat_stres' => $tingkatStres,
         ];
     }
 
@@ -54,81 +48,268 @@ class PsychologicalTestFactory extends Factory
      */
     public function forParticipant(Participant $participant): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'participant_id' => $participant->id,
             'event_id' => $participant->event_id,
+            'username' => $participant->username,
+            'no_test' => $participant->test_number,
         ]);
     }
 
     /**
-     * State: High performance (MS - Memenuhi Syarat)
+     * State: High performance (PQ >= 80)
      */
     public function highPerformance(): static
     {
         return $this->state(function (array $attributes) {
-            $rawScore = fake()->randomFloat(2, 45, 50);
-            $iqScore = fake()->numberBetween(110, 125);
+            $nilaiPq = fake()->randomFloat(2, 80, 90);
+            $tingkatStres = 'normal';
 
             return [
-                'raw_score' => $rawScore,
-                'iq_score' => $iqScore,
-                'validity_status' => 'Hasil tes ini konsisten dan dapat dipercaya',
-                'internal_status' => 'Terbuka',
-                'interpersonal_status' => 'Terbuka',
-                'work_capacity_status' => 'Terbuka',
-                'clinical_status' => 'Normal',
-                'conclusion_code' => 'MS',
-                'conclusion_text' => 'MEMENUHI SYARAT (MS)',
-                'notes' => null,
+                'validitas' => 'Hasil tes sangat konsisten dan dapat diandalkan.',
+                'internal' => $this->generateInternal($nilaiPq),
+                'interpersonal' => $this->generateInterpersonal($nilaiPq),
+                'kap_kerja' => $this->generateKapKerja($nilaiPq),
+                'klinik' => 'Klien memiliki tingkat stres normal.',
+                'kesimpulan' => $this->generateKesimpulan($nilaiPq, $tingkatStres),
+                'psikogram' => $this->generatePsikogram($nilaiPq),
+                'nilai_pq' => $nilaiPq,
+                'tingkat_stres' => $tingkatStres,
             ];
         });
     }
 
     /**
-     * State: Medium performance (MS - Memenuhi Syarat)
+     * State: Good performance (PQ 65-79)
+     */
+    public function goodPerformance(): static
+    {
+        return $this->state(function (array $attributes) {
+            $nilaiPq = fake()->randomFloat(2, 65, 79);
+            $tingkatStres = fake()->randomElement(['normal', 'ringan']);
+
+            return [
+                'validitas' => 'Hasil tes ini akurat dan valid untuk dijadikan dasar penilaian.',
+                'internal' => $this->generateInternal($nilaiPq),
+                'interpersonal' => $this->generateInterpersonal($nilaiPq),
+                'kap_kerja' => $this->generateKapKerja($nilaiPq),
+                'klinik' => $tingkatStres === 'normal' ? 'Klien memiliki tingkat stres normal.' : 'Klien memiliki tingkat stres ringan.',
+                'kesimpulan' => $this->generateKesimpulan($nilaiPq, $tingkatStres),
+                'psikogram' => $this->generatePsikogram($nilaiPq),
+                'nilai_pq' => $nilaiPq,
+                'tingkat_stres' => $tingkatStres,
+            ];
+        });
+    }
+
+    /**
+     * State: Medium performance (PQ 50-64)
      */
     public function mediumPerformance(): static
     {
         return $this->state(function (array $attributes) {
-            $rawScore = fake()->randomFloat(2, 38, 45);
-            $iqScore = fake()->numberBetween(95, 110);
+            $nilaiPq = fake()->randomFloat(2, 50, 64);
+            $tingkatStres = fake()->randomElement(['ringan', 'sedang']);
 
             return [
-                'raw_score' => $rawScore,
-                'iq_score' => $iqScore,
-                'validity_status' => 'Hasil tes ini cukup konsisten dan cukup dapat dipercaya',
-                'internal_status' => 'Cukup terbuka',
-                'interpersonal_status' => 'Cukup terbuka',
-                'work_capacity_status' => 'Cukup terbuka',
-                'clinical_status' => 'Cukup normal',
-                'conclusion_code' => 'MS',
-                'conclusion_text' => 'MEMENUHI SYARAT (MS)',
-                'notes' => null,
+                'validitas' => 'Hasil tes cukup konsisten dan dapat dijadikan rujukan penilaian.',
+                'internal' => $this->generateInternal($nilaiPq),
+                'interpersonal' => $this->generateInterpersonal($nilaiPq),
+                'kap_kerja' => $this->generateKapKerja($nilaiPq),
+                'klinik' => $tingkatStres === 'ringan' ? 'Klien memiliki tingkat stres ringan.' : 'Klien mengalami stres sedang.',
+                'kesimpulan' => $this->generateKesimpulan($nilaiPq, $tingkatStres),
+                'psikogram' => $this->generatePsikogram($nilaiPq),
+                'nilai_pq' => $nilaiPq,
+                'tingkat_stres' => $tingkatStres,
             ];
         });
     }
 
     /**
-     * State: Low performance (TMS - Tidak Memenuhi Syarat)
+     * State: Low performance (PQ < 50)
      */
     public function lowPerformance(): static
     {
         return $this->state(function (array $attributes) {
-            $rawScore = fake()->randomFloat(2, 30, 38);
-            $iqScore = fake()->numberBetween(85, 95);
+            $nilaiPq = fake()->randomFloat(2, 35, 49);
+            $tingkatStres = fake()->randomElement(['berat', 'sangat berat']);
 
             return [
-                'raw_score' => $rawScore,
-                'iq_score' => $iqScore,
-                'validity_status' => 'Hasil tes ini kurang konsisten dan kurang dapat dipercaya',
-                'internal_status' => 'Kurang terbuka',
-                'interpersonal_status' => 'Kurang terbuka',
-                'work_capacity_status' => 'Kurang terbuka',
-                'clinical_status' => 'Kurang normal',
-                'conclusion_code' => 'TMS',
-                'conclusion_text' => 'TIDAK MEMENUHI SYARAT (TMS)',
-                'notes' => 'Perlu perhatian khusus pada aspek kejiwaan. Mungkin terdapat psikopatologi yang perlu diwaspadai.',
+                'validitas' => 'Hasil tes cukup valid namun terdapat beberapa inkonsistensi minor.',
+                'internal' => $this->generateInternal($nilaiPq),
+                'interpersonal' => $this->generateInterpersonal($nilaiPq),
+                'kap_kerja' => $this->generateKapKerja($nilaiPq),
+                'klinik' => $tingkatStres === 'berat' ? 'Klien mungkin mengalami stres berat.' : 'Klien mengalami stres sangat berat.',
+                'kesimpulan' => $this->generateKesimpulan($nilaiPq, $tingkatStres),
+                'psikogram' => $this->generatePsikogram($nilaiPq),
+                'nilai_pq' => $nilaiPq,
+                'tingkat_stres' => $tingkatStres,
             ];
         });
+    }
+
+    private function generateValiditas(float $nilaiPq): string
+    {
+        if ($nilaiPq >= 80) {
+            return 'Hasil tes sangat konsisten dan dapat diandalkan.';
+        } elseif ($nilaiPq >= 65) {
+            return 'Hasil tes ini akurat dan valid untuk dijadikan dasar penilaian.';
+        } elseif ($nilaiPq >= 50) {
+            return 'Hasil tes cukup konsisten dan dapat dijadikan rujukan penilaian.';
+        } elseif ($nilaiPq >= 40) {
+            return 'Hasil tes ini konsisten, akurat dan dapat dipercaya.';
+        } else {
+            return 'Hasil tes cukup valid namun terdapat beberapa inkonsistensi minor.';
+        }
+    }
+
+    private function generateInternal(float $nilaiPq): string
+    {
+        $qualities = $this->getQualityLevel($nilaiPq);
+
+        return "1. Kejujuran: {$qualities['high']}\n" .
+            "2. Tanggung jawab: {$qualities['high']}\n" .
+            "3. Ketaatan pada peraturan: {$qualities['medium']}\n" .
+            "4. Percaya diri: {$qualities['medium']}\n" .
+            "5. Kemampuan beradaptasi: {$qualities['medium']}\n" .
+            "6. Kemampuan Mengendalikan emosi: {$qualities['medium']}\n" .
+            "7. Kemandirian: {$qualities['low']}";
+    }
+
+    private function generateInterpersonal(float $nilaiPq): string
+    {
+        $qualities = $this->getQualityLevel($nilaiPq);
+        $socialization = ucfirst($qualities['high']);
+
+        return "1. Sosialisasi: {$socialization}\n" .
+            "2. Hubungan dalam keluarga: {$qualities['medium']}\n" .
+            "3. Kemampuan membina hubungan akrab: {$qualities['high']}\n" .
+            "4. Kemampuan mempercayai orang lain: {$qualities['medium']}";
+    }
+
+    private function generateKapKerja(float $nilaiPq): string
+    {
+        $qualities = $this->getQualityLevel($nilaiPq);
+
+        return "1. Kemampuan mengatasi kendala sikap (bekerja): {$qualities['high']}\n" .
+            "2. Kemampuan mengatasi permasalahan: {$qualities['low']}\n" .
+            "3. Kemampuan mengambil keputusan: {$qualities['medium']}\n" .
+            "4. Motivasi: {$qualities['medium']}";
+    }
+
+    private function generateKlinik(string $tingkatStres): string
+    {
+        return match ($tingkatStres) {
+            'normal' => 'Klien memiliki tingkat stres normal.',
+            'ringan' => 'Klien memiliki tingkat stres ringan.',
+            'sedang' => 'Klien mengalami stres sedang.',
+            'berat' => 'Klien mungkin mengalami stres berat.',
+            'sangat berat' => 'Klien mengalami stres sangat berat.',
+            default => 'Klien memiliki tingkat stres normal.',
+        };
+    }
+
+    private function generateKesimpulan(float $nilaiPq, string $tingkatStres): string
+    {
+        $overallFunction = $this->getOverallFunction($nilaiPq);
+        $kapasitasKerja = $this->getKapasitasKerja($nilaiPq);
+        $hubInterpersonal = $this->getHubInterpersonal($nilaiPq);
+        $kemampuanMengembangkan = $this->getKemampuanMengembangkan($nilaiPq);
+
+        $stresText = match ($tingkatStres) {
+            'normal' => 'tingkat stres normal',
+            'ringan' => 'stres ringan',
+            'sedang' => 'stres sedang',
+            'berat' => 'stres berat',
+            'sangat berat' => 'stres sangat berat',
+            default => 'tingkat stres normal',
+        };
+
+        return "1. Klien memiliki Fungsi Psikologik Menyeluruh (Overall Psychological Function) yang {$overallFunction}.(PQ={$nilaiPq})\n" .
+            "2. Saat ini klien mengalami {$stresText}.\n" .
+            "3. Klien memiliki kapasitas kerja yang {$kapasitasKerja}.\n" .
+            "4. Hubungan interpersonal klien: {$hubInterpersonal}.\n" .
+            "5. Kemampuan klien mengembangkan/merubah potensi diri: {$kemampuanMengembangkan}.";
+    }
+
+    private function generatePsikogram(float $nilaiPq): string
+    {
+        $baseScore = (int) $nilaiPq;
+        $variance = fake()->numberBetween(-10, 10);
+
+        $scores = [
+            'K.Mengatasi Masalah' => max(10, min(90, $baseScore + $variance - 20)),
+            'Kepemimpinan' => max(10, min(90, $baseScore + $variance - 15)),
+            'Integritas' => max(50, min(90, $baseScore + $variance)),
+            'Disiplin' => max(40, min(85, $baseScore + $variance - 5)),
+            'Percaya Diri' => max(25, min(80, $baseScore + $variance - 10)),
+            'Motivasi' => max(30, min(90, $baseScore + $variance)),
+            'Kapasitas Kerja' => max(35, min(90, $baseScore + $variance - 10)),
+            'Hub. Interpersonal' => max(25, min(85, $baseScore + $variance - 15)),
+            'Membina Hubungn Akrab' => max(20, min(85, $baseScore + $variance - 5)),
+            'Kemampuan Beradaptasi' => max(30, min(85, $baseScore + $variance - 10)),
+            'K.Mengendalikan Emosi' => max(15, min(80, $baseScore + $variance - 15)),
+            'K.Mengembangkan Diri' => max(20, min(75, $baseScore + $variance - 20)),
+        ];
+
+        $result = [];
+        $index = 1;
+        foreach ($scores as $key => $score) {
+            $result[] = "{$index}. {$key} {$score}";
+            $index++;
+        }
+
+        return implode("\n", $result);
+    }
+
+    private function getQualityLevel(float $nilaiPq): array
+    {
+        if ($nilaiPq >= 80) {
+            return ['high' => 'sangat bagus', 'medium' => 'bagus', 'low' => 'bagus'];
+        } elseif ($nilaiPq >= 65) {
+            return ['high' => 'bagus', 'medium' => 'bagus', 'low' => 'cukup'];
+        } elseif ($nilaiPq >= 50) {
+            return ['high' => 'cukup', 'medium' => 'cukup', 'low' => 'kurang'];
+        } elseif ($nilaiPq >= 40) {
+            return ['high' => 'cukup', 'medium' => 'cukup', 'low' => 'sangat kurang'];
+        } else {
+            return ['high' => 'kurang', 'medium' => 'kurang', 'low' => 'sangat kurang'];
+        }
+    }
+
+    private function getOverallFunction(float $nilaiPq): string
+    {
+        if ($nilaiPq >= 80) return 'sangat bagus';
+        if ($nilaiPq >= 65) return 'bagus';
+        if ($nilaiPq >= 50) return 'sedang';
+        if ($nilaiPq >= 40) return 'sedang';
+        return 'sangat kurang';
+    }
+
+    private function getKapasitasKerja(float $nilaiPq): string
+    {
+        if ($nilaiPq >= 80) return 'sangat baik';
+        if ($nilaiPq >= 65) return 'baik';
+        if ($nilaiPq >= 50) return 'sedang';
+        if ($nilaiPq >= 40) return 'sedang';
+        return 'kurang';
+    }
+
+    private function getHubInterpersonal(float $nilaiPq): string
+    {
+        if ($nilaiPq >= 80) return 'sangat bagus';
+        if ($nilaiPq >= 65) return 'bagus';
+        if ($nilaiPq >= 50) return 'cukup';
+        if ($nilaiPq >= 40) return 'cukup';
+        return 'sangat kurang';
+    }
+
+    private function getKemampuanMengembangkan(float $nilaiPq): string
+    {
+        if ($nilaiPq >= 80) return 'bagus';
+        if ($nilaiPq >= 65) return 'cukup';
+        if ($nilaiPq >= 50) return 'kurang';
+        if ($nilaiPq >= 40) return 'kurang';
+        return 'sangat kurang';
     }
 }

@@ -23,7 +23,7 @@ class EventSelector extends Component
         $this->availableEvents = AssessmentEvent::query()
             ->orderByDesc('start_date')
             ->get(['code', 'name'])
-            ->map(fn ($e) => ['code' => $e->code, 'name' => $e->name])
+            ->map(fn($e) => ['code' => $e->code, 'name' => $e->name])
             ->all();
 
         // Load event from session or use first available
@@ -39,7 +39,7 @@ class EventSelector extends Component
                 session(['filter.event_code' => $this->eventCode]);
 
                 // Dispatch event to notify parent that default was selected
-                \Log::info('EventSelector: Dispatching event-selected', ['eventCode' => $this->eventCode]);
+                // \Log::info('EventSelector: Dispatching event-selected', ['eventCode' => $this->eventCode]);
                 $this->dispatch('event-selected', eventCode: $this->eventCode);
             }
         }

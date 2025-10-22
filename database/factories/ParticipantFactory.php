@@ -27,9 +27,10 @@ class ParticipantFactory extends Factory
         $degree = fake()->randomElement($degrees);
 
         return [
+            'username' => fake()->unique()->bothify('???##-###'),
             'test_number' => $this->generateTestNumber(),
             'skb_number' => fake()->unique()->numerify('244002401200#####'),
-            'name' => strtoupper($firstName.' '.$lastName).', '.$degree,
+            'name' => strtoupper($firstName . ' ' . $lastName) . ', ' . $degree,
             'email' => fake()->unique()->safeEmail(),
             'phone' => fake()->numerify('08##########'),
             'gender' => $gender,
@@ -46,7 +47,7 @@ class ParticipantFactory extends Factory
         $prefix = fake()->numerify('##-#-#-##');
         $sequence = fake()->unique()->numerify('###');
 
-        return $prefix.'-'.$sequence;
+        return $prefix . '-' . $sequence;
     }
 
     /**
@@ -54,7 +55,7 @@ class ParticipantFactory extends Factory
      */
     public function forEvent(AssessmentEvent $event): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'event_id' => $event->id,
         ]);
     }
@@ -64,7 +65,7 @@ class ParticipantFactory extends Factory
      */
     public function forBatch(Batch $batch): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'batch_id' => $batch->id,
             'event_id' => $batch->event_id,
         ]);
@@ -75,7 +76,7 @@ class ParticipantFactory extends Factory
      */
     public function forPosition(PositionFormation $position): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'position_formation_id' => $position->id,
         ]);
     }
@@ -85,7 +86,7 @@ class ParticipantFactory extends Factory
      */
     public function assessedOn(string $date): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'assessment_date' => $date,
         ]);
     }

@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('event_id')->constrained('assessment_events')->cascadeOnDelete();
             $table->foreignId('batch_id')->nullable()->constrained('batches')->nullOnDelete();
             $table->foreignId('position_formation_id')->constrained('position_formations')->cascadeOnDelete();
+            $table->string('username')->unique();
             $table->string('test_number')->unique();
             $table->string('skb_number');
             $table->string('name');

@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Pages\GeneralReport;
 
-use App\Models\MmpiResult;
+use App\Models\PsychologicalTest;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -24,13 +24,13 @@ class MmpiResultsReport extends Component
         }
 
         // Ambil data dari model dan juga langsung dari DB sebagai cadangan
-        $mmpiResultsFromModel = MmpiResult::paginate(10);
-        $mmpiResultsFromDB = DB::table('mmpi_results')->paginate(10);
+        $mmpiResultsFromModel = PsychologicalTest::paginate(10);
+        $mmpiResultsFromDB = DB::table('psychological_tests')->paginate(10);
 
         // Pilih sumber data berdasarkan mana yang berhasil
         $mmpiResults = $mmpiResultsFromModel->count() > 0 ? $mmpiResultsFromModel : $mmpiResultsFromDB;
 
-        return view('livewire.pages.general-report.tkmi', [
+        return view('livewire.pages.general-report.mmpi', [
             'mmpiResults' => $mmpiResults,
             'tableExists' => $tableExists,
             'dataCount' => $dataCount,
