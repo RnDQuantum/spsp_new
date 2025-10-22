@@ -13,22 +13,23 @@ return new class extends Migration
     {
         Schema::create('psychological_tests', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('participant_id')->unique()->constrained('participants')->cascadeOnDelete();
-            $table->foreignId('event_id')->constrained('assessment_events')->cascadeOnDelete();
-            $table->decimal('raw_score', 5, 2);
-            $table->integer('iq_score')->nullable();
-            $table->string('validity_status');
-            $table->string('internal_status');
-            $table->string('interpersonal_status');
-            $table->string('work_capacity_status');
-            $table->string('clinical_status');
-            $table->string('conclusion_code');
-            $table->string('conclusion_text');
-            $table->text('notes')->nullable();
+            $table->unsignedBigInteger('event_id');
+            $table->unsignedBigInteger('participant_id');
+            $table->string('kode_proyek', 50)->nullable();
+            $table->string('no_test', 30)->nullable();
+            $table->string('username', 100)->nullable();
+            $table->text('validitas')->nullable();
+            $table->text('internal')->nullable();
+            $table->text('interpersonal')->nullable();
+            $table->text('kap_kerja')->nullable()->comment('Kapasitas Kerja');
+            $table->text('klinik')->nullable();
+            $table->text('kesimpulan')->nullable();
+            $table->text('psikogram')->nullable();
+            $table->decimal('nilai_pq', 10, 2)->nullable()->comment('Nilai Psychological Quotient');
+            $table->string('tingkat_stres', 20)->nullable();
             $table->timestamps();
 
-            $table->index('conclusion_code');
-            $table->index(['event_id', 'conclusion_code'], 'idx_psych_event_conclusion');
+            $table->index(['event_id', 'participant_id', 'kode_proyek']);
         });
     }
 
