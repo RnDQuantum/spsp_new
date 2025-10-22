@@ -52,6 +52,14 @@ class StandardPsikometrik extends Component
         // Event changed, position will be auto-reset by PositionSelector
         // Just reload data (position will be null, so data will be empty)
         $this->loadStandardData();
+
+        // Dispatch event to update charts
+        $this->dispatch('chartDataUpdated', [
+            'labels' => $this->chartData['labels'],
+            'ratings' => $this->chartData['ratings'],
+            'scores' => $this->chartData['scores'],
+            'templateName' => $this->selectedTemplate?->name ?? 'Standard',
+        ]);
     }
 
     public function handlePositionSelected(?int $positionFormationId): void
@@ -59,6 +67,14 @@ class StandardPsikometrik extends Component
         // Position selected, now we have both event and position
         // Load data with the new filters
         $this->loadStandardData();
+
+        // Dispatch event to update charts
+        $this->dispatch('chartDataUpdated', [
+            'labels' => $this->chartData['labels'],
+            'ratings' => $this->chartData['ratings'],
+            'scores' => $this->chartData['scores'],
+            'templateName' => $this->selectedTemplate?->name ?? 'Standard',
+        ]);
     }
 
 
