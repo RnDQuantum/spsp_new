@@ -28,10 +28,9 @@ class PsychologicalTestFactory extends Factory
         // Determine stress level
         $stressLevels = ['normal', 'ringan', 'sedang', 'berat', 'sangat berat'];
         $tingkatStres = $isExcellent ? 'normal' : ($isGood ? fake()->randomElement(['normal', 'ringan']) : ($isMedium ? fake()->randomElement(['ringan', 'sedang']) : ($isPoor ? fake()->randomElement(['sedang', 'berat']) :
-                        fake()->randomElement(['berat', 'sangat berat']))));
+            fake()->randomElement(['berat', 'sangat berat']))));
 
         return [
-            'kode_proyek' => 'PROJ-' . strtoupper(fake()->bothify('?####')),
             'no_test' => fake()->numerify('##-#-#-##-###'),
             'username' => fake()->bothify('???##-###'),
             'validitas' => $this->generateValiditas($nilaiPq),

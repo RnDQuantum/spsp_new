@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('event_id');
             $table->unsignedBigInteger('participant_id');
-            $table->string('kode_proyek', 50)->nullable();
             $table->string('no_test', 30)->nullable();
             $table->string('username', 100)->nullable();
             $table->text('validitas')->nullable();
@@ -29,7 +28,7 @@ return new class extends Migration
             $table->string('tingkat_stres', 20)->nullable();
             $table->timestamps();
 
-            $table->index(['event_id', 'participant_id', 'kode_proyek']);
+            $table->index(['event_id', 'participant_id']);
         });
     }
 
