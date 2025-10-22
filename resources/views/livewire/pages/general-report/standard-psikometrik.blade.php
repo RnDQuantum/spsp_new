@@ -3,53 +3,37 @@
 
         {{-- Filter Section --}}
         <div class="mb-6 bg-gray-50 p-4 rounded-lg border border-gray-300">
-            <div class="flex items-center gap-4 mb-3">
-                <label class="text-sm font-semibold text-gray-700 min-w-[120px]">
-                    Pilih Event:
-                </label>
-                <select wire:model.live="eventCode" class="flex-1 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                    @foreach($availableEvents as $evt)
-                        <option value="{{ $evt['code'] }}">{{ $evt['name'] }} - {{ $evt['institution'] }}</option>
-                    @endforeach
-                </select>
-            </div>
-
-            {{-- Position Filter --}}
-            @if (count($availablePositions) > 0)
-                <div class="flex items-center gap-4">
-                    <label class="text-sm font-semibold text-gray-700 min-w-[120px]">
-                        Pilih Jabatan:
-                    </label>
-                    <select wire:model.live="positionCode"
-                        class="flex-1 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                        @foreach ($availablePositions as $pos)
-                            <option value="{{ $pos['code'] }}">
-                                {{ $pos['name'] }} ({{ $pos['template_name'] }})
-                            </option>
-                        @endforeach
-                    </select>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {{-- Event Filter --}}
+                <div>
+                    @livewire('components.event-selector', ['showLabel' => true])
                 </div>
-            @endif
+
+                {{-- Position Filter --}}
+                <div>
+                    @livewire('components.position-selector', ['showLabel' => true])
+                </div>
+            </div>
 
             {{-- Template Info (Display Only) --}}
             @if($selectedTemplate)
-                <div class="mt-3 pt-3 border-t border-gray-200">
-                    <div class="flex items-start gap-2 text-sm text-gray-600">
-                        <span class="font-semibold">📄 Template:</span>
-                        <div>
-                            <div class="font-semibold text-gray-900">{{ $selectedTemplate->name }}</div>
-                            @if($selectedTemplate->description)
-                                <div class="text-xs text-gray-500 mt-1">{{ $selectedTemplate->description }}</div>
-                            @endif
-                        </div>
+            <div class="mt-3 pt-3 border-t border-gray-200">
+                <div class="flex items-start gap-2 text-sm text-gray-600">
+                    <span class="font-semibold">📄 Template:</span>
+                    <div>
+                        <div class="font-semibold text-gray-900">{{ $selectedTemplate->name }}</div>
+                        @if($selectedTemplate->description)
+                        <div class="text-xs text-gray-500 mt-1">{{ $selectedTemplate->description }}</div>
+                        @endif
                     </div>
-                    @if($selectedEvent)
-                        <div class="flex items-center gap-2 text-sm text-gray-600 mt-2">
-                            <span class="font-semibold">🏢 Institusi:</span>
-                            <span class="text-gray-900">{{ $selectedEvent->institution->name ?? 'N/A' }}</span>
-                        </div>
-                    @endif
                 </div>
+                @if($selectedEvent)
+                <div class="flex items-center gap-2 text-sm text-gray-600 mt-2">
+                    <span class="font-semibold">🏢 Institusi:</span>
+                    <span class="text-gray-900">{{ $selectedEvent->institution->name ?? 'N/A' }}</span>
+                </div>
+                @endif
+            </div>
             @endif
         </div>
 
@@ -58,12 +42,18 @@
             STANDAR PEMETAAN POTENSI INDIVIDU "STATIC PRIBADI SPIDER PLOT"
         </div>
 
-        {{-- Identitas --}}
-        @if($selectedEvent && $selectedTemplate)
+        {{-- Empty State --}}
+        @if(!$selectedEvent || !$selectedTemplate)
+        <div class="text-center py-12">
+            <div class="text-gray-500 text-lg mb-2">Tidak ada data untuk ditampilkan</div>
+            <div class="text-gray-400 text-sm">Silakan pilih event dan jabatan terlebih dahulu.</div>
+        </div>
+        @else
         <table class="w-full border border-black text-xs mb-4">
             <tr>
                 <td class="border border-black px-2 py-1 bg-blue-100 font-semibold w-1/5">Perusahaan/Lembaga</td>
-                <td class="border border-black px-2 py-1 w-2/5">{{ strtoupper($selectedEvent->institution->name ?? 'N/A') }}</td>
+                <td class="border border-black px-2 py-1 w-2/5">{{ strtoupper($selectedEvent->institution->name ??
+                    'N/A') }}</td>
                 <td class="border border-black px-2 py-1 bg-blue-100 font-semibold w-1/6"></td>
                 <td class="border border-black px-2 py-1 w-1/6"></td>
             </tr>
@@ -95,55 +85,64 @@
                     @php $romanNumerals = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X']; @endphp
 
                     @foreach($categoryData as $catIndex => $category)
-                        {{-- Aspects within Potensi Category --}}
-                        @foreach($category['aspects'] as $aspectIndex => $aspect)
-                            {{-- Aspect Row (if has sub-aspects, show as header) --}}
-                            @if(count($aspect['sub_aspects']) > 0)
-                                <tr>
-                                    <td class="border border-black px-2 py-2 text-center font-bold">{{ $romanNumerals[$aspectIndex] ?? ($aspectIndex + 1) }}</td>
-                                    <td class="border border-black px-2 py-2 font-bold">{{ $aspect['name'] }}</td>
-                                    <td class="border border-black px-2 py-2 text-center"></td>
-                                    <td class="border border-black px-2 py-2 text-center font-bold">{{ $aspect['sub_aspects_count'] }}</td>
-                                    <td class="border border-black px-2 py-2 text-center font-bold">{{ $aspect['weight_percentage'] }}</td>
-                                    <td class="border border-black px-2 py-2 text-center font-bold">{{ number_format($aspect['standard_rating'], 2) }}</td>
-                                    <td class="border border-black px-2 py-2 text-center font-bold">{{ number_format($aspect['score'], 2) }}</td>
-                                </tr>
+                    {{-- Aspects within Potensi Category --}}
+                    @foreach($category['aspects'] as $aspectIndex => $aspect)
+                    {{-- Aspect Row (if has sub-aspects, show as header) --}}
+                    @if(count($aspect['sub_aspects']) > 0)
+                    <tr>
+                        <td class="border border-black px-2 py-2 text-center font-bold">{{ $romanNumerals[$aspectIndex]
+                            ?? ($aspectIndex + 1) }}</td>
+                        <td class="border border-black px-2 py-2 font-bold">{{ $aspect['name'] }}</td>
+                        <td class="border border-black px-2 py-2 text-center"></td>
+                        <td class="border border-black px-2 py-2 text-center font-bold">{{ $aspect['sub_aspects_count']
+                            }}</td>
+                        <td class="border border-black px-2 py-2 text-center font-bold">{{ $aspect['weight_percentage']
+                            }}</td>
+                        <td class="border border-black px-2 py-2 text-center font-bold">{{
+                            number_format($aspect['standard_rating'], 2) }}</td>
+                        <td class="border border-black px-2 py-2 text-center font-bold">{{
+                            number_format($aspect['score'], 2) }}</td>
+                    </tr>
 
-                                {{-- Sub-Aspects --}}
-                                @foreach($aspect['sub_aspects'] as $subIndex => $subAspect)
-                                    <tr>
-                                        <td class="border border-black px-2 py-2 text-center">{{ $subIndex + 1 }}</td>
-                                        <td class="border border-black px-2 py-2 pl-8">{{ $subAspect['name'] }}</td>
-                                        <td class="border border-black px-2 py-2 text-center">{{ $subAspect['standard_rating'] }}</td>
-                                        <td class="border border-black px-2 py-2"></td>
-                                        <td class="border border-black px-2 py-2"></td>
-                                        <td class="border border-black px-2 py-2"></td>
-                                        <td class="border border-black px-2 py-2"></td>
-                                    </tr>
-                                @endforeach
-                            @else
-                                {{-- Aspect without sub-aspects (Kompetensi) --}}
-                                <tr>
-                                    <td class="border border-black px-2 py-2 text-center">{{ $aspectIndex + 1 }}</td>
-                                    <td class="border border-black px-2 py-2 pl-4">{{ $aspect['name'] }}</td>
-                                    <td class="border border-black px-2 py-2 text-center">{{ number_format($aspect['standard_rating'], 2) }}</td>
-                                    <td class="border border-black px-2 py-2"></td>
-                                    <td class="border border-black px-2 py-2 text-center">{{ $aspect['weight_percentage'] }}</td>
-                                    <td class="border border-black px-2 py-2"></td>
-                                    <td class="border border-black px-2 py-2"></td>
-                                </tr>
-                            @endif
-                        @endforeach
+                    {{-- Sub-Aspects --}}
+                    @foreach($aspect['sub_aspects'] as $subIndex => $subAspect)
+                    <tr>
+                        <td class="border border-black px-2 py-2 text-center">{{ $subIndex + 1 }}</td>
+                        <td class="border border-black px-2 py-2 pl-8">{{ $subAspect['name'] }}</td>
+                        <td class="border border-black px-2 py-2 text-center">{{ $subAspect['standard_rating'] }}</td>
+                        <td class="border border-black px-2 py-2"></td>
+                        <td class="border border-black px-2 py-2"></td>
+                        <td class="border border-black px-2 py-2"></td>
+                        <td class="border border-black px-2 py-2"></td>
+                    </tr>
+                    @endforeach
+                    @else
+                    {{-- Aspect without sub-aspects (Kompetensi) --}}
+                    <tr>
+                        <td class="border border-black px-2 py-2 text-center">{{ $aspectIndex + 1 }}</td>
+                        <td class="border border-black px-2 py-2 pl-4">{{ $aspect['name'] }}</td>
+                        <td class="border border-black px-2 py-2 text-center">{{
+                            number_format($aspect['standard_rating'], 2) }}</td>
+                        <td class="border border-black px-2 py-2"></td>
+                        <td class="border border-black px-2 py-2 text-center">{{ $aspect['weight_percentage'] }}</td>
+                        <td class="border border-black px-2 py-2"></td>
+                        <td class="border border-black px-2 py-2"></td>
+                    </tr>
+                    @endif
+                    @endforeach
                     @endforeach
 
                     {{-- TOTAL --}}
                     <tr class="bg-blue-100 font-bold">
                         <td class="border border-black px-2 py-2 text-center" colspan="2">JUMLAH</td>
-                        <td class="border border-black px-2 py-2 text-center">{{ number_format($totals['total_standard_rating_sum'], 2) }}</td>
+                        <td class="border border-black px-2 py-2 text-center">{{
+                            number_format($totals['total_standard_rating_sum'], 2) }}</td>
                         <td class="border border-black px-2 py-2 text-center">{{ $totals['total_aspects'] }}</td>
                         <td class="border border-black px-2 py-2 text-center">{{ $totals['total_weight'] }}</td>
-                        <td class="border border-black px-2 py-2 text-center">{{ number_format($totals['total_rating_sum'], 2) }}</td>
-                        <td class="border border-black px-2 py-2 text-center">{{ number_format($totals['total_score'], 2) }}</td>
+                        <td class="border border-black px-2 py-2 text-center">{{
+                            number_format($totals['total_rating_sum'], 2) }}</td>
+                        <td class="border border-black px-2 py-2 text-center">{{ number_format($totals['total_score'],
+                            2) }}</td>
                     </tr>
                 </tbody>
             </table>
@@ -178,16 +177,18 @@
             </thead>
             <tbody>
                 @foreach($categoryData as $catIndex => $category)
-                    @foreach($category['aspects'] as $aspectIndex => $aspect)
-                    <tr>
-                        <td class="border border-black px-2 py-1 text-center">{{ $romanNumerals[$aspectIndex] ?? ($aspectIndex + 1) }}</td>
-                        <td class="border border-black px-2 py-1">{{ $aspect['name'] }}</td>
-                        <td class="border border-black px-2 py-1 text-center">{{ $aspect['sub_aspects_count'] }}</td>
-                        <td class="border border-black px-2 py-1 text-center">{{ $aspect['weight_percentage'] }}</td>
-                        <td class="border border-black px-2 py-1 text-center">{{ number_format($aspect['standard_rating'], 2) }}</td>
-                        <td class="border border-black px-2 py-1 text-center">{{ number_format($aspect['score'], 2) }}</td>
-                    </tr>
-                    @endforeach
+                @foreach($category['aspects'] as $aspectIndex => $aspect)
+                <tr>
+                    <td class="border border-black px-2 py-1 text-center">{{ $romanNumerals[$aspectIndex] ??
+                        ($aspectIndex + 1) }}</td>
+                    <td class="border border-black px-2 py-1">{{ $aspect['name'] }}</td>
+                    <td class="border border-black px-2 py-1 text-center">{{ $aspect['sub_aspects_count'] }}</td>
+                    <td class="border border-black px-2 py-1 text-center">{{ $aspect['weight_percentage'] }}</td>
+                    <td class="border border-black px-2 py-1 text-center">{{ number_format($aspect['standard_rating'],
+                        2) }}</td>
+                    <td class="border border-black px-2 py-1 text-center">{{ number_format($aspect['score'], 2) }}</td>
+                </tr>
+                @endforeach
                 @endforeach
             </tbody>
             <tfoot>
@@ -195,8 +196,10 @@
                     <td class="border border-black px-2 py-2 text-center" colspan="2">Jumlah</td>
                     <td class="border border-black px-2 py-2 text-center">{{ $totals['total_aspects'] }}</td>
                     <td class="border border-black px-2 py-2 text-center">{{ $totals['total_weight'] }}</td>
-                    <td class="border border-black px-2 py-2 text-center">{{ number_format($totals['total_rating_sum'], 2) }}</td>
-                    <td class="border border-black px-2 py-2 text-center">{{ number_format($totals['total_score'], 2) }}</td>
+                    <td class="border border-black px-2 py-2 text-center">{{ number_format($totals['total_rating_sum'],
+                        2) }}</td>
+                    <td class="border border-black px-2 py-2 text-center">{{ number_format($totals['total_score'], 2) }}
+                    </td>
                 </tr>
             </tfoot>
         </table>
@@ -213,7 +216,6 @@
         @endif
 
         {{-- Footer TTD dan Catatan --}}
-        @if($selectedEvent)
         <div class="mt-16 grid grid-cols-2 gap-8 text-xs">
             <div>
                 <div class="mb-1">Menyetujui,</div>
@@ -229,7 +231,6 @@
                 <div class="text-xs">Pemegang Hak Cipta Haki No. 027762 - 10 Maret 2004</div>
             </div>
         </div>
-        @endif
     </div>
 
     @if(count($chartData['labels']) > 0)
