@@ -52,7 +52,7 @@ class PsychologicalTestFactory extends Factory
             'participant_id' => $participant->id,
             'event_id' => $participant->event_id,
             'username' => $participant->username,
-            'test_number' => $participant->test_number,
+            'no_test' => $participant->test_number,
         ]);
     }
 
