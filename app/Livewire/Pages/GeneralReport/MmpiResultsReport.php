@@ -13,6 +13,13 @@ class MmpiResultsReport extends Component
 {
     use WithPagination;
 
+    public $perPage = 10;
+
+    public function updatedPerPage()
+    {
+        $this->resetPage();
+    }
+
     public function render()
     {
         // Cek apakah tabel ada dan berisi data
@@ -24,11 +31,13 @@ class MmpiResultsReport extends Component
         }
 
         // Ambil data dari model dan juga langsung dari DB sebagai cadangan
-        $mmpiResultsFromModel = PsychologicalTest::paginate(10);
-        $mmpiResultsFromDB = DB::table('psychological_tests')->paginate(10);
+        $mmpiResultsFromModel = PsychologicalTest::query();
 
-        // Pilih sumber data berdasarkan mana yang berhasil
-        $mmpiResults = $mmpiResultsFromModel->count() > 0 ? $mmpiResultsFromModel : $mmpiResultsFromDB;
+        if ($this->perPage == -1) {
+            $mmpiResults = $mmpiResultsFromModel->get();
+        } else {
+            $mmpiResults = $mmpiResultsFromModel->paginate($this->perPage);
+        }
 
         return view('livewire.pages.general-report.mmpi', [
             'mmpiResults' => $mmpiResults,
