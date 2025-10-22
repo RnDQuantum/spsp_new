@@ -158,13 +158,16 @@
 
 <div class="bg-white dark:bg-gray-900 rounded-lg shadow-md overflow-hidden max-w-7xl mx-auto my-8">
     <!-- Header - DARK MODE READY -->
+    @if($showHeader)
     <div class="border-b-4 border-black dark:border-gray-300 py-3 bg-blue-50 dark:bg-gray-800">
         <h1 class="text-center text-lg font-bold uppercase tracking-wide text-black dark:text-white">
             GENERAL MATCHING - ASPEK PSIKOLOGI
         </h1>
     </div>
+    @endif
 
     <!-- Info Section - DARK MODE READY -->
+    @if($showInfoSection)
     <div class="grid grid-cols-2 border-b border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800">
         <!-- Left Column -->
         <div class="border-r border-gray-300 dark:border-gray-600">
@@ -222,6 +225,7 @@
             </div>
         </div>
     </div>
+    @endif
 
     <!-- Main Table - DARK MODE READY -->
     <div class="overflow-x-auto">
@@ -261,7 +265,7 @@
             </thead>
             <tbody>
                 <!-- ASPEK PSIKOLOGI (POTENSI) -->
-                @if ($potensiCategory && count($potensiAspects) > 0)
+                @if ($showPotensi && $potensiCategory && count($potensiAspects) > 0)
                 <tr class="bg-gray-100 dark:bg-gray-600">
                     <td class="border border-gray-300 dark:border-gray-600 px-4 py-2 font-bold text-sm text-black dark:text-white uppercase"
                         colspan="8">
@@ -326,7 +330,7 @@
                 @endif
 
                 <!-- ASPEK KOMPETENSI -->
-                @if ($kompetensiCategory && count($kompetensiAspects) > 0)
+                @if ($showKompetensi && $kompetensiCategory && count($kompetensiAspects) > 0)
                 <tr class="bg-gray-100 dark:bg-gray-600">
                     <td class="border border-gray-300 dark:border-gray-600 px-4 py-2 font-bold text-sm text-black dark:text-white uppercase"
                         colspan="8">

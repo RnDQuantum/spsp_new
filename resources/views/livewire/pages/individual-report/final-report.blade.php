@@ -7,7 +7,14 @@
     </div>
     {{-- General Matching Section --}}
     <div class="mb-8">
-        <livewire:pages.individual-report.general-matching :eventCode="$eventCode" :testNumber="$testNumber"
-            :isStandalone="false" :key="'general-matching-' . $eventCode . '-' . $testNumber" />
+        <livewire:pages.individual-report.general-matching
+            :eventCode="$eventCode"
+            :testNumber="$testNumber"
+            :isStandalone="false"
+            :showHeader="false"
+            :showInfoSection="false"
+            :showPotensi="true"
+            :showKompetensi="false"
+            :key="'potensi-only-' . $eventCode . '-' . $testNumber" />
     </div>
 </div>

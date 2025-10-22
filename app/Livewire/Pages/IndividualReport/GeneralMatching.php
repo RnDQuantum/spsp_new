@@ -38,11 +38,23 @@ class GeneralMatching extends Component
     // Flag untuk menentukan apakah standalone atau child
     public $isStandalone = true;
 
-    public function mount($eventCode, $testNumber): void
+    // Dynamic display parameters
+    public $showHeader = true;
+    public $showInfoSection = true;
+    public $showPotensi = true;
+    public $showKompetensi = true;
+
+    public function mount($eventCode, $testNumber, $showHeader = true, $showInfoSection = true, $showPotensi = true, $showKompetensi = true): void
     {
         // Gunakan parameter jika ada (dari route), atau fallback ke property (dari parent)
         $this->eventCode = $eventCode ?? $this->eventCode;
         $this->testNumber = $testNumber ?? $this->testNumber;
+
+        // Set dynamic display parameters
+        $this->showHeader = $showHeader;
+        $this->showInfoSection = $showInfoSection;
+        $this->showPotensi = $showPotensi;
+        $this->showKompetensi = $showKompetensi;
 
         // Tentukan apakah standalone (dari route) atau child (dari parent)
         $this->isStandalone = $eventCode !== null && $testNumber !== null;
