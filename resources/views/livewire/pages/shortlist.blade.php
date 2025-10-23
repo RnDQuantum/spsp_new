@@ -47,12 +47,12 @@
                 <!-- Per Page + Clear Button - 2 columns -->
                 <div class="md:col-span-2 flex gap-2">
                     <!-- Per Page Dropdown -->
-                    <div class="flex-1">
+                    <div class="w-16">
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                             Tampilkan
                         </label>
                         <select wire:model.live="perPage"
-                            class="w-full rounded-lg border border-gray-300 dark:border-gray-600 mt-1.5 px-3 py-2.5 pr-8 text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all appearance-none cursor-pointer">
+                            class="w-full rounded-lg border text-center border-gray-300 dark:border-gray-600 mt-1.5 px-3 py-2.5 text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all appearance-none cursor-pointer">
                             <option value="10">10</option>
                             <option value="25">25</option>
                             <option value="50">50</option>
