@@ -174,10 +174,12 @@
 // Normalisasi: trim + uppercase → aman dari spasi & case
                                     $c = trim(strtoupper($aspect['conclusion_text'])); @endphp
 
-                                @if ($c === 'MEMENUHI/MEET REQUIREMENT') bg-yellow-300 text-black
-                                @elseif ($c === 'LEBIH MEMENUHI/MORE REQUIREMENT')
-                                    bg-green-500 text-black
-                                @elseif ($c === 'DI BAWAH STANDAR/BELOW STANDARD')
+                                @if ($c === 'LEBIH MEMENUHI/MORE REQUIREMENT') bg-green-500 text-black
+                                @elseif ($c === 'MEMENUHI/MEET REQUIREMENT')
+                                    bg-yellow-400 text-black
+                                @elseif ($c === 'KURANG MEMENUHI/BELOW REQUIREMENT')
+                                    bg-orange-500 text-black
+                                @elseif ($c === 'BELUM MEMENUHI/UNDER PERFORM')
                                     bg-red-500 text-black
                                 @else
                                     bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-white @endif">
@@ -208,8 +210,15 @@
                             {{ number_format($totalGapRating, 2) }}</td>
                         <td class="border border-black px-3 py-2"></td>
                         <td class="border border-black px-3 py-2 
-                                   text-gray-900 dark:text-white"
-                            colspan="2">{{ $overallConclusion }}</td>
+                                text-black
+                                @php
+$c = trim(strtoupper($overallConclusion)); @endphp
+                                @if ($c === 'MEMENUHI STANDAR/MEET REQUIREMENT STANDARD') bg-green-500 text-black
+                                @elseif ($c === 'KURANG MEMENUHI STANDAR/BELOW REQUIREMENT STANDARD')
+                                    bg-red-600 text-black @endif"
+                            colspan="2">
+                            {{ $overallConclusion }}
+                        </td>
                     </tr>
 
                     <!-- Total Score Row -->
@@ -234,8 +243,15 @@
                                    text-gray-900 dark:text-white">
                             {{ number_format($totalGapScore, 2) }}</td>
                         <td class="border border-black px-3 py-2 
-                                   text-gray-900 dark:text-white"
-                            colspan="2">{{ $overallConclusion }}</td>
+                                text-black
+                                @php
+$c = trim(strtoupper($overallConclusion)); @endphp
+                                @if ($c === 'MEMENUHI STANDAR/MEET REQUIREMENT STANDARD') bg-green-500 text-black
+                                @elseif ($c === 'KURANG MEMENUHI STANDAR/BELOW REQUIREMENT STANDARD')
+                                    bg-red-600 text-black @endif"
+                            colspan="2">
+                            {{ $overallConclusion }}
+                        </td>
                     </tr>
                 </tbody>
             </table>
