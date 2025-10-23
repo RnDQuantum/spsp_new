@@ -74,31 +74,50 @@
         </div>
     </div>
 
-    {{-- General Matching Section --}}
+    {{-- General Matching Section potensi --}}
     <div class="mb-8">
         <livewire:pages.individual-report.general-matching :eventCode="$eventCode" :testNumber="$testNumber"
             :isStandalone="false" :showHeader="false" :showInfoSection="false" :showPotensi="true"
             :showKompetensi="false" :key="'potensi-only-' . $eventCode . '-' . $testNumber" />
-    </div>
-    <div class="mb-8">
-        <livewire:pages.individual-report.general-matching :eventCode="$eventCode" :testNumber="$testNumber"
-            :isStandalone="false" :showHeader="false" :showInfoSection="false" :showPotensi="false"
-            :showKompetensi="true" :key="'kompetensi-only-' . $eventCode . '-' . $testNumber" />
     </div>
 
     {{-- Psychology Mapping Section --}}
     <div class="mb-8">
         <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Psychology Mapping</h2>
         <livewire:pages.individual-report.general-psy-mapping :eventCode="$eventCode" :testNumber="$testNumber"
-            :isStandalone="false" :showHeader="false" :showInfoSection="false" :showTable="true"
-            :showRatingChart="true" :showScoreChart="true" :key="'psy-mapping-' . $eventCode . '-' . $testNumber" />
+            :isStandalone="false" :showHeader="false" :showInfoSection="false" :showTable="true" :showRatingChart="true"
+            :showScoreChart="true" :key="'psy-mapping-' . $eventCode . '-' . $testNumber" />
     </div>
 
-    {{-- Interpretation Section --}}
+    {{-- Interpretation Section potensi --}}
     <div class="mb-8">
         <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Interpretasi Hasil Assessment</h2>
         <livewire:pages.individual-report.interpretation-section :eventCode="$eventCode" :testNumber="$testNumber"
-            :isStandalone="false" :showHeader="false" :showPotensi="true" :showKompetensi="true"
+            :isStandalone="false" :showHeader="false" :showPotensi="true" :showKompetensi="false"
             :key="'interpretation-' . $eventCode . '-' . $testNumber" />
     </div>
+
+    {{-- General Matching Section kompetensi --}}
+    <div class="mb-8">
+        <livewire:pages.individual-report.general-matching :eventCode="$eventCode" :testNumber="$testNumber"
+            :isStandalone="false" :showHeader="false" :showInfoSection="false" :showPotensi="false"
+            :showKompetensi="true" :key="'kompetensi-only-' . $eventCode . '-' . $testNumber" />
+    </div>
+
+    {{-- Managerial Competency Mapping Section --}}
+    <div class="mb-8">
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Managerial Competency Mapping</h2>
+        <livewire:pages.individual-report.general-mc-mapping :eventCode="$eventCode" :testNumber="$testNumber"
+            :isStandalone="false" :showHeader="false" :showInfoSection="false" :showTable="true" :showRatingChart="true"
+            :showScoreChart="true" :key="'mc-mapping-' . $eventCode . '-' . $testNumber" />
+    </div>
+
+    {{-- Interpretation Section kompetensi --}}
+    <div class="mb-8">
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Interpretasi Kompetensi</h2>
+        <livewire:pages.individual-report.interpretation-section :eventCode="$eventCode" :testNumber="$testNumber"
+            :isStandalone="false" :showHeader="false" :showPotensi="false" :showKompetensi="true"
+            :key="'interpretation-kompetensi-' . $eventCode . '-' . $testNumber" />
+    </div>
+
 </div>
