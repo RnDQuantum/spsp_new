@@ -30,6 +30,19 @@ class RingkasanAssessment extends Component
     // Tolerance percentage (default 10%)
     public int $tolerancePercentage = 10;
 
+    // ADD: Public properties untuk support child component
+    public $eventCode;
+    public $testNumber;
+
+    // Flag untuk menentukan apakah standalone atau child
+    public $isStandalone = true;
+
+    // Dynamic display parameters
+    public $showHeader = true;
+    public $showBiodata = true;
+    public $showInfoSection = true;
+    public $showTable = true;
+
     /**
      * Get adjusted standard score for a category
      */
@@ -50,8 +63,26 @@ class RingkasanAssessment extends Component
         return $individualScore - $adjustedStandard;
     }
 
-    public function mount($eventCode, $testNumber): void
+    public function mount($eventCode = null, $testNumber = null, $showHeader = true, $showBiodata = true, $showInfoSection = true, $showTable = true): void
     {
+        // Gunakan parameter jika ada (dari route), atau fallback ke property (dari parent)
+        $this->eventCode = $eventCode ?? $this->eventCode;
+        $this->testNumber = $testNumber ?? $this->testNumber;
+
+        // Set dynamic display parameters
+        $this->showHeader = $showHeader;
+        $this->showBiodata = $showBiodata;
+        $this->showInfoSection = $showInfoSection;
+        $this->showTable = $showTable;
+
+        // Tentukan apakah standalone (dari route) atau child (dari parent)
+        $this->isStandalone = $eventCode !== null && $testNumber !== null;
+
+        // Validate
+        if (!$this->eventCode || !$this->testNumber) {
+            abort(404, 'Event code and test number are required');
+        }
+
         // Load tolerance from session (same as GeneralPsyMapping)
         $this->tolerancePercentage = session('individual_report.tolerance', 10);
 
@@ -61,10 +92,10 @@ class RingkasanAssessment extends Component
             'batch',
             'positionFormation.template',
         ])
-            ->whereHas('assessmentEvent', function ($query) use ($eventCode) {
-                $query->where('code', $eventCode);
+            ->whereHas('assessmentEvent', function ($query) {
+                $query->where('code', $this->eventCode);
             })
-            ->where('test_number', $testNumber)
+            ->where('test_number', $this->testNumber)
             ->firstOrFail();
 
         // Get template from position

@@ -120,4 +120,11 @@
             :key="'interpretation-kompetensi-' . $eventCode . '-' . $testNumber" />
     </div>
 
+    {{-- Ringkasan Assessment Section - Table Only --}}
+    <div class="mb-8">
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Ringkasan Hasil Assessment</h2>
+        <livewire:pages.individual-report.ringkasan-assessment :eventCode="$eventCode" :testNumber="$testNumber"
+            :isStandalone="false" :showHeader="false" :showBiodata="false" :showInfoSection="false" :showTable="true"
+            :key="'ringkasan-assessment-' . $eventCode . '-' . $testNumber" />
+    </div>
 </div>
