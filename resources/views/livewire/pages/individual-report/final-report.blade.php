@@ -17,4 +17,17 @@
             :showKompetensi="false"
             :key="'potensi-only-' . $eventCode . '-' . $testNumber" />
     </div>
+
+    {{-- Interpretation Section --}}
+    <div class="mb-8">
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Interpretasi Hasil Assessment</h2>
+        <livewire:pages.individual-report.interpretation-section
+            :eventCode="$eventCode"
+            :testNumber="$testNumber"
+            :isStandalone="false"
+            :showHeader="false"
+            :showPotensi="true"
+            :showKompetensi="true"
+            :key="'interpretation-' . $eventCode . '-' . $testNumber" />
+    </div>
 </div>
