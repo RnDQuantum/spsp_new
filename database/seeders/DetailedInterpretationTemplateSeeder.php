@@ -15,17 +15,22 @@ class DetailedInterpretationTemplateSeeder extends Seeder
         // Clear existing templates
         InterpretationTemplate::truncate();
 
-        // Seed HUBUNGAN SOSIAL sub-aspects (Aspect ID: 4)
+        // Seed POTENSI sub-aspects
         $this->seedHubunganSosial();
-
-        // Seed KECERDASAN sub-aspects (Aspect ID: 1)
         $this->seedKecerdasan();
-
-        // Seed KEPRIBADIAN sub-aspects (Aspect ID: 5)
         $this->seedKepribadian();
-
-        // Seed CARA KERJA / SIKAP KERJA sub-aspects (Aspect ID: 2)
         $this->seedCaraKerja();
+
+        // Seed KOMPETENSI aspects
+        $this->seedKompetensiIntegritas();
+        $this->seedKompetensiKerjasama();
+        $this->seedKompetensiKomunikasi();
+        $this->seedKompetensiOrientasiHasil();
+        $this->seedKompetensiPelayananPublik();
+        $this->seedKompetensiPengembanganDiri();
+        $this->seedKompetensiMengelolaPerubahan();
+        $this->seedKompetensiPengambilanKeputusan();
+        $this->seedKompetensiPerekatBangsa();
 
         // Seed generic fallbacks
         $this->seedGenericFallbacks();
@@ -499,47 +504,453 @@ class DetailedInterpretationTemplateSeeder extends Seeder
         }
     }
 
+    protected function seedKompetensiIntegritas(): void
+    {
+        $templates = [
+            [
+                'interpretable_type' => 'aspect',
+                'interpretable_name' => 'Integritas',
+                'rating_value' => 2,
+                'template_text' => 'Kemampuan menampilkan kompetensi integritas masih perlu ditingkatkan. Individu belum konsisten dalam mengingatkan rekan kerja untuk bertindak sesuai etika dan kode etik. Diperlukan pengembangan lebih lanjut dalam menunjukkan perilaku yang berintegritas dalam pelaksanaan tugas.',
+                'tone' => 'neutral',
+                'category' => 'development_area',
+            ],
+            [
+                'interpretable_type' => 'aspect',
+                'interpretable_name' => 'Integritas',
+                'rating_value' => 3,
+                'template_text' => 'Individu cukup kompeten menampilkan kompetensi integritas. Individu cukup mampu mengingatkan rekan kerja untuk bertindak sesuai dengan etika dan kode etik dalam pelaksanaan tugas.',
+                'tone' => 'neutral',
+                'category' => 'neutral',
+            ],
+            [
+                'interpretable_type' => 'aspect',
+                'interpretable_name' => 'Integritas',
+                'rating_value' => 4,
+                'template_text' => 'Individu kompeten menampilkan kompetensi integritas sesuai dengan standar level yang ditetapkan. Secara konsisten mampu mengingatkan dan mengajak rekan kerja untuk bertindak sesuai dengan etika dan kode etik. Hal ini tentunya akan memberikan dukungan terhadap peran tugasnya sesuai dengan formasi yang dituju.',
+                'tone' => 'positive',
+                'category' => 'strength',
+            ],
+        ];
+
+        foreach ($templates as $template) {
+            InterpretationTemplate::create([
+                ...$template,
+                'version' => 'v2.0',
+                'is_active' => true,
+            ]);
+        }
+    }
+
+    protected function seedKompetensiKerjasama(): void
+    {
+        $templates = [
+            [
+                'interpretable_type' => 'aspect',
+                'interpretable_name' => 'Kerjasama',
+                'rating_value' => 2,
+                'template_text' => 'Kemampuan menumbuhkan tim kerja masih perlu dikembangkan. Individu belum konsisten dalam membantu orang lain dan berbagi informasi yang relevan. Diperlukan upaya lebih untuk meningkatkan kolaborasi dalam tim.',
+                'tone' => 'neutral',
+                'category' => 'development_area',
+            ],
+            [
+                'interpretable_type' => 'aspect',
+                'interpretable_name' => 'Kerjasama',
+                'rating_value' => 3,
+                'template_text' => 'Kemampuan menumbuhkan tim kerja cukup kompeten. Hal ini cukup tergambarkan dengan bukti perilaku individu dalam membantu orang lain dan berbagi informasi yang relevan. Kemampuan ini memudahkannya untuk bekerjasama dalam melakukan tugas dalam memberikan pelayanan sesuai bidang tugas yang dituju.',
+                'tone' => 'neutral',
+                'category' => 'neutral',
+            ],
+            [
+                'interpretable_type' => 'aspect',
+                'interpretable_name' => 'Kerjasama',
+                'rating_value' => 4,
+                'template_text' => 'Kompeten dalam menampilkan kemampuan menumbuhkan tim kerja. Individu secara konsisten membantu orang lain dan aktif berbagi informasi yang relevan untuk keberhasilan tim. Kemampuan kolaborasi yang kuat ini sangat mendukung dalam pelaksanaan tugas sesuai formasi yang dituju.',
+                'tone' => 'positive',
+                'category' => 'strength',
+            ],
+        ];
+
+        foreach ($templates as $template) {
+            InterpretationTemplate::create([
+                ...$template,
+                'version' => 'v2.0',
+                'is_active' => true,
+            ]);
+        }
+    }
+
+    protected function seedKompetensiKomunikasi(): void
+    {
+        $templates = [
+            [
+                'interpretable_type' => 'aspect',
+                'interpretable_name' => 'Komunikasi',
+                'rating_value' => 2,
+                'template_text' => 'Kemampuan komunikasi masih perlu ditingkatkan. Individu belum optimal dalam menjalankan komunikasi formal dan informal, serta masih kesulitan dalam menyampaikan pesan dengan jelas dan menyusun materi presentasi yang efektif.',
+                'tone' => 'neutral',
+                'category' => 'development_area',
+            ],
+            [
+                'interpretable_type' => 'aspect',
+                'interpretable_name' => 'Komunikasi',
+                'rating_value' => 3,
+                'template_text' => 'Individu cukup mampu menampilkan kompetensi komunikasi dalam level yang ditetapkan dengan cukup kompeten. Dalam level ini individu cukup aktif menjalankan komunikasi secara formal dan informal; cukup menampilkan kesediaan mendengarkan orang lain, menginterpretasikan pesan dengan respon yang sesuai serta cukup mampu menyusun materi presentasi, pidato, naskah, laporan yang cukup bisa dimanfaatkan dalam pelaksanaan tugas.',
+                'tone' => 'neutral',
+                'category' => 'neutral',
+            ],
+            [
+                'interpretable_type' => 'aspect',
+                'interpretable_name' => 'Komunikasi',
+                'rating_value' => 4,
+                'template_text' => 'Kompeten dalam menampilkan kompetensi komunikasi. Individu aktif menjalankan komunikasi secara formal dan informal dengan efektif; menampilkan kesediaan mendengarkan orang lain, menginterpretasikan pesan dengan respon yang tepat serta mampu menyusun materi presentasi, pidato, naskah, dan laporan yang berkualitas untuk mendukung pelaksanaan tugas.',
+                'tone' => 'positive',
+                'category' => 'strength',
+            ],
+        ];
+
+        foreach ($templates as $template) {
+            InterpretationTemplate::create([
+                ...$template,
+                'version' => 'v2.0',
+                'is_active' => true,
+            ]);
+        }
+    }
+
+    protected function seedKompetensiOrientasiHasil(): void
+    {
+        $templates = [
+            [
+                'interpretable_type' => 'aspect',
+                'interpretable_name' => 'Orientasi Pada Hasil',
+                'rating_value' => 2,
+                'template_text' => 'Orientasi pada hasil masih perlu ditingkatkan. Individu belum konsisten dalam berupaya meningkatkan hasil kerja melebihi standar dan belum aktif mencari metode alternatif untuk peningkatan kinerja.',
+                'tone' => 'neutral',
+                'category' => 'development_area',
+            ],
+            [
+                'interpretable_type' => 'aspect',
+                'interpretable_name' => 'Orientasi Pada Hasil',
+                'rating_value' => 3,
+                'template_text' => 'Cukup kompeten dalam menampilkan kompetensi berorientasi pada hasil. Individu cukup mampu berupaya meningkatkan hasil kerja sesuai dengan standar yang ditetapkan dan mulai mencoba metode alternatif untuk peningkatan kinerja dalam pelaksanaan tugasnya.',
+                'tone' => 'neutral',
+                'category' => 'neutral',
+            ],
+            [
+                'interpretable_type' => 'aspect',
+                'interpretable_name' => 'Orientasi Pada Hasil',
+                'rating_value' => 4,
+                'template_text' => 'Kompeten dalam menampilkan kompetensi berorientasi pada hasil. Dalam level ini individu mampu berupaya meningkatkan hasil kerja pribadi yang lebih tinggi dari standar yang ditetapkan, mencari, mencoba metode alternatif untuk peningkatan kinerja. Kapasitas ini akan sangat mampu dimanfaatkan individu untuk bertanggung jawab atas tugas-tugasnya sesuai formasi yang dituju.',
+                'tone' => 'positive',
+                'category' => 'strength',
+            ],
+        ];
+
+        foreach ($templates as $template) {
+            InterpretationTemplate::create([
+                ...$template,
+                'version' => 'v2.0',
+                'is_active' => true,
+            ]);
+        }
+    }
+
+    protected function seedKompetensiPelayananPublik(): void
+    {
+        $templates = [
+            [
+                'interpretable_type' => 'aspect',
+                'interpretable_name' => 'Pelayanan Publik',
+                'rating_value' => 2,
+                'template_text' => 'Kemampuan pelayanan publik masih perlu ditingkatkan. Individu belum konsisten dalam menunjukkan sikap yakin dalam mengerjakan tugas pelayanan publik dan belum optimal dalam mencari informasi untuk mengenali kebutuhan pemangku kepentingan.',
+                'tone' => 'neutral',
+                'category' => 'development_area',
+            ],
+            [
+                'interpretable_type' => 'aspect',
+                'interpretable_name' => 'Pelayanan Publik',
+                'rating_value' => 3,
+                'template_text' => 'Cukup kompeten dalam menampilkan kompetensi pelayanan publik sesuai dengan standar level yang ditetapkan. Individu cukup mampu menunjukkan sikap yakin dalam mengerjakan tugas-tugas pelayanan publiknya serta cukup mampu secara aktif mencari informasi untuk mengenali kebutuhan dari pemangku kepentingan.',
+                'tone' => 'neutral',
+                'category' => 'neutral',
+            ],
+            [
+                'interpretable_type' => 'aspect',
+                'interpretable_name' => 'Pelayanan Publik',
+                'rating_value' => 4,
+                'template_text' => 'Kompeten dalam menampilkan kompetensi pelayanan publik. Individu mampu menunjukkan sikap yakin dan profesional dalam mengerjakan tugas pelayanan publik serta secara aktif mencari informasi untuk mengenali dan memenuhi kebutuhan pemangku kepentingan dengan baik.',
+                'tone' => 'positive',
+                'category' => 'strength',
+            ],
+        ];
+
+        foreach ($templates as $template) {
+            InterpretationTemplate::create([
+                ...$template,
+                'version' => 'v2.0',
+                'is_active' => true,
+            ]);
+        }
+    }
+
+    protected function seedKompetensiPengembanganDiri(): void
+    {
+        $templates = [
+            [
+                'interpretable_type' => 'aspect',
+                'interpretable_name' => 'Pengembangan Diri Dan Orang Lain',
+                'rating_value' => 2,
+                'template_text' => 'Kemampuan pengembangan diri dan orang lain masih perlu ditingkatkan. Individu belum optimal dalam mengembangkan kemampuan diri sendiri maupun membantu pengembangan kemampuan orang lain di lingkungan kerjanya.',
+                'tone' => 'neutral',
+                'category' => 'development_area',
+            ],
+            [
+                'interpretable_type' => 'aspect',
+                'interpretable_name' => 'Pengembangan Diri Dan Orang Lain',
+                'rating_value' => 3,
+                'template_text' => 'Cukup kompeten dalam menampilkan kompetensi pengembangan diri dan orang lain. Individu cukup mampu meningkatkan kemampuan diri dan cukup aktif dalam membantu orang lain untuk mengembangkan kemampuan mereka dalam menyelesaikan pekerjaan.',
+                'tone' => 'neutral',
+                'category' => 'neutral',
+            ],
+            [
+                'interpretable_type' => 'aspect',
+                'interpretable_name' => 'Pengembangan Diri Dan Orang Lain',
+                'rating_value' => 4,
+                'template_text' => 'Kompeten dalam menampilkan kompetensi pengembangan diri dan orang lain. Individu memiliki kompetensi dalam mengembangkan kemampuan diri dan orang lain yang memenuhi standar. Ia tidak hanya dapat meningkatkan kemampuan diri, namun juga meningkatkan kemampuan orang lain guna mengajarkan metode lain yang dapat memudahkan pekerjaan mereka.',
+                'tone' => 'positive',
+                'category' => 'strength',
+            ],
+        ];
+
+        foreach ($templates as $template) {
+            InterpretationTemplate::create([
+                ...$template,
+                'version' => 'v2.0',
+                'is_active' => true,
+            ]);
+        }
+    }
+
+    protected function seedKompetensiMengelolaPerubahan(): void
+    {
+        $templates = [
+            [
+                'interpretable_type' => 'aspect',
+                'interpretable_name' => 'Mengelola Perubahan',
+                'rating_value' => 2,
+                'template_text' => 'Kemampuan mengelola perubahan masih perlu ditingkatkan. Individu belum optimal dalam beradaptasi dengan perubahan di lingkungan kerja dan masih memerlukan waktu yang cukup lama untuk menerima perubahan yang terjadi.',
+                'tone' => 'neutral',
+                'category' => 'development_area',
+            ],
+            [
+                'interpretable_type' => 'aspect',
+                'interpretable_name' => 'Mengelola Perubahan',
+                'rating_value' => 3,
+                'template_text' => 'Cukup kompeten dalam menampilkan kompetensi mengelola perubahan. Individu cukup mampu beradaptasi mengikuti perubahan yang ada di lingkungan kerja dan cukup tanggap dalam menerima perubahan yang terjadi.',
+                'tone' => 'neutral',
+                'category' => 'neutral',
+            ],
+            [
+                'interpretable_type' => 'aspect',
+                'interpretable_name' => 'Mengelola Perubahan',
+                'rating_value' => 4,
+                'template_text' => 'Kompeten menampilkan kompetensi mengelola perubahan sesuai tuntutan dalam level jabatan fungsional pertama. Individu mampu proaktif dalam beradaptasi mengikuti perubahan yang ada di lingkungan kerja. Ia juga cepat dan tanggap dalam menerima perubahan.',
+                'tone' => 'positive',
+                'category' => 'strength',
+            ],
+        ];
+
+        foreach ($templates as $template) {
+            InterpretationTemplate::create([
+                ...$template,
+                'version' => 'v2.0',
+                'is_active' => true,
+            ]);
+        }
+    }
+
+    protected function seedKompetensiPengambilanKeputusan(): void
+    {
+        $templates = [
+            [
+                'interpretable_type' => 'aspect',
+                'interpretable_name' => 'Pengambilan Keputusan',
+                'rating_value' => 2,
+                'template_text' => 'Kemampuan pengambilan keputusan masih perlu ditingkatkan. Individu belum optimal dalam menganalisa masalah secara mendalam dan membuat keputusan operasional berdasarkan kesimpulan dari berbagai sumber informasi.',
+                'tone' => 'neutral',
+                'category' => 'development_area',
+            ],
+            [
+                'interpretable_type' => 'aspect',
+                'interpretable_name' => 'Pengambilan Keputusan',
+                'rating_value' => 3,
+                'template_text' => 'Cukup kompeten dalam menampilkan kompetensi pengambilan keputusan. Dalam level ini individu cukup mampu menampilkan perilaku untuk menganalisa suatu masalah secara mendalam serta membuat keputusan operasional berdasarkan kesimpulan dari berbagai sumber yang diterimanya.',
+                'tone' => 'neutral',
+                'category' => 'neutral',
+            ],
+            [
+                'interpretable_type' => 'aspect',
+                'interpretable_name' => 'Pengambilan Keputusan',
+                'rating_value' => 4,
+                'template_text' => 'Kompeten dalam menampilkan kompetensi pengambilan keputusan. Individu mampu menganalisa masalah secara mendalam dengan baik serta membuat keputusan operasional yang tepat berdasarkan kesimpulan dari berbagai sumber informasi yang komprehensif.',
+                'tone' => 'positive',
+                'category' => 'strength',
+            ],
+        ];
+
+        foreach ($templates as $template) {
+            InterpretationTemplate::create([
+                ...$template,
+                'version' => 'v2.0',
+                'is_active' => true,
+            ]);
+        }
+    }
+
+    protected function seedKompetensiPerekatBangsa(): void
+    {
+        $templates = [
+            [
+                'interpretable_type' => 'aspect',
+                'interpretable_name' => 'Perekat Bangsa',
+                'rating_value' => 2,
+                'template_text' => 'Kemampuan sebagai perekat bangsa masih perlu ditingkatkan. Individu belum konsisten dalam mengembangkan sikap saling menghargai dan menekankan persamaan serta persatuan, dan masih perlu mengembangkan kemampuan dalam menghadapi konflik yang melibatkan perbedaan suku, ras, dan agama.',
+                'tone' => 'neutral',
+                'category' => 'development_area',
+            ],
+            [
+                'interpretable_type' => 'aspect',
+                'interpretable_name' => 'Perekat Bangsa',
+                'rating_value' => 3,
+                'template_text' => 'Cukup mampu menampilkan kompetensi perekat bangsa sesuai dengan standar yang ditetapkan. Individu cukup aktif mengembangkan sikap saling menghargai dan menekankan persamaan dan persatuan. Kemampuan ini memungkinkannya untuk cukup mampu bersikap tenang apabila menghadapi konflik yang melibatkan perbedaan suku, ras, dan agama.',
+                'tone' => 'neutral',
+                'category' => 'neutral',
+            ],
+            [
+                'interpretable_type' => 'aspect',
+                'interpretable_name' => 'Perekat Bangsa',
+                'rating_value' => 4,
+                'template_text' => 'Kemampuan dalam mempromosikan sikap toleransi mampu ditampilkan individu sesuai dengan standar level yang ditetapkan. Mampu secara aktif mengembangkan sikap saling menghargai dan menekankan persamaan dan persatuan. Kemampuan ini memungkinkannya untuk mampu bersikap tenang apabila menghadapi konflik yang melibatkan perbedaan suku, ras, dan agama.',
+                'tone' => 'positive',
+                'category' => 'strength',
+            ],
+        ];
+
+        foreach ($templates as $template) {
+            InterpretationTemplate::create([
+                ...$template,
+                'version' => 'v2.0',
+                'is_active' => true,
+            ]);
+        }
+    }
+
     protected function seedGenericFallbacks(): void
     {
-        // Generic fallback untuk rating 1-5
-        $genericTemplates = [
+        // Generic fallback untuk POTENSI sub-aspects (rating 1-5)
+        // Placeholder [nama aspek] akan diganti dengan nama sub-aspect yang sebenarnya
+        $genericSubAspects = [
             [
                 'interpretable_type' => 'sub_aspect',
                 'interpretable_name' => null,
                 'rating_value' => 1,
-                'template_text' => 'Kemampuan dalam aspek ini sangat kurang dan memerlukan pengembangan intensif. Diperlukan pelatihan dan bimbingan khusus untuk meningkatkan kompetensi dalam area ini.',
+                'template_text' => 'Kemampuan dalam [nama aspek] masih sangat terbatas dan memerlukan pengembangan intensif. Diperlukan pelatihan dan bimbingan khusus untuk meningkatkan kapasitas di area ini agar dapat memenuhi tuntutan peran yang diharapkan.',
+                'tone' => 'negative',
+                'category' => 'development_area',
             ],
             [
                 'interpretable_type' => 'sub_aspect',
                 'interpretable_name' => null,
                 'rating_value' => 2,
-                'template_text' => 'Kemampuan dalam aspek ini masih kurang memadai dan perlu ditingkatkan. Individu menunjukkan beberapa kesulitan dalam menampilkan kompetensi yang diharapkan, sehingga diperlukan upaya pengembangan yang konsisten untuk dapat memenuhi standar yang ditetapkan.',
+                'template_text' => 'Kemampuan dalam [nama aspek] masih perlu pengembangan lebih lanjut. Individu menunjukkan beberapa keterbatasan yang memerlukan upaya konsisten untuk meningkatkan kapasitas sesuai dengan standar yang ditetapkan.',
+                'tone' => 'neutral',
+                'category' => 'development_area',
             ],
             [
                 'interpretable_type' => 'sub_aspect',
                 'interpretable_name' => null,
                 'rating_value' => 3,
-                'template_text' => 'Kemampuan dalam aspek ini tergolong cukup memadai. Individu mampu menampilkan kompetensi sesuai dengan standar dasar yang diharapkan, meskipun masih ada ruang untuk peningkatan lebih lanjut.',
+                'template_text' => 'Kemampuan dalam [nama aspek] berada pada tingkat yang cukup memadai. Individu mampu menampilkan kapasitas sesuai dengan standar dasar yang diharapkan, meskipun masih ada ruang untuk peningkatan lebih lanjut.',
+                'tone' => 'neutral',
+                'category' => 'neutral',
             ],
             [
                 'interpretable_type' => 'sub_aspect',
                 'interpretable_name' => null,
                 'rating_value' => 4,
-                'template_text' => 'Kemampuan dalam aspek ini tergolong baik dan dapat diandalkan. Individu secara konsisten menampilkan kompetensi yang memenuhi bahkan kadang melampaui standar yang ditetapkan.',
+                'template_text' => 'Kemampuan dalam [nama aspek] tergolong baik dan dapat diandalkan. Individu secara konsisten menampilkan kapasitas yang memenuhi bahkan kadang melampaui standar yang ditetapkan, sehingga dapat menjadi kekuatan dalam pelaksanaan tugas.',
+                'tone' => 'positive',
+                'category' => 'strength',
             ],
             [
                 'interpretable_type' => 'sub_aspect',
                 'interpretable_name' => null,
                 'rating_value' => 5,
-                'template_text' => 'Kemampuan dalam aspek ini sangat menonjol dan menjadi kekuatan utama individu. Individu secara konsisten menampilkan kompetensi yang jauh melampaui standar yang ditetapkan dan dapat menjadi role model bagi orang lain.',
+                'template_text' => 'Kemampuan dalam [nama aspek] sangat menonjol dan menjadi kekuatan utama individu. Kapasitas yang ditampilkan secara konsisten jauh melampaui standar yang ditetapkan dan dapat menjadi role model bagi orang lain dalam organisasi.',
+                'tone' => 'positive',
+                'category' => 'strength',
             ],
         ];
 
-        foreach ($genericTemplates as $template) {
-            InterpretationTemplate::create([
-                ...$template,
+        // Generic fallback untuk KOMPETENSI aspects (rating 1-5)
+        // Placeholder [nama aspek] akan diganti dengan nama aspect yang sebenarnya
+        $genericAspects = [
+            [
+                'interpretable_type' => 'aspect',
+                'interpretable_name' => null,
+                'rating_value' => 1,
+                'template_text' => 'Kemampuan menampilkan kompetensi [nama aspek] masih sangat terbatas dan memerlukan pengembangan yang serius. Individu belum mampu menampilkan perilaku kerja yang sesuai dengan standar yang ditetapkan. Diperlukan program pengembangan intensif untuk dapat memenuhi ekspektasi peran.',
+                'tone' => 'negative',
+                'category' => 'development_area',
+            ],
+            [
+                'interpretable_type' => 'aspect',
+                'interpretable_name' => null,
+                'rating_value' => 2,
+                'template_text' => 'Kemampuan menampilkan kompetensi [nama aspek] masih perlu ditingkatkan. Individu menunjukkan beberapa keterbatasan dalam menampilkan perilaku kerja yang diharapkan. Diperlukan upaya pengembangan yang konsisten untuk dapat memenuhi standar kompetensi yang ditetapkan.',
                 'tone' => 'neutral',
                 'category' => 'development_area',
+            ],
+            [
+                'interpretable_type' => 'aspect',
+                'interpretable_name' => null,
+                'rating_value' => 3,
+                'template_text' => 'Kemampuan dalam [nama aspek] cukup memadai dan sesuai dengan ekspektasi umum. Individu mampu menampilkan perilaku kerja sesuai dengan standar dasar yang ditetapkan, meskipun masih ada peluang untuk pengembangan lebih lanjut.',
+                'tone' => 'neutral',
+                'category' => 'neutral',
+            ],
+            [
+                'interpretable_type' => 'aspect',
+                'interpretable_name' => null,
+                'rating_value' => 4,
+                'template_text' => 'Kemampuan dalam [nama aspek] tergolong baik dan dapat diandalkan. Individu secara konsisten menampilkan perilaku kerja yang memenuhi bahkan kadang melampaui standar yang ditetapkan, sehingga dapat memberikan kontribusi positif terhadap pencapaian tujuan organisasi.',
+                'tone' => 'positive',
+                'category' => 'strength',
+            ],
+            [
+                'interpretable_type' => 'aspect',
+                'interpretable_name' => null,
+                'rating_value' => 5,
+                'template_text' => 'Kemampuan dalam [nama aspek] sangat menonjol dan menjadi keunggulan utama individu. Perilaku kerja yang ditampilkan secara konsisten jauh melampaui standar yang ditetapkan dan dapat menjadi contoh terbaik bagi rekan kerja lainnya.',
+                'tone' => 'positive',
+                'category' => 'strength',
+            ],
+        ];
+
+        // Insert sub_aspect fallbacks
+        foreach ($genericSubAspects as $template) {
+            InterpretationTemplate::create([
+                ...$template,
+                'version' => 'v2.0',
+                'is_active' => true,
+            ]);
+        }
+
+        // Insert aspect fallbacks
+        foreach ($genericAspects as $template) {
+            InterpretationTemplate::create([
+                ...$template,
                 'version' => 'v2.0',
                 'is_active' => true,
             ]);
