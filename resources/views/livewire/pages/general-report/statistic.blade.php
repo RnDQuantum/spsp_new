@@ -1,4 +1,4 @@
-<div class="max-w-6xl mx-auto mt-10 bg-white p-8 rounded shadow text-gray-900">
+<div class="max-w-6xl mx-auto mt-10 bg-white dark:bg-gray-900 p-8 rounded shadow text-gray-900 dark:text-gray-100">
 
     <!-- Dropdown Event, Position & Aspek -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
@@ -19,8 +19,9 @@
     </div>
 
     <!-- Judul Kurva -->
-    <div class="mb-2 text-center font-bold text-2xl uppercase">KURVA DISTRIBUSI FREKUENSI</div>
-    <div class="mb-4 text-center text-lg font-semibold text-red-800">
+    <div class="mb-2 text-center font-bold text-2xl uppercase text-gray-900 dark:text-gray-100">KURVA DISTRIBUSI
+        FREKUENSI</div>
+    <div class="mb-4 text-center text-lg font-semibold text-red-800 dark:text-red-400">
         {{ $aspectName ?: '—' }}
     </div>
 
@@ -33,33 +34,33 @@
 
         <!-- Tabel Kelas dan Rentang Nilai - di sebelah kanan chart -->
         <div class="flex-shrink-0 text-sm self-center">
-            <table class="border border-black text-gray-900">
+            <table class="border border-black dark:border-gray-600 text-gray-900 dark:text-gray-100">
                 <thead>
-                    <tr style="background-color: #eee;">
-                        <th class="border border-black px-3 py-2 font-semibold">Kelas</th>
-                        <th class="border border-black px-3 py-2 font-semibold">Rentang Nilai</th>
+                    <tr style="background-color: #eee;" class="dark:bg-gray-700">
+                        <th class="border border-black dark:border-gray-600 px-3 py-2 font-semibold">Kelas</th>
+                        <th class="border border-black dark:border-gray-600 px-3 py-2 font-semibold">Rentang Nilai</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td class="border border-black px-3 py-2 text-center">I</td>
-                        <td class="border border-black px-3 py-2">1.00 - 1.80</td>
+                    <tr class="bg-white dark:bg-gray-800">
+                        <td class="border border-black dark:border-gray-600 px-3 py-2 text-center">I</td>
+                        <td class="border border-black dark:border-gray-600 px-3 py-2">1.00 - 1.80</td>
                     </tr>
-                    <tr>
-                        <td class="border border-black px-3 py-2 text-center">II</td>
-                        <td class="border border-black px-3 py-2">1.80 - 2.60</td>
+                    <tr class="bg-white dark:bg-gray-800">
+                        <td class="border border-black dark:border-gray-600 px-3 py-2 text-center">II</td>
+                        <td class="border border-black dark:border-gray-600 px-3 py-2">1.80 - 2.60</td>
                     </tr>
-                    <tr>
-                        <td class="border border-black px-3 py-2 text-center">III</td>
-                        <td class="border border-black px-3 py-2">2.60 - 3.40</td>
+                    <tr class="bg-white dark:bg-gray-800">
+                        <td class="border border-black dark:border-gray-600 px-3 py-2 text-center">III</td>
+                        <td class="border border-black dark:border-gray-600 px-3 py-2">2.60 - 3.40</td>
                     </tr>
-                    <tr>
-                        <td class="border border-black px-3 py-2 text-center">IV</td>
-                        <td class="border border-black px-3 py-2">3.40 - 4.20</td>
+                    <tr class="bg-white dark:bg-gray-800">
+                        <td class="border border-black dark:border-gray-600 px-3 py-2 text-center">IV</td>
+                        <td class="border border-black dark:border-gray-600 px-3 py-2">3.40 - 4.20</td>
                     </tr>
-                    <tr>
-                        <td class="border border-black px-3 py-2 text-center">V</td>
-                        <td class="border border-black px-3 py-2">4.20 - 5.00</td>
+                    <tr class="bg-white dark:bg-gray-800">
+                        <td class="border border-black dark:border-gray-600 px-3 py-2 text-center">V</td>
+                        <td class="border border-black dark:border-gray-600 px-3 py-2">4.20 - 5.00</td>
                     </tr>
                 </tbody>
             </table>
@@ -68,13 +69,15 @@
 
     <!-- Area Standar & Rata-rata Rating - tepat di bawah chart -->
     <div class="flex justify-center gap-6 mt-6 px-6">
-        <div class="bg-cyan-200 p-6 rounded-lg text-center min-w-[160px]">
-            <div class="text-sm font-semibold">Standar Rating</div>
-            <div class="text-3xl font-bold text-orange-900 mt-3">{{ number_format($standardRating, 2) }}</div>
+        <div class="bg-cyan-200 dark:bg-cyan-700 p-6 rounded-lg text-center min-w-[160px]">
+            <div class="text-sm font-semibold text-gray-900 dark:text-gray-100">Standar Rating</div>
+            <div class="text-3xl font-bold text-orange-900 dark:text-orange-400 mt-3">
+                {{ number_format($standardRating, 2) }}</div>
         </div>
-        <div class="bg-orange-200 p-6 rounded-lg text-center min-w-[160px]">
-            <div class="text-sm font-semibold">Rata-rata Rating</div>
-            <div class="text-3xl font-bold text-cyan-900 mt-3">{{ number_format($averageRating, 2) }}</div>
+        <div class="bg-orange-200 dark:bg-orange-700 p-6 rounded-lg text-center min-w-[160px]">
+            <div class="text-sm font-semibold text-gray-900 dark:text-gray-100">Rata-rata Rating</div>
+            <div class="text-3xl font-bold text-cyan-900 dark:text-cyan-400 mt-3">{{ number_format($averageRating, 2) }}
+            </div>
         </div>
     </div>
 </div>
