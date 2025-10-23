@@ -31,18 +31,18 @@ class RankingPsyMapping extends Component
     // Conclusion configuration - single source of truth
     public array $conclusionConfig = [
         'Di Atas Standar' => [
-            'chartColor' => '#10b981',
-            'tailwindClass' => 'bg-green-100 border-green-300',
+            'chartColor' => '#22c55e',
+            'tailwindClass' => 'bg-green-500 dark:bg-green-600 border-green-300 dark:border-green-400',
             'rangeText' => 'Tolerance = 0 & Gap ≥ 0',
         ],
         'Memenuhi Standar' => [
-            'chartColor' => '#3b82f6',
-            'tailwindClass' => 'bg-blue-100 border-blue-300',
+            'chartColor' => '#eab308',
+            'tailwindClass' => 'bg-yellow-500 dark:bg-yellow-600 border-blue-300 dark:border-blue-400',
             'rangeText' => 'Tolerance > 0 & Gap ≥ Threshold',
         ],
         'Di Bawah Standar' => [
             'chartColor' => '#ef4444',
-            'tailwindClass' => 'bg-red-100 border-red-300',
+            'tailwindClass' => 'bg-red-500 dark:bg-red-600 border-red-300 dark:border-red-400',
             'rangeText' => 'Gap < Threshold',
         ],
     ];
