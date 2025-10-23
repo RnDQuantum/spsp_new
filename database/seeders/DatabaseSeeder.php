@@ -45,6 +45,12 @@ class DatabaseSeeder extends Seeder
             DynamicAssessmentSeeder::class,
         ]);
 
+        // 4. Seed Interpretation Templates
+        $this->command->info('📋 Seeding interpretation templates...');
+        $this->call([
+            DetailedInterpretationTemplateSeeder::class,
+        ]);
+
         $this->command->info('✅ Database seeding completed successfully!');
     }
 }
