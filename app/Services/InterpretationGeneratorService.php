@@ -114,9 +114,10 @@ class InterpretationGeneratorService
         $sentences = [];
 
         foreach ($subAssessments as $subAssessment) {
-            $template = $this->templateService->getTemplate(
+            // Get template by name (more flexible across different templates)
+            $template = $this->templateService->getTemplateByName(
                 'sub_aspect',
-                $subAssessment->sub_aspect_id,
+                $subAssessment->subAspect->name,
                 $subAssessment->individual_rating
             );
 
@@ -171,9 +172,10 @@ class InterpretationGeneratorService
             // Cast individual_rating to integer for template lookup
             $ratingValue = (int) round($assessment->individual_rating);
 
-            $template = $this->templateService->getTemplate(
+            // Get template by name (more flexible across different templates)
+            $template = $this->templateService->getTemplateByName(
                 'aspect',
-                $assessment->aspect_id,
+                $assessment->aspect->name,
                 $ratingValue
             );
 
