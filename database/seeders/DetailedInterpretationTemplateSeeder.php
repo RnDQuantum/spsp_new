@@ -508,38 +508,46 @@ class DetailedInterpretationTemplateSeeder extends Seeder
                 'interpretable_name' => null,
                 'rating_value' => 1,
                 'template_text' => 'Kemampuan dalam aspek ini sangat kurang dan memerlukan pengembangan intensif. Diperlukan pelatihan dan bimbingan khusus untuk meningkatkan kompetensi dalam area ini.',
+                'tone' => 'negative',
+                'category' => 'development_area',
             ],
             [
                 'interpretable_type' => 'sub_aspect',
                 'interpretable_name' => null,
                 'rating_value' => 2,
                 'template_text' => 'Kemampuan dalam aspek ini masih kurang memadai dan perlu ditingkatkan. Individu menunjukkan beberapa kesulitan dalam menampilkan kompetensi yang diharapkan, sehingga diperlukan upaya pengembangan yang konsisten untuk dapat memenuhi standar yang ditetapkan.',
+                'tone' => 'neutral',
+                'category' => 'development_area',
             ],
             [
                 'interpretable_type' => 'sub_aspect',
                 'interpretable_name' => null,
                 'rating_value' => 3,
                 'template_text' => 'Kemampuan dalam aspek ini tergolong cukup memadai. Individu mampu menampilkan kompetensi sesuai dengan standar dasar yang diharapkan, meskipun masih ada ruang untuk peningkatan lebih lanjut.',
+                'tone' => 'neutral',
+                'category' => 'neutral',
             ],
             [
                 'interpretable_type' => 'sub_aspect',
                 'interpretable_name' => null,
                 'rating_value' => 4,
                 'template_text' => 'Kemampuan dalam aspek ini tergolong baik dan dapat diandalkan. Individu secara konsisten menampilkan kompetensi yang memenuhi bahkan kadang melampaui standar yang ditetapkan.',
+                'tone' => 'positive',
+                'category' => 'strength',
             ],
             [
                 'interpretable_type' => 'sub_aspect',
                 'interpretable_name' => null,
                 'rating_value' => 5,
                 'template_text' => 'Kemampuan dalam aspek ini sangat menonjol dan menjadi kekuatan utama individu. Individu secara konsisten menampilkan kompetensi yang jauh melampaui standar yang ditetapkan dan dapat menjadi role model bagi orang lain.',
+                'tone' => 'positive',
+                'category' => 'strength',
             ],
         ];
 
         foreach ($genericTemplates as $template) {
             InterpretationTemplate::create([
                 ...$template,
-                'tone' => 'neutral',
-                'category' => 'development_area',
                 'version' => 'v2.0',
                 'is_active' => true,
             ]);
