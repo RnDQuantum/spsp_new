@@ -56,8 +56,41 @@ class GeneralPsyMapping extends Component
 
     public $chartIndividualScores = [];
 
-    public function mount($eventCode, $testNumber): void
+    // ADD: Public properties untuk support child component
+    public $eventCode;
+    public $testNumber;
+
+    // Flag untuk menentukan apakah standalone atau child
+    public $isStandalone = true;
+
+    // Dynamic display parameters
+    public $showHeader = true;
+    public $showInfoSection = true;
+    public $showTable = true;
+    public $showRatingChart = true;
+    public $showScoreChart = true;
+
+    public function mount($eventCode = null, $testNumber = null, $showHeader = true, $showInfoSection = true, $showTable = true, $showRatingChart = true, $showScoreChart = true): void
     {
+        // Gunakan parameter jika ada (dari route), atau fallback ke property (dari parent)
+        $this->eventCode = $eventCode ?? $this->eventCode;
+        $this->testNumber = $testNumber ?? $this->testNumber;
+
+        // Set dynamic display parameters
+        $this->showHeader = $showHeader;
+        $this->showInfoSection = $showInfoSection;
+        $this->showTable = $showTable;
+        $this->showRatingChart = $showRatingChart;
+        $this->showScoreChart = $showScoreChart;
+
+        // Tentukan apakah standalone (dari route) atau child (dari parent)
+        $this->isStandalone = $eventCode !== null && $testNumber !== null;
+
+        // Validate
+        if (!$this->eventCode || !$this->testNumber) {
+            abort(404, 'Event code and test number are required');
+        }
+
         // Generate unique chart ID
         $this->chartId = 'generalPsyMapping'.uniqid();
 
@@ -70,10 +103,10 @@ class GeneralPsyMapping extends Component
             'batch',
             'positionFormation.template',
         ])
-            ->whereHas('assessmentEvent', function ($query) use ($eventCode) {
-                $query->where('code', $eventCode);
+            ->whereHas('assessmentEvent', function ($query) {
+                $query->where('code', $this->eventCode);
             })
-            ->where('test_number', $testNumber)
+            ->where('test_number', $this->testNumber)
             ->firstOrFail();
 
         $template = $this->participant->positionFormation->template;

@@ -1,37 +1,42 @@
 <div>
     <div class="mx-auto my-8 shadow overflow-hidden" style="max-width: 1400px;" class="bg-white dark:bg-gray-800">
 
-        <!-- Header - DARK MODE READY -->
-        <div class="border-b-4 border-black py-3 bg-sky-200 dark:bg-gray-700">
-            <h1
-                class="text-center text-lg font-bold uppercase tracking-wide 
-                       text-gray-900 dark:text-white">
-                PSYCHOLOGY MAPPING
-            </h1>
-            <p class="text-center text-sm font-semibold 
-                     text-gray-700 dark:text-gray-200 mt-1">
-                {{ $participant->name }}
-            </p>
-            <p class="text-center text-sm font-semibold 
-                     text-gray-700 dark:text-gray-200 mt-1">
-                {{ $participant->event->name }}
-            </p>
-            <p class="text-center text-sm font-semibold 
-                     text-gray-700 dark:text-gray-200 mt-1">
-                {{ $participant->positionFormation->name }} - {{ $participant->positionFormation->template->name }}
-            </p>
-        </div>
+        @if ($showHeader)
+            <!-- Header - DARK MODE READY -->
+            <div class="border-b-4 border-black py-3 bg-sky-200 dark:bg-gray-700">
+                <h1
+                    class="text-center text-lg font-bold uppercase tracking-wide
+                           text-gray-900 dark:text-white">
+                    PSYCHOLOGY MAPPING
+                </h1>
+                <p class="text-center text-sm font-semibold
+                         text-gray-700 dark:text-gray-200 mt-1">
+                    {{ $participant->name }}
+                </p>
+                <p class="text-center text-sm font-semibold
+                         text-gray-700 dark:text-gray-200 mt-1">
+                    {{ $participant->event->name }}
+                </p>
+                <p class="text-center text-sm font-semibold
+                         text-gray-700 dark:text-gray-200 mt-1">
+                    {{ $participant->positionFormation->name }} - {{ $participant->positionFormation->template->name }}
+                </p>
+            </div>
+        @endif
 
-        <!-- Tolerance Selector Component -->
-        @php
-            $summary = $this->getPassingSummary();
-        @endphp
-        @livewire('components.tolerance-selector', [
-            'passing' => $summary['passing'],
-            'total' => $summary['total'],
-        ])
+        @if ($showInfoSection)
+            <!-- Tolerance Selector Component -->
+            @php
+                $summary = $this->getPassingSummary();
+            @endphp
+            @livewire('components.tolerance-selector', [
+                'passing' => $summary['passing'],
+                'total' => $summary['total'],
+            ])
+        @endif
 
-        <!-- Table Section - DARK MODE READY -->
+        @if ($showTable)
+            <!-- Table Section - DARK MODE READY -->
         <div class="p-4 overflow-x-auto bg-white dark:bg-gray-800">
             <table class="min-w-full border border-black text-xs">
                 <thead>
@@ -256,8 +261,10 @@ $c = trim(strtoupper($overallConclusion)); @endphp
                 </tbody>
             </table>
         </div>
+        @endif
 
-        <!-- Chart Section Rating - DARK MODE READY -->
+        @if ($showRatingChart)
+            <!-- Chart Section Rating - DARK MODE READY -->
         <div class="p-6 border-t-2 border-black bg-white dark:bg-gray-800" wire:ignore
             id="chart-rating-{{ $chartId }}">
             <div class="text-center text-base font-bold mb-6 
@@ -306,8 +313,10 @@ $c = trim(strtoupper($overallConclusion)); @endphp
                 </span>
             </div>
         </div>
+        @endif
 
-        <!-- Chart Section Score - DARK MODE READY -->
+        @if ($showScoreChart)
+            <!-- Chart Section Score - DARK MODE READY -->
         <div class="p-6 border-t-2 border-black bg-white dark:bg-gray-800" wire:ignore
             id="chart-score-{{ $chartId }}">
             <div class="text-center text-base font-bold mb-6 
@@ -356,10 +365,12 @@ $c = trim(strtoupper($overallConclusion)); @endphp
                 </span>
             </div>
         </div>
+        @endif
 
-        <!-- 1 SCRIPT FULL - DARK MODE CHARTS (PSYCHOLOGY) -->
-        <!-- 1 SCRIPT FULL - DARK MODE CHARTS (PSYCHOLOGY) - FIXED TICK LABELS -->
-        <script>
+        @if ($showRatingChart || $showScoreChart)
+            <!-- 1 SCRIPT FULL - DARK MODE CHARTS (PSYCHOLOGY) -->
+            <!-- 1 SCRIPT FULL - DARK MODE CHARTS (PSYCHOLOGY) - FIXED TICK LABELS -->
+            <script>
             (function() {
                 if (window['chartSetup_{{ $chartId }}']) return;
                 window['chartSetup_{{ $chartId }}'] = true;
@@ -748,8 +759,12 @@ $c = trim(strtoupper($overallConclusion)); @endphp
                 }
 
                 waitForLivewire(function() {
-                    setupRatingChart();
-                    setupScoreChart();
+                    @if ($showRatingChart)
+                        setupRatingChart();
+                    @endif
+                    @if ($showScoreChart)
+                        setupScoreChart();
+                    @endif
 
                     // TOLERANCE UPDATE
                     Livewire.on('chartDataUpdated', function(data) {
@@ -826,6 +841,7 @@ $c = trim(strtoupper($overallConclusion)); @endphp
                     attributeFilter: ['class']
                 });
             })();
-        </script>
+            </script>
+        @endif
     </div>
 </div>

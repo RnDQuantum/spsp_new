@@ -83,7 +83,15 @@
     <div class="mb-8">
         <livewire:pages.individual-report.general-matching :eventCode="$eventCode" :testNumber="$testNumber"
             :isStandalone="false" :showHeader="false" :showInfoSection="false" :showPotensi="false"
-            :showKompetensi="true" :key="'potensi-only-' . $eventCode . '-' . $testNumber" />
+            :showKompetensi="true" :key="'kompetensi-only-' . $eventCode . '-' . $testNumber" />
+    </div>
+
+    {{-- Psychology Mapping Section --}}
+    <div class="mb-8">
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Psychology Mapping</h2>
+        <livewire:pages.individual-report.general-psy-mapping :eventCode="$eventCode" :testNumber="$testNumber"
+            :isStandalone="false" :showHeader="false" :showInfoSection="false" :showTable="true"
+            :showRatingChart="true" :showScoreChart="true" :key="'psy-mapping-' . $eventCode . '-' . $testNumber" />
     </div>
 
     {{-- Interpretation Section --}}
