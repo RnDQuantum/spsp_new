@@ -11,9 +11,41 @@ class InterpretationTemplateService
      * Get template text for specific sub-aspect/aspect + rating
      *
      * @param string $type 'sub_aspect' or 'aspect'
-     * @param int $id The sub_aspect_id or aspect_id
+     * @param string $name The name of sub_aspect or aspect
      * @param int $rating Rating value 1-5
      * @return string|null
+     */
+    public function getTemplateByName(string $type, string $name, int $rating): ?string
+    {
+        // Cache key for performance
+        $cacheKey = "interpretation_template_{$type}_" . md5($name) . "_{$rating}";
+
+        return Cache::remember($cacheKey, now()->addDay(), function () use ($type, $name, $rating) {
+            // Try to get template by name first
+            $template = InterpretationTemplate::where('interpretable_type', $type)
+                ->where('interpretable_name', $name)
+                ->where('rating_value', $rating)
+                ->where('is_active', true)
+                ->first();
+
+            if ($template) {
+                return $template->template_text;
+            }
+
+            // Fallback to generic template (interpretable_name = null or empty)
+            $genericTemplate = InterpretationTemplate::where('interpretable_type', $type)
+                ->whereNull('interpretable_name')
+                ->where('rating_value', $rating)
+                ->where('is_active', true)
+                ->first();
+
+            return $genericTemplate?->template_text;
+        });
+    }
+
+    /**
+     * Legacy method - kept for backward compatibility
+     * @deprecated Use getTemplateByName instead
      */
     public function getTemplate(string $type, int $id, int $rating): ?string
     {

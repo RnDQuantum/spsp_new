@@ -449,26 +449,148 @@ LIMIT 10;
 
 ## Maintenance & Updates
 
-### Adding New Templates
+### Adding New Templates for New Aspects/Sub-Aspects
 
-1. **Via Database** (recommended for quick updates):
+**IMPORTANT**: Since v2.0, templates use **name-based matching**. When adding new aspects or sub-aspects, you only need to update the seeder.
+
+#### Step-by-Step Guide:
+
+**1. Identify the Exact Name**
 ```php
+// Via tinker
+php artisan tinker
+
+$newSubAspect = \App\Models\SubAspect::find($id);
+echo $newSubAspect->name; // Example: "Kreativitas"
+
+// IMPORTANT: Name must be exact match (case-sensitive)
+```
+
+**2. Add Template to DetailedInterpretationTemplateSeeder**
+
+Edit `database/seeders/DetailedInterpretationTemplateSeeder.php`:
+
+```php
+protected function seedKreativitas(): void
+{
+    $templates = [
+        // Rating 2: Development needed
+        [
+            'interpretable_type' => 'sub_aspect',
+            'interpretable_name' => 'Kreativitas', // Must match exactly
+            'rating_value' => 2,
+            'template_text' => 'Kreativitas individu masih perlu dikembangkan. Ia cenderung menggunakan pendekatan yang konvensional dan kesulitan dalam menghasilkan ide-ide baru yang inovatif.',
+            'tone' => 'neutral',
+            'category' => 'development_area',
+        ],
+        // Rating 3: Adequate
+        [
+            'interpretable_type' => 'sub_aspect',
+            'interpretable_name' => 'Kreativitas',
+            'rating_value' => 3,
+            'template_text' => 'Individu memiliki kreativitas yang cukup memadai dalam menghasilkan ide-ide baru untuk menyelesaikan permasalahan yang dihadapi.',
+            'tone' => 'neutral',
+            'category' => 'neutral',
+        ],
+        // Rating 4: Good
+        [
+            'interpretable_type' => 'sub_aspect',
+            'interpretable_name' => 'Kreativitas',
+            'rating_value' => 4,
+            'template_text' => 'Kreativitas yang dimiliki individu tergolong baik. Ia mampu menghasilkan ide-ide inovatif dan solusi kreatif untuk berbagai tantangan yang dihadapi.',
+            'tone' => 'positive',
+            'category' => 'strength',
+        ],
+    ];
+
+    foreach ($templates as $template) {
+        InterpretationTemplate::create([
+            ...$template,
+            'version' => 'v2.0',
+            'is_active' => true,
+        ]);
+    }
+}
+
+// Add to run() method
+public function run(): void
+{
+    InterpretationTemplate::truncate();
+
+    $this->seedHubunganSosial();
+    $this->seedKecerdasan();
+    $this->seedKepribadian();
+    $this->seedCaraKerja();
+    $this->seedKreativitas(); // NEW METHOD
+    $this->seedGenericFallbacks();
+}
+```
+
+**3. Run the Seeder**
+```bash
+php artisan db:seed --class=DetailedInterpretationTemplateSeeder
+```
+
+**4. Regenerate Existing Interpretations (if needed)**
+```bash
+# Regenerate all
+php artisan interpretations:regenerate
+
+# Or specific event
+php artisan interpretations:regenerate --event=P3K-KEJAKSAAN-2025
+```
+
+#### Best Practices:
+
+1. **Create templates for common ratings (2, 3, 4)**
+   - Rating 1 and 5 can use generic fallback if not critical
+
+2. **Use consistent tone and category**
+   ```php
+   Rating 1-2 → 'tone' => 'neutral', 'category' => 'development_area'
+   Rating 3   → 'tone' => 'neutral', 'category' => 'neutral'
+   Rating 4-5 → 'tone' => 'positive', 'category' => 'strength'
+   ```
+
+3. **Ensure exact name match (case-sensitive)**
+   ```php
+   ✅ Database: "Kepekaan Interpersonal" → Seeder: "Kepekaan Interpersonal"
+   ❌ Database: "Kepekaan Interpersonal" → Seeder: "kepekaan interpersonal"
+   ```
+
+4. **Write 2-3 sentences per template**
+   - First sentence: Main characteristic
+   - Second sentence: Impact/implication
+   - Third sentence (optional): Future outlook
+
+5. **Organize by aspect category**
+   - Create separate methods for each major aspect
+   - Keep related sub-aspects together
+
+#### Quick Add via Tinker (for single template):
+
+```php
+php artisan tinker
+
 \App\Models\InterpretationTemplate::create([
     'interpretable_type' => 'sub_aspect',
-    'interpretable_id' => 5,  // ID dari sub-aspect
-    'rating_value' => 4,
-    'template_text' => 'Individu kompeten dalam...',
-    'tone' => 'professional',
-    'category' => 'potensi',
-    'version' => 'v1.0',
+    'interpretable_name' => 'Kreativitas',
+    'rating_value' => 3,
+    'template_text' => 'Individu memiliki kreativitas yang cukup memadai...',
+    'tone' => 'neutral',
+    'category' => 'neutral',
+    'version' => 'v2.0',
     'is_active' => true,
 ]);
 ```
 
-2. **Via Seeder** (recommended for bulk updates):
-   - Edit `database/seeders/InterpretationTemplateSeeder.php`
-   - Add new template to appropriate section
-   - Run: `php artisan db:seed --class=InterpretationTemplateSeeder`
+### What You DON'T Need to Update:
+
+✅ **InterpretationTemplateService** - Already uses name-based matching
+✅ **InterpretationGeneratorService** - Already dynamic, no hardcoded logic
+✅ **Migration files** - Schema already supports name-based templates
+✅ **Models** - Already complete with required fields
+✅ **Livewire components** - Work automatically with new templates
 
 ### Updating Existing Templates
 
@@ -662,6 +784,16 @@ php artisan interpretations:regenerate {event_code?} {--force}
 
 ## Change Log
 
+### Version 2.0.0 (2025-10-23)
+- **BREAKING CHANGE**: Template matching now name-based instead of ID-based
+- Added `interpretable_name` column to `interpretation_templates` table
+- Templates now work across all position templates with same sub-aspect/aspect names
+- Updated `InterpretationTemplateService` with `getTemplateByName()` method
+- Updated `InterpretationGeneratorService` to use name-based matching
+- Seeder updated to use sub-aspect/aspect names instead of IDs
+- More detailed templates (2-3 sentences per sub-aspect)
+- Better fallback hierarchy (name-based → generic → hardcoded)
+
 ### Version 1.0.0 (2025-10-23)
 - Initial implementation
 - Database schema created
@@ -674,4 +806,4 @@ php artisan interpretations:regenerate {event_code?} {--force}
 
 **Last Updated**: 2025-10-23
 **Maintained By**: Development Team
-**Status**: Production Ready
+**Status**: Production Ready (v2.0)

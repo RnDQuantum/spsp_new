@@ -81,46 +81,53 @@ class InterpretationSection extends Component
         // Get template & category IDs
         $template = $this->participant->positionFormation->template;
 
+        // Get categories
+        $potensiCategory = $template->categoryTypes()
+            ->where('code', 'potensi')
+            ->first();
+
+        $kompetensiCategory = $template->categoryTypes()
+            ->where('code', 'kompetensi')
+            ->first();
+
+        // Check if interpretations exist in DB
+        $existingInterpretations = Interpretation::where('participant_id', $this->participant->id)
+            ->whereIn('category_type_id', [
+                $potensiCategory?->id,
+                $kompetensiCategory?->id,
+            ])
+            ->get()
+            ->keyBy('category_type_id');
+
+        // If any interpretation is missing, generate all
+        $potensiExists = $potensiCategory && $existingInterpretations->has($potensiCategory->id);
+        $kompetensiExists = $kompetensiCategory && $existingInterpretations->has($kompetensiCategory->id);
+
+        if (! $potensiExists || ! $kompetensiExists) {
+            // Generate all interpretations (both Potensi and Kompetensi)
+            $generator = app(InterpretationGeneratorService::class);
+            $generator->generateForParticipant($this->participant);
+
+            // Reload from database
+            $existingInterpretations = Interpretation::where('participant_id', $this->participant->id)
+                ->whereIn('category_type_id', [
+                    $potensiCategory?->id,
+                    $kompetensiCategory?->id,
+                ])
+                ->get()
+                ->keyBy('category_type_id');
+        }
+
         // Load Potensi interpretation
-        if ($this->showPotensi) {
-            $potensiCategory = $template->categoryTypes()
-                ->where('code', 'potensi')
-                ->first();
-
-            if ($potensiCategory) {
-                $potensiInterpretation = Interpretation::where('participant_id', $this->participant->id)
-                    ->where('category_type_id', $potensiCategory->id)
-                    ->first();
-
-                // If not exist, generate
-                if (! $potensiInterpretation) {
-                    $generator = app(InterpretationGeneratorService::class);
-                    $this->potensiInterpretation = $generator->generatePotensiInterpretation($this->participant);
-                } else {
-                    $this->potensiInterpretation = $potensiInterpretation->interpretation_text;
-                }
-            }
+        if ($this->showPotensi && $potensiCategory) {
+            $potensiInterpretation = $existingInterpretations->get($potensiCategory->id);
+            $this->potensiInterpretation = $potensiInterpretation?->interpretation_text;
         }
 
         // Load Kompetensi interpretation
-        if ($this->showKompetensi) {
-            $kompetensiCategory = $template->categoryTypes()
-                ->where('code', 'kompetensi')
-                ->first();
-
-            if ($kompetensiCategory) {
-                $kompetensiInterpretation = Interpretation::where('participant_id', $this->participant->id)
-                    ->where('category_type_id', $kompetensiCategory->id)
-                    ->first();
-
-                // If not exist, generate
-                if (! $kompetensiInterpretation) {
-                    $generator = app(InterpretationGeneratorService::class);
-                    $this->kompetensiInterpretation = $generator->generateKompetensiInterpretation($this->participant);
-                } else {
-                    $this->kompetensiInterpretation = $kompetensiInterpretation->interpretation_text;
-                }
-            }
+        if ($this->showKompetensi && $kompetensiCategory) {
+            $kompetensiInterpretation = $existingInterpretations->get($kompetensiCategory->id);
+            $this->kompetensiInterpretation = $kompetensiInterpretation?->interpretation_text;
         }
     }
 

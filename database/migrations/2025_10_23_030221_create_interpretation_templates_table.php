@@ -17,8 +17,10 @@ return new class extends Migration
             // Polymorphic relation to sub_aspects or aspects
             $table->enum('interpretable_type', ['sub_aspect', 'aspect'])
                 ->comment('Type: sub_aspect for Potensi detail, aspect for Kompetensi');
-            $table->unsignedBigInteger('interpretable_id')
-                ->comment('FK to sub_aspects.id or aspects.id');
+            $table->unsignedBigInteger('interpretable_id')->nullable()
+                ->comment('FK to sub_aspects.id or aspects.id (nullable for name-based matching)');
+            $table->string('interpretable_name')->nullable()
+                ->comment('Name of sub_aspect or aspect for flexible matching across templates');
 
             // Rating context (1-5)
             $table->tinyInteger('rating_value')->unsigned()
@@ -44,14 +46,9 @@ return new class extends Migration
 
             // Indexes for performance
             $table->index(['interpretable_type', 'interpretable_id'], 'idx_interpretable');
+            $table->index(['interpretable_type', 'interpretable_name', 'rating_value'], 'idx_type_name_rating');
             $table->index('rating_value', 'idx_rating');
             $table->index('is_active', 'idx_active');
-
-            // Unique constraint: only 1 active template per type+id+rating
-            $table->unique(
-                ['interpretable_type', 'interpretable_id', 'rating_value', 'is_active'],
-                'unique_active_template'
-            );
         });
     }
 

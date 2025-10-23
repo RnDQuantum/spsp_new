@@ -10,6 +10,7 @@ class InterpretationTemplate extends Model
     protected $fillable = [
         'interpretable_type',
         'interpretable_id',
+        'interpretable_name',
         'rating_value',
         'template_text',
         'tone',
