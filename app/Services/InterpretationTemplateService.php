@@ -20,7 +20,7 @@ class InterpretationTemplateService
         // Cache key for performance
         $cacheKey = "interpretation_template_{$type}_" . md5($name) . "_{$rating}";
 
-        return Cache::remember($cacheKey, now()->addDay(), function () use ($type, $name, $rating) {
+        $templateText = Cache::remember($cacheKey, now()->addDay(), function () use ($type, $name, $rating) {
             // Try to get template by name first
             $template = InterpretationTemplate::where('interpretable_type', $type)
                 ->where('interpretable_name', $name)
@@ -41,6 +41,13 @@ class InterpretationTemplateService
 
             return $genericTemplate?->template_text;
         });
+
+        // Replace placeholder [nama aspek] with actual aspect name
+        if ($templateText) {
+            $templateText = str_replace('[nama aspek]', $name, $templateText);
+        }
+
+        return $templateText;
     }
 
     /**
