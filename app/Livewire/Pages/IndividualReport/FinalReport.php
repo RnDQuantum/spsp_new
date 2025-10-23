@@ -2,6 +2,8 @@
 
 namespace App\Livewire\Pages\IndividualReport;
 
+use App\Models\AssessmentEvent;
+use App\Models\Participant;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 
@@ -10,11 +12,36 @@ class FinalReport extends Component
 {
     public $eventCode;
     public $testNumber;
+    public $institutionName;
+    public $eventName;
+    public $participant;
 
     public function mount($eventCode, $testNumber): void
     {
         $this->eventCode = $eventCode;
         $this->testNumber = $testNumber;
+
+        // Ambil AssessmentEvent dengan relasi institution berdasarkan eventCode
+        $assessmentEvent = AssessmentEvent::with('institution')
+            ->where('code', $this->eventCode)
+            ->first();
+
+        if ($assessmentEvent) {
+            $this->institutionName = $assessmentEvent->institution->name ?? '';
+            $this->eventName = $assessmentEvent->name ?? '';
+        }
+
+        // Ambil participant dengan relasi
+        $this->participant = Participant::with([
+            'assessmentEvent',
+            'batch',
+            'positionFormation.template',
+        ])
+            ->whereHas('assessmentEvent', function ($query) {
+                $query->where('code', $this->eventCode);
+            })
+            ->where('test_number', $this->testNumber)
+            ->firstOrFail();
     }
 
     public function render()
