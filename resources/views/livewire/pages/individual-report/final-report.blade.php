@@ -127,4 +127,158 @@
             :isStandalone="false" :showHeader="false" :showBiodata="false" :showInfoSection="false" :showTable="true"
             :key="'ringkasan-assessment-' . $eventCode . '-' . $testNumber" />
     </div>
+
+    {{-- Hasil Rekomendasi Section --}}
+    <div class="mb-8">
+        <div class="mx-auto shadow overflow-hidden bg-white dark:bg-gray-800">
+            <!-- Header -->
+            <div class="bg-teal-600 dark:bg-teal-700 py-3">
+                <h2 class="text-center text-xl font-bold uppercase tracking-wide text-white">
+                    HASIL REKOMENDASI
+                </h2>
+            </div>
+
+            <!-- Table -->
+            <div class="overflow-x-auto">
+                <table class="min-w-full border-collapse">
+                    <!-- Header Row -->
+                    <thead>
+                        <tr class="bg-green-500">
+                            <th class="border-2 border-black px-4 py-3 text-center font-bold text-black">NO.</th>
+                            <th class="border-2 border-black px-4 py-3 text-center font-bold text-black">ASPEK PENILAIAN
+                            </th>
+                            <th class="border-2 border-black px-4 py-3 text-center font-bold text-black">SKOR/ HASIL
+                            </th>
+                            <th class="border-2 border-black px-4 py-3 text-center font-bold text-black">KESIMPULAN</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Row 1: Psikotest -->
+                        <tr class="bg-white dark:bg-gray-800">
+                            <td
+                                class="border-2 border-black px-4 py-3 text-center font-semibold text-gray-900 dark:text-white">
+                                1
+                            </td>
+                            <td class="border-2 border-black px-4 py-3 font-semibold text-gray-900 dark:text-white">
+                                Psikotest
+                            </td>
+                            <td class="border-2 border-black px-4 py-3 text-gray-900 dark:text-white">
+                                <div class="space-y-1">
+                                    <div class="flex justify-between">
+                                        <span class="font-semibold">1. IQ</span>
+                                        <span>: {{ $psychologicalTest ? $psychologicalTest->iq_score : '97' }}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="font-semibold">2. Total Score</span>
+                                        <span>: {{ $psychologicalTest ? number_format($psychologicalTest->raw_score, 2) : '0.00' }}</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="border-2 border-black px-4 py-3 text-center font-bold text-lg
+                                @if ($psychologicalTest && $psychologicalTest->conclusion_code == 'MS')
+                                    bg-green-500 text-black
+                                @elseif($psychologicalTest && $psychologicalTest->conclusion_code == 'MMS')
+                                    bg-yellow-400 text-black
+                                @elseif($psychologicalTest && $psychologicalTest->conclusion_code == 'TMS')
+                                    bg-red-500 text-white
+                                @else
+                                    bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-white
+                                @endif">
+                                {{ $psychologicalTest ? $psychologicalTest->conclusion_code : 'Tidak Ikut Assessment' }}
+                            </td>
+                        </tr>
+
+                        <!-- Row 2: Tes Kejiwaan (Header) -->
+                        <tr class="bg-green-500">
+                            <th class="border-2 border-black px-4 py-3 text-center font-bold text-black">NO.</th>
+                            <th class="border-2 border-black px-4 py-3 text-center font-bold text-black">ASPEK PENILAIAN
+                            </th>
+                            <th class="border-2 border-black px-4 py-3 text-center font-bold text-black" colspan="2">
+                                SKOR/ HASIL</th>
+                        </tr>
+
+                        <!-- Row 3: Tes Kejiwaan (Content) -->
+                        @if ($psychologicalTest)
+                        <tr class="bg-white dark:bg-gray-800">
+                            <td class="border-2 border-black px-4 py-3 text-center font-semibold text-gray-900 dark:text-white"
+                                rowspan="2">
+                                4
+                            </td>
+                            <td class="border-2 border-black px-4 py-3 font-semibold text-gray-900 dark:text-white"
+                                rowspan="2">
+                                Tes Kejiwaan
+                            </td>
+                            <td class="border-2 border-black px-4 py-3 text-gray-900 dark:text-white" colspan="2">
+                                <div class="space-y-1 text-sm">
+                                    <div class="flex justify-between">
+                                        <span class="font-semibold">1. Validitas</span>
+                                        <span>: {{ $psychologicalTest->validity_status ?? '-' }}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="font-semibold">2. Internal Pribadi</span>
+                                        <span>: {{ $psychologicalTest->internal_status ?? '-' }}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="font-semibold">3. Interpersonal</span>
+                                        <span>: {{ $psychologicalTest->interpersonal_status ?? '-' }}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="font-semibold">4. Kapasitas Kerja</span>
+                                        <span>: {{ $psychologicalTest->work_capacity_status ?? '-' }}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="font-semibold">5. Klinis</span>
+                                        <span>: {{ $psychologicalTest->clinical_status ?? '-' }}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="font-semibold">6. Kesimpulan</span>
+                                        <span>: {{ $psychologicalTest->conclusion_text ?? '-' }}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="font-semibold">7. Psikogram</span>
+                                        <span>: -</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="font-semibold">8. Nilai PQ</span>
+                                        <span>: -</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="font-semibold">9. Tingkat Stres</span>
+                                        <span>: -</span>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- Row 4: Hasil Keputusan Kejiwaan -->
+                        <tr class="bg-purple-900">
+                            <td class="border-2 border-black px-4 py-3 font-semibold text-white" colspan="2">
+                                <div class="flex items-center justify-between">
+                                    <span>5. Hasil Keputusan Kejiwaan</span>
+                                    <span class="px-4 py-2 font-bold text-lg {{ $psychologicalTest && $psychologicalTest->conclusion_code ? ($psychologicalTest->conclusion_code >= 70 ? 'bg-green-500 text-black' : ($psychologicalTest->conclusion_code >= 50 ? 'bg-yellow-400 text-black' : 'bg-red-500 text-white')) : 'bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-white' }}">
+                                        {{ $psychologicalTest->conclusion_code ?? '-' }}
+                                    </span>
+                                </div>
+                            </td>
+                        </tr>
+                        @else
+                        <tr class="bg-white dark:bg-gray-800">
+                            <td
+                                class="border-2 border-black px-4 py-3 text-center font-semibold text-gray-900 dark:text-white">
+                                4
+                            </td>
+                            <td class="border-2 border-black px-4 py-3 font-semibold text-gray-900 dark:text-white">
+                                Tes Kejiwaan
+                            </td>
+                            <td class="border-2 border-black px-4 py-3 text-center text-gray-500 dark:text-gray-400"
+                                colspan="2">
+                                Data Tes Kejiwaan Tidak Tersedia
+                            </td>
+                        </tr>
+                        @endif
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>

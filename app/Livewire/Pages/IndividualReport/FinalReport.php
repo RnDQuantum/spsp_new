@@ -3,7 +3,9 @@
 namespace App\Livewire\Pages\IndividualReport;
 
 use App\Models\AssessmentEvent;
+use App\Models\FinalAssessment;
 use App\Models\Participant;
+use App\Models\PsychologicalTest;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 
@@ -15,6 +17,8 @@ class FinalReport extends Component
     public $institutionName;
     public $eventName;
     public $participant;
+    public $finalAssessment;
+    public $psychologicalTest;
 
     public function mount($eventCode, $testNumber): void
     {
@@ -42,6 +46,12 @@ class FinalReport extends Component
             })
             ->where('test_number', $this->testNumber)
             ->firstOrFail();
+
+        // Load Final Assessment
+        $this->finalAssessment = FinalAssessment::where('participant_id', $this->participant->id)->first();
+
+        // Load Psychological Test
+        $this->psychologicalTest = PsychologicalTest::where('participant_id', $this->participant->id)->first();
     }
 
     public function render()
