@@ -174,11 +174,11 @@
 // Normalisasi: trim + uppercase → aman dari spasi & case
                                     $c = trim(strtoupper($aspect['conclusion_text'])); @endphp
 
-                                @if ($c === 'MEMENUHI/MEET REQUIREMENT') bg-yellow-300 text-black
+                                @if ($c === 'MEMENUHI/MEET REQUIREMENT') bg-yellow-400 text-black
                                 @elseif ($c === 'LEBIH MEMENUHI/MORE REQUIREMENT')
-                                    bg-green-500 text-black
+                                    bg-green-600 text-black
                                 @elseif ($c === 'DI BAWAH STANDAR/BELOW STANDARD')
-                                    bg-red-500 text-black
+                                    bg-red-600 text-black
                                 @else
                                     bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-white @endif
     ">
@@ -212,9 +212,9 @@
                                 text-black
                                 @php
 $c = trim(strtoupper($overallConclusion)); @endphp
-                                @if ($c === 'MEMENUHI STANDAR/MEET REQUIREMENT STANDARD') bg-green-500 text-black
+                                @if ($c === 'MEMENUHI STANDAR/MEET REQUIREMENT STANDARD') bg-green-600 text-black
                                 @elseif ($c === 'KURANG MEMENUHI STANDAR/BELOW REQUIREMENT STANDARD')
-                                    bg-red-500 text-black @endif"
+                                    bg-red-600 text-black @endif"
                             colspan="2">
                             {{ $overallConclusion }}
                         </td>
@@ -245,9 +245,9 @@ $c = trim(strtoupper($overallConclusion)); @endphp
                                 text-black
                                 @php
 $c = trim(strtoupper($overallConclusion)); @endphp
-                                @if ($c === 'MEMENUHI STANDAR/MEET REQUIREMENT STANDARD') bg-green-500 text-black
+                                @if ($c === 'MEMENUHI STANDAR/MEET REQUIREMENT STANDARD') bg-green-600 text-black
                                 @elseif ($c === 'KURANG MEMENUHI STANDAR/BELOW REQUIREMENT STANDARD')
-                                    bg-red-500 text-black @endif"
+                                    bg-red-600 text-black @endif"
                             colspan="2">
                             {{ $overallConclusion }}
                         </td>
