@@ -52,20 +52,19 @@
             <table class="min-w-full border-2 border-black text-sm">
                 <thead>
                     <tr class="bg-cyan-200 dark:bg-gray-700">
-                        <th
-                            class="border-2 border-black px-3 py-3 font-bold text-center text-black dark:text-white w-10">
+                        <th class="border-2 border-black px-3 py-3 font-bold text-center text-black dark:text-white w-10"
+                            rowspan="2">
                             NO</th>
-                        <th
-                            class="border-2 border-black px-3 py-3 font-bold text-center text-black dark:text-white w-48">
+                        <th class="border-2 border-black px-3 py-3 font-bold text-center text-black dark:text-white w-48"
+                            rowspan="2">
                             AKTIFITAS/KOMPETENSI</th>
                         <th class="border-2 border-black px-3 py-3 font-bold text-center text-black dark:text-white"
                             colspan="5" style="width: 250px;">RATING</th>
-                        <th class="border-2 border-black px-3 py-3 font-bold text-center text-black dark:text-white">
+                        <th class="border-2 border-black px-3 py-3 font-bold text-center text-black dark:text-white"
+                            rowspan="2">
                             Kesimpulan</th>
                     </tr>
                     <tr class="bg-cyan-200 dark:bg-gray-700">
-                        <th class="border-2 border-black px-3 py-2"></th>
-                        <th class="border-2 border-black px-3 py-2"></th>
                         <th
                             class="border-2 border-black px-3 py-2 font-bold text-center text-black dark:text-white w-12">
                             1</th>
@@ -81,7 +80,6 @@
                         <th
                             class="border-2 border-black px-3 py-2 font-bold text-center text-black dark:text-white w-12">
                             5</th>
-                        <th class="border-2 border-black px-3 py-2"></th>
                     </tr>
                     <tr>
                         <td class="border-2 border-black px-3 py-2 font-bold bg-gray-100 dark:bg-gray-600 text-black dark:text-white"

@@ -158,73 +158,76 @@
 
 <div class="bg-white dark:bg-gray-900 rounded-lg shadow-md overflow-hidden max-w-7xl mx-auto my-8">
     <!-- Header - DARK MODE READY -->
-    @if($showHeader)
-    <div class="border-b-4 border-black dark:border-gray-300 py-3 bg-blue-50 dark:bg-gray-800">
-        <h1 class="text-center text-lg font-bold uppercase tracking-wide text-black dark:text-white">
-            GENERAL MATCHING - ASPEK PSIKOLOGI
-        </h1>
-    </div>
+    @if ($showHeader)
+        <div class="border-b-4 border-black dark:border-gray-300 py-3 bg-blue-50 dark:bg-gray-800">
+            <h1 class="text-center text-lg font-bold uppercase tracking-wide text-black dark:text-white">
+                GENERAL MATCHING - ASPEK PSIKOLOGI
+            </h1>
+        </div>
     @endif
 
     <!-- Info Section - DARK MODE READY -->
-    @if($showInfoSection)
-    <div class="grid grid-cols-2 border-b border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800">
-        <!-- Left Column -->
-        <div class="border-r border-gray-300 dark:border-gray-600">
-            <div class="grid grid-cols-3 border-b border-gray-300 dark:border-gray-600">
-                <div class="px-4 py-2 text-sm text-black dark:text-gray-200">Nomor Tes</div>
-                <div class="px-4 py-2 text-sm col-span-2 text-black dark:text-gray-200">: {{ $participant->test_number
-                    }}
+    @if ($showInfoSection)
+        <div class="grid grid-cols-2 border-b border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800">
+            <!-- Left Column -->
+            <div class="border-r border-gray-300 dark:border-gray-600">
+                <div class="grid grid-cols-3 border-b border-gray-300 dark:border-gray-600">
+                    <div class="px-4 py-2 text-sm text-black dark:text-gray-200">Nomor Tes</div>
+                    <div class="px-4 py-2 text-sm col-span-2 text-black dark:text-gray-200">:
+                        {{ $participant->test_number }}
+                    </div>
+                </div>
+                <div class="grid grid-cols-3 border-b border-gray-300 dark:border-gray-600">
+                    <div class="px-4 py-2 text-sm text-black dark:text-gray-200">Nomor SKB</div>
+                    <div class="px-4 py-2 text-sm col-span-2 text-black dark:text-gray-200">:
+                        {{ $participant->skb_number }}
+                    </div>
+                </div>
+                <div class="grid grid-cols-3 border-b border-gray-300 dark:border-gray-600">
+                    <div class="px-4 py-2 text-sm text-black dark:text-gray-200">Nama</div>
+                    <div class="px-4 py-2 text-sm col-span-2 text-black dark:text-gray-200">: {{ $participant->name }}
+                    </div>
+                </div>
+                <div class="grid grid-cols-3 border-b border-gray-300 dark:border-gray-600">
+                    <div class="px-4 py-2 text-sm text-black dark:text-gray-200">Formasi Jabatan</div>
+                    <div class="px-4 py-2 text-sm col-span-2 text-black dark:text-gray-200">:
+                        {{ $participant->positionFormation->name }}</div>
+                </div>
+                <div class="grid grid-cols-3">
+                    <div class="px-4 py-2 text-sm text-black dark:text-gray-200">Tanggal Tes</div>
+                    <div class="px-4 py-2 text-sm col-span-2 text-black dark:text-gray-200">:
+                        {{ $participant->assessment_date->format('d F Y') }}</div>
                 </div>
             </div>
-            <div class="grid grid-cols-3 border-b border-gray-300 dark:border-gray-600">
-                <div class="px-4 py-2 text-sm text-black dark:text-gray-200">Nomor SKB</div>
-                <div class="px-4 py-2 text-sm col-span-2 text-black dark:text-gray-200">: {{ $participant->skb_number }}
-                </div>
-            </div>
-            <div class="grid grid-cols-3 border-b border-gray-300 dark:border-gray-600">
-                <div class="px-4 py-2 text-sm text-black dark:text-gray-200">Nama</div>
-                <div class="px-4 py-2 text-sm col-span-2 text-black dark:text-gray-200">: {{ $participant->name }}</div>
-            </div>
-            <div class="grid grid-cols-3 border-b border-gray-300 dark:border-gray-600">
-                <div class="px-4 py-2 text-sm text-black dark:text-gray-200">Formasi Jabatan</div>
-                <div class="px-4 py-2 text-sm col-span-2 text-black dark:text-gray-200">:
-                    {{ $participant->positionFormation->name }}</div>
-            </div>
-            <div class="grid grid-cols-3">
-                <div class="px-4 py-2 text-sm text-black dark:text-gray-200">Tanggal Tes</div>
-                <div class="px-4 py-2 text-sm col-span-2 text-black dark:text-gray-200">:
-                    {{ $participant->assessment_date->format('d F Y') }}</div>
-            </div>
-        </div>
 
-        <!-- Right Column - JOB PERSON MATCH -->
-        <div class="flex flex-col">
-            <div class="grid grid-cols-2 border-b border-gray-300 dark:border-gray-600">
-                <div class="px-4 py-2 text-sm text-black dark:text-gray-200">Standar/Standard</div>
-                <div class="px-4 py-2 text-sm text-black dark:text-gray-200">:
-                    {{ $participant->positionFormation->template->name }}</div>
-            </div>
-            <div class="grid grid-cols-2 border-b border-gray-300 dark:border-gray-600">
-                <div class="px-4 py-2 text-sm text-black dark:text-gray-200">Event</div>
-                <div class="px-4 py-2 text-sm text-black dark:text-gray-200">: {{ $participant->assessmentEvent->name }}
+            <!-- Right Column - JOB PERSON MATCH -->
+            <div class="flex flex-col">
+                <div class="grid grid-cols-2 border-b border-gray-300 dark:border-gray-600">
+                    <div class="px-4 py-2 text-sm text-black dark:text-gray-200">Standar/Standard</div>
+                    <div class="px-4 py-2 text-sm text-black dark:text-gray-200">:
+                        {{ $participant->positionFormation->template->name }}</div>
                 </div>
-            </div>
-            <div
-                class="px-4 py-2 text-center font-bold text-sm border-b border-gray-300 dark:border-gray-600 text-black dark:text-white">
-                JOB PERSON MATCH
-            </div>
-            <div class="flex-grow flex items-center px-4 py-2">
-                <div class="w-full h-8 relative">
-                    <div class="h-full rounded {{ $jobMatchPercentage <= 40 ? 'gradient-bar-low' : ($jobMatchPercentage <= 70 ? 'gradient-bar-medium' : 'gradient-bar-high') }}"
-                        style="width: {{ $jobMatchPercentage }}%;"></div>
-                    <div class="absolute right-0 top-0 bottom-0 flex items-center pr-2">
-                        <span class="text-sm font-bold text-black dark:text-white">{{ $jobMatchPercentage }}%</span>
+                <div class="grid grid-cols-2 border-b border-gray-300 dark:border-gray-600">
+                    <div class="px-4 py-2 text-sm text-black dark:text-gray-200">Event</div>
+                    <div class="px-4 py-2 text-sm text-black dark:text-gray-200">:
+                        {{ $participant->assessmentEvent->name }}
+                    </div>
+                </div>
+                <div
+                    class="px-4 py-2 text-center font-bold text-sm border-b border-gray-300 dark:border-gray-600 text-black dark:text-white">
+                    JOB PERSON MATCH
+                </div>
+                <div class="flex-grow flex items-center px-4 py-2">
+                    <div class="w-full h-8 relative">
+                        <div class="h-full rounded {{ $jobMatchPercentage <= 40 ? 'gradient-bar-low' : ($jobMatchPercentage <= 70 ? 'gradient-bar-medium' : 'gradient-bar-high') }}"
+                            style="width: {{ $jobMatchPercentage }}%;"></div>
+                        <div class="absolute right-0 top-0 bottom-0 flex items-center pr-2">
+                            <span class="text-sm font-bold text-black dark:text-white">{{ $jobMatchPercentage }}%</span>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
     @endif
 
     <!-- Main Table - DARK MODE READY -->
@@ -236,16 +239,13 @@
                         rowspan="2">NO.</th>
                     <th class="border border-gray-300 dark:border-gray-600 px-4 py-2 text-center text-sm font-bold text-black dark:text-white"
                         rowspan="2">ASPEK</th>
-                    <th
-                        class="border border-gray-300 dark:border-gray-600 px-2 py-2 text-center text-sm font-bold text-black dark:text-white">
+                    <th class="border border-gray-300 dark:border-gray-600 px-2 py-2 text-center text-sm font-bold text-black dark:text-white"
+                        rowspan="2">
                         STANDARD</th>
                     <th class="border border-gray-300 dark:border-gray-600 px-2 py-2 text-center text-xs font-bold text-black dark:text-white range-scale"
                         colspan="5">RATING</th>
                 </tr>
                 <tr class="bg-blue-100 dark:bg-gray-700">
-                    <th
-                        class="border border-gray-300 dark:border-gray-600 px-2 py-1 text-center text-xs rating-cell-standard-1">
-                    </th>
                     <th
                         class="border border-gray-300 dark:border-gray-600 px-2 py-1 text-center text-xs text-white range-scale rating-cell-1">
                         1 Rendah</th>
@@ -266,152 +266,155 @@
             <tbody>
                 <!-- ASPEK PSIKOLOGI (POTENSI) -->
                 @if ($showPotensi && $potensiCategory && count($potensiAspects) > 0)
-                <tr class="bg-gray-100 dark:bg-gray-600">
-                    <td class="border border-gray-300 dark:border-gray-600 px-4 py-2 font-bold text-sm text-black dark:text-white uppercase"
-                        colspan="8">
-                        {{ $potensiCategory->name }}
-                    </td>
-                </tr>
+                    <tr class="bg-gray-100 dark:bg-gray-600">
+                        <td class="border border-gray-300 dark:border-gray-600 px-4 py-2 font-bold text-sm text-black dark:text-white uppercase"
+                            colspan="8">
+                            {{ $potensiCategory->name }}
+                        </td>
+                    </tr>
 
-                @foreach ($potensiAspects as $index => $aspect)
-                <!-- Aspect Header with Progress Bar -->
-                <tr class="bg-gray-100 dark:bg-gray-600">
-                    <td
-                        class="border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm font-bold text-black dark:text-white text-center">
-                        {{ $loop->iteration }}.</td>
-                    <td
-                        class="border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm font-bold text-black dark:text-white">
-                        {{ $aspect['name'] }}</td>
-                    <td
-                        class="border border-gray-300 dark:border-gray-600 px-2 py-2 text-sm font-bold text-black dark:text-white text-center">
-                        {{ number_format($aspect['standard_rating'], 2, ',', '.') }}
-                    </td>
-                    <td class="border border-gray-300 dark:border-gray-600 range-scale" colspan="5">
-                        <div class="progress-container">
-                            <div class="h-full rounded {{ $aspect['percentage'] <= 40 ? 'gradient-bar-low' : ($aspect['percentage'] <= 70 ? 'gradient-bar-medium' : 'gradient-bar-high') }}"
-                                style="width: {{ $aspect['percentage'] }}%;"></div>
-                            <div class="absolute right-0 top-0 bottom-0 flex items-center pr-2">
-                                <div class="rating-display text-right">
-                                    <div class="percentage">{{ $aspect['percentage'] }}%</div>
-                                    <div
-                                        class="rating-comparison {{ $aspect['individual_rating'] >= $aspect['standard_rating'] ? 'above-standard' : 'below-standard' }}">
-                                        {{ number_format($aspect['individual_rating'], 2, ',', '.') }} /
-                                        {{ number_format($aspect['standard_rating'], 2, ',', '.') }}
+                    @foreach ($potensiAspects as $index => $aspect)
+                        <!-- Aspect Header with Progress Bar -->
+                        <tr class="bg-gray-100 dark:bg-gray-600">
+                            <td
+                                class="border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm font-bold text-black dark:text-white text-center">
+                                {{ $loop->iteration }}.</td>
+                            <td
+                                class="border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm font-bold text-black dark:text-white">
+                                {{ $aspect['name'] }}</td>
+                            <td
+                                class="border border-gray-300 dark:border-gray-600 px-2 py-2 text-sm font-bold text-black dark:text-white text-center">
+                                {{ number_format($aspect['standard_rating'], 2, ',', '.') }}
+                            </td>
+                            <td class="border border-gray-300 dark:border-gray-600 range-scale" colspan="5">
+                                <div class="progress-container">
+                                    <div class="h-full rounded {{ $aspect['percentage'] <= 40 ? 'gradient-bar-low' : ($aspect['percentage'] <= 70 ? 'gradient-bar-medium' : 'gradient-bar-high') }}"
+                                        style="width: {{ $aspect['percentage'] }}%;"></div>
+                                    <div class="absolute right-0 top-0 bottom-0 flex items-center pr-2">
+                                        <div class="rating-display text-right">
+                                            <div class="percentage">{{ $aspect['percentage'] }}%</div>
+                                            <div
+                                                class="rating-comparison {{ $aspect['individual_rating'] >= $aspect['standard_rating'] ? 'above-standard' : 'below-standard' }}">
+                                                {{ number_format($aspect['individual_rating'], 2, ',', '.') }} /
+                                                {{ number_format($aspect['standard_rating'], 2, ',', '.') }}
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-                    </td>
-                </tr>
+                            </td>
+                        </tr>
 
-                <!-- Sub-Aspects -->
-                @foreach ($aspect['sub_aspects'] as $subIndex => $subAspect)
-                <tr class="bg-gray-50 dark:bg-gray-700">
-                    <td
-                        class="border border-gray-300 dark:border-gray-600 px-4 py-1 text-xs text-black dark:text-gray-200 col-number text-center">
-                        {{ $subIndex + 1 }}.</td>
-                    <td
-                        class="border border-gray-300 dark:border-gray-600 px-4 py-1 text-xs text-black dark:text-gray-200">
-                        {{ $subAspect['name'] }}</td>
-                    <td
-                        class="border border-gray-300 dark:border-gray-600 px-2 py-1 text-xs text-black dark:text-gray-200 text-center">
-                        {{ $subAspect['standard_rating'] }}</td>
-                    @for ($i = 1; $i <= 5; $i++) <td
-                        class="border border-gray-300 dark:border-gray-600 range-scale text-center {{ $subAspect['standard_rating'] == $i ? 'rating-cell-standard-' . $i : 'rating-cell-empty text-black dark:text-gray-200' }}">
-                        @if ($subAspect['individual_rating'] == $i)
-                        <span
-                            class="rating-x {{ $subAspect['individual_rating'] >= $subAspect['standard_rating'] ? 'above-standard' : 'below-standard' }}">X</span>
-                        @endif
-                        </td>
-                        @endfor
-                </tr>
-                @endforeach
-                @endforeach
+                        <!-- Sub-Aspects -->
+                        @foreach ($aspect['sub_aspects'] as $subIndex => $subAspect)
+                            <tr class="bg-gray-50 dark:bg-gray-700">
+                                <td
+                                    class="border border-gray-300 dark:border-gray-600 px-4 py-1 text-xs text-black dark:text-gray-200 col-number text-center">
+                                    {{ $subIndex + 1 }}.</td>
+                                <td
+                                    class="border border-gray-300 dark:border-gray-600 px-4 py-1 text-xs text-black dark:text-gray-200">
+                                    {{ $subAspect['name'] }}</td>
+                                <td
+                                    class="border border-gray-300 dark:border-gray-600 px-2 py-1 text-xs text-black dark:text-gray-200 text-center">
+                                    {{ $subAspect['standard_rating'] }}</td>
+                                @for ($i = 1; $i <= 5; $i++)
+                                    <td
+                                        class="border border-gray-300 dark:border-gray-600 range-scale text-center {{ $subAspect['standard_rating'] == $i ? 'rating-cell-standard-' . $i : 'rating-cell-empty text-black dark:text-gray-200' }}">
+                                        @if ($subAspect['individual_rating'] == $i)
+                                            <span
+                                                class="rating-x {{ $subAspect['individual_rating'] >= $subAspect['standard_rating'] ? 'above-standard' : 'below-standard' }}">X</span>
+                                        @endif
+                                    </td>
+                                @endfor
+                            </tr>
+                        @endforeach
+                    @endforeach
                 @endif
 
                 <!-- ASPEK KOMPETENSI -->
                 @if ($showKompetensi && $kompetensiCategory && count($kompetensiAspects) > 0)
-                <tr class="bg-gray-100 dark:bg-gray-600">
-                    <td class="border border-gray-300 dark:border-gray-600 px-4 py-2 font-bold text-sm text-black dark:text-white uppercase"
-                        colspan="8">
-                        {{ $kompetensiCategory->name }}
-                    </td>
-                </tr>
+                    <tr class="bg-gray-100 dark:bg-gray-600">
+                        <td class="border border-gray-300 dark:border-gray-600 px-4 py-2 font-bold text-sm text-black dark:text-white uppercase"
+                            colspan="8">
+                            {{ $kompetensiCategory->name }}
+                        </td>
+                    </tr>
 
-                @foreach ($kompetensiAspects as $index => $aspect)
-                <!-- Aspect Header with Progress Bar -->
-                <tr class="bg-gray-100 dark:bg-gray-600">
-                    <td
-                        class="border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm font-bold text-black dark:text-white text-center">
-                        {{ $loop->iteration }}.</td>
-                    <td
-                        class="border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm font-bold text-black dark:text-white">
-                        {{ $aspect['name'] }}</td>
-                    <td
-                        class="border border-gray-300 dark:border-gray-600 px-2 py-2 text-sm font-bold text-black dark:text-white text-center">
-                        {{ number_format($aspect['standard_rating'], 2, ',', '.') }}
-                    </td>
-                    <td class="border border-gray-300 dark:border-gray-600 range-scale" colspan="5">
-                        <div class="progress-container">
-                            <div class="h-full rounded {{ $aspect['percentage'] <= 40 ? 'gradient-bar-low' : ($aspect['percentage'] <= 70 ? 'gradient-bar-medium' : 'gradient-bar-high') }}"
-                                style="width: {{ $aspect['percentage'] }}%;"></div>
-                            <div class="absolute right-0 top-0 bottom-0 flex items-center pr-2">
-                                <div class="rating-display text-right">
-                                    <div class="percentage">{{ $aspect['percentage'] }}%</div>
-                                    <div
-                                        class="rating-comparison {{ $aspect['individual_rating'] >= $aspect['standard_rating'] ? 'above-standard' : 'below-standard' }}">
-                                        {{ number_format($aspect['individual_rating'], 2, ',', '.') }} /
-                                        {{ number_format($aspect['standard_rating'], 2, ',', '.') }}
+                    @foreach ($kompetensiAspects as $index => $aspect)
+                        <!-- Aspect Header with Progress Bar -->
+                        <tr class="bg-gray-100 dark:bg-gray-600">
+                            <td
+                                class="border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm font-bold text-black dark:text-white text-center">
+                                {{ $loop->iteration }}.</td>
+                            <td
+                                class="border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm font-bold text-black dark:text-white">
+                                {{ $aspect['name'] }}</td>
+                            <td
+                                class="border border-gray-300 dark:border-gray-600 px-2 py-2 text-sm font-bold text-black dark:text-white text-center">
+                                {{ number_format($aspect['standard_rating'], 2, ',', '.') }}
+                            </td>
+                            <td class="border border-gray-300 dark:border-gray-600 range-scale" colspan="5">
+                                <div class="progress-container">
+                                    <div class="h-full rounded {{ $aspect['percentage'] <= 40 ? 'gradient-bar-low' : ($aspect['percentage'] <= 70 ? 'gradient-bar-medium' : 'gradient-bar-high') }}"
+                                        style="width: {{ $aspect['percentage'] }}%;"></div>
+                                    <div class="absolute right-0 top-0 bottom-0 flex items-center pr-2">
+                                        <div class="rating-display text-right">
+                                            <div class="percentage">{{ $aspect['percentage'] }}%</div>
+                                            <div
+                                                class="rating-comparison {{ $aspect['individual_rating'] >= $aspect['standard_rating'] ? 'above-standard' : 'below-standard' }}">
+                                                {{ number_format($aspect['individual_rating'], 2, ',', '.') }} /
+                                                {{ number_format($aspect['standard_rating'], 2, ',', '.') }}
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-                    </td>
-                </tr>
+                            </td>
+                        </tr>
 
-                <!-- Kompetensi Description -->
-                @if (isset($aspect['description']) && $aspect['description'])
-                <tr class="bg-gray-50 dark:bg-gray-700">
-                    <td
-                        class="border border-gray-300 dark:border-gray-600 px-4 py-1 text-xs text-black dark:text-gray-200 text-center">
-                        1.</td>
-                    <td
-                        class="border border-gray-300 dark:border-gray-600 px-4 py-1 text-xs text-black dark:text-gray-200">
-                        {{ $aspect['description'] }}</td>
-                    <td
-                        class="border border-gray-300 dark:border-gray-600 px-2 py-1 text-xs text-black dark:text-gray-200 text-center">
-                        {{ $aspect['standard_rating'] }}</td>
-                    @for ($i = 1; $i <= 5; $i++) <td
-                        class="border border-gray-300 dark:border-gray-600 range-scale text-center {{ $aspect['standard_rating'] == $i ? 'rating-cell-standard-' . $i : 'rating-cell-empty text-black dark:text-gray-200' }}">
-                        @if (round($aspect['individual_rating']) == $i)
-                        <span
-                            class="rating-x {{ round($aspect['individual_rating']) >= $aspect['standard_rating'] ? 'above-standard' : 'below-standard' }}">X</span>
+                        <!-- Kompetensi Description -->
+                        @if (isset($aspect['description']) && $aspect['description'])
+                            <tr class="bg-gray-50 dark:bg-gray-700">
+                                <td
+                                    class="border border-gray-300 dark:border-gray-600 px-4 py-1 text-xs text-black dark:text-gray-200 text-center">
+                                    1.</td>
+                                <td
+                                    class="border border-gray-300 dark:border-gray-600 px-4 py-1 text-xs text-black dark:text-gray-200">
+                                    {{ $aspect['description'] }}</td>
+                                <td
+                                    class="border border-gray-300 dark:border-gray-600 px-2 py-1 text-xs text-black dark:text-gray-200 text-center">
+                                    {{ $aspect['standard_rating'] }}</td>
+                                @for ($i = 1; $i <= 5; $i++)
+                                    <td
+                                        class="border border-gray-300 dark:border-gray-600 range-scale text-center {{ $aspect['standard_rating'] == $i ? 'rating-cell-standard-' . $i : 'rating-cell-empty text-black dark:text-gray-200' }}">
+                                        @if (round($aspect['individual_rating']) == $i)
+                                            <span
+                                                class="rating-x {{ round($aspect['individual_rating']) >= $aspect['standard_rating'] ? 'above-standard' : 'below-standard' }}">X</span>
+                                        @endif
+                                    </td>
+                                @endfor
+                            </tr>
+                        @else
+                            <tr class="bg-gray-50 dark:bg-gray-700">
+                                <td
+                                    class="border border-gray-300 dark:border-gray-600 px-4 py-1 text-xs text-black dark:text-gray-200 text-center">
+                                    1.</td>
+                                <td
+                                    class="border border-gray-300 dark:border-gray-600 px-4 py-1 text-xs text-black dark:text-gray-200">
+                                    Rating Level</td>
+                                <td
+                                    class="border border-gray-300 dark:border-gray-600 px-2 py-1 text-xs text-black dark:text-gray-200 text-center">
+                                    {{ $aspect['standard_rating'] }}</td>
+                                @for ($i = 1; $i <= 5; $i++)
+                                    <td
+                                        class="border border-gray-300 dark:border-gray-600 range-scale text-center {{ $aspect['standard_rating'] == $i ? 'rating-cell-standard-' . $i : 'rating-cell-empty text-black dark:text-gray-200' }}">
+                                        @if (round($aspect['individual_rating']) == $i)
+                                            <span
+                                                class="rating-x {{ round($aspect['individual_rating']) >= $aspect['standard_rating'] ? 'above-standard' : 'below-standard' }}">X</span>
+                                        @endif
+                                    </td>
+                                @endfor
+                            </tr>
                         @endif
-                        </td>
-                        @endfor
-                </tr>
-                @else
-                <tr class="bg-gray-50 dark:bg-gray-700">
-                    <td
-                        class="border border-gray-300 dark:border-gray-600 px-4 py-1 text-xs text-black dark:text-gray-200 text-center">
-                        1.</td>
-                    <td
-                        class="border border-gray-300 dark:border-gray-600 px-4 py-1 text-xs text-black dark:text-gray-200">
-                        Rating Level</td>
-                    <td
-                        class="border border-gray-300 dark:border-gray-600 px-2 py-1 text-xs text-black dark:text-gray-200 text-center">
-                        {{ $aspect['standard_rating'] }}</td>
-                    @for ($i = 1; $i <= 5; $i++) <td
-                        class="border border-gray-300 dark:border-gray-600 range-scale text-center {{ $aspect['standard_rating'] == $i ? 'rating-cell-standard-' . $i : 'rating-cell-empty text-black dark:text-gray-200' }}">
-                        @if (round($aspect['individual_rating']) == $i)
-                        <span
-                            class="rating-x {{ round($aspect['individual_rating']) >= $aspect['standard_rating'] ? 'above-standard' : 'below-standard' }}">X</span>
-                        @endif
-                        </td>
-                        @endfor
-                </tr>
-                @endif
-                @endforeach
+                    @endforeach
                 @endif
             </tbody>
         </table>

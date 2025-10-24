@@ -44,17 +44,17 @@
                 <table class="min-w-full border border-black text-xs">
                     <thead>
                         <tr class="bg-sky-200 dark:bg-gray-700 text-gray-900 dark:text-white">
-                            <th
-                                class="border border-black px-3 py-2 font-semibold 
-                                   bg-white dark:bg-gray-800">
+                            <th class="border border-black px-3 py-2 font-semibold 
+                                   bg-white dark:bg-gray-800"
+                                rowspan="2">
                                 No</th>
-                            <th
-                                class="border border-black px-3 py-2 font-semibold 
-                                   bg-white dark:bg-gray-800">
+                            <th class="border border-black px-3 py-2 font-semibold 
+                                   bg-white dark:bg-gray-800"
+                                rowspan="2">
                                 Atribut/Attribute</th>
-                            <th
-                                class="border border-black px-3 py-2 font-semibold 
-                                   bg-white dark:bg-gray-800">
+                            <th class="border border-black px-3 py-2 font-semibold 
+                                   bg-white dark:bg-gray-800"
+                                rowspan="2">
                                 Bobot %<br>100</th>
                             <th class="border border-black px-3 py-2 font-semibold 
                                    bg-white dark:bg-gray-800"
@@ -69,28 +69,16 @@
                             <th class="border border-black px-3 py-2 font-semibold 
                                    bg-white dark:bg-gray-800"
                                 colspan="2">Gap</th>
-                            <th
-                                class="border border-black px-3 py-2 font-semibold 
-                                   bg-white dark:bg-gray-800">
+                            <th class="border border-black px-3 py-2 font-semibold 
+                                   bg-white dark:bg-gray-800"
+                                rowspan="2">
                                 Prosentase<br>Kesesuaian</th>
-                            <th
-                                class="border border-black px-3 py-2 font-semibold 
-                                   bg-white dark:bg-gray-800">
+                            <th class="border border-black px-3 py-2 font-semibold 
+                                   bg-white dark:bg-gray-800"
+                                rowspan="2">
                                 Kesimpulan/Conclusion</th>
                         </tr>
                         <tr class="bg-sky-200 dark:bg-gray-700 text-gray-900 dark:text-white">
-                            <th
-                                class="border border-black px-3 py-1 
-                                   bg-white dark:bg-gray-800">
-                            </th>
-                            <th
-                                class="border border-black px-3 py-1 
-                                   bg-white dark:bg-gray-800">
-                            </th>
-                            <th
-                                class="border border-black px-3 py-1 
-                                   bg-white dark:bg-gray-800">
-                            </th>
                             <th
                                 class="border border-black px-3 py-1 font-semibold 
                                    bg-white dark:bg-gray-800">
@@ -115,14 +103,6 @@
                                 class="border border-black px-3 py-0 font-semibold 
                                    bg-white dark:bg-gray-800">
                                 Score</th>
-                            <th
-                                class="border border-black px-3 py-1 
-                                   bg-white dark:bg-gray-800">
-                            </th>
-                            <th
-                                class="border border-black px-3 py-1 
-                                   bg-white dark:bg-gray-800">
-                            </th>
                         </tr>
                     </thead>
                     <tbody>
