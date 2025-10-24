@@ -36,6 +36,8 @@ class StandardPsikometrik extends Component
         'scores' => [],
     ];
 
+    public int $maxScore = 0;
+
     // Unique chart ID
     public string $chartId = '';
 
@@ -65,6 +67,7 @@ class StandardPsikometrik extends Component
             'ratings' => $this->chartData['ratings'],
             'scores' => $this->chartData['scores'],
             'templateName' => $this->selectedTemplate?->name ?? 'Standard',
+            'maxScore' => $this->maxScore,
         ]);
     }
 
@@ -84,6 +87,7 @@ class StandardPsikometrik extends Component
             'ratings' => [],
             'scores' => [],
         ];
+        $this->maxScore = 0;
 
         // Read filters from session
         $eventCode = session('filter.event_code');
@@ -179,6 +183,9 @@ class StandardPsikometrik extends Component
                 $this->chartData['labels'][] = $aspect->name;
                 $this->chartData['ratings'][] = $aspectAvgRating;
                 $this->chartData['scores'][] = $aspectScore;
+
+                // Track maximum score for dynamic chart scaling
+                $this->maxScore = max($this->maxScore, $aspectScore);
 
                 $categoryAspectsCount += $subAspectsCount;
                 $categoryWeightSum += $aspect->weight_percentage;

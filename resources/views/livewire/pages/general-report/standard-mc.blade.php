@@ -317,15 +317,7 @@
                                         }
                                     },
                                     datalabels: {
-                                        backgroundColor: 'transparent',
-                                        borderWidth: 0,
-                                        borderRadius: 4,
-                                        color: 'white', // Can adjust to colors.textColor if needed
-                                        font: {
-                                            weight: 'bold',
-                                            size: 11
-                                        },
-                                        padding: 6
+                                        display: false
                                     }
                                 },
                                 scales: {
@@ -485,15 +477,7 @@
                                         }
                                     },
                                     datalabels: {
-                                        backgroundColor: 'transparent',
-                                        borderWidth: 0,
-                                        borderRadius: 4,
-                                        color: 'white', // Can adjust to colors.textColor if needed
-                                        font: {
-                                            weight: 'bold',
-                                            size: 11
-                                        },
-                                        padding: 6
+                                        display: false
                                     }
                                 },
                                 scales: {

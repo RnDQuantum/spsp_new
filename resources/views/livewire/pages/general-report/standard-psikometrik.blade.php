@@ -442,7 +442,7 @@
                     let chartLabels = @js($chartData['labels']);
                     let chartScores = @js($chartData['scores']);
                     let templateName = @js($selectedTemplate?->name ?? 'Standard');
-                    let maxScore = @js($maxScore ?? 100);
+                    let maxScore = @js($maxScore);
 
                     function getChartColors() {
                         const isDarkMode = document.documentElement.classList.contains('dark');
@@ -565,11 +565,13 @@
                                 chartLabels = chartData.labels;
                                 chartScores = chartData.scores;
                                 templateName = chartData.templateName || 'Standard';
+                                maxScore = chartData.maxScore || maxScore;
 
                                 const chart = window.skorChart_{{ $chartId }};
                                 chart.data.labels = chartLabels;
                                 chart.data.datasets[0].label = templateName;
                                 chart.data.datasets[0].data = chartScores;
+                                chart.options.scales.r.max = maxScore;
                                 updateChartColors();
                                 chart.options.scales.r.ticks.backdropColor = 'transparent';
                                 chart.options.scales.r.ticks.showLabelBackdrop = false;
