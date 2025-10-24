@@ -93,8 +93,23 @@
                                 @endphp
                                 {{ $percentage }}%
                             </td>
-                            <td class="border border-black dark:border-gray-300 px-3 py-2">
-                                {{ $aspect['conclusion_text'] }}</td>
+                            <td
+                                class="border border-white px-3 py-2 text-center
+                                @php
+// Normalisasi: trim + uppercase → aman dari spasi & case
+                                    $c = trim(strtoupper($aspect['conclusion_text'])); @endphp
+
+                                @if ($c === 'LEBIH MEMENUHI/MORE REQUIREMENT') bg-green-500 text-black font-bold
+                                @elseif ($c === 'MEMENUHI/MEET REQUIREMENT')
+                                    bg-yellow-400 text-black font-bold
+                                @elseif ($c === 'KURANG MEMENUHI/BELOW')
+                                    bg-orange-500 text-black font-bold
+                                @elseif ($c === 'BELUM MEMENUHI/UNDER PERFORM')
+                                    bg-red-600 text-black font-bold
+                                @else
+                                    bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-white @endif">
+                                {{ $aspect['conclusion_text'] }}
+                            </td>
                         </tr>
                     @endforeach
 
@@ -111,8 +126,19 @@
                         <td class="border border-black dark:border-gray-300 px-3 py-2 text-center">
                             {{ number_format($totalGapRating, 2) }}</td>
                         <td class="border border-black dark:border-gray-300 px-3 py-2"></td>
-                        <td class="border border-black dark:border-gray-300 px-3 py-2" colspan="2">
-                            {{ $overallConclusion }}</td>
+                        <td class="border border-black dark:border-gray-300 px-3 py-2 text-center
+                            @php
+// Normalisasi: trim + uppercase → aman dari spasi & case
+                                $c = trim(strtoupper($overallConclusion)); @endphp
+
+                            @if ($c === 'MEMENUHI STANDAR/MEET REQUIREMENT STANDARD') bg-green-500 dark:bg-green-600 text-black dark:text-white
+                            @elseif ($c === 'KURANG MEMENUHI STANDAR/BELOW REQUIREMENT STANDARD')
+                                bg-red-500 dark:bg-red-600 text-black dark:text-gray-200
+                            @else
+                                bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-gray-200 @endif"
+                            colspan="2">
+                            {{ $overallConclusion }}
+                        </td>
                     </tr>
 
                     <!-- Total Score Row -->
@@ -128,8 +154,19 @@
                         <td class="border border-black dark:border-gray-300 px-3 py-2"></td>
                         <td class="border border-black dark:border-gray-300 px-3 py-2 text-center">
                             {{ number_format($totalGapScore, 2) }}</td>
-                        <td class="border border-black dark:border-gray-300 px-3 py-2" colspan="2">
-                            {{ $overallConclusion }}</td>
+                        <td class="border border-black dark:border-gray-300 px-3 py-2 text-center
+                            @php
+// Normalisasi: trim + uppercase → aman dari spasi & case
+                                $c = trim(strtoupper($overallConclusion)); @endphp
+
+                            @if ($c === 'MEMENUHI STANDAR/MEET REQUIREMENT STANDARD') bg-green-500 dark:bg-green-600 text-black dark:text-white
+                            @elseif ($c === 'KURANG MEMENUHI STANDAR/BELOW REQUIREMENT STANDARD')
+                                bg-red-500 dark:bg-red-600 text-black dark:text-gray-200
+                            @else
+                                bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-gray-200 @endif"
+                            colspan="2">
+                            {{ $overallConclusion }}
+                        </td>
                     </tr>
                 </tbody>
             </table>
