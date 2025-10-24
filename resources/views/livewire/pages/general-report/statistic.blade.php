@@ -36,7 +36,7 @@
         <div class="flex-shrink-0 text-sm self-center">
             <table class="border border-black dark:border-gray-600 text-gray-900 dark:text-gray-100">
                 <thead>
-                    <tr style="background-color: #eee;" class="dark:bg-gray-700">
+                    <tr class="dark:bg-gray-700">
                         <th class="border border-black dark:border-gray-600 px-3 py-2 font-semibold">Kelas</th>
                         <th class="border border-black dark:border-gray-600 px-3 py-2 font-semibold">Rentang Nilai</th>
                     </tr>
