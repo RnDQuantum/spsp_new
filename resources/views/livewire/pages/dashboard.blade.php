@@ -1,35 +1,35 @@
 <div>
     @if (session('force_reload'))
-    <script>
-        window.location.reload();
-    </script>
+        <script>
+            window.location.reload();
+        </script>
     @endif
     <!-- Loading Overlay - DARK MODE READY -->
     @if ($isLoading)
-    <div
-        class="fixed inset-0 bg-black bg-opacity-50 dark:bg-gray-900 dark:bg-opacity-80 flex items-center justify-center z-50">
-        <div class="bg-white dark:bg-gray-800 rounded-lg p-8 shadow-xl max-w-md mx-4">
-            <div class="text-center">
-                <!-- Animated Spinner -->
-                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+        <div
+            class="fixed inset-0 bg-black bg-opacity-50 dark:bg-gray-900 dark:bg-opacity-80 flex items-center justify-center z-50">
+            <div class="bg-white dark:bg-gray-800 rounded-lg p-8 shadow-xl max-w-md mx-4">
+                <div class="text-center">
+                    <!-- Animated Spinner -->
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
 
-                <!-- Loading Message -->
-                <p class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">{{ $loadingMessage }}</p>
-                <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Mohon tunggu sebentar...</p>
+                    <!-- Loading Message -->
+                    <p class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">{{ $loadingMessage }}</p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Mohon tunggu sebentar...</p>
 
-                <!-- Simple Status Indicator -->
-                <div class="flex items-center justify-center space-x-2">
-                    <div class="flex space-x-1">
-                        <div class="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
-                        <div class="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style="animation-delay: 0.1s">
-                        </div>
-                        <div class="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style="animation-delay: 0.2s">
+                    <!-- Simple Status Indicator -->
+                    <div class="flex items-center justify-center space-x-2">
+                        <div class="flex space-x-1">
+                            <div class="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
+                            <div class="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style="animation-delay: 0.1s">
+                            </div>
+                            <div class="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style="animation-delay: 0.2s">
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
     @endif
 
     <div class="bg-white dark:bg-gray-900 mx-auto my-8 shadow-lg dark:shadow-gray-800/50 overflow-hidden"
@@ -40,19 +40,19 @@
                 SPIDER PLOT ANALYSIS - DASHBOARD
             </h1>
             @if ($participant)
-            <p class="text-center text-sm font-semibold text-gray-700 dark:text-gray-300 mt-1">
-                {{ $participant->name }}
-            </p>
-            <p class="text-center text-sm font-semibold text-gray-700 dark:text-gray-300 mt-1">
-                {{ $participant->assessmentEvent->name }}
-            </p>
-            <p class="text-center text-sm font-semibold text-gray-700 dark:text-gray-300 mt-1">
-                {{ $participant->positionFormation->name }} - {{ $participant->positionFormation->template->name }}
-            </p>
+                <p class="text-center text-sm font-semibold text-gray-700 dark:text-gray-300 mt-1">
+                    {{ $participant->name }}
+                </p>
+                <p class="text-center text-sm font-semibold text-gray-700 dark:text-gray-300 mt-1">
+                    {{ $participant->assessmentEvent->name }}
+                </p>
+                <p class="text-center text-sm font-semibold text-gray-700 dark:text-gray-300 mt-1">
+                    {{ $participant->positionFormation->name }} - {{ $participant->positionFormation->template->name }}
+                </p>
             @else
-            <p class="text-center text-sm font-semibold text-gray-700 dark:text-gray-300 mt-1">
-                Tampilan Standar Proyek
-            </p>
+                <p class="text-center text-sm font-semibold text-gray-700 dark:text-gray-300 mt-1">
+                    Tampilan Standar Proyek
+                </p>
             @endif
         </div>
 
@@ -72,79 +72,79 @@
 
         <!-- Tolerance Selector Component -->
         @if (count($allAspectsData) > 0)
-        @php
-        $summary = $this->getPassingSummary();
-        @endphp
-        @livewire('components.tolerance-selector', [
-        'passing' => $summary['passing'],
-        'total' => $summary['total'],
-        ])
+            @php
+                $summary = $this->getPassingSummary();
+            @endphp
+            @livewire('components.tolerance-selector', [
+                'passing' => $summary['passing'],
+                'total' => $summary['total'],
+            ])
         @endif
 
         <!-- Charts Grid - DARK MODE READY -->
         @if (count($allAspectsData) > 0)
-        <div class="p-6">
-            <h1 class="text-3xl text-center font-bold text-gray-800 dark:text-gray-100 mb-8">Static Pribadi Spider
-                Plot (SPSP)</h1>
+            <div class="p-6">
+                <h1 class="text-3xl text-center font-bold text-gray-800 dark:text-gray-100 mb-8">Static Pribadi Spider
+                    Plot (SPSP)</h1>
 
-            <!-- Charts - Vertical Layout -->
-            <div class="space-y-6 mt-8">
-                <!-- Chart Potensi (Pentagon) -->
-                @if (count($potensiLabels) > 0)
-                <div
-                    class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg dark:shadow-gray-700/50 border border-gray-200 dark:border-gray-600">
-                    <h3 class="text-lg text-center font-semibold text-gray-800 dark:text-gray-100 mb-4">
-                        Potential Mapping (Rating)
-                    </h3>
-                    <div class="relative" style="height: 600px;" wire:ignore>
-                        <canvas id="potensiChart-{{ $potensiChartId }}"></canvas>
-                    </div>
-                </div>
-                @endif
+                <!-- Charts - Vertical Layout -->
+                <div class="space-y-6 mt-8">
+                    <!-- Chart Potensi (Pentagon) -->
+                    @if (count($potensiLabels) > 0)
+                        <div
+                            class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg dark:shadow-gray-700/50 border border-gray-200 dark:border-gray-600">
+                            <h3 class="text-lg text-center font-semibold text-gray-800 dark:text-gray-100 mb-4">
+                                Potential Mapping (Rating)
+                            </h3>
+                            <div class="relative" style="height: 600px;" wire:ignore>
+                                <canvas id="potensiChart-{{ $potensiChartId }}"></canvas>
+                            </div>
+                        </div>
+                    @endif
 
-                <!-- Chart Kompetensi (Nonagon) -->
-                @if (count($kompetensiLabels) > 0)
-                <div
-                    class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg dark:shadow-gray-700/50 border border-gray-200 dark:border-gray-600">
-                    <h3 class="text-lg text-center font-semibold text-gray-800 dark:text-gray-100 mb-4">
-                        Managerial Potency Mapping
-                        (Rating)
-                    </h3>
-                    <div class="relative" style="height: 600px;" wire:ignore>
-                        <canvas id="kompetensiChart-{{ $kompetensiChartId }}"></canvas>
-                    </div>
-                </div>
-                @endif
+                    <!-- Chart Kompetensi (Nonagon) -->
+                    @if (count($kompetensiLabels) > 0)
+                        <div
+                            class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg dark:shadow-gray-700/50 border border-gray-200 dark:border-gray-600">
+                            <h3 class="text-lg text-center font-semibold text-gray-800 dark:text-gray-100 mb-4">
+                                Managerial Potency Mapping
+                                (Rating)
+                            </h3>
+                            <div class="relative" style="height: 600px;" wire:ignore>
+                                <canvas id="kompetensiChart-{{ $kompetensiChartId }}"></canvas>
+                            </div>
+                        </div>
+                    @endif
 
-                <!-- Chart General (Tetradecagon) -->
-                @if (count($generalLabels) > 0)
-                <div
-                    class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg dark:shadow-gray-700/50 border border-gray-200 dark:border-gray-600">
-                    <h3 class="text-lg text-center font-semibold text-gray-800 dark:text-gray-100 mb-4">General
-                        Mapping (Rating)
-                    </h3>
-                    <div class="relative" style="height: 600px;" wire:ignore>
-                        <canvas id="generalChart-{{ $generalChartId }}"></canvas>
-                    </div>
+                    <!-- Chart General (Tetradecagon) -->
+                    @if (count($generalLabels) > 0)
+                        <div
+                            class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg dark:shadow-gray-700/50 border border-gray-200 dark:border-gray-600">
+                            <h3 class="text-lg text-center font-semibold text-gray-800 dark:text-gray-100 mb-4">General
+                                Mapping (Rating)
+                            </h3>
+                            <div class="relative" style="height: 600px;" wire:ignore>
+                                <canvas id="generalChart-{{ $generalChartId }}"></canvas>
+                            </div>
+                        </div>
+                    @endif
                 </div>
-                @endif
             </div>
-        </div>
         @else
-        <div class="p-6">
-            <div class="text-center text-gray-500 dark:text-gray-400">
-                <p class="text-lg">Silakan pilih Event dan Jabatan untuk melihat data standar.</p>
-                <p class="text-sm mt-2">Pilih Peserta untuk melihat perbandingan dengan standar.</p>
+            <div class="p-6">
+                <div class="text-center text-gray-500 dark:text-gray-400">
+                    <p class="text-lg">Silakan pilih Event dan Jabatan untuk melihat data standar.</p>
+                    <p class="text-sm mt-2">Pilih Peserta untuk melihat perbandingan dengan standar.</p>
+                </div>
             </div>
-        </div>
         @endif
     </div>
 
     <!-- Chart Scripts - DARK MODE READY -->
     @if (count($allAspectsData) > 0)
-    @push('scripts')
-    <script>
-        (function() {
+        @push('scripts')
+            <script>
+                (function() {
                     // Wait for Chart.js to be available
                     function waitForChartJs(callback) {
                         if (typeof Chart !== 'undefined') {
@@ -392,7 +392,9 @@
                                             color: colors.text,
                                             font: {
                                                 size: 16
-                                            }
+                                            },
+                                            backdropColor: 'transparent', // Tambahkan ini
+                                            showLabelBackdrop: false // Tambahkan ini
                                         },
                                         grid: {
                                             color: colors.grid
@@ -589,7 +591,9 @@
                                             color: colors.text,
                                             font: {
                                                 size: 16
-                                            }
+                                            },
+                                            backdropColor: 'transparent', // Tambahkan ini
+                                            showLabelBackdrop: false // Tambahkan ini
                                         },
                                         grid: {
                                             color: colors.grid
@@ -786,7 +790,9 @@
                                             color: colors.text,
                                             font: {
                                                 size: 16
-                                            }
+                                            },
+                                            backdropColor: 'transparent', // Tambahkan ini
+                                            showLabelBackdrop: false // Tambahkan ini
                                         },
                                         grid: {
                                             color: colors.grid
@@ -921,7 +927,7 @@
 
                     setupDarkModeListener();
                 })();
-    </script>
-    @endpush
+            </script>
+        @endpush
     @endif
 </div>
