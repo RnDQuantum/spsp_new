@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Laravel Launcher - SPSP</title>
+    <meta http-equiv="x-ua-compatible" content="IE=edge">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <HTA:APPLICATION 
+        ID="LaravelLauncher"
+        APPLICATIONNAME="Laravel Launcher"
+        BORDER="dialog"
+        BORDERSTYLE="normal"
+        CAPTION="yes"
+        MAXIMIZEBUTTON="no"
+        MINIMIZEBUTTON="yes"
+        SHOWINTASKBAR="yes"
+        SINGLEINSTANCE="yes"
+        SYSMENU="yes"
+        WINDOWSTATE="normal"
+    />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 25px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 35px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 550px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #6c757d;
+            font-size: 13px;
+            margin-bottom: 25px;
+        }
+
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .status-card {
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .status-card.active {
+            background: linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%);
+        }
+
+        .status-label {
+            font-size: 11px;
+            color: #6c757d;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .status-value {
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .indicator.off {
+            background: #dc3545;
+        }
+
+        .indicator.on {
+            background: #28a745;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        button {
+            padding: 18px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-start {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-start:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-stop {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .btn-stop:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(245, 87, 108, 0.4);
+        }
+
+        .btn-open {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            grid-column: 1 / -1;
+        }
+
+        .btn-open:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(79, 172, 254, 0.4);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .info-box {
+            padding: 15px;
+            background: #e9ecef;
+            border-radius: 10px;
+            font-size: 13px;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .info-box.success {
+            background: linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%);
+            color: #155724;
+        }
+
+        .info-box.error {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            color: #721c24;
+        }
+
+        .logs {
+            padding: 15px;
+            background: #1e1e1e;
+            color: #d4d4d4;
+            border-radius: 10px;
+            font-family: 'Consolas', monospace;
+            font-size: 11px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .log-entry {
+            margin-bottom: 3px;
+        }
+
+        .log-time {
+            color: #858585;
+        }
+
+        .log-success {
+            color: #4ec9b0;
+        }
+
+        .log-error {
+            color: #f48771;
+        }
+
+        .log-info {
+            color: #9cdcfe;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Laravel Launcher</h1>
+        <div class="subtitle">SPSP Application</div>
+
+        <div class="status-grid">
+            <div class="status-card" id="phpCard">
+                <div class="status-label">PHP Server</div>
+                <div class="status-value">
+                    <span class="indicator off" id="phpIndicator"></span>
+                    <span id="phpStatus">Off</span>
+                </div>
+            </div>
+            <div class="status-card" id="viteCard">
+                <div class="status-label">Vite Dev</div>
+                <div class="status-value">
+                    <span class="indicator off" id="viteIndicator"></span>
+                    <span id="viteStatus">Off</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="button-group">
+            <button class="btn-start" onclick="startAll()" id="btnStart">
+                START ALL
+            </button>
+            <button class="btn-stop" onclick="stopAll()" id="btnStop" disabled>
+                STOP ALL
+            </button>
+            <button class="btn-open" onclick="openBrowser()" id="btnOpen" disabled>
+                OPEN BROWSER
+            </button>
+        </div>
+
+        <div class="info-box" id="infoBox">
+            Klik "START ALL" untuk menjalankan aplikasi
+        </div>
+
+        <div class="logs" id="logs">
+            <div class="log-entry log-info"><span class="log-time">[System]</span> Ready...</div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        var shell = new ActiveXObject("WScript.Shell");
+        var fso = new ActiveXObject("Scripting.FileSystemObject");
+        var isRunning = false;
+
+        // KONFIGURASI - SESUAIKAN INI!
+        var LARAVEL_PATH = "C:\\laragon\\www\\spsp_new";  // <-- Path Laravel Anda
+        var MYSQL_PATH = "C:\\laragon\\bin\\mysql\\mysql-8.0.30-winx64";  // <-- Path MySQL Laragon
+        var APP_URL = "http://127.0.0.1:8000";
+
+        function addLog(message, type) {
+            var logs = document.getElementById("logs");
+            var time = new Date().toLocaleTimeString('id-ID');
+            var logClass = 'log-' + (type || 'info');
+            logs.innerHTML += '<div class="log-entry ' + logClass + '"><span class="log-time">[' + time + ']</span> ' + message + '</div>';
+            logs.scrollTop = logs.scrollHeight;
+        }
+
+        function updateInfo(message, type) {
+            var infoBox = document.getElementById("infoBox");
+            infoBox.className = "info-box" + (type ? " " + type : "");
+            infoBox.innerHTML = message;
+        }
+
+        function setStatus(service, status) {
+            var indicator = document.getElementById(service + "Indicator");
+            var statusText = document.getElementById(service + "Status");
+            var card = document.getElementById(service + "Card");
+            
+            if (status) {
+                indicator.className = "indicator on";
+                statusText.innerText = "Running";
+                card.className = "status-card active";
+            } else {
+                indicator.className = "indicator off";
+                statusText.innerText = "Off";
+                card.className = "status-card";
+            }
+        }
+
+        function startAll() {
+            try {
+                addLog('=== MEMULAI APLIKASI ===', 'info');
+                
+                // Validasi folder Laravel
+                if (!fso.FolderExists(LARAVEL_PATH)) {
+                    addLog('ERROR: Folder tidak ditemukan: ' + LARAVEL_PATH, 'error');
+                    updateInfo('Folder Laravel tidak ditemukan! Edit path di file HTA.', 'error');
+                    alert('Folder Laravel tidak ditemukan!\n\nPath: ' + LARAVEL_PATH + '\n\nSilakan edit variabel LARAVEL_PATH di dalam file HTA ini.');
+                    return;
+                }
+
+                if (!fso.FileExists(LARAVEL_PATH + "\\artisan")) {
+                    addLog('ERROR: File artisan tidak ditemukan', 'error');
+                    updateInfo('Ini bukan folder Laravel yang valid!', 'error');
+                    return;
+                }
+
+                addLog('Path Laravel: ' + LARAVEL_PATH, 'success');
+                updateInfo('Memulai services...', '');
+
+                // START PHP Artisan
+                addLog('Starting PHP Artisan Server...', 'info');
+                var phpCmd = 'cmd /c start "PHP Artisan" cmd /k "cd /d ' + LARAVEL_PATH + ' && php artisan serve"';
+                addLog('Command: ' + phpCmd, 'info');
+                shell.Run(phpCmd, 1);  // 1 = normal window, 0 = hidden
+                
+                setTimeout(function() {
+                    setStatus('php', true);
+                    addLog('PHP Server running at ' + APP_URL, 'success');
+                }, 3000);
+
+                // START NPM Dev
+                setTimeout(function() {
+                    addLog('Starting Vite Dev Server...', 'info');
+                    var npmCmd = 'cmd /c start "Vite Dev" cmd /k "cd /d ' + LARAVEL_PATH + ' && npm run dev"';
+                    addLog('Command: ' + npmCmd, 'info');
+                    shell.Run(npmCmd, 1);
+                    
+                    setTimeout(function() {
+                        setStatus('vite', true);
+                        addLog('Vite Dev Server running', 'success');
+                        
+                        isRunning = true;
+                        updateUI();
+                        updateInfo('Aplikasi berjalan! Klik OPEN BROWSER', 'success');
+                        
+                        // Auto open browser
+                        setTimeout(function() {
+                            openBrowser();
+                        }, 2000);
+                    }, 3000);
+                }, 3000);
+                
+            } catch(e) {
+                addLog('FATAL ERROR: ' + e.message, 'error');
+                addLog('Description: ' + e.description, 'error');
+                updateInfo('Error: ' + e.message, 'error');
+                alert('Error:\n' + e.message + '\n\n' + e.description);
+            }
+        }
+
+        function stopAll() {
+            try {
+                addLog('=== MENGHENTIKAN APLIKASI ===', 'info');
+                updateInfo('Menghentikan services...', '');
+                
+                // Kill processes
+                addLog('Stopping PHP...', 'info');
+                shell.Run("taskkill /F /IM php.exe /T", 0, false);
+                
+                addLog('Stopping Node...', 'info');
+                shell.Run("taskkill /F /IM node.exe /T", 0, false);
+                
+                // Reset status
+                setStatus('php', false);
+                setStatus('vite', false);
+                
+                isRunning = false;
+                updateUI();
+                
+                addLog('Semua service dihentikan', 'success');
+                updateInfo('Service dihentikan. Klik START ALL untuk menjalankan lagi.', '');
+                
+            } catch(e) {
+                addLog('Error: ' + e.message, 'error');
+            }
+        }
+
+        function openBrowser() {
+            try {
+                shell.Run(APP_URL);
+                addLog('Browser opened: ' + APP_URL, 'info');
+            } catch(e) {
+                addLog('Error opening browser: ' + e.message, 'error');
+            }
+        }
+
+        function updateUI() {
+            document.getElementById("btnStart").disabled = isRunning;
+            document.getElementById("btnStop").disabled = !isRunning;
+            document.getElementById("btnOpen").disabled = !isRunning;
+        }
+
+        window.onbeforeunload = function() {
+            if (isRunning) {
+                if (confirm("Service masih berjalan!\n\nHentikan semua service?")) {
+                    stopAll();
+                }
+            }
+        }
+
+        // Log info on load
+        addLog('Path Laravel: ' + LARAVEL_PATH, 'info');
+        addLog('App URL: ' + APP_URL, 'info');
+        
+        // Check if Laravel folder exists
+        if (fso.FolderExists(LARAVEL_PATH)) {
+            addLog('Folder Laravel ditemukan!', 'success');
+            if (fso.FileExists(LARAVEL_PATH + "\\artisan")) {
+                addLog('File artisan ditemukan!', 'success');
+                updateInfo('Siap untuk dijalankan. Klik START ALL', '');
+            } else {
+                addLog('WARNING: File artisan tidak ditemukan', 'error');
+                updateInfo('File artisan tidak ditemukan! Pastikan path benar.', 'error');
+            }
+        } else {
+            addLog('WARNING: Folder Laravel tidak ditemukan', 'error');
+            updateInfo('Folder Laravel tidak ditemukan! Edit path di file HTA.', 'error');
+        }
+    </script>
+</body>
+</html>
