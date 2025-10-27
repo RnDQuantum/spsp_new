@@ -2,11 +2,11 @@
 <html>
 
 <head>
-    <title>Laravel Launcher - SPSP</title>
+    <title>SPSP Launcher</title>
     <meta http-equiv="x-ua-compatible" content="IE=edge">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <HTA:APPLICATION ID="LaravelLauncher" APPLICATIONNAME="Laravel Launcher" BORDER="dialog" BORDERSTYLE="normal"
-        CAPTION="yes" MAXIMIZEBUTTON="no" MINIMIZEBUTTON="yes" SHOWINTASKBAR="yes" SINGLEINSTANCE="yes" SYSMENU="yes"
+    <HTA:APPLICATION ID="SPSPLauncher" APPLICATIONNAME="SPSP Launcer" BORDER="dialog" BORDERSTYLE="normal" CAPTION="yes"
+        MAXIMIZEBUTTON="no" MINIMIZEBUTTON="yes" SHOWINTASKBAR="yes" SINGLEINSTANCE="yes" SYSMENU="yes"
         WINDOWSTATE="normal" />
     <style>
         * {
@@ -144,23 +144,23 @@
         }
 
         .btn-start {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #2744c6 0%, #764ba2 100%);
             color: white;
         }
 
         .btn-stop {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            background: linear-gradient(135deg, #f10d0d 0%, #d7394e 100%);
             color: white;
         }
 
         .btn-open {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            background: linear-gradient(135deg, #09028c 0%, #0ea7af 100%);
             color: white;
             grid-column: 1 / -1;
         }
 
         .btn-db {
-            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            background: linear-gradient(135deg, #04b03d 0%, #08c19f 100%);
             color: white;
             grid-column: 1 / -1;
         }
@@ -224,12 +224,45 @@
         .log-info {
             color: #9cdcfe;
         }
+
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            /* jarak antar baris */
+            width: 100%;
+        }
+
+        .button-group .row {
+            display: flex;
+            gap: 10px;
+            /* jarak antar tombol di baris pertama */
+            width: 100%;
+        }
+
+        .button-group .row:first-child button {
+            flex: 1;
+            /* bagi rata lebar untuk 3 tombol pertama */
+        }
+
+        .button-group .btn-open {
+            width: 100%;
+            /* tombol OPEN BROWSER memenuhi lebar container */
+        }
+
+        /* Styling opsional */
+        button {
+            padding: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 5px;
+        }
     </style>
 </head>
 
 <body>
     <div class="container">
-        <h1>Laravel Launcher</h1>
+        <h1>SPSP Launcher</h1>
         <div class="subtitle">SPSP Application</div>
 
         <div class="status-grid">
@@ -251,11 +284,16 @@
         </div>
 
         <div class="button-group">
-            <button class="btn-start" onclick="startAll()" id="btnStart">START ALL</button>
-            <button class="btn-stop" onclick="stopAll()" id="btnStop" disabled>STOP ALL</button>
-            <button class="btn-db" onclick="checkDatabase()" id="btnDB">TEST DATABASE</button>
-            <button class="btn-open" onclick="openBrowser()" id="btnOpen" disabled>OPEN BROWSER</button>
+            <div class="row">
+                <button class="btn-start" onclick="startAll()" id="btnStart">START ALL</button>
+                <button class="btn-stop" onclick="stopAll()" id="btnStop" disabled>STOP ALL</button>
+                <button class="btn-db" onclick="checkDatabase()" id="btnDB">TEST DATABASE</button>
+            </div>
+            <div class="row">
+                <button class="btn-open" onclick="openBrowser()" id="btnOpen" disabled>OPEN BROWSER</button>
+            </div>
         </div>
+
 
         <div class="info-box" id="infoBox">Klik "START ALL" untuk menjalankan aplikasi</div>
 
