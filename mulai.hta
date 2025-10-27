@@ -1,22 +1,13 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Laravel Launcher - SPSP</title>
     <meta http-equiv="x-ua-compatible" content="IE=edge">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <HTA:APPLICATION 
-        ID="LaravelLauncher"
-        APPLICATIONNAME="Laravel Launcher"
-        BORDER="dialog"
-        BORDERSTYLE="normal"
-        CAPTION="yes"
-        MAXIMIZEBUTTON="no"
-        MINIMIZEBUTTON="yes"
-        SHOWINTASKBAR="yes"
-        SINGLEINSTANCE="yes"
-        SYSMENU="yes"
-        WINDOWSTATE="normal"
-    />
+    <HTA:APPLICATION ID="LaravelLauncher" APPLICATIONNAME="Laravel Launcher" BORDER="dialog" BORDERSTYLE="normal"
+        CAPTION="yes" MAXIMIZEBUTTON="no" MINIMIZEBUTTON="yes" SHOWINTASKBAR="yes" SINGLEINSTANCE="yes" SYSMENU="yes"
+        WINDOWSTATE="normal" />
     <style>
         * {
             margin: 0;
@@ -34,7 +25,7 @@
             background: white;
             border-radius: 20px;
             padding: 35px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             max-width: 550px;
             margin: 0 auto;
         }
@@ -45,7 +36,7 @@
             margin-bottom: 10px;
             font-size: 28px;
         }
-        
+
         .subtitle {
             text-align: center;
             color: #6c757d;
@@ -104,9 +95,35 @@
             animation: pulse 2s infinite;
         }
 
+        .indicator.loading {
+            border: 2px solid #f8f9fa;
+            border-top: 2px solid #ffc107;
+            border-radius: 50%;
+            width: 14px;
+            height: 14px;
+            animation: spin 1s linear infinite;
+        }
+
         @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.6; }
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.6;
+            }
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
         .button-group {
@@ -131,19 +148,9 @@
             color: white;
         }
 
-        .btn-start:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
-        }
-
         .btn-stop {
             background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
             color: white;
-        }
-
-        .btn-stop:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(245, 87, 108, 0.4);
         }
 
         .btn-open {
@@ -152,9 +159,15 @@
             grid-column: 1 / -1;
         }
 
-        .btn-open:hover:not(:disabled) {
+        .btn-db {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            color: white;
+            grid-column: 1 / -1;
+        }
+
+        button:hover:not(:disabled) {
             transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(79, 172, 254, 0.4);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
         }
 
         button:disabled {
@@ -213,6 +226,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <h1>Laravel Launcher</h1>
@@ -221,35 +235,29 @@
         <div class="status-grid">
             <div class="status-card" id="phpCard">
                 <div class="status-label">PHP Server</div>
-                <div class="status-value">
-                    <span class="indicator off" id="phpIndicator"></span>
-                    <span id="phpStatus">Off</span>
-                </div>
+                <div class="status-value"><span class="indicator off" id="phpIndicator"></span><span
+                        id="phpStatus">Off</span></div>
             </div>
             <div class="status-card" id="viteCard">
                 <div class="status-label">Vite Dev</div>
-                <div class="status-value">
-                    <span class="indicator off" id="viteIndicator"></span>
-                    <span id="viteStatus">Off</span>
-                </div>
+                <div class="status-value"><span class="indicator off" id="viteIndicator"></span><span
+                        id="viteStatus">Off</span></div>
+            </div>
+            <div class="status-card" id="dbCard">
+                <div class="status-label">Database</div>
+                <div class="status-value"><span class="indicator off" id="dbIndicator"></span><span
+                        id="dbStatus">Off</span></div>
             </div>
         </div>
 
         <div class="button-group">
-            <button class="btn-start" onclick="startAll()" id="btnStart">
-                START ALL
-            </button>
-            <button class="btn-stop" onclick="stopAll()" id="btnStop" disabled>
-                STOP ALL
-            </button>
-            <button class="btn-open" onclick="openBrowser()" id="btnOpen" disabled>
-                OPEN BROWSER
-            </button>
+            <button class="btn-start" onclick="startAll()" id="btnStart">START ALL</button>
+            <button class="btn-stop" onclick="stopAll()" id="btnStop" disabled>STOP ALL</button>
+            <button class="btn-db" onclick="checkDatabase()" id="btnDB">TEST DATABASE</button>
+            <button class="btn-open" onclick="openBrowser()" id="btnOpen" disabled>OPEN BROWSER</button>
         </div>
 
-        <div class="info-box" id="infoBox">
-            Klik "START ALL" untuk menjalankan aplikasi
-        </div>
+        <div class="info-box" id="infoBox">Klik "START ALL" untuk menjalankan aplikasi</div>
 
         <div class="logs" id="logs">
             <div class="log-entry log-info"><span class="log-time">[System]</span> Ready...</div>
@@ -261,9 +269,7 @@
         var fso = new ActiveXObject("Scripting.FileSystemObject");
         var isRunning = false;
 
-        // KONFIGURASI - SESUAIKAN INI!
-        var LARAVEL_PATH = "C:\\laragon\\www\\spsp_new";  // <-- Path Laravel Anda
-        var MYSQL_PATH = "C:\\laragon\\bin\\mysql\\mysql-8.0.30-winx64";  // <-- Path MySQL Laragon
+        var LARAVEL_PATH = "C:\\laragon\\www\\spsp_new";
         var APP_URL = "http://127.0.0.1:8000";
 
         function addLog(message, type) {
@@ -284,7 +290,12 @@
             var indicator = document.getElementById(service + "Indicator");
             var statusText = document.getElementById(service + "Status");
             var card = document.getElementById(service + "Card");
-            
+            if (status === "loading") {
+                indicator.className = "indicator loading";
+                statusText.innerText = "Checking...";
+                card.className = "status-card";
+                return;
+            }
             if (status) {
                 indicator.className = "indicator on";
                 statusText.innerText = "Running";
@@ -296,101 +307,106 @@
             }
         }
 
+        // ✅ Cek status MySQL dengan animasi loading
+        function checkDatabase() {
+            var btn = document.getElementById("btnDB");
+            btn.disabled = true;
+            setStatus("db", "loading");
+            updateInfo("Memeriksa status database...", "");
+
+            setTimeout(function () { // beri jeda agar UI sempat refresh
+                try {
+                    addLog("Memeriksa status MySQL...", "info");
+                    var exec = shell.Exec('cmd /c tasklist /FI "IMAGENAME eq mysqld.exe"');
+                    var output = exec.StdOut.ReadAll();
+
+                    if (output.indexOf("mysqld.exe") !== -1) {
+                        setStatus("db", true);
+                        addLog("Database MySQL aktif.", "success");
+                        updateInfo("Database sedang berjalan.", "success");
+                    } else {
+                        setStatus("db", false);
+                        addLog("Database MySQL tidak aktif.", "error");
+                        updateInfo("Database belum berjalan (silakan nyalakan lewat Laragon).", "error");
+                    }
+                } catch (e) {
+                    addLog("Error cek database: " + e.message, "error");
+                    updateInfo("Error saat memeriksa database.", "error");
+                    setStatus("db", false);
+                } finally {
+                    btn.disabled = false;
+                }
+            }, 200);
+        }
+
         function startAll() {
             try {
-                addLog('=== MEMULAI APLIKASI ===', 'info');
-                
-                // Validasi folder Laravel
+                addLog("=== MEMULAI APLIKASI ===", "info");
                 if (!fso.FolderExists(LARAVEL_PATH)) {
-                    addLog('ERROR: Folder tidak ditemukan: ' + LARAVEL_PATH, 'error');
-                    updateInfo('Folder Laravel tidak ditemukan! Edit path di file HTA.', 'error');
-                    alert('Folder Laravel tidak ditemukan!\n\nPath: ' + LARAVEL_PATH + '\n\nSilakan edit variabel LARAVEL_PATH di dalam file HTA ini.');
+                    addLog("ERROR: Folder tidak ditemukan: " + LARAVEL_PATH, "error");
+                    updateInfo("Folder Laravel tidak ditemukan! Edit path di file HTA.", "error");
                     return;
                 }
-
-                if (!fso.FileExists(LARAVEL_PATH + "\\artisan")) {
-                    addLog('ERROR: File artisan tidak ditemukan', 'error');
-                    updateInfo('Ini bukan folder Laravel yang valid!', 'error');
-                    return;
-                }
-
-                addLog('Path Laravel: ' + LARAVEL_PATH, 'success');
-                updateInfo('Memulai services...', '');
-
-                // START PHP Artisan
-                addLog('Starting PHP Artisan Server...', 'info');
-                var phpCmd = 'cmd /c start "PHP Artisan" cmd /k "cd /d ' + LARAVEL_PATH + ' && php artisan serve"';
-                addLog('Command: ' + phpCmd, 'info');
-                shell.Run(phpCmd, 1);  // 1 = normal window, 0 = hidden
-                
-                setTimeout(function() {
-                    setStatus('php', true);
-                    addLog('PHP Server running at ' + APP_URL, 'success');
+                addLog("Path Laravel: " + LARAVEL_PATH, "success");
+                updateInfo("Memulai services...", "");
+                shell.Run('cmd /c start "PHP Artisan" cmd /k "cd /d ' + LARAVEL_PATH + ' && php artisan serve"', 1);
+                setTimeout(function () {
+                    setStatus("php", true);
+                    addLog("PHP Server running at " + APP_URL, "success");
                 }, 3000);
-
-                // START NPM Dev
-                setTimeout(function() {
-                    addLog('Starting Vite Dev Server...', 'info');
-                    var npmCmd = 'cmd /c start "Vite Dev" cmd /k "cd /d ' + LARAVEL_PATH + ' && npm run dev"';
-                    addLog('Command: ' + npmCmd, 'info');
-                    shell.Run(npmCmd, 1);
-                    
-                    setTimeout(function() {
-                        setStatus('vite', true);
-                        addLog('Vite Dev Server running', 'success');
-                        
+                setTimeout(function () {
+                    shell.Run('cmd /c start "Vite Dev" cmd /k "cd /d ' + LARAVEL_PATH + ' && npm run dev"', 1);
+                    setTimeout(function () {
+                        setStatus("vite", true);
+                        addLog("Vite Dev Server running", "success");
                         isRunning = true;
                         updateUI();
-                        updateInfo('Aplikasi berjalan! Klik OPEN BROWSER', 'success');
-                        
-                        // Auto open browser
-                        setTimeout(function() {
-                            openBrowser();
-                        }, 2000);
+                        updateInfo("Aplikasi berjalan! Klik OPEN BROWSER", "success");
+                        setTimeout(openBrowser, 2000);
                     }, 3000);
                 }, 3000);
-                
-            } catch(e) {
-                addLog('FATAL ERROR: ' + e.message, 'error');
-                addLog('Description: ' + e.description, 'error');
-                updateInfo('Error: ' + e.message, 'error');
-                alert('Error:\n' + e.message + '\n\n' + e.description);
+            } catch (e) {
+                addLog("FATAL ERROR: " + e.message, "error");
+                updateInfo("Error: " + e.message, "error");
             }
         }
 
         function stopAll() {
             try {
-                addLog('=== MENGHENTIKAN APLIKASI ===', 'info');
-                updateInfo('Menghentikan services...', '');
-                
-                // Kill processes
-                addLog('Stopping PHP...', 'info');
+                addLog("=== MENGHENTIKAN APLIKASI ===", "info");
+                updateInfo("Menghentikan services...", "");
+
+                // Hentikan proses PHP & Node
+                addLog("Stopping PHP...", "info");
                 shell.Run("taskkill /F /IM php.exe /T", 0, false);
-                
-                addLog('Stopping Node...', 'info');
+
+                addLog("Stopping Node...", "info");
                 shell.Run("taskkill /F /IM node.exe /T", 0, false);
-                
-                // Reset status
-                setStatus('php', false);
-                setStatus('vite', false);
-                
+
+                // Tutup terminal yang terbuka (cmd window dengan title kita)
+                addLog("Closing opened terminal windows...", "info");
+                shell.Run('taskkill /FI "WINDOWTITLE eq PHP Artisan*" /F', 0, false);
+                shell.Run('taskkill /FI "WINDOWTITLE eq Vite Dev*" /F', 0, false);
+
+                // Reset status UI
+                setStatus("php", false);
+                setStatus("vite", false);
                 isRunning = false;
                 updateUI();
-                
-                addLog('Semua service dihentikan', 'success');
-                updateInfo('Service dihentikan. Klik START ALL untuk menjalankan lagi.', '');
-                
-            } catch(e) {
-                addLog('Error: ' + e.message, 'error');
+                addLog("Semua service dihentikan dan terminal ditutup", "success");
+                updateInfo("Service dihentikan. Klik START ALL untuk menjalankan lagi.", "");
+            } catch (e) {
+                addLog("Error: " + e.message, "error");
             }
         }
+
 
         function openBrowser() {
             try {
                 shell.Run(APP_URL);
-                addLog('Browser opened: ' + APP_URL, 'info');
-            } catch(e) {
-                addLog('Error opening browser: ' + e.message, 'error');
+                addLog("Browser opened: " + APP_URL, "info");
+            } catch (e) {
+                addLog("Error opening browser: " + e.message, "error");
             }
         }
 
@@ -400,32 +416,24 @@
             document.getElementById("btnOpen").disabled = !isRunning;
         }
 
-        window.onbeforeunload = function() {
-            if (isRunning) {
-                if (confirm("Service masih berjalan!\n\nHentikan semua service?")) {
-                    stopAll();
-                }
+        window.onbeforeunload = function () {
+            if (isRunning && confirm("Service masih berjalan!\n\nHentikan semua service?")) {
+                stopAll();
             }
         }
 
-        // Log info on load
-        addLog('Path Laravel: ' + LARAVEL_PATH, 'info');
-        addLog('App URL: ' + APP_URL, 'info');
-        
-        // Check if Laravel folder exists
+        addLog("Path Laravel: " + LARAVEL_PATH, "info");
+        addLog("App URL: " + APP_URL, "info");
         if (fso.FolderExists(LARAVEL_PATH)) {
-            addLog('Folder Laravel ditemukan!', 'success');
-            if (fso.FileExists(LARAVEL_PATH + "\\artisan")) {
-                addLog('File artisan ditemukan!', 'success');
-                updateInfo('Siap untuk dijalankan. Klik START ALL', '');
-            } else {
-                addLog('WARNING: File artisan tidak ditemukan', 'error');
-                updateInfo('File artisan tidak ditemukan! Pastikan path benar.', 'error');
-            }
+            addLog("Folder Laravel ditemukan!", "success");
         } else {
-            addLog('WARNING: Folder Laravel tidak ditemukan', 'error');
-            updateInfo('Folder Laravel tidak ditemukan! Edit path di file HTA.', 'error');
+            addLog("WARNING: Folder Laravel tidak ditemukan", "error");
         }
+
+        window.resizeTo(650, 810);
+        window.moveTo((screen.availWidth - 650) / 2, (screen.availHeight - 700) / 2); // supaya center
+
     </script>
 </body>
+
 </html>
