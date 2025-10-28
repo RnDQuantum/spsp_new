@@ -8,14 +8,17 @@ use Livewire\Component;
 class Sidebar extends Component
 {
     public ?string $eventCode = null;
+
     public ?int $positionFormationId = null;
+
     public ?int $participantId = null;
+
     public ?string $testNumber = null;
 
     protected $listeners = [
         'event-selected' => 'handleEventSelected',
         'position-selected' => 'handlePositionSelected',
-        'participant-selected' => 'handleParticipantSelected'
+        'participant-selected' => 'handleParticipantSelected',
     ];
 
     public function mount(): void
@@ -63,6 +66,33 @@ class Sidebar extends Component
     public function canShowIndividualReports(): bool
     {
         return $this->eventCode !== null && $this->testNumber !== null;
+    }
+
+    /**
+     * Check if current route matches the given route name
+     */
+    public function isActiveRoute(string $routeName, array $params = []): bool
+    {
+        if (! request()->route()) {
+            return false;
+        }
+
+        $currentRoute = request()->route()->getName();
+
+        if ($currentRoute === $routeName) {
+            // For routes with parameters, also check if params match
+            if (! empty($params)) {
+                foreach ($params as $key => $value) {
+                    if (request()->route($key) !== $value) {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        return false;
     }
 
     public function render()

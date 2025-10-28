@@ -20,7 +20,7 @@
     <x-navbar :title="$title ?? 'Dashboard'" />
 
     {{-- MAIN CONTENT --}}
-    <div :class="sidebarMinimized ? 'md:ml-20' : 'md:ml-64'" class="transition-all duration-300 pt-20 p-8 min-h-screen bg-gray-100 dark:bg-gray-900">
+    <div :class="sidebarMinimized ? 'md:ml-20' : 'md:ml-64'" class="transition-all duration-300 pt-16 md:pt-20 px-4 sm:px-6 lg:px-8 py-6 min-h-screen bg-gray-100 dark:bg-gray-900">
         {{ $slot }}
     </div>
 
