@@ -1,6 +1,40 @@
 <!-- Sidebar -->
-<div x-data="{ mobileOpen: false, minimized: true, individualOpen: false, generalOpen: false, mappingOpen: false, assessmentOpen: false }"
-    x-init="$dispatch('sidebar-toggled', { minimized: minimized })"
+<div x-data="{
+        mobileOpen: false,
+        minimized: $persist(true).as('sidebar_minimized'),
+        individualOpen: $persist(false).as('sidebar_individual_open'),
+        generalOpen: $persist(false).as('sidebar_general_open'),
+        mappingOpen: $persist(false).as('sidebar_mapping_open'),
+        assessmentOpen: $persist(false).as('sidebar_assessment_open'),
+        scrollPosition: 0,
+        init() {
+            // Restore scroll position after DOM is ready
+            this.$nextTick(() => {
+                const savedScroll = localStorage.getItem('sidebar_scroll_position');
+                if (savedScroll && this.$refs.sidebarNav) {
+                    this.$refs.sidebarNav.scrollTop = parseInt(savedScroll);
+                }
+            });
+            // Dispatch initial state
+            this.$dispatch('sidebar-toggled', { minimized: this.minimized });
+
+            // Save scroll position before page unload
+            window.addEventListener('beforeunload', () => {
+                this.saveScrollPosition();
+            });
+
+            // Save scroll position on Livewire navigation
+            document.addEventListener('livewire:navigating', () => {
+                this.saveScrollPosition();
+            });
+        },
+        saveScrollPosition() {
+            if (this.$refs.sidebarNav) {
+                localStorage.setItem('sidebar_scroll_position', this.$refs.sidebarNav.scrollTop);
+            }
+        }
+    }"
+    x-init="init()"
     @sidebar-toggled.window="minimized = $event.detail.minimized">
     <!-- Mobile Toggle Button -->
     <button @click="mobileOpen = !mobileOpen"
@@ -46,7 +80,7 @@
             </div>
 
             <!-- Menu dengan Scroll -->
-            <nav class="flex-1 px-3 py-4 overflow-y-auto space-y-1">
+            <nav x-ref="sidebarNav" @scroll.debounce.500ms="saveScrollPosition()" class="flex-1 px-3 py-4 overflow-y-auto space-y-1">
                 <!-- Dashboard -->
                 <a href="/dashboard" x-tooltip.raw="minimized ? 'Dashboard' : null"
                     @class([

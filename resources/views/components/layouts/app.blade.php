@@ -10,7 +10,15 @@
     @livewireStyles
 </head>
 
-<body class="bg-gray-100 min-h-screen" x-data="{ sidebarMinimized: false }"
+<body class="bg-gray-100 min-h-screen" x-data="{
+        sidebarMinimized: $persist(true).as('sidebar_minimized'),
+        init() {
+            // Listen for sidebar toggle events to keep in sync
+            this.$watch('sidebarMinimized', value => {
+                this.$dispatch('sidebar-toggled', { minimized: value });
+            });
+        }
+    }" x-init="init()"
     @sidebar-toggled.window="sidebarMinimized = $event.detail.minimized">
 
     {{-- SIDEBAR --}}

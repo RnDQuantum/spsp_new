@@ -1,7 +1,7 @@
 @props(['title' => 'Dashboard'])
 
 <!-- Navbar Sticky -->
-<nav x-data="{ sidebarMinimized: true }" @sidebar-toggled.window="sidebarMinimized = $event.detail.minimized"
+<nav x-data="{ sidebarMinimized: $persist(true).as('sidebar_minimized') }" @sidebar-toggled.window="sidebarMinimized = $event.detail.minimized"
     :class="sidebarMinimized ? 'md:left-20' : 'md:left-64'"
     class="fixed top-0 right-0 left-0 z-30 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm transition-all duration-300 md:left-20 backdrop-blur-sm bg-opacity-95 dark:bg-opacity-95">
     <div class="px-4 sm:px-6 lg:px-8 py-3">
