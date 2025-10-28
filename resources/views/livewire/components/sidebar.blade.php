@@ -33,9 +33,7 @@
                 localStorage.setItem('sidebar_scroll_position', this.$refs.sidebarNav.scrollTop);
             }
         }
-    }"
-    x-init="init()"
-    @sidebar-toggled.window="minimized = $event.detail.minimized">
+    }" x-init="init()" @sidebar-toggled.window="minimized = $event.detail.minimized">
     <!-- Mobile Toggle Button -->
     <button @click="mobileOpen = !mobileOpen"
         class="fixed top-4 left-4 z-50 p-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg shadow-lg md:hidden hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
@@ -73,20 +71,23 @@
 
         <div class="h-full flex flex-col">
             <!-- Logo/Brand -->
-            <div :class="minimized ? 'text-center' : ''" class="px-4 py-6 border-b border-gray-200 dark:border-gray-700">
+            <div :class="minimized ? 'text-center' : ''"
+                class="px-4 py-6 border-b border-gray-200 dark:border-gray-700">
                 <img :src="minimized ? '{{ asset('images/thumb-qhrmi.png') }}' : '{{ asset('images/thumb-qhrmi-hd.jpg') }}'"
                     :alt="minimized ? 'MD' : 'My Dashboard'" :class="minimized ? 'h-10 mx-auto' : 'ml-2 h-12'"
                     class="object-contain transition-all duration-300">
             </div>
 
             <!-- Menu dengan Scroll -->
-            <nav x-ref="sidebarNav" @scroll.debounce.500ms="saveScrollPosition()" class="flex-1 px-3 py-4 overflow-y-auto space-y-1">
+            <nav x-ref="sidebarNav" @scroll.debounce.500ms="saveScrollPosition()"
+                class="flex-1 px-3 py-4 overflow-y-auto space-y-1">
                 <!-- Dashboard -->
                 <a href="/dashboard" x-tooltip.raw="minimized ? 'Dashboard' : null"
-                    @class([
-                        'group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200',
-                        'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border-l-4 border-blue-700 dark:border-blue-400' => $this->isActiveRoute('dashboard'),
-                        'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' => !$this->isActiveRoute('dashboard'),
+                    @class([ 'group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200'
+                    , 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border-l-4 border-blue-700 dark:border-blue-400'=>
+                    $this->isActiveRoute('dashboard'),
+                    'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' =>
+                    !$this->isActiveRoute('dashboard'),
                     ])
                     :class="minimized ? 'justify-center px-2' : ''">
                     <i class="fa-solid fa-house w-5 text-center" :class="!minimized && 'mr-3'"></i>
@@ -96,15 +97,17 @@
 
                 <!-- Shortlist Peserta -->
                 <a wire:navigate href="{{ route('shortlist') }}" x-tooltip.raw="minimized ? 'Shortlist Peserta' : null"
-                    @class([
-                        'group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200',
-                        'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border-l-4 border-blue-700 dark:border-blue-400' => $this->isActiveRoute('shortlist'),
-                        'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' => !$this->isActiveRoute('shortlist'),
+                    @class([ 'group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200'
+                    , 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border-l-4 border-blue-700 dark:border-blue-400'=>
+                    $this->isActiveRoute('shortlist'),
+                    'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' =>
+                    !$this->isActiveRoute('shortlist'),
                     ])
                     :class="minimized ? 'justify-center px-2' : ''">
                     <i class="fa-solid fa-users w-5 text-center" :class="!minimized && 'mr-3'"></i>
                     <span x-show="!minimized" x-transition:enter="transition ease-out duration-200"
-                        x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">Shortlist Peserta</span>
+                        x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">Shortlist
+                        Peserta</span>
                 </a>
 
                 <!-- Individual Report dengan Sub Menu -->
@@ -132,38 +135,46 @@
 
                     <!-- Sub Menu Individual Report -->
                     <div x-show="individualOpen" x-transition:enter="transition ease-out duration-200"
-                        x-transition:enter-start="opacity-0 -translate-y-1" x-transition:enter-end="opacity-100 translate-y-0"
+                        x-transition:enter-start="opacity-0 -translate-y-1"
+                        x-transition:enter-end="opacity-100 translate-y-0"
                         x-transition:leave="transition ease-in duration-150"
-                        x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-1"
-                        id="submenu-individual" class="ml-4 mt-1 space-y-1" role="menu" aria-labelledby="btn-individual"
-                        style="display: none;">
+                        x-transition:leave-start="opacity-100 translate-y-0"
+                        x-transition:leave-end="opacity-0 -translate-y-1" id="submenu-individual"
+                        class="ml-4 mt-1 space-y-1" role="menu" aria-labelledby="btn-individual" style="display: none;">
                         @if (!$this->canShowIndividualReports())
-                            <div
-                                class="mx-2 my-2 p-2.5 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-600/50 rounded-lg">
-                                <div class="flex items-start gap-2">
-                                    <i class="fa-solid fa-circle-exclamation text-yellow-600 dark:text-yellow-400 text-sm mt-0.5"></i>
-                                    <div class="flex-1">
-                                        <p class="text-xs font-semibold text-yellow-800 dark:text-yellow-300 mb-1">Pilih
-                                            Data</p>
-                                        <p class="text-xs text-yellow-700 dark:text-yellow-400/90 leading-relaxed">
-                                            Pilih Proyek & Peserta di
-                                            <a href="{{ route('dashboard') }}" wire:navigate
-                                                class="underline hover:text-yellow-600 dark:hover:text-yellow-300 font-medium">Dashboard</a>
-                                        </p>
-                                    </div>
+                        <div
+                            class="mx-2 my-2 p-2.5 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-600/50 rounded-lg">
+                            <div class="flex items-start gap-2">
+                                <i
+                                    class="fa-solid fa-circle-exclamation text-yellow-600 dark:text-yellow-400 text-sm mt-0.5"></i>
+                                <div class="flex-1">
+                                    <p class="text-xs font-semibold text-yellow-800 dark:text-yellow-300 mb-1">Pilih
+                                        Data</p>
+                                    <p class="text-xs text-yellow-700 dark:text-yellow-400/90 leading-relaxed">
+                                        Pilih Proyek & Peserta di
+                                        <a href="{{ route('dashboard') }}" wire:navigate
+                                            class="underline hover:text-yellow-600 dark:hover:text-yellow-300 font-medium">Dashboard</a>
+                                        atau pilih salah satu peserta di
+                                        <a href="{{ route('shortlist') }}" wire:navigate
+                                            class="underline hover:text-yellow-600 dark:hover:text-yellow-300 font-medium">Shortlist</a>
+                                    </p>
                                 </div>
                             </div>
+                        </div>
                         @endif
 
                         <!-- Grouping: General -->
                         <div class="pt-2">
                             <a wire:navigate
                                 href="{{ $this->canShowIndividualReports() ? route('general_matching', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) : '#' }}"
-                                role="menuitem" @class([
-                                    'block px-3 py-2 text-xs rounded-lg transition-all duration-200',
-                                    'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium' => $this->isActiveRoute('general_matching'),
-                                    'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' => $this->canShowIndividualReports() && !$this->isActiveRoute('general_matching'),
-                                    'text-gray-400 dark:text-gray-600 cursor-not-allowed' => !$this->canShowIndividualReports(),
+                                role="menuitem"
+                                @class([ 'block px-3 py-2 text-xs rounded-lg transition-all duration-200'
+                                , 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium'=>
+                                $this->isActiveRoute('general_matching'),
+                                'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' =>
+                                $this->canShowIndividualReports() && !$this->isActiveRoute('general_matching'),
+                                'text-gray-400 dark:text-gray-600 cursor-not-allowed' =>
+                                !$this->canShowIndividualReports(),
                                 ])
                                 @if (!$this->canShowIndividualReports()) title="Pilih data terlebih dahulu" @endif>
                                 <i class="fa-solid fa-circle-dot mr-2 text-xs"></i>General Matching
@@ -189,41 +200,53 @@
                                 class="ml-3 space-y-1" style="display: none;">
                                 <a wire:navigate
                                     href="{{ $this->canShowIndividualReports() ? route('general_mapping', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) : '#' }}"
-                                    role="menuitem" @class([
-                                        'block px-3 py-2 text-xs rounded-lg transition-all duration-200',
-                                        'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium' => $this->isActiveRoute('general_mapping'),
-                                        'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' => $this->canShowIndividualReports() && !$this->isActiveRoute('general_mapping'),
-                                        'text-gray-400 dark:text-gray-600 cursor-not-allowed' => !$this->canShowIndividualReports(),
+                                    role="menuitem"
+                                    @class([ 'block px-3 py-2 text-xs rounded-lg transition-all duration-200'
+                                    , 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium'=>
+                                    $this->isActiveRoute('general_mapping'),
+                                    'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' =>
+                                    $this->canShowIndividualReports() && !$this->isActiveRoute('general_mapping'),
+                                    'text-gray-400 dark:text-gray-600 cursor-not-allowed' =>
+                                    !$this->canShowIndividualReports(),
                                     ])>
                                     <i class="fa-solid fa-circle text-[0.4rem] mr-2"></i>General Mapping
                                 </a>
                                 <a wire:navigate
                                     href="{{ $this->canShowIndividualReports() ? route('general_psy_mapping', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) : '#' }}"
-                                    role="menuitem" @class([
-                                        'block px-3 py-2 text-xs rounded-lg transition-all duration-200',
-                                        'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium' => $this->isActiveRoute('general_psy_mapping'),
-                                        'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' => $this->canShowIndividualReports() && !$this->isActiveRoute('general_psy_mapping'),
-                                        'text-gray-400 dark:text-gray-600 cursor-not-allowed' => !$this->canShowIndividualReports(),
+                                    role="menuitem"
+                                    @class([ 'block px-3 py-2 text-xs rounded-lg transition-all duration-200'
+                                    , 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium'=>
+                                    $this->isActiveRoute('general_psy_mapping'),
+                                    'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' =>
+                                    $this->canShowIndividualReports() && !$this->isActiveRoute('general_psy_mapping'),
+                                    'text-gray-400 dark:text-gray-600 cursor-not-allowed' =>
+                                    !$this->canShowIndividualReports(),
                                     ])>
                                     <i class="fa-solid fa-circle text-[0.4rem] mr-2"></i>Psychology Mapping
                                 </a>
                                 <a wire:navigate
                                     href="{{ $this->canShowIndividualReports() ? route('general_mc_mapping', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) : '#' }}"
-                                    role="menuitem" @class([
-                                        'block px-3 py-2 text-xs rounded-lg transition-all duration-200',
-                                        'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium' => $this->isActiveRoute('general_mc_mapping'),
-                                        'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' => $this->canShowIndividualReports() && !$this->isActiveRoute('general_mc_mapping'),
-                                        'text-gray-400 dark:text-gray-600 cursor-not-allowed' => !$this->canShowIndividualReports(),
+                                    role="menuitem"
+                                    @class([ 'block px-3 py-2 text-xs rounded-lg transition-all duration-200'
+                                    , 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium'=>
+                                    $this->isActiveRoute('general_mc_mapping'),
+                                    'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' =>
+                                    $this->canShowIndividualReports() && !$this->isActiveRoute('general_mc_mapping'),
+                                    'text-gray-400 dark:text-gray-600 cursor-not-allowed' =>
+                                    !$this->canShowIndividualReports(),
                                     ])>
                                     <i class="fa-solid fa-circle text-[0.4rem] mr-2"></i>Managerial Competency
                                 </a>
                                 <a wire:navigate
                                     href="{{ $this->canShowIndividualReports() ? route('ringkasan_mc_mapping', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) : '#' }}"
-                                    role="menuitem" @class([
-                                        'block px-3 py-2 text-xs rounded-lg transition-all duration-200',
-                                        'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium' => $this->isActiveRoute('ringkasan_mc_mapping'),
-                                        'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' => $this->canShowIndividualReports() && !$this->isActiveRoute('ringkasan_mc_mapping'),
-                                        'text-gray-400 dark:text-gray-600 cursor-not-allowed' => !$this->canShowIndividualReports(),
+                                    role="menuitem"
+                                    @class([ 'block px-3 py-2 text-xs rounded-lg transition-all duration-200'
+                                    , 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium'=>
+                                    $this->isActiveRoute('ringkasan_mc_mapping'),
+                                    'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' =>
+                                    $this->canShowIndividualReports() && !$this->isActiveRoute('ringkasan_mc_mapping'),
+                                    'text-gray-400 dark:text-gray-600 cursor-not-allowed' =>
+                                    !$this->canShowIndividualReports(),
                                     ])>
                                     <i class="fa-solid fa-circle text-[0.4rem] mr-2"></i>Ringkasan Potency
                                 </a>
@@ -249,31 +272,40 @@
                                 class="ml-3 space-y-1" style="display: none;">
                                 <a wire:navigate
                                     href="{{ $this->canShowIndividualReports() ? route('spider_plot', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) : '#' }}"
-                                    role="menuitem" @class([
-                                        'block px-3 py-2 text-xs rounded-lg transition-all duration-200',
-                                        'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium' => $this->isActiveRoute('spider_plot'),
-                                        'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' => $this->canShowIndividualReports() && !$this->isActiveRoute('spider_plot'),
-                                        'text-gray-400 dark:text-gray-600 cursor-not-allowed' => !$this->canShowIndividualReports(),
+                                    role="menuitem"
+                                    @class([ 'block px-3 py-2 text-xs rounded-lg transition-all duration-200'
+                                    , 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium'=>
+                                    $this->isActiveRoute('spider_plot'),
+                                    'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' =>
+                                    $this->canShowIndividualReports() && !$this->isActiveRoute('spider_plot'),
+                                    'text-gray-400 dark:text-gray-600 cursor-not-allowed' =>
+                                    !$this->canShowIndividualReports(),
                                     ])>
                                     <i class="fa-solid fa-circle text-[0.4rem] mr-2"></i>Spider Plot
                                 </a>
                                 <a wire:navigate
                                     href="{{ $this->canShowIndividualReports() ? route('ringkasan_assessment', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) : '#' }}"
-                                    role="menuitem" @class([
-                                        'block px-3 py-2 text-xs rounded-lg transition-all duration-200',
-                                        'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium' => $this->isActiveRoute('ringkasan_assessment'),
-                                        'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' => $this->canShowIndividualReports() && !$this->isActiveRoute('ringkasan_assessment'),
-                                        'text-gray-400 dark:text-gray-600 cursor-not-allowed' => !$this->canShowIndividualReports(),
+                                    role="menuitem"
+                                    @class([ 'block px-3 py-2 text-xs rounded-lg transition-all duration-200'
+                                    , 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium'=>
+                                    $this->isActiveRoute('ringkasan_assessment'),
+                                    'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' =>
+                                    $this->canShowIndividualReports() && !$this->isActiveRoute('ringkasan_assessment'),
+                                    'text-gray-400 dark:text-gray-600 cursor-not-allowed' =>
+                                    !$this->canShowIndividualReports(),
                                     ])>
                                     <i class="fa-solid fa-circle text-[0.4rem] mr-2"></i>Ringkasan Assessment
                                 </a>
                                 <a wire:navigate
                                     href="{{ $this->canShowIndividualReports() ? route('final_report', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) : '#' }}"
-                                    role="menuitem" @class([
-                                        'block px-3 py-2 text-xs rounded-lg transition-all duration-200',
-                                        'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium' => $this->isActiveRoute('final_report'),
-                                        'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' => $this->canShowIndividualReports() && !$this->isActiveRoute('final_report'),
-                                        'text-gray-400 dark:text-gray-600 cursor-not-allowed' => !$this->canShowIndividualReports(),
+                                    role="menuitem"
+                                    @class([ 'block px-3 py-2 text-xs rounded-lg transition-all duration-200'
+                                    , 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium'=>
+                                    $this->isActiveRoute('final_report'),
+                                    'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' =>
+                                    $this->canShowIndividualReports() && !$this->isActiveRoute('final_report'),
+                                    'text-gray-400 dark:text-gray-600 cursor-not-allowed' =>
+                                    !$this->canShowIndividualReports(),
                                     ])>
                                     <i class="fa-solid fa-circle text-[0.4rem] mr-2"></i>Laporan Individu
                                 </a>
@@ -307,65 +339,82 @@
 
                     <!-- Sub Menu General Report -->
                     <div x-show="generalOpen" x-transition:enter="transition ease-out duration-200"
-                        x-transition:enter-start="opacity-0 -translate-y-1" x-transition:enter-end="opacity-100 translate-y-0"
+                        x-transition:enter-start="opacity-0 -translate-y-1"
+                        x-transition:enter-end="opacity-100 translate-y-0"
                         x-transition:leave="transition ease-in duration-150"
-                        x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-1"
-                        id="submenu-general" class="ml-4 mt-1 space-y-1" role="menu" aria-labelledby="btn-general"
-                        style="display: none;">
-                        <a wire:navigate href="{{ route('ranking-psy-mapping') }}" role="menuitem" @class([
-                            'block px-3 py-2 text-xs rounded-lg transition-all duration-200',
-                            'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium' => $this->isActiveRoute('ranking-psy-mapping'),
-                            'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' => !$this->isActiveRoute('ranking-psy-mapping'),
-                        ])>
+                        x-transition:leave-start="opacity-100 translate-y-0"
+                        x-transition:leave-end="opacity-0 -translate-y-1" id="submenu-general"
+                        class="ml-4 mt-1 space-y-1" role="menu" aria-labelledby="btn-general" style="display: none;">
+                        <a wire:navigate href="{{ route('ranking-psy-mapping') }}" role="menuitem"
+                            @class([ 'block px-3 py-2 text-xs rounded-lg transition-all duration-200'
+                            , 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium'=>
+                            $this->isActiveRoute('ranking-psy-mapping'),
+                            'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' =>
+                            !$this->isActiveRoute('ranking-psy-mapping'),
+                            ])>
                             <i class="fa-solid fa-circle-dot mr-2 text-xs"></i>Ranking Psychology
                         </a>
-                        <a wire:navigate href="{{ route('ranking-mc-mapping') }}" role="menuitem" @class([
-                            'block px-3 py-2 text-xs rounded-lg transition-all duration-200',
-                            'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium' => $this->isActiveRoute('ranking-mc-mapping'),
-                            'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' => !$this->isActiveRoute('ranking-mc-mapping'),
-                        ])>
+                        <a wire:navigate href="{{ route('ranking-mc-mapping') }}" role="menuitem"
+                            @class([ 'block px-3 py-2 text-xs rounded-lg transition-all duration-200'
+                            , 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium'=>
+                            $this->isActiveRoute('ranking-mc-mapping'),
+                            'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' =>
+                            !$this->isActiveRoute('ranking-mc-mapping'),
+                            ])>
                             <i class="fa-solid fa-circle-dot mr-2 text-xs"></i>Ranking Managerial
                         </a>
-                        <a wire:navigate href="{{ route('rekap-ranking-assessment') }}" role="menuitem" @class([
-                            'block px-3 py-2 text-xs rounded-lg transition-all duration-200',
-                            'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium' => $this->isActiveRoute('rekap-ranking-assessment'),
-                            'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' => !$this->isActiveRoute('rekap-ranking-assessment'),
-                        ])>
+                        <a wire:navigate href="{{ route('rekap-ranking-assessment') }}" role="menuitem"
+                            @class([ 'block px-3 py-2 text-xs rounded-lg transition-all duration-200'
+                            , 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium'=>
+                            $this->isActiveRoute('rekap-ranking-assessment'),
+                            'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' =>
+                            !$this->isActiveRoute('rekap-ranking-assessment'),
+                            ])>
                             <i class="fa-solid fa-circle-dot mr-2 text-xs"></i>Ranking Assessment
                         </a>
-                        <a wire:navigate href="{{ route('statistic') }}" role="menuitem" @class([
-                            'block px-3 py-2 text-xs rounded-lg transition-all duration-200',
-                            'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium' => $this->isActiveRoute('statistic'),
-                            'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' => !$this->isActiveRoute('statistic'),
-                        ])>
+                        <a wire:navigate href="{{ route('statistic') }}" role="menuitem"
+                            @class([ 'block px-3 py-2 text-xs rounded-lg transition-all duration-200'
+                            , 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium'=>
+                            $this->isActiveRoute('statistic'),
+                            'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' =>
+                            !$this->isActiveRoute('statistic'),
+                            ])>
                             <i class="fa-solid fa-circle-dot mr-2 text-xs"></i>Statistik
                         </a>
-                        <a wire:navigate href="{{ route('training-recommendation') }}" role="menuitem" @class([
-                            'block px-3 py-2 text-xs rounded-lg transition-all duration-200',
-                            'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium' => $this->isActiveRoute('training-recommendation'),
-                            'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' => !$this->isActiveRoute('training-recommendation'),
-                        ])>
+                        <a wire:navigate href="{{ route('training-recommendation') }}" role="menuitem"
+                            @class([ 'block px-3 py-2 text-xs rounded-lg transition-all duration-200'
+                            , 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium'=>
+                            $this->isActiveRoute('training-recommendation'),
+                            'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' =>
+                            !$this->isActiveRoute('training-recommendation'),
+                            ])>
                             <i class="fa-solid fa-circle-dot mr-2 text-xs"></i>Training Recommendation
                         </a>
-                        <a wire:navigate href="{{ route('standard-mc') }}" role="menuitem" @class([
-                            'block px-3 py-2 text-xs rounded-lg transition-all duration-200',
-                            'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium' => $this->isActiveRoute('standard-mc'),
-                            'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' => !$this->isActiveRoute('standard-mc'),
-                        ])>
+                        <a wire:navigate href="{{ route('standard-mc') }}" role="menuitem"
+                            @class([ 'block px-3 py-2 text-xs rounded-lg transition-all duration-200'
+                            , 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium'=>
+                            $this->isActiveRoute('standard-mc'),
+                            'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' =>
+                            !$this->isActiveRoute('standard-mc'),
+                            ])>
                             <i class="fa-solid fa-circle-dot mr-2 text-xs"></i>Standar Managerial
                         </a>
-                        <a wire:navigate href="{{ route('standard-psikometrik') }}" role="menuitem" @class([
-                            'block px-3 py-2 text-xs rounded-lg transition-all duration-200',
-                            'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium' => $this->isActiveRoute('standard-psikometrik'),
-                            'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' => !$this->isActiveRoute('standard-psikometrik'),
-                        ])>
+                        <a wire:navigate href="{{ route('standard-psikometrik') }}" role="menuitem"
+                            @class([ 'block px-3 py-2 text-xs rounded-lg transition-all duration-200'
+                            , 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium'=>
+                            $this->isActiveRoute('standard-psikometrik'),
+                            'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' =>
+                            !$this->isActiveRoute('standard-psikometrik'),
+                            ])>
                             <i class="fa-solid fa-circle-dot mr-2 text-xs"></i>Standar Potential
                         </a>
-                        <a wire:navigate href="{{ route('general-report.mmpi') }}" role="menuitem" @class([
-                            'block px-3 py-2 text-xs rounded-lg transition-all duration-200',
-                            'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium' => $this->isActiveRoute('general-report.mmpi'),
-                            'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' => !$this->isActiveRoute('general-report.mmpi'),
-                        ])>
+                        <a wire:navigate href="{{ route('general-report.mmpi') }}" role="menuitem"
+                            @class([ 'block px-3 py-2 text-xs rounded-lg transition-all duration-200'
+                            , 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium'=>
+                            $this->isActiveRoute('general-report.mmpi'),
+                            'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' =>
+                            !$this->isActiveRoute('general-report.mmpi'),
+                            ])>
                             <i class="fa-solid fa-circle-dot mr-2 text-xs"></i>MMPI
                         </a>
                     </div>
