@@ -4,8 +4,6 @@
         minimized: $persist(true).as('sidebar_minimized'),
         individualOpen: $persist(false).as('sidebar_individual_open'),
         generalOpen: $persist(false).as('sidebar_general_open'),
-        mappingOpen: $persist(false).as('sidebar_mapping_open'),
-        assessmentOpen: $persist(false).as('sidebar_assessment_open'),
         scrollPosition: 0,
         init() {
             // Restore scroll position after DOM is ready
@@ -61,7 +59,7 @@
         class="fixed top-0 left-0 z-40 h-screen bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transition-all duration-300 shadow-lg">
         <!-- Toggle Button Desktop -->
         <button
-            @click="minimized = !minimized; if (minimized) { individualOpen = false; generalOpen = false; mappingOpen = false; assessmentOpen = false }; $dispatch('sidebar-toggled', { minimized: minimized })"
+            @click="minimized = !minimized; if (minimized) { individualOpen = false; generalOpen = false }; $dispatch('sidebar-toggled', { minimized: minimized })"
             class="hidden md:block absolute -right-3 top-6 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-full p-1.5 border-2 border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-500 transition-all shadow-md">
             <svg :class="minimized ? 'rotate-180' : ''" class="w-4 h-4 transition-transform duration-300" fill="none"
                 stroke="currentColor" viewBox="0 0 24 24">
@@ -163,154 +161,125 @@
                         </div>
                         @endif
 
-                        <!-- Grouping: General -->
-                        <div class="pt-2">
-                            <a wire:navigate
-                                href="{{ $this->canShowIndividualReports() ? route('general_matching', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) : '#' }}"
-                                role="menuitem"
-                                @class([ 'block px-3 py-2 text-xs rounded-lg transition-all duration-200'
-                                , 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium'=>
-                                $this->isActiveRoute('general_matching'),
-                                'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' =>
-                                $this->canShowIndividualReports() && !$this->isActiveRoute('general_matching'),
-                                'text-gray-400 dark:text-gray-600 cursor-not-allowed' =>
-                                !$this->canShowIndividualReports(),
-                                ])
-                                @if (!$this->canShowIndividualReports()) title="Pilih data terlebih dahulu" @endif>
-                                <i class="fa-solid fa-circle-dot mr-2 text-xs"></i>General Matching
-                            </a>
-                        </div>
+                        <a wire:navigate
+                            href="{{ $this->canShowIndividualReports() ? route('general_matching', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) : '#' }}"
+                            role="menuitem"
+                            @class([ 'block px-3 py-2 text-xs rounded-lg transition-all duration-200'
+                            , 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium'=>
+                            $this->isActiveRoute('general_matching'),
+                            'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' =>
+                            $this->canShowIndividualReports() && !$this->isActiveRoute('general_matching'),
+                            'text-gray-400 dark:text-gray-600 cursor-not-allowed' =>
+                            !$this->canShowIndividualReports(),
+                            ])
+                            @if (!$this->canShowIndividualReports()) title="Pilih data terlebih dahulu" @endif>
+                            <i class="fa-solid fa-circle-dot mr-2 text-xs"></i>General Matching
+                        </a>
 
-                        <!-- Grouping: Mapping Reports -->
-                        <div>
-                            <button @click="mappingOpen = !mappingOpen"
-                                class="w-full flex items-center justify-between px-3 py-2 text-xs font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-colors">
-                                <span><i class="fa-solid fa-map mr-2"></i>Mapping</span>
-                                <svg :class="mappingOpen ? 'rotate-180' : ''"
-                                    class="w-3 h-3 transition-transform duration-200" fill="currentColor"
-                                    viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd"
-                                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                                        clip-rule="evenodd"></path>
-                                </svg>
-                            </button>
+                        <a wire:navigate
+                            href="{{ $this->canShowIndividualReports() ? route('general_mapping', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) : '#' }}"
+                            role="menuitem"
+                            @class([ 'block px-3 py-2 text-xs rounded-lg transition-all duration-200'
+                            , 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium'=>
+                            $this->isActiveRoute('general_mapping'),
+                            'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' =>
+                            $this->canShowIndividualReports() && !$this->isActiveRoute('general_mapping'),
+                            'text-gray-400 dark:text-gray-600 cursor-not-allowed' =>
+                            !$this->canShowIndividualReports(),
+                            ])
+                            @if (!$this->canShowIndividualReports()) title="Pilih data terlebih dahulu" @endif>
+                            <i class="fa-solid fa-circle-dot mr-2 text-xs"></i>General Mapping
+                        </a>
 
-                            <div x-show="mappingOpen" x-transition:enter="transition ease-out duration-150"
-                                x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
-                                class="ml-3 space-y-1" style="display: none;">
-                                <a wire:navigate
-                                    href="{{ $this->canShowIndividualReports() ? route('general_mapping', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) : '#' }}"
-                                    role="menuitem"
-                                    @class([ 'block px-3 py-2 text-xs rounded-lg transition-all duration-200'
-                                    , 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium'=>
-                                    $this->isActiveRoute('general_mapping'),
-                                    'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' =>
-                                    $this->canShowIndividualReports() && !$this->isActiveRoute('general_mapping'),
-                                    'text-gray-400 dark:text-gray-600 cursor-not-allowed' =>
-                                    !$this->canShowIndividualReports(),
-                                    ])>
-                                    <i class="fa-solid fa-circle text-[0.4rem] mr-2"></i>General Mapping
-                                </a>
-                                <a wire:navigate
-                                    href="{{ $this->canShowIndividualReports() ? route('general_psy_mapping', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) : '#' }}"
-                                    role="menuitem"
-                                    @class([ 'block px-3 py-2 text-xs rounded-lg transition-all duration-200'
-                                    , 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium'=>
-                                    $this->isActiveRoute('general_psy_mapping'),
-                                    'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' =>
-                                    $this->canShowIndividualReports() && !$this->isActiveRoute('general_psy_mapping'),
-                                    'text-gray-400 dark:text-gray-600 cursor-not-allowed' =>
-                                    !$this->canShowIndividualReports(),
-                                    ])>
-                                    <i class="fa-solid fa-circle text-[0.4rem] mr-2"></i>Psychology Mapping
-                                </a>
-                                <a wire:navigate
-                                    href="{{ $this->canShowIndividualReports() ? route('general_mc_mapping', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) : '#' }}"
-                                    role="menuitem"
-                                    @class([ 'block px-3 py-2 text-xs rounded-lg transition-all duration-200'
-                                    , 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium'=>
-                                    $this->isActiveRoute('general_mc_mapping'),
-                                    'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' =>
-                                    $this->canShowIndividualReports() && !$this->isActiveRoute('general_mc_mapping'),
-                                    'text-gray-400 dark:text-gray-600 cursor-not-allowed' =>
-                                    !$this->canShowIndividualReports(),
-                                    ])>
-                                    <i class="fa-solid fa-circle text-[0.4rem] mr-2"></i>Managerial Competency
-                                </a>
-                                <a wire:navigate
-                                    href="{{ $this->canShowIndividualReports() ? route('ringkasan_mc_mapping', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) : '#' }}"
-                                    role="menuitem"
-                                    @class([ 'block px-3 py-2 text-xs rounded-lg transition-all duration-200'
-                                    , 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium'=>
-                                    $this->isActiveRoute('ringkasan_mc_mapping'),
-                                    'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' =>
-                                    $this->canShowIndividualReports() && !$this->isActiveRoute('ringkasan_mc_mapping'),
-                                    'text-gray-400 dark:text-gray-600 cursor-not-allowed' =>
-                                    !$this->canShowIndividualReports(),
-                                    ])>
-                                    <i class="fa-solid fa-circle text-[0.4rem] mr-2"></i>Ringkasan Potency
-                                </a>
-                            </div>
-                        </div>
+                        <a wire:navigate
+                            href="{{ $this->canShowIndividualReports() ? route('general_psy_mapping', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) : '#' }}"
+                            role="menuitem"
+                            @class([ 'block px-3 py-2 text-xs rounded-lg transition-all duration-200'
+                            , 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium'=>
+                            $this->isActiveRoute('general_psy_mapping'),
+                            'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' =>
+                            $this->canShowIndividualReports() && !$this->isActiveRoute('general_psy_mapping'),
+                            'text-gray-400 dark:text-gray-600 cursor-not-allowed' =>
+                            !$this->canShowIndividualReports(),
+                            ])
+                            @if (!$this->canShowIndividualReports()) title="Pilih data terlebih dahulu" @endif>
+                            <i class="fa-solid fa-circle-dot mr-2 text-xs"></i>Psychology Mapping
+                        </a>
 
-                        <!-- Grouping: Assessment & Reports -->
-                        <div>
-                            <button @click="assessmentOpen = !assessmentOpen"
-                                class="w-full flex items-center justify-between px-3 py-2 text-xs font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-colors">
-                                <span><i class="fa-solid fa-chart-line mr-2"></i>Assessment</span>
-                                <svg :class="assessmentOpen ? 'rotate-180' : ''"
-                                    class="w-3 h-3 transition-transform duration-200" fill="currentColor"
-                                    viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd"
-                                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                                        clip-rule="evenodd"></path>
-                                </svg>
-                            </button>
+                        <a wire:navigate
+                            href="{{ $this->canShowIndividualReports() ? route('general_mc_mapping', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) : '#' }}"
+                            role="menuitem"
+                            @class([ 'block px-3 py-2 text-xs rounded-lg transition-all duration-200'
+                            , 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium'=>
+                            $this->isActiveRoute('general_mc_mapping'),
+                            'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' =>
+                            $this->canShowIndividualReports() && !$this->isActiveRoute('general_mc_mapping'),
+                            'text-gray-400 dark:text-gray-600 cursor-not-allowed' =>
+                            !$this->canShowIndividualReports(),
+                            ])
+                            @if (!$this->canShowIndividualReports()) title="Pilih data terlebih dahulu" @endif>
+                            <i class="fa-solid fa-circle-dot mr-2 text-xs"></i>Managerial Competency Mapping
+                        </a>
 
-                            <div x-show="assessmentOpen" x-transition:enter="transition ease-out duration-150"
-                                x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
-                                class="ml-3 space-y-1" style="display: none;">
-                                <a wire:navigate
-                                    href="{{ $this->canShowIndividualReports() ? route('spider_plot', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) : '#' }}"
-                                    role="menuitem"
-                                    @class([ 'block px-3 py-2 text-xs rounded-lg transition-all duration-200'
-                                    , 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium'=>
-                                    $this->isActiveRoute('spider_plot'),
-                                    'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' =>
-                                    $this->canShowIndividualReports() && !$this->isActiveRoute('spider_plot'),
-                                    'text-gray-400 dark:text-gray-600 cursor-not-allowed' =>
-                                    !$this->canShowIndividualReports(),
-                                    ])>
-                                    <i class="fa-solid fa-circle text-[0.4rem] mr-2"></i>Spider Plot
-                                </a>
-                                <a wire:navigate
-                                    href="{{ $this->canShowIndividualReports() ? route('ringkasan_assessment', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) : '#' }}"
-                                    role="menuitem"
-                                    @class([ 'block px-3 py-2 text-xs rounded-lg transition-all duration-200'
-                                    , 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium'=>
-                                    $this->isActiveRoute('ringkasan_assessment'),
-                                    'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' =>
-                                    $this->canShowIndividualReports() && !$this->isActiveRoute('ringkasan_assessment'),
-                                    'text-gray-400 dark:text-gray-600 cursor-not-allowed' =>
-                                    !$this->canShowIndividualReports(),
-                                    ])>
-                                    <i class="fa-solid fa-circle text-[0.4rem] mr-2"></i>Ringkasan Assessment
-                                </a>
-                                <a wire:navigate
-                                    href="{{ $this->canShowIndividualReports() ? route('final_report', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) : '#' }}"
-                                    role="menuitem"
-                                    @class([ 'block px-3 py-2 text-xs rounded-lg transition-all duration-200'
-                                    , 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium'=>
-                                    $this->isActiveRoute('final_report'),
-                                    'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' =>
-                                    $this->canShowIndividualReports() && !$this->isActiveRoute('final_report'),
-                                    'text-gray-400 dark:text-gray-600 cursor-not-allowed' =>
-                                    !$this->canShowIndividualReports(),
-                                    ])>
-                                    <i class="fa-solid fa-circle text-[0.4rem] mr-2"></i>Laporan Individu
-                                </a>
-                            </div>
-                        </div>
+                        <a wire:navigate
+                            href="{{ $this->canShowIndividualReports() ? route('spider_plot', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) : '#' }}"
+                            role="menuitem"
+                            @class([ 'block px-3 py-2 text-xs rounded-lg transition-all duration-200'
+                            , 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium'=>
+                            $this->isActiveRoute('spider_plot'),
+                            'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' =>
+                            $this->canShowIndividualReports() && !$this->isActiveRoute('spider_plot'),
+                            'text-gray-400 dark:text-gray-600 cursor-not-allowed' =>
+                            !$this->canShowIndividualReports(),
+                            ])
+                            @if (!$this->canShowIndividualReports()) title="Pilih data terlebih dahulu" @endif>
+                            <i class="fa-solid fa-circle-dot mr-2 text-xs"></i>Spider Plot
+                        </a>
+
+                        <a wire:navigate
+                            href="{{ $this->canShowIndividualReports() ? route('ringkasan_mc_mapping', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) : '#' }}"
+                            role="menuitem"
+                            @class([ 'block px-3 py-2 text-xs rounded-lg transition-all duration-200'
+                            , 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium'=>
+                            $this->isActiveRoute('ringkasan_mc_mapping'),
+                            'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' =>
+                            $this->canShowIndividualReports() && !$this->isActiveRoute('ringkasan_mc_mapping'),
+                            'text-gray-400 dark:text-gray-600 cursor-not-allowed' =>
+                            !$this->canShowIndividualReports(),
+                            ])
+                            @if (!$this->canShowIndividualReports()) title="Pilih data terlebih dahulu" @endif>
+                            <i class="fa-solid fa-circle-dot mr-2 text-xs"></i>Ringkasan Managerial Potency Mapping
+                        </a>
+
+                        <a wire:navigate
+                            href="{{ $this->canShowIndividualReports() ? route('ringkasan_assessment', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) : '#' }}"
+                            role="menuitem"
+                            @class([ 'block px-3 py-2 text-xs rounded-lg transition-all duration-200'
+                            , 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium'=>
+                            $this->isActiveRoute('ringkasan_assessment'),
+                            'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' =>
+                            $this->canShowIndividualReports() && !$this->isActiveRoute('ringkasan_assessment'),
+                            'text-gray-400 dark:text-gray-600 cursor-not-allowed' =>
+                            !$this->canShowIndividualReports(),
+                            ])
+                            @if (!$this->canShowIndividualReports()) title="Pilih data terlebih dahulu" @endif>
+                            <i class="fa-solid fa-circle-dot mr-2 text-xs"></i>Ringkasan Hasil Assessment Individu
+                        </a>
+
+                        <a wire:navigate
+                            href="{{ $this->canShowIndividualReports() ? route('final_report', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) : '#' }}"
+                            role="menuitem"
+                            @class([ 'block px-3 py-2 text-xs rounded-lg transition-all duration-200'
+                            , 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium'=>
+                            $this->isActiveRoute('final_report'),
+                            'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' =>
+                            $this->canShowIndividualReports() && !$this->isActiveRoute('final_report'),
+                            'text-gray-400 dark:text-gray-600 cursor-not-allowed' =>
+                            !$this->canShowIndividualReports(),
+                            ])
+                            @if (!$this->canShowIndividualReports()) title="Pilih data terlebih dahulu" @endif>
+                            <i class="fa-solid fa-circle-dot mr-2 text-xs"></i>Laporan Individu
+                        </a>
                     </div>
                 </div>
 
