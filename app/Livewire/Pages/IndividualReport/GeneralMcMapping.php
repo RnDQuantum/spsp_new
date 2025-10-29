@@ -75,7 +75,9 @@ class GeneralMcMapping extends Component
 
     public $showScoreChart = true;
 
-    public function mount($eventCode = null, $testNumber = null, $showHeader = true, $showInfoSection = true, $showTable = true, $showRatingChart = true, $showScoreChart = true): void
+    public $showRankingInfo = true;
+
+    public function mount($eventCode = null, $testNumber = null, $showHeader = true, $showInfoSection = true, $showTable = true, $showRatingChart = true, $showScoreChart = true, $showRankingInfo = true): void
     {
         // Gunakan parameter jika ada (dari route), atau fallback ke property (dari parent)
         $this->eventCode = $eventCode ?? $this->eventCode;
@@ -87,6 +89,7 @@ class GeneralMcMapping extends Component
         $this->showTable = $showTable;
         $this->showRatingChart = $showRatingChart;
         $this->showScoreChart = $showScoreChart;
+        $this->showRankingInfo = $showRankingInfo;
 
         // Tentukan apakah standalone (dari route) atau child (dari parent)
         $this->isStandalone = $eventCode !== null && $testNumber !== null;

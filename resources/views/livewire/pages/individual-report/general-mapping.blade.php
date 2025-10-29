@@ -171,11 +171,12 @@
         </div>
 
         <!-- Ranking Information Section -->
-        @php
-            $rankingInfo = $this->getParticipantRanking();
-        @endphp
+        @if ($showRankingInfo)
+            @php
+                $rankingInfo = $this->getParticipantRanking();
+            @endphp
 
-        @if ($rankingInfo)
+            @if ($rankingInfo)
             <div class="px-6 py-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900 dark:to-indigo-900 border-t-2 border-black dark:border-gray-600">
                 <div class="max-w-5xl mx-auto">
                     <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
@@ -258,6 +259,7 @@
                     </div>
                 </div>
             </div>
+            @endif
         @endif
 
         <!-- Chart Section Rating -->

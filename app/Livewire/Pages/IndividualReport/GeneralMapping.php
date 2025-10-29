@@ -7,6 +7,7 @@ use App\Models\AspectAssessment;
 use App\Models\CategoryAssessment;
 use App\Models\CategoryType;
 use App\Models\Participant;
+use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -60,8 +61,29 @@ class GeneralMapping extends Component
 
     public $chartIndividualScores = [];
 
-    public function mount($eventCode, $testNumber): void
+    // Dynamic display parameters
+    public $showHeader = true;
+
+    public $showInfoSection = true;
+
+    public $showTable = true;
+
+    public $showRatingChart = true;
+
+    public $showScoreChart = true;
+
+    public $showRankingInfo = true;
+
+    public function mount($eventCode = null, $testNumber = null, $showHeader = true, $showInfoSection = true, $showTable = true, $showRatingChart = true, $showScoreChart = true, $showRankingInfo = true): void
     {
+        // Set dynamic display parameters
+        $this->showHeader = $showHeader;
+        $this->showInfoSection = $showInfoSection;
+        $this->showTable = $showTable;
+        $this->showRatingChart = $showRatingChart;
+        $this->showScoreChart = $showScoreChart;
+        $this->showRankingInfo = $showRankingInfo;
+
         // Generate unique chart ID
         $this->chartId = 'generalMapping'.uniqid();
 
@@ -317,8 +339,10 @@ class GeneralMapping extends Component
         foreach ($this->aspectsData as $aspect) {
             // Count as passing if conclusion text is "Memenuhi" or "Lebih Memenuhi"
             // Exclude "Belum Memenuhi" and "Kurang Memenuhi"
-            if ($aspect['conclusion_text'] === 'Memenuhi/Meet Requirement' ||
-                $aspect['conclusion_text'] === 'Lebih Memenuhi/More Requirement') {
+            if (
+                $aspect['conclusion_text'] === 'Memenuhi/Meet Requirement' ||
+                $aspect['conclusion_text'] === 'Lebih Memenuhi/More Requirement'
+            ) {
                 $passingAspects++;
             }
         }
@@ -358,7 +382,7 @@ class GeneralMapping extends Component
         $kompetensiId = (int) $this->kompetensiCategory->id;
 
         // Get all participants with their scores using same logic as RekapRankingAssessment
-        $baseQuery = \DB::table('aspect_assessments as aa')
+        $baseQuery = DB::table('aspect_assessments as aa')
             ->join('aspects as a', 'a.id', '=', 'aa.aspect_id')
             ->where('aa.event_id', $event->id)
             ->where('aa.position_formation_id', $positionFormationId)
@@ -370,7 +394,7 @@ class GeneralMapping extends Component
             ->selectRaw('SUM(CASE WHEN a.category_type_id = ? THEN aa.standard_score ELSE 0 END) as kompetensi_standard_score', [$kompetensiId]);
 
         // Order by total weighted individual score
-        $allParticipants = \DB::query()->fromSub($baseQuery, 't')
+        $allParticipants = DB::query()->fromSub($baseQuery, 't')
             ->select('*')
             ->selectRaw('? * potensi_individual_score / 100 + ? * kompetensi_individual_score / 100 as total_weighted_individual', [$potensiWeight, $kompetensiWeight])
             ->orderByDesc('total_weighted_individual')

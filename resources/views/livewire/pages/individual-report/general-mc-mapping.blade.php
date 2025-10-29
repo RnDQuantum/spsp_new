@@ -248,7 +248,7 @@ $c = trim(strtoupper($overallConclusion)); @endphp
         @endif
 
         <!-- Ranking Information Section -->
-        @if ($showTable)
+        @if ($showRankingInfo)
             @php
                 $rankingInfo = $this->getParticipantRanking();
             @endphp

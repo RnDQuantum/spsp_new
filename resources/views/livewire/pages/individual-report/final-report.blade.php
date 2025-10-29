@@ -130,7 +130,7 @@
         <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Managerial Competency Mapping</h2>
         <livewire:pages.individual-report.general-mc-mapping :eventCode="$eventCode" :testNumber="$testNumber"
             :isStandalone="false" :showHeader="false" :showInfoSection="false" :showTable="true" :showRatingChart="true"
-            :showScoreChart="true" :key="'mc-mapping-' . $eventCode . '-' . $testNumber" />
+            :showScoreChart="true" :showRankingInfo="false" :key="'mc-mapping-' . $eventCode . '-' . $testNumber" />
     </div>
 
     {{-- Interpretation Section kompetensi --}}
