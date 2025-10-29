@@ -75,7 +75,9 @@ class GeneralPsyMapping extends Component
 
     public $showScoreChart = true;
 
-    public function mount($eventCode = null, $testNumber = null, $showHeader = true, $showInfoSection = true, $showTable = true, $showRatingChart = true, $showScoreChart = true): void
+    public $showRankingInfo = true;
+
+    public function mount($eventCode = null, $testNumber = null, $showHeader = true, $showInfoSection = true, $showTable = true, $showRatingChart = true, $showScoreChart = true, $showRankingInfo = true): void
     {
         // Gunakan parameter jika ada (dari route), atau fallback ke property (dari parent)
         $this->eventCode = $eventCode ?? $this->eventCode;
@@ -87,6 +89,7 @@ class GeneralPsyMapping extends Component
         $this->showTable = $showTable;
         $this->showRatingChart = $showRatingChart;
         $this->showScoreChart = $showScoreChart;
+        $this->showRankingInfo = $showRankingInfo;
 
         // Tentukan apakah standalone (dari route) atau child (dari parent)
         $this->isStandalone = $eventCode !== null && $testNumber !== null;
@@ -97,7 +100,7 @@ class GeneralPsyMapping extends Component
         }
 
         // Generate unique chart ID
-        $this->chartId = 'generalPsyMapping'.uniqid();
+        $this->chartId = 'generalPsyMapping' . uniqid();
 
         // Load tolerance from session
         $this->tolerancePercentage = session('individual_report.tolerance', 10);
@@ -336,8 +339,10 @@ class GeneralPsyMapping extends Component
         foreach ($this->aspectsData as $aspect) {
             // Count as passing if conclusion text is "Memenuhi" or "Lebih Memenuhi"
             // Exclude "Belum Memenuhi" and "Kurang Memenuhi"
-            if ($aspect['conclusion_text'] === 'Memenuhi/Meet Requirement' ||
-                $aspect['conclusion_text'] === 'Lebih Memenuhi/More Requirement') {
+            if (
+                $aspect['conclusion_text'] === 'Memenuhi/Meet Requirement' ||
+                $aspect['conclusion_text'] === 'Lebih Memenuhi/More Requirement'
+            ) {
                 $passingAspects++;
             }
         }
