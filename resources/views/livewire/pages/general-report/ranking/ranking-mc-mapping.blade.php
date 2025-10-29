@@ -33,10 +33,13 @@
             class="min-w-full border-2 border-black dark:border-gray-600 text-sm text-gray-900 dark:text-gray-100 mt-6">
             <thead>
                 <tr class="bg-gray-200 dark:bg-gray-700">
-                    <th class="border-2 border-black dark:border-gray-600 px-3 py-3 text-center">Ranking</th>
-                    <th class="border-2 border-black dark:border-gray-600 px-3 py-3 text-center">NIP</th>
-                    <th class="border-2 border-black dark:border-gray-600 px-3 py-3 text-center">Nama</th>
-                    <th class="border-2 border-black dark:border-gray-600 px-3 py-3 text-center">Jabatan</th>
+                    <th class="border-2 border-black dark:border-gray-600 px-3 py-3 text-center" rowspan="2">Ranking
+                    </th>
+                    <th class="border-2 border-black dark:border-gray-600 px-3 py-3 text-center" rowspan="2">NIP</th>
+                    <th class="border-2 border-black dark:border-gray-600 px-3 py-3 text-center" rowspan="2">Nama
+                    </th>
+                    <th class="border-2 border-black dark:border-gray-600 px-3 py-3 text-center" rowspan="2">Jabatan
+                    </th>
                     <th class="border-2 border-black dark:border-gray-600 px-3 py-3 text-center" colspan="2">
                         <span x-data
                             x-text="$wire.tolerancePercentage > 0 ? 'Standard (-' + $wire.tolerancePercentage + '%)' : 'Standard'"></span>
@@ -46,14 +49,15 @@
                     <th class="border-2 border-black dark:border-gray-600 px-3 py-3 text-center" colspan="2">Gap</th>
                     <th class="border-2 border-black dark:border-gray-600 px-3 py-3 text-center">
                         Prosentase<br>Kesesuaian</th>
-                    <th class="border-2 border-black dark:border-gray-600 px-3 py-3 text-center">Kesimpulan/Conclusion
+                    <th class="border-2 border-black dark:border-gray-600 px-3 py-3 text-center" rowspan="2">
+                        Kesimpulan/Conclusion
                     </th>
                 </tr>
                 <tr class="bg-gray-200 dark:bg-gray-700">
-                    <th class="border-2 border-black dark:border-gray-600 px-3 py-1"></th>
-                    <th class="border-2 border-black dark:border-gray-600 px-3 py-1"></th>
-                    <th class="border-2 border-black dark:border-gray-600 px-3 py-1"></th>
-                    <th class="border-2 border-black dark:border-gray-600 px-3 py-1"></th>
+                    {{-- <th class="border-2 border-black dark:border-gray-600 px-3 py-1"></th> --}}
+                    {{-- <th class="border-2 border-black dark:border-gray-600 px-3 py-1"></th> --}}
+                    {{-- <th class="border-2 border-black dark:border-gray-600 px-3 py-1"></th> --}}
+                    {{-- <th class="border-2 border-black dark:border-gray-600 px-3 py-1"></th> --}}
                     <th class="border-2 border-black dark:border-gray-600 px-3 py-1 font-semibold">Rating/<br>Level</th>
                     <th class="border-2 border-black dark:border-gray-600 px-3 py-1 font-semibold">Score</th>
                     <th class="border-2 border-black dark:border-gray-600 px-3 py-1 font-semibold">Rating/<br>Level</th>
@@ -61,7 +65,7 @@
                     <th class="border-2 border-black dark:border-gray-600 px-3 py-1 font-semibold">Rating/<br>Level</th>
                     <th class="border-2 border-black dark:border-gray-600 px-3 py-1 font-semibold">Score</th>
                     <th class="border-2 border-black dark:border-gray-600 px-3 py-1"></th>
-                    <th class="border-2 border-black dark:border-gray-600 px-3 py-1"></th>
+                    {{-- <th class="border-2 border-black dark:border-gray-600 px-3 py-1"></th> --}}
                 </tr>
             </thead>
             <tbody>
