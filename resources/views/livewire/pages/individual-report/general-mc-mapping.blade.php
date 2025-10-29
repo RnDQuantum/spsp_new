@@ -247,6 +247,83 @@ $c = trim(strtoupper($overallConclusion)); @endphp
             </div>
         @endif
 
+        <!-- Ranking Information Section -->
+        @if ($showTable)
+            @php
+                $rankingInfo = $this->getParticipantRanking();
+            @endphp
+
+            @if ($rankingInfo)
+                <div class="px-6 py-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900 dark:to-indigo-900 border-t-2 border-black dark:border-gray-600">
+                    <div class="max-w-4xl mx-auto">
+                        <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
+                            <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path>
+                            </svg>
+                            Ranking Peserta - Kategori Kompetensi
+                        </h3>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <!-- Ranking Card -->
+                            <div class="bg-white dark:bg-gray-800 border-2 border-blue-300 dark:border-blue-600 rounded-lg p-4 text-center">
+                                <div class="text-sm text-gray-500 dark:text-gray-400 mb-2">Ranking</div>
+                                <div class="text-4xl font-bold text-blue-600 dark:text-blue-400">
+                                    #{{ $rankingInfo['rank'] }}
+                                </div>
+                            </div>
+
+                            <!-- Total Participants Card -->
+                            <div class="bg-white dark:bg-gray-800 border-2 border-indigo-300 dark:border-indigo-600 rounded-lg p-4 text-center">
+                                <div class="text-sm text-gray-500 dark:text-gray-400 mb-2">Total Peserta</div>
+                                <div class="text-4xl font-bold text-indigo-600 dark:text-indigo-400">
+                                    {{ $rankingInfo['total'] }}
+                                </div>
+                                <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                    {{ $participant->positionFormation->name }}
+                                </div>
+                            </div>
+
+                            <!-- Conclusion Card -->
+                            <div class="bg-white dark:bg-gray-800 border-2 rounded-lg p-4 text-center
+                                @php
+                                    $conclusion = strtoupper(trim($rankingInfo['conclusion']));
+                                @endphp
+                                @if ($conclusion === 'DI ATAS STANDAR')
+                                    border-green-300 dark:border-green-600
+                                @elseif ($conclusion === 'MEMENUHI STANDAR')
+                                    border-yellow-300 dark:border-yellow-600
+                                @else
+                                    border-red-300 dark:border-red-600
+                                @endif
+                            ">
+                                <div class="text-sm text-gray-500 dark:text-gray-400 mb-2">Status</div>
+                                <div class="text-lg font-bold px-4 py-2 rounded-lg
+                                    @if ($conclusion === 'DI ATAS STANDAR')
+                                        bg-green-500 dark:bg-green-600 text-white
+                                    @elseif ($conclusion === 'MEMENUHI STANDAR')
+                                        bg-yellow-400 dark:bg-yellow-500 text-black
+                                    @else
+                                        bg-red-500 dark:bg-red-600 text-white
+                                    @endif
+                                ">
+                                    {{ $rankingInfo['conclusion'] }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Additional Info -->
+                        <div class="mt-4 bg-blue-100 dark:bg-blue-800 border border-blue-200 dark:border-blue-600 rounded-lg p-3">
+                            <div class="text-sm text-blue-800 dark:text-blue-200">
+                                <strong>Keterangan:</strong> Ranking berdasarkan total Individual Score dari semua aspek dalam kategori Kompetensi,
+                                dibandingkan dengan peserta lain di event yang sama pada posisi
+                                <strong>{{ $participant->positionFormation->name }}</strong>.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
+        @endif
+
         @if ($showRatingChart)
             <!-- Chart Section Rating - DARK MODE READY -->
             <div class="p-6 border-t-2 border-black bg-white dark:bg-gray-800" wire:ignore

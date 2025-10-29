@@ -58,6 +58,7 @@ class GeneralMcMapping extends Component
 
     // ADD: Public properties untuk support child component
     public $eventCode;
+
     public $testNumber;
 
     // Flag untuk menentukan apakah standalone atau child
@@ -65,9 +66,13 @@ class GeneralMcMapping extends Component
 
     // Dynamic display parameters
     public $showHeader = true;
+
     public $showInfoSection = true;
+
     public $showTable = true;
+
     public $showRatingChart = true;
+
     public $showScoreChart = true;
 
     public function mount($eventCode = null, $testNumber = null, $showHeader = true, $showInfoSection = true, $showTable = true, $showRatingChart = true, $showScoreChart = true): void
@@ -87,7 +92,7 @@ class GeneralMcMapping extends Component
         $this->isStandalone = $eventCode !== null && $testNumber !== null;
 
         // Validate
-        if (!$this->eventCode || !$this->testNumber) {
+        if (! $this->eventCode || ! $this->testNumber) {
             abort(404, 'Event code and test number are required');
         }
 
@@ -339,6 +344,92 @@ class GeneralMcMapping extends Component
             'total' => $totalAspects,
             'passing' => $passingAspects,
             'percentage' => $totalAspects > 0 ? round(($passingAspects / $totalAspects) * 100) : 0,
+        ];
+    }
+
+    /**
+     * Get participant ranking information in Kompetensi category
+     */
+    public function getParticipantRanking(): ?array
+    {
+        if (! $this->participant || ! $this->kompetensiCategory) {
+            return null;
+        }
+
+        $event = $this->participant->assessmentEvent;
+        $positionFormationId = $this->participant->position_formation_id;
+
+        if (! $event) {
+            return null;
+        }
+
+        // Get all aspect IDs for Kompetensi category
+        $kompetensiAspectIds = Aspect::query()
+            ->where('category_type_id', $this->kompetensiCategory->id)
+            ->orderBy('order')
+            ->pluck('id')
+            ->all();
+
+        if (empty($kompetensiAspectIds)) {
+            return null;
+        }
+
+        // Get all participants with their scores for the same event and position
+        $allParticipants = AspectAssessment::query()
+            ->selectRaw('participant_id, SUM(standard_score) as sum_original_standard_score, SUM(individual_rating) as sum_individual_rating, SUM(individual_score) as sum_individual_score')
+            ->where('event_id', $event->id)
+            ->where('position_formation_id', $positionFormationId)
+            ->whereIn('aspect_id', $kompetensiAspectIds)
+            ->groupBy('participant_id')
+            ->orderByDesc('sum_individual_score')
+            ->orderByDesc('sum_individual_rating')
+            ->get();
+
+        $totalParticipants = $allParticipants->count();
+
+        // Find current participant's rank and calculate conclusion
+        $rank = null;
+        $conclusion = null;
+        foreach ($allParticipants as $index => $participant) {
+            if ($participant->participant_id === $this->participant->id) {
+                $rank = $index + 1;
+
+                // Calculate conclusion using same logic as RankingMcMapping
+                $originalStandardScore = (float) $participant->sum_original_standard_score;
+                $individualScore = (float) $participant->sum_individual_score;
+
+                // Calculate adjusted standard based on tolerance
+                $toleranceFactor = 1 - ($this->tolerancePercentage / 100);
+                $adjustedStandardScore = $originalStandardScore * $toleranceFactor;
+
+                // Calculate gaps
+                $originalGap = $individualScore - $originalStandardScore;
+                $adjustedGap = $individualScore - $adjustedStandardScore;
+
+                // Calculate threshold
+                $threshold = -$adjustedStandardScore * ($this->tolerancePercentage / 100);
+
+                // Determine conclusion using same logic as RankingMcMapping
+                if ($originalGap >= 0) {
+                    $conclusion = 'Di Atas Standar';
+                } elseif ($this->tolerancePercentage > 0 && $adjustedGap >= $threshold) {
+                    $conclusion = 'Memenuhi Standar';
+                } else {
+                    $conclusion = 'Di Bawah Standar';
+                }
+
+                break;
+            }
+        }
+
+        if ($rank === null) {
+            return null;
+        }
+
+        return [
+            'rank' => $rank,
+            'total' => $totalParticipants,
+            'conclusion' => $conclusion,
         ];
     }
 
