@@ -164,8 +164,7 @@
                         @if ($this->canShowIndividualReports())
                         <a wire:navigate
                             href="{{ route('general_matching', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) }}"
-                            role="menuitem"
-                            @class([ 'block px-3 py-2 text-xs rounded-lg transition-all duration-200'
+                            role="menuitem" @class([ 'block px-3 py-2 text-xs rounded-lg transition-all duration-200'
                             , 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium'=>
                             $this->isActiveRoute('general_matching'),
                             'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' =>
@@ -183,8 +182,7 @@
                         @if ($this->canShowIndividualReports())
                         <a wire:navigate
                             href="{{ route('general_mapping', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) }}"
-                            role="menuitem"
-                            @class([ 'block px-3 py-2 text-xs rounded-lg transition-all duration-200'
+                            role="menuitem" @class([ 'block px-3 py-2 text-xs rounded-lg transition-all duration-200'
                             , 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium'=>
                             $this->isActiveRoute('general_mapping'),
                             'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' =>
@@ -202,46 +200,55 @@
                         @if ($this->canShowIndividualReports())
                         <a wire:navigate
                             href="{{ route('general_psy_mapping', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) }}"
-                            role="menuitem"
-                            @class([ 'block px-3 py-2 text-xs rounded-lg transition-all duration-200'
+                            role="menuitem" @class([ 'block px-3 py-2 text-xs rounded-lg transition-all duration-200'
                             , 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium'=>
                             $this->isActiveRoute('general_psy_mapping'),
                             'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' =>
                             !$this->isActiveRoute('general_psy_mapping'),
                             ])>
-                            <i class="fa-solid fa-circle-dot mr-2 text-xs"></i>Psychology Mapping
+                            <div class="flex items-start gap-2">
+                                <i class="fa-solid fa-circle-dot text-xs mt-0.5 flex-shrink-0"></i>
+                                <span class="flex-1 leading-tight">General Psychology Mapping</span>
+                            </div>
                         </a>
                         @else
                         <span role="menuitem" title="Pilih data terlebih dahulu"
                             class="block px-3 py-2 text-xs rounded-lg transition-all duration-200 text-gray-400 dark:text-gray-600 cursor-not-allowed">
-                            <i class="fa-solid fa-circle-dot mr-2 text-xs"></i>Psychology Mapping
+                            <div class="flex items-start gap-2">
+                                <i class="fa-solid fa-circle-dot text-xs mt-0.5 flex-shrink-0"></i>
+                                <span class="flex-1 leading-tight">General Psychology Mapping</span>
+                            </div>
                         </span>
                         @endif
 
                         @if ($this->canShowIndividualReports())
                         <a wire:navigate
                             href="{{ route('general_mc_mapping', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) }}"
-                            role="menuitem"
-                            @class([ 'block px-3 py-2 text-xs rounded-lg transition-all duration-200'
+                            role="menuitem" @class([ 'block px-3 py-2 text-xs rounded-lg transition-all duration-200'
                             , 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium'=>
                             $this->isActiveRoute('general_mc_mapping'),
                             'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' =>
                             !$this->isActiveRoute('general_mc_mapping'),
                             ])>
-                            <i class="fa-solid fa-circle-dot mr-2 text-xs"></i>Managerial Competency Mapping
+                            <div class="flex items-start gap-2">
+                                <i class="fa-solid fa-circle-dot text-xs mt-0.5 flex-shrink-0"></i>
+                                <span class="flex-1 leading-tight">General Managerial Competency Mapping</span>
+                            </div>
                         </a>
                         @else
                         <span role="menuitem" title="Pilih data terlebih dahulu"
                             class="block px-3 py-2 text-xs rounded-lg transition-all duration-200 text-gray-400 dark:text-gray-600 cursor-not-allowed">
-                            <i class="fa-solid fa-circle-dot mr-2 text-xs"></i>Managerial Competency Mapping
+                            <div class="flex items-start gap-2">
+                                <i class="fa-solid fa-circle-dot text-xs mt-0.5 flex-shrink-0"></i>
+                                <span class="flex-1 leading-tight">General Managerial Competency Mapping</span>
+                            </div>
                         </span>
                         @endif
 
                         @if ($this->canShowIndividualReports())
                         <a wire:navigate
                             href="{{ route('spider_plot', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) }}"
-                            role="menuitem"
-                            @class([ 'block px-3 py-2 text-xs rounded-lg transition-all duration-200'
+                            role="menuitem" @class([ 'block px-3 py-2 text-xs rounded-lg transition-all duration-200'
                             , 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium'=>
                             $this->isActiveRoute('spider_plot'),
                             'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' =>
@@ -259,46 +266,55 @@
                         @if ($this->canShowIndividualReports())
                         <a wire:navigate
                             href="{{ route('ringkasan_mc_mapping', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) }}"
-                            role="menuitem"
-                            @class([ 'block px-3 py-2 text-xs rounded-lg transition-all duration-200'
+                            role="menuitem" @class([ 'block px-3 py-2 text-xs rounded-lg transition-all duration-200'
                             , 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium'=>
                             $this->isActiveRoute('ringkasan_mc_mapping'),
                             'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' =>
                             !$this->isActiveRoute('ringkasan_mc_mapping'),
                             ])>
-                            <i class="fa-solid fa-circle-dot mr-2 text-xs"></i>Ringkasan Managerial Potency Mapping
+                            <div class="flex items-start gap-2">
+                                <i class="fa-solid fa-circle-dot text-xs mt-0.5 flex-shrink-0"></i>
+                                <span class="flex-1 leading-tight">Ringkasan Managerial Potency Mapping</span>
+                            </div>
                         </a>
                         @else
                         <span role="menuitem" title="Pilih data terlebih dahulu"
                             class="block px-3 py-2 text-xs rounded-lg transition-all duration-200 text-gray-400 dark:text-gray-600 cursor-not-allowed">
-                            <i class="fa-solid fa-circle-dot mr-2 text-xs"></i>Ringkasan Managerial Potency Mapping
+                            <div class="flex items-start gap-2">
+                                <i class="fa-solid fa-circle-dot text-xs mt-0.5 flex-shrink-0"></i>
+                                <span class="flex-1 leading-tight">Ringkasan Managerial Potency Mapping</span>
+                            </div>
                         </span>
                         @endif
 
                         @if ($this->canShowIndividualReports())
                         <a wire:navigate
                             href="{{ route('ringkasan_assessment', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) }}"
-                            role="menuitem"
-                            @class([ 'block px-3 py-2 text-xs rounded-lg transition-all duration-200'
+                            role="menuitem" @class([ 'block px-3 py-2 text-xs rounded-lg transition-all duration-200'
                             , 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium'=>
                             $this->isActiveRoute('ringkasan_assessment'),
                             'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' =>
                             !$this->isActiveRoute('ringkasan_assessment'),
                             ])>
-                            <i class="fa-solid fa-circle-dot mr-2 text-xs"></i>Ringkasan Hasil Assessment Individu
+                            <div class="flex items-start gap-2">
+                                <i class="fa-solid fa-circle-dot text-xs mt-0.5 flex-shrink-0"></i>
+                                <span class="flex-1 leading-tight">Ringkasan Hasil Assessment Individu</span>
+                            </div>
                         </a>
                         @else
                         <span role="menuitem" title="Pilih data terlebih dahulu"
                             class="block px-3 py-2 text-xs rounded-lg transition-all duration-200 text-gray-400 dark:text-gray-600 cursor-not-allowed">
-                            <i class="fa-solid fa-circle-dot mr-2 text-xs"></i>Ringkasan Hasil Assessment Individu
+                            <div class="flex items-start gap-2">
+                                <i class="fa-solid fa-circle-dot text-xs mt-0.5 flex-shrink-0"></i>
+                                <span class="flex-1 leading-tight">Ringkasan Hasil Assessment Individu</span>
+                            </div>
                         </span>
                         @endif
 
                         @if ($this->canShowIndividualReports())
                         <a wire:navigate
                             href="{{ route('final_report', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) }}"
-                            role="menuitem"
-                            @class([ 'block px-3 py-2 text-xs rounded-lg transition-all duration-200'
+                            role="menuitem" @class([ 'block px-3 py-2 text-xs rounded-lg transition-all duration-200'
                             , 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium'=>
                             $this->isActiveRoute('final_report'),
                             'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' =>
@@ -353,7 +369,10 @@
                             'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' =>
                             !$this->isActiveRoute('ranking-psy-mapping'),
                             ])>
-                            <i class="fa-solid fa-circle-dot mr-2 text-xs"></i>Ranking Psychology
+                            <div class="flex items-start gap-2">
+                                <i class="fa-solid fa-circle-dot text-xs mt-0.5 flex-shrink-0"></i>
+                                <span class="flex-1 leading-tight">Ranking Psychology Mapping</span>
+                            </div>
                         </a>
                         <a wire:navigate href="{{ route('ranking-mc-mapping') }}" role="menuitem"
                             @class([ 'block px-3 py-2 text-xs rounded-lg transition-all duration-200'
@@ -362,7 +381,10 @@
                             'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' =>
                             !$this->isActiveRoute('ranking-mc-mapping'),
                             ])>
-                            <i class="fa-solid fa-circle-dot mr-2 text-xs"></i>Ranking Managerial
+                            <div class="flex items-start gap-2">
+                                <i class="fa-solid fa-circle-dot text-xs mt-0.5 flex-shrink-0"></i>
+                                <span class="flex-1 leading-tight">Ranking Managerial Competency Mapping</span>
+                            </div>
                         </a>
                         <a wire:navigate href="{{ route('rekap-ranking-assessment') }}" role="menuitem"
                             @class([ 'block px-3 py-2 text-xs rounded-lg transition-all duration-200'
@@ -371,7 +393,10 @@
                             'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' =>
                             !$this->isActiveRoute('rekap-ranking-assessment'),
                             ])>
-                            <i class="fa-solid fa-circle-dot mr-2 text-xs"></i>Ranking Assessment
+                            <div class="flex items-start gap-2">
+                                <i class="fa-solid fa-circle-dot text-xs mt-0.5 flex-shrink-0"></i>
+                                <span class="flex-1 leading-tight">Ranking Ringkasan Hasil Assessment</span>
+                            </div>
                         </a>
                         <a wire:navigate href="{{ route('statistic') }}" role="menuitem"
                             @class([ 'block px-3 py-2 text-xs rounded-lg transition-all duration-200'
@@ -389,7 +414,10 @@
                             'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' =>
                             !$this->isActiveRoute('training-recommendation'),
                             ])>
-                            <i class="fa-solid fa-circle-dot mr-2 text-xs"></i>Training Recommendation
+                            <div class="flex items-start gap-2">
+                                <i class="fa-solid fa-circle-dot text-xs mt-0.5 flex-shrink-0"></i>
+                                <span class="flex-1 leading-tight">Training Recommendation</span>
+                            </div>
                         </a>
                         <a wire:navigate href="{{ route('standard-mc') }}" role="menuitem"
                             @class([ 'block px-3 py-2 text-xs rounded-lg transition-all duration-200'
@@ -398,7 +426,10 @@
                             'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' =>
                             !$this->isActiveRoute('standard-mc'),
                             ])>
-                            <i class="fa-solid fa-circle-dot mr-2 text-xs"></i>Standar Managerial
+                            <div class="flex items-start gap-2">
+                                <i class="fa-solid fa-circle-dot text-xs mt-0.5 flex-shrink-0"></i>
+                                <span class="flex-1 leading-tight">Standar Managerial Competency Mapping</span>
+                            </div>
                         </a>
                         <a wire:navigate href="{{ route('standard-psikometrik') }}" role="menuitem"
                             @class([ 'block px-3 py-2 text-xs rounded-lg transition-all duration-200'
@@ -407,7 +438,10 @@
                             'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' =>
                             !$this->isActiveRoute('standard-psikometrik'),
                             ])>
-                            <i class="fa-solid fa-circle-dot mr-2 text-xs"></i>Standar Potential
+                            <div class="flex items-start gap-2">
+                                <i class="fa-solid fa-circle-dot text-xs mt-0.5 flex-shrink-0"></i>
+                                <span class="flex-1 leading-tight">Standar Potential Mapping</span>
+                            </div>
                         </a>
                         <a wire:navigate href="{{ route('general-report.mmpi') }}" role="menuitem"
                             @class([ 'block px-3 py-2 text-xs rounded-lg transition-all duration-200'
@@ -440,17 +474,4 @@
             </div>
         </div>
     </aside>
-
-    <!-- Loading Indicator -->
-    <div wire:loading wire:target="handleEventSelected,handlePositionSelected,handleParticipantSelected"
-        class="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2">
-        <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
-            </circle>
-            <path class="opacity-75" fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-            </path>
-        </svg>
-        <span class="text-sm">Memuat...</span>
-    </div>
 </div>
