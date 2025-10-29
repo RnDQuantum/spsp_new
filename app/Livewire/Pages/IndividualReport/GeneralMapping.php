@@ -330,6 +330,117 @@ class GeneralMapping extends Component
         ];
     }
 
+    /**
+     * Get participant ranking information for combined Potensi + Kompetensi weighted score
+     */
+    public function getParticipantRanking(): ?array
+    {
+        if (! $this->participant || ! $this->potensiCategory || ! $this->kompetensiCategory) {
+            return null;
+        }
+
+        $event = $this->participant->assessmentEvent;
+        $positionFormationId = $this->participant->position_formation_id;
+
+        if (! $event) {
+            return null;
+        }
+
+        // Get category weights
+        $potensiWeight = (int) ($this->potensiCategory->weight_percentage ?? 0);
+        $kompetensiWeight = (int) ($this->kompetensiCategory->weight_percentage ?? 0);
+
+        if (($potensiWeight + $kompetensiWeight) === 0) {
+            return null;
+        }
+
+        $potensiId = (int) $this->potensiCategory->id;
+        $kompetensiId = (int) $this->kompetensiCategory->id;
+
+        // Get all participants with their scores using same logic as RekapRankingAssessment
+        $baseQuery = \DB::table('aspect_assessments as aa')
+            ->join('aspects as a', 'a.id', '=', 'aa.aspect_id')
+            ->where('aa.event_id', $event->id)
+            ->where('aa.position_formation_id', $positionFormationId)
+            ->groupBy('aa.participant_id')
+            ->selectRaw('aa.participant_id as participant_id')
+            ->selectRaw('SUM(CASE WHEN a.category_type_id = ? THEN aa.individual_score ELSE 0 END) as potensi_individual_score', [$potensiId])
+            ->selectRaw('SUM(CASE WHEN a.category_type_id = ? THEN aa.standard_score ELSE 0 END) as potensi_standard_score', [$potensiId])
+            ->selectRaw('SUM(CASE WHEN a.category_type_id = ? THEN aa.individual_score ELSE 0 END) as kompetensi_individual_score', [$kompetensiId])
+            ->selectRaw('SUM(CASE WHEN a.category_type_id = ? THEN aa.standard_score ELSE 0 END) as kompetensi_standard_score', [$kompetensiId]);
+
+        // Order by total weighted individual score
+        $allParticipants = \DB::query()->fromSub($baseQuery, 't')
+            ->select('*')
+            ->selectRaw('? * potensi_individual_score / 100 + ? * kompetensi_individual_score / 100 as total_weighted_individual', [$potensiWeight, $kompetensiWeight])
+            ->orderByDesc('total_weighted_individual')
+            ->get();
+
+        $totalParticipants = $allParticipants->count();
+
+        // Find current participant's rank and calculate conclusion
+        $rank = null;
+        $conclusion = null;
+        foreach ($allParticipants as $index => $row) {
+            if ($row->participant_id === $this->participant->id) {
+                $rank = $index + 1;
+
+                // Calculate conclusion using same logic as RekapRankingAssessment
+                $potInd = (float) $row->potensi_individual_score;
+                $potStd = (float) $row->potensi_standard_score;
+                $komInd = (float) $row->kompetensi_individual_score;
+                $komStd = (float) $row->kompetensi_standard_score;
+
+                // Calculate adjusted standard based on tolerance
+                $toleranceFactor = 1 - ($this->tolerancePercentage / 100);
+                $adjustedPotStd = $potStd * $toleranceFactor;
+                $adjustedKomStd = $komStd * $toleranceFactor;
+
+                // Weighted calculations
+                $weightedPot = $potInd * ($potensiWeight / 100);
+                $weightedKom = $komInd * ($kompetensiWeight / 100);
+                $totalWeightedInd = $weightedPot + $weightedKom;
+
+                $weightedPotStd = $adjustedPotStd * ($potensiWeight / 100);
+                $weightedKomStd = $adjustedKomStd * ($kompetensiWeight / 100);
+                $totalWeightedStd = $weightedPotStd + $weightedKomStd;
+
+                // Calculate original gap (at tolerance 0)
+                $originalWeightedStd = $potStd * ($potensiWeight / 100) + $komStd * ($kompetensiWeight / 100);
+                $originalGap = $totalWeightedInd - $originalWeightedStd;
+
+                // Calculate adjusted gap
+                $adjustedGap = $totalWeightedInd - $totalWeightedStd;
+
+                // Calculate threshold
+                $threshold = -$totalWeightedStd * ($this->tolerancePercentage / 100);
+
+                // Determine conclusion using same logic as RekapRankingAssessment
+                if ($originalGap >= 0) {
+                    $conclusion = 'Di Atas Standar';
+                } elseif ($this->tolerancePercentage > 0 && $adjustedGap >= $threshold) {
+                    $conclusion = 'Memenuhi Standar';
+                } else {
+                    $conclusion = 'Di Bawah Standar';
+                }
+
+                break;
+            }
+        }
+
+        if ($rank === null) {
+            return null;
+        }
+
+        return [
+            'rank' => $rank,
+            'total' => $totalParticipants,
+            'conclusion' => $conclusion,
+            'potensi_weight' => $potensiWeight,
+            'kompetensi_weight' => $kompetensiWeight,
+        ];
+    }
+
     public function render()
     {
         return view('livewire.pages.individual-report.general-mapping');
