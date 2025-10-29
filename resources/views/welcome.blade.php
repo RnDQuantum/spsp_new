@@ -27,9 +27,10 @@
             </h2>
 
             <!-- Hak Cipta -->
-            <p class="text-sm md:text-base text-gray-600 mb-8">
+            <p class="text-sm md:text-base text-gray-600 mb-4">
                 HAK CIPTA: DIRJEN HAKI No. 027762 TANGGAL 10 MARET 2004
             </p>
+
 
             <!-- Tombol Mulai -->
             <a href="{{ route('login') }}"

@@ -83,7 +83,16 @@
                                 {{ number_format($row['total_weighted_individual'], 2) }}</td>
                             <td class="border-2 border-black dark:border-gray-600 px-2 py-2 text-center">
                                 {{ number_format($row['gap'], 2) }}</td>
-                            <td class="border-2 border-black dark:border-gray-600 px-2 py-2 text-center">
+                            @php
+                                $bgColor = match ($row['conclusion']) {
+                                    'Di Atas Standar' => 'bg-green-600',
+                                    'Memenuhi Standar' => 'bg-blue-600',
+                                    'Di Bawah Standar' => 'bg-red-600',
+                                    default => 'bg-gray-600',
+                                };
+                            @endphp
+                            <td
+                                class="border-2 border-black dark:border-gray-600 px-2 py-2 text-center {{ $bgColor }} text-white">
                                 {{ $row['conclusion'] }}</td>
                         </tr>
                     @endforeach
