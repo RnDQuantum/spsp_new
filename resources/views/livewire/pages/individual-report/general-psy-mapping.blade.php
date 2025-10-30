@@ -130,18 +130,14 @@
                         </td>
                         <td class="border border-black px-3 py-2 text-center
                                 @php
-// Normalisasi: trim + uppercase → aman dari spasi & case
-                                    $c = trim(strtoupper($aspect['conclusion_text'])); @endphp
+                                    $c = trim(strtoupper($aspect['conclusion_text']));
+                                @endphp
 
-                                @if ($c === 'LEBIH MEMENUHI/MORE REQUIREMENT') bg-green-500 text-black font-bold
-                                @elseif ($c === 'MEMENUHI/MEET REQUIREMENT')
-                                    bg-yellow-400 text-black font-bold
-                                @elseif ($c === 'KURANG MEMENUHI/BELOW REQUIREMENT')
-                                    bg-orange-500 text-black font-bold
-                                @elseif ($c === 'BELUM MEMENUHI/UNDER PERFORM')
-                                    bg-red-600 text-black font-bold
-                                @else
-                                    bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-white @endif">
+                                @if ($c === 'DI ATAS STANDAR') bg-green-600 text-white font-bold
+                                @elseif ($c === 'MEMENUHI STANDAR') bg-blue-600 text-white font-bold
+                                @elseif ($c === 'DI BAWAH STANDAR') bg-red-600 text-white font-bold
+                                @else bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-white
+                                @endif">
                             {{ $aspect['conclusion_text'] }}
                         </td>
                     </tr>
@@ -160,17 +156,19 @@
                                    text-gray-900 dark:text-white">
                             {{ number_format($totalIndividualRating, 2) }}</td>
                         <td class="border border-black px-3 py-2 bg-black"></td>
-                        <td class="border border-black px-3 py-2 text-center 
+                        <td class="border border-black px-3 py-2 text-center
                                    text-gray-900 dark:text-white">
                             {{ number_format($totalGapRating, 2) }}</td>
                         <td class="border border-black px-3 py-2 bg-black"></td>
-                        <td class="border border-black px-3 py-2 
-                                text-black
+                        <td class="border border-black px-3 py-2 text-center
                                 @php
-$c = trim(strtoupper($overallConclusion)); @endphp
-                                @if ($c === 'MEMENUHI STANDAR/MEET REQUIREMENT STANDARD') bg-green-500 text-black
-                                @elseif ($c === 'KURANG MEMENUHI STANDAR/BELOW REQUIREMENT STANDARD')
-                                    bg-red-600 text-black @endif" colspan="2">
+                                    $c = trim(strtoupper($overallConclusion));
+                                @endphp
+                                @if ($c === 'DI ATAS STANDAR') bg-green-600 text-white font-bold
+                                @elseif ($c === 'MEMENUHI STANDAR') bg-blue-600 text-white font-bold
+                                @elseif ($c === 'DI BAWAH STANDAR') bg-red-600 text-white font-bold
+                                @else bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-white
+                                @endif" colspan="2">
                             {{ $overallConclusion }}
                         </td>
                     </tr>
@@ -189,16 +187,18 @@ $c = trim(strtoupper($overallConclusion)); @endphp
                                    text-gray-900 dark:text-white">
                             {{ number_format($totalIndividualScore, 2) }}</td>
                         <td class="border border-black px-3 py-2 bg-black"></td>
-                        <td class="border border-black px-3 py-2 text-center 
+                        <td class="border border-black px-3 py-2 text-center
                                    text-gray-900 dark:text-white">
                             {{ number_format($totalGapScore, 2) }}</td>
-                        <td class="border border-black px-3 py-2 
-                                text-black
+                        <td class="border border-black px-3 py-2 text-center
                                 @php
-$c = trim(strtoupper($overallConclusion)); @endphp
-                                @if ($c === 'MEMENUHI STANDAR/MEET REQUIREMENT STANDARD') bg-green-500 text-black
-                                @elseif ($c === 'KURANG MEMENUHI STANDAR/BELOW REQUIREMENT STANDARD')
-                                    bg-red-600 text-black @endif" colspan="2">
+                                    $c = trim(strtoupper($overallConclusion));
+                                @endphp
+                                @if ($c === 'DI ATAS STANDAR') bg-green-600 text-white font-bold
+                                @elseif ($c === 'MEMENUHI STANDAR') bg-blue-600 text-white font-bold
+                                @elseif ($c === 'DI BAWAH STANDAR') bg-red-600 text-white font-bold
+                                @else bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-white
+                                @endif" colspan="2">
                             {{ $overallConclusion }}
                         </td>
                     </tr>
@@ -257,7 +257,7 @@ $c = trim(strtoupper($overallConclusion)); @endphp
                                 @if ($conclusion === 'DI ATAS STANDAR')
                                     border-green-300 dark:border-green-600
                                 @elseif ($conclusion === 'MEMENUHI STANDAR')
-                                    border-yellow-300 dark:border-yellow-600
+                                    border-blue-300 dark:border-blue-600
                                 @else
                                     border-red-300 dark:border-red-600
                                 @endif
@@ -265,11 +265,11 @@ $c = trim(strtoupper($overallConclusion)); @endphp
                         <div class="text-sm text-gray-500 dark:text-gray-400 mb-2">Status</div>
                         <div class="text-lg font-bold px-4 py-2 rounded-lg
                                     @if ($conclusion === 'DI ATAS STANDAR')
-                                        bg-green-500 dark:bg-green-600 text-white
+                                        bg-green-600 dark:bg-green-600 text-white
                                     @elseif ($conclusion === 'MEMENUHI STANDAR')
-                                        bg-yellow-400 dark:bg-yellow-500 text-black
+                                        bg-blue-600 dark:bg-blue-600 text-white
                                     @else
-                                        bg-red-500 dark:bg-red-600 text-white
+                                        bg-red-600 dark:bg-red-600 text-white
                                     @endif
                                 ">
                             {{ $rankingInfo['conclusion'] }}
