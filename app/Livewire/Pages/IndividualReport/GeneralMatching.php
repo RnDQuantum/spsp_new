@@ -33,6 +33,7 @@ class GeneralMatching extends Component
 
     // ADD: Public properties untuk support child component
     public $eventCode;
+
     public $testNumber;
 
     // Flag untuk menentukan apakah standalone atau child
@@ -40,8 +41,11 @@ class GeneralMatching extends Component
 
     // Dynamic display parameters
     public $showHeader = true;
+
     public $showInfoSection = true;
+
     public $showPotensi = true;
+
     public $showKompetensi = true;
 
     public function mount($eventCode, $testNumber, $showHeader = true, $showInfoSection = true, $showPotensi = true, $showKompetensi = true): void
@@ -60,7 +64,7 @@ class GeneralMatching extends Component
         $this->isStandalone = $eventCode !== null && $testNumber !== null;
 
         // Validate
-        if (!$this->eventCode || !$this->testNumber) {
+        if (! $this->eventCode || ! $this->testNumber) {
             abort(404, 'Event code and test number are required');
         }
 
@@ -111,16 +115,12 @@ class GeneralMatching extends Component
 
         // Collect percentages from potensi aspects
         foreach ($this->potensiAspects as $aspect) {
-            // Calculate percentage same way as in loadAspectsForCategory
-            $percentage = min(($aspect['individual_rating'] / $aspect['standard_rating']) * 100, 100);
-            $allPercentages[] = $percentage;
+            $allPercentages[] = $aspect['percentage'];
         }
 
         // Collect percentages from kompetensi aspects
         foreach ($this->kompetensiAspects as $aspect) {
-            // Calculate percentage same way as in loadAspectsForCategory
-            $percentage = min(($aspect['individual_rating'] / $aspect['standard_rating']) * 100, 100);
-            $allPercentages[] = $percentage;
+            $allPercentages[] = $aspect['percentage'];
         }
 
         // Calculate average if there are any aspects
@@ -150,19 +150,50 @@ class GeneralMatching extends Component
 
         // Process each aspect
         $this->$propertyName = $aspectAssessments->map(function ($assessment) {
-            // Calculate percentage based on individual vs standard rating, capped at 100%
-            $percentage = min(($assessment->individual_rating / $assessment->standard_rating) * 100, 100);
+            // Calculate percentage using generalized logic
+            $percentage = $this->calculateAspectPercentage($assessment);
 
             return [
                 'name' => $assessment->aspect->name,
                 'code' => $assessment->aspect->code,
-                'percentage' => round($percentage), // Round to remove decimal places
+                'percentage' => round($percentage), // Standard rounding (5-9 up, 0-4 down)
                 'individual_rating' => $assessment->individual_rating,
                 'standard_rating' => $assessment->standard_rating,
                 'description' => $assessment->aspect->description,
                 'sub_aspects' => $this->loadSubAspects($assessment),
             ];
         })->toArray();
+    }
+
+    private function calculateAspectPercentage(AspectAssessment $assessment): float
+    {
+        // Check if aspect has sub-aspects
+        if ($assessment->subAspectAssessments->isNotEmpty()) {
+            // Calculate based on sub-aspects (for Potensi or any category with sub-aspects)
+            $totalValue = 0;
+            $subAspectCount = $assessment->subAspectAssessments->count();
+
+            foreach ($assessment->subAspectAssessments as $subAssessment) {
+                // If individual >= standard, value = 1.0 (full contribution)
+                // If individual < standard, value = individual / standard (proportional)
+                if ($subAssessment->individual_rating >= $subAssessment->standard_rating) {
+                    $totalValue += 1.0;
+                } else {
+                    $totalValue += $subAssessment->individual_rating / $subAssessment->standard_rating;
+                }
+            }
+
+            // Average of all sub-aspects, then convert to percentage
+            return ($totalValue / $subAspectCount) * 100;
+        } else {
+            // Calculate based on aspect-level rating (for Kompetensi or any category without sub-aspects)
+            // Apply the same logic: if individual >= standard, return 100%
+            if ($assessment->individual_rating >= $assessment->standard_rating) {
+                return 100;
+            } else {
+                return ($assessment->individual_rating / $assessment->standard_rating) * 100;
+            }
+        }
     }
 
     private function loadSubAspects(AspectAssessment $aspectAssessment): array
@@ -215,6 +246,7 @@ class GeneralMatching extends Component
             return view('livewire.pages.individual-report.general-matching')
                 ->layout('components.layouts.app', ['title' => 'General Matching']);
         }
+
         return view('livewire.pages.individual-report.general-matching');
     }
 }
