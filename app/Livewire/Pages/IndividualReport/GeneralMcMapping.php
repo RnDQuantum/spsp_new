@@ -33,6 +33,10 @@ class GeneralMcMapping extends Component
 
     public $totalGapScore = 0;
 
+    public $totalOriginalStandardScore = 0;
+
+    public $totalOriginalGapScore = 0;
+
     public $overallConclusion = '';
 
     // Tolerance percentage (loaded from session)
@@ -179,11 +183,15 @@ class GeneralMcMapping extends Component
             $adjustedStandardRating = $originalStandardRating * $toleranceFactor;
             $adjustedStandardScore = $originalStandardScore * $toleranceFactor;
 
-            // 3. Recalculate gap based on adjusted standard
+            // 3. Calculate original gap (at tolerance 0%)
+            $originalGapRating = $individualRating - $originalStandardRating;
+            $originalGapScore = $individualScore - $originalStandardScore;
+
+            // 4. Calculate adjusted gap (with tolerance)
             $adjustedGapRating = $individualRating - $adjustedStandardRating;
             $adjustedGapScore = $individualScore - $adjustedStandardScore;
 
-            // 4. Calculate percentage based on adjusted standard
+            // 5. Calculate percentage based on adjusted standard
             $adjustedPercentage = $adjustedStandardScore > 0
                 ? ($individualScore / $adjustedStandardScore) * 100
                 : 0;
@@ -199,21 +207,25 @@ class GeneralMcMapping extends Component
                 'individual_score' => $individualScore,
                 'gap_rating' => $adjustedGapRating,
                 'gap_score' => $adjustedGapScore,
+                'original_gap_rating' => $originalGapRating,
+                'original_gap_score' => $originalGapScore,
                 'percentage_score' => $adjustedPercentage,
-                'conclusion_text' => $this->getConclusionText($adjustedPercentage),
+                'conclusion_text' => $this->getConclusionText($originalGapScore, $adjustedGapScore),
             ];
         })->toArray();
     }
 
     private function calculateTotals(): void
     {
-        // ⚠️ CRITICAL: Reset totals before recalculating
+        // Reset totals before recalculating
         $this->totalStandardRating = 0;
         $this->totalStandardScore = 0;
         $this->totalIndividualRating = 0;
         $this->totalIndividualScore = 0;
         $this->totalGapRating = 0;
         $this->totalGapScore = 0;
+        $this->totalOriginalStandardScore = 0;
+        $this->totalOriginalGapScore = 0;
 
         foreach ($this->aspectsData as $aspect) {
             $this->totalStandardRating += $aspect['standard_rating'];
@@ -222,10 +234,12 @@ class GeneralMcMapping extends Component
             $this->totalIndividualScore += $aspect['individual_score'];
             $this->totalGapRating += $aspect['gap_rating'];
             $this->totalGapScore += $aspect['gap_score'];
+            $this->totalOriginalStandardScore += $aspect['original_standard_score'];
+            $this->totalOriginalGapScore += $aspect['original_gap_score'];
         }
 
-        // Determine overall conclusion based on total gap score
-        $this->overallConclusion = $this->getOverallConclusion($this->totalGapScore);
+        // Determine overall conclusion based on gap-based logic
+        $this->overallConclusion = $this->getOverallConclusion($this->totalOriginalGapScore, $this->totalGapScore);
     }
 
     private function prepareChartData(): void
@@ -250,26 +264,25 @@ class GeneralMcMapping extends Component
         }
     }
 
-    private function getConclusionText(float $percentageScore): string
+    private function getConclusionText(float $originalGap, float $adjustedGap): string
     {
-        // Conclusion based on percentage score relative to adjusted standard
-        if ($percentageScore >= 110) {
-            return 'Lebih Memenuhi/More Requirement';
-        } elseif ($percentageScore >= 100) {
-            return 'Memenuhi/Meet Requirement';
-        } elseif ($percentageScore >= 90) {
-            return 'Kurang Memenuhi/Below Requirement';
+        if ($originalGap >= 0) {
+            return 'Di Atas Standar';
+        } elseif ($adjustedGap >= 0) {
+            return 'Memenuhi Standar';
         } else {
-            return 'Belum Memenuhi/Under Perform';
+            return 'Di Bawah Standar';
         }
     }
 
-    private function getOverallConclusion(float $totalGapScore): string
+    private function getOverallConclusion(float $totalOriginalGapScore, float $totalAdjustedGapScore): string
     {
-        if ($totalGapScore >= 0) {
-            return 'Memenuhi Standar/Meet Requirement Standard';
+        if ($totalOriginalGapScore >= 0) {
+            return 'Di Atas Standar';
+        } elseif ($totalAdjustedGapScore >= 0) {
+            return 'Memenuhi Standar';
         } else {
-            return 'Kurang Memenuhi Standar/Below Requirement Standard';
+            return 'Di Bawah Standar';
         }
     }
 
@@ -335,10 +348,11 @@ class GeneralMcMapping extends Component
         $passingAspects = 0;
 
         foreach ($this->aspectsData as $aspect) {
-            // Count as passing if conclusion text is "Memenuhi" or "Lebih Memenuhi"
-            // Exclude "Belum Memenuhi" and "Kurang Memenuhi"
-            if ($aspect['conclusion_text'] === 'Memenuhi/Meet Requirement' ||
-                $aspect['conclusion_text'] === 'Lebih Memenuhi/More Requirement') {
+            // Count as passing if conclusion text is "Di Atas Standar" or "Memenuhi Standar"
+            if (
+                $aspect['conclusion_text'] === 'Di Atas Standar' ||
+                $aspect['conclusion_text'] === 'Memenuhi Standar'
+            ) {
                 $passingAspects++;
             }
         }
@@ -397,7 +411,7 @@ class GeneralMcMapping extends Component
             if ($participant->participant_id === $this->participant->id) {
                 $rank = $index + 1;
 
-                // Calculate conclusion using same logic as RankingMcMapping
+                // Calculate conclusion using gap-based logic
                 $originalStandardScore = (float) $participant->sum_original_standard_score;
                 $individualScore = (float) $participant->sum_individual_score;
 
@@ -409,13 +423,10 @@ class GeneralMcMapping extends Component
                 $originalGap = $individualScore - $originalStandardScore;
                 $adjustedGap = $individualScore - $adjustedStandardScore;
 
-                // Calculate threshold
-                $threshold = -$adjustedStandardScore * ($this->tolerancePercentage / 100);
-
-                // Determine conclusion using same logic as RankingMcMapping
+                // Determine conclusion using gap-based logic (no threshold)
                 if ($originalGap >= 0) {
                     $conclusion = 'Di Atas Standar';
-                } elseif ($this->tolerancePercentage > 0 && $adjustedGap >= $threshold) {
+                } elseif ($adjustedGap >= 0) {
                     $conclusion = 'Memenuhi Standar';
                 } else {
                     $conclusion = 'Di Bawah Standar';
