@@ -140,7 +140,7 @@ $c = trim(strtoupper($row['conclusion'])); @endphp
                         class="text-sm font-normal text-blue-600 dark:text-blue-400"></span>
                 </h3>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <!-- Original Standard -->
                     <div class="bg-white dark:bg-gray-800 border border-blue-200 dark:border-blue-600 rounded-lg p-3">
                         <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Standar Original (100%)</div>
@@ -157,14 +157,6 @@ $c = trim(strtoupper($row['conclusion'])); @endphp
                         </div>
                         <div class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
                             {{ number_format($standardInfo['adjusted_standard'], 2) }}</div>
-                    </div>
-
-                    <!-- Threshold -->
-                    <div
-                        class="bg-white dark:bg-gray-800 border border-orange-300 dark:border-orange-600 rounded-lg p-3">
-                        <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Threshold (Batas Toleransi)</div>
-                        <div class="text-2xl font-bold text-orange-600 dark:text-orange-400">
-                            {{ number_format($standardInfo['threshold'], 2) }}</div>
                     </div>
                 </div>
             </div>
@@ -229,20 +221,17 @@ $c = trim(strtoupper($row['conclusion'])); @endphp
             <!-- Keterangan Rentang Nilai -->
             <div class="mt-4 bg-blue-50 dark:bg-blue-900 border border-blue-200 dark:border-blue-600 rounded-lg p-3">
                 <div class="text-sm text-blue-800 dark:text-blue-200">
-                    <strong>Keterangan:</strong> Kesimpulan berdasarkan Gap (Individual Score - Adjusted Standard)
-                    dan
-                    threshold toleransi
+                    <strong>Keterangan:</strong> Kesimpulan berdasarkan Gap (Individual Score - Standard)
                     <span x-data
-                        x-text="$wire.tolerancePercentage > 0 ? '(' + $wire.tolerancePercentage + '%)' : '(0%)'"></span>.
+                        x-text="$wire.tolerancePercentage > 0 ? 'dengan toleransi ' + $wire.tolerancePercentage + '%' : 'tanpa toleransi'"></span>.
                     <br>
                     <strong>Rumus:</strong>
                     <ul class="list-disc ml-6 mt-1">
-                        <li>Original Gap = Individual Score - Original Standard (at Tolerance 0)</li>
-                        <li>Adjusted Gap = Individual Score - Adjusted Standard</li>
-                        <li>Threshold = -Adjusted Standard × (Tolerance / 100)</li>
-                        <li><strong>Di Atas Standar:</strong> Original Gap ≥ 0 (tidak berubah dengan toleransi)</li>
-                        <li><strong>Memenuhi Standar:</strong> Tolerance > 0 & Adjusted Gap ≥ Threshold</li>
-                        <li><strong>Di Bawah Standar:</strong> Sisanya</li>
+                        <li>Original Gap = Individual Score - Original Standard (Tolerance 0%)</li>
+                        <li>Adjusted Gap = Individual Score - Adjusted Standard (Tolerance dikurangi)</li>
+                        <li><strong>Di Atas Standar:</strong> Original Gap ≥ 0 (melebihi standar asli)</li>
+                        <li><strong>Memenuhi Standar:</strong> Adjusted Gap ≥ 0 (melebihi standar adjusted, di bawah standar asli)</li>
+                        <li><strong>Di Bawah Standar:</strong> Adjusted Gap < 0 (masih di bawah standar adjusted)</li>
                     </ul>
                 </div>
             </div>

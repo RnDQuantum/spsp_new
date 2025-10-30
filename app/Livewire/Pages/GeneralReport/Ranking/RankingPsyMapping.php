@@ -31,19 +31,19 @@ class RankingPsyMapping extends Component
     // Conclusion configuration - single source of truth
     public array $conclusionConfig = [
         'Di Atas Standar' => [
-            'chartColor' => '#22c55e',
-            'tailwindClass' => 'bg-green-500 dark:bg-green-600 border-green-300 dark:border-green-400',
-            'rangeText' => 'Tolerance = 0 & Gap ≥ 0',
+            'chartColor' => '#10b981',
+            'tailwindClass' => 'bg-green-600 dark:bg-green-600 border-green-300 dark:border-green-400',
+            'rangeText' => 'Original Gap ≥ 0',
         ],
         'Memenuhi Standar' => [
-            'chartColor' => '#eab308',
-            'tailwindClass' => 'bg-yellow-500 dark:bg-yellow-600 border-blue-300 dark:border-blue-400',
-            'rangeText' => 'Tolerance > 0 & Gap ≥ Threshold',
+            'chartColor' => '#3b82f6',
+            'tailwindClass' => 'bg-blue-600 dark:bg-blue-600 border-blue-300 dark:border-blue-400',
+            'rangeText' => 'Adjusted Gap ≥ 0',
         ],
         'Di Bawah Standar' => [
             'chartColor' => '#ef4444',
-            'tailwindClass' => 'bg-red-500 dark:bg-red-600 border-red-300 dark:border-red-400',
-            'rangeText' => 'Gap < Threshold',
+            'tailwindClass' => 'bg-red-600 dark:bg-red-600 border-red-300 dark:border-red-400',
+            'rangeText' => 'Adjusted Gap < 0',
         ],
     ];
 
@@ -216,9 +216,6 @@ class RankingPsyMapping extends Component
                 ? ($individualScore / $adjustedStandardScore) * 100
                 : 0;
 
-            // Calculate threshold: -(Adjusted Standard × Tolerance%)
-            $threshold = -$adjustedStandardScore * ($this->tolerancePercentage / 100);
-
             return [
                 'rank' => $startRank + $index + 1,
                 'nip' => $participant?->skb_number ?? $participant?->test_number ?? '-',
@@ -233,7 +230,7 @@ class RankingPsyMapping extends Component
                 'gap_rating' => round($adjustedGapRating, 2),
                 'gap_score' => round($adjustedGapScore, 2),
                 'percentage_score' => round($adjustedPercentage, 2),
-                'conclusion' => $this->getConclusionText($originalGapScore, $adjustedGapScore, $threshold),
+                'conclusion' => $this->getConclusionText($originalGapScore, $adjustedGapScore),
                 'matrix' => 1,
             ];
         })->all();
@@ -247,12 +244,11 @@ class RankingPsyMapping extends Component
         );
     }
 
-    private function getConclusionText(float $originalGap, float $adjustedGap, float $threshold): string
+    private function getConclusionText(float $originalGap, float $adjustedGap): string
     {
-        // New logic: Di Atas Standar is fixed based on original gap (tolerance 0)
         if ($originalGap >= 0) {
             return 'Di Atas Standar';
-        } elseif ($this->tolerancePercentage > 0 && $adjustedGap >= $threshold) {
+        } elseif ($adjustedGap >= 0) {
             return 'Memenuhi Standar';
         } else {
             return 'Di Bawah Standar';
@@ -339,11 +335,8 @@ class RankingPsyMapping extends Component
             // Calculate adjusted gap
             $adjustedGap = $individualScore - $adjustedStandardScore;
 
-            // Calculate threshold
-            $threshold = -$adjustedStandardScore * ($this->tolerancePercentage / 100);
-
-            // Count as passing if original gap >= 0 OR (tolerance > 0 and adjusted gap >= threshold)
-            return $originalGap >= 0 || ($this->tolerancePercentage > 0 && $adjustedGap >= $threshold);
+            // Count as passing if original gap >= 0 OR adjusted gap >= 0
+            return $originalGap >= 0 || $adjustedGap >= 0;
         })->count();
 
         return [
@@ -414,13 +407,9 @@ class RankingPsyMapping extends Component
         $toleranceFactor = 1 - $this->tolerancePercentage / 100;
         $adjustedStandardScore = $originalStandardScore * $toleranceFactor;
 
-        // Threshold calculation
-        $threshold = -$adjustedStandardScore * ($this->tolerancePercentage / 100);
-
         return [
             'original_standard' => round($originalStandardScore, 2),
             'adjusted_standard' => round($adjustedStandardScore, 2),
-            'threshold' => round($threshold, 2),
         ];
     }
 
@@ -486,15 +475,12 @@ class RankingPsyMapping extends Component
             $toleranceFactor = 1 - ($this->tolerancePercentage / 100);
             $adjustedStandardScore = $originalStandardScore * $toleranceFactor;
 
-            // Calculate gap based on adjusted standard
-            $gap = $individualScore - $adjustedStandardScore;
-
-            // Calculate threshold: -(Adjusted Standard × Tolerance%)
-            $threshold = -$adjustedStandardScore * ($this->tolerancePercentage / 100);
+            // Calculate gaps
+            $originalGap = $individualScore - $originalStandardScore;
+            $adjustedGap = $individualScore - $adjustedStandardScore;
 
             // Determine conclusion
-            $originalGap = $individualScore - $originalStandardScore;
-            $conclusion = $this->getConclusionText($originalGap, $gap, $threshold);
+            $conclusion = $this->getConclusionText($originalGap, $adjustedGap);
             $conclusions[$conclusion]++;
         }
 
