@@ -400,6 +400,7 @@ class GeneralMcMapping extends Component
             ->groupBy('participant_id')
             ->orderByDesc('sum_individual_score')
             ->orderByDesc('sum_individual_rating')
+            ->orderBy('participant_id')
             ->get();
 
         $totalParticipants = $allParticipants->count();

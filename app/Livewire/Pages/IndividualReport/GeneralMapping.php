@@ -393,6 +393,7 @@ class GeneralMapping extends Component
             ->select('*')
             ->selectRaw('? * potensi_individual_score / 100 + ? * kompetensi_individual_score / 100 as total_weighted_individual', [$potensiWeight, $kompetensiWeight])
             ->orderByDesc('total_weighted_individual')
+            ->orderBy('participant_id')
             ->get();
 
         $totalParticipants = $allParticipants->count();

@@ -181,7 +181,8 @@ class RankingPsyMapping extends Component
             ->whereIn('aspect_id', $potensiAspectIds)
             ->groupBy('participant_id')
             ->orderByDesc('sum_individual_score')
-            ->orderByDesc('sum_individual_rating');
+            ->orderByDesc('sum_individual_rating')
+            ->orderBy('participant_id');
 
         /** @var LengthAwarePaginator $paginator */
         $paginator = $query->paginate($this->perPage, pageName: 'page')->withQueryString();

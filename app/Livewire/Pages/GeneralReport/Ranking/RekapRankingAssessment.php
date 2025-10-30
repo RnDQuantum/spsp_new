@@ -289,7 +289,8 @@ class RekapRankingAssessment extends Component
                         $orderingQuery = DB::query()->fromSub($baseQuery, 't')
                             ->select('*')
                             ->selectRaw('? * potensi_individual_score / 100 + ? * kompetensi_individual_score / 100 as total_weighted_individual', [$this->potensiWeight, $this->kompetensiWeight])
-                            ->orderByDesc('total_weighted_individual');
+                            ->orderByDesc('total_weighted_individual')
+                            ->orderBy('participant_id');
 
                         /** @var LengthAwarePaginator $paginator */
                         $paginator = $orderingQuery->paginate($this->perPage)->withQueryString();
