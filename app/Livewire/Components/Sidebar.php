@@ -38,12 +38,14 @@ class Sidebar extends Component
     public function handleEventSelected(?string $eventCode): void
     {
         $this->eventCode = $eventCode;
+        $this->participantId = null; // Reset participant ID when event changes
         $this->testNumber = null; // Reset test number when event changes
     }
 
     public function handlePositionSelected(?int $positionFormationId): void
     {
         $this->positionFormationId = $positionFormationId;
+        $this->participantId = null; // Reset participant ID when position changes
         $this->testNumber = null; // Reset test number when position changes
     }
 
@@ -62,10 +64,21 @@ class Sidebar extends Component
 
     /**
      * Check if individual report links should be enabled
+     * Validates that the combination of eventCode and testNumber exists in database
      */
     public function canShowIndividualReports(): bool
     {
-        return $this->eventCode !== null && $this->testNumber !== null;
+        // Basic null check
+        if ($this->eventCode === null || $this->testNumber === null) {
+            return false;
+        }
+
+        // Validate that the combination exists in database
+        $participant = Participant::whereHas('event', function ($query) {
+            $query->where('code', $this->eventCode);
+        })->where('test_number', $this->testNumber)->first();
+
+        return $participant !== null;
     }
 
     /**
