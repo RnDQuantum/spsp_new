@@ -180,14 +180,13 @@ class GeneralMapping extends Component
             $adjustedStandardRating = $originalStandardRating * $toleranceFactor;
             $adjustedStandardScore = $originalStandardScore * $toleranceFactor;
 
-            // Recalculate gap based on adjusted standard
+            // Calculate original gap (at tolerance 0)
+            $originalGapRating = $individualRating - $originalStandardRating;
+            $originalGapScore = $individualScore - $originalStandardScore;
+
+            // Calculate adjusted gap (with tolerance)
             $adjustedGapRating = $individualRating - $adjustedStandardRating;
             $adjustedGapScore = $individualScore - $adjustedStandardScore;
-
-            // Calculate percentage based on adjusted standard
-            $adjustedPercentage = $adjustedStandardScore > 0
-                ? ($individualScore / $adjustedStandardScore) * 100
-                : 0;
 
             return [
                 'name' => $assessment->aspect->name,
@@ -201,8 +200,8 @@ class GeneralMapping extends Component
                 'individual_score' => $individualScore,
                 'gap_rating' => $adjustedGapRating,
                 'gap_score' => $adjustedGapScore,
-                'percentage_score' => $adjustedPercentage,
-                'conclusion_text' => $this->getConclusionText($adjustedPercentage),
+                'original_gap_score' => $originalGapScore,
+                'conclusion_text' => $this->getConclusionText($originalGapScore, $adjustedGapScore),
             ];
         })->toArray();
     }
@@ -252,17 +251,14 @@ class GeneralMapping extends Component
         }
     }
 
-    private function getConclusionText(float $percentageScore): string
+    private function getConclusionText(float $originalGapScore, float $adjustedGapScore): string
     {
-        // Conclusion based on percentage score relative to adjusted standard
-        if ($percentageScore >= 110) {
-            return 'Lebih Memenuhi/More Requirement';
-        } elseif ($percentageScore >= 100) {
-            return 'Memenuhi/Meet Requirement';
-        } elseif ($percentageScore >= 90) {
-            return 'Kurang Memenuhi/Below Requirement';
+        if ($originalGapScore >= 0) {
+            return 'Di Atas Standar';
+        } elseif ($adjustedGapScore >= 0) {
+            return 'Memenuhi Standar';
         } else {
-            return 'Belum Memenuhi/Under Perform';
+            return 'Di Bawah Standar';
         }
     }
 
@@ -337,11 +333,10 @@ class GeneralMapping extends Component
         $passingAspects = 0;
 
         foreach ($this->aspectsData as $aspect) {
-            // Count as passing if conclusion text is "Memenuhi" or "Lebih Memenuhi"
-            // Exclude "Belum Memenuhi" and "Kurang Memenuhi"
+            // Count as passing if conclusion is "Di Atas Standar" or "Memenuhi Standar"
             if (
-                $aspect['conclusion_text'] === 'Memenuhi/Meet Requirement' ||
-                $aspect['conclusion_text'] === 'Lebih Memenuhi/More Requirement'
+                $aspect['conclusion_text'] === 'Di Atas Standar' ||
+                $aspect['conclusion_text'] === 'Memenuhi Standar'
             ) {
                 $passingAspects++;
             }
@@ -436,13 +431,10 @@ class GeneralMapping extends Component
                 // Calculate adjusted gap
                 $adjustedGap = $totalWeightedInd - $totalWeightedStd;
 
-                // Calculate threshold
-                $threshold = -$totalWeightedStd * ($this->tolerancePercentage / 100);
-
                 // Determine conclusion using same logic as RekapRankingAssessment
                 if ($originalGap >= 0) {
                     $conclusion = 'Di Atas Standar';
-                } elseif ($this->tolerancePercentage > 0 && $adjustedGap >= $threshold) {
+                } elseif ($adjustedGap >= 0) {
                     $conclusion = 'Memenuhi Standar';
                 } else {
                     $conclusion = 'Di Bawah Standar';

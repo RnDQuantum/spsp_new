@@ -124,7 +124,7 @@
                         class="text-sm font-normal text-blue-600 dark:text-blue-400"></span>
                 </h3>
 
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <!-- Psychology Standard -->
                     <div class="bg-white dark:bg-gray-800 border border-blue-200 dark:border-blue-600 rounded-lg p-3">
                         <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Standar Psychology
@@ -144,17 +144,9 @@
                     <!-- Total Standard -->
                     <div
                         class="bg-white dark:bg-gray-800 border border-indigo-300 dark:border-indigo-600 rounded-lg p-3">
-                        <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Total Standar</div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Total Standar (Adjusted)</div>
                         <div class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
                             {{ number_format($standardInfo['total_standard'], 2) }}</div>
-                    </div>
-
-                    <!-- Threshold -->
-                    <div
-                        class="bg-white dark:bg-gray-800 border border-orange-300 dark:border-orange-600 rounded-lg p-3">
-                        <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Threshold (Batas Toleransi)</div>
-                        <div class="text-2xl font-bold text-orange-600 dark:text-orange-400">
-                            {{ number_format($standardInfo['threshold'], 2) }}</div>
                     </div>
                 </div>
             </div>
@@ -189,18 +181,9 @@
                             {{ $conclusion }}
                         </div>
                         <div class="text-xs text-gray-500 dark:text-gray-400 font-medium">
-                            @switch($conclusion)
-                                @case('Di Atas Standar')
-                                    Tolerance = 0 & Gap ≥ 0
-                                @break
-
-                                @case('Memenuhi Standar')
-                                    Tolerance > 0 & Gap ≥ Threshold
-                                @break
-
-                                @case('Di Bawah Standar')
-                            Gap < Threshold @break @endswitch </div>
+                            {{ $conclusionConfig[$conclusion]['rangeText'] ?? '-' }}
                         </div>
+                    </div>
                 @endforeach
             </div>
 
@@ -233,18 +216,17 @@
             <div class="mt-4 bg-blue-50 dark:bg-blue-900 border border-blue-200 dark:border-blue-600 rounded-lg p-3">
                 <div class="text-sm text-blue-800 dark:text-blue-200">
                     <strong>Keterangan:</strong> Kesimpulan berdasarkan Gap (Total Weighted Individual - Total
-                    Weighted Standard) dan threshold toleransi
+                    Weighted Standard)
                     <span x-data
-                        x-text="$wire.tolerancePercentage > 0 ? '(' + $wire.tolerancePercentage + '%)' : '(0%)'"></span>.
+                        x-text="$wire.tolerancePercentage > 0 ? 'dengan toleransi ' + $wire.tolerancePercentage + '%' : 'tanpa toleransi'"></span>.
                     <br>
                     <strong>Rumus:</strong>
                     <ul class="list-disc ml-6 mt-1">
-                        <li>Original Gap = Total Weighted Individual - Original Weighted Standard (at Tolerance 0)</li>
-                        <li>Adjusted Gap = Total Weighted Individual - Total Weighted Standard</li>
-                        <li>Threshold = -Total Weighted Standard × (Tolerance / 100)</li>
-                        <li><strong>Di Atas Standar:</strong> Original Gap ≥ 0 (tidak berubah dengan toleransi)</li>
-                        <li><strong>Memenuhi Standar:</strong> Tolerance > 0 & Adjusted Gap ≥ Threshold</li>
-                        <li><strong>Di Bawah Standar:</strong> Sisanya</li>
+                        <li>Original Gap = Total Weighted Individual - Original Weighted Standard (Tolerance 0%)</li>
+                        <li>Adjusted Gap = Total Weighted Individual - Adjusted Weighted Standard (Tolerance dikurangi)</li>
+                        <li><strong>Di Atas Standar:</strong> Original Gap ≥ 0 (melebihi standar asli)</li>
+                        <li><strong>Memenuhi Standar:</strong> Adjusted Gap ≥ 0 (melebihi standar adjusted, di bawah standar asli)</li>
+                        <li><strong>Di Bawah Standar:</strong> Adjusted Gap < 0 (masih di bawah standar adjusted)</li>
                     </ul>
                 </div>
             </div>

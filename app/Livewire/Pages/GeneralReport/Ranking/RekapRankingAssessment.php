@@ -35,17 +35,17 @@ class RekapRankingAssessment extends Component
         'Di Atas Standar' => [
             'chartColor' => '#10b981',
             'tailwindClass' => 'bg-green-100 border-green-300',
-            'rangeText' => 'Tolerance = 0 & Gap ≥ 0',
+            'rangeText' => 'Skor Individual > Standar Original',
         ],
         'Memenuhi Standar' => [
             'chartColor' => '#3b82f6',
             'tailwindClass' => 'bg-blue-100 border-blue-300',
-            'rangeText' => 'Tolerance > 0 & Gap ≥ Threshold',
+            'rangeText' => 'Skor Individual > Standar Adjusted',
         ],
         'Di Bawah Standar' => [
             'chartColor' => '#ef4444',
             'tailwindClass' => 'bg-red-100 border-red-300',
-            'rangeText' => 'Gap < Threshold',
+            'rangeText' => 'Skor Individual < Standar Adjusted',
         ],
     ];
 
@@ -156,14 +156,10 @@ class RekapRankingAssessment extends Component
         $weightedKomStd = $adjustedKomStd * ($this->kompetensiWeight / 100);
         $totalWeightedStd = $weightedPotStd + $weightedKomStd;
 
-        // Threshold calculation
-        $threshold = -$totalWeightedStd * ($this->tolerancePercentage / 100);
-
         return [
             'psy_standard' => round($weightedPotStd, 2),
             'mc_standard' => round($weightedKomStd, 2),
             'total_standard' => round($totalWeightedStd, 2),
-            'threshold' => round($threshold, 2),
         ];
     }
 
@@ -332,9 +328,8 @@ class RekapRankingAssessment extends Component
                             $originalGap = $totalWeightedInd - $originalWeightedStd;
 
                             // Gap calculation based on adjusted standard
-                            $gap = $totalWeightedInd - $totalWeightedStd;
-                            $threshold = -$totalWeightedStd * ($this->tolerancePercentage / 100);
-                            $conclusion = $this->getConclusionText($originalGap, $gap, $threshold);
+                            $adjustedGap = $totalWeightedInd - $totalWeightedStd;
+                            $conclusion = $this->getConclusionText($originalGap, $adjustedGap);
 
                             return [
                                 'rank' => $startRank + $index + 1,
@@ -345,7 +340,7 @@ class RekapRankingAssessment extends Component
                                 'psy_weighted' => round($weightedPot, 2),
                                 'mc_weighted' => round($weightedKom, 2),
                                 'total_weighted_individual' => round($totalWeightedInd, 2),
-                                'gap' => round($gap, 2),
+                                'gap' => round($adjustedGap, 2),
                                 'conclusion' => $conclusion,
                             ];
                         })->all();
@@ -444,9 +439,10 @@ class RekapRankingAssessment extends Component
             $originalWeightedStd = $potStd * ($this->potensiWeight / 100) + $komStd * ($this->kompetensiWeight / 100);
             $originalGap = $totalWeightedInd - $originalWeightedStd;
 
-            $gap = $totalWeightedInd - $totalWeightedStd;
-            $threshold = -$totalWeightedStd * ($this->tolerancePercentage / 100);
-            if ($originalGap >= 0 || ($this->tolerancePercentage > 0 && $gap >= $threshold)) {
+            $adjustedGap = $totalWeightedInd - $totalWeightedStd;
+
+            // Passing = Di Atas Standar OR Memenuhi Standar
+            if ($originalGap >= 0 || $adjustedGap >= 0) {
                 $passing++;
             }
         }
@@ -534,23 +530,21 @@ class RekapRankingAssessment extends Component
             $originalWeightedStd = $potStd * ($this->potensiWeight / 100) + $komStd * ($this->kompetensiWeight / 100);
             $originalGap = $totalWeightedInd - $originalWeightedStd;
 
-            $gap = $totalWeightedInd - $totalWeightedStd;
-            $threshold = -$totalWeightedStd * ($this->tolerancePercentage / 100);
+            $adjustedGap = $totalWeightedInd - $totalWeightedStd;
 
             // Determine conclusion based on new logic
-            $conclusion = $this->getConclusionText($originalGap, $gap, $threshold);
+            $conclusion = $this->getConclusionText($originalGap, $adjustedGap);
             $conclusions[$conclusion]++;
         }
 
         return $conclusions;
     }
 
-    private function getConclusionText(float $originalGap, float $adjustedGap, float $threshold): string
+    private function getConclusionText(float $originalGap, float $adjustedGap): string
     {
-        // New logic: Di Atas Standar is fixed based on original gap (tolerance 0)
         if ($originalGap >= 0) {
             return 'Di Atas Standar';
-        } elseif ($this->tolerancePercentage > 0 && $adjustedGap >= $threshold) {
+        } elseif ($adjustedGap >= 0) {
             return 'Memenuhi Standar';
         } else {
             return 'Di Bawah Standar';
