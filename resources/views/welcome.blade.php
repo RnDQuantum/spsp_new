@@ -33,10 +33,13 @@
 
 
             <!-- Tombol Mulai -->
-            <a href="{{ route('login') }}"
+            {{-- TEMPORARY: Bypass authentication - redirect to dashboard directly --}}
+            {{-- TODO: Restore authentication by changing 'dashboard' back to 'login' --}}
+            <a href="{{ route('dashboard') }}"
                 class="inline-block bg-red-600 hover:bg-red-700 text-white font-semibold px-8 py-3 rounded-lg transition duration-300 shadow-lg hover:shadow-xl">
                 Mulai
             </a>
+            {{-- ORIGINAL (with auth): <a href="{{ route('login') }}"> --}}
         </div>
     </body>
 

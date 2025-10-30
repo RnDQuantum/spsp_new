@@ -53,6 +53,9 @@ class LoginController extends Controller
 
         $request->session()->regenerateToken();
 
-        return redirect()->route('login');
+        // TEMPORARY: Redirect to welcome instead of login for bypass authentication
+        // TODO: Change back to route('login') when restoring authentication
+        return redirect()->route('welcome');
+        // ORIGINAL: return redirect()->route('login');
     }
 }

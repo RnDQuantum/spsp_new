@@ -6,6 +6,10 @@ use Illuminate\Support\Facades\Route;
 
 // Route::get('/', Welcome::class);
 Route::get('/', function () {
+    // TEMPORARY: Set force_reload session for bypass authentication
+    // TODO: Remove this line when restoring authentication (force_reload will be set in LoginController)
+    session()->flash('force_reload', true);
+
     return view('welcome');
 })->name('welcome');
 
@@ -16,7 +20,10 @@ Route::middleware(['guest'])->group(function () {
 });
 
 // Protected Routes
-Route::middleware(['auth'])->group(function () {
+// TEMPORARY: Comment out 'auth' middleware to bypass authentication
+// TODO: Uncomment line below and remove the line after to restore authentication
+// Route::middleware(['auth'])->group(function () {
+Route::middleware([])->group(function () {
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
     Route::get('/dashboard', \App\Livewire\Pages\Dashboard::class)->name('dashboard');
 
