@@ -38,6 +38,10 @@ class GeneralMapping extends Component
 
     public $totalGapScore = 0;
 
+    public $totalOriginalStandardScore = 0;
+
+    public $totalOriginalGapScore = 0;
+
     public $overallConclusion = '';
 
     // Tolerance percentage (loaded from session)
@@ -215,6 +219,8 @@ class GeneralMapping extends Component
         $this->totalIndividualScore = 0;
         $this->totalGapRating = 0;
         $this->totalGapScore = 0;
+        $this->totalOriginalStandardScore = 0;
+        $this->totalOriginalGapScore = 0;
 
         foreach ($this->aspectsData as $aspect) {
             $this->totalStandardRating += $aspect['standard_rating'];
@@ -223,10 +229,12 @@ class GeneralMapping extends Component
             $this->totalIndividualScore += $aspect['individual_score'];
             $this->totalGapRating += $aspect['gap_rating'];
             $this->totalGapScore += $aspect['gap_score'];
+            $this->totalOriginalStandardScore += $aspect['original_standard_score'];
+            $this->totalOriginalGapScore += $aspect['original_gap_score'];
         }
 
-        // Determine overall conclusion based on total gap score
-        $this->overallConclusion = $this->getOverallConclusion($this->totalGapScore);
+        // Determine overall conclusion based on gap-based logic
+        $this->overallConclusion = $this->getOverallConclusion($this->totalOriginalGapScore, $this->totalGapScore);
     }
 
     private function prepareChartData(): void
@@ -262,12 +270,14 @@ class GeneralMapping extends Component
         }
     }
 
-    private function getOverallConclusion(float $totalGapScore): string
+    private function getOverallConclusion(float $totalOriginalGapScore, float $totalAdjustedGapScore): string
     {
-        if ($totalGapScore >= 0) {
-            return 'Memenuhi Standar/Meet Requirement Standard';
+        if ($totalOriginalGapScore >= 0) {
+            return 'Di Atas Standar';
+        } elseif ($totalAdjustedGapScore >= 0) {
+            return 'Memenuhi Standar';
         } else {
-            return 'Kurang Memenuhi Standar/Below Requirement Standard';
+            return 'Di Bawah Standar';
         }
     }
 

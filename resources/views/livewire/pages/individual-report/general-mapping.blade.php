@@ -122,16 +122,16 @@
                         <td class="border border-black dark:border-gray-300 px-3 py-2 text-center">
                             {{ number_format($totalGapRating, 2) }}</td>
                         <td class="border border-black dark:border-gray-300 px-3 py-2 bg-black"></td>
-                        <td class="border border-black dark:border-gray-300 px-3 py-2 text-center
+                        <td class="border border-white px-3 py-2 text-center font-bold
                             @php
                                 $c = trim(strtoupper($overallConclusion));
                             @endphp
 
-                            @if ($c === 'MEMENUHI STANDAR/MEET REQUIREMENT STANDARD') bg-green-600 dark:bg-green-600 text-white dark:text-white
-                            @elseif ($c === 'KURANG MEMENUHI STANDAR/BELOW REQUIREMENT STANDARD')
-                                bg-red-600 dark:bg-red-600 text-white dark:text-white
-                            @else
-                                bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-gray-200 @endif"
+                            @if ($c === 'DI ATAS STANDAR') bg-green-600 text-white
+                            @elseif ($c === 'MEMENUHI STANDAR') bg-blue-600 text-white
+                            @elseif ($c === 'DI BAWAH STANDAR') bg-red-600 text-white
+                            @else bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-white
+                            @endif"
                             colspan="2">
                             {{ $overallConclusion }}
                         </td>
@@ -150,16 +150,16 @@
                         <td class="border border-black dark:border-gray-300 px-3 py-2 bg-black"></td>
                         <td class="border border-black dark:border-gray-300 px-3 py-2 text-center">
                             {{ number_format($totalGapScore, 2) }}</td>
-                        <td class="border border-black dark:border-gray-300 px-3 py-2 text-center
+                        <td class="border border-white px-3 py-2 text-center font-bold
                             @php
                                 $c = trim(strtoupper($overallConclusion));
                             @endphp
 
-                            @if ($c === 'MEMENUHI STANDAR/MEET REQUIREMENT STANDARD') bg-green-600 dark:bg-green-600 text-white dark:text-white
-                            @elseif ($c === 'KURANG MEMENUHI STANDAR/BELOW REQUIREMENT STANDARD')
-                                bg-red-600 dark:bg-red-600 text-white dark:text-white
-                            @else
-                                bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-gray-200 @endif"
+                            @if ($c === 'DI ATAS STANDAR') bg-green-600 text-white
+                            @elseif ($c === 'MEMENUHI STANDAR') bg-blue-600 text-white
+                            @elseif ($c === 'DI BAWAH STANDAR') bg-red-600 text-white
+                            @else bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-white
+                            @endif"
                             colspan="2">
                             {{ $overallConclusion }}
                         </td>

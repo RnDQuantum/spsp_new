@@ -7,8 +7,8 @@ Panduan ini menjelaskan implementasi logic kesimpulan baru yang telah diterapkan
 **Status Implementasi:**
 
 - ✅ **RekapRankingAssessment** - Fully implemented & tested
-- ✅ **GeneralMapping** - Fully implemented & tested
-- ⏳ **GeneralPsyMapping** - Pending
+- ✅ **GeneralMapping** - Fully implemented & tested (Fixed 2025-01-31)
+- ✅ **GeneralPsyMapping** - Fully implemented & tested
 - ⏳ **GeneralMcMapping** - Pending
 - ⏳ **GeneralMatching** - Pending
 - ⏳ **SpiderPlot** - Pending
