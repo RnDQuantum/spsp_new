@@ -13,10 +13,33 @@ class MmpiResultsReport extends Component
 {
     use WithPagination;
 
+    // Pagination
     public $perPage = 10;
+
+    // Global search
+    public $search = '';
+
+    // Query string parameters
+    protected $queryString = [
+        'search' => ['except' => ''],
+        'perPage' => ['except' => 10],
+    ];
+
+    // Reset pagination when search or per page changes
+    public function updatedSearch()
+    {
+        $this->resetPage();
+    }
 
     public function updatedPerPage()
     {
+        $this->resetPage();
+    }
+
+    // Reset search
+    public function resetSearch()
+    {
+        $this->search = '';
         $this->resetPage();
     }
 
@@ -30,13 +53,33 @@ class MmpiResultsReport extends Component
             $dataCount = DB::table('mmpi_results')->count();
         }
 
-        // Ambil data dari model dan juga langsung dari DB sebagai cadangan
-        $mmpiResultsFromModel = PsychologicalTest::query();
+        // Ambil data dengan filter
+        $mmpiResultsQuery = PsychologicalTest::query();
 
+        // Jika ada pencarian, cari di semua field relevan sekaligus
+        if ($this->search) {
+            $mmpiResultsQuery->where(function ($query) {
+                // Cari berdasarkan kode proyek
+                $query->whereHas('event', function ($eventQuery) {
+                    $eventQuery->where('code', 'like', '%' . $this->search . '%');
+                })
+                    // Atau berdasarkan no_test
+                    ->orWhere('no_test', 'like', '%' . $this->search . '%')
+                    // Atau berdasarkan tingkat_stres - gunakan where exact atau like sesuai kebutuhan
+                    ->orWhere('tingkat_stres', 'like', '%' . $this->search . '%');
+
+                // Jika perlu juga cari berdasarkan nilai PQ (jika angka)
+                if (is_numeric($this->search)) {
+                    $query->orWhere('nilai_pq', $this->search);
+                }
+            });
+        }
+
+        // Pagination atau get all
         if ($this->perPage == -1) {
-            $mmpiResults = $mmpiResultsFromModel->get();
+            $mmpiResults = $mmpiResultsQuery->get();
         } else {
-            $mmpiResults = $mmpiResultsFromModel->paginate($this->perPage);
+            $mmpiResults = $mmpiResultsQuery->paginate($this->perPage);
         }
 
         return view('livewire.pages.general-report.mmpi', [

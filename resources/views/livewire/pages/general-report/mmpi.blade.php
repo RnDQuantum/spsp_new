@@ -4,7 +4,8 @@
         <h1 class="text-2xl font-bold text-gray-800 dark:text-white uppercase tracking-wider">
             Laporan Hasil Tes MMPI
         </h1>
-        <div class="flex items-center">
+
+        {{-- <div class="flex items-center">
             <label for="perPage" class="text-sm font-medium text-gray-700 dark:text-gray-300 mr-2">Tampilkan</label>
             <select id="perPage" wire:model.live="perPage"
                 class="text-sm bg-gray-50 border border-gray-300 text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
@@ -14,8 +15,66 @@
                 <option value="100">100</option>
                 <option value="-1">All</option>
             </select>
+        </div> --}}
+    </div>
+
+    <!-- Simple Search Box -->
+    <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
+        <div class="w-full md:w-1/2 relative">
+            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                    fill="none" viewBox="0 0 20 20">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z" />
+                </svg>
+            </div>
+            <input wire:model.live.debounce.300ms="search" type="search" id="search"
+                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
+                placeholder="Cari berdasarkan kode proyek, nomor test, atau tingkat stres..." autocomplete="off">
+            @if ($search)
+                <button wire:click="resetSearch"
+                    class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
+                    title="Hapus pencarian">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                        </path>
+                    </svg>
+                </button>
+            @endif
+        </div>
+
+        <!-- Per Page Selector di sebelah kanan -->
+        <div class="flex items-center">
+            <label for="perPage" class="text-sm font-medium text-gray-700 dark:text-gray-300 mr-2">Tampilkan</label>
+            <select id="perPage" wire:model.live="perPage"
+                class="text-sm bg-gray-50 border border-gray-300 text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 block p-2.5">
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+                <option value="-1">Semua</option>
+            </select>
         </div>
     </div>
+
+    <!-- Search Results Info -->
+    @if ($search)
+        <div class="flex items-center text-sm text-gray-600 dark:text-gray-400 mb-4">
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <span>
+                Menampilkan hasil untuk pencarian "{{ $search }}"
+            </span>
+            <button wire:click="resetSearch"
+                class="ml-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 text-xs font-medium">
+                Hapus pencarian
+            </button>
+        </div>
+    @endif
 
     <!-- Tabel Data -->
     <div class="overflow-hidden shadow rounded-lg mb-8 border border-gray-200 dark:border-gray-700">
@@ -178,8 +237,8 @@
                                         <button type="button"
                                             class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
                                             title="Lihat Detail">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
-                                                fill="currentColor">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5"
+                                                viewBox="0 0 20 20" fill="currentColor">
                                                 <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
                                                 <path fill-rule="evenodd"
                                                     d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
@@ -189,8 +248,8 @@
                                         <button type="button"
                                             class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
                                             title="Export PDF">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
-                                                fill="currentColor">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5"
+                                                viewBox="0 0 20 20" fill="currentColor">
                                                 <path fill-rule="evenodd"
                                                     d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0015.414 6L12 2.586A2 2 0 0010.586 2H6zm5 6a1 1 0 10-2 0v3.586l-1.293-1.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V8z"
                                                     clip-rule="evenodd" />
@@ -212,7 +271,8 @@
                                         </path>
                                     </svg>
                                     <p class="text-base font-medium dark:text-gray-300">Tidak ada data ditemukan</p>
-                                    <p class="text-sm text-gray-400 dark:text-gray-500 mt-1">Pastikan tabel mmpi_results
+                                    <p class="text-sm text-gray-400 dark:text-gray-500 mt-1">Pastikan tabel
+                                        mmpi_results
                                         ada dan berisi data.</p>
                                     <button type="button" wire:click="$refresh"
                                         class="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600">
