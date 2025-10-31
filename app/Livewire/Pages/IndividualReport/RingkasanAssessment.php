@@ -187,18 +187,18 @@ class RingkasanAssessment extends Component
         // Calculate adjusted gap (with tolerance applied)
         $adjustedGap = $this->getAdjustedGap($individualScore, $originalStandardScore);
 
-        // Original gap >= 0: Sangat Kompeten (exceeds original standard)
+        // Original gap >= 0: Di Atas Standar (exceeds original standard)
         if ($originalGap >= 0) {
-            return 'Sangat Kompeten';
+            return 'Di Atas Standar';
         }
 
-        // Adjusted gap >= 0: Kompeten (exceeds adjusted standard, below original)
+        // Adjusted gap >= 0: Memenuhi Standar (exceeds adjusted standard, below original)
         if ($adjustedGap >= 0) {
-            return 'Kompeten';
+            return 'Memenuhi Standar';
         }
 
-        // Otherwise: Belum Kompeten
-        return 'Belum Kompeten';
+        // Otherwise: Di Bawah Standar
+        return 'Di Bawah Standar';
     }
 
     public function getConclusionColorClass(?string $conclusionCode): string
@@ -208,14 +208,10 @@ class RingkasanAssessment extends Component
         }
 
         return match ($conclusionCode) {
-            // Potensi conclusions (3-color scheme: green-blue-red)
+            // Standard conclusions (3-color scheme: green-blue-red)
             'Di Atas Standar' => 'bg-green-600 text-white',
             'Memenuhi Standar' => 'bg-blue-600 text-white',
             'Di Bawah Standar' => 'bg-red-600 text-white',
-            // Kompetensi conclusions (3-color scheme: green-blue-red)
-            'Sangat Kompeten' => 'bg-green-600 text-white',
-            'Kompeten' => 'bg-blue-600 text-white',
-            'Belum Kompeten' => 'bg-red-600 text-white',
             // Default
             'Tidak Ikut Assessment' => 'bg-gray-300 text-black',
             default => 'bg-gray-300 text-black',
@@ -420,7 +416,7 @@ class RingkasanAssessment extends Component
         if ($this->kompetensiAssessment) {
             $total++;
             $kompetensiConclusion = $this->getKompetensiConclusion();
-            if (in_array($kompetensiConclusion, ['Sangat Kompeten', 'Kompeten'])) {
+            if (in_array($kompetensiConclusion, ['Di Atas Standar', 'Memenuhi Standar'])) {
                 $passing++;
             }
         }

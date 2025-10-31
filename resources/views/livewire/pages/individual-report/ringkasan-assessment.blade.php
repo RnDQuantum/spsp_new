@@ -202,10 +202,10 @@
                             </td>
                             <td
                                 class="border-2 border-black px-3 py-3 text-center font-bold
-                            @if ($this->getKompetensiConclusion() == 'Sangat Kompeten') bg-green-600 text-white
-                            @elseif($this->getKompetensiConclusion() == 'Kompeten')
+                            @if ($this->getKompetensiConclusion() == 'Di Atas Standar') bg-green-600 text-white
+                            @elseif($this->getKompetensiConclusion() == 'Memenuhi Standar')
                                 bg-blue-600 text-white
-                            @elseif($this->getKompetensiConclusion() == 'Belum Kompeten')
+                            @elseif($this->getKompetensiConclusion() == 'Di Bawah Standar')
                                 bg-red-600 text-white
                             @else
                                 bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-white @endif">
