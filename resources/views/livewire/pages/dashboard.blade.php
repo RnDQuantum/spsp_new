@@ -206,19 +206,19 @@
                     // Dark mode colors
                     const darkModeColors = {
                         background: '#1f2937', // gray-800
-                        text: '#f9fafb', // gray-50
-                        grid: '#374151', // gray-600
+                        text: '#ffffff', // gray-50
+                        grid: '#ffffff', // gray-600
                         pointLabels: '#d1d5db', // gray-300
-                        legend: '#f9fafb', // gray-50
+                        legend: '#ffffff', // gray-50
                     };
 
                     // Light mode colors (default)
                     const lightModeColors = {
                         background: '#ffffff',
-                        text: '#111827', // gray-900
-                        grid: '#d1d5db', // gray-300
-                        pointLabels: '#111827', // gray-900
-                        legend: '#111827', // gray-900
+                        text: '#000000', // gray-900
+                        grid: '#000000', // gray-300
+                        pointLabels: '#000000', // gray-900
+                        legend: '#000000', // gray-900
                     };
 
                     // Get current theme
@@ -352,16 +352,16 @@
                                         label: 'Standard',
                                         data: @js($potensiOriginalStandardRatings),
                                         fill: true,
-                                        backgroundColor: '#fafa05',
-                                        borderColor: '#e6d105',
-                                        pointBackgroundColor: '#e6d105',
+                                        backgroundColor: '#5db010', // HIJAU SOLID
+                                        borderColor: '#8fd006',
+                                        pointBackgroundColor: '#8fd006',
                                         pointBorderColor: '#fff',
                                         borderWidth: 2.5,
                                         pointRadius: 4,
                                         pointBorderWidth: 2,
                                         datalabels: {
                                             color: '#000000',
-                                            backgroundColor: '#fafa05',
+                                            backgroundColor: '#5db010', // Gunakan hijau
                                             borderRadius: 4,
                                             padding: {
                                                 top: 4,
@@ -393,20 +393,24 @@
                                             font: {
                                                 size: 16
                                             },
-                                            backdropColor: 'transparent', // Tambahkan ini
-                                            showLabelBackdrop: false // Tambahkan ini
+                                            backdropColor: 'transparent',
+                                            showLabelBackdrop: false,
+                                            z: 2
                                         },
                                         grid: {
-                                            color: colors.grid
+                                            color: colors.grid,
+                                            z: 1
                                         },
                                         pointLabels: {
                                             color: colors.pointLabels,
                                             font: {
                                                 size: 16
-                                            }
+                                            },
+                                            z: 3
                                         },
                                         angleLines: {
-                                            color: colors.grid
+                                            color: colors.grid,
+                                            z: 1
                                         }
                                     }
                                 },
@@ -552,16 +556,16 @@
                                     label: 'Standard',
                                     data: @js($kompetensiOriginalStandardRatings),
                                     fill: true,
-                                    backgroundColor: '#fafa05',
-                                    borderColor: '#e6d105',
-                                    pointBackgroundColor: '#e6d105',
+                                    backgroundColor: '#5db010', // HIJAU SOLID
+                                    borderColor: '#8fd006',
+                                    pointBackgroundColor: '#8fd006',
                                     pointBorderColor: '#fff',
                                     borderWidth: 2.5,
                                     pointRadius: 4,
                                     pointBorderWidth: 2,
                                     datalabels: {
                                         color: '#000000',
-                                        backgroundColor: '#fafa05',
+                                        backgroundColor: '#5db010', // Gunakan hijau
                                         borderRadius: 4,
                                         padding: {
                                             top: 4,
@@ -592,20 +596,24 @@
                                             font: {
                                                 size: 16
                                             },
-                                            backdropColor: 'transparent', // Tambahkan ini
-                                            showLabelBackdrop: false // Tambahkan ini
+                                            backdropColor: 'transparent',
+                                            showLabelBackdrop: false,
+                                            z: 2
                                         },
                                         grid: {
-                                            color: colors.grid
+                                            color: colors.grid,
+                                            z: 1
                                         },
                                         pointLabels: {
                                             color: colors.pointLabels,
                                             font: {
                                                 size: 16
-                                            }
+                                            },
+                                            z: 3
                                         },
                                         angleLines: {
-                                            color: colors.grid
+                                            color: colors.grid,
+                                            z: 1
                                         }
                                     }
                                 },
@@ -751,16 +759,16 @@
                                     label: 'Standard',
                                     data: @js($generalOriginalStandardRatings),
                                     fill: true,
-                                    backgroundColor: '#fafa05',
-                                    borderColor: '#e6d105',
-                                    pointBackgroundColor: '#e6d105',
+                                    backgroundColor: '#5db010', // HIJAU SOLID
+                                    borderColor: '#8fd006',
+                                    pointBackgroundColor: '#8fd006',
                                     pointBorderColor: '#fff',
                                     borderWidth: 2.5,
                                     pointRadius: 4,
                                     pointBorderWidth: 2,
                                     datalabels: {
                                         color: '#000000',
-                                        backgroundColor: '#fafa05',
+                                        backgroundColor: '#5db010', // Gunakan hijau
                                         borderRadius: 4,
                                         padding: {
                                             top: 4,
@@ -791,20 +799,24 @@
                                             font: {
                                                 size: 16
                                             },
-                                            backdropColor: 'transparent', // Tambahkan ini
-                                            showLabelBackdrop: false // Tambahkan ini
+                                            backdropColor: 'transparent',
+                                            showLabelBackdrop: false,
+                                            z: 2
                                         },
                                         grid: {
-                                            color: colors.grid
+                                            color: colors.grid,
+                                            z: 1
                                         },
                                         pointLabels: {
                                             color: colors.pointLabels,
                                             font: {
                                                 size: 16
-                                            }
+                                            },
+                                            z: 3
                                         },
                                         angleLines: {
-                                            color: colors.grid
+                                            color: colors.grid,
+                                            z: 1
                                         }
                                     }
                                 },
