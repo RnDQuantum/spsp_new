@@ -155,10 +155,12 @@
                             </td>
                             <td
                                 class="border-2 border-black px-3 py-3 text-center font-bold
-                            @if ($this->getPotensiConclusion() == 'Di Atas Standar') bg-green-500 text-black
-                            @elseif($this->getPotensiConclusion() == 'Di Bawah Standar') 
+                            @if ($this->getPotensiConclusion() == 'Di Atas Standar') bg-green-600 text-white
+                            @elseif($this->getPotensiConclusion() == 'Memenuhi Standar')
+                                bg-blue-600 text-white
+                            @elseif($this->getPotensiConclusion() == 'Di Bawah Standar')
                                 bg-red-600 text-white
-                            @else 
+                            @else
                                 bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-white @endif">
                                 {{ $this->getPotensiConclusion() }}
                             </td>
@@ -200,10 +202,12 @@
                             </td>
                             <td
                                 class="border-2 border-black px-3 py-3 text-center font-bold
-                            @if ($this->getKompetensiConclusion() == 'Sangat Kompeten') bg-green-500 text-black
-                            @elseif($this->getKompetensiConclusion() == 'Belum Kompeten') 
+                            @if ($this->getKompetensiConclusion() == 'Sangat Kompeten') bg-green-600 text-white
+                            @elseif($this->getKompetensiConclusion() == 'Kompeten')
+                                bg-blue-600 text-white
+                            @elseif($this->getKompetensiConclusion() == 'Belum Kompeten')
                                 bg-red-600 text-white
-                            @else 
+                            @else
                                 bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-white @endif">
                                 {{ $this->getKompetensiConclusion() }}
                             </td>
@@ -249,12 +253,12 @@
                             </td>
                             <td
                                 class="border-2 border-black px-3 py-3 text-center font-bold
-                            @if ($this->getTotalConclusionInTable() == 'Di Atas Standar') bg-green-600 text-black
-                            @elseif($this->getTotalConclusionInTable() == 'Memenuhi Standar') 
-                                bg-yellow-400 text-gray-900
-                            @elseif($this->getTotalConclusionInTable() == 'Di Bawah Standar') 
+                            @if ($this->getTotalConclusionInTable() == 'Di Atas Standar') bg-green-600 text-white
+                            @elseif($this->getTotalConclusionInTable() == 'Memenuhi Standar')
+                                bg-blue-600 text-white
+                            @elseif($this->getTotalConclusionInTable() == 'Di Bawah Standar')
                                 bg-red-600 text-white
-                            @else 
+                            @else
                                 bg-gray-600 text-white @endif">
                                 {{ $this->getTotalConclusionInTable() }}
                             </td>
@@ -275,13 +279,13 @@
                         </td>
                         <td
                             class="border-2 border-black px-4 py-4 text-center font-bold text-lg
-                        @if ($this->getFinalConclusionText() == 'Potensial') bg-green-500 text-black
-                        @elseif($this->getFinalConclusionText() == 'Potensial Dengan Catatan') 
-                            bg-yellow-400 text-gray-900
-                        @elseif($this->getFinalConclusionText() == 'Kurang Potensial') 
-                            bg-red-600 text-black
-                        @else 
-                            bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-white @endif">
+                        @if ($this->getFinalConclusionText() == 'Sangat Potensial') bg-green-600 text-white
+                        @elseif($this->getFinalConclusionText() == 'Potensial')
+                            bg-blue-600 text-white
+                        @elseif($this->getFinalConclusionText() == 'Kurang Potensial')
+                            bg-red-600 text-white
+                        @else
+                            bg-red-600 text-white @endif">
                             {{ $this->getFinalConclusionText() }}
                         </td>
                     </tr>

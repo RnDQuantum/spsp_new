@@ -32,6 +32,7 @@ class RingkasanAssessment extends Component
 
     // ADD: Public properties untuk support child component
     public $eventCode;
+
     public $testNumber;
 
     // Flag untuk menentukan apakah standalone atau child
@@ -39,8 +40,11 @@ class RingkasanAssessment extends Component
 
     // Dynamic display parameters
     public $showHeader = true;
+
     public $showBiodata = true;
+
     public $showInfoSection = true;
+
     public $showTable = true;
 
     /**
@@ -79,7 +83,7 @@ class RingkasanAssessment extends Component
         $this->isStandalone = $eventCode !== null && $testNumber !== null;
 
         // Validate
-        if (!$this->eventCode || !$this->testNumber) {
+        if (! $this->eventCode || ! $this->testNumber) {
             abort(404, 'Event code and test number are required');
         }
 
@@ -136,22 +140,24 @@ class RingkasanAssessment extends Component
         // Get original values
         $individualScore = $this->potensiAssessment->total_individual_score;
         $originalStandardScore = $this->potensiAssessment->total_standard_score;
-        $originalGapScore = $this->potensiAssessment->gap_score;
+
+        // Calculate original gap (at tolerance 0%)
+        $originalGap = $individualScore - $originalStandardScore;
 
         // Check if not participating: original gap = -standard (individual is 0)
-        if ($originalGapScore == -$originalStandardScore) {
+        if ($originalGap == -$originalStandardScore) {
             return 'Tidak Ikut Assessment';
         }
 
-        // Calculate adjusted gap based on tolerance
+        // Calculate adjusted gap (with tolerance applied)
         $adjustedGap = $this->getAdjustedGap($individualScore, $originalStandardScore);
 
-        // Adjusted gap > 0: Di Atas Standar
-        if ($adjustedGap > 0) {
+        // Original gap >= 0: Di Atas Standar (exceeds original standard)
+        if ($originalGap >= 0) {
             return 'Di Atas Standar';
         }
 
-        // Adjusted gap >= 0: Memenuhi Standar (within tolerance)
+        // Adjusted gap >= 0: Memenuhi Standar (exceeds adjusted standard, below original)
         if ($adjustedGap >= 0) {
             return 'Memenuhi Standar';
         }
@@ -169,22 +175,24 @@ class RingkasanAssessment extends Component
         // Get original values
         $individualScore = $this->kompetensiAssessment->total_individual_score;
         $originalStandardScore = $this->kompetensiAssessment->total_standard_score;
-        $originalGapScore = $this->kompetensiAssessment->gap_score;
+
+        // Calculate original gap (at tolerance 0%)
+        $originalGap = $individualScore - $originalStandardScore;
 
         // Check if not participating: original gap = -standard (individual is 0)
-        if ($originalGapScore == -$originalStandardScore) {
+        if ($originalGap == -$originalStandardScore) {
             return 'Tidak Ikut Assessment';
         }
 
-        // Calculate adjusted gap based on tolerance
+        // Calculate adjusted gap (with tolerance applied)
         $adjustedGap = $this->getAdjustedGap($individualScore, $originalStandardScore);
 
-        // Adjusted gap > 0: Sangat Kompeten
-        if ($adjustedGap > 0) {
+        // Original gap >= 0: Sangat Kompeten (exceeds original standard)
+        if ($originalGap >= 0) {
             return 'Sangat Kompeten';
         }
 
-        // Adjusted gap >= 0: Kompeten (within tolerance)
+        // Adjusted gap >= 0: Kompeten (exceeds adjusted standard, below original)
         if ($adjustedGap >= 0) {
             return 'Kompeten';
         }
@@ -200,13 +208,13 @@ class RingkasanAssessment extends Component
         }
 
         return match ($conclusionCode) {
-            // Potensi conclusions
-            'Di Atas Standar' => 'bg-green-500 text-white',
-            'Memenuhi Standar' => 'bg-yellow-400 text-black',
+            // Potensi conclusions (3-color scheme: green-blue-red)
+            'Di Atas Standar' => 'bg-green-600 text-white',
+            'Memenuhi Standar' => 'bg-blue-600 text-white',
             'Di Bawah Standar' => 'bg-red-600 text-white',
-            // Kompetensi conclusions
+            // Kompetensi conclusions (3-color scheme: green-blue-red)
             'Sangat Kompeten' => 'bg-green-600 text-white',
-            'Kompeten' => 'bg-green-500 text-white',
+            'Kompeten' => 'bg-blue-600 text-white',
             'Belum Kompeten' => 'bg-red-600 text-white',
             // Default
             'Tidak Ikut Assessment' => 'bg-gray-300 text-black',
@@ -237,23 +245,25 @@ class RingkasanAssessment extends Component
         // Get original values
         $totalIndividualScore = (float) $this->finalAssessment->total_individual_score;
         $originalTotalStandardScore = (float) $this->finalAssessment->total_standard_score;
-        $originalTotalGapScore = $totalIndividualScore - $originalTotalStandardScore;
+
+        // Calculate original gap (at tolerance 0%)
+        $originalGap = $totalIndividualScore - $originalTotalStandardScore;
 
         // Check if not participating: original gap = -standard (individual is 0)
-        if ($originalTotalGapScore == -$originalTotalStandardScore) {
+        if ($originalGap == -$originalTotalStandardScore) {
             return 'Tidak Ikut Assessment';
         }
 
-        // Calculate adjusted gap based on tolerance
-        $adjustedTotalGap = $this->getAdjustedGap($totalIndividualScore, $originalTotalStandardScore);
+        // Calculate adjusted gap (with tolerance applied)
+        $adjustedGap = $this->getAdjustedGap($totalIndividualScore, $originalTotalStandardScore);
 
-        // Adjusted gap > 0: Di Atas Standar
-        if ($adjustedTotalGap > 0) {
+        // Original gap >= 0: Di Atas Standar (exceeds original standard)
+        if ($originalGap >= 0) {
             return 'Di Atas Standar';
         }
 
-        // Adjusted gap >= 0: Memenuhi Standar (within tolerance)
-        if ($adjustedTotalGap >= 0) {
+        // Adjusted gap >= 0: Memenuhi Standar (exceeds adjusted standard, below original)
+        if ($adjustedGap >= 0) {
             return 'Memenuhi Standar';
         }
 
@@ -266,8 +276,8 @@ class RingkasanAssessment extends Component
         $conclusion = $this->getTotalConclusionInTable();
 
         return match ($conclusion) {
-            'Di Atas Standar' => 'bg-green-500 text-white',
-            'Memenuhi Standar' => 'bg-yellow-400 text-black',
+            'Di Atas Standar' => 'bg-green-600 text-white',
+            'Memenuhi Standar' => 'bg-blue-600 text-white',
             'Di Bawah Standar' => 'bg-red-600 text-white',
             'Tidak Ikut Assessment' => 'bg-gray-300 text-black',
             default => 'bg-gray-300 text-black',
@@ -276,20 +286,15 @@ class RingkasanAssessment extends Component
 
     public function getFinalConclusionText(): string
     {
-        // Get individual category conclusions
-        $potensiConclusion = $this->getPotensiConclusion();
-        $kompetensiConclusion = $this->getKompetensiConclusion();
-
-        // Otherwise, use table conclusion
+        // Get table conclusion
         $tableConclusion = $this->getTotalConclusionInTable();
 
-        // Based on table conclusion, determine final conclusion
+        // Based on table conclusion, determine final conclusion (3 categories only)
         return match ($tableConclusion) {
-            'Tidak Ikut Assessment' => 'Tidak Ikut Assessment',
-            'Di Atas Standar' => 'Potensial',
-            'Memenuhi Standar' => 'Potensial Dengan Catatan',
+            'Di Atas Standar' => 'Sangat Potensial',
+            'Memenuhi Standar' => 'Potensial',
             'Di Bawah Standar' => 'Kurang Potensial',
-            default => 'Tidak Ikut Assessment',
+            default => 'Kurang Potensial',
         };
     }
 
@@ -298,11 +303,10 @@ class RingkasanAssessment extends Component
         $finalConclusion = $this->getFinalConclusionText();
 
         return match ($finalConclusion) {
-            'Potensial' => 'bg-green-500 text-white',
-            'Potensial Dengan Catatan' => 'bg-yellow-400 text-black',
+            'Sangat Potensial' => 'bg-green-600 text-white',
+            'Potensial' => 'bg-blue-600 text-white',
             'Kurang Potensial' => 'bg-red-600 text-white',
-            'Tidak Ikut Assessment' => 'bg-gray-300 text-black',
-            default => 'bg-gray-300 text-black',
+            default => 'bg-red-600 text-white',
         };
     }
 
