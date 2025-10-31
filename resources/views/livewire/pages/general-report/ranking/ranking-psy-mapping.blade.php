@@ -29,10 +29,13 @@
             class="min-w-full border-2 border-black dark:border-gray-600 text-sm text-gray-900 dark:text-gray-100 mt-6">
             <thead>
                 <tr class="bg-gray-200 dark:bg-gray-700">
-                    <th class="border-2 border-black dark:border-gray-600 px-3 py-3 text-center">Ranking</th>
-                    <th class="border-2 border-black dark:border-gray-600 px-3 py-3 text-center">NIP</th>
-                    <th class="border-2 border-black dark:border-gray-600 px-3 py-3 text-center">Nama</th>
-                    <th class="border-2 border-black dark:border-gray-600 px-3 py-3 text-center">Jabatan</th>
+                    <th class="border-2 border-black dark:border-gray-600 px-3 py-3 text-center" rowspan="2">Ranking
+                    </th>
+                    <th class="border-2 border-black dark:border-gray-600 px-3 py-3 text-center" rowspan="2">NIP</th>
+                    <th class="border-2 border-black dark:border-gray-600 px-3 py-3 text-center" rowspan="2">Nama
+                    </th>
+                    <th class="border-2 border-black dark:border-gray-600 px-3 py-3 text-center" rowspan="2">Jabatan
+                    </th>
                     <th class="border-2 border-black dark:border-gray-600 px-3 py-3 text-center" colspan="2">
                         <span x-data
                             x-text="$wire.tolerancePercentage > 0 ? 'Standard (-' + $wire.tolerancePercentage + '%)' : 'Standard'"></span>
@@ -42,16 +45,13 @@
                     </th>
                     <th class="border-2 border-black dark:border-gray-600 px-3 py-3 text-center" colspan="2">Gap
                     </th>
-                    <th class="border-2 border-black dark:border-gray-600 px-3 py-3 text-center">
+                    <th class="border-2 border-black dark:border-gray-600 px-3 py-3 text-center" rowspan="2">
                         Prosentase<br>Kesesuaian</th>
-                    <th class="border-2 border-black dark:border-gray-600 px-3 py-3 text-center">Kesimpulan/Conclusion
+                    <th class="border-2 border-black dark:border-gray-600 px-3 py-3 text-center" rowspan="2">
+                        Kesimpulan/Conclusion
                     </th>
                 </tr>
                 <tr class="bg-gray-200 dark:bg-gray-700">
-                    <th class="border-2 border-black dark:border-gray-600 px-3 py-1"></th>
-                    <th class="border-2 border-black dark:border-gray-600 px-3 py-1"></th>
-                    <th class="border-2 border-black dark:border-gray-600 px-3 py-1"></th>
-                    <th class="border-2 border-black dark:border-gray-600 px-3 py-1"></th>
                     <th class="border-2 border-black dark:border-gray-600 px-3 py-1 font-semibold">Rating/<br>Level
                     </th>
                     <th class="border-2 border-black dark:border-gray-600 px-3 py-1 font-semibold">Score</th>
@@ -61,8 +61,6 @@
                     <th class="border-2 border-black dark:border-gray-600 px-3 py-1 font-semibold">Rating/<br>Level
                     </th>
                     <th class="border-2 border-black dark:border-gray-600 px-3 py-1 font-semibold">Score</th>
-                    <th class="border-2 border-black dark:border-gray-600 px-3 py-1"></th>
-                    <th class="border-2 border-black dark:border-gray-600 px-3 py-1"></th>
                 </tr>
             </thead>
             <tbody>
@@ -230,7 +228,8 @@ $c = trim(strtoupper($row['conclusion'])); @endphp
                         <li>Original Gap = Individual Score - Original Standard (Tolerance 0%)</li>
                         <li>Adjusted Gap = Individual Score - Adjusted Standard (Tolerance dikurangi)</li>
                         <li><strong>Di Atas Standar:</strong> Original Gap ≥ 0 (melebihi standar asli)</li>
-                        <li><strong>Memenuhi Standar:</strong> Adjusted Gap ≥ 0 (melebihi standar adjusted, di bawah standar asli)</li>
+                        <li><strong>Memenuhi Standar:</strong> Adjusted Gap ≥ 0 (melebihi standar adjusted, di bawah
+                            standar asli)</li>
                         <li><strong>Di Bawah Standar:</strong> Adjusted Gap < 0 (masih di bawah standar adjusted)</li>
                     </ul>
                 </div>

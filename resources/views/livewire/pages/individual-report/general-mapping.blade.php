@@ -94,8 +94,7 @@
                             <td
                                 class="border border-white px-3 py-2 text-center
                                 @php
-                                    $c = trim(strtoupper($aspect['conclusion_text']));
-                                @endphp
+$c = trim(strtoupper($aspect['conclusion_text'])); @endphp
 
                                 @if ($c === 'DI ATAS STANDAR') bg-green-600 text-white font-bold
                                 @elseif ($c === 'MEMENUHI STANDAR')
@@ -124,14 +123,12 @@
                         <td class="border border-black dark:border-gray-300 px-3 py-2 bg-black"></td>
                         <td class="border border-white px-3 py-2 text-center font-bold
                             @php
-                                $c = trim(strtoupper($overallConclusion));
-                            @endphp
+$c = trim(strtoupper($overallConclusion)); @endphp
 
                             @if ($c === 'DI ATAS STANDAR') bg-green-600 text-white
                             @elseif ($c === 'MEMENUHI STANDAR') bg-blue-600 text-white
                             @elseif ($c === 'DI BAWAH STANDAR') bg-red-600 text-white
-                            @else bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-white
-                            @endif"
+                            @else bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-white @endif"
                             colspan="2">
                             {{ $overallConclusion }}
                         </td>
@@ -152,14 +149,12 @@
                             {{ number_format($totalGapScore, 2) }}</td>
                         <td class="border border-white px-3 py-2 text-center font-bold
                             @php
-                                $c = trim(strtoupper($overallConclusion));
-                            @endphp
+$c = trim(strtoupper($overallConclusion)); @endphp
 
                             @if ($c === 'DI ATAS STANDAR') bg-green-600 text-white
                             @elseif ($c === 'MEMENUHI STANDAR') bg-blue-600 text-white
                             @elseif ($c === 'DI BAWAH STANDAR') bg-red-600 text-white
-                            @else bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-white
-                            @endif"
+                            @else bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-white @endif"
                             colspan="2">
                             {{ $overallConclusion }}
                         </td>
@@ -175,88 +170,96 @@
             @endphp
 
             @if ($rankingInfo)
-            <div class="px-6 py-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900 dark:to-indigo-900 border-t-2 border-black dark:border-gray-600">
-                <div class="max-w-5xl mx-auto">
-                    <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
-                        <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path>
-                        </svg>
-                        Ranking Peserta - Skor Gabungan (Weighted)
-                    </h3>
+                <div
+                    class="px-6 py-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900 dark:to-indigo-900 border-t-2 border-black dark:border-gray-600">
+                    <div class="max-w-5xl mx-auto">
+                        <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
+                            <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z">
+                                </path>
+                            </svg>
+                            Ranking Peserta - Skor Gabungan (Weighted)
+                        </h3>
 
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <!-- Ranking Card -->
-                        <div class="bg-white dark:bg-gray-800 border-2 border-blue-300 dark:border-blue-600 rounded-lg p-4 text-center">
-                            <div class="text-sm text-gray-500 dark:text-gray-400 mb-2">Ranking</div>
-                            <div class="text-4xl font-bold text-blue-600 dark:text-blue-400">
-                                #{{ $rankingInfo['rank'] }}
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <!-- Ranking Card -->
+                            <div
+                                class="bg-white dark:bg-gray-800 border-2 border-blue-300 dark:border-blue-600 rounded-lg p-4 text-center">
+                                <div class="text-sm text-gray-500 dark:text-gray-400 mb-2">Ranking</div>
+                                <div class="text-4xl font-bold text-blue-600 dark:text-blue-400">
+                                    #{{ $rankingInfo['rank'] }}
+                                </div>
                             </div>
-                        </div>
 
-                        <!-- Total Participants Card -->
-                        <div class="bg-white dark:bg-gray-800 border-2 border-indigo-300 dark:border-indigo-600 rounded-lg p-4 text-center">
-                            <div class="text-sm text-gray-500 dark:text-gray-400 mb-2">Total Peserta</div>
-                            <div class="text-4xl font-bold text-indigo-600 dark:text-indigo-400">
-                                {{ $rankingInfo['total'] }}
+                            <!-- Total Participants Card -->
+                            <div
+                                class="bg-white dark:bg-gray-800 border-2 border-indigo-300 dark:border-indigo-600 rounded-lg p-4 text-center">
+                                <div class="text-sm text-gray-500 dark:text-gray-400 mb-2">Total Peserta</div>
+                                <div class="text-4xl font-bold text-indigo-600 dark:text-indigo-400">
+                                    {{ $rankingInfo['total'] }}
+                                </div>
+                                <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                    {{ $participant->positionFormation->name }}
+                                </div>
                             </div>
-                            <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                {{ $participant->positionFormation->name }}
-                            </div>
-                        </div>
 
-                        <!-- Weights Info Card -->
-                        <div class="bg-white dark:bg-gray-800 border-2 border-indigo-300 dark:border-indigo-600 rounded-lg p-4 text-center">
-                            <div class="text-sm text-gray-500 dark:text-gray-400 mb-2">Bobot Penilaian</div>
-                            <div class="text-sm font-bold text-indigo-600 dark:text-indigo-400">
-                                Potensi: {{ $rankingInfo['potensi_weight'] }}%
+                            <!-- Weights Info Card -->
+                            <div
+                                class="bg-white dark:bg-gray-800 border-2 border-indigo-300 dark:border-indigo-600 rounded-lg p-4 text-center">
+                                <div class="text-sm text-gray-500 dark:text-gray-400 mb-2">Bobot Penilaian</div>
+                                <div class="text-sm font-bold text-indigo-600 dark:text-indigo-400">
+                                    Potensi: {{ $rankingInfo['potensi_weight'] }}%
+                                </div>
+                                <div class="text-sm font-bold text-indigo-600 dark:text-indigo-400">
+                                    Kompetensi: {{ $rankingInfo['kompetensi_weight'] }}%
+                                </div>
                             </div>
-                            <div class="text-sm font-bold text-indigo-600 dark:text-indigo-400">
-                                Kompetensi: {{ $rankingInfo['kompetensi_weight'] }}%
-                            </div>
-                        </div>
 
-                        <!-- Conclusion Card -->
-                        <div class="bg-white dark:bg-gray-800 border-2 rounded-lg p-4 text-center
+                            <!-- Conclusion Card -->
+                            <div
+                                class="bg-white dark:bg-gray-800 border-2 rounded-lg p-4 text-center
                             @php
-                                $conclusion = strtoupper(trim($rankingInfo['conclusion']));
-                            @endphp
-                            @if ($conclusion === 'DI ATAS STANDAR')
-                                border-green-300 dark:border-green-600
+$conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
+                            @if ($conclusion === 'DI ATAS STANDAR') border-green-300 dark:border-green-600
                             @elseif ($conclusion === 'MEMENUHI STANDAR')
                                 border-blue-300 dark:border-blue-600
                             @else
-                                border-red-300 dark:border-red-600
-                            @endif
+                                border-red-300 dark:border-red-600 @endif
                         ">
-                            <div class="text-sm text-gray-500 dark:text-gray-400 mb-2">Status</div>
-                            <div class="text-base font-bold px-3 py-2 rounded-lg
-                                @if ($conclusion === 'DI ATAS STANDAR')
-                                    bg-green-600 dark:bg-green-600 text-white
+                                <div class="text-sm text-gray-500 dark:text-gray-400 mb-2">Status</div>
+                                <div
+                                    class="text-base font-bold px-3 py-2 rounded-lg
+                                @if ($conclusion === 'DI ATAS STANDAR') bg-green-600 dark:bg-green-600 text-white
                                 @elseif ($conclusion === 'MEMENUHI STANDAR')
                                     bg-blue-600 dark:bg-blue-600 text-white
                                 @else
-                                    bg-red-600 dark:bg-red-600 text-white
-                                @endif
+                                    bg-red-600 dark:bg-red-600 text-white @endif
                             ">
-                                {{ $rankingInfo['conclusion'] }}
+                                    {{ $rankingInfo['conclusion'] }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Additional Info -->
+                        <div
+                            class="mt-4 bg-blue-100 dark:bg-blue-800 border border-blue-200 dark:border-blue-600 rounded-lg p-3">
+                            <div class="text-sm text-blue-800 dark:text-blue-200">
+                                <strong>Keterangan:</strong> Ranking berdasarkan <strong>Total Weighted Individual
+                                    Score</strong> dari kombinasi:
+                                <br>
+                                • <strong>Potensi ({{ $rankingInfo['potensi_weight'] }}%)</strong>: Psychology Mapping
+                                <br>
+                                • <strong>Kompetensi ({{ $rankingInfo['kompetensi_weight'] }}%)</strong>: Managerial
+                                Competency Mapping
+                                <br>
+                                Dibandingkan dengan peserta lain di event yang sama pada posisi
+                                <strong>{{ $participant->positionFormation->name }}</strong>.
                             </div>
                         </div>
                     </div>
-
-                    <!-- Additional Info -->
-                    <div class="mt-4 bg-blue-100 dark:bg-blue-800 border border-blue-200 dark:border-blue-600 rounded-lg p-3">
-                        <div class="text-sm text-blue-800 dark:text-blue-200">
-                            <strong>Keterangan:</strong> Ranking berdasarkan <strong>Total Weighted Individual Score</strong> dari kombinasi:
-                            <br>
-                            • <strong>Potensi ({{ $rankingInfo['potensi_weight'] }}%)</strong>: Psychology Mapping
-                            <br>
-                            • <strong>Kompetensi ({{ $rankingInfo['kompetensi_weight'] }}%)</strong>: Managerial Competency Mapping
-                            <br>
-                            Dibandingkan dengan peserta lain di event yang sama pada posisi <strong>{{ $participant->positionFormation->name }}</strong>.
-                        </div>
-                    </div>
                 </div>
-            </div>
             @endif
         @endif
 
@@ -310,10 +313,10 @@
                     function getGridColors() {
                         const isDark = document.documentElement.classList.contains('dark');
                         return {
-                            grid: isDark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.15)',
-                            angleLines: isDark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.15)',
-                            ticks: isDark ? '#e5e7eb' : '#000000',
-                            pointLabels: isDark ? '#f9fafb' : '#000000'
+                            grid: isDark ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)',
+                            angleLines: isDark ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)',
+                            ticks: isDark ? '#ffffff' : '#000000', // Warna solid untuk ticks
+                            pointLabels: isDark ? '#ffffff' : '#000000' // Warna solid untuk label
                         };
                     }
 
@@ -374,7 +377,7 @@
                                 label: participantName,
                                 data: individualRatings,
                                 fill: true,
-                                backgroundColor: '#5db010',
+                                backgroundColor: 'rgba(93, 176, 16, 0.7)', // Semi-transparan untuk visibilitas grid
                                 borderColor: '#8fd006',
                                 pointBackgroundColor: '#8fd006',
                                 pointBorderColor: '#fff',
@@ -400,7 +403,7 @@
                                 label: `Tolerance ${tolerancePercentage}%`,
                                 data: standardRatings,
                                 fill: true,
-                                backgroundColor: '#b50505',
+                                backgroundColor: 'rgba(181, 5, 5, 0.7)', // Semi-transparan untuk visibilitas grid
                                 borderColor: '#b50505',
                                 borderWidth: 2,
                                 pointRadius: 3,
@@ -423,7 +426,7 @@
                                 label: 'Standard',
                                 data: originalStandardRatings,
                                 fill: true,
-                                backgroundColor: '#fafa05',
+                                backgroundColor: 'rgba(250, 250, 5, 0.7)', // Semi-transparan untuk visibilitas grid
                                 borderColor: '#e6d105',
                                 pointBackgroundColor: '#e6d105',
                                 pointBorderColor: '#fff',
@@ -477,20 +480,24 @@
                                             font: {
                                                 size: 11,
                                                 weight: 'bold'
-                                            }
+                                            },
+                                            z: 2 // Tambahkan z-index untuk ticks
                                         },
                                         pointLabels: {
                                             font: {
                                                 size: 11,
                                                 weight: '600'
                                             },
-                                            color: colors.pointLabels
+                                            color: colors.pointLabels,
+                                            z: 3 // Tambahkan z-index untuk point labels
                                         },
                                         grid: {
-                                            color: colors.grid
+                                            color: colors.grid,
+                                            z: 1 // Tambahkan z-index untuk grid
                                         },
                                         angleLines: {
-                                            color: colors.angleLines
+                                            color: colors.angleLines,
+                                            z: 1 // Tambahkan z-index untuk angle lines
                                         }
                                     }
                                 }
@@ -605,10 +612,10 @@
                     function getGridColors() {
                         const isDark = document.documentElement.classList.contains('dark');
                         return {
-                            grid: isDark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.15)',
-                            angleLines: isDark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.15)',
-                            ticks: isDark ? '#e5e7eb' : '#000000',
-                            pointLabels: isDark ? '#f9fafb' : '#000000'
+                            grid: isDark ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)',
+                            angleLines: isDark ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)',
+                            ticks: isDark ? '#ffffff' : '#000000', // Warna solid untuk ticks
+                            pointLabels: isDark ? '#ffffff' : '#000000' // Warna solid untuk label
                         };
                     }
 
@@ -670,7 +677,7 @@
                                 label: participantName,
                                 data: individualScores,
                                 fill: true,
-                                backgroundColor: '#5db010',
+                                backgroundColor: 'rgba(93, 176, 16, 0.7)', // Semi-transparan untuk visibilitas grid
                                 borderColor: '#8fd006',
                                 pointBackgroundColor: '#8fd006',
                                 pointBorderColor: '#fff',
@@ -696,7 +703,7 @@
                                 label: `Tolerance ${tolerancePercentage}%`,
                                 data: standardScores,
                                 fill: true,
-                                backgroundColor: '#b50505',
+                                backgroundColor: 'rgba(181, 5, 5, 0.7)', // Semi-transparan untuk visibilitas grid
                                 borderColor: '#b50505',
                                 borderWidth: 2,
                                 pointRadius: 3,
@@ -719,7 +726,7 @@
                                 label: 'Standard',
                                 data: originalStandardScores,
                                 fill: true,
-                                backgroundColor: '#fafa05',
+                                backgroundColor: 'rgba(250, 250, 5, 0.7)', // Semi-transparan untuk visibilitas grid
                                 borderColor: '#e6d105',
                                 pointBackgroundColor: '#e6d105',
                                 pointBorderColor: '#fff',
@@ -773,20 +780,24 @@
                                             font: {
                                                 size: 11,
                                                 weight: 'bold'
-                                            }
+                                            },
+                                            z: 2 // Tambahkan z-index untuk ticks
                                         },
                                         pointLabels: {
                                             font: {
                                                 size: 11,
                                                 weight: '600'
                                             },
-                                            color: colors.pointLabels
+                                            color: colors.pointLabels,
+                                            z: 3 // Tambahkan z-index untuk point labels
                                         },
                                         grid: {
-                                            color: colors.grid
+                                            color: colors.grid,
+                                            z: 1 // Tambahkan z-index untuk grid
                                         },
                                         angleLines: {
-                                            color: colors.angleLines
+                                            color: colors.angleLines,
+                                            z: 1 // Tambahkan z-index untuk angle lines
                                         }
                                     }
                                 }

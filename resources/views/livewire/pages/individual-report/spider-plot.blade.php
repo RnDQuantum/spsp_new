@@ -74,13 +74,16 @@
             window['spiderChartSetup_{{ $potensiChartId }}'] = true;
 
             // 🌙 DARK MODE COLORS
+            // 🌙 DARK MODE COLORS
             const getColors = () => {
                 const dark = document.documentElement.classList.contains('dark');
                 return {
-                    grid: dark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)',
-                    ticks: dark ? '#e5e7eb' : '#374151',
-                    pointLabels: dark ? '#f9fafb' : '#111827',
-                    legend: dark ? '#f9fafb' : '#111827'
+                    grid: dark ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)', // Lebih pekat (0.15 -> 0.5)
+                    angleLines: dark ? 'rgba(255, 255, 255, 0.5)' :
+                    'rgba(0, 0, 0, 0.5)', // Lebih pekat (0.15 -> 0.5)
+                    ticks: dark ? '#ffffff' : '#000000', // Warna solid
+                    pointLabels: dark ? '#ffffff' : '#000000', // Warna solid
+                    legend: dark ? '#ffffff' : '#000000' // Warna solid
                 };
             };
 
@@ -128,7 +131,7 @@
                                 label: '{{ $participant->name }}',
                                 data: @js($potensiIndividualRatings),
                                 fill: true,
-                                backgroundColor: '#5db010',
+                                backgroundColor: 'rgba(93, 176, 16, 0.7)', // Semi-transparan (green)
                                 borderColor: '#8fd006',
                                 pointBackgroundColor: '#8fd006',
                                 pointBorderColor: '#fff',
@@ -153,7 +156,7 @@
                             {
                                 label: 'Tolerance {{ $tolerancePercentage }}%',
                                 data: @js($potensiStandardRatings),
-                                backgroundColor: '#b50505',
+                                backgroundColor: 'rgba(181, 5, 5, 0.7)', // Semi-transparan (red)
                                 borderColor: '#b50505',
                                 borderWidth: 2,
                                 pointRadius: 3,
@@ -179,7 +182,7 @@
                                 label: 'Standard',
                                 data: @js($potensiOriginalStandardRatings),
                                 fill: true,
-                                backgroundColor: '#fafa05',
+                                backgroundColor: 'rgba(250, 250, 5, 0.7)', // Semi-transparan (yellow)
                                 borderColor: '#e6d105',
                                 pointBackgroundColor: '#e6d105',
                                 pointBorderColor: '#fff',
@@ -230,11 +233,12 @@
                                     stepSize: 1,
                                     color: colors.ticks,
                                     font: {
-                                        size: 12,
+                                        size: 16,
                                         weight: 'bold'
                                     },
                                     backdropColor: 'transparent',
-                                    z: 1000
+                                    showLabelBackdrop: false,
+                                    z: 2 // Gunakan z-index 2 bukan 1000
                                 },
                                 pointLabels: {
                                     color: colors.pointLabels,
@@ -242,13 +246,15 @@
                                         size: 12,
                                         weight: '600'
                                     },
-                                    z: 1000
+                                    z: 3 // Gunakan z-index 3 bukan 1000
                                 },
                                 grid: {
-                                    color: colors.grid
+                                    color: colors.grid,
+                                    z: 1 // Tambahkan z-index 1
                                 },
                                 angleLines: {
-                                    color: colors.grid
+                                    color: colors.angleLines,
+                                    z: 1 // Tambahkan z-index 1
                                 }
                             }
                         }
@@ -277,7 +283,7 @@
                                 label: '{{ $participant->name }}',
                                 data: @js($kompetensiIndividualRatings),
                                 fill: true,
-                                backgroundColor: '#5db010',
+                                backgroundColor: 'rgba(93, 176, 16, 0.7)', // Semi-transparan (green)
                                 borderColor: '#8fd006',
                                 pointBackgroundColor: '#8fd006',
                                 pointBorderColor: '#fff',
@@ -302,7 +308,7 @@
                             {
                                 label: 'Tolerance {{ $tolerancePercentage }}%',
                                 data: @js($kompetensiStandardRatings),
-                                backgroundColor: '#b50505',
+                                backgroundColor: 'rgba(181, 5, 5, 0.7)', // Semi-transparan (red)
                                 borderColor: '#b50505',
                                 borderWidth: 2,
                                 pointRadius: 3,
@@ -328,7 +334,7 @@
                                 label: 'Standard',
                                 data: @js($kompetensiOriginalStandardRatings),
                                 fill: true,
-                                backgroundColor: '#fafa05',
+                                backgroundColor: 'rgba(250, 250, 5, 0.7)', // Semi-transparan (yellow)
                                 borderColor: '#e6d105',
                                 pointBackgroundColor: '#e6d105',
                                 pointBorderColor: '#fff',
@@ -379,11 +385,12 @@
                                     stepSize: 1,
                                     color: colors.ticks,
                                     font: {
-                                        size: 12,
+                                        size: 16,
                                         weight: 'bold'
                                     },
                                     backdropColor: 'transparent',
-                                    z: 1000
+                                    showLabelBackdrop: false,
+                                    z: 2 // Gunakan z-index 2 bukan 1000
                                 },
                                 pointLabels: {
                                     color: colors.pointLabels,
@@ -391,13 +398,15 @@
                                         size: 12,
                                         weight: '600'
                                     },
-                                    z: 1000
+                                    z: 3 // Gunakan z-index 3 bukan 1000
                                 },
                                 grid: {
-                                    color: colors.grid
+                                    color: colors.grid,
+                                    z: 1 // Tambahkan z-index 1
                                 },
                                 angleLines: {
-                                    color: colors.grid
+                                    color: colors.angleLines,
+                                    z: 1 // Tambahkan z-index 1
                                 }
                             }
                         }
@@ -426,7 +435,7 @@
                                 label: '{{ $participant->name }}',
                                 data: @js($generalIndividualRatings),
                                 fill: true,
-                                backgroundColor: '#5db010',
+                                backgroundColor: 'rgba(93, 176, 16, 0.7)', // Semi-transparan (green)
                                 borderColor: '#8fd006',
                                 pointBackgroundColor: '#8fd006',
                                 pointBorderColor: '#fff',
@@ -451,7 +460,7 @@
                             {
                                 label: 'Tolerance {{ $tolerancePercentage }}%',
                                 data: @js($generalStandardRatings),
-                                backgroundColor: '#b50505',
+                                backgroundColor: 'rgba(181, 5, 5, 0.7)', // Semi-transparan (red)
                                 borderColor: '#b50505',
                                 borderWidth: 2,
                                 pointRadius: 3,
@@ -477,7 +486,7 @@
                                 label: 'Standard',
                                 data: @js($generalOriginalStandardRatings),
                                 fill: true,
-                                backgroundColor: '#fafa05',
+                                backgroundColor: 'rgba(250, 250, 5, 0.7)', // Semi-transparan (yellow)
                                 borderColor: '#e6d105',
                                 pointBackgroundColor: '#e6d105',
                                 pointBorderColor: '#fff',
@@ -528,11 +537,12 @@
                                     stepSize: 1,
                                     color: colors.ticks,
                                     font: {
-                                        size: 12,
+                                        size: 16,
                                         weight: 'bold'
                                     },
                                     backdropColor: 'transparent',
-                                    z: 1000
+                                    showLabelBackdrop: false,
+                                    z: 2 // Gunakan z-index 2 bukan 1000
                                 },
                                 pointLabels: {
                                     color: colors.pointLabels,
@@ -540,13 +550,15 @@
                                         size: 12,
                                         weight: '600'
                                     },
-                                    z: 1000
+                                    z: 3 // Gunakan z-index 3 bukan 1000
                                 },
                                 grid: {
-                                    color: colors.grid
+                                    color: colors.grid,
+                                    z: 1 // Tambahkan z-index 1
                                 },
                                 angleLines: {
-                                    color: colors.grid
+                                    color: colors.angleLines,
+                                    z: 1 // Tambahkan z-index 1
                                 }
                             }
                         }

@@ -120,8 +120,6 @@
                                             text-white font-bold text-lg">√</span>
                                     @elseif ($isIndividual)
                                         √
-                                    @elseif ($isStandard)
-                                        S
                                     @endif
                                 </td>
                             @endfor
