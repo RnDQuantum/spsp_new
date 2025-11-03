@@ -98,7 +98,7 @@ $c = trim(strtoupper($aspect['conclusion_text'])); @endphp
 
                                 @if ($c === 'DI ATAS STANDAR') bg-green-600 text-white font-bold
                                 @elseif ($c === 'MEMENUHI STANDAR')
-                                    bg-blue-600 text-white font-bold
+                                    bg-yellow-400 text-gray-900 font-bold
                                 @elseif ($c === 'DI BAWAH STANDAR')
                                     bg-red-600 text-white font-bold
                                 @else
@@ -126,7 +126,7 @@ $c = trim(strtoupper($aspect['conclusion_text'])); @endphp
 $c = trim(strtoupper($overallConclusion)); @endphp
 
                             @if ($c === 'DI ATAS STANDAR') bg-green-600 text-white
-                            @elseif ($c === 'MEMENUHI STANDAR') bg-blue-600 text-white
+                            @elseif ($c === 'MEMENUHI STANDAR') bg-yellow-400 text-gray-900
                             @elseif ($c === 'DI BAWAH STANDAR') bg-red-600 text-white
                             @else bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-white @endif"
                             colspan="2">
@@ -152,7 +152,7 @@ $c = trim(strtoupper($overallConclusion)); @endphp
 $c = trim(strtoupper($overallConclusion)); @endphp
 
                             @if ($c === 'DI ATAS STANDAR') bg-green-600 text-white
-                            @elseif ($c === 'MEMENUHI STANDAR') bg-blue-600 text-white
+                            @elseif ($c === 'MEMENUHI STANDAR') bg-yellow-400 text-gray-900
                             @elseif ($c === 'DI BAWAH STANDAR') bg-red-600 text-white
                             @else bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-white @endif"
                             colspan="2">
@@ -171,7 +171,7 @@ $c = trim(strtoupper($overallConclusion)); @endphp
 
             @if ($rankingInfo)
                 <div
-                    class="px-6 py-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900 dark:to-indigo-900 border-t-2 border-black dark:border-gray-600">
+                    class="px-6 py-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-700 dark:to-gray-700 border-t-2 border-black dark:border-gray-600">
                     <div class="max-w-5xl mx-auto">
                         <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
                             <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor"
@@ -195,7 +195,7 @@ $c = trim(strtoupper($overallConclusion)); @endphp
 
                             <!-- Total Participants Card -->
                             <div
-                                class="bg-white dark:bg-gray-800 border-2 border-indigo-300 dark:border-indigo-600 rounded-lg p-4 text-center">
+                                class="bg-white dark:bg-gray-800 border-2 border-blue-300 dark:border-blue-600 rounded-lg p-4 text-center">
                                 <div class="text-sm text-gray-500 dark:text-gray-400 mb-2">Total Peserta</div>
                                 <div class="text-4xl font-bold text-indigo-600 dark:text-indigo-400">
                                     {{ $rankingInfo['total'] }}
@@ -207,7 +207,7 @@ $c = trim(strtoupper($overallConclusion)); @endphp
 
                             <!-- Weights Info Card -->
                             <div
-                                class="bg-white dark:bg-gray-800 border-2 border-indigo-300 dark:border-indigo-600 rounded-lg p-4 text-center">
+                                class="bg-white dark:bg-gray-800 border-2 border-blue-300 dark:border-blue-600 rounded-lg p-4 text-center">
                                 <div class="text-sm text-gray-500 dark:text-gray-400 mb-2">Bobot Penilaian</div>
                                 <div class="text-sm font-bold text-indigo-600 dark:text-indigo-400">
                                     Potensi: {{ $rankingInfo['potensi_weight'] }}%
@@ -224,18 +224,18 @@ $c = trim(strtoupper($overallConclusion)); @endphp
 $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                             @if ($conclusion === 'DI ATAS STANDAR') border-green-300 dark:border-green-600
                             @elseif ($conclusion === 'MEMENUHI STANDAR')
-                                border-blue-300 dark:border-blue-600
+                                border-yellow-300 dark:border-yellow-600
                             @else
                                 border-red-300 dark:border-red-600 @endif
                         ">
                                 <div class="text-sm text-gray-500 dark:text-gray-400 mb-2">Status</div>
                                 <div
                                     class="text-base font-bold px-3 py-2 rounded-lg
-                                @if ($conclusion === 'DI ATAS STANDAR') bg-green-600 dark:bg-green-600 text-white
+                                @if ($conclusion === 'DI ATAS STANDAR') bg-green-600 text-white
                                 @elseif ($conclusion === 'MEMENUHI STANDAR')
-                                    bg-blue-600 dark:bg-blue-600 text-white
+                                    bg-yellow-400 text-gray-900
                                 @else
-                                    bg-red-600 dark:bg-red-600 text-white @endif
+                                    bg-red-600 text-white @endif
                             ">
                                     {{ $rankingInfo['conclusion'] }}
                                 </div>

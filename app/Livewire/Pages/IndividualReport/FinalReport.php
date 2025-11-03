@@ -141,6 +141,7 @@ class FinalReport extends Component
 
     /**
      * Get final conclusion text based on tolerance
+     * Maps table conclusion to final "Potensial" labels
      */
     public function getFinalConclusionText(): string
     {
@@ -161,18 +162,22 @@ class FinalReport extends Component
         // Calculate adjusted gap based on tolerance
         $adjustedTotalGap = $this->getAdjustedGap($totalIndividualScore, $originalTotalStandardScore);
 
-        // Adjusted gap > 0: Di Atas Standar
-        if ($adjustedTotalGap > 0) {
-            return 'Potensial';
+        // Determine table conclusion first (3 categories)
+        if ($originalTotalGapScore > 0) {
+            $tableConclusion = 'Di Atas Standar';
+        } elseif ($adjustedTotalGap >= 0) {
+            $tableConclusion = 'Memenuhi Standar';
+        } else {
+            $tableConclusion = 'Di Bawah Standar';
         }
 
-        // Adjusted gap >= 0: Memenuhi Standar (within tolerance)
-        if ($adjustedTotalGap >= 0) {
-            return 'Potensial Dengan Catatan';
-        }
-
-        // Otherwise: Di Bawah Standar
-        return 'Kurang Potensial';
+        // Map table conclusion to final "Potensial" labels (same as RingkasanAssessment)
+        return match ($tableConclusion) {
+            'Di Atas Standar' => 'Sangat Potensial',
+            'Memenuhi Standar' => 'Potensial',
+            'Di Bawah Standar' => 'Kurang Potensial',
+            default => 'Kurang Potensial',
+        };
     }
 
     /**
@@ -183,8 +188,8 @@ class FinalReport extends Component
         $finalConclusion = $this->getFinalConclusionText();
 
         return match ($finalConclusion) {
-            'Potensial' => 'bg-green-500 text-white',
-            'Potensial Dengan Catatan' => 'bg-yellow-400 text-black',
+            'Sangat Potensial' => 'bg-green-600 text-white',
+            'Potensial' => 'bg-yellow-400 text-gray-900',
             'Kurang Potensial' => 'bg-red-600 text-white',
             'Tidak Ikut Assessment' => 'bg-gray-300 text-black',
             default => 'bg-gray-300 text-black',

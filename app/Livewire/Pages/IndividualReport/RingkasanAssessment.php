@@ -208,9 +208,9 @@ class RingkasanAssessment extends Component
         }
 
         return match ($conclusionCode) {
-            // Standard conclusions (3-color scheme: green-blue-red)
+            // Standard conclusions (3-color scheme: green-yellow-red)
             'Di Atas Standar' => 'bg-green-600 text-white',
-            'Memenuhi Standar' => 'bg-blue-600 text-white',
+            'Memenuhi Standar' => 'bg-yellow-400 text-black',
             'Di Bawah Standar' => 'bg-red-600 text-white',
             // Default
             'Tidak Ikut Assessment' => 'bg-gray-300 text-black',
@@ -273,7 +273,7 @@ class RingkasanAssessment extends Component
 
         return match ($conclusion) {
             'Di Atas Standar' => 'bg-green-600 text-white',
-            'Memenuhi Standar' => 'bg-blue-600 text-white',
+            'Memenuhi Standar' => 'bg-yellow-400 text-black',
             'Di Bawah Standar' => 'bg-red-600 text-white',
             'Tidak Ikut Assessment' => 'bg-gray-300 text-black',
             default => 'bg-gray-300 text-black',
@@ -300,7 +300,7 @@ class RingkasanAssessment extends Component
 
         return match ($finalConclusion) {
             'Sangat Potensial' => 'bg-green-600 text-white',
-            'Potensial' => 'bg-blue-600 text-white',
+            'Potensial' => 'bg-yellow-400 text-black',
             'Kurang Potensial' => 'bg-red-600 text-white',
             default => 'bg-red-600 text-white',
         };

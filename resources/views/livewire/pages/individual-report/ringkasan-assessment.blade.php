@@ -157,7 +157,7 @@
                                 class="border-2 border-black px-3 py-3 text-center font-bold
                             @if ($this->getPotensiConclusion() == 'Di Atas Standar') bg-green-600 text-white
                             @elseif($this->getPotensiConclusion() == 'Memenuhi Standar')
-                                bg-blue-600 text-white
+                                bg-yellow-400 text-gray-900
                             @elseif($this->getPotensiConclusion() == 'Di Bawah Standar')
                                 bg-red-600 text-white
                             @else
@@ -204,7 +204,7 @@
                                 class="border-2 border-black px-3 py-3 text-center font-bold
                             @if ($this->getKompetensiConclusion() == 'Di Atas Standar') bg-green-600 text-white
                             @elseif($this->getKompetensiConclusion() == 'Memenuhi Standar')
-                                bg-blue-600 text-white
+                                bg-yellow-400 text-gray-900
                             @elseif($this->getKompetensiConclusion() == 'Di Bawah Standar')
                                 bg-red-600 text-white
                             @else
@@ -255,7 +255,7 @@
                                 class="border-2 border-black px-3 py-3 text-center font-bold
                             @if ($this->getTotalConclusionInTable() == 'Di Atas Standar') bg-green-600 text-white
                             @elseif($this->getTotalConclusionInTable() == 'Memenuhi Standar')
-                                bg-blue-600 text-white
+                                bg-yellow-400 text-gray-900
                             @elseif($this->getTotalConclusionInTable() == 'Di Bawah Standar')
                                 bg-red-600 text-white
                             @else
@@ -281,7 +281,7 @@
                             class="border-2 border-black px-4 py-4 text-center font-bold text-lg
                         @if ($this->getFinalConclusionText() == 'Sangat Potensial') bg-green-600 text-white
                         @elseif($this->getFinalConclusionText() == 'Potensial')
-                            bg-blue-600 text-white
+                            bg-yellow-400 text-gray-900
                         @elseif($this->getFinalConclusionText() == 'Kurang Potensial')
                             bg-red-600 text-white
                         @else
