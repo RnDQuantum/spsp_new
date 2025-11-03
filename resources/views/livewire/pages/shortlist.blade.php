@@ -62,7 +62,7 @@
                     </div>
 
                     <!-- Clear Button -->
-                    @if ($selectedEventId || $search || $perPage != 10)
+                    @if ($selectedEventId || $search || $perPage != 10 || $sortField != 'name' || $sortDirection != 'asc')
                         <div class="self-end">
                             <button wire:click="clearFilters"
                                 class="inline-flex items-center justify-center mb-6 px-3 py-2.5 text-sm font-medium text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all"
@@ -80,7 +80,7 @@
     </div>
 
     <!-- Filter Summary -->
-    @if ($selectedEventId || $search)
+    @if ($selectedEventId || $search || $sortField != 'name' || $sortDirection != 'asc')
         <div class="px-6 py-3 bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
             <div class="flex flex-wrap items-center gap-2">
                 <span class="text-sm text-gray-600 dark:text-gray-300 font-medium">Filter aktif:</span>
@@ -108,6 +108,17 @@
                                 d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                         </svg>
                         "{{ $search }}"
+                    </span>
+                @endif
+                @if ($sortField != 'name' || $sortDirection != 'asc')
+                    <span
+                        class="inline-flex items-center px-3 py-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 text-sm font-medium rounded-full">
+                        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"></path>
+                        </svg>
+                        Urut: {{ ucfirst(trans('column.' . $sortField)) }}
+                        ({{ $sortDirection === 'asc' ? 'A-Z' : 'Z-A' }})
                     </span>
                 @endif
             </div>
@@ -206,37 +217,309 @@
                         <tr>
                             <th
                                 class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                No.</th>
-                            <th
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                NIP</th>
-                            <th
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                Nama</th>
-                            <th
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                Email</th>
-                            <th
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                Telepon</th>
-                            <th
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                Jenis Kelamin</th>
-                            <th
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                Kode Proyek</th>
-                            <th
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                Batch</th>
-                            <th
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                Posisi</th>
-                            <th
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                Tgl Assessment</th>
-                            <th
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                No. Test</th>
+                                No.
+                            </th>
+
+                            <!-- Sortable Headers -->
+                            <th wire:click="sort('skb_number')"
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                                <div class="flex items-center space-x-1 select-none">
+                                    <span>NIP</span>
+                                    <span class="text-gray-400">
+                                        @if ($sortField === 'skb_number')
+                                            @if ($sortDirection === 'asc')
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2" d="M5 15l7-7 7 7"></path>
+                                                </svg>
+                                            @else
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                                </svg>
+                                            @endif
+                                        @else
+                                            <svg class="w-4 h-4 opacity-0 group-hover:opacity-50" fill="none"
+                                                stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M5 15l7-7 7 7"></path>
+                                            </svg>
+                                        @endif
+                                    </span>
+                                </div>
+                            </th>
+
+                            <th wire:click="sort('name')"
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                                <div class="flex items-center space-x-1 select-none">
+                                    <span>Nama</span>
+                                    <span class="text-gray-400">
+                                        @if ($sortField === 'name')
+                                            @if ($sortDirection === 'asc')
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2" d="M5 15l7-7 7 7"></path>
+                                                </svg>
+                                            @else
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                                </svg>
+                                            @endif
+                                        @else
+                                            <svg class="w-4 h-4 opacity-0 group-hover:opacity-50" fill="none"
+                                                stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M5 15l7-7 7 7"></path>
+                                            </svg>
+                                        @endif
+                                    </span>
+                                </div>
+                            </th>
+
+                            <th wire:click="sort('email')"
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                                <div class="flex items-center space-x-1 select-none">
+                                    <span>Email</span>
+                                    <span class="text-gray-400">
+                                        @if ($sortField === 'email')
+                                            @if ($sortDirection === 'asc')
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2" d="M5 15l7-7 7 7"></path>
+                                                </svg>
+                                            @else
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                                </svg>
+                                            @endif
+                                        @else
+                                            <svg class="w-4 h-4 opacity-0 group-hover:opacity-50" fill="none"
+                                                stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M5 15l7-7 7 7"></path>
+                                            </svg>
+                                        @endif
+                                    </span>
+                                </div>
+                            </th>
+
+                            <th wire:click="sort('phone')"
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                                <div class="flex items-center space-x-1 select-none">
+                                    <span>Telepon</span>
+                                    <span class="text-gray-400">
+                                        @if ($sortField === 'phone')
+                                            @if ($sortDirection === 'asc')
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2" d="M5 15l7-7 7 7"></path>
+                                                </svg>
+                                            @else
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                                </svg>
+                                            @endif
+                                        @else
+                                            <svg class="w-4 h-4 opacity-0 group-hover:opacity-50" fill="none"
+                                                stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M5 15l7-7 7 7"></path>
+                                            </svg>
+                                        @endif
+                                    </span>
+                                </div>
+                            </th>
+
+                            <th wire:click="sort('gender')"
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                                <div class="flex items-center space-x-1 select-none">
+                                    <span>Jenis Kelamin</span>
+                                    <span class="text-gray-400">
+                                        @if ($sortField === 'gender')
+                                            @if ($sortDirection === 'asc')
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2" d="M5 15l7-7 7 7"></path>
+                                                </svg>
+                                            @else
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                                </svg>
+                                            @endif
+                                        @else
+                                            <svg class="w-4 h-4 opacity-0 group-hover:opacity-50" fill="none"
+                                                stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M5 15l7-7 7 7"></path>
+                                            </svg>
+                                        @endif
+                                    </span>
+                                </div>
+                            </th>
+
+                            <th wire:click="sort('event_code')"
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                                <div class="flex items-center space-x-1 select-none">
+                                    <span>Kode Proyek</span>
+                                    <span class="text-gray-400">
+                                        @if ($sortField === 'event_code')
+                                            @if ($sortDirection === 'asc')
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2" d="M5 15l7-7 7 7"></path>
+                                                </svg>
+                                            @else
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                                </svg>
+                                            @endif
+                                        @else
+                                            <svg class="w-4 h-4 opacity-0 group-hover:opacity-50" fill="none"
+                                                stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M5 15l7-7 7 7"></path>
+                                            </svg>
+                                        @endif
+                                    </span>
+                                </div>
+                            </th>
+
+                            <th wire:click="sort('batch_name')"
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                                <div class="flex items-center space-x-1 select-none">
+                                    <span>Batch</span>
+                                    <span class="text-gray-400">
+                                        @if ($sortField === 'batch_name')
+                                            @if ($sortDirection === 'asc')
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2" d="M5 15l7-7 7 7"></path>
+                                                </svg>
+                                            @else
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                                </svg>
+                                            @endif
+                                        @else
+                                            <svg class="w-4 h-4 opacity-0 group-hover:opacity-50" fill="none"
+                                                stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M5 15l7-7 7 7"></path>
+                                            </svg>
+                                        @endif
+                                    </span>
+                                </div>
+                            </th>
+
+                            <th wire:click="sort('position_name')"
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                                <div class="flex items-center space-x-1 select-none">
+                                    <span>Posisi</span>
+                                    <span class="text-gray-400">
+                                        @if ($sortField === 'position_name')
+                                            @if ($sortDirection === 'asc')
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2" d="M5 15l7-7 7 7"></path>
+                                                </svg>
+                                            @else
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                                </svg>
+                                            @endif
+                                        @else
+                                            <svg class="w-4 h-4 opacity-0 group-hover:opacity-50" fill="none"
+                                                stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M5 15l7-7 7 7"></path>
+                                            </svg>
+                                        @endif
+                                    </span>
+                                </div>
+                            </th>
+
+                            <th wire:click="sort('assessment_date')"
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                                <div class="flex items-center space-x-1 select-none">
+                                    <span>Tgl Assessment</span>
+                                    <span class="text-gray-400">
+                                        @if ($sortField === 'assessment_date')
+                                            @if ($sortDirection === 'asc')
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2" d="M5 15l7-7 7 7"></path>
+                                                </svg>
+                                            @else
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                                </svg>
+                                            @endif
+                                        @else
+                                            <svg class="w-4 h-4 opacity-0 group-hover:opacity-50" fill="none"
+                                                stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M5 15l7-7 7 7"></path>
+                                            </svg>
+                                        @endif
+                                    </span>
+                                </div>
+                            </th>
+
+                            <th wire:click="sort('test_number')"
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                                <div class="flex items-center space-x-1 select-none">
+                                    <span>No. Test</span>
+                                    <span class="text-gray-400">
+                                        @if ($sortField === 'test_number')
+                                            @if ($sortDirection === 'asc')
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2" d="M5 15l7-7 7 7"></path>
+                                                </svg>
+                                            @else
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                                </svg>
+                                            @endif
+                                        @else
+                                            <svg class="w-4 h-4 opacity-0 group-hover:opacity-50" fill="none"
+                                                stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M5 15l7-7 7 7"></path>
+                                            </svg>
+                                        @endif
+                                    </span>
+                                </div>
+                            </th>
                         </tr>
                     </thead>
                     <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
@@ -336,7 +619,7 @@
         @endif
 
         <!-- Loading Overlay (for subsequent loads) -->
-        <div wire:loading.delay.long wire:target="selectedEventId,search,perPage,gotoPage,previousPage,nextPage"
+        <div wire:loading.delay.long wire:target="selectedEventId,search,perPage,gotoPage,previousPage,nextPage,sort"
             class="absolute inset-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm flex items-center justify-center z-10 transition-opacity duration-200">
             <div class="flex flex-col items-center space-y-3">
                 <svg class="animate-spin h-10 w-10 text-blue-600 dark:text-blue-400"

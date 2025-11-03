@@ -26,6 +26,10 @@ class ParticipantsList extends Component
     // Add perPage property
     public int $perPage = 10;
 
+    // Add sorting properties
+    public string $sortField = 'name';
+    public string $sortDirection = 'asc';
+
     public function mount(): void
     {
         // Don't set default event - let user choose
@@ -84,6 +88,29 @@ class ParticipantsList extends Component
         ])->merge($events)->toArray();
     }
 
+    // Sort method to handle column sorting
+    public function sort($field): void
+    {
+        if ($this->sortField === $field) {
+            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            $this->sortField = $field;
+            $this->sortDirection = 'asc';
+        }
+
+        $this->resetPage();
+    }
+
+    // Get the sort direction icon for UI
+    public function getSortDirectionIcon($field): string
+    {
+        if ($this->sortField !== $field) {
+            return 'none';
+        }
+
+        return $this->sortDirection === 'asc' ? 'asc' : 'desc';
+    }
+
     #[Computed]
     public function participants()
     {
@@ -111,9 +138,32 @@ class ParticipantsList extends Component
             });
         }
 
+        // Apply sorting based on field
+        // Handle relationship sorting with special cases
+        switch ($this->sortField) {
+            case 'event_code':
+                $query->join('assessment_events', 'participants.event_id', '=', 'assessment_events.id')
+                    ->orderBy('assessment_events.code', $this->sortDirection)
+                    ->select('participants.*');
+                break;
+            case 'batch_name':
+                $query->join('batches', 'participants.batch_id', '=', 'batches.id')
+                    ->orderBy('batches.name', $this->sortDirection)
+                    ->select('participants.*');
+                break;
+            case 'position_name':
+                $query->join('position_formations', 'participants.position_formation_id', '=', 'position_formations.id')
+                    ->orderBy('position_formations.name', $this->sortDirection)
+                    ->select('participants.*');
+                break;
+            default:
+                // For direct participant fields
+                $query->orderBy($this->sortField, $this->sortDirection);
+        }
+
         // Handle "All" option
         if ($this->perPage === 0) {
-            $results = $query->orderBy('name')->get();
+            $results = $query->get();
             return new \Illuminate\Pagination\LengthAwarePaginator(
                 $results,
                 $results->count(),
@@ -123,7 +173,7 @@ class ParticipantsList extends Component
             );
         }
 
-        return $query->orderBy('name')->paginate($this->perPage);
+        return $query->paginate($this->perPage);
     }
 
     public function updatedSelectedEventId(): void
@@ -147,6 +197,9 @@ class ParticipantsList extends Component
         $this->selectedEventId = '';
         $this->search = '';
         $this->perPage = 10;
+        // Reset to default sort
+        $this->sortField = 'name';
+        $this->sortDirection = 'asc';
         $this->searchEvents();
         $this->resetPage();
     }
