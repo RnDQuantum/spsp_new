@@ -36,8 +36,7 @@
                     <th class="border-2 border-black dark:border-gray-600 px-3 py-3 text-center" rowspan="2">Ranking
                     </th>
                     <th class="border-2 border-black dark:border-gray-600 px-3 py-3 text-center" rowspan="2">NIP</th>
-                    <th class="border-2 border-black dark:border-gray-600 px-3 py-3 text-center" rowspan="2">Nama
-                    </th>
+                    <th class="border-2 border-black dark:border-gray-600 px-3 py-3 text-center" rowspan="2">Nama</th>
                     <th class="border-2 border-black dark:border-gray-600 px-3 py-3 text-center" rowspan="2">Jabatan
                     </th>
                     <th class="border-2 border-black dark:border-gray-600 px-3 py-3 text-center" colspan="2">
@@ -47,25 +46,18 @@
                     <th class="border-2 border-black dark:border-gray-600 px-3 py-3 text-center" colspan="2">Individu
                     </th>
                     <th class="border-2 border-black dark:border-gray-600 px-3 py-3 text-center" colspan="2">Gap</th>
-                    <th class="border-2 border-black dark:border-gray-600 px-3 py-3 text-center">
+                    <th class="border-2 border-black dark:border-gray-600 px-3 py-3 text-center" rowspan="2">
                         Prosentase<br>Kesesuaian</th>
                     <th class="border-2 border-black dark:border-gray-600 px-3 py-3 text-center" rowspan="2">
-                        Kesimpulan/Conclusion
-                    </th>
+                        Kesimpulan/Conclusion</th>
                 </tr>
                 <tr class="bg-gray-200 dark:bg-gray-700">
-                    {{-- <th class="border-2 border-black dark:border-gray-600 px-3 py-1"></th> --}}
-                    {{-- <th class="border-2 border-black dark:border-gray-600 px-3 py-1"></th> --}}
-                    {{-- <th class="border-2 border-black dark:border-gray-600 px-3 py-1"></th> --}}
-                    {{-- <th class="border-2 border-black dark:border-gray-600 px-3 py-1"></th> --}}
                     <th class="border-2 border-black dark:border-gray-600 px-3 py-1 font-semibold">Rating/<br>Level</th>
                     <th class="border-2 border-black dark:border-gray-600 px-3 py-1 font-semibold">Score</th>
                     <th class="border-2 border-black dark:border-gray-600 px-3 py-1 font-semibold">Rating/<br>Level</th>
                     <th class="border-2 border-black dark:border-gray-600 px-3 py-1 font-semibold">Score</th>
                     <th class="border-2 border-black dark:border-gray-600 px-3 py-1 font-semibold">Rating/<br>Level</th>
                     <th class="border-2 border-black dark:border-gray-600 px-3 py-1 font-semibold">Score</th>
-                    <th class="border-2 border-black dark:border-gray-600 px-3 py-1"></th>
-                    {{-- <th class="border-2 border-black dark:border-gray-600 px-3 py-1"></th> --}}
                 </tr>
             </thead>
             <tbody>
@@ -94,16 +86,18 @@
                         {{ number_format($row['percentage_score'], 2) }}%</td>
                     <td class="border-2 border-black dark:border-gray-600 px-3 py-2 text-center
                         @php
-// Normalisasi: trim + uppercase → aman dari spasi & case
-                            $c = trim(strtoupper($row['conclusion'])); @endphp
+                        $c = trim(strtoupper($row['conclusion'])); 
+                        @endphp
 
-                        @if ($c === 'DI ATAS STANDAR') bg-green-500 dark:bg-green-600 text-black dark:text-white
+                        @if ($c === 'DI ATAS STANDAR') bg-green-600 text-white font-bold
                         @elseif ($c === 'MEMENUHI STANDAR')
-                            bg-blue-500 dark:bg-blue-600 text-black dark:text-white
+                            bg-yellow-400 text-gray-900 font-bold  // ← KUNING seperti PsyMapping
                         @elseif ($c === 'DI BAWAH STANDAR')
-                            bg-red-500 dark:bg-red-600 text-black dark:text-white
+                            bg-red-600 text-white font-bold
                         @else
-                            bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-white @endif">
+                            bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-white 
+                        @endif
+                            ">
                         {{ $row['conclusion'] }}
                     </td>
                 </tr>
@@ -176,18 +170,34 @@
             $totalParticipants = array_sum($conclusionSummary);
             $percentage = $totalParticipants > 0 ? round(($count / $totalParticipants) * 100, 1) : 0;
 
-            // Get color and range from conclusionConfig
+            // Get range text from conclusionConfig
             $config = $this->conclusionConfig[$conclusion] ?? null;
-            $bgColor = $config['tailwindClass'] ?? 'bg-gray-100 border-gray-300';
             $rangeText = $config['rangeText'] ?? '-';
+
+            // Determine colors based on conclusion (same as table labels)
+            $c = trim(strtoupper($conclusion));
+            if ($c === 'DI ATAS STANDAR') {
+            $bgColor = 'bg-green-600';
+            $textColor = 'text-white';
+            } elseif ($c === 'MEMENUHI STANDAR') {
+            $bgColor = 'bg-yellow-400';
+            $textColor = 'text-gray-900';
+            } elseif ($c === 'DI BAWAH STANDAR') {
+            $bgColor = 'bg-red-600';
+            $textColor = 'text-white';
+            } else {
+            $bgColor = 'bg-gray-100 border-gray-300';
+            $textColor = 'text-gray-800';
+            }
             @endphp
 
             <div class="border-2 {{ $bgColor }} rounded-lg p-4 text-center">
-                <div class="text-3xl font-bold text-gray-900 dark:text-gray-100">{{ $count }}</div>
-                <div class="text-sm text-gray-600 dark:text-gray-300 mb-2">{{ $percentage }}%</div>
-                <div class="text-sm text-gray-700 dark:text-gray-200 font-semibold leading-tight mb-2">
-                    {{ $conclusion }}</div>
-                <div class="text-xs text-gray-500 dark:text-gray-400 font-medium">{{ $rangeText }}</div>
+                <div class="text-3xl font-bold {{ $textColor }}">{{ $count }}</div>
+                <div class="text-sm {{ $textColor }} mb-2">{{ $percentage }}%</div>
+                <div class="text-sm {{ $textColor }} font-semibold leading-tight mb-2">
+                    {{ $conclusion }}
+                </div>
+                <div class="text-xs {{ $textColor }} font-medium">{{ $rangeText }}</div>
             </div>
             @endforeach
         </div>
@@ -229,7 +239,8 @@
                     <li>Original Gap = Individual Score - Original Standard (Tolerance 0%)</li>
                     <li>Adjusted Gap = Individual Score - Adjusted Standard (Tolerance dikurangi)</li>
                     <li><strong>Di Atas Standar:</strong> Original Gap ≥ 0 (melebihi standar asli)</li>
-                    <li><strong>Memenuhi Standar:</strong> Adjusted Gap ≥ 0 (melebihi standar adjusted, di bawah standar
+                    <li><strong>Memenuhi Standar:</strong> Adjusted Gap ≥ 0 (melebihi standar adjusted, di bawah
+                        standar
                         asli)</li>
                     <li><strong>Di Bawah Standar:</strong> Adjusted Gap < 0 (masih di bawah standar adjusted)</li>
                 </ul>
@@ -292,12 +303,25 @@
                             $percentage =
                             $totalParticipants > 0 ? round(($count / $totalParticipants) * 100, 2) : 0;
 
-                            // Get color from conclusionConfig
-                            $config = $this->conclusionConfig[$conclusion] ?? null;
-                            $bgColor = $config['tailwindClass'] ?? 'bg-gray-100 border-gray-300';
+                            // Determine colors based on conclusion (same as table labels)
+                            $c = trim(strtoupper($conclusion));
+                            if ($c === 'DI ATAS STANDAR') {
+                            $bgColor = 'bg-green-600';
+                            $textColor = 'text-white';
+                            } elseif ($c === 'MEMENUHI STANDAR') {
+                            $bgColor = 'bg-yellow-400';
+                            $textColor = 'text-gray-900';
+                            } elseif ($c === 'DI BAWAH STANDAR') {
+                            $bgColor = 'bg-red-600';
+                            $textColor = 'text-white';
+                            } else {
+                            $bgColor = 'bg-gray-100';
+                            $textColor = 'text-gray-800';
+                            }
                             @endphp
                             <tr>
-                                <td class="border-2 border-gray-400 dark:border-gray-500 px-4 py-3 {{ $bgColor }}">
+                                <td
+                                    class="border-2 border-gray-400 dark:border-gray-500 px-4 py-3 {{ $bgColor }} {{ $textColor }} font-bold">
                                     {{ $conclusion }}</td>
                                 <td class="border-2 border-gray-400 dark:border-gray-500 px-4 py-3 text-center">
                                     {{ $count }}

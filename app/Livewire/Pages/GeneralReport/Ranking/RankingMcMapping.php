@@ -31,18 +31,18 @@ class RankingMcMapping extends Component
     // Conclusion configuration - single source of truth
     public array $conclusionConfig = [
         'Di Atas Standar' => [
-            'chartColor' => '#10b981',
-            'tailwindClass' => 'bg-green-600 dark:bg-green-600 border-green-300 dark:border-green-400',
+            'chartColor' => '#16a34a',      // green-600 
+            'tailwindClass' => 'bg-green-600 text-white',
             'rangeText' => 'Original Gap ≥ 0',
         ],
         'Memenuhi Standar' => [
-            'chartColor' => '#3b82f6',
-            'tailwindClass' => 'bg-blue-600 dark:bg-blue-600 border-blue-300 dark:border-blue-400',
+            'chartColor' => '#facc15',      // yellow-400 
+            'tailwindClass' => 'bg-yellow-400 text-gray-900',
             'rangeText' => 'Adjusted Gap ≥ 0',
         ],
         'Di Bawah Standar' => [
-            'chartColor' => '#ef4444',
-            'tailwindClass' => 'bg-red-600 dark:bg-red-600 border-red-300 dark:border-red-400',
+            'chartColor' => '#dc2626',      // red-600 
+            'tailwindClass' => 'bg-red-600 text-white',
             'rangeText' => 'Adjusted Gap < 0',
         ],
     ];
