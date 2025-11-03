@@ -86,50 +86,158 @@
                             class="py-3 px-4 text-center text-sm font-semibold text-gray-900 dark:text-white border border-gray-200 dark:border-gray-600 w-16">
                             ID
                         </th>
+
+                        <!-- KODE PROYEK - Sortable -->
                         <th
                             class="py-3 px-4 text-center text-sm font-semibold text-gray-900 dark:text-white border border-gray-200 dark:border-gray-600 w-32">
-                            KODE PROYEK
+                            <button wire:click="sortBy('kode_proyek')"
+                                class="flex items-center justify-center w-full hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                                <span>KODE PROYEK</span>
+                                <span class="ml-1">
+                                    @if ($sortField === 'kode_proyek')
+                                        @if ($sortDirection === 'asc')
+                                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                                <path
+                                                    d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
+                                            </svg>
+                                        @else
+                                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                                <path
+                                                    d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" />
+                                            </svg>
+                                        @endif
+                                    @else
+                                        <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M5 10l5-5 5 5H5z M5 12l5 5 5-5H5z" fill-rule="evenodd"
+                                                clip-rule="evenodd" />
+                                        </svg>
+                                    @endif
+                                </span>
+                            </button>
                         </th>
+
+                        <!-- NO. TEST - Sortable -->
                         <th
                             class="py-3 px-4 text-center text-sm font-semibold text-gray-900 dark:text-white border border-gray-200 dark:border-gray-600 w-32">
-                            NO. TEST
+                            <button wire:click="sortBy('no_test')"
+                                class="flex items-center justify-center w-full hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                                <span>NO. TEST</span>
+                                <span class="ml-1">
+                                    @if ($sortField === 'no_test')
+                                        @if ($sortDirection === 'asc')
+                                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                                <path
+                                                    d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
+                                            </svg>
+                                        @else
+                                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                                <path
+                                                    d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" />
+                                            </svg>
+                                        @endif
+                                    @else
+                                        <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M5 10l5-5 5 5H5z M5 12l5 5 5-5H5z" fill-rule="evenodd"
+                                                clip-rule="evenodd" />
+                                        </svg>
+                                    @endif
+                                </span>
+                            </button>
                         </th>
+
                         <th
                             class="py-3 px-4 text-center text-sm font-semibold text-gray-900 dark:text-white border border-gray-200 dark:border-gray-600 w-56">
                             VALIDITAS
                         </th>
+
                         <th
                             class="py-3 px-4 text-center text-sm font-semibold text-gray-900 dark:text-white border border-gray-200 dark:border-gray-600 w-72">
                             INTERNAL
                         </th>
+
                         <th
                             class="py-3 px-4 text-center text-sm font-semibold text-gray-900 dark:text-white border border-gray-200 dark:border-gray-600 w-72">
                             INTERPERSONAL
                         </th>
+
                         <th
                             class="py-3 px-4 text-center text-sm font-semibold text-gray-900 dark:text-white border border-gray-200 dark:border-gray-600 w-72">
                             KAP. KERJA
                         </th>
+
                         <th
                             class="py-3 px-4 text-center text-sm font-semibold text-gray-900 dark:text-white border border-gray-200 dark:border-gray-600 w-56">
                             KLINIK
                         </th>
+
                         <th
                             class="py-3 px-4 text-center text-sm font-semibold text-gray-900 dark:text-white border border-gray-200 dark:border-gray-600 w-72">
                             KESIMPULAN
                         </th>
+
                         <th
                             class="py-3 px-4 text-center text-sm font-semibold text-gray-900 dark:text-white border border-gray-200 dark:border-gray-600 w-72">
                             PSIKOGRAM
                         </th>
+
+                        <!-- NILAI PQ - Sortable -->
                         <th
                             class="py-3 px-4 text-center text-sm font-semibold text-gray-900 dark:text-white border border-gray-200 dark:border-gray-600 w-24">
-                            NILAI PQ
+                            <button wire:click="sortBy('nilai_pq')"
+                                class="flex items-center justify-center w-full hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                                <span>NILAI PQ</span>
+                                <span class="ml-1">
+                                    @if ($sortField === 'nilai_pq')
+                                        @if ($sortDirection === 'asc')
+                                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                                <path
+                                                    d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
+                                            </svg>
+                                        @else
+                                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                                <path
+                                                    d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" />
+                                            </svg>
+                                        @endif
+                                    @else
+                                        <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M5 10l5-5 5 5H5z M5 12l5 5 5-5H5z" fill-rule="evenodd"
+                                                clip-rule="evenodd" />
+                                        </svg>
+                                    @endif
+                                </span>
+                            </button>
                         </th>
+
+                        <!-- TINGKAT STRES - Sortable -->
                         <th
                             class="py-3 px-4 text-center text-sm font-semibold text-gray-900 dark:text-white border border-gray-200 dark:border-gray-600 w-32">
-                            TINGKAT STRES
+                            <button wire:click="sortBy('tingkat_stres')"
+                                class="flex items-center justify-center w-full hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                                <span>TINGKAT STRES</span>
+                                <span class="ml-1">
+                                    @if ($sortField === 'tingkat_stres')
+                                        @if ($sortDirection === 'asc')
+                                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                                <path
+                                                    d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
+                                            </svg>
+                                        @else
+                                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                                <path
+                                                    d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" />
+                                            </svg>
+                                        @endif
+                                    @else
+                                        <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M5 10l5-5 5 5H5z M5 12l5 5 5-5H5z" fill-rule="evenodd"
+                                                clip-rule="evenodd" />
+                                        </svg>
+                                    @endif
+                                </span>
+                            </button>
                         </th>
+
                         <th
                             class="py-3 px-4 text-center text-sm font-semibold text-gray-900 dark:text-white border border-gray-200 dark:border-gray-600 w-24">
                             AKSI

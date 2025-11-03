@@ -19,10 +19,16 @@ class MmpiResultsReport extends Component
     // Global search
     public $search = '';
 
+    // Sorting
+    public $sortField = 'id'; // Default sort by ID
+    public $sortDirection = 'asc'; // Default ascending
+
     // Query string parameters
     protected $queryString = [
         'search' => ['except' => ''],
         'perPage' => ['except' => 10],
+        'sortField' => ['except' => 'id'],
+        'sortDirection' => ['except' => 'asc'],
     ];
 
     // Reset pagination when search or per page changes
@@ -40,6 +46,21 @@ class MmpiResultsReport extends Component
     public function resetSearch()
     {
         $this->search = '';
+        $this->resetPage();
+    }
+
+    // Sorting method
+    public function sortBy($field)
+    {
+        // Jika field yang sama diklik, toggle direction
+        if ($this->sortField === $field) {
+            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            // Jika field baru, set ke ascending
+            $this->sortField = $field;
+            $this->sortDirection = 'asc';
+        }
+
         $this->resetPage();
     }
 
@@ -65,7 +86,7 @@ class MmpiResultsReport extends Component
                 })
                     // Atau berdasarkan no_test
                     ->orWhere('no_test', 'like', '%' . $this->search . '%')
-                    // Atau berdasarkan tingkat_stres - gunakan where exact atau like sesuai kebutuhan
+                    // Atau berdasarkan tingkat_stres
                     ->orWhere('tingkat_stres', 'like', '%' . $this->search . '%');
 
                 // Jika perlu juga cari berdasarkan nilai PQ (jika angka)
@@ -73,6 +94,50 @@ class MmpiResultsReport extends Component
                     $query->orWhere('nilai_pq', $this->search);
                 }
             });
+        }
+
+        // Sorting Logic
+        switch ($this->sortField) {
+            case 'kode_proyek':
+                // Sort by relation (event code)
+                $mmpiResultsQuery->join('events', 'psychological_tests.event_id', '=', 'events.id')
+                    ->orderBy('events.code', $this->sortDirection)
+                    ->select('psychological_tests.*');
+                break;
+
+            case 'no_test':
+                $mmpiResultsQuery->orderBy('no_test', $this->sortDirection);
+                break;
+
+            case 'username':
+                // Sort by username (asumsi ada relasi user atau field username)
+                // Sesuaikan dengan struktur database Anda
+                $mmpiResultsQuery->join('users', 'psychological_tests.user_id', '=', 'users.id')
+                    ->orderBy('users.username', $this->sortDirection)
+                    ->select('psychological_tests.*');
+                break;
+
+            case 'nilai_pq':
+                $mmpiResultsQuery->orderBy('nilai_pq', $this->sortDirection);
+                break;
+
+            case 'tingkat_stres':
+                // Custom order untuk tingkat stres (normal, ringan, sedang, berat, sangat berat)
+                $mmpiResultsQuery->orderByRaw("
+                    CASE tingkat_stres
+                        WHEN 'normal' THEN 1
+                        WHEN 'ringan' THEN 2
+                        WHEN 'sedang' THEN 3
+                        WHEN 'berat' THEN 4
+                        WHEN 'sangat berat' THEN 5
+                        ELSE 6
+                    END {$this->sortDirection}
+                ");
+                break;
+
+            default:
+                $mmpiResultsQuery->orderBy('id', $this->sortDirection);
+                break;
         }
 
         // Pagination atau get all
