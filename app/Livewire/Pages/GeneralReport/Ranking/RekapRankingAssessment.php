@@ -33,19 +33,19 @@ class RekapRankingAssessment extends Component
     // Conclusion configuration - single source of truth
     public array $conclusionConfig = [
         'Di Atas Standar' => [
-            'chartColor' => '#10b981',
-            'tailwindClass' => 'bg-green-100 border-green-300',
-            'rangeText' => 'Skor Individual > Standar Original',
+            'chartColor' => '#16a34a',      // green-600
+            'tailwindClass' => 'bg-green-600 text-white',
+            'rangeText' => 'Original Gap ≥ 0',
         ],
         'Memenuhi Standar' => [
-            'chartColor' => '#3b82f6',
-            'tailwindClass' => 'bg-blue-100 border-blue-300',
-            'rangeText' => 'Skor Individual > Standar Adjusted',
+            'chartColor' => '#facc15',      // yellow-400
+            'tailwindClass' => 'bg-yellow-400 text-gray-900',
+            'rangeText' => 'Adjusted Gap ≥ 0',
         ],
         'Di Bawah Standar' => [
-            'chartColor' => '#ef4444',
-            'tailwindClass' => 'bg-red-100 border-red-300',
-            'rangeText' => 'Skor Individual < Standar Adjusted',
+            'chartColor' => '#dc2626',      // red-600
+            'tailwindClass' => 'bg-red-600 text-white',
+            'rangeText' => 'Adjusted Gap < 0',
         ],
     ];
 
