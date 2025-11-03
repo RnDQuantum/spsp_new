@@ -18,9 +18,9 @@
 
     @php $summary = $this->getPassingSummary(); @endphp
     @livewire('components.tolerance-selector', [
-        'passing' => $summary['passing'],
-        'total' => $summary['total'],
-        'showSummary' => false,
+    'passing' => $summary['passing'],
+    'total' => $summary['total'],
+    'showSummary' => false,
     ])
 
     <!-- Table Section -->
@@ -65,31 +65,30 @@
             </thead>
             <tbody>
                 @if ($rankings && $rankings->count() > 0)
-                    @foreach ($rankings as $row)
-                        <tr class="bg-white dark:bg-gray-800">
-                            <td class="border-2 border-black dark:border-gray-600 px-3 py-2 text-center">
-                                {{ $row['rank'] }}</td>
-                            <td class="border-2 border-black dark:border-gray-600 px-3 py-2 text-center">
-                                {{ $row['nip'] }}</td>
-                            <td class="border-2 border-black dark:border-gray-600 px-3 py-2">{{ $row['name'] }}</td>
-                            <td class="border-2 border-black dark:border-gray-600 px-3 py-2">{{ $row['position'] }}
-                            </td>
-                            <td class="border-2 border-black dark:border-gray-600 px-3 py-2 text-center">
-                                {{ number_format($row['standard_rating'], 2) }}</td>
-                            <td class="border-2 border-black dark:border-gray-600 px-3 py-2 text-center">
-                                {{ number_format($row['standard_score'], 2) }}</td>
-                            <td class="border-2 border-black dark:border-gray-600 px-3 py-2 text-center">
-                                {{ number_format($row['individual_rating'], 2) }}</td>
-                            <td class="border-2 border-black dark:border-gray-600 px-3 py-2 text-center">
-                                {{ number_format($row['individual_score'], 2) }}</td>
-                            <td class="border-2 border-black dark:border-gray-600 px-3 py-2 text-center">
-                                {{ number_format($row['gap_rating'], 2) }}</td>
-                            <td class="border-2 border-black dark:border-gray-600 px-3 py-2 text-center">
-                                {{ number_format($row['gap_score'], 2) }}</td>
-                            <td class="border-2 border-black dark:border-gray-600 px-3 py-2 text-center">
-                                {{ number_format($row['percentage_score'], 2) }}%</td>
-                            <td
-                                class="border-2 border-black dark:border-gray-600 px-3 py-2 text-center
+                @foreach ($rankings as $row)
+                <tr class="bg-white dark:bg-gray-800">
+                    <td class="border-2 border-black dark:border-gray-600 px-3 py-2 text-center">
+                        {{ $row['rank'] }}</td>
+                    <td class="border-2 border-black dark:border-gray-600 px-3 py-2 text-center">
+                        {{ $row['nip'] }}</td>
+                    <td class="border-2 border-black dark:border-gray-600 px-3 py-2">{{ $row['name'] }}</td>
+                    <td class="border-2 border-black dark:border-gray-600 px-3 py-2">{{ $row['position'] }}
+                    </td>
+                    <td class="border-2 border-black dark:border-gray-600 px-3 py-2 text-center">
+                        {{ number_format($row['standard_rating'], 2) }}</td>
+                    <td class="border-2 border-black dark:border-gray-600 px-3 py-2 text-center">
+                        {{ number_format($row['standard_score'], 2) }}</td>
+                    <td class="border-2 border-black dark:border-gray-600 px-3 py-2 text-center">
+                        {{ number_format($row['individual_rating'], 2) }}</td>
+                    <td class="border-2 border-black dark:border-gray-600 px-3 py-2 text-center">
+                        {{ number_format($row['individual_score'], 2) }}</td>
+                    <td class="border-2 border-black dark:border-gray-600 px-3 py-2 text-center">
+                        {{ number_format($row['gap_rating'], 2) }}</td>
+                    <td class="border-2 border-black dark:border-gray-600 px-3 py-2 text-center">
+                        {{ number_format($row['gap_score'], 2) }}</td>
+                    <td class="border-2 border-black dark:border-gray-600 px-3 py-2 text-center">
+                        {{ number_format($row['percentage_score'], 2) }}%</td>
+                    <td class="border-2 border-black dark:border-gray-600 px-3 py-2 text-center
                                 @php
 $c = trim(strtoupper($row['conclusion'])); @endphp
 
@@ -100,161 +99,159 @@ $c = trim(strtoupper($row['conclusion'])); @endphp
                                     bg-red-600 text-white font-bold
                                 @else
                                     bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-white @endif">
-                                {{ $row['conclusion'] }}
-                        </tr>
-                    @endforeach
+                        {{ $row['conclusion'] }}
+                </tr>
+                @endforeach
                 @else
-                    <tr class="bg-white dark:bg-gray-800">
-                        <td colspan="12"
-                            class="border-2 border-black dark:border-gray-600 px-3 py-4 text-center text-gray-500 dark:text-gray-400">
-                            Tidak ada data untuk ditampilkan. Silakan pilih event dan jabatan.
-                        </td>
-                    </tr>
+                <tr class="bg-white dark:bg-gray-800">
+                    <td colspan="12"
+                        class="border-2 border-black dark:border-gray-600 px-3 py-4 text-center text-gray-500 dark:text-gray-400">
+                        Tidak ada data untuk ditampilkan. Silakan pilih event dan jabatan.
+                    </td>
+                </tr>
                 @endif
             </tbody>
         </table>
         @if ($rankings?->hasPages())
-            <div class="mt-4">
-                {{ $rankings->links(data: ['scrollTo' => false]) }}
-            </div>
+        <div class="mt-4">
+            {{ $rankings->links(data: ['scrollTo' => false]) }}
+        </div>
         @endif
     </div>
 
     <!-- Standard & Threshold Info Box -->
     @if ($standardInfo)
-        <div class="px-6 pb-6 bg-white dark:bg-gray-900">
-            <div
-                class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900 dark:to-indigo-900 border-2 border-blue-300 dark:border-blue-600 rounded-lg p-4 shadow-sm">
-                <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2">
-                    <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor"
-                        viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z">
-                        </path>
-                    </svg>
-                    Informasi Standar
-                    <span x-data
-                        x-text="$wire.tolerancePercentage > 0 ? '(Toleransi -' + $wire.tolerancePercentage + '%)' : '(Tanpa Toleransi)'"
-                        class="text-sm font-normal text-blue-600 dark:text-blue-400"></span>
-                </h3>
+    <div class="px-6 pb-6 bg-white dark:bg-gray-900">
+        <div
+            class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900 dark:to-indigo-900 border-2 border-blue-300 dark:border-blue-600 rounded-lg p-4 shadow-sm">
+            <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2">
+                <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z">
+                    </path>
+                </svg>
+                Informasi Standar
+                <span x-data
+                    x-text="$wire.tolerancePercentage > 0 ? '(Toleransi -' + $wire.tolerancePercentage + '%)' : '(Tanpa Toleransi)'"
+                    class="text-sm font-normal text-blue-600 dark:text-blue-400"></span>
+            </h3>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <!-- Original Standard -->
-                    <div class="bg-white dark:bg-gray-800 border border-blue-200 dark:border-blue-600 rounded-lg p-3">
-                        <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Standar Original (100%)</div>
-                        <div class="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                            {{ number_format($standardInfo['original_standard'], 2) }}</div>
-                    </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Original Standard -->
+                <div class="bg-white dark:bg-gray-800 border border-blue-200 dark:border-blue-600 rounded-lg p-3">
+                    <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Standar Original</div>
+                    <div class="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                        {{ number_format($standardInfo['original_standard'], 2) }}</div>
+                </div>
 
-                    <!-- Adjusted Standard -->
-                    <div
-                        class="bg-white dark:bg-gray-800 border border-indigo-300 dark:border-indigo-600 rounded-lg p-3">
-                        <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Standar Adjusted
-                            <span x-data
-                                x-text="$wire.tolerancePercentage > 0 ? '(-' + $wire.tolerancePercentage + '%)' : ''"></span>
-                        </div>
-                        <div class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
-                            {{ number_format($standardInfo['adjusted_standard'], 2) }}</div>
+                <!-- Adjusted Standard -->
+                <div class="bg-white dark:bg-gray-800 border border-indigo-300 dark:border-indigo-600 rounded-lg p-3">
+                    <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Standar Adjusted
+                        <span x-data
+                            x-text="$wire.tolerancePercentage > 0 ? '(-' + $wire.tolerancePercentage + '%)' : ''"></span>
                     </div>
+                    <div class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
+                        {{ number_format($standardInfo['adjusted_standard'], 2) }}</div>
                 </div>
             </div>
         </div>
+    </div>
     @endif
 
     <!-- Summary Statistics Section -->
     @if (!empty($conclusionSummary))
-        <div class="px-6 pb-6 bg-gray-50 dark:bg-gray-800 border-t-2 border-black dark:border-gray-600">
-            <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4 mt-4">Ringkasan Kesimpulan</h3>
+    <div class="px-6 pb-6 bg-gray-50 dark:bg-gray-800 border-t-2 border-black dark:border-gray-600">
+        <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4 mt-4">Ringkasan Kesimpulan</h3>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                @foreach ($conclusionSummary as $conclusion => $count)
-                    @php
-                        $totalParticipants = array_sum($conclusionSummary);
-                        $percentage = $totalParticipants > 0 ? round(($count / $totalParticipants) * 100, 1) : 0;
-
-                        // Get range text from conclusionConfig
-                        $config = $this->conclusionConfig[$conclusion] ?? null;
-                        $rangeText = $config['rangeText'] ?? '-';
-
-                        // Determine colors based on conclusion (same as table labels)
-                        $c = trim(strtoupper($conclusion));
-                        if ($c === 'DI ATAS STANDAR') {
-                            $bgColor = 'bg-green-600';
-                            $textColor = 'text-white';
-                        } elseif ($c === 'MEMENUHI STANDAR') {
-                            $bgColor = 'bg-yellow-400';
-                            $textColor = 'text-gray-900';
-                        } elseif ($c === 'DI BAWAH STANDAR') {
-                            $bgColor = 'bg-red-600';
-                            $textColor = 'text-white';
-                        } else {
-                            $bgColor = 'bg-gray-100 border-gray-300';
-                            $textColor = 'text-gray-800';
-                        }
-                    @endphp
-
-                    <div class="border-2 {{ $bgColor }} rounded-lg p-4 text-center">
-                        <div class="text-3xl font-bold {{ $textColor }}">{{ $count }}</div>
-                        <div class="text-sm {{ $textColor }} mb-2">{{ $percentage }}%</div>
-                        <div class="text-sm {{ $textColor }} font-semibold leading-tight mb-2">
-                            {{ $conclusion }}
-                        </div>
-                        <div class="text-xs {{ $textColor }} font-medium">{{ $rangeText }}</div>
-                    </div>
-                @endforeach
-            </div>
-
-            <!-- Overall Statistics -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            @foreach ($conclusionSummary as $conclusion => $count)
             @php
-                $totalParticipants = array_sum($conclusionSummary);
-                $passingCount =
-                    ($conclusionSummary['Di Atas Standar'] ?? 0) + ($conclusionSummary['Memenuhi Standar'] ?? 0);
-                $passingPercentage = $totalParticipants > 0 ? round(($passingCount / $totalParticipants) * 100, 1) : 0;
+            $totalParticipants = array_sum($conclusionSummary);
+            $percentage = $totalParticipants > 0 ? round(($count / $totalParticipants) * 100, 1) : 0;
+
+            // Get range text from conclusionConfig
+            $config = $this->conclusionConfig[$conclusion] ?? null;
+            $rangeText = $config['rangeText'] ?? '-';
+
+            // Determine colors based on conclusion (same as table labels)
+            $c = trim(strtoupper($conclusion));
+            if ($c === 'DI ATAS STANDAR') {
+            $bgColor = 'bg-green-600';
+            $textColor = 'text-white';
+            } elseif ($c === 'MEMENUHI STANDAR') {
+            $bgColor = 'bg-yellow-400';
+            $textColor = 'text-gray-900';
+            } elseif ($c === 'DI BAWAH STANDAR') {
+            $bgColor = 'bg-red-600';
+            $textColor = 'text-white';
+            } else {
+            $bgColor = 'bg-gray-100 border-gray-300';
+            $textColor = 'text-gray-800';
+            }
             @endphp
 
-            <div class="bg-white dark:bg-gray-800 border-2 border-black dark:border-gray-600 rounded-lg p-4">
-                <div class="grid grid-cols-3 gap-4 text-center">
-                    <div>
-                        <div class="text-lg font-bold text-gray-900 dark:text-gray-100">{{ $totalParticipants }}</div>
-                        <div class="text-sm text-gray-600 dark:text-gray-300">Total Peserta</div>
-                    </div>
-                    <div>
-                        <div class="text-lg font-bold text-green-600 dark:text-green-400">{{ $passingCount }}</div>
-                        <div class="text-sm text-gray-600 dark:text-gray-300">Lulus</div>
-                    </div>
-                    <div>
-                        <div class="text-lg font-bold text-blue-600 dark:text-blue-400">{{ $passingPercentage }}%
-                        </div>
-                        <div class="text-sm text-gray-600 dark:text-gray-300">Tingkat Kelulusan</div>
-                    </div>
+            <div class="border-2 {{ $bgColor }} rounded-lg p-4 text-center">
+                <div class="text-3xl font-bold {{ $textColor }}">{{ $count }}</div>
+                <div class="text-sm {{ $textColor }} mb-2">{{ $percentage }}%</div>
+                <div class="text-sm {{ $textColor }} font-semibold leading-tight mb-2">
+                    {{ $conclusion }}
                 </div>
+                <div class="text-xs {{ $textColor }} font-medium">{{ $rangeText }}</div>
             </div>
+            @endforeach
+        </div>
 
-            <!-- Keterangan Rentang Nilai -->
-            <div class="mt-4 bg-blue-50 dark:bg-blue-900 border border-blue-200 dark:border-blue-600 rounded-lg p-3">
-                <div class="text-sm text-blue-800 dark:text-blue-200">
-                    <strong>Keterangan:</strong> Kesimpulan berdasarkan Gap (Individual Score - Standard)
-                    <span x-data
-                        x-text="$wire.tolerancePercentage > 0 ? 'dengan toleransi ' + $wire.tolerancePercentage + '%' : 'tanpa toleransi'"></span>.
-                    <br>
-                    <strong>Rumus:</strong>
-                    <ul class="list-disc ml-6 mt-1">
-                        <li>Original Gap = Individual Score - Original Standard (Tolerance 0%)</li>
-                        <li>Adjusted Gap = Individual Score - Adjusted Standard (Tolerance dikurangi)</li>
-                        <li><strong>Di Atas Standar:</strong> Original Gap ≥ 0 (melebihi standar asli)</li>
-                        <li><strong>Memenuhi Standar:</strong> Adjusted Gap ≥ 0 (melebihi standar adjusted, di bawah
-                            standar asli)</li>
-                        <li><strong>Di Bawah Standar:</strong> Adjusted Gap < 0 (masih di bawah standar adjusted)</li>
-                    </ul>
+        <!-- Overall Statistics -->
+        @php
+        $totalParticipants = array_sum($conclusionSummary);
+        $passingCount =
+        ($conclusionSummary['Di Atas Standar'] ?? 0) + ($conclusionSummary['Memenuhi Standar'] ?? 0);
+        $passingPercentage = $totalParticipants > 0 ? round(($passingCount / $totalParticipants) * 100, 1) : 0;
+        @endphp
+
+        <div class="bg-white dark:bg-gray-800 border-2 border-black dark:border-gray-600 rounded-lg p-4">
+            <div class="grid grid-cols-3 gap-4 text-center">
+                <div>
+                    <div class="text-lg font-bold text-gray-900 dark:text-gray-100">{{ $totalParticipants }}</div>
+                    <div class="text-sm text-gray-600 dark:text-gray-300">Total Peserta</div>
+                </div>
+                <div>
+                    <div class="text-lg font-bold text-green-600 dark:text-green-400">{{ $passingCount }}</div>
+                    <div class="text-sm text-gray-600 dark:text-gray-300">Lulus</div>
+                </div>
+                <div>
+                    <div class="text-lg font-bold text-blue-600 dark:text-blue-400">{{ $passingPercentage }}%
+                    </div>
+                    <div class="text-sm text-gray-600 dark:text-gray-300">Tingkat Kelulusan</div>
                 </div>
             </div>
         </div>
+
+        <!-- Keterangan Rentang Nilai -->
+        <div class="mt-4 bg-blue-50 dark:bg-blue-900 border border-blue-200 dark:border-blue-600 rounded-lg p-3">
+            <div class="text-sm text-blue-800 dark:text-blue-200">
+                <strong>Keterangan:</strong> Kesimpulan berdasarkan Gap (Individual Score - Standard)
+                <span x-data
+                    x-text="$wire.tolerancePercentage > 0 ? 'dengan toleransi ' + $wire.tolerancePercentage + '%' : 'tanpa toleransi'"></span>.
+                <br>
+                <strong>Rumus:</strong>
+                <ul class="list-disc ml-6 mt-1">
+                    <li>Original Gap = Individual Score - Original Standard (Tolerance 0%)</li>
+                    <li>Adjusted Gap = Individual Score - Adjusted Standard (Tolerance dikurangi)</li>
+                    <li><strong>Di Atas Standar:</strong> Original Gap ≥ 0 (melebihi standar asli)</li>
+                    <li><strong>Memenuhi Standar:</strong> Adjusted Gap ≥ 0 (melebihi standar adjusted, di bawah
+                        standar asli)</li>
+                    <li><strong>Di Bawah Standar:</strong> Adjusted Gap < 0 (masih di bawah standar adjusted)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
     @endif
 
     <!-- Pie Chart Section -->
     @if (!empty($conclusionSummary))
-        <div class="mt-8 border-t-2 border-black dark:border-gray-600 pt-6 bg-white dark:bg-gray-900"
-            x-data="{
+    <div class="mt-8 border-t-2 border-black dark:border-gray-600 pt-6 bg-white dark:bg-gray-900" x-data="{
                 refreshChart() {
                     const labels = @js($chartLabels);
                     const data = @js($chartData);
@@ -264,92 +261,90 @@ $c = trim(strtoupper($row['conclusion'])); @endphp
                     }
                 }
             }" x-init="$nextTick(() => refreshChart())">
-            <div class="px-6 pb-6">
-                <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100 mb-6 text-center">Capacity Building
-                    Psychology Mapping
-                </h3>
+        <div class="px-6 pb-6">
+            <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100 mb-6 text-center">Capacity Building
+                Psychology Mapping
+            </h3>
 
-                <!-- Content Grid -->
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-                    <!-- Chart Section -->
-                    <div class="border border-gray-300 dark:border-gray-600 p-6 rounded-lg bg-gray-50 dark:bg-gray-800 transition-shadow duration-300 hover:shadow-xl"
-                        wire:ignore>
-                        <canvas id="conclusionPieChart" class="w-full h-full"></canvas>
-                    </div>
+            <!-- Content Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                <!-- Chart Section -->
+                <div class="border border-gray-300 dark:border-gray-600 p-6 rounded-lg bg-gray-50 dark:bg-gray-800 transition-shadow duration-300 hover:shadow-xl"
+                    wire:ignore>
+                    <canvas id="conclusionPieChart" class="w-full h-full"></canvas>
+                </div>
 
-                    <!-- Table Section -->
-                    <div class="border-2 border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden">
-                        <table class="w-full text-sm text-gray-900 dark:text-gray-100">
-                            <thead>
-                                <tr class="bg-gray-200 dark:bg-gray-700">
-                                    <th
-                                        class="border-2 border-gray-400 dark:border-gray-500 px-4 py-3 text-center font-bold">
-                                        KETERANGAN
-                                    </th>
-                                    <th
-                                        class="border-2 border-gray-400 dark:border-gray-500 px-4 py-3 text-center font-bold">
-                                        JUMLAH
-                                    </th>
-                                    <th
-                                        class="border-2 border-gray-400 dark:border-gray-500 px-4 py-3 text-center font-bold">
-                                        PROSENTASE
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white dark:bg-gray-800">
-                                @php
-                                    $totalParticipants = array_sum($conclusionSummary);
-                                @endphp
-                                @foreach ($conclusionSummary as $conclusion => $count)
-                                    @php
-                                        $percentage =
-                                            $totalParticipants > 0 ? round(($count / $totalParticipants) * 100, 2) : 0;
+                <!-- Table Section -->
+                <div class="border-2 border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden">
+                    <table class="w-full text-sm text-gray-900 dark:text-gray-100">
+                        <thead>
+                            <tr class="bg-gray-200 dark:bg-gray-700">
+                                <th
+                                    class="border-2 border-gray-400 dark:border-gray-500 px-4 py-3 text-center font-bold">
+                                    KETERANGAN
+                                </th>
+                                <th
+                                    class="border-2 border-gray-400 dark:border-gray-500 px-4 py-3 text-center font-bold">
+                                    JUMLAH
+                                </th>
+                                <th
+                                    class="border-2 border-gray-400 dark:border-gray-500 px-4 py-3 text-center font-bold">
+                                    PROSENTASE
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white dark:bg-gray-800">
+                            @php
+                            $totalParticipants = array_sum($conclusionSummary);
+                            @endphp
+                            @foreach ($conclusionSummary as $conclusion => $count)
+                            @php
+                            $percentage =
+                            $totalParticipants > 0 ? round(($count / $totalParticipants) * 100, 2) : 0;
 
-                                        // Determine colors based on conclusion (same as table labels)
-                                        $c = trim(strtoupper($conclusion));
-                                        if ($c === 'DI ATAS STANDAR') {
-                                            $bgColor = 'bg-green-600';
-                                            $textColor = 'text-white';
-                                        } elseif ($c === 'MEMENUHI STANDAR') {
-                                            $bgColor = 'bg-yellow-400';
-                                            $textColor = 'text-gray-900';
-                                        } elseif ($c === 'DI BAWAH STANDAR') {
-                                            $bgColor = 'bg-red-600';
-                                            $textColor = 'text-white';
-                                        } else {
-                                            $bgColor = 'bg-gray-100';
-                                            $textColor = 'text-gray-800';
-                                        }
-                                    @endphp
-                                    <tr>
-                                        <td
-                                            class="border-2 border-gray-400 dark:border-gray-500 px-4 py-3 {{ $bgColor }} {{ $textColor }} font-bold">
-                                            {{ $conclusion }}</td>
-                                        <td
-                                            class="border-2 border-gray-400 dark:border-gray-500 px-4 py-3 text-center">
-                                            {{ $count }}
-                                            orang
-                                        </td>
-                                        <td
-                                            class="border-2 border-gray-400 dark:border-gray-500 px-4 py-3 text-center">
-                                            {{ $percentage }}%
-                                        </td>
-                                    </tr>
-                                @endforeach
-                                <tr class="bg-gray-100 dark:bg-gray-700 font-semibold">
-                                    <td class="border-2 border-gray-400 dark:border-gray-500 px-4 py-3">Jumlah
-                                        Responden</td>
-                                    <td class="border-2 border-gray-400 dark:border-gray-500 px-4 py-3 text-center">
-                                        {{ $totalParticipants }} orang</td>
-                                    <td class="border-2 border-gray-400 dark:border-gray-500 px-4 py-3 text-center">
-                                        100.00%</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                            // Determine colors based on conclusion (same as table labels)
+                            $c = trim(strtoupper($conclusion));
+                            if ($c === 'DI ATAS STANDAR') {
+                            $bgColor = 'bg-green-600';
+                            $textColor = 'text-white';
+                            } elseif ($c === 'MEMENUHI STANDAR') {
+                            $bgColor = 'bg-yellow-400';
+                            $textColor = 'text-gray-900';
+                            } elseif ($c === 'DI BAWAH STANDAR') {
+                            $bgColor = 'bg-red-600';
+                            $textColor = 'text-white';
+                            } else {
+                            $bgColor = 'bg-gray-100';
+                            $textColor = 'text-gray-800';
+                            }
+                            @endphp
+                            <tr>
+                                <td
+                                    class="border-2 border-gray-400 dark:border-gray-500 px-4 py-3 {{ $bgColor }} {{ $textColor }} font-bold">
+                                    {{ $conclusion }}</td>
+                                <td class="border-2 border-gray-400 dark:border-gray-500 px-4 py-3 text-center">
+                                    {{ $count }}
+                                    orang
+                                </td>
+                                <td class="border-2 border-gray-400 dark:border-gray-500 px-4 py-3 text-center">
+                                    {{ $percentage }}%
+                                </td>
+                            </tr>
+                            @endforeach
+                            <tr class="bg-gray-100 dark:bg-gray-700 font-semibold">
+                                <td class="border-2 border-gray-400 dark:border-gray-500 px-4 py-3">Jumlah
+                                    Responden</td>
+                                <td class="border-2 border-gray-400 dark:border-gray-500 px-4 py-3 text-center">
+                                    {{ $totalParticipants }} orang</td>
+                                <td class="border-2 border-gray-400 dark:border-gray-500 px-4 py-3 text-center">
+                                    100.00%</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
+    </div>
     @endif
 </div>
 
