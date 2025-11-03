@@ -25,7 +25,7 @@ Panduan ini menjelaskan implementasi logic kesimpulan baru yang telah diterapkan
 | Kategori | Kondisi | Warna UI | Penjelasan |
 |----------|---------|----------|------------|
 | **Di Atas Standar** | `originalGap >= 0` | Hijau (`bg-green-600 text-white`) | Skor individual melebihi standar asli (tolerance 0%) |
-| **Memenuhi Standar** | `adjustedGap >= 0` | Kuning (`bg-yellow-400 text-black`) | Skor individual melebihi standar adjusted (tapi di bawah standar asli) |
+| **Memenuhi Standar** | `adjustedGap >= 0` | Kuning (`bg-yellow-400 text-gray-900`) | Skor individual melebihi standar adjusted (tapi di bawah standar asli) |
 | **Di Bawah Standar** | `adjustedGap < 0` | Merah (`bg-red-600 text-white`) | Skor individual masih di bawah standar adjusted |
 
 ### 2. **Perbedaan dengan Logic Lama**
@@ -297,7 +297,7 @@ if ($originalGap >= 0) {
     @endphp
 
     @if ($c === 'DI ATAS STANDAR') bg-green-600 text-white font-bold
-    @elseif ($c === 'MEMENUHI STANDAR') bg-yellow-400 text-black font-bold
+    @elseif ($c === 'MEMENUHI STANDAR') bg-yellow-400 text-gray-900 font-bold
     @elseif ($c === 'DI BAWAH STANDAR') bg-red-600 text-white font-bold
     @else bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-white
     @endif">
@@ -324,11 +324,11 @@ if ($originalGap >= 0) {
     <div class="text-sm text-gray-500 dark:text-gray-400 mb-2">Status</div>
     <div class="text-base font-bold px-3 py-2 rounded-lg
         @if ($conclusion === 'DI ATAS STANDAR')
-            bg-green-600 dark:bg-green-600 text-white
+            bg-green-600 text-white
         @elseif ($conclusion === 'MEMENUHI STANDAR')
-            bg-yellow-400 dark:bg-yellow-400 text-black
+            bg-yellow-400 text-gray-900
         @else
-            bg-red-600 dark:bg-red-600 text-white
+            bg-red-600 text-white
         @endif
     ">
         {{ $rankingInfo['conclusion'] }}
@@ -486,7 +486,7 @@ public array $conclusionConfig = [
 
 | Element | Di Atas Standar | Memenuhi Standar | Di Bawah Standar |
 |---------|-----------------|------------------|------------------|
-| **Table Cell** | `bg-green-600 text-white` | `bg-yellow-400 text-black` | `bg-red-600 text-white` |
+| **Table Cell** | `bg-green-600 text-white` | `bg-yellow-400 text-gray-900` | `bg-red-600 text-white` |
 | **Card Border** | `border-green-300` | `border-yellow-300` | `border-red-300` |
 | **Card Background** | `bg-green-100` | `bg-yellow-100` | `bg-red-100` |
 | **Chart Color** | `#10b981` | `#eab308` | `#ef4444` |
@@ -694,7 +694,7 @@ When migrating a component from old to new logic:
    **Replace:** `bg-green-600 text-white`
 
 2. **Find:** `bg-blue-600 text-white` (for "Memenuhi Standar")
-   **Replace:** `bg-yellow-400 text-black`
+   **Replace:** `bg-yellow-400 text-gray-900`
 
 3. **Find:** `bg-orange-500 text-black`
    **Replace:** `bg-red-600 text-white`
