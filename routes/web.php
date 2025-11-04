@@ -19,11 +19,11 @@ Route::middleware(['guest'])->group(function () {
     Route::post('/login', [LoginController::class, 'authenticate']);
 });
 
-// Protected Routes
+// Protected Routes (with Multi-Tenant Access Control)
 // TEMPORARY: Comment out 'auth' middleware to bypass authentication
 // TODO: Uncomment line below and remove the line after to restore authentication
-// Route::middleware(['auth'])->group(function () {
-Route::middleware(['auth'])->group(function () {
+// Route::middleware(['auth', 'institution.access'])->group(function () {
+Route::middleware(['auth', 'institution.access'])->group(function () {
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
     Route::get('/dashboard', \App\Livewire\Pages\Dashboard::class)->name('dashboard');
 

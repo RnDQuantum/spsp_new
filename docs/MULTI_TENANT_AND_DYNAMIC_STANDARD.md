@@ -21,7 +21,9 @@ Dokumentasi implementasi transformasi aplikasi menjadi multi-tenant SaaS dengan 
 ### Goals
 
 1. **Multi-Tenancy**: Setiap user terikat ke satu institution, hanya bisa akses data institution mereka
-2. **Role-Based Access**: Super admin bisa akses semua institution
+2. **Role-Based Access**:
+   - **Admin**: Akses semua institution + manage users/institutions
+   - **Client**: Akses hanya institution mereka sendiri
 3. **Dynamic Standard Analysis**: User bisa adjust bobot & rating untuk analisis tanpa ubah database
 4. **Session-Based**: Adjustment tersimpan di session (seperti tolerance), bisa di-reset
 
@@ -118,6 +120,8 @@ return new class extends Migration
 
 **File:** `database/seeders/RolesAndPermissionsSeeder.php`
 
+**SIMPLIFIED IMPLEMENTATION** - Hanya 2 role: `admin` dan `client`
+
 ```php
 <?php
 
@@ -138,30 +142,10 @@ class RolesAndPermissionsSeeder extends Seeder
 
         // Create permissions
         $permissions = [
-            // Events
-            'view events',
-            'create events',
-            'edit events',
-            'delete events',
-
-            // Participants
-            'view participants',
-            'create participants',
-            'edit participants',
-            'delete participants',
-
-            // Reports
-            'view reports',
-            'export reports',
-
-            // Standards (NEW)
-            'view standards',
-            'analyze standards',  // NEW: untuk dynamic standard analysis
-
-            // System (admin only)
-            'manage users',
-            'manage institutions',
-            'view all institutions',  // NEW: super admin only
+            'view all institutions',  // Only for admin
+            'manage users',            // Only for admin
+            'manage institutions',     // Only for admin
+            'analyze standards',       // For dynamic standard analysis
         ];
 
         foreach ($permissions as $permission) {
@@ -170,38 +154,22 @@ class RolesAndPermissionsSeeder extends Seeder
 
         // Create roles and assign permissions
 
-        // 1. Super Admin (global access)
-        $superAdmin = Role::create(['name' => 'super-admin']);
-        $superAdmin->givePermissionTo(Permission::all());
+        // 1. Admin (global access to all institutions)
+        $admin = Role::create(['name' => 'admin']);
+        $admin->givePermissionTo(Permission::all());
 
-        // 2. Institution Admin (full access within institution)
-        $institutionAdmin = Role::create(['name' => 'institution-admin']);
-        $institutionAdmin->givePermissionTo([
-            'view events',
-            'create events',
-            'edit events',
-            'delete events',
-            'view participants',
-            'create participants',
-            'edit participants',
-            'delete participants',
-            'view reports',
-            'export reports',
-            'view standards',
+        // 2. Client (access only their own institution data)
+        $client = Role::create(['name' => 'client']);
+        $client->givePermissionTo([
             'analyze standards',
-        ]);
-
-        // 3. Institution Viewer (read-only)
-        $institutionViewer = Role::create(['name' => 'institution-viewer']);
-        $institutionViewer->givePermissionTo([
-            'view events',
-            'view participants',
-            'view reports',
-            'view standards',
         ]);
     }
 }
 ```
+
+**Roles Explanation:**
+- **admin**: Dapat akses semua data dari semua institution + manage users/institutions
+- **client**: Hanya dapat akses data dari institution mereka sendiri + dapat melakukan dynamic standard analysis
 
 **Run seeder:**
 ```bash
@@ -260,11 +228,11 @@ class User extends Authenticatable
     }
 
     /**
-     * Check if user is super admin
+     * Check if user is admin
      */
-    public function isSuperAdmin(): bool
+    public function isAdmin(): bool
     {
-        return $this->hasRole('super-admin');
+        return $this->hasRole('admin');
     }
 
     /**
@@ -272,12 +240,12 @@ class User extends Authenticatable
      */
     public function canAccessInstitution(int $institutionId): bool
     {
-        // Super admin can access all institutions
-        if ($this->isSuperAdmin()) {
+        // Admin can access all institutions
+        if ($this->isAdmin()) {
             return true;
         }
 
-        // Other users can only access their own institution
+        // Clients can only access their own institution
         return $this->institution_id === $institutionId;
     }
 
@@ -320,12 +288,12 @@ class InstitutionScope implements Scope
             return;
         }
 
-        // Super admin can see all institutions
-        if ($user->isSuperAdmin()) {
+        // Admin can see all institutions
+        if ($user->isAdmin()) {
             return;
         }
 
-        // Other users only see their institution's data
+        // Clients only see their institution's data
         if ($user->institution_id) {
             $builder->where('institution_id', $user->institution_id);
         }
@@ -382,8 +350,8 @@ class EnsureUserBelongsToInstitution
             return $next($request);
         }
 
-        // Super admin bypass
-        if ($user->isSuperAdmin()) {
+        // Admin bypass
+        if ($user->isAdmin()) {
             return $next($request);
         }
 
@@ -414,8 +382,12 @@ class EnsureUserBelongsToInstitution
 ```php
 // routes/web.php
 
+// ✅ APPLIED - All protected routes now use institution.access middleware
 Route::middleware(['auth', 'institution.access'])->group(function () {
-    // All protected routes here
+    Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+    Route::get('/dashboard', \App\Livewire\Pages\Dashboard::class)->name('dashboard');
+    Route::get('/shortlist-peserta', \App\Livewire\Pages\ParticipantsList::class)->name('shortlist');
+    // ... all other protected routes
 });
 ```
 
@@ -1372,14 +1344,18 @@ php artisan make:migration add_multi_tenancy_to_users_table
 # 2. Run migration
 php artisan migrate
 
-# 3. Run seeder
+# 3. Run seeder (or use migrate:fresh --seed)
 php artisan db:seed --class=RolesAndPermissionsSeeder
 
-# 4. Assign roles to existing users
+# 4. DatabaseSeeder automatically creates admin user with role
+# See: database/seeders/DatabaseSeeder.php
+# Admin user: admin@example.com (password from factory)
+
+# 5. To manually assign roles to existing users:
 php artisan tinker
->>> $user = User::first();
->>> $user->assignRole('super-admin');
->>> $user->institution_id = 1;
+>>> $user = User::where('email', 'user@example.com')->first();
+>>> $user->assignRole('client');
+>>> $user->institution_id = 1;  // Required for client
 >>> $user->save();
 ```
 
@@ -1447,9 +1423,9 @@ use App\Models\AssessmentEvent;
 use App\Models\Institution;
 use App\Models\User;
 
-test('super admin can access all institutions', function () {
+test('admin can access all institutions', function () {
     $user = User::factory()->create();
-    $user->assignRole('super-admin');
+    $user->assignRole('admin');
 
     $institution1 = Institution::factory()->create();
     $institution2 = Institution::factory()->create();
@@ -1463,12 +1439,12 @@ test('super admin can access all institutions', function () {
     expect($events)->toHaveCount(2);
 });
 
-test('institution admin can only access own institution', function () {
+test('client can only access own institution', function () {
     $institution1 = Institution::factory()->create();
     $institution2 = Institution::factory()->create();
 
     $user = User::factory()->create(['institution_id' => $institution1->id]);
-    $user->assignRole('institution-admin');
+    $user->assignRole('client');
 
     $event1 = AssessmentEvent::factory()->create(['institution_id' => $institution1->id]);
     $event2 = AssessmentEvent::factory()->create(['institution_id' => $institution2->id]);
@@ -1480,12 +1456,12 @@ test('institution admin can only access own institution', function () {
     expect($events->first()->id)->toBe($event1->id);
 });
 
-test('user cannot access other institution event', function () {
+test('client cannot access other institution event', function () {
     $institution1 = Institution::factory()->create();
     $institution2 = Institution::factory()->create();
 
     $user = User::factory()->create(['institution_id' => $institution1->id]);
-    $user->assignRole('institution-viewer');
+    $user->assignRole('client');
 
     $event = AssessmentEvent::factory()->create(['institution_id' => $institution2->id]);
 
@@ -1624,7 +1600,7 @@ But for now, session-based is perfect for the use case!
 ### What We're Building
 
 1. **Multi-Tenant SaaS**
-   - Role-based access (super-admin, institution-admin, viewer)
+   - Role-based access (admin, client)
    - Institution-level data isolation
    - Global scopes for auto-filtering
 
@@ -1646,7 +1622,80 @@ But for now, session-based is perfect for the use case!
 2. ✅ Spatie Permission setup
 3. ✅ Middleware & Scopes
 4. ✅ DynamicStandardService
-5. ✅ UI Components
-6. ✅ Testing
+5. ⏳ UI Components (Next Phase)
+6. ⏳ Testing (Next Phase)
+
+---
+
+## IMPLEMENTATION STATUS
+
+### ✅ Phase 1: Completed (2025-01-04)
+
+**1. Database & Migration**
+- Migration `add_multi_tenancy_to_users_table` created and executed
+- Added: `institution_id`, `is_active`, `last_login_at` to users table
+
+**2. User Model Updates**
+- File: `app/Models/User.php`
+- Added fillable fields and casts
+- Added `institution()` relationship
+- Added `isAdmin()` helper method
+- Added `canAccessInstitution()` helper method
+- Added `scopeActive()` query scope
+
+**3. Roles & Permissions**
+- File: `database/seeders/RolesAndPermissionsSeeder.php`
+- Created 2 roles:
+  - **admin**: Full access to all institutions
+  - **client**: Access only to their own institution
+- Created 4 permissions:
+  - `view all institutions`
+  - `manage users`
+  - `manage institutions`
+  - `analyze standards`
+- **DatabaseSeeder** updated to automatically:
+  - Run RolesAndPermissionsSeeder first
+  - Create admin user (admin@example.com) with admin role
+  - Set `is_active = true` for admin user
+
+**4. Multi-Tenant Security**
+- File: `app/Models/Scopes/InstitutionScope.php`
+- Global scope for auto-filtering by institution_id
+- Applied to `AssessmentEvent` model
+- Admin users bypass the scope
+
+**5. Middleware**
+- File: `app/Http/Middleware/EnsureUserBelongsToInstitution.php`
+- Ensures clients have institution_id
+- Admin users bypass
+- Registered as `institution.access` alias in `bootstrap/app.php`
+- **Applied to all protected routes** in `routes/web.php`
+
+**6. Dynamic Standard Service**
+- File: `app/Services/DynamicStandardService.php`
+- Session-based storage with prefix `standard_adjustment`
+- Methods for get/save category weights, aspect weights/ratings, sub-aspect ratings
+- Bulk save and reset functionality
+- Validation methods
+- Returns original values from database when no adjustment exists
+
+### ⏳ Phase 2: Next Steps
+
+**1. Update Calculation Services**
+- Add `$useAdjustedStandard` parameter to:
+  - `AspectService::calculatePotensiAspect()`
+  - `AspectService::calculateKompetensiAspect()`
+  - `CategoryService::calculateCategory()`
+  - `FinalAssessmentService::calculateFinal()`
+
+**2. UI Components**
+- Create `StandardAnalysis` Livewire component
+- Add toggle to `StandardPsikometrik` component
+- Add toggle to `StandardMc` component
+
+**3. Testing**
+- Multi-tenancy tests
+- Dynamic standard service tests
+- Integration tests
 
 This architecture is clean, secure, and maintainable! 🚀

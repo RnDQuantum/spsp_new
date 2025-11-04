@@ -24,14 +24,23 @@ class DatabaseSeeder extends Seeder
     {
         $this->command->info('🌱 Starting database seeding...');
 
-        // 1. Create default admin user
-        $this->command->info('👤 Creating admin user...');
-        User::factory()->create([
-            'name' => 'Admin User',
-            'email' => 'admin@example.com',
+        // 1. Seed roles and permissions first
+        $this->command->info('🔐 Seeding roles and permissions...');
+        $this->call([
+            RolesAndPermissionsSeeder::class,
         ]);
 
-        // 2. Seed master data (institutions, templates, aspects, sub-aspects)
+        // 2. Create default admin user and assign role
+        $this->command->info('👤 Creating admin user...');
+        $adminUser = User::factory()->create([
+            'name' => 'Admin User',
+            'email' => 'admin@example.com',
+            'is_active' => true,
+        ]);
+        $adminUser->assignRole('admin');
+        $this->command->info('✅ Admin user created with admin role');
+
+        // 3. Seed master data (institutions, templates, aspects, sub-aspects)
         $this->command->info('📋 Seeding master data...');
         $this->call([
             InstitutionSeeder::class,
@@ -39,13 +48,13 @@ class DatabaseSeeder extends Seeder
             MasterDataSeeder::class,
         ]);
 
-        // 3. Seed participants with dynamic assessment seeder
+        // 4. Seed participants with dynamic assessment seeder
         $this->command->info('🎯 Seeding participants with assessments...');
         $this->call([
             DynamicAssessmentSeeder::class,
         ]);
 
-        // 4. Seed Interpretation Templates
+        // 5. Seed Interpretation Templates
         $this->command->info('📋 Seeding interpretation templates...');
         $this->call([
             DetailedInterpretationTemplateSeeder::class,
