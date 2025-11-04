@@ -207,7 +207,7 @@
                     const darkModeColors = {
                         background: '#1f2937', // gray-800
                         text: '#ffffff', // gray-50
-                        grid: '#ffffff', // gray-600
+                        grid: '#898989', // gray-600
                         pointLabels: '#d1d5db', // gray-300
                         legend: '#ffffff', // gray-50
                     };
@@ -216,7 +216,7 @@
                     const lightModeColors = {
                         background: '#ffffff',
                         text: '#000000', // gray-900
-                        grid: '#000000', // gray-300
+                        grid: '#898989', // gray-300
                         pointLabels: '#000000', // gray-900
                         legend: '#000000', // gray-900
                     };
@@ -281,8 +281,8 @@
                                         }
                                     },
                                     {
-                                        // === LAYER 2: TOLERANSI (TENGAH) ===
-                                        label: 'Tolerance {{ $tolerancePercentage }}%',
+                                        // === LAYER 2: STANDARD (TENGAH) ===
+                                        label: 'Standard', // UBAH DARI: 'Tolerance {{ $tolerancePercentage }}%'
                                         data: @js($potensiStandardRatings),
                                         borderColor: '#b50505', // MERAH SOLID
                                         backgroundColor: '#b50505',
@@ -313,8 +313,8 @@
                                         }
                                     },
                                     {
-                                        // === LAYER 3: STANDARD (PASTI ATAS) ===
-                                        label: 'Standard',
+                                        // === LAYER 3: TOLERANCE (PASTI ATAS) ===
+                                        label: 'Tolerance {{ $tolerancePercentage }}%', // UBAH DARI: 'Standard'
                                         data: @js($potensiOriginalStandardRatings),
                                         fill: true,
                                         backgroundColor: '#fafa05', // KUNING SOLID
@@ -347,10 +347,10 @@
                                         }
                                     }
                                 ] : [
-                                    // Only show standard when no participant
+                                    // Standar (hijau) - tidak ada perubahan
                                     {
                                         label: 'Standard',
-                                        data: @js($potensiOriginalStandardRatings),
+                                        data: @js($potensiStandardRatings),
                                         fill: true,
                                         backgroundColor: '#5db010', // HIJAU SOLID
                                         borderColor: '#8fd006',
@@ -360,8 +360,9 @@
                                         pointRadius: 4,
                                         pointBorderWidth: 2,
                                         datalabels: {
+                                            display: false,
                                             color: '#000000',
-                                            backgroundColor: '#5db010', // Gunakan hijau
+                                            backgroundColor: '#5db010',
                                             borderRadius: 4,
                                             padding: {
                                                 top: 4,
@@ -376,6 +377,39 @@
                                             anchor: 'center',
                                             align: 'center',
                                             offset: 6,
+                                            formatter: (value) => value.toFixed(2)
+                                        }
+                                    },
+                                    // Toleransi (kuning) - tidak ada perubahan
+                                    {
+                                        label: 'Tolerance {{ $tolerancePercentage }}%',
+                                        data: @js($potensiOriginalStandardRatings),
+                                        fill: true,
+                                        backgroundColor: '#fafa05', // KUNING SOLID
+                                        borderColor: '#e6d105',
+                                        pointBackgroundColor: '#e6d105',
+                                        pointBorderColor: '#fff',
+                                        borderWidth: 2,
+                                        pointRadius: 3,
+                                        pointBorderWidth: 2,
+                                        datalabels: {
+                                            display: false,
+                                            color: '#000000',
+                                            backgroundColor: '#fafa05',
+                                            borderRadius: 4,
+                                            padding: {
+                                                top: 4,
+                                                bottom: 4,
+                                                left: 6,
+                                                right: 6
+                                            },
+                                            font: {
+                                                weight: 'bold',
+                                                size: 9
+                                            },
+                                            anchor: 'end',
+                                            align: 'start',
+                                            offset: 0,
                                             formatter: (value) => value.toFixed(2)
                                         }
                                     }
@@ -456,116 +490,86 @@
                             data: {
                                 labels: @js($kompetensiLabels),
                                 datasets: hasParticipantData ? [{
-                                        label: @js($participant ? $participant->name : 'Peserta'),
-                                        data: @js($kompetensiIndividualRatings),
-                                        fill: true,
-                                        backgroundColor: '#5db010',
-                                        borderColor: '#8fd006',
-                                        pointBackgroundColor: '#8fd006',
-                                        pointBorderColor: '#fff',
-                                        pointHoverBackgroundColor: '#fff',
-                                        pointHoverBorderColor: '#8fd006',
-                                        borderWidth: 2.5,
-                                        pointRadius: 4,
-                                        pointBorderWidth: 2,
-                                        datalabels: {
-                                            color: '#000000',
-                                            backgroundColor: '#5db010',
-                                            borderRadius: 4,
-                                            padding: {
-                                                top: 4,
-                                                bottom: 4,
-                                                left: 6,
-                                                right: 6
-                                            },
-                                            font: {
-                                                weight: 'bold',
-                                                size: 10
-                                            },
-                                            anchor: 'end',
-                                            align: 'end',
-                                            offset: 6,
-                                            formatter: (value) => value.toFixed(2)
-                                        }
-                                    },
-                                    {
-                                        label: 'Tolerance {{ $tolerancePercentage }}%',
-                                        data: @js($kompetensiStandardRatings),
-                                        borderColor: '#b50505',
-                                        backgroundColor: '#b50505',
-                                        borderWidth: 2,
-                                        pointRadius: 3,
-                                        pointBackgroundColor: '#9a0404',
-                                        pointBorderColor: '#fff',
-                                        pointBorderWidth: 2,
-                                        fill: true,
-                                        datalabels: {
-                                            color: '#FFFFFF',
-                                            backgroundColor: '#b50505',
-                                            borderRadius: 4,
-                                            padding: {
-                                                top: 4,
-                                                bottom: 4,
-                                                left: 6,
-                                                right: 6
-                                            },
-                                            font: {
-                                                weight: 'bold',
-                                                size: 9
-                                            },
-                                            anchor: 'end',
-                                            align: 'start',
-                                            offset: 0,
-                                            formatter: (value) => value.toFixed(2)
-                                        }
-                                    },
-                                    {
-                                        label: 'Standard',
-                                        data: @js($kompetensiOriginalStandardRatings),
-                                        fill: true,
-                                        backgroundColor: '#fafa05',
-                                        borderColor: '#e6d105',
-                                        pointBackgroundColor: '#e6d105',
-                                        pointBorderColor: '#fff',
-                                        pointHoverBackgroundColor: '#fff',
-                                        pointHoverBorderColor: '#e6d105',
-                                        borderWidth: 2.5,
-                                        pointRadius: 4,
-                                        pointBorderWidth: 2,
-                                        datalabels: {
-                                            color: '#000000',
-                                            backgroundColor: '#fafa05',
-                                            borderRadius: 4,
-                                            padding: {
-                                                top: 4,
-                                                bottom: 4,
-                                                left: 6,
-                                                right: 6
-                                            },
-                                            font: {
-                                                weight: 'bold',
-                                                size: 10
-                                            },
-                                            anchor: 'center',
-                                            align: 'center',
-                                            offset: 6,
-                                            formatter: (value) => value.toFixed(2)
-                                        }
-                                    }
-                                ] : [{
-                                    label: 'Standard',
-                                    data: @js($kompetensiOriginalStandardRatings),
+                                    // Peserta (hijau)
+                                    label: @js($participant ? $participant->name : 'Peserta'),
+                                    data: @js($kompetensiIndividualRatings),
                                     fill: true,
-                                    backgroundColor: '#5db010', // HIJAU SOLID
+                                    backgroundColor: '#5db010',
                                     borderColor: '#8fd006',
                                     pointBackgroundColor: '#8fd006',
                                     pointBorderColor: '#fff',
+                                    pointHoverBackgroundColor: '#fff',
+                                    pointHoverBorderColor: '#8fd006',
                                     borderWidth: 2.5,
                                     pointRadius: 4,
                                     pointBorderWidth: 2,
                                     datalabels: {
                                         color: '#000000',
-                                        backgroundColor: '#5db010', // Gunakan hijau
+                                        backgroundColor: '#5db010',
+                                        borderRadius: 4,
+                                        padding: {
+                                            top: 4,
+                                            bottom: 4,
+                                            left: 6,
+                                            right: 6
+                                        },
+                                        font: {
+                                            weight: 'bold',
+                                            size: 10
+                                        },
+                                        anchor: 'end',
+                                        align: 'end',
+                                        offset: 6,
+                                        formatter: (value) => value.toFixed(2)
+                                    }
+                                }, {
+                                    // Standard (merah) - PERUBAHAN LABEL
+                                    label: 'Standard', // UBAH DARI: 'Tolerance {{ $tolerancePercentage }}%'
+                                    data: @js($kompetensiStandardRatings),
+                                    borderColor: '#b50505',
+                                    backgroundColor: '#b50505',
+                                    borderWidth: 2,
+                                    pointRadius: 3,
+                                    pointBackgroundColor: '#9a0404',
+                                    pointBorderColor: '#fff',
+                                    pointBorderWidth: 2,
+                                    fill: true,
+                                    datalabels: {
+                                        color: '#FFFFFF',
+                                        backgroundColor: '#b50505',
+                                        borderRadius: 4,
+                                        padding: {
+                                            top: 4,
+                                            bottom: 4,
+                                            left: 6,
+                                            right: 6
+                                        },
+                                        font: {
+                                            weight: 'bold',
+                                            size: 9
+                                        },
+                                        anchor: 'end',
+                                        align: 'start',
+                                        offset: 0,
+                                        formatter: (value) => value.toFixed(2)
+                                    }
+                                }, {
+                                    // Tolerance (kuning) - PERUBAHAN LABEL
+                                    label: 'Tolerance {{ $tolerancePercentage }}%', // UBAH DARI: 'Standard'
+                                    data: @js($kompetensiOriginalStandardRatings),
+                                    fill: true,
+                                    backgroundColor: '#fafa05',
+                                    borderColor: '#e6d105',
+                                    pointBackgroundColor: '#e6d105',
+                                    pointBorderColor: '#fff',
+                                    pointHoverBackgroundColor: '#fff',
+                                    pointHoverBorderColor: '#e6d105',
+                                    borderWidth: 2.5,
+                                    pointRadius: 4,
+                                    pointBorderWidth: 2,
+                                    datalabels: {
+                                        color: '#000000',
+                                        backgroundColor: '#fafa05',
                                         borderRadius: 4,
                                         padding: {
                                             top: 4,
@@ -582,7 +586,74 @@
                                         offset: 6,
                                         formatter: (value) => value.toFixed(2)
                                     }
-                                }]
+                                }] : [
+                                    // Standar (hijau) - tidak ada perubahan
+                                    {
+                                        label: 'Standard',
+                                        data: @js($kompetensiStandardRatings),
+                                        fill: true,
+                                        backgroundColor: '#5db010', // HIJAU SOLID
+                                        borderColor: '#8fd006',
+                                        pointBackgroundColor: '#8fd006',
+                                        pointBorderColor: '#fff',
+                                        borderWidth: 2.5,
+                                        pointRadius: 4,
+                                        pointBorderWidth: 2,
+                                        datalabels: {
+                                            display: false,
+                                            color: '#000000',
+                                            backgroundColor: '#5db010',
+                                            borderRadius: 4,
+                                            padding: {
+                                                top: 4,
+                                                bottom: 4,
+                                                left: 6,
+                                                right: 6
+                                            },
+                                            font: {
+                                                weight: 'bold',
+                                                size: 10
+                                            },
+                                            anchor: 'center',
+                                            align: 'center',
+                                            offset: 6,
+                                            formatter: (value) => value.toFixed(2)
+                                        }
+                                    },
+                                    // Toleransi (kuning) - tidak ada perubahan
+                                    {
+                                        label: 'Tolerance {{ $tolerancePercentage }}%',
+                                        data: @js($kompetensiOriginalStandardRatings),
+                                        fill: true,
+                                        backgroundColor: '#fafa05', // KUNING SOLID
+                                        borderColor: '#e6d105',
+                                        pointBackgroundColor: '#e6d105',
+                                        pointBorderColor: '#fff',
+                                        borderWidth: 2,
+                                        pointRadius: 3,
+                                        pointBorderWidth: 2,
+                                        datalabels: {
+                                            display: false,
+                                            color: '#000000',
+                                            backgroundColor: '#fafa05',
+                                            borderRadius: 4,
+                                            padding: {
+                                                top: 4,
+                                                bottom: 4,
+                                                left: 6,
+                                                right: 6
+                                            },
+                                            font: {
+                                                weight: 'bold',
+                                                size: 9
+                                            },
+                                            anchor: 'end',
+                                            align: 'start',
+                                            offset: 0,
+                                            formatter: (value) => value.toFixed(2)
+                                        }
+                                    }
+                                ]
                             },
                             options: {
                                 scales: {
@@ -659,116 +730,86 @@
                             data: {
                                 labels: @js($generalLabels),
                                 datasets: hasParticipantData ? [{
-                                        label: @js($participant ? $participant->name : 'Peserta'),
-                                        data: @js($generalIndividualRatings),
-                                        fill: true,
-                                        backgroundColor: '#5db010',
-                                        borderColor: '#8fd006',
-                                        pointBackgroundColor: '#8fd006',
-                                        pointBorderColor: '#fff',
-                                        pointHoverBackgroundColor: '#fff',
-                                        pointHoverBorderColor: '#8fd006',
-                                        borderWidth: 2.5,
-                                        pointRadius: 4,
-                                        pointBorderWidth: 2,
-                                        datalabels: {
-                                            color: '#000000',
-                                            backgroundColor: '#5db010',
-                                            borderRadius: 4,
-                                            padding: {
-                                                top: 4,
-                                                bottom: 4,
-                                                left: 6,
-                                                right: 6
-                                            },
-                                            font: {
-                                                weight: 'bold',
-                                                size: 10
-                                            },
-                                            anchor: 'end',
-                                            align: 'end',
-                                            offset: 6,
-                                            formatter: (value) => value.toFixed(2)
-                                        }
-                                    },
-                                    {
-                                        label: 'Tolerance {{ $tolerancePercentage }}%',
-                                        data: @js($generalStandardRatings),
-                                        borderColor: '#b50505',
-                                        backgroundColor: '#b50505',
-                                        borderWidth: 2,
-                                        pointRadius: 3,
-                                        pointBackgroundColor: '#9a0404',
-                                        pointBorderColor: '#fff',
-                                        pointBorderWidth: 2,
-                                        fill: true,
-                                        datalabels: {
-                                            color: '#FFFFFF',
-                                            backgroundColor: '#b50505',
-                                            borderRadius: 4,
-                                            padding: {
-                                                top: 4,
-                                                bottom: 4,
-                                                left: 6,
-                                                right: 6
-                                            },
-                                            font: {
-                                                weight: 'bold',
-                                                size: 9
-                                            },
-                                            anchor: 'end',
-                                            align: 'start',
-                                            offset: 0,
-                                            formatter: (value) => value.toFixed(2)
-                                        }
-                                    },
-                                    {
-                                        label: 'Standard',
-                                        data: @js($generalOriginalStandardRatings),
-                                        fill: true,
-                                        backgroundColor: '#fafa05',
-                                        borderColor: '#e6d105',
-                                        pointBackgroundColor: '#e6d105',
-                                        pointBorderColor: '#fff',
-                                        pointHoverBackgroundColor: '#fff',
-                                        pointHoverBorderColor: '#e6d105',
-                                        borderWidth: 2.5,
-                                        pointRadius: 4,
-                                        pointBorderWidth: 2,
-                                        datalabels: {
-                                            color: '#000000',
-                                            backgroundColor: '#fafa05',
-                                            borderRadius: 4,
-                                            padding: {
-                                                top: 4,
-                                                bottom: 4,
-                                                left: 6,
-                                                right: 6
-                                            },
-                                            font: {
-                                                weight: 'bold',
-                                                size: 10
-                                            },
-                                            anchor: 'center',
-                                            align: 'center',
-                                            offset: 6,
-                                            formatter: (value) => value.toFixed(2)
-                                        }
-                                    }
-                                ] : [{
-                                    label: 'Standard',
-                                    data: @js($generalOriginalStandardRatings),
+                                    // Peserta (hijau)
+                                    label: @js($participant ? $participant->name : 'Peserta'),
+                                    data: @js($generalIndividualRatings),
                                     fill: true,
-                                    backgroundColor: '#5db010', // HIJAU SOLID
+                                    backgroundColor: '#5db010',
                                     borderColor: '#8fd006',
                                     pointBackgroundColor: '#8fd006',
                                     pointBorderColor: '#fff',
+                                    pointHoverBackgroundColor: '#fff',
+                                    pointHoverBorderColor: '#8fd006',
                                     borderWidth: 2.5,
                                     pointRadius: 4,
                                     pointBorderWidth: 2,
                                     datalabels: {
                                         color: '#000000',
-                                        backgroundColor: '#5db010', // Gunakan hijau
+                                        backgroundColor: '#5db010',
+                                        borderRadius: 4,
+                                        padding: {
+                                            top: 4,
+                                            bottom: 4,
+                                            left: 6,
+                                            right: 6
+                                        },
+                                        font: {
+                                            weight: 'bold',
+                                            size: 10
+                                        },
+                                        anchor: 'end',
+                                        align: 'end',
+                                        offset: 6,
+                                        formatter: (value) => value.toFixed(2)
+                                    }
+                                }, {
+                                    // Standard (merah) - PERUBAHAN LABEL
+                                    label: 'Standard', // UBAH DARI: 'Tolerance {{ $tolerancePercentage }}%'
+                                    data: @js($generalStandardRatings),
+                                    borderColor: '#b50505',
+                                    backgroundColor: '#b50505',
+                                    borderWidth: 2,
+                                    pointRadius: 3,
+                                    pointBackgroundColor: '#9a0404',
+                                    pointBorderColor: '#fff',
+                                    pointBorderWidth: 2,
+                                    fill: true,
+                                    datalabels: {
+                                        color: '#FFFFFF',
+                                        backgroundColor: '#b50505',
+                                        borderRadius: 4,
+                                        padding: {
+                                            top: 4,
+                                            bottom: 4,
+                                            left: 6,
+                                            right: 6
+                                        },
+                                        font: {
+                                            weight: 'bold',
+                                            size: 9
+                                        },
+                                        anchor: 'end',
+                                        align: 'start',
+                                        offset: 0,
+                                        formatter: (value) => value.toFixed(2)
+                                    }
+                                }, {
+                                    // Tolerance (kuning) - PERUBAHAN LABEL
+                                    label: 'Tolerance {{ $tolerancePercentage }}%', // UBAH DARI: 'Standard'
+                                    data: @js($generalOriginalStandardRatings),
+                                    fill: true,
+                                    backgroundColor: '#fafa05',
+                                    borderColor: '#e6d105',
+                                    pointBackgroundColor: '#e6d105',
+                                    pointBorderColor: '#fff',
+                                    pointHoverBackgroundColor: '#fff',
+                                    pointHoverBorderColor: '#e6d105',
+                                    borderWidth: 2.5,
+                                    pointRadius: 4,
+                                    pointBorderWidth: 2,
+                                    datalabels: {
+                                        color: '#000000',
+                                        backgroundColor: '#fafa05',
                                         borderRadius: 4,
                                         padding: {
                                             top: 4,
@@ -785,7 +826,74 @@
                                         offset: 6,
                                         formatter: (value) => value.toFixed(2)
                                     }
-                                }]
+                                }] : [
+                                    // Standar (hijau) - tidak ada perubahan
+                                    {
+                                        label: 'Standard',
+                                        data: @js($generalStandardRatings),
+                                        fill: true,
+                                        backgroundColor: '#5db010', // HIJAU SOLID
+                                        borderColor: '#8fd006',
+                                        pointBackgroundColor: '#8fd006',
+                                        pointBorderColor: '#fff',
+                                        borderWidth: 2.5,
+                                        pointRadius: 4,
+                                        pointBorderWidth: 2,
+                                        datalabels: {
+                                            display: false,
+                                            color: '#000000',
+                                            backgroundColor: '#5db010',
+                                            borderRadius: 4,
+                                            padding: {
+                                                top: 4,
+                                                bottom: 4,
+                                                left: 6,
+                                                right: 6
+                                            },
+                                            font: {
+                                                weight: 'bold',
+                                                size: 10
+                                            },
+                                            anchor: 'center',
+                                            align: 'center',
+                                            offset: 6,
+                                            formatter: (value) => value.toFixed(2)
+                                        }
+                                    },
+                                    // Toleransi (kuning) - tidak ada perubahan
+                                    {
+                                        label: 'Tolerance {{ $tolerancePercentage }}%',
+                                        data: @js($generalOriginalStandardRatings),
+                                        fill: true,
+                                        backgroundColor: '#fafa05', // KUNING SOLID
+                                        borderColor: '#e6d105',
+                                        pointBackgroundColor: '#e6d105',
+                                        pointBorderColor: '#fff',
+                                        borderWidth: 2,
+                                        pointRadius: 3,
+                                        pointBorderWidth: 2,
+                                        datalabels: {
+                                            display: false,
+                                            color: '#000000',
+                                            backgroundColor: '#fafa05',
+                                            borderRadius: 4,
+                                            padding: {
+                                                top: 4,
+                                                bottom: 4,
+                                                left: 6,
+                                                right: 6
+                                            },
+                                            font: {
+                                                weight: 'bold',
+                                                size: 9
+                                            },
+                                            anchor: 'end',
+                                            align: 'start',
+                                            offset: 0,
+                                            formatter: (value) => value.toFixed(2)
+                                        }
+                                    }
+                                ]
                             },
                             options: {
                                 scales: {
@@ -901,15 +1009,19 @@
                         chart.data.labels = data.labels;
 
                         if (hasParticipant) {
-                            // Update all 3 datasets (participant, tolerance, standard)
+                            // Update ketiga dataset (peserta, standar, toleransi)
                             chart.data.datasets[0].label = participantName || 'Peserta';
                             chart.data.datasets[0].data = data.individualRatings;
-                            chart.data.datasets[1].label = `Tolerance ${tolerancePercentage}%`;
-                            chart.data.datasets[1].data = data.standardRatings;
-                            chart.data.datasets[2].data = data.originalStandardRatings;
+                            chart.data.datasets[1].label = 'Standard'; // UBAH DARI: `Tolerance ${tolerancePercentage}%`
+                            chart.data.datasets[1].data = data.standardRatings; // nilai setelah toleransi
+                            chart.data.datasets[2].label = `Tolerance ${tolerancePercentage}%`; // UBAH DARI: 'Standard'
+                            chart.data.datasets[2].data = data.originalStandardRatings; // nilai asli
                         } else {
-                            // Update only standard dataset
-                            chart.data.datasets[0].data = data.originalStandardRatings;
+                            // Update standar dan toleransi (tidak ada peserta) - tidak ada perubahan
+                            chart.data.datasets[0].label = `Standard`;
+                            chart.data.datasets[0].data = data.standardRatings;
+                            chart.data.datasets[1].label = `Tolerance ${tolerancePercentage}%`;
+                            chart.data.datasets[1].data = data.originalStandardRatings;
                         }
 
                         chart.update('active');
