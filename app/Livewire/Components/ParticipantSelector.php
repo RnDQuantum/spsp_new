@@ -156,6 +156,18 @@ class ParticipantSelector extends Component
         return collect($this->availableParticipants)->contains('id', $id);
     }
 
+    /**
+     * Reset participant filter
+     */
+    public function resetParticipant(): void
+    {
+        $this->participantId = null;
+        session()->forget('filter.participant_id');
+
+        // Dispatch event to parent component
+        $this->dispatch('participant-reset');
+    }
+
     public function render()
     {
         return view('livewire.components.participant-selector');

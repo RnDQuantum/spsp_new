@@ -3,13 +3,13 @@
 namespace App\Livewire\Pages;
 
 use App\Models\Aspect;
-use Livewire\Component;
-use App\Models\Participant;
-use App\Models\CategoryType;
-use Livewire\Attributes\Layout;
 use App\Models\AspectAssessment;
 use App\Models\CategoryAssessment;
+use App\Models\CategoryType;
+use App\Models\Participant;
 use Illuminate\Support\Facades\Log;
+use Livewire\Attributes\Layout;
+use Livewire\Component;
 
 #[Layout('components.layouts.app', ['title' => 'Dashboard'])]
 class Dashboard extends Component
@@ -80,15 +80,16 @@ class Dashboard extends Component
         'event-selected' => 'handleEventSelected',
         'position-selected' => 'handlePositionSelected',
         'participant-selected' => 'handleParticipantSelected',
+        'participant-reset' => 'handleParticipantReset',
         'tolerance-updated' => 'handleToleranceUpdate',
     ];
 
     public function mount(): void
     {
         // Generate static chart IDs (same across re-renders)
-        $this->potensiChartId = 'potensiSpider' . uniqid();
-        $this->kompetensiChartId = 'kompetensiSpider' . uniqid();
-        $this->generalChartId = 'generalSpider' . uniqid();
+        $this->potensiChartId = 'potensiSpider'.uniqid();
+        $this->kompetensiChartId = 'kompetensiSpider'.uniqid();
+        $this->generalChartId = 'generalSpider'.uniqid();
 
         // Load tolerance from session
         $this->tolerancePercentage = session('individual_report.tolerance', 10);
@@ -168,6 +169,20 @@ class Dashboard extends Component
             $this->loadDashboardData();
             $this->dispatchChartUpdate();
         }
+    }
+
+    /**
+     * Handle participant reset
+     */
+    public function handleParticipantReset(): void
+    {
+        Log::info('Dashboard: handleParticipantReset called');
+
+        // Show loading state
+        $this->showLoading('Mereset filter peserta dan memuat data standar...');
+
+        // Trigger reload to show standard data
+        $this->js('setTimeout(() => window.location.reload(), 800)');
     }
 
     /**
