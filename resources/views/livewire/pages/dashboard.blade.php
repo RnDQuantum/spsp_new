@@ -261,6 +261,7 @@
                                         pointRadius: 4,
                                         pointBorderWidth: 2,
                                         datalabels: {
+                                            display: false,
                                             color: '#000000',
                                             backgroundColor: '#5db010',
                                             borderRadius: 4,
@@ -293,6 +294,7 @@
                                         pointBorderWidth: 2,
                                         fill: true,
                                         datalabels: {
+                                            display: false,
                                             color: '#FFFFFF',
                                             backgroundColor: '#b50505',
                                             borderRadius: 4,
@@ -327,6 +329,7 @@
                                         pointRadius: 4,
                                         pointBorderWidth: 2,
                                         datalabels: {
+                                            display: false,
                                             color: '#000000',
                                             backgroundColor: '#fafa05',
                                             borderRadius: 4,
@@ -504,6 +507,7 @@
                                     pointRadius: 4,
                                     pointBorderWidth: 2,
                                     datalabels: {
+                                        display: false,
                                         color: '#000000',
                                         backgroundColor: '#5db010',
                                         borderRadius: 4,
@@ -535,6 +539,7 @@
                                     pointBorderWidth: 2,
                                     fill: true,
                                     datalabels: {
+                                        display: false,
                                         color: '#FFFFFF',
                                         backgroundColor: '#b50505',
                                         borderRadius: 4,
@@ -568,6 +573,7 @@
                                     pointRadius: 4,
                                     pointBorderWidth: 2,
                                     datalabels: {
+                                        display: false,
                                         color: '#000000',
                                         backgroundColor: '#fafa05',
                                         borderRadius: 4,
@@ -744,6 +750,7 @@
                                     pointRadius: 4,
                                     pointBorderWidth: 2,
                                     datalabels: {
+                                        display: false,
                                         color: '#000000',
                                         backgroundColor: '#5db010',
                                         borderRadius: 4,
@@ -775,6 +782,7 @@
                                     pointBorderWidth: 2,
                                     fill: true,
                                     datalabels: {
+                                        display: false,
                                         color: '#FFFFFF',
                                         backgroundColor: '#b50505',
                                         borderRadius: 4,
@@ -808,6 +816,7 @@
                                     pointRadius: 4,
                                     pointBorderWidth: 2,
                                     datalabels: {
+                                        display: false,
                                         color: '#000000',
                                         backgroundColor: '#fafa05',
                                         borderRadius: 4,
