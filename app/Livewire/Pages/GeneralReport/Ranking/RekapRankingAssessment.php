@@ -19,7 +19,7 @@ class RekapRankingAssessment extends Component
 
     public int $kompetensiWeight = 0;
 
-    public int $perPage = 10;
+    public $perPage = 10; // Changed from int to allow 'all'
 
     public int $tolerancePercentage = 10;
 
@@ -63,6 +63,11 @@ class RekapRankingAssessment extends Component
 
         // Prepare chart data
         $this->prepareChartData();
+    }
+
+    public function updatedPerPage(): void
+    {
+        $this->resetPage();
     }
 
     public function handleEventSelected(?string $eventCode): void
@@ -292,67 +297,126 @@ class RekapRankingAssessment extends Component
                             ->orderByDesc('total_weighted_individual')
                             ->orderBy('participant_id');
 
-                        /** @var LengthAwarePaginator $paginator */
-                        $paginator = $orderingQuery->paginate($this->perPage)->withQueryString();
+                        // Handle "all" perPage option
+                        if ($this->perPage === 'all') {
+                            $allData = $orderingQuery->get();
+                            $items = collect($allData)->values()->map(function ($row, int $index) {
+                                $participant = DB::table('participants')->where('id', $row->participant_id)->first();
 
-                        $currentPage = (int) $paginator->currentPage();
-                        $perPage = (int) $paginator->perPage();
-                        $startRank = ($currentPage - 1) * $perPage;
+                                // Get original values from database
+                                $potInd = (float) $row->potensi_individual_score;
+                                $potStd = (float) $row->potensi_standard_score;
+                                $komInd = (float) $row->kompetensi_individual_score;
+                                $komStd = (float) $row->kompetensi_standard_score;
 
-                        $items = collect($paginator->items())->values()->map(function ($row, int $index) use ($startRank) {
-                            $participant = DB::table('participants')->where('id', $row->participant_id)->first();
+                                // Calculate adjusted standard based on tolerance
+                                $toleranceFactor = 1 - ($this->tolerancePercentage / 100);
+                                $adjustedPotStd = $potStd * $toleranceFactor;
+                                $adjustedKomStd = $komStd * $toleranceFactor;
 
-                            // Get original values from database
-                            $potInd = (float) $row->potensi_individual_score;
-                            $potStd = (float) $row->potensi_standard_score;
-                            $komInd = (float) $row->kompetensi_individual_score;
-                            $komStd = (float) $row->kompetensi_standard_score;
+                                // Individual scores
+                                $totalInd = $potInd + $komInd;
+                                $weightedPot = $potInd * ($this->potensiWeight / 100);
+                                $weightedKom = $komInd * ($this->kompetensiWeight / 100);
+                                $totalWeightedInd = $weightedPot + $weightedKom;
 
-                            // Calculate adjusted standard based on tolerance
-                            $toleranceFactor = 1 - ($this->tolerancePercentage / 100);
-                            $adjustedPotStd = $potStd * $toleranceFactor;
-                            $adjustedKomStd = $komStd * $toleranceFactor;
+                                // Adjusted standard scores
+                                $weightedPotStd = $adjustedPotStd * ($this->potensiWeight / 100);
+                                $weightedKomStd = $adjustedKomStd * ($this->kompetensiWeight / 100);
+                                $totalWeightedStd = $weightedPotStd + $weightedKomStd;
 
-                            // Individual scores
-                            $totalInd = $potInd + $komInd;
-                            $weightedPot = $potInd * ($this->potensiWeight / 100);
-                            $weightedKom = $komInd * ($this->kompetensiWeight / 100);
-                            $totalWeightedInd = $weightedPot + $weightedKom;
+                                // Calculate original gap (at tolerance 0)
+                                $originalWeightedStd = $potStd * ($this->potensiWeight / 100) + $komStd * ($this->kompetensiWeight / 100);
+                                $originalGap = $totalWeightedInd - $originalWeightedStd;
 
-                            // Adjusted standard scores
-                            $weightedPotStd = $adjustedPotStd * ($this->potensiWeight / 100);
-                            $weightedKomStd = $adjustedKomStd * ($this->kompetensiWeight / 100);
-                            $totalWeightedStd = $weightedPotStd + $weightedKomStd;
+                                // Gap calculation based on adjusted standard
+                                $adjustedGap = $totalWeightedInd - $totalWeightedStd;
+                                $conclusion = $this->getConclusionText($originalGap, $adjustedGap);
 
-                            // Calculate original gap (at tolerance 0)
-                            $originalWeightedStd = $potStd * ($this->potensiWeight / 100) + $komStd * ($this->kompetensiWeight / 100);
-                            $originalGap = $totalWeightedInd - $originalWeightedStd;
+                                return [
+                                    'rank' => $index + 1,
+                                    'name' => $participant->name ?? '-',
+                                    'psy_individual' => round($potInd, 2),
+                                    'mc_individual' => round($komInd, 2),
+                                    'total_individual' => round($totalInd, 2),
+                                    'psy_weighted' => round($weightedPot, 2),
+                                    'mc_weighted' => round($weightedKom, 2),
+                                    'total_weighted_individual' => round($totalWeightedInd, 2),
+                                    'gap' => round($adjustedGap, 2),
+                                    'conclusion' => $conclusion,
+                                ];
+                            })->all();
 
-                            // Gap calculation based on adjusted standard
-                            $adjustedGap = $totalWeightedInd - $totalWeightedStd;
-                            $conclusion = $this->getConclusionText($originalGap, $adjustedGap);
+                            $rows = new LengthAwarePaginator(
+                                $items,
+                                count($items),
+                                count($items),
+                                1,
+                                ['path' => request()->url(), 'query' => request()->query()]
+                            );
+                        } else {
+                            /** @var LengthAwarePaginator $paginator */
+                            $paginator = $orderingQuery->paginate((int)$this->perPage)->withQueryString();
 
-                            return [
-                                'rank' => $startRank + $index + 1,
-                                'name' => $participant->name ?? '-',
-                                'psy_individual' => round($potInd, 2),
-                                'mc_individual' => round($komInd, 2),
-                                'total_individual' => round($totalInd, 2),
-                                'psy_weighted' => round($weightedPot, 2),
-                                'mc_weighted' => round($weightedKom, 2),
-                                'total_weighted_individual' => round($totalWeightedInd, 2),
-                                'gap' => round($adjustedGap, 2),
-                                'conclusion' => $conclusion,
-                            ];
-                        })->all();
+                            $currentPage = (int) $paginator->currentPage();
+                            $perPage = (int) $paginator->perPage();
+                            $startRank = ($currentPage - 1) * $perPage;
 
-                        $rows = new LengthAwarePaginator(
-                            $items,
-                            $paginator->total(),
-                            $paginator->perPage(),
-                            $paginator->currentPage(),
-                            ['path' => $paginator->path(), 'query' => request()->query()]
-                        );
+                            $items = collect($paginator->items())->values()->map(function ($row, int $index) use ($startRank) {
+                                $participant = DB::table('participants')->where('id', $row->participant_id)->first();
+
+                                // Get original values from database
+                                $potInd = (float) $row->potensi_individual_score;
+                                $potStd = (float) $row->potensi_standard_score;
+                                $komInd = (float) $row->kompetensi_individual_score;
+                                $komStd = (float) $row->kompetensi_standard_score;
+
+                                // Calculate adjusted standard based on tolerance
+                                $toleranceFactor = 1 - ($this->tolerancePercentage / 100);
+                                $adjustedPotStd = $potStd * $toleranceFactor;
+                                $adjustedKomStd = $komStd * $toleranceFactor;
+
+                                // Individual scores
+                                $totalInd = $potInd + $komInd;
+                                $weightedPot = $potInd * ($this->potensiWeight / 100);
+                                $weightedKom = $komInd * ($this->kompetensiWeight / 100);
+                                $totalWeightedInd = $weightedPot + $weightedKom;
+
+                                // Adjusted standard scores
+                                $weightedPotStd = $adjustedPotStd * ($this->potensiWeight / 100);
+                                $weightedKomStd = $adjustedKomStd * ($this->kompetensiWeight / 100);
+                                $totalWeightedStd = $weightedPotStd + $weightedKomStd;
+
+                                // Calculate original gap (at tolerance 0)
+                                $originalWeightedStd = $potStd * ($this->potensiWeight / 100) + $komStd * ($this->kompetensiWeight / 100);
+                                $originalGap = $totalWeightedInd - $originalWeightedStd;
+
+                                // Gap calculation based on adjusted standard
+                                $adjustedGap = $totalWeightedInd - $totalWeightedStd;
+                                $conclusion = $this->getConclusionText($originalGap, $adjustedGap);
+
+                                return [
+                                    'rank' => $startRank + $index + 1,
+                                    'name' => $participant->name ?? '-',
+                                    'psy_individual' => round($potInd, 2),
+                                    'mc_individual' => round($komInd, 2),
+                                    'total_individual' => round($totalInd, 2),
+                                    'psy_weighted' => round($weightedPot, 2),
+                                    'mc_weighted' => round($weightedKom, 2),
+                                    'total_weighted_individual' => round($totalWeightedInd, 2),
+                                    'gap' => round($adjustedGap, 2),
+                                    'conclusion' => $conclusion,
+                                ];
+                            })->all();
+
+                            $rows = new LengthAwarePaginator(
+                                $items,
+                                $paginator->total(),
+                                $paginator->perPage(),
+                                $paginator->currentPage(),
+                                ['path' => $paginator->path(), 'query' => request()->query()]
+                            );
+                        }
                     }
                 }
             }
