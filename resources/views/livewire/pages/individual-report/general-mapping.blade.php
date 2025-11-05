@@ -385,6 +385,7 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                                 pointRadius: 4,
                                 hidden: window.ratingVisibility_{{ $chartId }}[0],
                                 datalabels: {
+                                    display: false,
                                     color: '#000000',
                                     backgroundColor: '#5db010',
                                     borderRadius: 4,
@@ -409,6 +410,7 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                                 pointRadius: 3,
                                 hidden: window.ratingVisibility_{{ $chartId }}[1],
                                 datalabels: {
+                                    display: false,
                                     color: '#FFFFFF',
                                     backgroundColor: '#b50505',
                                     borderRadius: 4,
@@ -434,6 +436,7 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                                 pointRadius: 4,
                                 hidden: window.ratingVisibility_{{ $chartId }}[2],
                                 datalabels: {
+                                    display: false,
                                     color: '#000000',
                                     backgroundColor: '#fafa05',
                                     borderRadius: 4,
@@ -477,11 +480,12 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                                             color: colors.ticks,
                                             backdropColor: 'transparent',
                                             showLabelBackdrop: false,
+                                            display: false, // SEMBUNYIKAN TICKS DEFAULT
                                             font: {
-                                                size: 11,
+                                                size: 12,
                                                 weight: 'bold'
                                             },
-                                            z: 2 // Tambahkan z-index untuk ticks
+                                            z: 2
                                         },
                                         pointLabels: {
                                             font: {
@@ -489,19 +493,53 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                                                 weight: '600'
                                             },
                                             color: colors.pointLabels,
-                                            z: 3 // Tambahkan z-index untuk point labels
+                                            padding: 15,
+                                            z: 3
                                         },
                                         grid: {
                                             color: colors.grid,
-                                            z: 1 // Tambahkan z-index untuk grid
+                                            z: 1
                                         },
                                         angleLines: {
                                             color: colors.angleLines,
-                                            z: 1 // Tambahkan z-index untuk angle lines
+                                            z: 1
                                         }
                                     }
                                 }
-                            }
+                            },
+                            plugins: [{
+                                id: 'shiftTicks',
+                                afterDraw: (chart) => {
+                                    const {
+                                        ctx,
+                                        scales
+                                    } = chart;
+                                    const scale = scales.r;
+                                    const ticks = scale.ticks;
+                                    const yCenter = scale.yCenter;
+                                    const xCenter = scale.xCenter;
+
+                                    ctx.save();
+                                    ctx.font = `bold ${scale.options.ticks.font.size}px sans-serif`;
+                                    ctx.fillStyle = scale.options.ticks.color || '#000';
+                                    ctx.textAlign = 'center';
+                                    ctx.textBaseline = 'middle';
+
+                                    // Offset untuk menggeser posisi
+                                    const offsetX = 10; // geser ke kanan
+                                    const offsetY = 0; // tidak geser vertikal
+
+                                    ticks.forEach((tick) => {
+                                        const value = tick.value;
+                                        const radius = scale.getDistanceFromCenterForValue(value);
+                                        const labelY = yCenter - radius - offsetY;
+                                        const labelX = xCenter + offsetX;
+                                        ctx.fillText(value, labelX, labelY);
+                                    });
+
+                                    ctx.restore();
+                                }
+                            }]
                         });
 
                         console.log('✅ Rating chart initialized');
@@ -685,6 +723,7 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                                 pointRadius: 4,
                                 hidden: window.scoreVisibility_{{ $chartId }}[0],
                                 datalabels: {
+                                    display: false,
                                     color: '#000000',
                                     backgroundColor: '#5db010',
                                     borderRadius: 4,
@@ -709,6 +748,7 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                                 pointRadius: 3,
                                 hidden: window.scoreVisibility_{{ $chartId }}[1],
                                 datalabels: {
+                                    display: false,
                                     color: '#FFFFFF',
                                     backgroundColor: '#b50505',
                                     borderRadius: 4,
@@ -734,6 +774,7 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                                 pointRadius: 4,
                                 hidden: window.scoreVisibility_{{ $chartId }}[2],
                                 datalabels: {
+                                    display: false,
                                     color: '#000000',
                                     backgroundColor: '#fafa05',
                                     borderRadius: 4,
@@ -777,31 +818,66 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                                             color: colors.ticks,
                                             backdropColor: 'transparent',
                                             showLabelBackdrop: false,
+                                            display: false, // SEMBUNYIKAN TICKS DEFAULT
                                             font: {
                                                 size: 11,
                                                 weight: 'bold'
                                             },
-                                            z: 2 // Tambahkan z-index untuk ticks
+                                            z: 2
                                         },
                                         pointLabels: {
                                             font: {
-                                                size: 11,
-                                                weight: '600'
+                                                size: 14,
+                                                weight: '600',
                                             },
                                             color: colors.pointLabels,
-                                            z: 3 // Tambahkan z-index untuk point labels
+                                            padding: 15,
+                                            z: 3
                                         },
                                         grid: {
                                             color: colors.grid,
-                                            z: 1 // Tambahkan z-index untuk grid
+                                            z: 1
                                         },
                                         angleLines: {
                                             color: colors.angleLines,
-                                            z: 1 // Tambahkan z-index untuk angle lines
+                                            z: 1
                                         }
                                     }
                                 }
-                            }
+                            },
+                            plugins: [{
+                                id: 'shiftTicks',
+                                afterDraw: (chart) => {
+                                    const {
+                                        ctx,
+                                        scales
+                                    } = chart;
+                                    const scale = scales.r;
+                                    const ticks = scale.ticks;
+                                    const yCenter = scale.yCenter;
+                                    const xCenter = scale.xCenter;
+
+                                    ctx.save();
+                                    ctx.font = `bold ${scale.options.ticks.font.size}px sans-serif`;
+                                    ctx.fillStyle = scale.options.ticks.color || '#000';
+                                    ctx.textAlign = 'center';
+                                    ctx.textBaseline = 'middle';
+
+                                    // Offset untuk menggeser posisi
+                                    const offsetX = 10; // geser ke kanan
+                                    const offsetY = 0; // tidak geser vertikal
+
+                                    ticks.forEach((tick) => {
+                                        const value = tick.value;
+                                        const radius = scale.getDistanceFromCenterForValue(value);
+                                        const labelY = yCenter - radius - offsetY;
+                                        const labelX = xCenter + offsetX;
+                                        ctx.fillText(value, labelX, labelY);
+                                    });
+
+                                    ctx.restore();
+                                }
+                            }]
                         });
 
                         console.log('✅ Score chart initialized');
