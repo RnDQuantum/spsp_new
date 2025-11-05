@@ -128,10 +128,11 @@
                     data: {
                         labels: @js($potensiLabels),
                         datasets: [{
+                                // LAYER 1: PESERTA (HIJAU) - Dataset 0
                                 label: '{{ $participant->name }}',
                                 data: @js($potensiIndividualRatings),
                                 fill: true,
-                                backgroundColor: 'rgba(93, 176, 16, 0.7)', // Semi-transparan (green)
+                                backgroundColor: '#5db010', // ← UBAH dari rgba(..., 0.7) ke SOLID
                                 borderColor: '#8fd006',
                                 pointBackgroundColor: '#8fd006',
                                 pointBorderColor: '#fff',
@@ -139,6 +140,7 @@
                                 pointRadius: 4,
                                 pointBorderWidth: 2,
                                 datalabels: {
+                                    display: false,
                                     color: '#000000',
                                     backgroundColor: '#5db010',
                                     borderRadius: 4,
@@ -154,9 +156,10 @@
                                 }
                             },
                             {
-                                label: 'Tolerance {{ $tolerancePercentage }}%',
+                                // LAYER 2: STANDARD (MERAH) - Dataset 1
+                                label: 'Standard', // ← UBAH dari 'Tolerance {{ $tolerancePercentage }}%'
                                 data: @js($potensiStandardRatings),
-                                backgroundColor: 'rgba(181, 5, 5, 0.7)', // Semi-transparan (red)
+                                backgroundColor: '#b50505', // ← UBAH dari rgba(..., 0.7) ke SOLID
                                 borderColor: '#b50505',
                                 borderWidth: 2,
                                 pointRadius: 3,
@@ -165,6 +168,7 @@
                                 pointBorderWidth: 2,
                                 fill: true,
                                 datalabels: {
+                                    display: false,
                                     color: '#FFFFFF',
                                     backgroundColor: '#b50505',
                                     borderRadius: 4,
@@ -179,10 +183,11 @@
                                 }
                             },
                             {
-                                label: 'Standard',
+                                // LAYER 3: TOLERANCE (KUNING) - Dataset 2
+                                label: 'Tolerance {{ $tolerancePercentage }}%', // ← UBAH dari 'Standard'
                                 data: @js($potensiOriginalStandardRatings),
                                 fill: true,
-                                backgroundColor: 'rgba(250, 250, 5, 0.7)', // Semi-transparan (yellow)
+                                backgroundColor: '#fafa05', // ← UBAH dari rgba(..., 0.7) ke SOLID
                                 borderColor: '#e6d105',
                                 pointBackgroundColor: '#e6d105',
                                 pointBorderColor: '#fff',
@@ -190,6 +195,7 @@
                                 pointRadius: 4,
                                 pointBorderWidth: 2,
                                 datalabels: {
+                                    display: false,
                                     color: '#000000',
                                     backgroundColor: '#fafa05',
                                     borderRadius: 4,
@@ -230,6 +236,7 @@
                                 min: 0,
                                 max: 5,
                                 ticks: {
+                                    display: false,
                                     stepSize: 1,
                                     color: colors.ticks,
                                     font: {
@@ -258,7 +265,39 @@
                                 }
                             }
                         }
-                    }
+                    },
+                    plugins: [{
+                        id: 'shiftTicks',
+                        afterDraw: (chart) => {
+                            const {
+                                ctx,
+                                scales
+                            } = chart;
+                            const scale = scales.r;
+                            const ticks = scale.ticks;
+                            const yCenter = scale.yCenter;
+                            const xCenter = scale.xCenter;
+
+                            ctx.save();
+                            ctx.font = `bold ${scale.options.ticks.font.size}px sans-serif`;
+                            ctx.fillStyle = scale.options.ticks.color || '#000';
+                            ctx.textAlign = 'center';
+                            ctx.textBaseline = 'middle';
+
+                            const offsetX = 10;
+                            const offsetY = 0;
+
+                            ticks.forEach((tick) => {
+                                const value = tick.value;
+                                const radius = scale.getDistanceFromCenterForValue(value);
+                                const labelY = yCenter - radius - offsetY;
+                                const labelX = xCenter + offsetX;
+                                ctx.fillText(value, labelX, labelY);
+                            });
+
+                            ctx.restore();
+                        }
+                    }]
                 });
             }
 
@@ -283,7 +322,7 @@
                                 label: '{{ $participant->name }}',
                                 data: @js($kompetensiIndividualRatings),
                                 fill: true,
-                                backgroundColor: 'rgba(93, 176, 16, 0.7)', // Semi-transparan (green)
+                                backgroundColor: '#5db010', // ← SOLID
                                 borderColor: '#8fd006',
                                 pointBackgroundColor: '#8fd006',
                                 pointBorderColor: '#fff',
@@ -291,6 +330,7 @@
                                 pointRadius: 4,
                                 pointBorderWidth: 2,
                                 datalabels: {
+                                    display: false,
                                     color: '#000000',
                                     backgroundColor: '#5db010',
                                     borderRadius: 4,
@@ -306,9 +346,9 @@
                                 }
                             },
                             {
-                                label: 'Tolerance {{ $tolerancePercentage }}%',
+                                label: 'Standard', // ← UBAH
                                 data: @js($kompetensiStandardRatings),
-                                backgroundColor: 'rgba(181, 5, 5, 0.7)', // Semi-transparan (red)
+                                backgroundColor: '#b50505', // ← SOLID
                                 borderColor: '#b50505',
                                 borderWidth: 2,
                                 pointRadius: 3,
@@ -317,6 +357,7 @@
                                 pointBorderWidth: 2,
                                 fill: true,
                                 datalabels: {
+                                    display: false,
                                     color: '#FFFFFF',
                                     backgroundColor: '#b50505',
                                     borderRadius: 4,
@@ -331,10 +372,10 @@
                                 }
                             },
                             {
-                                label: 'Standard',
+                                label: 'Tolerance {{ $tolerancePercentage }}%', // ← UBAH
                                 data: @js($kompetensiOriginalStandardRatings),
                                 fill: true,
-                                backgroundColor: 'rgba(250, 250, 5, 0.7)', // Semi-transparan (yellow)
+                                backgroundColor: '#fafa05', // ← SOLID
                                 borderColor: '#e6d105',
                                 pointBackgroundColor: '#e6d105',
                                 pointBorderColor: '#fff',
@@ -342,6 +383,7 @@
                                 pointRadius: 4,
                                 pointBorderWidth: 2,
                                 datalabels: {
+                                    display: false,
                                     color: '#000000',
                                     backgroundColor: '#fafa05',
                                     borderRadius: 4,
@@ -382,6 +424,7 @@
                                 min: 0,
                                 max: 5,
                                 ticks: {
+                                    display: false,
                                     stepSize: 1,
                                     color: colors.ticks,
                                     font: {
@@ -410,7 +453,39 @@
                                 }
                             }
                         }
-                    }
+                    },
+                    plugins: [{
+                        id: 'shiftTicks',
+                        afterDraw: (chart) => {
+                            const {
+                                ctx,
+                                scales
+                            } = chart;
+                            const scale = scales.r;
+                            const ticks = scale.ticks;
+                            const yCenter = scale.yCenter;
+                            const xCenter = scale.xCenter;
+
+                            ctx.save();
+                            ctx.font = `bold ${scale.options.ticks.font.size}px sans-serif`;
+                            ctx.fillStyle = scale.options.ticks.color || '#000';
+                            ctx.textAlign = 'center';
+                            ctx.textBaseline = 'middle';
+
+                            const offsetX = 10;
+                            const offsetY = 0;
+
+                            ticks.forEach((tick) => {
+                                const value = tick.value;
+                                const radius = scale.getDistanceFromCenterForValue(value);
+                                const labelY = yCenter - radius - offsetY;
+                                const labelX = xCenter + offsetX;
+                                ctx.fillText(value, labelX, labelY);
+                            });
+
+                            ctx.restore();
+                        }
+                    }]
                 });
             }
 
@@ -435,7 +510,7 @@
                                 label: '{{ $participant->name }}',
                                 data: @js($generalIndividualRatings),
                                 fill: true,
-                                backgroundColor: 'rgba(93, 176, 16, 0.7)', // Semi-transparan (green)
+                                backgroundColor: '#5db010', // Semi-transparan (green)
                                 borderColor: '#8fd006',
                                 pointBackgroundColor: '#8fd006',
                                 pointBorderColor: '#fff',
@@ -443,6 +518,7 @@
                                 pointRadius: 4,
                                 pointBorderWidth: 2,
                                 datalabels: {
+                                    display: false,
                                     color: '#000000',
                                     backgroundColor: '#5db010',
                                     borderRadius: 4,
@@ -458,9 +534,9 @@
                                 }
                             },
                             {
-                                label: 'Tolerance {{ $tolerancePercentage }}%',
+                                label: 'Standard', // ← UBAH
                                 data: @js($generalStandardRatings),
-                                backgroundColor: 'rgba(181, 5, 5, 0.7)', // Semi-transparan (red)
+                                backgroundColor: '#b50505', // Semi-transparan (red)
                                 borderColor: '#b50505',
                                 borderWidth: 2,
                                 pointRadius: 3,
@@ -469,6 +545,7 @@
                                 pointBorderWidth: 2,
                                 fill: true,
                                 datalabels: {
+                                    display: false,
                                     color: '#FFFFFF',
                                     backgroundColor: '#b50505',
                                     borderRadius: 4,
@@ -483,10 +560,9 @@
                                 }
                             },
                             {
-                                label: 'Standard',
+                                label: 'Tolerance {{ $tolerancePercentage }}%', // ← UBAH
                                 data: @js($generalOriginalStandardRatings),
-                                fill: true,
-                                backgroundColor: 'rgba(250, 250, 5, 0.7)', // Semi-transparan (yellow)
+                                backgroundColor: '#fafa05', // Semi-transparan (yellow)
                                 borderColor: '#e6d105',
                                 pointBackgroundColor: '#e6d105',
                                 pointBorderColor: '#fff',
@@ -494,6 +570,7 @@
                                 pointRadius: 4,
                                 pointBorderWidth: 2,
                                 datalabels: {
+                                    display: false,
                                     color: '#000000',
                                     backgroundColor: '#fafa05',
                                     borderRadius: 4,
@@ -534,6 +611,7 @@
                                 min: 0,
                                 max: 5,
                                 ticks: {
+                                    display: false,
                                     stepSize: 1,
                                     color: colors.ticks,
                                     font: {
@@ -562,7 +640,39 @@
                                 }
                             }
                         }
-                    }
+                    },
+                    plugins: [{
+                        id: 'shiftTicks',
+                        afterDraw: (chart) => {
+                            const {
+                                ctx,
+                                scales
+                            } = chart;
+                            const scale = scales.r;
+                            const ticks = scale.ticks;
+                            const yCenter = scale.yCenter;
+                            const xCenter = scale.xCenter;
+
+                            ctx.save();
+                            ctx.font = `bold ${scale.options.ticks.font.size}px sans-serif`;
+                            ctx.fillStyle = scale.options.ticks.color || '#000';
+                            ctx.textAlign = 'center';
+                            ctx.textBaseline = 'middle';
+
+                            const offsetX = 10;
+                            const offsetY = 0;
+
+                            ticks.forEach((tick) => {
+                                const value = tick.value;
+                                const radius = scale.getDistanceFromCenterForValue(value);
+                                const labelY = yCenter - radius - offsetY;
+                                const labelX = xCenter + offsetX;
+                                ctx.fillText(value, labelX, labelY);
+                            });
+
+                            ctx.restore();
+                        }
+                    }]
                 });
             }
 
@@ -586,9 +696,17 @@
                         // **POTENSI CHART**
                         if (chartData.potensi && window.potensiChart_{{ $potensiChartId }}) {
                             const chart = window.potensiChart_{{ $potensiChartId }};
-                            chart.data.datasets[1].label = `Tolerance ${tolerancePercentage}%`;
-                            chart.data.datasets[1].data = chartData.potensi.standardRatings;
-                            chart.data.datasets[2].data = chartData.potensi.originalStandardRatings;
+
+                            // UBAH BAGIAN INI:
+                            chart.data.datasets[0].data = chartData.potensi
+                                .individualRatings; // Peserta
+                            chart.data.datasets[1].label = 'Standard'; // ← UBAH label
+                            chart.data.datasets[1].data = chartData.potensi
+                                .standardRatings; // Standard
+                            chart.data.datasets[2].label =
+                                `Tolerance ${tolerancePercentage}%`; // ← UBAH label
+                            chart.data.datasets[2].data = chartData.potensi
+                                .originalStandardRatings; // Tolerance
 
                             chart.options.scales.r.ticks.color = colors.ticks;
                             chart.options.scales.r.pointLabels.color = colors.pointLabels;
@@ -602,8 +720,13 @@
                         // **KOMPETENSI CHART**
                         if (chartData.kompetensi && window.kompetensiChart_{{ $kompetensiChartId }}) {
                             const chart = window.kompetensiChart_{{ $kompetensiChartId }};
-                            chart.data.datasets[1].label = `Tolerance ${tolerancePercentage}%`;
+
+                            // UBAH BAGIAN INI:
+                            chart.data.datasets[0].data = chartData.kompetensi.individualRatings;
+                            chart.data.datasets[1].label = 'Standard'; // ← UBAH label
                             chart.data.datasets[1].data = chartData.kompetensi.standardRatings;
+                            chart.data.datasets[2].label =
+                                `Tolerance ${tolerancePercentage}%`; // ← UBAH label
                             chart.data.datasets[2].data = chartData.kompetensi.originalStandardRatings;
 
                             chart.options.scales.r.ticks.color = colors.ticks;
@@ -618,8 +741,13 @@
                         // **GENERAL CHART**
                         if (chartData.general && window.generalChart_{{ $generalChartId }}) {
                             const chart = window.generalChart_{{ $generalChartId }};
-                            chart.data.datasets[1].label = `Tolerance ${tolerancePercentage}%`;
+
+                            // UBAH BAGIAN INI:
+                            chart.data.datasets[0].data = chartData.general.individualRatings;
+                            chart.data.datasets[1].label = 'Standard'; // ← UBAH label
                             chart.data.datasets[1].data = chartData.general.standardRatings;
+                            chart.data.datasets[2].label =
+                                `Tolerance ${tolerancePercentage}%`; // ← UBAH label
                             chart.data.datasets[2].data = chartData.general.originalStandardRatings;
 
                             chart.options.scales.r.ticks.color = colors.ticks;
