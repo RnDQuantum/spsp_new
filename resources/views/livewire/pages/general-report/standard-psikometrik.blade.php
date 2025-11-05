@@ -290,10 +290,11 @@
                     function getChartColors() {
                         const isDarkMode = document.documentElement.classList.contains('dark');
                         return {
-                            borderColor: isDarkMode ? '#3b82f6' : '#1e40af', // Lighter blue in dark mode
-                            backgroundColor: isDarkMode ? 'rgba(59, 130, 246, 0.2)' : 'rgba(30, 64, 175, 0.2)',
-                            pointBackgroundColor: isDarkMode ? '#3b82f6' : '#1e40af',
-                            pointBorderColor: isDarkMode ? '#3b82f6' : '#1e40af',
+                            borderColor: isDarkMode ? '#22c55e' : '#16a34a', // ← UBAH dari biru ke hijau
+                            backgroundColor: isDarkMode ? 'rgba(34, 197, 94, 0.2)' :
+                            'rgba(22, 163, 74, 0.2)', // ← UBAH dari biru ke hijau
+                            pointBackgroundColor: isDarkMode ? '#22c55e' : '#16a34a', // ← UBAH dari biru ke hijau
+                            pointBorderColor: isDarkMode ? '#22c55e' : '#16a34a', // ← UBAH dari biru ke hijau
                             textColor: isDarkMode ? '#e5e7eb' : '#374151',
                             gridColor: isDarkMode ? 'rgba(229, 231, 235, 0.2)' : 'rgba(55, 65, 81, 0.2)'
                         };
@@ -447,10 +448,11 @@
                     function getChartColors() {
                         const isDarkMode = document.documentElement.classList.contains('dark');
                         return {
-                            borderColor: isDarkMode ? '#ef4444' : '#dc2626', // Lighter red in dark mode
-                            backgroundColor: isDarkMode ? 'rgba(239, 68, 68, 0.15)' : 'rgba(220, 38, 38, 0.15)',
-                            pointBackgroundColor: isDarkMode ? '#ef4444' : '#dc2626',
-                            pointBorderColor: isDarkMode ? '#ef4444' : '#dc2626',
+                            borderColor: isDarkMode ? '#22c55e' : '#16a34a', // ← UBAH dari merah ke hijau
+                            backgroundColor: isDarkMode ? 'rgba(34, 197, 94, 0.15)' :
+                            'rgba(22, 163, 74, 0.15)', // ← UBAH dari merah ke hijau
+                            pointBackgroundColor: isDarkMode ? '#22c55e' : '#16a34a', // ← UBAH dari merah ke hijau
+                            pointBorderColor: isDarkMode ? '#22c55e' : '#16a34a', // ← UBAH dari merah ke hijau
                             textColor: isDarkMode ? '#e5e7eb' : '#374151',
                             gridColor: isDarkMode ? 'rgba(229, 231, 235, 0.2)' : 'rgba(55, 65, 81, 0.2)'
                         };
