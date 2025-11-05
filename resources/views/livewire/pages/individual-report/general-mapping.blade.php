@@ -493,6 +493,7 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                                                 weight: '600'
                                             },
                                             color: colors.pointLabels,
+                                            padding: 15,
                                             z: 3
                                         },
                                         grid: {
@@ -830,6 +831,7 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                                                 weight: '600',
                                             },
                                             color: colors.pointLabels,
+                                            padding: 15,
                                             z: 3
                                         },
                                         grid: {
