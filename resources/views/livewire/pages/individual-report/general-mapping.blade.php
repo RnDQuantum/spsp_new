@@ -277,24 +277,18 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
             <!-- Legend -->
             <div class="flex justify-center text-sm gap-8 text-gray-900 dark:text-gray-100 mb-8"
                 id="rating-legend-{{ $chartId }}">
-                <span
-                    class="legend-item flex items-center gap-2 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-700 px-3 py-2 rounded-lg transition-all duration-200 border border-gray-300 dark:border-gray-600 shadow-sm"
-                    data-chart="rating" data-dataset="2">
-                    <span class="inline-block w-12 h-3 rounded-sm" style="background-color: #fafa05;"></span>
-                    <span class="font-semibold text-gray-800 dark:text-gray-200">Standard</span>
-                </span>
-                <span
-                    class="legend-item flex items-center gap-2 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-700 px-3 py-2 rounded-lg transition-all duration-200 border border-gray-300 dark:border-gray-600 shadow-sm"
-                    data-chart="rating" data-dataset="0">
+                <!-- GANTI URUTAN LEGEND INI -->
+                <span class="legend-item ... " data-chart="rating" data-dataset="0">
                     <span class="inline-block w-12 h-3 rounded-sm" style="background-color: #5db010;"></span>
-                    <span class="font-semibold text-gray-800 dark:text-gray-200"
-                        style="color: #5db010;">{{ $participant->name }}</span>
+                    <span class="font-semibold ...">{{ $participant->name }}</span>
                 </span>
-                <span
-                    class="legend-item flex items-center gap-2 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-700 px-3 py-2 rounded-lg transition-all duration-200 border border-gray-300 dark:border-gray-600 shadow-sm"
-                    data-chart="rating" data-dataset="1">
+                <span class="legend-item ... " data-chart="rating" data-dataset="1">
                     <span class="inline-block w-12 h-3 rounded-sm" style="background-color: #b50505;"></span>
-                    <span class="font-semibold text-gray-800 dark:text-gray-200" x-data
+                    <span class="font-semibold ...">Standard</span>
+                </span>
+                <span class="legend-item ... " data-chart="rating" data-dataset="2">
+                    <span class="inline-block w-12 h-3 rounded-sm" style="background-color: #fafa05;"></span>
+                    <span class="font-semibold ..." x-data
                         x-text="'Tolerance ' + $wire.tolerancePercentage + '%'"></span>
                 </span>
             </div>
@@ -374,10 +368,11 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                         const colors = getGridColors();
 
                         const datasets = [{
+                                // LAYER 1: PESERTA (HIJAU)
                                 label: participantName,
                                 data: individualRatings,
                                 fill: true,
-                                backgroundColor: 'rgba(93, 176, 16, 0.7)', // Semi-transparan untuk visibilitas grid
+                                backgroundColor: '#5db010', // ← UBAH dari rgba(..., 0.7) ke solid
                                 borderColor: '#8fd006',
                                 pointBackgroundColor: '#8fd006',
                                 pointBorderColor: '#fff',
@@ -401,13 +396,16 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                                 }
                             },
                             {
-                                label: `Tolerance ${tolerancePercentage}%`,
-                                data: standardRatings,
+                                label: 'Standard', // ← UBAH dari 'Tolerance {{ $tolerancePercentage }}%'
+                                data: standardRatings, // ← data tetap standardRatings
                                 fill: true,
-                                backgroundColor: 'rgba(181, 5, 5, 0.7)', // Semi-transparan untuk visibilitas grid
+                                backgroundColor: '#b50505', // ← UBAH dari rgba(..., 0.7) ke solid
                                 borderColor: '#b50505',
                                 borderWidth: 2,
                                 pointRadius: 3,
+                                pointBackgroundColor: '#9a0404',
+                                pointBorderColor: '#fff',
+                                pointBorderWidth: 2,
                                 hidden: window.ratingVisibility_{{ $chartId }}[1],
                                 datalabels: {
                                     display: false,
@@ -425,10 +423,10 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                                 }
                             },
                             {
-                                label: 'Standard',
-                                data: originalStandardRatings,
+                                label: `Tolerance ${tolerancePercentage}%`, // ← UBAH dari 'Standard'
+                                data: originalStandardRatings, // ← data tetap originalStandardRatings
                                 fill: true,
-                                backgroundColor: 'rgba(250, 250, 5, 0.7)', // Semi-transparan untuk visibilitas grid
+                                backgroundColor: '#fafa05', // ← UBAH dari rgba(..., 0.7) ke solid
                                 borderColor: '#e6d105',
                                 pointBackgroundColor: '#e6d105',
                                 pointBorderColor: '#fff',
@@ -560,11 +558,13 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                             if (!chartData || !window.ratingChart_{{ $chartId }}) return;
 
                             const chart = window.ratingChart_{{ $chartId }};
-                            chart.data.datasets[1].label = `Tolerance ${chartData.tolerance}%`;
-                            chart.data.datasets[1].data = chartData.standardRatings;
-                            chart.data.datasets[2].data = chartData.originalStandardRatings;
-                            chart.data.datasets.forEach((d, i) => d.hidden = window
-                                .ratingVisibility_{{ $chartId }}[i]);
+
+                            // UBAH BAGIAN INI:
+                            chart.data.datasets[0].data = chartData.individualRatings; // Peserta
+                            chart.data.datasets[1].label = 'Standard'; // ← UBAH label
+                            chart.data.datasets[1].data = chartData.standardRatings; // Standard
+                            chart.data.datasets[2].label = `Tolerance ${chartData.tolerance}%`; // ← UBAH label
+                            chart.data.datasets[2].data = chartData.originalStandardRatings; // Tolerance
 
                             const colors = getGridColors();
                             chart.options.scales.r.ticks.color = colors.ticks;
@@ -614,24 +614,18 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
             <!-- Legend -->
             <div class="flex justify-center text-sm gap-8 text-gray-900 dark:text-gray-100 mb-8"
                 id="score-legend-{{ $chartId }}">
-                <span
-                    class="legend-item flex items-center gap-2 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-700 px-3 py-2 rounded-lg transition-all duration-200 border border-gray-300 dark:border-gray-600 shadow-sm"
-                    data-chart="score" data-dataset="2">
-                    <span class="inline-block w-12 h-3 rounded-sm" style="background-color: #fafa05;"></span>
-                    <span class="font-semibold text-gray-800 dark:text-gray-200">Standard</span>
-                </span>
-                <span
-                    class="legend-item flex items-center gap-2 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-700 px-3 py-2 rounded-lg transition-all duration-200 border border-gray-300 dark:border-gray-600 shadow-sm"
-                    data-chart="score" data-dataset="0">
+                <!-- GANTI URUTAN LEGEND INI -->
+                <span class="legend-item ... " data-chart="rating" data-dataset="0">
                     <span class="inline-block w-12 h-3 rounded-sm" style="background-color: #5db010;"></span>
-                    <span class="font-semibold text-gray-800 dark:text-gray-200"
-                        style="color: #5db010;">{{ $participant->name }}</span>
+                    <span class="font-semibold ...">{{ $participant->name }}</span>
                 </span>
-                <span
-                    class="legend-item flex items-center gap-2 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-700 px-3 py-2 rounded-lg transition-all duration-200 border border-gray-300 dark:border-gray-600 shadow-sm"
-                    data-chart="score" data-dataset="1">
+                <span class="legend-item ... " data-chart="rating" data-dataset="1">
                     <span class="inline-block w-12 h-3 rounded-sm" style="background-color: #b50505;"></span>
-                    <span class="font-semibold text-gray-800 dark:text-gray-200" x-data
+                    <span class="font-semibold ...">Standard</span>
+                </span>
+                <span class="legend-item ... " data-chart="rating" data-dataset="2">
+                    <span class="inline-block w-12 h-3 rounded-sm" style="background-color: #fafa05;"></span>
+                    <span class="font-semibold ..." x-data
                         x-text="'Tolerance ' + $wire.tolerancePercentage + '%'"></span>
                 </span>
             </div>
@@ -715,7 +709,7 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                                 label: participantName,
                                 data: individualScores,
                                 fill: true,
-                                backgroundColor: 'rgba(93, 176, 16, 0.7)', // Semi-transparan untuk visibilitas grid
+                                backgroundColor: '#5db010', // Semi-transparan untuk visibilitas grid
                                 borderColor: '#8fd006',
                                 pointBackgroundColor: '#8fd006',
                                 pointBorderColor: '#fff',
@@ -739,10 +733,10 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                                 }
                             },
                             {
-                                label: `Tolerance ${tolerancePercentage}%`,
+                                label: 'Standard', // ← UBAH dari 'Tolerance ...'
                                 data: standardScores,
                                 fill: true,
-                                backgroundColor: 'rgba(181, 5, 5, 0.7)', // Semi-transparan untuk visibilitas grid
+                                backgroundColor: '#b50505', // Semi-transparan untuk visibilitas grid
                                 borderColor: '#b50505',
                                 borderWidth: 2,
                                 pointRadius: 3,
@@ -763,10 +757,10 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                                 }
                             },
                             {
-                                label: 'Standard',
+                                label: `Tolerance ${tolerancePercentage}%`, // ← UBAH dari 'Standard'
                                 data: originalStandardScores,
                                 fill: true,
-                                backgroundColor: 'rgba(250, 250, 5, 0.7)', // Semi-transparan untuk visibilitas grid
+                                backgroundColor: '#fafa05', // Semi-transparan untuk visibilitas grid
                                 borderColor: '#e6d105',
                                 pointBackgroundColor: '#e6d105',
                                 pointBorderColor: '#fff',
@@ -898,11 +892,11 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                             if (!chartData || !window.scoreChart_{{ $chartId }}) return;
 
                             const chart = window.scoreChart_{{ $chartId }};
-                            chart.data.datasets[1].label = `Tolerance ${chartData.tolerance}%`;
+                            chart.data.datasets[0].data = chartData.individualScores;
+                            chart.data.datasets[1].label = 'Standard'; // ← UBAH
                             chart.data.datasets[1].data = chartData.standardScores;
+                            chart.data.datasets[2].label = `Tolerance ${chartData.tolerance}%`; // ← UBAH
                             chart.data.datasets[2].data = chartData.originalStandardScores;
-                            chart.data.datasets.forEach((d, i) => d.hidden = window
-                                .scoreVisibility_{{ $chartId }}[i]);
 
                             const colors = getGridColors();
                             chart.options.scales.r.ticks.color = colors.ticks;
