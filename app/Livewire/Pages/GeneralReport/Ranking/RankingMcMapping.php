@@ -113,6 +113,28 @@ class RankingMcMapping extends Component
         ]);
     }
 
+    public function updatedPerPage(): void
+    {
+        $this->resetPage();
+
+        // Refresh chart data
+        $this->prepareChartData();
+
+        $summary = $this->getPassingSummary();
+        $this->dispatch('summary-updated', [
+            'passing' => $summary['passing'],
+            'total' => $summary['total'],
+            'percentage' => $summary['percentage'],
+        ]);
+
+        // Dispatch chart update event
+        $this->dispatch('pieChartDataUpdated', [
+            'labels' => $this->chartLabels,
+            'data' => $this->chartData,
+            'colors' => $this->chartColors,
+        ]);
+    }
+
     private function getConclusionText(float $originalGap, float $adjustedGap): string
     {
         if ($originalGap >= 0) {
@@ -182,7 +204,7 @@ class RankingMcMapping extends Component
             return null;
         }
 
-        // Aggregate by participant in DB and paginate - FILTER by position
+        // Aggregate by participant in DB - FILTER by position
         $query = AspectAssessment::query()
             ->selectRaw('participant_id, SUM(standard_rating) as sum_original_standard_rating, SUM(standard_score) as sum_original_standard_score, SUM(individual_rating) as sum_individual_rating, SUM(individual_score) as sum_individual_score')
             ->where('event_id', $event->id)
@@ -193,6 +215,68 @@ class RankingMcMapping extends Component
             ->orderByDesc('sum_individual_rating')
             ->orderBy('participant_id');
 
+        // Check if "Show All" is selected
+        if ($this->perPage === 0) {
+            // Get all data without pagination
+            $allData = $query->get();
+
+            $items = collect($allData)->values()->map(function ($row, int $index): array {
+                $participant = Participant::with('positionFormation')->find($row->participant_id);
+
+                // Get original values from database
+                $originalStandardRating = (float) $row->sum_original_standard_rating;
+                $originalStandardScore = (float) $row->sum_original_standard_score;
+                $individualRating = (float) $row->sum_individual_rating;
+                $individualScore = (float) $row->sum_individual_score;
+
+                // Calculate adjusted standard based on tolerance
+                $toleranceFactor = 1 - ($this->tolerancePercentage / 100);
+                $adjustedStandardRating = $originalStandardRating * $toleranceFactor;
+                $adjustedStandardScore = $originalStandardScore * $toleranceFactor;
+
+                // Calculate gap based on adjusted standard
+                $adjustedGapRating = $individualRating - $adjustedStandardRating;
+                $adjustedGapScore = $individualScore - $adjustedStandardScore;
+
+                // Calculate original gap (at tolerance 0)
+                $originalGapScore = $individualScore - $originalStandardScore;
+
+                // Calculate percentage based on adjusted standard
+                $adjustedPercentage = $adjustedStandardScore > 0
+                    ? ($individualScore / $adjustedStandardScore) * 100
+                    : 0;
+
+                return [
+                    'rank' => $index + 1,
+                    'nip' => $participant?->skb_number ?? $participant?->test_number ?? '-',
+                    'name' => $participant?->name ?? '-',
+                    'position' => $participant?->positionFormation?->name ?? '-',
+                    'original_standard_rating' => round($originalStandardRating, 2),
+                    'original_standard_score' => round($originalStandardScore, 2),
+                    'standard_rating' => round($adjustedStandardRating, 2),
+                    'standard_score' => round($adjustedStandardScore, 2),
+                    'individual_rating' => round($individualRating, 2),
+                    'individual_score' => round($individualScore, 2),
+                    'gap_rating' => round($adjustedGapRating, 2),
+                    'gap_score' => round($adjustedGapScore, 2),
+                    'percentage_score' => round($adjustedPercentage, 2),
+                    'conclusion' => $this->getConclusionText($originalGapScore, $adjustedGapScore),
+                    'matrix' => 1,
+                ];
+            })->all();
+
+            $totalItems = count($items);
+
+            return new LengthAwarePaginator(
+                $items,
+                $totalItems,
+                $totalItems > 0 ? $totalItems : 1, // perPage
+                1, // currentPage
+                ['path' => request()->url(), 'query' => request()->query()]
+            );
+        }
+
+        // Normal pagination
         /** @var LengthAwarePaginator $paginator */
         $paginator = $query->paginate($this->perPage, pageName: 'page')->withQueryString();
 
