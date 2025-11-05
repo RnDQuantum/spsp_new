@@ -703,6 +703,7 @@
                                         min: 0,
                                         max: 5,
                                         ticks: {
+                                            display: false,
                                             stepSize: 1,
                                             color: colors.text,
                                             font: {
@@ -747,7 +748,40 @@
                                 responsive: true,
                                 maintainAspectRatio: false,
                                 backgroundColor: colors.background
-                            }
+                            },
+                            plugins: [{
+                                id: 'shiftTicks',
+                                afterDraw: (chart) => {
+                                    const {
+                                        ctx,
+                                        scales
+                                    } = chart;
+                                    const scale = scales.r;
+                                    const ticks = scale.ticks;
+                                    const yCenter = scale.yCenter;
+                                    const xCenter = scale.xCenter;
+
+                                    ctx.save();
+                                    ctx.font = scale.options.ticks.font.size + 'px sans-serif';
+                                    ctx.fillStyle = scale.options.ticks.color || '#000';
+                                    ctx.textAlign = 'center';
+                                    ctx.textBaseline = 'middle';
+
+                                    // Geser sedikit ke kanan (misalnya +5)
+                                    const offsetX = 10;
+                                    const offsetY = 0; // tetap tidak digeser ke atas/bawah
+
+                                    ticks.forEach((tick) => {
+                                        const value = tick.value;
+                                        const radius = scale.getDistanceFromCenterForValue(value);
+                                        const labelY = yCenter - radius - offsetY;
+                                        const labelX = xCenter + offsetX; // geser sedikit ke kanan
+                                        ctx.fillText(value, labelX, labelY);
+                                    });
+
+                                    ctx.restore();
+                                }
+                            }]
                         });
                     }
 
@@ -946,6 +980,7 @@
                                         min: 0,
                                         max: 5,
                                         ticks: {
+                                            display: false,
                                             stepSize: 1,
                                             color: colors.text,
                                             font: {
@@ -990,7 +1025,40 @@
                                 responsive: true,
                                 maintainAspectRatio: false,
                                 backgroundColor: colors.background
-                            }
+                            },
+                            plugins: [{
+                                id: 'shiftTicks',
+                                afterDraw: (chart) => {
+                                    const {
+                                        ctx,
+                                        scales
+                                    } = chart;
+                                    const scale = scales.r;
+                                    const ticks = scale.ticks;
+                                    const yCenter = scale.yCenter;
+                                    const xCenter = scale.xCenter;
+
+                                    ctx.save();
+                                    ctx.font = scale.options.ticks.font.size + 'px sans-serif';
+                                    ctx.fillStyle = scale.options.ticks.color || '#000';
+                                    ctx.textAlign = 'center';
+                                    ctx.textBaseline = 'middle';
+
+                                    // Geser sedikit ke kanan (misalnya +5)
+                                    const offsetX = 10;
+                                    const offsetY = 0; // tetap tidak digeser ke atas/bawah
+
+                                    ticks.forEach((tick) => {
+                                        const value = tick.value;
+                                        const radius = scale.getDistanceFromCenterForValue(value);
+                                        const labelY = yCenter - radius - offsetY;
+                                        const labelX = xCenter + offsetX; // geser sedikit ke kanan
+                                        ctx.fillText(value, labelX, labelY);
+                                    });
+
+                                    ctx.restore();
+                                }
+                            }]
                         });
                     }
 
