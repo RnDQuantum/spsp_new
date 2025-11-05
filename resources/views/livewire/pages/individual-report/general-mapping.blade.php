@@ -385,6 +385,7 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                                 pointRadius: 4,
                                 hidden: window.ratingVisibility_{{ $chartId }}[0],
                                 datalabels: {
+                                    display: false,
                                     color: '#000000',
                                     backgroundColor: '#5db010',
                                     borderRadius: 4,
@@ -409,6 +410,7 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                                 pointRadius: 3,
                                 hidden: window.ratingVisibility_{{ $chartId }}[1],
                                 datalabels: {
+                                    display: false,
                                     color: '#FFFFFF',
                                     backgroundColor: '#b50505',
                                     borderRadius: 4,
@@ -434,6 +436,7 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                                 pointRadius: 4,
                                 hidden: window.ratingVisibility_{{ $chartId }}[2],
                                 datalabels: {
+                                    display: false,
                                     color: '#000000',
                                     backgroundColor: '#fafa05',
                                     borderRadius: 4,
@@ -685,6 +688,7 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                                 pointRadius: 4,
                                 hidden: window.scoreVisibility_{{ $chartId }}[0],
                                 datalabels: {
+                                    display: false,
                                     color: '#000000',
                                     backgroundColor: '#5db010',
                                     borderRadius: 4,
@@ -709,6 +713,7 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                                 pointRadius: 3,
                                 hidden: window.scoreVisibility_{{ $chartId }}[1],
                                 datalabels: {
+                                    display: false,
                                     color: '#FFFFFF',
                                     backgroundColor: '#b50505',
                                     borderRadius: 4,
@@ -734,6 +739,7 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                                 pointRadius: 4,
                                 hidden: window.scoreVisibility_{{ $chartId }}[2],
                                 datalabels: {
+                                    display: false,
                                     color: '#000000',
                                     backgroundColor: '#fafa05',
                                     borderRadius: 4,
