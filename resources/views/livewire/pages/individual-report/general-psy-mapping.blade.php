@@ -337,38 +337,44 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                 </div>
 
                 <!-- Legend Rating - DARK MODE READY -->
+                <!-- GANTI URUTAN LEGEND INI -->
                 <div class="flex justify-center text-sm gap-8 mb-8" id="rating-legend-{{ $chartId }}">
+                    <!-- Dataset 0: Peserta - HIJAU -->
                     <span
                         class="legend-item flex items-center gap-2 cursor-pointer select-none 
-                           hover:bg-gray-100 dark:hover:bg-gray-600 
-                           px-3 py-2 rounded-lg transition-all duration-200 
-                           border border-gray-300 dark:border-gray-600 
-                           shadow-sm bg-white dark:bg-gray-700 
-                           text-gray-900 dark:text-white"
-                        data-chart="rating" data-dataset="2">
-                        <span class="inline-block w-12 h-3 rounded-sm" style="background-color: #fafa05;"></span>
-                        <span class="font-semibold">Standard</span>
-                    </span>
-                    <span
-                        class="legend-item flex items-center gap-2 cursor-pointer select-none 
-                           hover:bg-gray-100 dark:hover:bg-gray-600 
-                           px-3 py-2 rounded-lg transition-all duration-200 
-                           border border-gray-300 dark:border-gray-600 
-                           shadow-sm bg-white dark:bg-gray-700 
-                           text-gray-900 dark:text-white"
+           hover:bg-gray-100 dark:hover:bg-gray-600 
+           px-3 py-2 rounded-lg transition-all duration-200 
+           border border-gray-300 dark:border-gray-600 
+           shadow-sm bg-white dark:bg-gray-700 
+           text-gray-900 dark:text-white"
                         data-chart="rating" data-dataset="0">
                         <span class="inline-block w-12 h-3 rounded-sm" style="background-color: #5db010;"></span>
                         <span class="font-semibold" style="color: #5db010;">{{ $participant->name }}</span>
                     </span>
+
+                    <!-- Dataset 1: Standard - MERAH -->
                     <span
                         class="legend-item flex items-center gap-2 cursor-pointer select-none 
-                           hover:bg-gray-100 dark:hover:bg-gray-600 
-                           px-3 py-2 rounded-lg transition-all duration-200 
-                           border border-gray-300 dark:border-gray-600 
-                           shadow-sm bg-white dark:bg-gray-700 
-                           text-gray-900 dark:text-white"
+           hover:bg-gray-100 dark:hover:bg-gray-600 
+           px-3 py-2 rounded-lg transition-all duration-200 
+           border border-gray-300 dark:border-gray-600 
+           shadow-sm bg-white dark:bg-gray-700 
+           text-gray-900 dark:text-white"
                         data-chart="rating" data-dataset="1">
                         <span class="inline-block w-12 h-3 rounded-sm" style="background-color: #b50505;"></span>
+                        <span class="font-semibold">Standard</span>
+                    </span>
+
+                    <!-- Dataset 2: Tolerance - KUNING -->
+                    <span
+                        class="legend-item flex items-center gap-2 cursor-pointer select-none 
+           hover:bg-gray-100 dark:hover:bg-gray-600 
+           px-3 py-2 rounded-lg transition-all duration-200 
+           border border-gray-300 dark:border-gray-600 
+           shadow-sm bg-white dark:bg-gray-700 
+           text-gray-900 dark:text-white"
+                        data-chart="rating" data-dataset="2">
+                        <span class="inline-block w-12 h-3 rounded-sm" style="background-color: #fafa05;"></span>
                         <span class="font-semibold" x-data
                             x-text="'Tolerance ' + $wire.tolerancePercentage + '%'"></span>
                     </span>
@@ -391,38 +397,44 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                 </div>
 
                 <!-- Legend Score - DARK MODE READY -->
+                <!-- GANTI URUTAN LEGEND INI (sama seperti rating) -->
                 <div class="flex justify-center text-sm gap-8 mb-8" id="score-legend-{{ $chartId }}">
+                    <!-- Dataset 0: Peserta - HIJAU -->
                     <span
                         class="legend-item flex items-center gap-2 cursor-pointer select-none 
-                           hover:bg-gray-100 dark:hover:bg-gray-600 
-                           px-3 py-2 rounded-lg transition-all duration-200 
-                           border border-gray-300 dark:border-gray-600 
-                           shadow-sm bg-white dark:bg-gray-700 
-                           text-gray-900 dark:text-white"
-                        data-chart="score" data-dataset="2">
-                        <span class="inline-block w-12 h-3 rounded-sm" style="background-color: #fafa05;"></span>
-                        <span class="font-semibold">Standard</span>
-                    </span>
-                    <span
-                        class="legend-item flex items-center gap-2 cursor-pointer select-none 
-                           hover:bg-gray-100 dark:hover:bg-gray-600 
-                           px-3 py-2 rounded-lg transition-all duration-200 
-                           border border-gray-300 dark:border-gray-600 
-                           shadow-sm bg-white dark:bg-gray-700 
-                           text-gray-900 dark:text-white"
+           hover:bg-gray-100 dark:hover:bg-gray-600 
+           px-3 py-2 rounded-lg transition-all duration-200 
+           border border-gray-300 dark:border-gray-600 
+           shadow-sm bg-white dark:bg-gray-700 
+           text-gray-900 dark:text-white"
                         data-chart="score" data-dataset="0">
                         <span class="inline-block w-12 h-3 rounded-sm" style="background-color: #5db010;"></span>
                         <span class="font-semibold" style="color: #5db010;">{{ $participant->name }}</span>
                     </span>
+
+                    <!-- Dataset 1: Standard - MERAH -->
                     <span
                         class="legend-item flex items-center gap-2 cursor-pointer select-none 
-                           hover:bg-gray-100 dark:hover:bg-gray-600 
-                           px-3 py-2 rounded-lg transition-all duration-200 
-                           border border-gray-300 dark:border-gray-600 
-                           shadow-sm bg-white dark:bg-gray-700 
-                           text-gray-900 dark:text-white"
+           hover:bg-gray-100 dark:hover:bg-gray-600 
+           px-3 py-2 rounded-lg transition-all duration-200 
+           border border-gray-300 dark:border-gray-600 
+           shadow-sm bg-white dark:bg-gray-700 
+           text-gray-900 dark:text-white"
                         data-chart="score" data-dataset="1">
                         <span class="inline-block w-12 h-3 rounded-sm" style="background-color: #b50505;"></span>
+                        <span class="font-semibold">Standard</span>
+                    </span>
+
+                    <!-- Dataset 2: Tolerance - KUNING -->
+                    <span
+                        class="legend-item flex items-center gap-2 cursor-pointer select-none 
+           hover:bg-gray-100 dark:hover:bg-gray-600 
+           px-3 py-2 rounded-lg transition-all duration-200 
+           border border-gray-300 dark:border-gray-600 
+           shadow-sm bg-white dark:bg-gray-700 
+           text-gray-900 dark:text-white"
+                        data-chart="score" data-dataset="2">
+                        <span class="inline-block w-12 h-3 rounded-sm" style="background-color: #fafa05;"></span>
                         <span class="font-semibold" x-data
                             x-text="'Tolerance ' + $wire.tolerancePercentage + '%'"></span>
                     </span>
@@ -523,10 +535,11 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                         const colors = getColors();
 
                         const datasets = [{
+                                // LAYER 1: PESERTA (HIJAU) - Dataset 0
                                 label: participantName,
                                 data: individualRatings,
                                 fill: true,
-                                backgroundColor: 'rgba(93, 176, 16, 0.7)', // Semi-transparan untuk visibilitas grid
+                                backgroundColor: '#5db010', // ← UBAH dari rgba(..., 0.7) ke SOLID
                                 borderColor: '#8fd006',
                                 pointBackgroundColor: '#8fd006',
                                 pointBorderColor: '#fff',
@@ -535,6 +548,7 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                                 pointBorderWidth: 2,
                                 hidden: window.ratingVisibility_{{ $chartId }}[0],
                                 datalabels: {
+                                    display: false,
                                     color: '#000000',
                                     backgroundColor: '#5db010',
                                     borderRadius: 4,
@@ -550,10 +564,11 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                                 }
                             },
                             {
-                                label: `Tolerance ${tolerancePercentage}%`,
+                                // LAYER 2: STANDARD (MERAH) - Dataset 1
+                                label: 'Standard', // ← UBAH dari `Tolerance ${tolerancePercentage}%`
                                 data: standardRatings,
                                 fill: true,
-                                backgroundColor: 'rgba(181, 5, 5, 0.7)', // Semi-transparan untuk visibilitas grid
+                                backgroundColor: '#b50505', // ← UBAH dari rgba(..., 0.7) ke SOLID
                                 borderColor: '#b50505',
                                 borderWidth: 2,
                                 pointRadius: 3,
@@ -562,6 +577,7 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                                 pointBorderWidth: 2,
                                 hidden: window.ratingVisibility_{{ $chartId }}[1],
                                 datalabels: {
+                                    display: false,
                                     color: '#FFFFFF',
                                     backgroundColor: '#b50505',
                                     borderRadius: 4,
@@ -576,10 +592,11 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                                 }
                             },
                             {
-                                label: 'Standard',
+                                // LAYER 3: TOLERANCE (KUNING) - Dataset 2
+                                label: `Tolerance ${tolerancePercentage}%`, // ← UBAH dari 'Standard'
                                 data: originalStandardRatings,
                                 fill: true,
-                                backgroundColor: 'rgba(250, 250, 5, 0.7)', // Semi-transparan untuk visibilitas grid
+                                backgroundColor: '#fafa05', // ← UBAH dari rgba(..., 0.7) ke SOLID
                                 borderColor: '#e6d105',
                                 pointBackgroundColor: '#e6d105',
                                 pointBorderColor: '#fff',
@@ -588,6 +605,7 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                                 pointBorderWidth: 2,
                                 hidden: window.ratingVisibility_{{ $chartId }}[2],
                                 datalabels: {
+                                    display: false,
                                     color: '#000000',
                                     backgroundColor: '#fafa05',
                                     borderRadius: 4,
@@ -628,6 +646,7 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                                         min: 0,
                                         max: 5,
                                         ticks: {
+                                            display: false,
                                             stepSize: 1,
                                             color: colors.ticks,
                                             font: {
@@ -656,7 +675,40 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                                         }
                                     }
                                 }
-                            }
+                            },
+                            plugins: [{
+                                id: 'shiftTicks',
+                                afterDraw: (chart) => {
+                                    const {
+                                        ctx,
+                                        scales
+                                    } = chart;
+                                    const scale = scales.r;
+                                    const ticks = scale.ticks;
+                                    const yCenter = scale.yCenter;
+                                    const xCenter = scale.xCenter;
+
+                                    ctx.save();
+                                    ctx.font = `bold ${scale.options.ticks.font.size}px sans-serif`;
+                                    ctx.fillStyle = scale.options.ticks.color || '#000';
+                                    ctx.textAlign = 'center';
+                                    ctx.textBaseline = 'middle';
+
+                                    // Offset untuk menggeser posisi
+                                    const offsetX = 10; // geser ke kanan
+                                    const offsetY = 0; // tidak geser vertikal
+
+                                    ticks.forEach((tick) => {
+                                        const value = tick.value;
+                                        const radius = scale.getDistanceFromCenterForValue(value);
+                                        const labelY = yCenter - radius - offsetY;
+                                        const labelX = xCenter + offsetX;
+                                        ctx.fillText(value, labelX, labelY);
+                                    });
+
+                                    ctx.restore();
+                                }
+                            }]
                         });
 
                         setTimeout(() => {
@@ -683,10 +735,11 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                         const colors = getColors();
 
                         const datasets = [{
+                                // LAYER 1: PESERTA (HIJAU) - Dataset 0
                                 label: participantName,
                                 data: individualScores,
                                 fill: true,
-                                backgroundColor: 'rgba(93, 176, 16, 0.7)', // Semi-transparan untuk visibilitas grid
+                                backgroundColor: '#5db010', // ← UBAH dari rgba
                                 borderColor: '#8fd006',
                                 pointBackgroundColor: '#8fd006',
                                 pointBorderColor: '#fff',
@@ -695,6 +748,7 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                                 pointBorderWidth: 2,
                                 hidden: window.scoreVisibility_{{ $chartId }}[0],
                                 datalabels: {
+                                    display: false,
                                     color: '#000000',
                                     backgroundColor: '#5db010',
                                     borderRadius: 4,
@@ -710,10 +764,11 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                                 }
                             },
                             {
-                                label: `Tolerance ${tolerancePercentage}%`,
+                                // LAYER 2: STANDARD (MERAH) - Dataset 1
+                                label: 'Standard', // ← UBAH dari `Tolerance ${tolerancePercentage}%`
                                 data: standardScores,
                                 fill: true,
-                                backgroundColor: 'rgba(181, 5, 5, 0.7)', // Semi-transparan untuk visibilitas grid
+                                backgroundColor: '#b50505', // ← UBAH dari rgba
                                 borderColor: '#b50505',
                                 borderWidth: 2,
                                 pointRadius: 3,
@@ -722,6 +777,7 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                                 pointBorderWidth: 2,
                                 hidden: window.scoreVisibility_{{ $chartId }}[1],
                                 datalabels: {
+                                    display: false,
                                     color: '#FFFFFF',
                                     backgroundColor: '#b50505',
                                     borderRadius: 4,
@@ -736,10 +792,11 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                                 }
                             },
                             {
-                                label: 'Standard',
+                                // LAYER 3: TOLERANCE (KUNING) - Dataset 2
+                                label: `Tolerance ${tolerancePercentage}%`, // ← UBAH dari 'Standard'
                                 data: originalStandardScores,
                                 fill: true,
-                                backgroundColor: 'rgba(250, 250, 5, 0.7)', // Semi-transparan untuk visibilitas grid
+                                backgroundColor: '#fafa05', // ← UBAH dari rgba
                                 borderColor: '#e6d105',
                                 pointBackgroundColor: '#e6d105',
                                 pointBorderColor: '#fff',
@@ -748,6 +805,7 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                                 pointBorderWidth: 2,
                                 hidden: window.scoreVisibility_{{ $chartId }}[2],
                                 datalabels: {
+                                    display: false,
                                     color: '#000000',
                                     backgroundColor: '#fafa05',
                                     borderRadius: 4,
@@ -788,6 +846,7 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                                         min: 0,
                                         max: maxScore,
                                         ticks: {
+                                            display: false,
                                             stepSize: 20,
                                             color: colors.ticks,
                                             font: {
@@ -816,7 +875,40 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                                         }
                                     }
                                 }
-                            }
+                            },
+                            plugins: [{
+                                id: 'shiftTicks',
+                                afterDraw: (chart) => {
+                                    const {
+                                        ctx,
+                                        scales
+                                    } = chart;
+                                    const scale = scales.r;
+                                    const ticks = scale.ticks;
+                                    const yCenter = scale.yCenter;
+                                    const xCenter = scale.xCenter;
+
+                                    ctx.save();
+                                    ctx.font = `bold ${scale.options.ticks.font.size}px sans-serif`;
+                                    ctx.fillStyle = scale.options.ticks.color || '#000';
+                                    ctx.textAlign = 'center';
+                                    ctx.textBaseline = 'middle';
+
+                                    // Offset untuk menggeser posisi
+                                    const offsetX = 10; // geser ke kanan
+                                    const offsetY = 0; // tidak geser vertikal
+
+                                    ticks.forEach((tick) => {
+                                        const value = tick.value;
+                                        const radius = scale.getDistanceFromCenterForValue(value);
+                                        const labelY = yCenter - radius - offsetY;
+                                        const labelX = xCenter + offsetX;
+                                        ctx.fillText(value, labelX, labelY);
+                                    });
+
+                                    ctx.restore();
+                                }
+                            }]
                         });
 
                         setTimeout(() => {
@@ -847,9 +939,15 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                             // UPDATE RATING
                             if (window.ratingChart_{{ $chartId }}) {
                                 const chart = window.ratingChart_{{ $chartId }};
-                                chart.data.datasets[1].label = `Tolerance ${chartData.tolerance}%`;
-                                chart.data.datasets[1].data = chartData.standardRatings;
-                                chart.data.datasets[2].data = chartData.originalStandardRatings;
+
+                                // UBAH BAGIAN INI:
+                                chart.data.datasets[0].data = chartData.individualRatings; // Peserta
+                                chart.data.datasets[1].label = 'Standard'; // ← UBAH label
+                                chart.data.datasets[1].data = chartData.standardRatings; // Standard
+                                chart.data.datasets[2].label =
+                                    `Tolerance ${chartData.tolerance}%`; // ← UBAH label
+                                chart.data.datasets[2].data = chartData.originalStandardRatings; // Tolerance
+
                                 chart.data.datasets.forEach((d, i) => d.hidden = window
                                     .ratingVisibility_{{ $chartId }}[i]);
 
@@ -865,11 +963,18 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                             }
 
                             // UPDATE SCORE
+                            // UPDATE SCORE
                             if (window.scoreChart_{{ $chartId }}) {
                                 const chart = window.scoreChart_{{ $chartId }};
-                                chart.data.datasets[1].label = `Tolerance ${chartData.tolerance}%`;
-                                chart.data.datasets[1].data = chartData.standardScores;
-                                chart.data.datasets[2].data = chartData.originalStandardScores;
+
+                                // UBAH BAGIAN INI:
+                                chart.data.datasets[0].data = chartData.individualScores; // Peserta
+                                chart.data.datasets[1].label = 'Standard'; // ← UBAH label
+                                chart.data.datasets[1].data = chartData.standardScores; // Standard
+                                chart.data.datasets[2].label =
+                                    `Tolerance ${chartData.tolerance}%`; // ← UBAH label
+                                chart.data.datasets[2].data = chartData.originalStandardScores; // Tolerance
+
                                 chart.data.datasets.forEach((d, i) => d.hidden = window
                                     .scoreVisibility_{{ $chartId }}[i]);
 
