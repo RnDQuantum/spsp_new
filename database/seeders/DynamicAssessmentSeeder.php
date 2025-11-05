@@ -68,9 +68,9 @@ class DynamicAssessmentSeeder extends Seeder
                 'positions' => [['code' => 'dokter_umum', 'name' => 'Dokter Umum', 'quota' => 50, 'template_code' => 'professional_standard_v1'], ['code' => 'perawat', 'name' => 'Perawat', 'quota' => 100, 'template_code' => 'staff_standard_v1'], ['code' => 'apoteker', 'name' => 'Apoteker', 'quota' => 50, 'template_code' => 'supervisor_standard_v1']],
                 'participants_count' => 200, // JUMLAH PESERTA
                 'performance_distribution' => [
-                    'high' => 25, // 25% high performers (exceed standard)
-                    'medium' => 60, // 60% medium performers (around standard)
-                    'low' => 15, // 15% low performers (below standard)
+                    'high' => 20, // 25% high performers (exceed standard)
+                    'medium' => 10, // 60% medium performers (around standard)
+                    'low' => 70, // 15% low performers (below standard)
                 ],
             ],
         ];
@@ -118,7 +118,7 @@ class DynamicAssessmentSeeder extends Seeder
                     ...$batchData,
                 ]);
             }
-            $this->info('  📦 Batches created: '.count($batches));
+            $this->info('  📦 Batches created: ' . count($batches));
 
             // 4. Create positions with their templates
             $positions = [];
@@ -137,7 +137,7 @@ class DynamicAssessmentSeeder extends Seeder
                 $position->load('template');
                 $positions[] = $position;
             }
-            $this->info('  💼 Positions created: '.count($positions));
+            $this->info('  💼 Positions created: ' . count($positions));
 
             // 5. Generate participants with calculated assessments
             $this->info("  👥 Creating {$config['participants_count']} participants...");
@@ -199,9 +199,9 @@ class DynamicAssessmentSeeder extends Seeder
     {
         // Base performance multiplier range by level
         [$minMultiplier, $maxMultiplier] = match ($performanceLevel) {
-            'high' => [1.05, 1.25], // Exceed standard significantly
-            'medium' => [0.85, 1.1], // Around standard (more variation)
-            'low' => [0.65, 0.85], // Below standard
+            'high' => [1.05, 1.25], // Exceed standard significantly (rating 3.15-5.00)
+            'medium' => [0.85, 1.1], // Around standard (rating 2.55-4.40)
+            'low' => [0.40, 0.75], // Below standard (rating 1.20-3.00, includes Kelas I & II)
         };
 
         $assessmentsData = [
