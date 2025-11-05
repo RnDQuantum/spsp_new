@@ -330,7 +330,7 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                        text-gray-900 dark:text-white">
                     Profil Kompetensi Spider Plot Chart (Rating)</div>
                 <div class="flex justify-center mb-6">
-                    <div style="width: 700px; height: 700px; position: relative;">
+                    <div style="width: 900px; height: 900px; position: relative;">
                         <canvas id="spiderRatingChart-{{ $chartId }}"></canvas>
                     </div>
                 </div>
@@ -390,7 +390,7 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                        text-gray-900 dark:text-white">
                     Profil Kompetensi Spider Plot Chart (Score)</div>
                 <div class="flex justify-center mb-6">
-                    <div style="width: 700px; height: 700px; position: relative;">
+                    <div style="width: 900px; height: 900px; position: relative;">
                         <canvas id="spiderScoreChart-{{ $chartId }}"></canvas>
                     </div>
                 </div>
