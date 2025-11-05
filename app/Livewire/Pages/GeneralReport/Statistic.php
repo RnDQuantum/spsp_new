@@ -87,11 +87,23 @@ class Statistic extends Component
         $this->standardRating = (float) ($aspect?->standard_rating ?? 0.0);
 
         // Build distribution (bucket 1..5) - FILTER by position
+        // Use CASE WHEN to match the classification table ranges:
+        // I: 1.00-1.80, II: 1.80-2.60, III: 2.60-3.40, IV: 3.40-4.20, V: 4.20-5.00
         $rows = DB::table('aspect_assessments as aa')
             ->where('aa.event_id', $event->id)
             ->where('aa.position_formation_id', $positionFormationId)
             ->where('aa.aspect_id', $aspectId)
-            ->selectRaw('ROUND(aa.individual_rating) as bucket, COUNT(*) as total')
+            ->selectRaw('
+                CASE
+                    WHEN aa.individual_rating >= 1.00 AND aa.individual_rating < 1.80 THEN 1
+                    WHEN aa.individual_rating >= 1.80 AND aa.individual_rating < 2.60 THEN 2
+                    WHEN aa.individual_rating >= 2.60 AND aa.individual_rating < 3.40 THEN 3
+                    WHEN aa.individual_rating >= 3.40 AND aa.individual_rating < 4.20 THEN 4
+                    WHEN aa.individual_rating >= 4.20 AND aa.individual_rating <= 5.00 THEN 5
+                    ELSE 0
+                END as bucket,
+                COUNT(*) as total
+            ')
             ->groupBy('bucket')
             ->get();
 
