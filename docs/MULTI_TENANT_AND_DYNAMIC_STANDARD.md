@@ -1595,6 +1595,380 @@ But for now, session-based is perfect for the use case!
 
 ---
 
+## SELECTIVE ASPECTS/SUB-ASPECTS FEATURE
+
+### Overview
+
+Beyond adjusting weights and ratings, users can also **select which aspects/sub-aspects to include** in their analysis. This enables "what-if" scenarios like:
+- "What if we only evaluate 3 key aspects instead of all 5?"
+- "What if we focus only on intellectual sub-aspects and ignore others?"
+- "How does ranking change if we remove certain competencies?"
+
+### Key Features
+
+1. **Template-level selection** - Applies to all events using the same template
+2. **Session-based** - No database changes, temporary analysis only
+3. **Hierarchical control** - Disable aspect → auto-disable all sub-aspects
+4. **Real-time impact** - Spider chart axes change, rankings recalculate
+5. **Weight redistribution** - User manually adjusts weights to maintain 100%
+
+### Components Affected (14 Total)
+
+All components that display or calculate assessment data will auto-update when selection changes:
+
+**General Reports:**
+1. StandardPsikometrik (Potensi - edit location)
+2. StandardMc (Kompetensi - edit location)
+3. GeneralMatching
+4. GeneralMapping
+5. GeneralPsyMapping
+6. GeneralMcMapping
+7. SpiderPlot (axes change dynamically)
+
+**Ringkasan Reports:**
+8. RingkasanMcMapping
+9. RingkasanAssessment
+
+**Ranking Reports:**
+10. RankingPsyMapping
+11. RankingMcMapping
+12. RekapRankingAssessment
+
+**Others:**
+13. Dashboard (statistics recalculate)
+14. TrainingRecommendation
+
+### UI Design - SelectiveAspectsModal
+
+**Trigger Button (above table):**
+
+```blade
+┌──────────────────────────────────────────────────┐
+│ 📊 STANDARD POTENSI                              │
+│ Template: Staff Standard v1                      │
+│ Bobot Kategori: 50% (clickable)                  │
+│                                                   │
+│ [🔧 Pilih Aspek & Sub-Aspek (4/5 aspek, 18/22 sub)] │
+│ [♻️ Reset ke Default]                            │
+└──────────────────────────────────────────────────┘
+```
+
+**Modal Content (Tree Structure):**
+
+```blade
+┌────────────────────────────────────────────────────────┐
+│ Pilih Aspek & Sub-Aspek Potensi untuk Analisis        │
+│                                                         │
+│ [✓ Select All] [✗ Deselect All]                       │
+├────────────────────────────────────────────────────────┤
+│                                                         │
+│ ✅ Kecerdasan                          [30]%           │
+│    ├─ ✅ Kecerdasan Umum              Std: [3]        │
+│    ├─ ✅ Daya Tangkap                 Std: [4]        │
+│    ├─ ✅ Daya Analisa                 Std: [3]        │
+│    └─ ❌ Kemampuan Logika             Std: [3]        │
+│                                                         │
+│ ❌ Cara Kerja                          [0]%            │
+│    └─ (All sub-aspects auto-disabled and greyed out)   │
+│                                                         │
+│ ✅ Potensi Kerja                       [35]%           │
+│    └─ [+] Expand to show 5 sub-aspects                 │
+│                                                         │
+│ ✅ Hubungan Sosial                     [20]%           │
+│ ✅ Kepribadian                         [15]%           │
+│                                                         │
+├────────────────────────────────────────────────────────┤
+│ Validasi:                                               │
+│ ✅ Total Bobot: 100% (valid)                           │
+│ ✅ Aspek Aktif: 4/5 (minimal 3 - valid)                │
+│ ✅ Sub-Aspek: Semua aspek aktif punya min 1 sub       │
+│                                                         │
+│ atau jika invalid:                                      │
+│ ⚠️ Total Bobot: 85% (kurang 15%) ← INVALID            │
+│ ⚠️ Kecerdasan: Minimal 1 sub-aspek harus aktif        │
+├────────────────────────────────────────────────────────┤
+│ [Apply Changes] [Cancel]                               │
+│ ↑ disabled jika validasi gagal                         │
+└────────────────────────────────────────────────────────┘
+```
+
+### Business Rules
+
+**1. Aspect Selection**
+- ✅ Minimum **3 aspects active** per category (Potensi & Kompetensi)
+- ✅ Total weight of active aspects = **100%** (strict validation)
+- ✅ Disabled aspect weight automatically = **0%**
+- ✅ User must **manually redistribute** weights to reach 100%
+
+**2. Sub-Aspect Selection (Potensi only)**
+- ✅ Minimum **1 sub-aspect active** per active aspect
+- ✅ Parent aspect disabled → all sub-aspects **auto-disabled** (greyed out)
+- ✅ Adjusted aspect standard rating = **average of active sub-aspects only**
+
+**Example:**
+```php
+Original:
+Aspect: Kecerdasan
+Sub-aspects: [3, 4, 3, 3] → Standard Rating = 3.25
+
+Adjusted (2 sub-aspects disabled):
+Sub-aspects: [3, 4] (only active ones) → Standard Rating = 3.5
+```
+
+**3. Kompetensi Standard Ratings**
+- ✅ Standard rating must be **INTEGER 1-5** (not decimal)
+- ✅ Editable via inline click → modal
+
+### Weight Redistribution Flow
+
+```
+User unchecks "Cara Kerja" (original weight 20%)
+    ↓
+System auto-sets: aspect_weights.cara_kerja = 0
+    ↓
+Total weight = 25 + 0 + 20 + 20 + 15 = 80%
+    ↓
+Modal shows: ⚠️ "Total Bobot: 80% (kurang 20%)"
+Apply button DISABLED
+    ↓
+User manually adjusts other weights:
+- Kecerdasan: 25% → 30%
+- Potensi Kerja: 20% → 25%
+- Hubungan Sosial: 20% → 25%
+- Kepribadian: 15% → 20%
+Total = 100% ✅
+    ↓
+Apply button ENABLED
+    ↓
+User clicks Apply → Session updated → All components refresh
+```
+
+### Real-time Update Mechanism
+
+**Livewire Browser Events:**
+
+```php
+// In StandardPsikometrik or StandardMc (edit location)
+public function applySelection(array $data)
+{
+    // Validate
+    $errors = $this->validateSelection($data);
+    if (!empty($errors)) {
+        return; // Show errors in modal
+    }
+
+    // Save to session
+    $this->dynamicStandardService->saveBulkSelection(
+        $this->templateId,
+        $data
+    );
+
+    // Broadcast to ALL components
+    $this->dispatch('standard-adjusted',
+        templateId: $this->templateId
+    );
+
+    // Close modal
+    $this->showSelectionModal = false;
+}
+```
+
+```php
+// In ALL 14 affected components
+protected $listeners = [
+    'standard-adjusted' => 'handleStandardUpdate',
+];
+
+public function handleStandardUpdate($templateId)
+{
+    // Get current template being displayed
+    $currentTemplateId = $this->getCurrentTemplateId();
+
+    // Only refresh if same template
+    if ($currentTemplateId === $templateId) {
+        $this->recalculate(); // Recalculate with adjusted standard
+    }
+}
+```
+
+### Spider Chart Impact
+
+**Original Chart (5 axes - all aspects active):**
+```
+         Kecerdasan
+              |
+   Kepribadian + Cara Kerja
+        |             |
+ Hubungan Sosial - Potensi Kerja
+```
+
+**Adjusted Chart (3 axes - 2 aspects disabled):**
+```
+         Kecerdasan
+              |
+   Kepribadian + Potensi Kerja
+```
+
+**Implementation:**
+- Chart component reads active aspects from session
+- Only renders axes for active aspects
+- Shape changes dynamically (pentagon → triangle, etc.)
+
+### Session Structure Extended
+
+```php
+'standard_adjustment.{templateId}' => [
+    'adjusted_at' => '2025-01-05 10:30:00',
+
+    // Category weights
+    'category_weights' => [
+        'potensi' => 45,
+        'kompetensi' => 55,
+    ],
+
+    // NEW: Active aspects/sub-aspects
+    'active_aspects' => [
+        'kecerdasan' => true,
+        'cara_kerja' => false,  // disabled
+        'potensi_kerja' => true,
+        'hubungan_sosial' => true,
+        'kepribadian' => true,
+        // Kompetensi aspects...
+    ],
+
+    'active_sub_aspects' => [
+        'kecerdasan_umum' => true,
+        'daya_tangkap' => true,
+        'daya_analisa' => true,
+        'kemampuan_logika' => false,  // disabled
+        // Other sub-aspects...
+    ],
+
+    // Aspect weights (adjusted)
+    'aspect_weights' => [
+        'kecerdasan' => 30,
+        'cara_kerja' => 0,  // disabled = 0%
+        'potensi_kerja' => 35,
+        'hubungan_sosial' => 20,
+        'kepribadian' => 15,
+        // Total must = 100%
+    ],
+
+    // Aspect ratings (INTEGER for Kompetensi)
+    'aspect_ratings' => [
+        'integritas' => 4,  // INTEGER 1-5
+        'kerjasama' => 3,
+        // ...
+    ],
+
+    // Sub-aspect ratings (INTEGER for Potensi)
+    'sub_aspect_ratings' => [
+        'kecerdasan_umum' => 4,  // INTEGER 1-5
+        'daya_tangkap' => 5,
+        'daya_analisa' => 3,
+        // ...
+    ],
+]
+```
+
+### Template-Position Relationship
+
+```
+Template: supervisor_standard_v1
+    ↓
+Used by Position: Auditor
+    ↓
+Used in Events:
+    - Event A (P3K Kejaksaan 2025)
+    - Event B (Rekrutmen BNN 2025)
+
+User adjusts supervisor_standard_v1 (session):
+✅ Event A (Auditor) → uses adjusted standard
+✅ Event B (Auditor) → uses adjusted standard
+❌ Event C (Analis - uses staff_standard_v1) → not affected
+```
+
+**Session Persistence:**
+- Adjustment persists across all views/filters for same template
+- Survives page refresh (session-based)
+- Lost on logout (by design - temporary analysis)
+- Reset button available to restore defaults
+
+### Validation Examples
+
+**Valid Selection:**
+```
+Potensi:
+✅ 4/5 aspects active (≥ 3) ✓
+✅ Total weight = 100% ✓
+✅ Each active aspect has ≥ 1 sub-aspect ✓
+→ Apply button ENABLED
+```
+
+**Invalid Selection #1: Too few aspects**
+```
+Potensi:
+❌ 2/5 aspects active (< 3) ✗
+⚠️ "Minimal 3 aspek harus aktif"
+→ Apply button DISABLED
+```
+
+**Invalid Selection #2: Weight not 100%**
+```
+Potensi:
+✅ 4/5 aspects active ✓
+❌ Total weight = 85% ✗
+⚠️ "Total bobot harus 100% (saat ini: 85%)"
+→ Apply button DISABLED
+```
+
+**Invalid Selection #3: Active aspect without sub-aspects**
+```
+Potensi:
+✅ Kecerdasan active
+❌ All Kecerdasan sub-aspects disabled ✗
+⚠️ "Aspek Kecerdasan harus memiliki minimal 1 sub-aspek aktif"
+→ Apply button DISABLED
+```
+
+### Component File Structure
+
+```
+app/
+├─ Livewire/
+│  ├─ Components/
+│  │  └─ SelectiveAspectsModal.php (NEW - reusable)
+│  └─ Pages/
+│     └─ GeneralReport/
+│        ├─ StandardPsikometrik.php (UPDATE)
+│        ├─ StandardMc.php (UPDATE)
+│        ├─ Dashboard.php (UPDATE - add listener)
+│        ├─ GeneralMatching.php (UPDATE - add listener)
+│        ├─ GeneralMapping.php (UPDATE - add listener)
+│        ├─ GeneralPsyMapping.php (UPDATE - add listener)
+│        ├─ GeneralMcMapping.php (UPDATE - add listener)
+│        ├─ SpiderPlot.php (UPDATE - dynamic axes)
+│        ├─ RingkasanMcMapping.php (UPDATE - add listener)
+│        ├─ RingkasanAssessment.php (UPDATE - add listener)
+│        ├─ RankingPsyMapping.php (UPDATE - add listener)
+│        ├─ RankingMcMapping.php (UPDATE - add listener)
+│        ├─ RekapRankingAssessment.php (UPDATE - add listener)
+│        └─ Training/
+│           └─ TrainingRecommendation.php (UPDATE - add listener)
+│
+├─ Services/
+│  └─ DynamicStandardService.php (UPDATE - add selection methods)
+│
+resources/views/livewire/
+├─ components/
+│  └─ selective-aspects-modal.blade.php (NEW)
+└─ pages/general-report/
+   ├─ standard-psikometrik.blade.php (UPDATE)
+   └─ standard-mc.blade.php (UPDATE)
+```
+
+---
+
 ## SUMMARY
 
 ### What We're Building
@@ -1609,12 +1983,15 @@ But for now, session-based is perfect for the use case!
    - Template-level adjustments
    - Real-time calculation preview
    - Easy reset to original
+   - **Selective aspects/sub-aspects** (choose which to include in analysis)
+   - **Inline editing** (click to edit weights/ratings)
+   - **Global auto-update** (all 14 components auto-refresh)
 
 3. **UI Components**
-   - StandardAnalysis component (new)
-   - Toggle in StandardPsikometrik & StandardMc
+   - Inline editing in StandardPsikometrik & StandardMc
+   - SelectiveAspectsModal (reusable modal for aspect selection)
    - Real-time validation
-   - User-friendly interface
+   - User-friendly interface with visual indicators
 
 ### Implementation Order
 
@@ -1679,23 +2056,281 @@ But for now, session-based is perfect for the use case!
 - Validation methods
 - Returns original values from database when no adjustment exists
 
-### ⏳ Phase 2: Next Steps
+### ⏳ Phase 2: In Progress (2025-01-05)
 
-**1. Update Calculation Services**
-- Add `$useAdjustedStandard` parameter to:
-  - `AspectService::calculatePotensiAspect()`
-  - `AspectService::calculateKompetensiAspect()`
-  - `CategoryService::calculateCategory()`
-  - `FinalAssessmentService::calculateFinal()`
+**Phase 2A: Extend DynamicStandardService** ⏳
+- Add methods for selective aspects/sub-aspects:
+  - `isAspectActive()`, `isSubAspectActive()`
+  - `setAspectActive()`, `setSubAspectActive()`
+  - `getActiveAspects()`, `getActiveSubAspects()`
+  - `saveBulkSelection()`
+  - `validateSelection()` - validates min 3 aspects, 100% weight, min 1 sub-aspect
+- Update existing methods to respect active/inactive aspects
 
-**2. UI Components**
-- Create `StandardAnalysis` Livewire component
-- Add toggle to `StandardPsikometrik` component
-- Add toggle to `StandardMc` component
+**Phase 2B: Create SelectiveAspectsModal Component** ⏳
+- Reusable Livewire component for both Potensi & Kompetensi
+- Tree structure with expand/collapse
+- Real-time validation in modal
+- Parameters: `templateId`, `categoryCode` (potensi/kompetensi)
+- File: `app/Livewire/Components/SelectiveAspectsModal.php`
+- View: `resources/views/livewire/components/selective-aspects-modal.blade.php`
 
-**3. Testing**
-- Multi-tenancy tests
-- Dynamic standard service tests
-- Integration tests
+**Phase 2C: Update StandardPsikometrik & StandardMc** ⏳
+- Add inline editing for weights & ratings (click to edit → modal)
+- Add trigger button for SelectiveAspectsModal
+- Add visual indicators for adjusted values (amber bg + border)
+- Add Reset button to restore defaults
+- Dispatch 'standard-adjusted' event after save
+- Show category weight prominently above table
+
+**Phase 2D: Update 14 Affected Components** ⏳
+All components add listener for auto-refresh:
+1. ✅ StandardPsikometrik (edit location)
+2. ✅ StandardMc (edit location)
+3. ⏳ Dashboard
+4. ⏳ GeneralMatching
+5. ⏳ GeneralMapping
+6. ⏳ GeneralPsyMapping
+7. ⏳ GeneralMcMapping
+8. ⏳ SpiderPlot (dynamic axes based on active aspects)
+9. ⏳ RingkasanMcMapping
+10. ⏳ RingkasanAssessment
+11. ⏳ RankingPsyMapping
+12. ⏳ RankingMcMapping
+13. ⏳ RekapRankingAssessment
+14. ⏳ TrainingRecommendation
+
+**Phase 2E: Update Calculation Services** ⏳
+- Update services to use only active aspects/sub-aspects:
+  - `AspectService::calculatePotensiAspect()` - average only active sub-aspects
+  - `AspectService::calculateKompetensiAspect()` - skip if aspect inactive
+  - `CategoryService::calculateCategory()` - sum only active aspects
+  - `FinalAssessmentService::calculateFinal()` - use adjusted category weights
+
+**Phase 2F: Testing** ⏳
+- Unit tests for DynamicStandardService
+- Integration tests for selective aspects
+- Component tests for modal validation
+- E2E tests for real-time update mechanism
+
+---
+
+## IMPLEMENTATION PLAN - PHASE 2 DETAIL
+
+### Step 1: DynamicStandardService Extension
+
+**New Methods to Add:**
+
+```php
+// Check if aspect/sub-aspect is active
+public function isAspectActive(int $templateId, string $aspectCode): bool;
+public function isSubAspectActive(int $templateId, string $subAspectCode): bool;
+
+// Set aspect/sub-aspect active state
+public function setAspectActive(int $templateId, string $aspectCode, bool $active): void;
+public function setSubAspectActive(int $templateId, string $subAspectCode, bool $active): void;
+
+// Get all active aspects/sub-aspects for a template
+public function getActiveAspects(int $templateId): array;
+public function getActiveSubAspects(int $templateId): array;
+
+// Bulk save from modal
+public function saveBulkSelection(int $templateId, array $data): void;
+
+// Validation
+public function validateSelection(int $templateId, array $data): array;
+// Returns: ['errors' => [...], 'valid' => true/false]
+```
+
+**Validation Rules:**
+```php
+public function validateSelection(int $templateId, array $data): array
+{
+    $errors = [];
+
+    // 1. Minimum 3 aspects per category
+    $potensiActive = array_filter($data['active_aspects']['potensi'] ?? []);
+    if (count($potensiActive) < 3) {
+        $errors[] = 'Minimal 3 aspek Potensi harus aktif';
+    }
+
+    $kompetensiActive = array_filter($data['active_aspects']['kompetensi'] ?? []);
+    if (count($kompetensiActive) < 3) {
+        $errors[] = 'Minimal 3 aspek Kompetensi harus aktif';
+    }
+
+    // 2. Total weight must be 100% per category
+    $potensiWeightTotal = array_sum($data['aspect_weights']['potensi'] ?? []);
+    if ($potensiWeightTotal !== 100) {
+        $errors[] = "Total bobot Potensi harus 100% (saat ini: {$potensiWeightTotal}%)";
+    }
+
+    $kompetensiWeightTotal = array_sum($data['aspect_weights']['kompetensi'] ?? []);
+    if ($kompetensiWeightTotal !== 100) {
+        $errors[] = "Total bobot Kompetensi harus 100% (saat ini: {$kompetensiWeightTotal}%)";
+    }
+
+    // 3. Each active aspect must have at least 1 active sub-aspect (Potensi only)
+    foreach ($data['active_aspects']['potensi'] as $aspectCode => $isActive) {
+        if ($isActive) {
+            $subAspects = $data['active_sub_aspects'][$aspectCode] ?? [];
+            $activeSubAspects = array_filter($subAspects);
+            if (count($activeSubAspects) < 1) {
+                $errors[] = "Aspek {$aspectCode} harus memiliki minimal 1 sub-aspek aktif";
+            }
+        }
+    }
+
+    return [
+        'valid' => empty($errors),
+        'errors' => $errors,
+    ];
+}
+```
+
+### Step 2: SelectiveAspectsModal Component
+
+**Component Structure:**
+```php
+namespace App\Livewire\Components;
+
+use App\Models\AssessmentTemplate;
+use App\Models\CategoryType;
+use App\Services\DynamicStandardService;
+use Livewire\Attributes\Computed;
+use Livewire\Component;
+
+class SelectiveAspectsModal extends Component
+{
+    public int $templateId;
+    public string $categoryCode; // 'potensi' or 'kompetensi'
+    public bool $show = false;
+
+    public array $selectedAspects = [];
+    public array $selectedSubAspects = [];
+    public array $aspectWeights = [];
+
+    protected $listeners = ['openSelectionModal'];
+
+    public function mount(int $templateId, string $categoryCode): void
+    {
+        $this->templateId = $templateId;
+        $this->categoryCode = $categoryCode;
+        $this->loadCurrentSelection();
+    }
+
+    private function loadCurrentSelection(): void
+    {
+        // Load from session or default to all active
+    }
+
+    #[Computed]
+    public function validationErrors(): array
+    {
+        // Real-time validation
+    }
+
+    #[Computed]
+    public function totalWeight(): int
+    {
+        return array_sum($this->aspectWeights);
+    }
+
+    public function toggleAspect(string $aspectCode): void
+    {
+        // When aspect unchecked, auto-uncheck all sub-aspects
+        // Set weight to 0
+    }
+
+    public function applySelection(): void
+    {
+        // Validate, save to session, dispatch event, close modal
+    }
+}
+```
+
+### Step 3: StandardPsikometrik & StandardMc Updates
+
+**Add to both components:**
+
+1. **Inline editing for cells:**
+```php
+public bool $showEditWeightModal = false;
+public bool $showEditRatingModal = false;
+public string $editingField = '';
+public $editingValue = null;
+
+public function openEditWeight(string $aspectCode, int $currentWeight): void
+{
+    $this->editingField = $aspectCode;
+    $this->editingValue = $currentWeight;
+    $this->showEditWeightModal = true;
+}
+
+public function saveWeight(): void
+{
+    $this->dynamicStandardService->saveAspectWeight(
+        $this->templateId,
+        $this->editingField,
+        $this->editingValue
+    );
+
+    $this->showEditWeightModal = false;
+    $this->dispatch('standard-adjusted', templateId: $this->templateId);
+}
+```
+
+2. **Visual indicators in blade:**
+```blade
+@php
+    $isAdjusted = $dynamicStandardService->hasAspectWeightAdjustment($templateId, $aspect->code);
+    $weight = $dynamicStandardService->getAspectWeight($templateId, $aspect->code);
+    $originalWeight = $aspect->weight_percentage;
+@endphp
+
+<td class="px-4 py-2">
+    <span
+        wire:click="openEditWeight('{{ $aspect->code }}', {{ $weight }})"
+        class="cursor-pointer px-2 py-1 rounded transition-colors
+            {{ $isAdjusted ? 'bg-amber-50 border border-amber-300' : 'hover:bg-gray-100' }}"
+        title="Klik untuk edit"
+    >
+        {{ $weight }}%
+        @if($isAdjusted)
+            <span class="text-amber-600">⚡</span>
+            <span class="text-xs text-gray-500">(asli: {{ $originalWeight }}%)</span>
+        @endif
+    </span>
+</td>
+```
+
+### Step 4: Add Listeners to 12 Other Components
+
+**Template for each component:**
+```php
+protected $listeners = [
+    'standard-adjusted' => 'handleStandardUpdate',
+];
+
+public function handleStandardUpdate($templateId)
+{
+    // Get current template being viewed
+    $currentTemplateId = $this->getCurrentTemplateId();
+
+    if ($currentTemplateId === $templateId) {
+        // Refresh component data
+        $this->loadData();
+        // or $this->dispatch('$refresh');
+    }
+}
+
+private function getCurrentTemplateId(): ?int
+{
+    // Logic to get template ID from current event/position
+    // Example: $this->event->positionFormation->template_id
+}
+```
+
+---
 
 This architecture is clean, secure, and maintainable! 🚀
