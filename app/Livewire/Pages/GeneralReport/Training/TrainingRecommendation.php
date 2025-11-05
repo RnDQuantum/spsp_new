@@ -29,7 +29,7 @@ class TrainingRecommendation extends Component
     public int $tolerancePercentage = 10;
 
     // Pagination
-    public int $perPage = 10;
+    public string $perPage = '10';
 
     // Summary data
     public int $totalParticipants = 0;
@@ -131,6 +131,12 @@ class TrainingRecommendation extends Component
             'passing' => $this->notRecommendedCount,
             'total' => $this->totalParticipants,
         ]);
+    }
+
+    public function updatedPerPage()
+    {
+        $this->perPage = $this->perPage === 'all' ? 999999 : (int) $this->perPage;
+        $this->resetPage();
     }
 
     /**

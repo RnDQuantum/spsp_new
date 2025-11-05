@@ -107,6 +107,20 @@
             </tr>
         </table>
 
+        <div class="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm">
+            <div class="flex items-center gap-2 mb-3">
+                <span class="text-gray-700 dark:text-gray-300">Show:</span>
+                <select wire:model.live="perPage"
+                    class="px-2 py-1 text-sm border rounded dark:bg-gray-800 dark:border-gray-600">
+                    <option value="10">10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                    <option value="all">All</option>
+                </select>
+            </div>
+        </div>
+
         <!-- TABLE DATA: Participants -->
         <div class="overflow-x-auto mt-4 relative">
             <!-- Loading Indicator - Inside Container -->
