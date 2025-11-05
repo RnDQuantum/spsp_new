@@ -55,11 +55,11 @@
                         <td class="border border-black dark:border-gray-600 px-3 py-2">2.60 - 3.40</td>
                     </tr>
                     <tr class="bg-white dark:bg-gray-800">
-                        <td class="border border-black dark:border-gray-600 px-3 py-2 text-center">IV (Sangat Baik)</td>
+                        <td class="border border-black dark:border-gray-600 px-3 py-2 text-center">IV (Baik Sekali)</td>
                         <td class="border border-black dark:border-gray-600 px-3 py-2">3.40 - 4.20</td>
                     </tr>
                     <tr class="bg-white dark:bg-gray-800">
-                        <td class="border border-black dark:border-gray-600 px-3 py-2 text-center">V (Baik Sekali)</td>
+                        <td class="border border-black dark:border-gray-600 px-3 py-2 text-center">V (Sangat Baik)</td>
                         <td class="border border-black dark:border-gray-600 px-3 py-2">4.20 - 5.00</td>
                     </tr>
                 </tbody>
@@ -185,6 +185,14 @@
                                     font: {
                                         size: 14,
                                         weight: 'bold'
+                                    },
+                                    // ========== TAMBAHKAN CALLBACK INI ==========
+                                    callback: function(value, index) {
+                                        const labels = ['I', 'II', 'III', 'IV', 'V'];
+                                        const descriptions = ['Kurang Baik', 'Cukup Baik', 'Baik',
+                                            'Baik Sekali', 'Sangat Baik'
+                                        ];
+                                        return [labels[index], descriptions[index]];
                                     }
                                 }
                             },
