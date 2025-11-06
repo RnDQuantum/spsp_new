@@ -442,22 +442,30 @@ class DynamicStandardService
         if (isset($data['active_aspects'])) {
             $potensiActiveCount = 0;
             $kompetensiActiveCount = 0;
+            $hasPotensiData = false;
+            $hasKompetensiData = false;
 
             foreach ($data['active_aspects'] as $aspectCode => $isActive) {
-                if ($isActive) {
-                    if (isset($potensiAspects[$aspectCode])) {
+                if (isset($potensiAspects[$aspectCode])) {
+                    $hasPotensiData = true;
+                    if ($isActive) {
                         $potensiActiveCount++;
-                    } elseif (isset($kompetensiAspects[$aspectCode])) {
+                    }
+                } elseif (isset($kompetensiAspects[$aspectCode])) {
+                    $hasKompetensiData = true;
+                    if ($isActive) {
                         $kompetensiActiveCount++;
                     }
                 }
             }
 
-            if ($potensiActiveCount > 0 && $potensiActiveCount < 3) {
+            // If we have potensi data, must have at least 3 active
+            if ($hasPotensiData && $potensiActiveCount < 3) {
                 $errors[] = "Minimal 3 aspek Potensi harus aktif (saat ini: {$potensiActiveCount})";
             }
 
-            if ($kompetensiActiveCount > 0 && $kompetensiActiveCount < 3) {
+            // If we have kompetensi data, must have at least 3 active
+            if ($hasKompetensiData && $kompetensiActiveCount < 3) {
                 $errors[] = "Minimal 3 aspek Kompetensi harus aktif (saat ini: {$kompetensiActiveCount})";
             }
         }
