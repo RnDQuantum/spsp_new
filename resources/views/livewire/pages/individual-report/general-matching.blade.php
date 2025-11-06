@@ -14,7 +14,7 @@
         --gradient-low: #FF0000;
         /* --gradient-medium: #f59e0b; */
         --gradient-medium: #FFFF00;
-        --gradient-high: #00FF00;
+        --gradient-high: #00cc00;
         --yellow-light: #fef3c7;
         --yellow-dark: #92400e;
         --green-success: #15803d;
@@ -27,7 +27,7 @@
         --bg-header: #1e40af;
         --bg-row-odd: #374151;
         --bg-row-even: #4b5563;
-        --bg-empty: ##374151;
+        --bg-empty: #374151;
         --text-primary: #f9fafb;
         --text-secondary: #d1d5db;
         --border-color: #4b5563;
@@ -35,7 +35,7 @@
         --gradient-low: #FF0000;
         /* --gradient-medium: #f59e0b; */
         --gradient-medium: #FFFF00;
-        --gradient-high: #00FF00;
+        --gradient-high: #00cc00;
         --yellow-light: #78350f;
         --yellow-dark: #fef3c7;
         --green-success: #22c55e;
@@ -94,12 +94,14 @@
     }
 
     .rating-cell-4 {
-        background: linear-gradient(90deg, #ccff33, #66ff66);
+        background: linear-gradient(90deg, #ccff33, #33cc33);
+        /* Berakhir di hijau sedang */
         color: black;
     }
 
     .rating-cell-5 {
-        background: linear-gradient(90deg, #66ff66, #00cc00);
+        background: linear-gradient(90deg, #33cc33, #00cc00);
+        /* Mulai dari hijau sedang */
         color: black;
     }
 
@@ -125,7 +127,7 @@
     .dark .rating-cell-standard-3,
     .dark .rating-cell-standard-4,
     .dark .rating-cell-standard-5 {
-        background: #000000;
+        background: #1a1c1e;
         /* Abu-abu sedang untuk dark mode */
         color: #f9fafb;
         /* Text terang */
@@ -156,11 +158,11 @@
     }
 
     .rating-cell-individual.below-standard {
-        background: linear-gradient(135deg, var(--gradient-low), #b91c1c);
+        background: var(--gradient-low);
     }
 
     .rating-cell-individual.above-standard {
-        background: linear-gradient(135deg, var(--gradient-high), #047857);
+        background: var(--gradient-high);
     }
 
     /* Rating Display */
@@ -266,7 +268,7 @@
     <div class="overflow-x-auto">
         <table class="w-full border-collapse">
             <thead>
-                <tr class="bg-gray-100 dark:bg-gray-700">
+                <tr class="bg-gray-100 dark:bg-gray-800">
                     <th class="border border-gray-300 dark:border-gray-600 px-4 py-2 text-center text-sm font-bold text-black dark:text-white col-number"
                         rowspan="3">NO.</th>
                     <th class="border border-gray-300 dark:border-gray-600 px-4 py-2 text-center text-sm font-bold text-black dark:text-white"
@@ -277,7 +279,7 @@
                     <th class="border border-gray-300 dark:border-gray-600 px-2 py-2 text-center text-xs font-bold text-black dark:text-white range-scale"
                         colspan="5">RATING</th>
                 </tr>
-                <tr class="bg-gray-100 dark:bg-gray-700">
+                <tr class="bg-gray-100 dark:bg-gray-800">
                     <th
                         class="border border-gray-300 dark:border-gray-600 px-2 py-1 text-center text-xs text-black dark:text-white ">
                         1</th>
@@ -315,7 +317,7 @@
             <tbody>
                 <!-- ASPEK PSIKOLOGI (POTENSI) -->
                 @if ($showPotensi && $potensiCategory && count($potensiAspects) > 0)
-                    <tr class="bg-gray-100 dark:bg-gray-600">
+                    <tr class="bg-gray-100 dark:bg-gray-800">
                         <td class="border border-gray-300 dark:border-gray-600 px-4 py-2 font-bold text-sm text-black dark:text-white uppercase"
                             colspan="8">
                             {{ $potensiCategory->name }}
@@ -324,7 +326,7 @@
 
                     @foreach ($potensiAspects as $index => $aspect)
                         <!-- Aspect Header with Progress Bar -->
-                        <tr class="bg-gray-100 dark:bg-gray-600">
+                        <tr class="bg-gray-100 dark:bg-gray-800">
                             <td
                                 class="border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm font-bold text-black dark:text-white text-center">
                                 {{ $loop->iteration }}.</td>
@@ -386,7 +388,7 @@
                                     <td
                                         class="border border-gray-300 dark:border-gray-600 range-scale text-center {{ $cellClass }}">
                                         @if ($isIndividual)
-                                            X
+                                            {{ $isAboveStandard ? '✓' : '✗' }}
                                         @endif
                                     </td>
                                 @endfor
@@ -397,7 +399,7 @@
 
                 <!-- ASPEK KOMPETENSI -->
                 @if ($showKompetensi && $kompetensiCategory && count($kompetensiAspects) > 0)
-                    <tr class="bg-gray-100 dark:bg-gray-600">
+                    <tr class="bg-gray-100 dark:bg-gray-800">
                         <td class="border border-gray-300 dark:border-gray-600 px-4 py-2 font-bold text-sm text-black dark:text-white uppercase"
                             colspan="8">
                             {{ $kompetensiCategory->name }}
@@ -406,7 +408,7 @@
 
                     @foreach ($kompetensiAspects as $index => $aspect)
                         <!-- Aspect Header with Progress Bar -->
-                        <tr class="bg-gray-100 dark:bg-gray-600">
+                        <tr class="bg-gray-100 dark:bg-gray-800">
                             <td
                                 class="border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm font-bold text-black dark:text-white text-center">
                                 {{ $loop->iteration }}.</td>
@@ -468,7 +470,7 @@
                                     <td
                                         class="border border-gray-300 dark:border-gray-600 range-scale text-center {{ $cellClass }}">
                                         @if ($isIndividual)
-                                            X
+                                            {{ $isAboveStandard ? '✓' : '✗' }}
                                         @endif
                                     </td>
                                 @endfor
@@ -505,7 +507,7 @@
                                     <td
                                         class="border border-gray-300 dark:border-gray-600 range-scale text-center {{ $cellClass }}">
                                         @if ($isIndividual)
-                                            X
+                                            {{ $isAboveStandard ? '✓' : '✗' }}
                                         @endif
                                     </td>
                                 @endfor
