@@ -32,11 +32,6 @@ class SelectiveAspectsModal extends Component
         'openSelectionModal' => 'open',
     ];
 
-    public function __construct()
-    {
-        parent::__construct();
-    }
-
     /**
      * Open modal and load data
      */

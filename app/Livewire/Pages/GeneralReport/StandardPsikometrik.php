@@ -5,6 +5,7 @@ namespace App\Livewire\Pages\GeneralReport;
 use App\Models\AssessmentEvent;
 use App\Models\AssessmentTemplate;
 use App\Models\CategoryType;
+use App\Services\DynamicStandardService;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -14,6 +15,7 @@ class StandardPsikometrik extends Component
     protected $listeners = [
         'event-selected' => 'handleEventSelected',
         'position-selected' => 'handlePositionSelected',
+        'standard-adjusted' => 'handleStandardUpdate',
     ];
 
     public ?AssessmentEvent $selectedEvent = null;
@@ -41,10 +43,28 @@ class StandardPsikometrik extends Component
     // Unique chart ID
     public string $chartId = '';
 
-    public function mount(): void
+    // PHASE 2C: Modal states for inline editing
+    public bool $showEditWeightModal = false;
+
+    public bool $showEditRatingModal = false;
+
+    public bool $showEditCategoryWeightModal = false;
+
+    public string $editingField = '';
+
+    public int|float|null $editingValue = null;
+
+    public int|float|null $editingOriginalValue = null;
+
+    // PHASE 2C: DynamicStandardService injected via mount()
+    protected DynamicStandardService $dynamicStandardService;
+
+    public function mount(DynamicStandardService $dynamicStandardService): void
     {
+        $this->dynamicStandardService = $dynamicStandardService;
+
         // Generate unique chart ID
-        $this->chartId = 'standardPsikometrik' . uniqid();
+        $this->chartId = 'standardPsikometrik'.uniqid();
 
         $this->loadStandardData();
     }
@@ -71,8 +91,175 @@ class StandardPsikometrik extends Component
         ]);
     }
 
+    /**
+     * PHASE 2C: Handle standard adjustment from SelectiveAspectsModal
+     */
+    public function handleStandardUpdate(int $templateId): void
+    {
+        // Only refresh if same template
+        if ($this->selectedTemplate && $this->selectedTemplate->id === $templateId) {
+            $this->loadStandardData();
 
+            // Re-dispatch chart update
+            $this->dispatch('chartDataUpdated', [
+                'labels' => $this->chartData['labels'],
+                'ratings' => $this->chartData['ratings'],
+                'scores' => $this->chartData['scores'],
+                'templateName' => $this->selectedTemplate?->name ?? 'Standard',
+                'maxScore' => $this->maxScore,
+            ]);
+        }
+    }
 
+    /**
+     * PHASE 2C: Open modal to edit category weight
+     */
+    public function openEditCategoryWeight(string $categoryCode, int $currentWeight): void
+    {
+        if (! $this->selectedTemplate) {
+            return;
+        }
+
+        $this->editingField = $categoryCode;
+        $this->editingValue = $currentWeight;
+        $this->editingOriginalValue = CategoryType::where('template_id', $this->selectedTemplate->id)
+            ->where('code', $categoryCode)
+            ->first()?->weight_percentage ?? $currentWeight;
+        $this->showEditCategoryWeightModal = true;
+    }
+
+    /**
+     * PHASE 2C: Save category weight adjustment
+     */
+    public function saveCategoryWeight(): void
+    {
+        if (! $this->selectedTemplate || ! is_int($this->editingValue)) {
+            return;
+        }
+
+        $this->dynamicStandardService->saveCategoryWeight(
+            $this->selectedTemplate->id,
+            $this->editingField,
+            $this->editingValue
+        );
+
+        $this->showEditCategoryWeightModal = false;
+        $this->dispatch('standard-adjusted', templateId: $this->selectedTemplate->id);
+    }
+
+    /**
+     * PHASE 2C: Open modal to edit aspect weight
+     */
+    public function openEditAspectWeight(string $aspectCode, int $currentWeight): void
+    {
+        if (! $this->selectedTemplate) {
+            return;
+        }
+
+        $this->editingField = $aspectCode;
+        $this->editingValue = $currentWeight;
+        $this->editingOriginalValue = \App\Models\Aspect::where('template_id', $this->selectedTemplate->id)
+            ->where('code', $aspectCode)
+            ->first()?->weight_percentage ?? $currentWeight;
+        $this->showEditWeightModal = true;
+    }
+
+    /**
+     * PHASE 2C: Save aspect weight adjustment
+     */
+    public function saveAspectWeight(): void
+    {
+        if (! $this->selectedTemplate || ! is_int($this->editingValue)) {
+            return;
+        }
+
+        $this->dynamicStandardService->saveAspectWeight(
+            $this->selectedTemplate->id,
+            $this->editingField,
+            $this->editingValue
+        );
+
+        $this->showEditWeightModal = false;
+        $this->dispatch('standard-adjusted', templateId: $this->selectedTemplate->id);
+    }
+
+    /**
+     * PHASE 2C: Open modal to edit sub-aspect rating
+     */
+    public function openEditSubAspectRating(string $subAspectCode, int $currentRating): void
+    {
+        if (! $this->selectedTemplate) {
+            return;
+        }
+
+        $this->editingField = $subAspectCode;
+        $this->editingValue = $currentRating;
+        $this->editingOriginalValue = \App\Models\SubAspect::whereHas('aspect', function ($query) {
+            $query->where('template_id', $this->selectedTemplate->id);
+        })->where('code', $subAspectCode)->first()?->standard_rating ?? $currentRating;
+        $this->showEditRatingModal = true;
+    }
+
+    /**
+     * PHASE 2C: Save sub-aspect rating adjustment
+     */
+    public function saveSubAspectRating(): void
+    {
+        if (! $this->selectedTemplate || ! is_int($this->editingValue)) {
+            return;
+        }
+
+        $this->dynamicStandardService->saveSubAspectRating(
+            $this->selectedTemplate->id,
+            $this->editingField,
+            $this->editingValue
+        );
+
+        $this->showEditRatingModal = false;
+        $this->dispatch('standard-adjusted', templateId: $this->selectedTemplate->id);
+    }
+
+    /**
+     * PHASE 2C: Open SelectiveAspectsModal
+     */
+    public function openSelectionModal(): void
+    {
+        if (! $this->selectedTemplate) {
+            return;
+        }
+
+        $this->dispatch('openSelectionModal', templateId: $this->selectedTemplate->id, categoryCode: 'potensi');
+    }
+
+    /**
+     * PHASE 2C: Reset all adjustments
+     */
+    public function resetAdjustments(): void
+    {
+        if (! $this->selectedTemplate) {
+            return;
+        }
+
+        $this->dynamicStandardService->resetAdjustments($this->selectedTemplate->id);
+        $this->dispatch('standard-adjusted', templateId: $this->selectedTemplate->id);
+    }
+
+    /**
+     * PHASE 2C: Close modals
+     */
+    public function closeModal(): void
+    {
+        $this->showEditWeightModal = false;
+        $this->showEditRatingModal = false;
+        $this->showEditCategoryWeightModal = false;
+        $this->editingField = '';
+        $this->editingValue = null;
+        $this->editingOriginalValue = null;
+    }
+
+    /**
+     * PHASE 2C: Load standard data with DynamicStandardService integration
+     */
     private function loadStandardData(): void
     {
         $this->categoryData = [];
@@ -93,7 +280,7 @@ class StandardPsikometrik extends Component
         $eventCode = session('filter.event_code');
         $positionFormationId = session('filter.position_formation_id');
 
-        if (!$eventCode || !$positionFormationId) {
+        if (! $eventCode || ! $positionFormationId) {
             return;
         }
 
@@ -102,7 +289,7 @@ class StandardPsikometrik extends Component
             ->where('code', $eventCode)
             ->first();
 
-        if (!$this->selectedEvent) {
+        if (! $this->selectedEvent) {
             return;
         }
 
@@ -111,24 +298,26 @@ class StandardPsikometrik extends Component
             ->where('id', $positionFormationId)
             ->first();
 
-        if (!$selectedPosition) {
+        if (! $selectedPosition) {
             return;
         }
 
         // Get template from the selected position
         $this->selectedTemplate = $selectedPosition->template;
 
-        if (!$this->selectedTemplate) {
+        if (! $this->selectedTemplate) {
             return;
         }
 
+        $templateId = $this->selectedTemplate->id;
+
         // Load ONLY Potensi category type with aspects and sub-aspects from selected position's template
         $categories = CategoryType::query()
-            ->where('template_id', $this->selectedTemplate->id)
+            ->where('template_id', $templateId)
             ->where('code', 'potensi')
             ->with([
-                'aspects' => fn($q) => $q->orderBy('order'),
-                'aspects.subAspects' => fn($q) => $q->orderBy('order'),
+                'aspects' => fn ($q) => $q->orderBy('order'),
+                'aspects.subAspects' => fn ($q) => $q->orderBy('order'),
             ])
             ->orderBy('order')
             ->get();
@@ -147,39 +336,68 @@ class StandardPsikometrik extends Component
             $categoryScoreSum = 0.0;
             $categorySubAspectStandardSum = 0.0;
 
-            foreach ($category->aspects as $aspect) {
-                $subAspectsData = [];
-                $subAspectsCount = $aspect->subAspects->count();
-                $subAspectsStandardSum = 0;
+            // PHASE 2C: Get adjusted category weight
+            $categoryWeight = $this->dynamicStandardService->getCategoryWeight($templateId, $category->code);
+            $categoryOriginalWeight = $category->weight_percentage;
 
-                foreach ($aspect->subAspects as $subAspect) {
-                    $subAspectsData[] = [
-                        'name' => $subAspect->name,
-                        'standard_rating' => $subAspect->standard_rating,
-                        'description' => $subAspect->description,
-                    ];
-                    $subAspectsStandardSum += $subAspect->standard_rating;
+            foreach ($category->aspects as $aspect) {
+                // PHASE 2C: Check if aspect is active
+                if (! $this->dynamicStandardService->isAspectActive($templateId, $aspect->code)) {
+                    continue; // Skip inactive aspects
                 }
 
-                // Calculate aspect average rating from sub-aspects
-                $aspectAvgRating = $subAspectsCount > 0
-                    ? round($subAspectsStandardSum / $subAspectsCount, 2)
-                    : $aspect->standard_rating;
+                // PHASE 2C: Get adjusted aspect weight
+                $aspectWeight = $this->dynamicStandardService->getAspectWeight($templateId, $aspect->code);
+                $aspectOriginalWeight = $aspect->weight_percentage;
 
-                // Calculate aspect score: rating × weight
-                $aspectScore = round($aspectAvgRating * $aspect->weight_percentage, 2);
+                $subAspectsData = [];
+                $activeSubAspectsCount = 0;
+                $activeSubAspectsStandardSum = 0;
+
+                foreach ($aspect->subAspects as $subAspect) {
+                    // PHASE 2C: Check if sub-aspect is active
+                    if (! $this->dynamicStandardService->isSubAspectActive($templateId, $subAspect->code)) {
+                        continue; // Skip inactive sub-aspects
+                    }
+
+                    // PHASE 2C: Get adjusted sub-aspect rating
+                    $subAspectRating = $this->dynamicStandardService->getSubAspectRating($templateId, $subAspect->code);
+                    $subAspectOriginalRating = $subAspect->standard_rating;
+
+                    $subAspectsData[] = [
+                        'code' => $subAspect->code,
+                        'name' => $subAspect->name,
+                        'standard_rating' => $subAspectRating,
+                        'original_rating' => $subAspectOriginalRating,
+                        'is_adjusted' => $subAspectRating !== $subAspectOriginalRating,
+                        'description' => $subAspect->description,
+                    ];
+                    $activeSubAspectsCount++;
+                    $activeSubAspectsStandardSum += $subAspectRating;
+                }
+
+                // Calculate aspect average rating from ACTIVE sub-aspects
+                $aspectAvgRating = $activeSubAspectsCount > 0
+                    ? round($activeSubAspectsStandardSum / $activeSubAspectsCount, 2)
+                    : $this->dynamicStandardService->getAspectRating($templateId, $aspect->code);
+
+                // Calculate aspect score: rating × adjusted weight
+                $aspectScore = round($aspectAvgRating * $aspectWeight, 2);
 
                 $aspectsData[] = [
+                    'code' => $aspect->code,
                     'name' => $aspect->name,
-                    'weight_percentage' => $aspect->weight_percentage,
+                    'weight_percentage' => $aspectWeight,
+                    'original_weight' => $aspectOriginalWeight,
+                    'is_weight_adjusted' => $aspectWeight !== $aspectOriginalWeight,
                     'standard_rating' => $aspectAvgRating,
-                    'sub_aspects_count' => $subAspectsCount,
+                    'sub_aspects_count' => $activeSubAspectsCount,
                     'sub_aspects' => $subAspectsData,
-                    'sub_aspects_standard_sum' => $subAspectsStandardSum,
+                    'sub_aspects_standard_sum' => $activeSubAspectsStandardSum,
                     'score' => $aspectScore,
                 ];
 
-                // For chart data - each aspect is a point on the chart
+                // For chart data - each ACTIVE aspect is a point on the chart
                 $this->chartData['labels'][] = $aspect->name;
                 $this->chartData['ratings'][] = $aspectAvgRating;
                 $this->chartData['scores'][] = $aspectScore;
@@ -187,16 +405,16 @@ class StandardPsikometrik extends Component
                 // Track maximum score for dynamic chart scaling
                 $this->maxScore = max($this->maxScore, $aspectScore);
 
-                $categoryAspectsCount += $subAspectsCount;
-                $categoryWeightSum += $aspect->weight_percentage;
+                $categoryAspectsCount += $activeSubAspectsCount;
+                $categoryWeightSum += $aspectWeight;
                 $categoryStandardRatingSum += $aspectAvgRating;
                 $categoryScoreSum += $aspectScore;
-                $categorySubAspectStandardSum += $subAspectsStandardSum;
+                $categorySubAspectStandardSum += $activeSubAspectsStandardSum;
                 $totalAspectRatingSum += $aspectAvgRating; // Track sum of aspect ratings
             }
 
             // Calculate category average rating
-            $categoryAspectCount = $category->aspects->count();
+            $categoryAspectCount = count($aspectsData);
             $categoryAvgRating = $categoryAspectCount > 0
                 ? round($categoryStandardRatingSum / $categoryAspectCount, 2)
                 : 0.0;
@@ -204,7 +422,9 @@ class StandardPsikometrik extends Component
             $this->categoryData[] = [
                 'name' => $category->name,
                 'code' => $category->code,
-                'weight_percentage' => $category->weight_percentage,
+                'weight_percentage' => $categoryWeight,
+                'original_weight' => $categoryOriginalWeight,
+                'is_weight_adjusted' => $categoryWeight !== $categoryOriginalWeight,
                 'aspects_count' => $categoryAspectsCount,
                 'standard_rating' => $categoryAvgRating,
                 'score' => $categoryScoreSum,

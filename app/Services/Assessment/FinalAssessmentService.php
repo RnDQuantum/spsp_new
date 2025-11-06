@@ -14,8 +14,7 @@ class FinalAssessmentService
 {
     public function __construct(
         private DynamicStandardService $dynamicStandardService
-    ) {
-    }
+    ) {}
 
     /**
      * Calculate final assessment from category assessments

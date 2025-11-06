@@ -1,7 +1,8 @@
-{{-- Selective Aspects Modal --}}
-@if ($show)
-    <div x-data="{ show: @entangle('show') }" x-show="show" x-cloak class="fixed inset-0 z-50 overflow-y-auto"
-        aria-labelledby="modal-title" role="dialog" aria-modal="true">
+{{-- Selective Aspects Modal - Always has root element for Livewire --}}
+<div>
+    @if ($show)
+        <div x-data="{ show: @entangle('show') }" x-show="show" x-cloak class="fixed inset-0 z-50 overflow-y-auto"
+            aria-labelledby="modal-title" role="dialog" aria-modal="true">
         {{-- Backdrop --}}
         <div class="fixed inset-0 bg-gray-900/75 dark:bg-gray-900/90 transition-opacity" aria-hidden="true"
             wire:click="close"></div>
@@ -181,5 +182,6 @@
                 </div>
             </div>
         </div>
-    </div>
-@endif
+        </div>
+    @endif
+</div>

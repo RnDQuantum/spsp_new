@@ -15,8 +15,7 @@ class CategoryService
 {
     public function __construct(
         private DynamicStandardService $dynamicStandardService
-    ) {
-    }
+    ) {}
 
     /**
      * Calculate category assessment from aspects

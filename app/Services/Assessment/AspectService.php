@@ -14,8 +14,8 @@ class AspectService
 {
     public function __construct(
         private DynamicStandardService $dynamicStandardService
-    ) {
-    }
+    ) {}
+
     /**
      * Calculate aspect assessment for Potensi (from sub-aspects)
      * PHASE 2E: Now integrated with DynamicStandardService

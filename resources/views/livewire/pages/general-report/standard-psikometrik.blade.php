@@ -36,6 +36,35 @@
                         </div>
                     @endif
                 </div>
+
+                {{-- PHASE 2C: Control Buttons --}}
+                <div class="mt-4 flex items-center justify-between gap-4">
+                    <div class="flex items-center gap-3">
+                        <button wire:click="openSelectionModal" type="button"
+                            class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            🎯 Pilih Aspek & Sub-Aspek
+                        </button>
+                        <button wire:click="resetAdjustments" type="button"
+                            class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500">
+                            ↻ Reset ke Default
+                        </button>
+                    </div>
+
+                    {{-- Adjustment Indicator --}}
+                    @php
+                        $hasAdjustments = app(\App\Services\DynamicStandardService::class)->hasAdjustments($selectedTemplate->id);
+                    @endphp
+                    @if($hasAdjustments)
+                        <div class="flex items-center gap-2 text-sm">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300">
+                                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                                </svg>
+                                Standar Disesuaikan
+                            </span>
+                        </div>
+                    @endif
+                </div>
             @endif
         </div>
 
@@ -112,9 +141,15 @@
                                         <td
                                             class="border border-black dark:border-gray-600 px-2 py-2 text-center font-bold">
                                             {{ $aspect['sub_aspects_count'] }}</td>
-                                        <td
-                                            class="border border-black dark:border-gray-600 px-2 py-2 text-center font-bold">
-                                            {{ $aspect['weight_percentage'] }}</td>
+                                        {{-- PHASE 2C: Clickable Weight Cell with Visual Indicator --}}
+                                        <td wire:click="openEditAspectWeight('{{ $aspect['code'] }}', {{ $aspect['weight_percentage'] }})"
+                                            class="border border-black dark:border-gray-600 px-2 py-2 text-center font-bold cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/20 {{ $aspect['is_weight_adjusted'] ?? false ? 'bg-amber-100 dark:bg-amber-900/30' : '' }}"
+                                            title="{{ ($aspect['is_weight_adjusted'] ?? false) ? 'Disesuaikan dari ' . $aspect['original_weight'] . '% - Klik untuk edit' : 'Klik untuk edit' }}">
+                                            {{ $aspect['weight_percentage'] }}
+                                            @if($aspect['is_weight_adjusted'] ?? false)
+                                                <span class="text-amber-600 dark:text-amber-400">⚡</span>
+                                            @endif
+                                        </td>
                                         <td
                                             class="border border-black dark:border-gray-600 px-2 py-2 text-center font-bold">
                                             {{ number_format($aspect['standard_rating'], 2) }}</td>
@@ -130,8 +165,15 @@
                                                 {{ $subIndex + 1 }}</td>
                                             <td class="border border-black dark:border-gray-600 px-2 py-2 pl-8">
                                                 {{ $subAspect['name'] }}</td>
-                                            <td class="border border-black dark:border-gray-600 px-2 py-2 text-center">
-                                                {{ $subAspect['standard_rating'] }}</td>
+                                            {{-- PHASE 2C: Clickable Rating Cell with Visual Indicator --}}
+                                            <td wire:click="openEditSubAspectRating('{{ $subAspect['code'] }}', {{ $subAspect['standard_rating'] }})"
+                                                class="border border-black dark:border-gray-600 px-2 py-2 text-center cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/20 {{ $subAspect['is_adjusted'] ?? false ? 'bg-amber-100 dark:bg-amber-900/30' : '' }}"
+                                                title="{{ ($subAspect['is_adjusted'] ?? false) ? 'Disesuaikan dari ' . $subAspect['original_rating'] . ' - Klik untuk edit' : 'Klik untuk edit' }}">
+                                                {{ $subAspect['standard_rating'] }}
+                                                @if($subAspect['is_adjusted'] ?? false)
+                                                    <span class="text-amber-600 dark:text-amber-400">⚡</span>
+                                                @endif
+                                            </td>
                                             <td class="border border-black dark:border-gray-600 px-2 py-2"></td>
                                             <td class="border border-black dark:border-gray-600 px-2 py-2"></td>
                                             <td class="border border-black dark:border-gray-600 px-2 py-2"></td>
@@ -270,6 +312,79 @@
             </div>
         </div>
     </div>
+
+    {{-- PHASE 2C: Include SelectiveAspectsModal Component --}}
+    @livewire('components.selective-aspects-modal')
+
+    {{-- PHASE 2C: Inline Edit Modals --}}
+
+    {{-- Edit Aspect Weight Modal --}}
+    @if($showEditWeightModal)
+        <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+            <div class="fixed inset-0 bg-gray-900/75 dark:bg-gray-900/90 transition-opacity" wire:click="closeModal"></div>
+            <div class="flex min-h-full items-center justify-center p-4">
+                <div class="relative w-full max-w-md bg-white dark:bg-gray-800 rounded-lg shadow-xl">
+                    <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Edit Bobot Aspek</h3>
+                    </div>
+                    <div class="px-6 py-4">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Bobot (%):
+                        </label>
+                        <input type="number" wire:model="editingValue" min="0" max="100"
+                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                        <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                            Nilai asli: {{ $editingOriginalValue }}%
+                        </p>
+                    </div>
+                    <div class="px-6 py-4 flex items-center justify-end gap-3">
+                        <button wire:click="closeModal" type="button"
+                            class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600">
+                            Batal
+                        </button>
+                        <button wire:click="saveAspectWeight" type="button"
+                            class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700">
+                            Simpan
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    {{-- Edit Sub-Aspect Rating Modal --}}
+    @if($showEditRatingModal)
+        <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+            <div class="fixed inset-0 bg-gray-900/75 dark:bg-gray-900/90 transition-opacity" wire:click="closeModal"></div>
+            <div class="flex min-h-full items-center justify-center p-4">
+                <div class="relative w-full max-w-md bg-white dark:bg-gray-800 rounded-lg shadow-xl">
+                    <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Edit Rating Sub-Aspek</h3>
+                    </div>
+                    <div class="px-6 py-4">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Rating (1-5):
+                        </label>
+                        <input type="number" wire:model="editingValue" min="1" max="5"
+                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                        <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                            Nilai asli: {{ $editingOriginalValue }}
+                        </p>
+                    </div>
+                    <div class="px-6 py-4 flex items-center justify-end gap-3">
+                        <button wire:click="closeModal" type="button"
+                            class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600">
+                            Batal
+                        </button>
+                        <button wire:click="saveSubAspectRating" type="button"
+                            class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700">
+                            Simpan
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
 
     @if (count($chartData['labels']) > 0)
         <script>

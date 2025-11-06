@@ -277,7 +277,7 @@ class DynamicStandardService
         $adjustments = $this->getAdjustments($templateId);
 
         // If not set in session, default is active (true)
-        if (!isset($adjustments['active_aspects'][$aspectCode])) {
+        if (! isset($adjustments['active_aspects'][$aspectCode])) {
             return true;
         }
 
@@ -292,7 +292,7 @@ class DynamicStandardService
         $adjustments = $this->getAdjustments($templateId);
 
         // If not set in session, default is active (true)
-        if (!isset($adjustments['active_sub_aspects'][$subAspectCode])) {
+        if (! isset($adjustments['active_sub_aspects'][$subAspectCode])) {
             return true;
         }
 
@@ -309,7 +309,7 @@ class DynamicStandardService
         $adjustments['adjusted_at'] = now()->toDateTimeString();
 
         // If aspect is disabled, set weight to 0
-        if (!$active) {
+        if (! $active) {
             $adjustments['aspect_weights'][$aspectCode] = 0;
         }
 
@@ -338,7 +338,7 @@ class DynamicStandardService
         $adjustments = $this->getAdjustments($templateId);
 
         // If no active_aspects set, return all aspects as active
-        if (!isset($adjustments['active_aspects'])) {
+        if (! isset($adjustments['active_aspects'])) {
             $template = AssessmentTemplate::with('aspects')->findOrFail($templateId);
 
             return $template->aspects->pluck('code')->toArray();
@@ -358,7 +358,7 @@ class DynamicStandardService
         $adjustments = $this->getAdjustments($templateId);
 
         // If no active_sub_aspects set, return all sub-aspects as active
-        if (!isset($adjustments['active_sub_aspects'])) {
+        if (! isset($adjustments['active_sub_aspects'])) {
             $template = AssessmentTemplate::with('aspects.subAspects')->findOrFail($templateId);
             $subAspects = [];
 
