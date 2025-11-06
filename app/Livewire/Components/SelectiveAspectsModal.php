@@ -52,16 +52,10 @@ class SelectiveAspectsModal extends Component
     {
         $dynamicService = app(DynamicStandardService::class);
         $template = AssessmentTemplate::with([
-            'categoryTypes',
-            'aspects' => fn ($q) => $q->where('category_type_id', function ($query) {
-                $query->select('id')
-                    ->from('category_types')
-                    ->where('template_id', $this->templateId)
-                    ->where('code', $this->categoryCode)
-                    ->limit(1);
+            'aspects' => fn($q) => $q->whereHas('categoryType', function ($query) {
+                $query->where('code', $this->categoryCode);
             })->orderBy('order'),
-            'aspects.categoryType',
-            'aspects.subAspects' => fn ($q) => $q->orderBy('order'),
+            'aspects.subAspects' => fn($q) => $q->orderBy('order'),
         ])->findOrFail($this->templateId);
 
         // Initialize selection state from session (or default to all active)
@@ -215,16 +209,10 @@ class SelectiveAspectsModal extends Component
     public function templateAspects()
     {
         return AssessmentTemplate::with([
-            'categoryTypes',
-            'aspects' => fn ($q) => $q->where('category_type_id', function ($query) {
-                $query->select('id')
-                    ->from('category_types')
-                    ->where('template_id', $this->templateId)
-                    ->where('code', $this->categoryCode)
-                    ->limit(1);
+            'aspects' => fn($q) => $q->whereHas('categoryType', function ($query) {
+                $query->where('code', $this->categoryCode);
             })->orderBy('order'),
-            'aspects.categoryType',
-            'aspects.subAspects' => fn ($q) => $q->orderBy('order'),
+            'aspects.subAspects' => fn($q) => $q->orderBy('order'),
         ])->findOrFail($this->templateId)->aspects;
     }
 
@@ -268,7 +256,7 @@ class SelectiveAspectsModal extends Component
     #[Computed]
     public function activeAspectsCount(): int
     {
-        return count(array_filter($this->selectedAspects, fn ($active) => $active === true));
+        return count(array_filter($this->selectedAspects, fn($active) => $active === true));
     }
 
     /**
