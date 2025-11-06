@@ -80,30 +80,21 @@ class SelectiveAspectsModal extends Component
     }
 
     /**
-     * Toggle aspect active/inactive
+     * Watch for changes to selectedAspects and trigger side effects
+     * This is called automatically by Livewire when selectedAspects changes via wire:model.live
      */
-    public function toggleAspect(string $aspectCode): void
+    public function updatedSelectedAspects($value, $key): void
     {
-        $this->selectedAspects[$aspectCode] = ! $this->selectedAspects[$aspectCode];
-
+        // $key is the aspect code, $value is the new boolean value
         // If unchecked, auto-uncheck all sub-aspects and set weight to 0
-        if (! $this->selectedAspects[$aspectCode]) {
-            if (isset($this->selectedSubAspects[$aspectCode])) {
-                foreach ($this->selectedSubAspects[$aspectCode] as $subCode => $val) {
-                    $this->selectedSubAspects[$aspectCode][$subCode] = false;
+        if (! $value) {
+            if (isset($this->selectedSubAspects[$key])) {
+                foreach ($this->selectedSubAspects[$key] as $subCode => $val) {
+                    $this->selectedSubAspects[$key][$subCode] = false;
                 }
             }
-            $this->aspectWeights[$aspectCode] = 0;
+            $this->aspectWeights[$key] = 0;
         }
-    }
-
-    /**
-     * Toggle sub-aspect active/inactive
-     */
-    public function toggleSubAspect(string $aspectCode, string $subAspectCode): void
-    {
-        $this->selectedSubAspects[$aspectCode][$subAspectCode] =
-            ! $this->selectedSubAspects[$aspectCode][$subAspectCode];
     }
 
     /**

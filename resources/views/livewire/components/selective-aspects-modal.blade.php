@@ -48,7 +48,6 @@
                             <div class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700/50">
                                 {{-- Checkbox --}}
                                 <input type="checkbox" wire:model.live="selectedAspects.{{ $aspect->code }}"
-                                    wire:click="toggleAspect('{{ $aspect->code }}')"
                                     class="w-5 h-5 rounded text-blue-600 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600">
 
                                 {{-- Expand/Collapse Button (for Potensi) --}}
@@ -102,7 +101,6 @@
                                             {{-- Sub-Aspect Checkbox --}}
                                             <input type="checkbox"
                                                 wire:model.live="selectedSubAspects.{{ $aspect->code }}.{{ $subAspect->code }}"
-                                                wire:click="toggleSubAspect('{{ $aspect->code }}', '{{ $subAspect->code }}')"
                                                 class="w-4 h-4 rounded text-blue-600 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600"
                                                 {{ ! ($selectedAspects[$aspect->code] ?? true) ? 'disabled' : '' }}>
 
