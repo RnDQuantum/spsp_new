@@ -148,7 +148,7 @@
                             title="{{ ($aspect['is_weight_adjusted'] ?? false) ? 'Disesuaikan dari ' . $aspect['original_weight'] . '% - Edit via modal Pilih Aspek' : '' }}">
                             {{ $aspect['weight_percentage'] }}
                             @if($aspect['is_weight_adjusted'] ?? false)
-                            <span class="text-amber-600 dark:text-amber-400">⚡</span>
+                            <span class="text-amber-600 dark:text-amber-400"></span>
                             @endif
                         </td>
                         <td class="border border-black dark:border-gray-600 px-2 py-2 text-center font-bold">
