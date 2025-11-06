@@ -2,7 +2,7 @@
     <div class="mx-auto my-8 shadow overflow-hidden max-w-6xl bg-white dark:bg-gray-800">
 
         <!-- Header - DARK MODE READY -->
-        <div class="border-b-4 border-black py-4 bg-white dark:bg-gray-700">
+        <div class="border-b-4 border-black py-4 bg-gray-200 dark:bg-gray-700">
             <h1 class="text-center text-2xl font-bold uppercase tracking-wide text-black dark:text-white">
                 RINGKASAN KOMPETENSI
             </h1>
@@ -51,7 +51,7 @@
         <div class="px-6 pb-6 bg-white dark:bg-gray-800">
             <table class="min-w-full border-2 border-black text-sm">
                 <thead>
-                    <tr class="bg-cyan-200 dark:bg-gray-700">
+                    <tr class="bg-gray-200 dark:bg-gray-700">
                         <th class="border-2 border-black px-3 py-3 font-bold text-center text-black dark:text-white w-10"
                             rowspan="2">
                             NO</th>
@@ -64,7 +64,7 @@
                             rowspan="2">
                             Kesimpulan</th>
                     </tr>
-                    <tr class="bg-cyan-200 dark:bg-gray-700">
+                    <tr class="bg-gray-200 dark:bg-gray-700">
                         <th
                             class="border-2 border-black px-3 py-2 font-bold text-center text-black dark:text-white w-12">
                             1</th>
@@ -106,19 +106,15 @@
                                 @endphp
                                 <td
                                     class="border-2 border-black px-3 py-3 text-center relative
-                                    @if ($isStandard) bg-gradient-to-r from-amber-200 to-amber-300 text-amber-800 font-bold @endif
-                                    @if ($isIndividual && !$isStandard) @if ($i == 1) bg-red-500 text-white font-bold text-lg
+                                    @if ($isIndividual) @if ($i == 1) bg-red-500 text-white font-bold text-lg
                                         @elseif($i == 2) bg-orange-500 text-white font-bold text-lg
                                         @elseif($i == 3) bg-amber-500 text-white font-bold text-lg
-                                        @elseif($i == 4) bg-emerald-500 text-white font-bold text-lg
-                                        @else bg-emerald-700 text-white font-bold text-lg @endif
+                                        @elseif($i == 4) bg-green-500 text-white font-bold text-lg
+                                        @else bg-green-700 text-white font-bold text-lg @endif
+@elseif ($isStandard)
+bg-gray-500 dark:bg-gray-500 font-bold text-white
                                     @endif">
-                                    @if ($isIndividual && $isStandard)
-                                        <span
-                                            class="inline-block px-1 py-0.5 rounded
-                                            @if ($i == 1) bg-red-500 @elseif($i == 2) bg-orange-500 @elseif($i == 3) bg-amber-500 @elseif($i == 4) bg-emerald-500 @else bg-emerald-700 @endif
-                                            text-white font-bold text-lg">√</span>
-                                    @elseif ($isIndividual)
+                                    @if ($isIndividual)
                                         √
                                     @endif
                                 </td>
@@ -139,7 +135,7 @@
             <div class="grid grid-cols-1 gap-2 text-sm text-black dark:text-gray-200">
                 <div class="flex items-center gap-3">
                     <div
-                        class="w-8 h-6 bg-gradient-to-r from-amber-200 to-amber-300 border-2 border-black flex items-center justify-center font-bold text-amber-800">
+                        class="w-8 h-6 bg-gray-500 border-2 border-black flex items-center justify-center font-bold text-gray-100">
                         S
                     </div>
                     <span><em>Standar</em></span>
@@ -164,13 +160,13 @@
                 </div>
                 <div class="flex items-center gap-3">
                     <div
-                        class="w-8 h-6 bg-emerald-500 border-2 border-black flex items-center justify-center font-bold text-white">
+                        class="w-8 h-6 bg-green-500 border-2 border-black flex items-center justify-center font-bold text-white">
                         √</div>
                     <span><em>Rating 4 - Baik</em></span>
                 </div>
                 <div class="flex items-center gap-3">
                     <div
-                        class="w-8 h-6 bg-emerald-700 border-2 border-black flex items-center justify-center font-bold text-white">
+                        class="w-8 h-6 bg-green-700 border-2 border-black flex items-center justify-center font-bold text-white">
                         √</div>
                     <span><em>Rating 5 - Baik Sekali</em></span>
                 </div>
