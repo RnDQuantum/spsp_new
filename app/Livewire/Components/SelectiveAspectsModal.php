@@ -11,15 +11,13 @@ use Livewire\Component;
 
 class SelectiveAspectsModal extends Component
 {
-    public int $templateId;
-
-    public string $categoryCode;
-
+    public int $templateId = 0;
+    public string $categoryCode = '';
     public bool $show = false;
+    public bool $dataLoaded = false;
 
     // Selected aspects and sub-aspects
     public array $selectedAspects = [];
-
     public array $selectedSubAspects = [];
 
     // Aspect weights (adjusted)
@@ -28,21 +26,71 @@ class SelectiveAspectsModal extends Component
     // Expanded aspects (for tree UI)
     public array $expandedAspects = [];
 
+    // Cache template data
+    private ?object $cachedTemplate = null;
+
     protected $listeners = [
         'openSelectionModal' => 'open',
+        'preloadModalData' => 'preload',
     ];
+
+    /**
+     * Mount component
+     */
+    public function mount(): void
+    {
+        // Initialize empty state to prevent errors
+        $this->resetState();
+    }
+
+    /**
+     * Reset component state
+     */
+    private function resetState(): void
+    {
+        $this->selectedAspects = [];
+        $this->selectedSubAspects = [];
+        $this->aspectWeights = [];
+        $this->expandedAspects = [];
+        $this->dataLoaded = false;
+    }
+
+    /**
+     * Preload modal data (optional - for better performance)
+     */
+    public function preload(int $templateId, string $categoryCode = 'potensi'): void
+    {
+        if ($this->templateId === $templateId && $this->categoryCode === $categoryCode) {
+            return; // Already loaded
+        }
+
+        $this->templateId = $templateId;
+        $this->categoryCode = $categoryCode;
+        $this->loadSelectionData();
+    }
 
     /**
      * Open modal and load data
      */
-    public function open(int $templateId, string $categoryCode): void
+    public function open(int $templateId, string $categoryCode = 'potensi'): void
     {
-        $this->templateId = $templateId;
-        $this->categoryCode = $categoryCode;
-
-        $this->loadSelectionData();
-
+        // Show modal immediately
         $this->show = true;
+
+        // If data not loaded or different template, load it
+        if (!$this->dataLoaded || $this->templateId !== $templateId || $this->categoryCode !== $categoryCode) {
+            $this->templateId = $templateId;
+            $this->categoryCode = $categoryCode;
+            
+            // Dispatch event to show loading state
+            $this->dispatch('modal-loading');
+            
+            // Load data
+            $this->loadSelectionData();
+        }
+
+        // Dispatch event that data is ready
+        $this->dispatch('modal-ready');
     }
 
     /**
@@ -50,50 +98,97 @@ class SelectiveAspectsModal extends Component
      */
     private function loadSelectionData(): void
     {
-        $dynamicService = app(DynamicStandardService::class);
-        $template = AssessmentTemplate::with([
-            'aspects' => fn($q) => $q->whereHas('categoryType', function ($query) {
-                $query->where('code', $this->categoryCode);
-            })->orderBy('order'),
-            'aspects.subAspects' => fn($q) => $q->orderBy('order'),
-        ])->findOrFail($this->templateId);
+        if ($this->templateId === 0) {
+            return;
+        }
 
-        // Initialize selection state from session (or default to all active)
-        foreach ($template->aspects as $aspect) {
-            $isActive = $dynamicService->isAspectActive($this->templateId, $aspect->code);
-            $this->selectedAspects[$aspect->code] = $isActive;
-            $this->aspectWeights[$aspect->code] = $dynamicService->getAspectWeight($this->templateId, $aspect->code);
+        try {
+            $dynamicService = app(DynamicStandardService::class);
+            
+            // Use eager loading to minimize queries
+            $template = AssessmentTemplate::with([
+                'aspects' => fn($q) => $q->whereHas('categoryType', function ($query) {
+                    $query->where('code', $this->categoryCode);
+                })->orderBy('order')->with('subAspects'),
+            ])->find($this->templateId);
 
-            // Initialize sub-aspects (for Potensi only)
-            if ($this->categoryCode === 'potensi') {
-                foreach ($aspect->subAspects as $subAspect) {
-                    $this->selectedSubAspects[$aspect->code][$subAspect->code] = $dynamicService->isSubAspectActive(
-                        $this->templateId,
-                        $subAspect->code
-                    );
+            if (!$template) {
+                $this->dataLoaded = false;
+                return;
+            }
+
+            // Cache template for computed properties
+            $this->cachedTemplate = $template;
+
+            // Initialize selection state from session (or default to all active)
+            foreach ($template->aspects as $aspect) {
+                $isActive = $dynamicService->isAspectActive($this->templateId, $aspect->code);
+                $this->selectedAspects[$aspect->code] = $isActive;
+                $this->aspectWeights[$aspect->code] = $dynamicService->getAspectWeight($this->templateId, $aspect->code);
+
+                // Initialize sub-aspects (for Potensi only)
+                if ($this->categoryCode === 'potensi' && $aspect->subAspects) {
+                    $this->selectedSubAspects[$aspect->code] = [];
+                    foreach ($aspect->subAspects as $subAspect) {
+                        $this->selectedSubAspects[$aspect->code][$subAspect->code] = $dynamicService->isSubAspectActive(
+                            $this->templateId,
+                            $subAspect->code
+                        );
+                    }
+                    // Expand by default for better UX
+                    $this->expandedAspects[$aspect->code] = true;
                 }
             }
 
-            // Expand all aspects by default
-            $this->expandedAspects[$aspect->code] = true;
+            $this->dataLoaded = true;
+            
+        } catch (\Exception $e) {
+            $this->dataLoaded = false;
+            logger()->error('Failed to load modal data: ' . $e->getMessage());
         }
     }
 
     /**
-     * Watch for changes to selectedAspects and trigger side effects
-     * This is called automatically by Livewire when selectedAspects changes via wire:model.live
+     * Watch for changes to selectedAspects
      */
     public function updatedSelectedAspects($value, $key): void
     {
-        // $key is the aspect code, $value is the new boolean value
         // If unchecked, auto-uncheck all sub-aspects and set weight to 0
-        if (! $value) {
+        if (!$value) {
             if (isset($this->selectedSubAspects[$key])) {
                 foreach ($this->selectedSubAspects[$key] as $subCode => $val) {
                     $this->selectedSubAspects[$key][$subCode] = false;
                 }
             }
             $this->aspectWeights[$key] = 0;
+        } else {
+            // If checked and weight is 0, set a default weight
+            if ($this->aspectWeights[$key] === 0) {
+                // Distribute weight evenly among active aspects
+                $activeCount = $this->activeAspectsCount;
+                if ($activeCount > 0) {
+                    $defaultWeight = intval(100 / $activeCount);
+                    $this->aspectWeights[$key] = $defaultWeight;
+                }
+            }
+            
+            // Auto-check at least one sub-aspect if none selected
+            if ($this->categoryCode === 'potensi' && isset($this->selectedSubAspects[$key])) {
+                $hasActiveSubAspect = false;
+                foreach ($this->selectedSubAspects[$key] as $subCode => $isActive) {
+                    if ($isActive) {
+                        $hasActiveSubAspect = true;
+                        break;
+                    }
+                }
+                if (!$hasActiveSubAspect) {
+                    // Auto-select first sub-aspect
+                    $firstKey = array_key_first($this->selectedSubAspects[$key]);
+                    if ($firstKey) {
+                        $this->selectedSubAspects[$key][$firstKey] = true;
+                    }
+                }
+            }
         }
     }
 
@@ -102,7 +197,7 @@ class SelectiveAspectsModal extends Component
      */
     public function toggleExpand(string $aspectCode): void
     {
-        $this->expandedAspects[$aspectCode] = ! ($this->expandedAspects[$aspectCode] ?? false);
+        $this->expandedAspects[$aspectCode] = !($this->expandedAspects[$aspectCode] ?? false);
     }
 
     /**
@@ -113,13 +208,16 @@ class SelectiveAspectsModal extends Component
         foreach ($this->selectedAspects as $code => $value) {
             $this->selectedAspects[$code] = true;
 
-            // Re-enable sub-aspects
+            // Re-enable all sub-aspects
             if (isset($this->selectedSubAspects[$code])) {
                 foreach ($this->selectedSubAspects[$code] as $subCode => $subValue) {
                     $this->selectedSubAspects[$code][$subCode] = true;
                 }
             }
         }
+        
+        // Auto-distribute weights
+        $this->autoDistributeWeights();
     }
 
     /**
@@ -141,11 +239,26 @@ class SelectiveAspectsModal extends Component
     }
 
     /**
-     * Update weight for an aspect
+     * Auto-distribute weights evenly among active aspects
      */
-    public function updateWeight(string $aspectCode, int $weight): void
+    public function autoDistributeWeights(): void
     {
-        $this->aspectWeights[$aspectCode] = $weight;
+        $activeAspects = array_filter($this->selectedAspects, fn($active) => $active === true);
+        $activeCount = count($activeAspects);
+        
+        if ($activeCount > 0) {
+            $weightPerAspect = intval(100 / $activeCount);
+            $remainder = 100 - ($weightPerAspect * $activeCount);
+            
+            $index = 0;
+            foreach ($this->selectedAspects as $code => $isActive) {
+                if ($isActive) {
+                    // Add remainder to first aspect to ensure total = 100
+                    $this->aspectWeights[$code] = $weightPerAspect + ($index === 0 ? $remainder : 0);
+                    $index++;
+                }
+            }
+        }
     }
 
     /**
@@ -155,8 +268,10 @@ class SelectiveAspectsModal extends Component
     {
         $validation = $this->validationResult;
 
-        if (! $validation['valid']) {
-            return; // Keep modal open, validation errors will show
+        if (!$validation['valid']) {
+            // Show validation errors via toast or alert
+            $this->dispatch('show-validation-error', errors: $validation['errors']);
+            return;
         }
 
         // Save to session via DynamicStandardService
@@ -182,7 +297,10 @@ class SelectiveAspectsModal extends Component
         $this->dispatch('standard-adjusted', templateId: $this->templateId);
 
         // Close modal
-        $this->show = false;
+        $this->close();
+        
+        // Show success message
+        $this->dispatch('show-success', message: 'Perubahan berhasil diterapkan');
     }
 
     /**
@@ -191,6 +309,8 @@ class SelectiveAspectsModal extends Component
     public function close(): void
     {
         $this->show = false;
+        // Reset state after small delay to avoid flicker
+        $this->dispatch('modal-closed');
     }
 
     /**
@@ -199,12 +319,20 @@ class SelectiveAspectsModal extends Component
     #[Computed]
     public function templateAspects()
     {
+        if (!$this->dataLoaded || $this->templateId === 0) {
+            return collect([]);
+        }
+
+        // Use cached template if available
+        if ($this->cachedTemplate && $this->cachedTemplate->id === $this->templateId) {
+            return $this->cachedTemplate->aspects;
+        }
+
         return AssessmentTemplate::with([
             'aspects' => fn($q) => $q->whereHas('categoryType', function ($query) {
                 $query->where('code', $this->categoryCode);
-            })->orderBy('order'),
-            'aspects.subAspects' => fn($q) => $q->orderBy('order'),
-        ])->findOrFail($this->templateId)->aspects;
+            })->orderBy('order')->with('subAspects'),
+        ])->find($this->templateId)?->aspects ?? collect([]);
     }
 
     /**
@@ -213,23 +341,42 @@ class SelectiveAspectsModal extends Component
     #[Computed]
     public function validationResult(): array
     {
-        $dynamicService = app(DynamicStandardService::class);
+        if (!$this->dataLoaded) {
+            return ['valid' => false, 'errors' => ['Data belum dimuat']];
+        }
 
-        $data = [
-            'active_aspects' => $this->selectedAspects,
-            'aspect_weights' => $this->aspectWeights,
-        ];
+        $errors = [];
 
+        // Check minimum active aspects (at least 3)
+        if ($this->activeAspectsCount < 3) {
+            $errors[] = 'Minimal 3 aspek harus aktif (saat ini: ' . $this->activeAspectsCount . ')';
+        }
+
+        // Check total weight must be 100%
+        $totalWeight = $this->totalWeight;
+        if ($totalWeight !== 100 && $this->activeAspectsCount > 0) {
+            $errors[] = 'Total bobot harus 100% (saat ini: ' . $totalWeight . '%)';
+        }
+
+        // For Potensi, check each active aspect has at least 1 active sub-aspect
         if ($this->categoryCode === 'potensi') {
-            $data['active_sub_aspects'] = [];
-            foreach ($this->selectedSubAspects as $aspectCode => $subAspects) {
-                foreach ($subAspects as $subCode => $isActive) {
-                    $data['active_sub_aspects'][$subCode] = $isActive;
+            foreach ($this->selectedAspects as $aspectCode => $isActive) {
+                if ($isActive && isset($this->selectedSubAspects[$aspectCode])) {
+                    $activeSubCount = count(array_filter(
+                        $this->selectedSubAspects[$aspectCode],
+                        fn($active) => $active === true
+                    ));
+                    if ($activeSubCount === 0) {
+                        $errors[] = "Aspek {$aspectCode} harus memiliki minimal 1 sub-aspek aktif";
+                    }
                 }
             }
         }
 
-        return $dynamicService->validateSelection($this->templateId, $data);
+        return [
+            'valid' => empty($errors),
+            'errors' => $errors,
+        ];
     }
 
     /**
@@ -238,7 +385,13 @@ class SelectiveAspectsModal extends Component
     #[Computed]
     public function totalWeight(): int
     {
-        return array_sum($this->aspectWeights);
+        $total = 0;
+        foreach ($this->aspectWeights as $code => $weight) {
+            if ($this->selectedAspects[$code] ?? false) {
+                $total += $weight;
+            }
+        }
+        return $total;
     }
 
     /**
