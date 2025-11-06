@@ -44,6 +44,7 @@ class DatabaseSeeder extends Seeder
         $this->command->info('📋 Seeding master data...');
         $this->call([
             InstitutionSeeder::class,
+            ClientSeeder::class,
             AssessmentTemplateSeeder::class,
             MasterDataSeeder::class,
         ]);
