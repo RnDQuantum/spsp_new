@@ -52,6 +52,7 @@ class SelectiveAspectsModal extends Component
     {
         $dynamicService = app(DynamicStandardService::class);
         $template = AssessmentTemplate::with([
+            'categoryTypes',
             'aspects' => fn ($q) => $q->where('category_type_id', function ($query) {
                 $query->select('id')
                     ->from('category_types')
@@ -59,6 +60,7 @@ class SelectiveAspectsModal extends Component
                     ->where('code', $this->categoryCode)
                     ->limit(1);
             })->orderBy('order'),
+            'aspects.categoryType',
             'aspects.subAspects' => fn ($q) => $q->orderBy('order'),
         ])->findOrFail($this->templateId);
 
@@ -213,6 +215,7 @@ class SelectiveAspectsModal extends Component
     public function templateAspects()
     {
         return AssessmentTemplate::with([
+            'categoryTypes',
             'aspects' => fn ($q) => $q->where('category_type_id', function ($query) {
                 $query->select('id')
                     ->from('category_types')
@@ -220,6 +223,7 @@ class SelectiveAspectsModal extends Component
                     ->where('code', $this->categoryCode)
                     ->limit(1);
             })->orderBy('order'),
+            'aspects.categoryType',
             'aspects.subAspects' => fn ($q) => $q->orderBy('order'),
         ])->findOrFail($this->templateId)->aspects;
     }
