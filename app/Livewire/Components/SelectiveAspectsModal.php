@@ -293,14 +293,21 @@ class SelectiveAspectsModal extends Component
 
         $dynamicService->saveBulkSelection($this->templateId, $dataToSave);
 
-        // Dispatch event for other components to refresh
-        $this->dispatch('standard-adjusted', templateId: $this->templateId);
+        // Show success message FIRST before closing
+        $this->dispatch('show-success', message: 'Perubahan berhasil diterapkan');
 
         // Close modal
-        $this->close();
+        $this->show = false;
         
-        // Show success message
-        $this->dispatch('show-success', message: 'Perubahan berhasil diterapkan');
+        // Dispatch event to parent component to refresh data
+        // Use dispatch()->to() for targeted dispatch or global dispatch
+        $this->dispatch('standard-adjusted', templateId: $this->templateId)->self();
+        
+        // Also dispatch directly to parent component
+        $this->dispatch('handleStandardUpdate', templateId: $this->templateId);
+        
+        // Dispatch browser event to close modal via Alpine
+        $this->dispatch('close-modal');
     }
 
     /**

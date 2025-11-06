@@ -3,7 +3,7 @@
     {{-- Modal Container with Alpine.js for instant display --}}
     <div x-data="selectiveAspectsModal()" x-on:open-selection-modal-instant.window="openModal()"
         x-on:modal-loading.window="loading = true" x-on:modal-ready.window="loading = false; dataReady = true"
-        x-on:modal-closed.window="handleClose()"
+        x-on:modal-closed.window="handleClose()" x-on:close-modal.window="isOpen = false; handleClose()"
         x-on:show-validation-error.window="showValidationError($event.detail.errors)"
         x-on:show-success.window="showSuccessMessage($event.detail.message)">
         {{-- Modal Wrapper --}}
@@ -294,6 +294,15 @@
                     message: ''
                 },
 
+                init() {
+                    // Listen for close-modal event
+                    this.$watch('$wire.show', (value) => {
+                        if (!value) {
+                            this.isOpen = false;
+                        }
+                    });
+                },
+
                 openModal() {
                     this.isOpen = true;
                     this.loading = true;
@@ -325,9 +334,11 @@
                     this.toast.type = 'success';
                     this.toast.message = message;
                     this.toast.show = true;
+                    // Close modal after showing success
                     setTimeout(() => {
                         this.toast.show = false;
-                    }, 3000);
+                        this.isOpen = false; // Close modal
+                    }, 2000);
                 }
             }
         }

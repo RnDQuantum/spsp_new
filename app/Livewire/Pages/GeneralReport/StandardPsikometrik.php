@@ -16,6 +16,7 @@ class StandardPsikometrik extends Component
         'event-selected' => 'handleEventSelected',
         'position-selected' => 'handlePositionSelected',
         'standard-adjusted' => 'handleStandardUpdate',
+        'handleStandardUpdate' => 'handleStandardUpdate',
     ];
 
     public ?AssessmentEvent $selectedEvent = null;
