@@ -4,20 +4,28 @@ declare(strict_types=1);
 
 namespace App\Services\Assessment;
 
+use App\Models\Aspect;
 use App\Models\AspectAssessment;
 use App\Models\CategoryAssessment;
 use App\Models\CategoryType;
 use App\Models\Participant;
+use App\Services\DynamicStandardService;
 
 class CategoryService
 {
+    public function __construct(
+        private DynamicStandardService $dynamicStandardService
+    ) {
+    }
+
     /**
      * Calculate category assessment from aspects
+     * PHASE 2E: Now integrated with DynamicStandardService - only sum ACTIVE aspects
      */
     public function calculateCategory(CategoryAssessment $categoryAssessment): void
     {
         // 1. Get all aspect assessments for this category
-        $aspectAssessments = AspectAssessment::where(
+        $aspectAssessments = AspectAssessment::with('aspect')->where(
             'category_assessment_id',
             $categoryAssessment->id
         )->get();
@@ -26,11 +34,24 @@ class CategoryService
             return;
         }
 
-        // 2. Aggregate all aspects (SUM)
-        $totalStandardRating = $aspectAssessments->sum('standard_rating');
-        $totalStandardScore = $aspectAssessments->sum('standard_score');
-        $totalIndividualRating = $aspectAssessments->sum('individual_rating');
-        $totalIndividualScore = $aspectAssessments->sum('individual_score');
+        // Get template ID from first aspect
+        $firstAspect = $aspectAssessments->first()->aspect;
+        $templateId = $firstAspect->template_id;
+
+        // PHASE 2E: Filter only ACTIVE aspects based on session
+        $activeAspectAssessments = $aspectAssessments->filter(function ($aspectAssessment) use ($templateId) {
+            return $this->dynamicStandardService->isAspectActive($templateId, $aspectAssessment->aspect->code);
+        });
+
+        if ($activeAspectAssessments->isEmpty()) {
+            return;
+        }
+
+        // 2. Aggregate only ACTIVE aspects (SUM)
+        $totalStandardRating = $activeAspectAssessments->sum('standard_rating');
+        $totalStandardScore = $activeAspectAssessments->sum('standard_score');
+        $totalIndividualRating = $activeAspectAssessments->sum('individual_rating');
+        $totalIndividualScore = $activeAspectAssessments->sum('individual_score');
 
         // 3. Calculate gaps
         $gapRating = $totalIndividualRating - $totalStandardRating;
