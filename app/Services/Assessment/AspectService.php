@@ -8,15 +8,25 @@ use App\Models\Aspect;
 use App\Models\AspectAssessment;
 use App\Models\CategoryAssessment;
 use App\Models\SubAspectAssessment;
+use App\Services\DynamicStandardService;
 
 class AspectService
 {
+    public function __construct(
+        private DynamicStandardService $dynamicStandardService
+    ) {}
+
     /**
      * Calculate aspect assessment for Potensi (from sub-aspects)
+     * PHASE 2E: Now integrated with DynamicStandardService
      */
     public function calculatePotensiAspect(AspectAssessment $aspectAssessment): void
     {
-        // 1. Get all sub-aspect assessments
+        // 1. Get aspect from master
+        $aspect = Aspect::with('subAspects')->findOrFail($aspectAssessment->aspect_id);
+        $templateId = $aspect->template_id;
+
+        // 2. Get all sub-aspect assessments (filter only active sub-aspects)
         $subAssessments = SubAspectAssessment::where(
             'aspect_assessment_id',
             $aspectAssessment->id
@@ -26,29 +36,40 @@ class AspectService
             return; // Skip if no sub-aspects
         }
 
-        // 2. Calculate individual_rating = AVERAGE of sub-aspects (DECIMAL)
-        $individualRating = $subAssessments->avg('individual_rating');
+        // PHASE 2E: Filter only ACTIVE sub-aspects based on session
+        $activeSubAssessments = $subAssessments->filter(function ($subAssessment) use ($templateId) {
+            $subAspect = $subAssessment->subAspect;
 
-        // 3. Get aspect from master for weight
-        $aspect = Aspect::findOrFail($aspectAssessment->aspect_id);
+            return $this->dynamicStandardService->isSubAspectActive($templateId, $subAspect->code);
+        });
 
-        // 4. Calculate scores
+        if ($activeSubAssessments->isEmpty()) {
+            return; // Skip if no active sub-aspects
+        }
+
+        // 3. Calculate individual_rating = AVERAGE of ACTIVE sub-aspects (DECIMAL)
+        $individualRating = $activeSubAssessments->avg('individual_rating');
+
+        // 4. Get adjusted weight from DynamicStandardService
+        $weight = $this->dynamicStandardService->getAspectWeight($templateId, $aspect->code);
+
+        // 5. Calculate scores using adjusted weight
         // Score = rating × weight_percentage
-        $standardScore = $aspectAssessment->standard_rating * $aspect->weight_percentage;
-        $individualScore = $individualRating * $aspect->weight_percentage;
+        $standardScore = $aspectAssessment->standard_rating * $weight;
+        $individualScore = $individualRating * $weight;
 
-        // 5. Calculate gaps
+        // 6. Calculate gaps
         $gapRating = $individualRating - $aspectAssessment->standard_rating;
         $gapScore = $individualScore - $standardScore;
 
-        // 6. Calculate percentage for spider chart (rating out of max scale 5)
+        // 7. Calculate percentage for spider chart (rating out of max scale 5)
         $percentageScore = (int) round(($individualRating / 5) * 100);
 
-        // 7. Determine conclusion
+        // 8. Determine conclusion
         $conclusionCode = $this->determineConclusion($gapRating);
         $conclusionText = $this->getConclusionText($conclusionCode);
 
-        // 8. Update aspect assessment
+        // 9. Update aspect assessment
         $aspectAssessment->update([
             'individual_rating' => round($individualRating, 2),
             'standard_score' => round($standardScore, 2),
@@ -63,6 +84,7 @@ class AspectService
 
     /**
      * Calculate aspect assessment for Kompetensi (direct from API)
+     * PHASE 2E: Now integrated with DynamicStandardService
      *
      * @param  int  $individualRating  From API (INTEGER 1-5)
      */
@@ -70,26 +92,30 @@ class AspectService
         AspectAssessment $aspectAssessment,
         int $individualRating
     ): void {
-        // 1. Get aspect from master for weight
+        // 1. Get aspect from master
         $aspect = Aspect::findOrFail($aspectAssessment->aspect_id);
+        $templateId = $aspect->template_id;
 
-        // 2. Calculate scores
+        // 2. Get adjusted weight from DynamicStandardService
+        $weight = $this->dynamicStandardService->getAspectWeight($templateId, $aspect->code);
+
+        // 3. Calculate scores using adjusted weight
         // Score = rating × weight_percentage
-        $standardScore = $aspectAssessment->standard_rating * $aspect->weight_percentage;
-        $individualScore = $individualRating * $aspect->weight_percentage;
+        $standardScore = $aspectAssessment->standard_rating * $weight;
+        $individualScore = $individualRating * $weight;
 
-        // 3. Calculate gaps
+        // 4. Calculate gaps
         $gapRating = $individualRating - $aspectAssessment->standard_rating;
         $gapScore = $individualScore - $standardScore;
 
-        // 4. Calculate percentage (rating out of max scale 5)
+        // 5. Calculate percentage (rating out of max scale 5)
         $percentageScore = (int) round(($individualRating / 5) * 100);
 
-        // 5. Determine conclusion
+        // 6. Determine conclusion
         $conclusionCode = $this->determineConclusion($gapRating);
         $conclusionText = $this->getConclusionText($conclusionCode);
 
-        // 6. Update aspect assessment
+        // 7. Update aspect assessment
         $aspectAssessment->update([
             'individual_rating' => $individualRating, // Already INTEGER from API
             'standard_score' => round($standardScore, 2),

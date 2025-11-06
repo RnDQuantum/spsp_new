@@ -8,22 +8,29 @@ use App\Models\CategoryAssessment;
 use App\Models\CategoryType;
 use App\Models\FinalAssessment;
 use App\Models\Participant;
+use App\Services\DynamicStandardService;
 
 class FinalAssessmentService
 {
+    public function __construct(
+        private DynamicStandardService $dynamicStandardService
+    ) {}
+
     /**
      * Calculate final assessment from category assessments
+     * PHASE 2E: Now integrated with DynamicStandardService - use adjusted category weights
      */
     public function calculateFinal(Participant $participant): FinalAssessment
     {
         $participant->loadMissing('positionFormation.template');
+        $templateId = $participant->positionFormation->template_id;
 
         // 1. Get category types from template (DYNAMIC - template from position, not event!)
-        $potensiCategory = CategoryType::where('template_id', $participant->positionFormation->template_id)
+        $potensiCategory = CategoryType::where('template_id', $templateId)
             ->where('code', 'potensi')
             ->firstOrFail();
 
-        $kompetensiCategory = CategoryType::where('template_id', $participant->positionFormation->template_id)
+        $kompetensiCategory = CategoryType::where('template_id', $templateId)
             ->where('code', 'kompetensi')
             ->firstOrFail();
 
@@ -36,11 +43,11 @@ class FinalAssessmentService
             ->where('category_type_id', $kompetensiCategory->id)
             ->firstOrFail();
 
-        // 3. Get weights from template (DYNAMIC!)
-        $potensiWeight = $potensiCategory->weight_percentage;
-        $kompetensiWeight = $kompetensiCategory->weight_percentage;
+        // 3. Get weights from DynamicStandardService (adjusted or original)
+        $potensiWeight = $this->dynamicStandardService->getCategoryWeight($templateId, 'potensi');
+        $kompetensiWeight = $this->dynamicStandardService->getCategoryWeight($templateId, 'kompetensi');
 
-        // 4. Calculate weighted scores
+        // 4. Calculate weighted scores using adjusted weights
         $totalStandardScore =
             ($potensiAssessment->total_standard_score * ($potensiWeight / 100)) +
             ($kompetensiAssessment->total_standard_score * ($kompetensiWeight / 100));

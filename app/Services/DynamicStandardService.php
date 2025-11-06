@@ -264,4 +264,293 @@ class DynamicStandardService
 
         return $errors;
     }
+
+    // ========================================
+    // PHASE 2A: FEATURE 4 - SELECTIVE ASPECTS/SUB-ASPECTS
+    // ========================================
+
+    /**
+     * Check if aspect is active (selected for analysis)
+     */
+    public function isAspectActive(int $templateId, string $aspectCode): bool
+    {
+        $adjustments = $this->getAdjustments($templateId);
+
+        // If not set in session, default is active (true)
+        if (! isset($adjustments['active_aspects'][$aspectCode])) {
+            return true;
+        }
+
+        return (bool) $adjustments['active_aspects'][$aspectCode];
+    }
+
+    /**
+     * Check if sub-aspect is active (selected for analysis)
+     */
+    public function isSubAspectActive(int $templateId, string $subAspectCode): bool
+    {
+        $adjustments = $this->getAdjustments($templateId);
+
+        // If not set in session, default is active (true)
+        if (! isset($adjustments['active_sub_aspects'][$subAspectCode])) {
+            return true;
+        }
+
+        return (bool) $adjustments['active_sub_aspects'][$subAspectCode];
+    }
+
+    /**
+     * Set aspect active/inactive status
+     */
+    public function setAspectActive(int $templateId, string $aspectCode, bool $active): void
+    {
+        $adjustments = $this->getAdjustments($templateId);
+        $adjustments['active_aspects'][$aspectCode] = $active;
+        $adjustments['adjusted_at'] = now()->toDateTimeString();
+
+        // If aspect is disabled, set weight to 0
+        if (! $active) {
+            $adjustments['aspect_weights'][$aspectCode] = 0;
+        }
+
+        Session::put($this->getSessionKey($templateId), $adjustments);
+    }
+
+    /**
+     * Set sub-aspect active/inactive status
+     */
+    public function setSubAspectActive(int $templateId, string $subAspectCode, bool $active): void
+    {
+        $adjustments = $this->getAdjustments($templateId);
+        $adjustments['active_sub_aspects'][$subAspectCode] = $active;
+        $adjustments['adjusted_at'] = now()->toDateTimeString();
+
+        Session::put($this->getSessionKey($templateId), $adjustments);
+    }
+
+    /**
+     * Get all active aspects for a template
+     *
+     * @return array Array of aspect codes that are active
+     */
+    public function getActiveAspects(int $templateId): array
+    {
+        $adjustments = $this->getAdjustments($templateId);
+
+        // If no active_aspects set, return all aspects as active
+        if (! isset($adjustments['active_aspects'])) {
+            $template = AssessmentTemplate::with('aspects')->findOrFail($templateId);
+
+            return $template->aspects->pluck('code')->toArray();
+        }
+
+        // Return only aspects where value is true
+        return array_keys(array_filter($adjustments['active_aspects'], fn ($active) => $active === true));
+    }
+
+    /**
+     * Get all active sub-aspects for a template
+     *
+     * @return array Array of sub-aspect codes that are active
+     */
+    public function getActiveSubAspects(int $templateId): array
+    {
+        $adjustments = $this->getAdjustments($templateId);
+
+        // If no active_sub_aspects set, return all sub-aspects as active
+        if (! isset($adjustments['active_sub_aspects'])) {
+            $template = AssessmentTemplate::with('aspects.subAspects')->findOrFail($templateId);
+            $subAspects = [];
+
+            foreach ($template->aspects as $aspect) {
+                foreach ($aspect->subAspects as $subAspect) {
+                    $subAspects[] = $subAspect->code;
+                }
+            }
+
+            return $subAspects;
+        }
+
+        // Return only sub-aspects where value is true
+        return array_keys(array_filter($adjustments['active_sub_aspects'], fn ($active) => $active === true));
+    }
+
+    /**
+     * Save bulk selection (aspects, sub-aspects, and weights)
+     *
+     * @param  array  $data  Contains: active_aspects, active_sub_aspects, aspect_weights
+     */
+    public function saveBulkSelection(int $templateId, array $data): void
+    {
+        $adjustments = $this->getAdjustments($templateId);
+
+        // Merge new data
+        if (isset($data['active_aspects'])) {
+            $adjustments['active_aspects'] = array_merge(
+                $adjustments['active_aspects'] ?? [],
+                $data['active_aspects']
+            );
+        }
+
+        if (isset($data['active_sub_aspects'])) {
+            $adjustments['active_sub_aspects'] = array_merge(
+                $adjustments['active_sub_aspects'] ?? [],
+                $data['active_sub_aspects']
+            );
+        }
+
+        if (isset($data['aspect_weights'])) {
+            $adjustments['aspect_weights'] = array_merge(
+                $adjustments['aspect_weights'] ?? [],
+                $data['aspect_weights']
+            );
+        }
+
+        $adjustments['adjusted_at'] = now()->toDateTimeString();
+
+        Session::put($this->getSessionKey($templateId), $adjustments);
+    }
+
+    /**
+     * Validate selection (active aspects, sub-aspects, and weights)
+     *
+     * @return array ['valid' => bool, 'errors' => array]
+     */
+    public function validateSelection(int $templateId, array $data): array
+    {
+        $errors = [];
+
+        // Get template data for validation
+        $template = AssessmentTemplate::with([
+            'categoryTypes',
+            'aspects.subAspects',
+        ])->findOrFail($templateId);
+
+        // Group aspects by category
+        $potensiAspects = [];
+        $kompetensiAspects = [];
+
+        foreach ($template->aspects as $aspect) {
+            if ($aspect->categoryType->code === 'potensi') {
+                $potensiAspects[$aspect->code] = $aspect;
+            } else {
+                $kompetensiAspects[$aspect->code] = $aspect;
+            }
+        }
+
+        // Rule 1: Minimum 3 aspects per category must be active
+        if (isset($data['active_aspects'])) {
+            $potensiActiveCount = 0;
+            $kompetensiActiveCount = 0;
+
+            foreach ($data['active_aspects'] as $aspectCode => $isActive) {
+                if ($isActive) {
+                    if (isset($potensiAspects[$aspectCode])) {
+                        $potensiActiveCount++;
+                    } elseif (isset($kompetensiAspects[$aspectCode])) {
+                        $kompetensiActiveCount++;
+                    }
+                }
+            }
+
+            if ($potensiActiveCount > 0 && $potensiActiveCount < 3) {
+                $errors[] = "Minimal 3 aspek Potensi harus aktif (saat ini: {$potensiActiveCount})";
+            }
+
+            if ($kompetensiActiveCount > 0 && $kompetensiActiveCount < 3) {
+                $errors[] = "Minimal 3 aspek Kompetensi harus aktif (saat ini: {$kompetensiActiveCount})";
+            }
+        }
+
+        // Rule 2: Total weight per category must = 100%
+        if (isset($data['aspect_weights'])) {
+            $potensiWeightTotal = 0;
+            $kompetensiWeightTotal = 0;
+
+            foreach ($data['aspect_weights'] as $aspectCode => $weight) {
+                if (isset($potensiAspects[$aspectCode])) {
+                    $potensiWeightTotal += $weight;
+                } elseif (isset($kompetensiAspects[$aspectCode])) {
+                    $kompetensiWeightTotal += $weight;
+                }
+            }
+
+            if ($potensiWeightTotal > 0 && $potensiWeightTotal !== 100) {
+                $errors[] = "Total bobot Potensi harus 100% (saat ini: {$potensiWeightTotal}%)";
+            }
+
+            if ($kompetensiWeightTotal > 0 && $kompetensiWeightTotal !== 100) {
+                $errors[] = "Total bobot Kompetensi harus 100% (saat ini: {$kompetensiWeightTotal}%)";
+            }
+        }
+
+        // Rule 3: Each active aspect (Potensi only) must have ≥1 active sub-aspect
+        if (isset($data['active_aspects']) && isset($data['active_sub_aspects'])) {
+            foreach ($data['active_aspects'] as $aspectCode => $isActive) {
+                if ($isActive && isset($potensiAspects[$aspectCode])) {
+                    $aspect = $potensiAspects[$aspectCode];
+                    $activeSubCount = 0;
+
+                    foreach ($aspect->subAspects as $subAspect) {
+                        if (isset($data['active_sub_aspects'][$subAspect->code]) &&
+                            $data['active_sub_aspects'][$subAspect->code]) {
+                            $activeSubCount++;
+                        }
+                    }
+
+                    if ($aspect->subAspects->count() > 0 && $activeSubCount < 1) {
+                        $errors[] = "Aspek {$aspect->name} harus memiliki minimal 1 sub-aspek aktif";
+                    }
+                }
+            }
+        }
+
+        return [
+            'valid' => empty($errors),
+            'errors' => $errors,
+        ];
+    }
+
+    /**
+     * Get count of active aspects per category
+     *
+     * @return array ['potensi' => int, 'kompetensi' => int]
+     */
+    public function getActiveAspectsCount(int $templateId): array
+    {
+        $template = AssessmentTemplate::with(['categoryTypes', 'aspects'])->findOrFail($templateId);
+        $adjustments = $this->getAdjustments($templateId);
+
+        $counts = ['potensi' => 0, 'kompetensi' => 0];
+
+        foreach ($template->aspects as $aspect) {
+            $isActive = $adjustments['active_aspects'][$aspect->code] ?? true;
+
+            if ($isActive) {
+                $categoryCode = $aspect->categoryType->code;
+                $counts[$categoryCode]++;
+            }
+        }
+
+        return $counts;
+    }
+
+    /**
+     * Get total aspects count per category
+     *
+     * @return array ['potensi' => int, 'kompetensi' => int]
+     */
+    public function getTotalAspectsCount(int $templateId): array
+    {
+        $template = AssessmentTemplate::with(['categoryTypes', 'aspects'])->findOrFail($templateId);
+
+        $counts = ['potensi' => 0, 'kompetensi' => 0];
+
+        foreach ($template->aspects as $aspect) {
+            $categoryCode = $aspect->categoryType->code;
+            $counts[$categoryCode]++;
+        }
+
+        return $counts;
+    }
 }

@@ -22,4 +22,9 @@ class AssessmentTemplate extends Model
     {
         return $this->hasMany(PositionFormation::class, 'template_id');
     }
+
+    public function aspects()
+    {
+        return $this->hasMany(Aspect::class, 'template_id');
+    }
 }

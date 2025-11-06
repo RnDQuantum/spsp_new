@@ -16,26 +16,59 @@
 
             {{-- Template Info (Display Only) --}}
             @if ($selectedTemplate)
-                <div class="mt-3 pt-3 border-t border-gray-200 dark:border-gray-600">
-                    <div class="flex items-start gap-2 text-sm text-gray-600 dark:text-gray-300">
-                        <span class="font-semibold">📄 Template:</span>
-                        <div>
-                            <div class="font-semibold text-gray-900 dark:text-gray-100">{{ $selectedTemplate->name }}
-                            </div>
-                            @if ($selectedTemplate->description)
-                                <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                    {{ $selectedTemplate->description }}</div>
-                            @endif
+            <div class="mt-3 pt-3 border-t border-gray-200 dark:border-gray-600">
+                <div class="flex items-start gap-2 text-sm text-gray-600 dark:text-gray-300">
+                    <span class="font-semibold">📄 Template:</span>
+                    <div>
+                        <div class="font-semibold text-gray-900 dark:text-gray-100">{{ $selectedTemplate->name }}
                         </div>
+                        @if ($selectedTemplate->description)
+                        <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            {{ $selectedTemplate->description }}</div>
+                        @endif
                     </div>
-                    @if ($selectedEvent)
-                        <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300 mt-2">
-                            <span class="font-semibold">🏢 Institusi:</span>
-                            <span
-                                class="text-gray-900 dark:text-gray-100">{{ $selectedEvent->institution->name ?? 'N/A' }}</span>
-                        </div>
-                    @endif
                 </div>
+                @if ($selectedEvent)
+                <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300 mt-2">
+                    <span class="font-semibold">🏢 Institusi:</span>
+                    <span class="text-gray-900 dark:text-gray-100">{{ $selectedEvent->institution->name ?? 'N/A'
+                        }}</span>
+                </div>
+                @endif
+            </div>
+
+            {{-- PHASE 2C: Control Buttons --}}
+            <div class="mt-4 flex items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <button wire:click="openSelectionModal" type="button"
+                        class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        🎯 Pilih Aspek & Sub-Aspek
+                    </button>
+                    <button wire:click="resetAdjustments" type="button"
+                        class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500">
+                        ↻ Reset ke Default
+                    </button>
+                </div>
+
+                {{-- Adjustment Indicator --}}
+                @php
+                $hasAdjustments =
+                app(\App\Services\DynamicStandardService::class)->hasAdjustments($selectedTemplate->id);
+                @endphp
+                @if($hasAdjustments)
+                <div class="flex items-center gap-2 text-sm">
+                    <span
+                        class="inline-flex items-center px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300">
+                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd"
+                                d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                                clip-rule="evenodd" />
+                        </svg>
+                        Standar Disesuaikan
+                    </span>
+                </div>
+                @endif
+            </div>
             @endif
         </div>
 
@@ -47,158 +80,47 @@
 
         {{-- Empty State --}}
         @if (!$selectedEvent || !$selectedTemplate)
-            <div class="text-center py-12">
-                <div class="text-gray-500 dark:text-gray-300 text-lg mb-2">Tidak ada data untuk ditampilkan</div>
-                <div class="text-gray-400 dark:text-gray-400 text-sm">Silakan pilih event dan jabatan terlebih dahulu.
-                </div>
+        <div class="text-center py-12">
+            <div class="text-gray-500 dark:text-gray-300 text-lg mb-2">Tidak ada data untuk ditampilkan</div>
+            <div class="text-gray-400 dark:text-gray-400 text-sm">Silakan pilih event dan jabatan terlebih dahulu.
             </div>
+        </div>
         @else
-            <table class="w-full border border-black dark:border-gray-600 text-xs mb-4">
-                <tr>
-                    <td
-                        class="border border-black dark:border-gray-600 px-2 py-1 bg-blue-100 dark:bg-blue-900 font-semibold w-1/5">
-                        Perusahaan/Lembaga</td>
-                    <td class="border border-black dark:border-gray-600 px-2 py-1 w-2/5">
-                        {{ strtoupper($selectedEvent->institution->name ?? 'N/A') }}</td>
-                    <td
-                        class="border border-black dark:border-gray-600 px-2 py-1 bg-blue-100 dark:bg-blue-900 font-semibold w-1/6">
-                    </td>
-                    <td class="border border-black dark:border-gray-600 px-2 py-1 w-1/6"></td>
-                </tr>
-                <tr>
-                    <td
-                        class="border border-black dark:border-gray-600 px-2 py-1 bg-blue-100 dark:bg-blue-900 font-semibold">
-                        Standard Penilaian</td>
-                    <td class="border border-black dark:border-gray-600 px-2 py-1">{{ $selectedTemplate->name }}</td>
-                    <td
-                        class="border border-black dark:border-gray-600 px-2 py-1 bg-blue-100 dark:bg-blue-900 font-semibold">
-                        Kode:</td>
-                    <td class="border border-black dark:border-gray-600 px-2 py-1 text-center">
-                        {{ $selectedTemplate->code }}</td>
-                </tr>
-            </table>
+        <table class="w-full border border-black dark:border-gray-600 text-xs mb-4">
+            <tr>
+                <td
+                    class="border border-black dark:border-gray-600 px-2 py-1 bg-blue-100 dark:bg-blue-900 font-semibold w-1/5">
+                    Perusahaan/Lembaga</td>
+                <td class="border border-black dark:border-gray-600 px-2 py-1 w-2/5">
+                    {{ strtoupper($selectedEvent->institution->name ?? 'N/A') }}</td>
+                <td
+                    class="border border-black dark:border-gray-600 px-2 py-1 bg-blue-100 dark:bg-blue-900 font-semibold w-1/6">
+                </td>
+                <td class="border border-black dark:border-gray-600 px-2 py-1 w-1/6"></td>
+            </tr>
+            <tr>
+                <td
+                    class="border border-black dark:border-gray-600 px-2 py-1 bg-blue-100 dark:bg-blue-900 font-semibold">
+                    Standard Penilaian</td>
+                <td class="border border-black dark:border-gray-600 px-2 py-1">{{ $selectedTemplate->name }}</td>
+                <td
+                    class="border border-black dark:border-gray-600 px-2 py-1 bg-blue-100 dark:bg-blue-900 font-semibold">
+                    Kode:</td>
+                <td class="border border-black dark:border-gray-600 px-2 py-1 text-center">
+                    {{ $selectedTemplate->code }}</td>
+            </tr>
+        </table>
         @endif
 
         {{-- Tabel Detail dengan Sub-Aspects --}}
         @if (count($categoryData) > 0)
-            <div class="mt-4 mb-4">
-                <table class="w-full border border-black dark:border-gray-600 text-xs">
-                    <thead>
-                        <tr class="bg-blue-100 dark:bg-blue-900">
-                            <th class="border border-black dark:border-gray-600 px-2 py-2 w-12">No.</th>
-                            <th class="border border-black dark:border-gray-600 px-2 py-2">ATRIBUT</th>
-                            <th class="border border-black dark:border-gray-600 px-2 py-2 w-24">NILAI STANDAR</th>
-                            <th class="border border-black dark:border-gray-600 px-2 py-2 w-24">JUMLAH ATRIBUT</th>
-                            <th class="border border-black dark:border-gray-600 px-2 py-2 w-20">BOBOT (%)</th>
-                            <th class="border border-black dark:border-gray-600 px-2 py-2 w-24">RATING Rata-Rata</th>
-                            <th class="border border-black dark:border-gray-600 px-2 py-2 w-20">SKOR</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @php $romanNumerals = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X']; @endphp
-
-                        @foreach ($categoryData as $catIndex => $category)
-                            {{-- Aspects within Potensi Category --}}
-                            @foreach ($category['aspects'] as $aspectIndex => $aspect)
-                                {{-- Aspect Row (if has sub-aspects, show as header) --}}
-                                @if (count($aspect['sub_aspects']) > 0)
-                                    <tr>
-                                        <td
-                                            class="border border-black dark:border-gray-600 px-2 py-2 text-center font-bold">
-                                            {{ $romanNumerals[$aspectIndex] ?? $aspectIndex + 1 }}</td>
-                                        <td class="border border-black dark:border-gray-600 px-2 py-2 font-bold">
-                                            {{ $aspect['name'] }}</td>
-                                        <td class="border border-black dark:border-gray-600 px-2 py-2 text-center"></td>
-                                        <td
-                                            class="border border-black dark:border-gray-600 px-2 py-2 text-center font-bold">
-                                            {{ $aspect['sub_aspects_count'] }}</td>
-                                        <td
-                                            class="border border-black dark:border-gray-600 px-2 py-2 text-center font-bold">
-                                            {{ $aspect['weight_percentage'] }}</td>
-                                        <td
-                                            class="border border-black dark:border-gray-600 px-2 py-2 text-center font-bold">
-                                            {{ number_format($aspect['standard_rating'], 2) }}</td>
-                                        <td
-                                            class="border border-black dark:border-gray-600 px-2 py-2 text-center font-bold">
-                                            {{ number_format($aspect['score'], 2) }}</td>
-                                    </tr>
-
-                                    {{-- Sub-Aspects --}}
-                                    @foreach ($aspect['sub_aspects'] as $subIndex => $subAspect)
-                                        <tr>
-                                            <td class="border border-black dark:border-gray-600 px-2 py-2 text-center">
-                                                {{ $subIndex + 1 }}</td>
-                                            <td class="border border-black dark:border-gray-600 px-2 py-2 pl-8">
-                                                {{ $subAspect['name'] }}</td>
-                                            <td class="border border-black dark:border-gray-600 px-2 py-2 text-center">
-                                                {{ $subAspect['standard_rating'] }}</td>
-                                            <td class="border border-black dark:border-gray-600 px-2 py-2"></td>
-                                            <td class="border border-black dark:border-gray-600 px-2 py-2"></td>
-                                            <td class="border border-black dark:border-gray-600 px-2 py-2"></td>
-                                            <td class="border border-black dark:border-gray-600 px-2 py-2"></td>
-                                        </tr>
-                                    @endforeach
-                                @else
-                                    {{-- Aspect without sub-aspects (Kompetensi) --}}
-                                    <tr>
-                                        <td class="border border-black dark:border-gray-600 px-2 py-2 text-center">
-                                            {{ $aspectIndex + 1 }}</td>
-                                        <td class="border border-black dark:border-gray-600 px-2 py-2 pl-4">
-                                            {{ $aspect['name'] }}</td>
-                                        <td class="border border-black dark:border-gray-600 px-2 py-2 text-center">
-                                            {{ number_format($aspect['standard_rating'], 2) }}</td>
-                                        <td class="border border-black dark:border-gray-600 px-2 py-2"></td>
-                                        <td class="border border-black dark:border-gray-600 px-2 py-2 text-center">
-                                            {{ $aspect['weight_percentage'] }}</td>
-                                        <td class="border border-black dark:border-gray-600 px-2 py-2"></td>
-                                        <td class="border border-black dark:border-gray-600 px-2 py-2"></td>
-                                    </tr>
-                                @endif
-                            @endforeach
-                        @endforeach
-
-                        {{-- TOTAL --}}
-                        <tr class="bg-blue-100 dark:bg-blue-900 font-bold">
-                            <td class="border border-black dark:border-gray-600 px-2 py-2 text-center" colspan="2">
-                                JUMLAH</td>
-                            <td class="border border-black dark:border-gray-600 px-2 py-2 text-center">
-                                {{ number_format($totals['total_standard_rating_sum'], 2) }}</td>
-                            <td class="border border-black dark:border-gray-600 px-2 py-2 text-center">
-                                {{ $totals['total_aspects'] }}</td>
-                            <td class="border border-black dark:border-gray-600 px-2 py-2 text-center">
-                                {{ $totals['total_weight'] }}</td>
-                            <td class="border border-black dark:border-gray-600 px-2 py-2 text-center">
-                                {{ number_format($totals['total_rating_sum'], 2) }}</td>
-                            <td class="border border-black dark:border-gray-600 px-2 py-2 text-center">
-                                {{ number_format($totals['total_score'], 2) }}</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        @endif
-
-        {{-- CHART SATU - Rating --}}
-        @if (count($chartData['labels']) > 0)
-            <div class="border border-black dark:border-gray-600 mb-6 mt-6 p-4 bg-gray-50 dark:bg-gray-700" wire:ignore
-                id="chart-rating-{{ $chartId }}">
-                <div class="text-center text-xs font-bold mb-4">
-                    Gambar Rating Standar Atribut Potensi Mapping Static Pribadi Spider Plot
-                </div>
-                <div class="flex justify-center">
-                    <canvas id="chartRating-{{ $chartId }}" style="max-width:600px; max-height:400px;"></canvas>
-                </div>
-            </div>
-
-            {{-- Tabel Mapping Summary --}}
-            <div
-                class="mb-2 mt-6 font-bold text-xs bg-blue-100 dark:bg-blue-900 border border-black dark:border-gray-600 px-2 py-2 text-center">
-                ATRIBUT POTENSI MAPPING
-            </div>
-            <table class="w-full border border-black dark:border-gray-600 text-xs mb-4">
+        <div class="mt-4 mb-4">
+            <table class="w-full border border-black dark:border-gray-600 text-xs">
                 <thead>
                     <tr class="bg-blue-100 dark:bg-blue-900">
                         <th class="border border-black dark:border-gray-600 px-2 py-2 w-12">No.</th>
                         <th class="border border-black dark:border-gray-600 px-2 py-2">ATRIBUT</th>
+                        <th class="border border-black dark:border-gray-600 px-2 py-2 w-24">NILAI STANDAR</th>
                         <th class="border border-black dark:border-gray-600 px-2 py-2 w-24">JUMLAH ATRIBUT</th>
                         <th class="border border-black dark:border-gray-600 px-2 py-2 w-20">BOBOT (%)</th>
                         <th class="border border-black dark:border-gray-600 px-2 py-2 w-24">RATING Rata-Rata</th>
@@ -206,29 +128,82 @@
                     </tr>
                 </thead>
                 <tbody>
+                    @php $romanNumerals = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X']; @endphp
+
                     @foreach ($categoryData as $catIndex => $category)
-                        @foreach ($category['aspects'] as $aspectIndex => $aspect)
-                            <tr>
-                                <td class="border border-black dark:border-gray-600 px-2 py-1 text-center">
-                                    {{ $romanNumerals[$aspectIndex] ?? $aspectIndex + 1 }}</td>
-                                <td class="border border-black dark:border-gray-600 px-2 py-1">{{ $aspect['name'] }}
-                                </td>
-                                <td class="border border-black dark:border-gray-600 px-2 py-1 text-center">
-                                    {{ $aspect['sub_aspects_count'] }}</td>
-                                <td class="border border-black dark:border-gray-600 px-2 py-1 text-center">
-                                    {{ $aspect['weight_percentage'] }}</td>
-                                <td class="border border-black dark:border-gray-600 px-2 py-1 text-center">
-                                    {{ number_format($aspect['standard_rating'], 2) }}</td>
-                                <td class="border border-black dark:border-gray-600 px-2 py-1 text-center">
-                                    {{ number_format($aspect['score'], 2) }}</td>
-                            </tr>
-                        @endforeach
-                    @endforeach
-                </tbody>
-                <tfoot>
-                    <tr class="font-bold bg-blue-100 dark:bg-blue-900">
-                        <td class="border border-black dark:border-gray-600 px-2 py-2 text-center" colspan="2">Jumlah
+                    {{-- Aspects within Potensi Category --}}
+                    @foreach ($category['aspects'] as $aspectIndex => $aspect)
+                    {{-- Aspect Row (if has sub-aspects, show as header) --}}
+                    @if (count($aspect['sub_aspects']) > 0)
+                    <tr>
+                        <td class="border border-black dark:border-gray-600 px-2 py-2 text-center font-bold">
+                            {{ $romanNumerals[$aspectIndex] ?? $aspectIndex + 1 }}</td>
+                        <td class="border border-black dark:border-gray-600 px-2 py-2 font-bold">
+                            {{ $aspect['name'] }}</td>
+                        <td class="border border-black dark:border-gray-600 px-2 py-2 text-center"></td>
+                        <td class="border border-black dark:border-gray-600 px-2 py-2 text-center font-bold">
+                            {{ $aspect['sub_aspects_count'] }}</td>
+                        {{-- PHASE 2C: Weight Cell with Visual Indicator (edit via modal only) --}}
+                        <td class="border border-black dark:border-gray-600 px-2 py-2 text-center font-bold {{ $aspect['is_weight_adjusted'] ?? false ? 'bg-amber-100 dark:bg-amber-900/30' : '' }}"
+                            title="{{ ($aspect['is_weight_adjusted'] ?? false) ? 'Disesuaikan dari ' . $aspect['original_weight'] . '% - Edit via modal Pilih Aspek' : '' }}">
+                            {{ $aspect['weight_percentage'] }}
+                            @if($aspect['is_weight_adjusted'] ?? false)
+                            <span class="text-amber-600 dark:text-amber-400"></span>
+                            @endif
                         </td>
+                        <td class="border border-black dark:border-gray-600 px-2 py-2 text-center font-bold">
+                            {{ number_format($aspect['standard_rating'], 2) }}</td>
+                        <td class="border border-black dark:border-gray-600 px-2 py-2 text-center font-bold">
+                            {{ number_format($aspect['score'], 2) }}</td>
+                    </tr>
+
+                    {{-- Sub-Aspects --}}
+                    @foreach ($aspect['sub_aspects'] as $subIndex => $subAspect)
+                    <tr>
+                        <td class="border border-black dark:border-gray-600 px-2 py-2 text-center">
+                            {{ $subIndex + 1 }}</td>
+                        <td class="border border-black dark:border-gray-600 px-2 py-2 pl-8">
+                            {{ $subAspect['name'] }}</td>
+                        {{-- PHASE 2C: Clickable Rating Cell with Visual Indicator --}}
+                        <td wire:click="openEditSubAspectRating('{{ $subAspect['code'] }}', {{ $subAspect['standard_rating'] }})"
+                            class="border border-black dark:border-gray-600 px-2 py-2 text-center cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/20 {{ $subAspect['is_adjusted'] ?? false ? 'bg-amber-100 dark:bg-amber-900/30' : '' }}"
+                            title="{{ ($subAspect['is_adjusted'] ?? false) ? 'Disesuaikan dari ' . $subAspect['original_rating'] . ' - Klik untuk edit' : 'Klik untuk edit' }}">
+                            {{ $subAspect['standard_rating'] }}
+                            @if($subAspect['is_adjusted'] ?? false)
+                            <span class="text-amber-600 dark:text-amber-400"></span>
+                            @endif
+                        </td>
+                        <td class="border border-black dark:border-gray-600 px-2 py-2"></td>
+                        <td class="border border-black dark:border-gray-600 px-2 py-2"></td>
+                        <td class="border border-black dark:border-gray-600 px-2 py-2"></td>
+                        <td class="border border-black dark:border-gray-600 px-2 py-2"></td>
+                    </tr>
+                    @endforeach
+                    @else
+                    {{-- Aspect without sub-aspects (Kompetensi) --}}
+                    <tr>
+                        <td class="border border-black dark:border-gray-600 px-2 py-2 text-center">
+                            {{ $aspectIndex + 1 }}</td>
+                        <td class="border border-black dark:border-gray-600 px-2 py-2 pl-4">
+                            {{ $aspect['name'] }}</td>
+                        <td class="border border-black dark:border-gray-600 px-2 py-2 text-center">
+                            {{ number_format($aspect['standard_rating'], 2) }}</td>
+                        <td class="border border-black dark:border-gray-600 px-2 py-2"></td>
+                        <td class="border border-black dark:border-gray-600 px-2 py-2 text-center">
+                            {{ $aspect['weight_percentage'] }}</td>
+                        <td class="border border-black dark:border-gray-600 px-2 py-2"></td>
+                        <td class="border border-black dark:border-gray-600 px-2 py-2"></td>
+                    </tr>
+                    @endif
+                    @endforeach
+                    @endforeach
+
+                    {{-- TOTAL --}}
+                    <tr class="bg-blue-100 dark:bg-blue-900 font-bold">
+                        <td class="border border-black dark:border-gray-600 px-2 py-2 text-center" colspan="2">
+                            JUMLAH</td>
+                        <td class="border border-black dark:border-gray-600 px-2 py-2 text-center">
+                            {{ number_format($totals['total_standard_rating_sum'], 2) }}</td>
                         <td class="border border-black dark:border-gray-600 px-2 py-2 text-center">
                             {{ $totals['total_aspects'] }}</td>
                         <td class="border border-black dark:border-gray-600 px-2 py-2 text-center">
@@ -238,19 +213,85 @@
                         <td class="border border-black dark:border-gray-600 px-2 py-2 text-center">
                             {{ number_format($totals['total_score'], 2) }}</td>
                     </tr>
-                </tfoot>
+                </tbody>
             </table>
+        </div>
+        @endif
 
-            {{-- CHART DUA - Skor --}}
-            <div class="border border-black dark:border-gray-600 mb-8 mt-6 p-4 bg-gray-50 dark:bg-gray-700" wire:ignore
-                id="chart-skor-{{ $chartId }}">
-                <div class="text-center text-xs font-bold mb-4">
-                    Gambar Skor Standar Atribut Potensi Mapping Static Pribadi Spider Plot
-                </div>
-                <div class="flex justify-center">
-                    <canvas id="chartSkor-{{ $chartId }}" style="max-width:600px; max-height:400px;"></canvas>
-                </div>
+        {{-- CHART SATU - Rating --}}
+        @if (count($chartData['labels']) > 0)
+        <div class="border border-black dark:border-gray-600 mb-6 mt-6 p-4 bg-gray-50 dark:bg-gray-700" wire:ignore
+            id="chart-rating-{{ $chartId }}">
+            <div class="text-center text-xs font-bold mb-4">
+                Gambar Rating Standar Atribut Potensi Mapping Static Pribadi Spider Plot
             </div>
+            <div class="flex justify-center">
+                <canvas id="chartRating-{{ $chartId }}" style="max-width:600px; max-height:400px;"></canvas>
+            </div>
+        </div>
+
+        {{-- Tabel Mapping Summary --}}
+        <div
+            class="mb-2 mt-6 font-bold text-xs bg-blue-100 dark:bg-blue-900 border border-black dark:border-gray-600 px-2 py-2 text-center">
+            ATRIBUT POTENSI MAPPING
+        </div>
+        <table class="w-full border border-black dark:border-gray-600 text-xs mb-4">
+            <thead>
+                <tr class="bg-blue-100 dark:bg-blue-900">
+                    <th class="border border-black dark:border-gray-600 px-2 py-2 w-12">No.</th>
+                    <th class="border border-black dark:border-gray-600 px-2 py-2">ATRIBUT</th>
+                    <th class="border border-black dark:border-gray-600 px-2 py-2 w-24">JUMLAH ATRIBUT</th>
+                    <th class="border border-black dark:border-gray-600 px-2 py-2 w-20">BOBOT (%)</th>
+                    <th class="border border-black dark:border-gray-600 px-2 py-2 w-24">RATING Rata-Rata</th>
+                    <th class="border border-black dark:border-gray-600 px-2 py-2 w-20">SKOR</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach ($categoryData as $catIndex => $category)
+                @foreach ($category['aspects'] as $aspectIndex => $aspect)
+                <tr>
+                    <td class="border border-black dark:border-gray-600 px-2 py-1 text-center">
+                        {{ $romanNumerals[$aspectIndex] ?? $aspectIndex + 1 }}</td>
+                    <td class="border border-black dark:border-gray-600 px-2 py-1">{{ $aspect['name'] }}
+                    </td>
+                    <td class="border border-black dark:border-gray-600 px-2 py-1 text-center">
+                        {{ $aspect['sub_aspects_count'] }}</td>
+                    <td class="border border-black dark:border-gray-600 px-2 py-1 text-center">
+                        {{ $aspect['weight_percentage'] }}</td>
+                    <td class="border border-black dark:border-gray-600 px-2 py-1 text-center">
+                        {{ number_format($aspect['standard_rating'], 2) }}</td>
+                    <td class="border border-black dark:border-gray-600 px-2 py-1 text-center">
+                        {{ number_format($aspect['score'], 2) }}</td>
+                </tr>
+                @endforeach
+                @endforeach
+            </tbody>
+            <tfoot>
+                <tr class="font-bold bg-blue-100 dark:bg-blue-900">
+                    <td class="border border-black dark:border-gray-600 px-2 py-2 text-center" colspan="2">Jumlah
+                    </td>
+                    <td class="border border-black dark:border-gray-600 px-2 py-2 text-center">
+                        {{ $totals['total_aspects'] }}</td>
+                    <td class="border border-black dark:border-gray-600 px-2 py-2 text-center">
+                        {{ $totals['total_weight'] }}</td>
+                    <td class="border border-black dark:border-gray-600 px-2 py-2 text-center">
+                        {{ number_format($totals['total_rating_sum'], 2) }}</td>
+                    <td class="border border-black dark:border-gray-600 px-2 py-2 text-center">
+                        {{ number_format($totals['total_score'], 2) }}</td>
+                </tr>
+            </tfoot>
+        </table>
+
+        {{-- CHART DUA - Skor --}}
+        <div class="border border-black dark:border-gray-600 mb-8 mt-6 p-4 bg-gray-50 dark:bg-gray-700" wire:ignore
+            id="chart-skor-{{ $chartId }}">
+            <div class="text-center text-xs font-bold mb-4">
+                Gambar Skor Standar Atribut Potensi Mapping Static Pribadi Spider Plot
+            </div>
+            <div class="flex justify-center">
+                <canvas id="chartSkor-{{ $chartId }}" style="max-width:600px; max-height:400px;"></canvas>
+            </div>
+        </div>
         @endif
 
         {{-- Footer TTD dan Catatan --}}
@@ -271,9 +312,48 @@
         </div>
     </div>
 
+    {{-- PHASE 2C: Include SelectiveAspectsModal Component --}}
+    @livewire('components.selective-aspects-modal')
+
+    {{-- PHASE 2C: Inline Edit Modal for Sub-Aspect Rating Only --}}
+
+    {{-- Edit Sub-Aspect Rating Modal --}}
+    @if($showEditRatingModal)
+    <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="fixed inset-0 bg-gray-900/75 dark:bg-gray-900/90 transition-opacity" wire:click="closeModal"></div>
+        <div class="flex min-h-full items-center justify-center p-4">
+            <div class="relative w-full max-w-md bg-white dark:bg-gray-800 rounded-lg shadow-xl">
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Edit Rating Sub-Aspek</h3>
+                </div>
+                <div class="px-6 py-4">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Rating (1-5):
+                    </label>
+                    <input type="number" wire:model="editingValue" min="1" max="5"
+                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                        Nilai asli: {{ $editingOriginalValue }}
+                    </p>
+                </div>
+                <div class="px-6 py-4 flex items-center justify-end gap-3">
+                    <button wire:click="closeModal" type="button"
+                        class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600">
+                        Batal
+                    </button>
+                    <button wire:click="saveSubAspectRating" type="button"
+                        class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700">
+                        Simpan
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+
     @if (count($chartData['labels']) > 0)
-        <script>
-            (function() {
+    <script>
+        (function() {
                 if (window['ratingChartSetup_{{ $chartId }}']) return;
                 window['ratingChartSetup_{{ $chartId }}'] = true;
 
@@ -427,10 +507,10 @@
 
                 setupRatingChart();
             })();
-        </script>
+    </script>
 
-        <script>
-            (function() {
+    <script>
+        (function() {
                 if (window['skorChartSetup_{{ $chartId }}']) return;
                 window['skorChartSetup_{{ $chartId }}'] = true;
 
@@ -587,6 +667,6 @@
 
                 setupSkorChart();
             })();
-        </script>
+    </script>
     @endif
 </div>
