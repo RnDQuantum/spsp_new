@@ -130,6 +130,30 @@ class DynamicStandardService
     }
 
     /**
+     * Save both category weights (Potensi + Kompetensi) with validation
+     */
+    public function saveBothCategoryWeights(
+        int $templateId,
+        string $potensiCode,
+        int $potensiWeight,
+        string $kompetensiCode,
+        int $kompetensiWeight
+    ): void {
+        // Validate total is 100
+        $total = $potensiWeight + $kompetensiWeight;
+        if ($total !== 100) {
+            throw new \InvalidArgumentException("Total bobot kategori harus 100% (saat ini: {$total}%)");
+        }
+
+        $adjustments = $this->getAdjustments($templateId);
+        $adjustments['category_weights'][$potensiCode] = $potensiWeight;
+        $adjustments['category_weights'][$kompetensiCode] = $kompetensiWeight;
+        $adjustments['adjusted_at'] = now()->toDateTimeString();
+
+        Session::put($this->getSessionKey($templateId), $adjustments);
+    }
+
+    /**
      * Save aspect weight adjustment
      */
     public function saveAspectWeight(int $templateId, string $aspectCode, int $weight): void
