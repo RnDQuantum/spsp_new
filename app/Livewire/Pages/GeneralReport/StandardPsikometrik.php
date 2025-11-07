@@ -201,7 +201,7 @@ class StandardPsikometrik extends Component
     }
 
     /**
-     * PHASE 2C: Reset adjustments for Potensi category only
+     * PHASE 2C: Reset adjustments (both category weights + Potensi aspects)
      */
     public function resetAdjustments(): void
     {
@@ -209,7 +209,14 @@ class StandardPsikometrik extends Component
             return;
         }
 
-        app(DynamicStandardService::class)->resetCategoryAdjustments($this->selectedTemplate->id, 'potensi');
+        $dynamicService = app(DynamicStandardService::class);
+
+        // Reset Potensi category adjustments (aspects, sub-aspects, ratings)
+        $dynamicService->resetCategoryAdjustments($this->selectedTemplate->id, 'potensi');
+
+        // Reset both category weights
+        $dynamicService->resetCategoryWeights($this->selectedTemplate->id);
+
         $this->dispatch('standard-adjusted', templateId: $this->selectedTemplate->id);
     }
 

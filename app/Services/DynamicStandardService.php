@@ -22,7 +22,7 @@ class DynamicStandardService
      */
     private function getSessionKey(int $templateId): string
     {
-        return self::SESSION_PREFIX . ".{$templateId}";
+        return self::SESSION_PREFIX.".{$templateId}";
     }
 
     /**
@@ -46,7 +46,7 @@ class DynamicStandardService
 
         // Load template to get aspect codes for this category
         $template = AssessmentTemplate::with([
-            'categoryTypes' => fn($q) => $q->where('code', $categoryCode)->with('aspects.subAspects'),
+            'categoryTypes' => fn ($q) => $q->where('code', $categoryCode)->with('aspects.subAspects'),
         ])->find($templateId);
 
         if (! $template) {
@@ -257,6 +257,48 @@ class DynamicStandardService
     }
 
     /**
+     * Reset only category weights (Potensi + Kompetensi)
+     */
+    public function resetCategoryWeights(int $templateId): void
+    {
+        $adjustments = $this->getAdjustments($templateId);
+
+        if (empty($adjustments)) {
+            return;
+        }
+
+        // Remove both category weight adjustments
+        if (isset($adjustments['category_weights']['potensi'])) {
+            unset($adjustments['category_weights']['potensi']);
+        }
+
+        if (isset($adjustments['category_weights']['kompetensi'])) {
+            unset($adjustments['category_weights']['kompetensi']);
+        }
+
+        // If category_weights is now empty, remove the key
+        if (isset($adjustments['category_weights']) && empty($adjustments['category_weights'])) {
+            unset($adjustments['category_weights']);
+        }
+
+        // If no adjustments left, remove the entire session
+        $hasRemainingAdjustments = ! empty($adjustments['category_weights'])
+            || ! empty($adjustments['aspect_weights'])
+            || ! empty($adjustments['aspect_ratings'])
+            || ! empty($adjustments['sub_aspect_ratings'])
+            || ! empty($adjustments['active_aspects'])
+            || ! empty($adjustments['active_sub_aspects']);
+
+        if (! $hasRemainingAdjustments) {
+            Session::forget($this->getSessionKey($templateId));
+        } else {
+            // Save the cleaned adjustments
+            $adjustments['adjusted_at'] = now()->toDateTimeString();
+            Session::put($this->getSessionKey($templateId), $adjustments);
+        }
+    }
+
+    /**
      * Reset adjustments for a specific category only
      */
     public function resetCategoryAdjustments(int $templateId, string $categoryCode): void
@@ -269,7 +311,7 @@ class DynamicStandardService
 
         // Load original template to get aspect codes for this category
         $template = AssessmentTemplate::with([
-            'categoryTypes' => fn($q) => $q->where('code', $categoryCode)->with('aspects.subAspects'),
+            'categoryTypes' => fn ($q) => $q->where('code', $categoryCode)->with('aspects.subAspects'),
         ])->find($templateId);
 
         if (! $template) {
@@ -499,7 +541,7 @@ class DynamicStandardService
         }
 
         // Return only aspects where value is true
-        return array_keys(array_filter($adjustments['active_aspects'], fn($active) => $active === true));
+        return array_keys(array_filter($adjustments['active_aspects'], fn ($active) => $active === true));
     }
 
     /**
@@ -526,7 +568,7 @@ class DynamicStandardService
         }
 
         // Return only sub-aspects where value is true
-        return array_keys(array_filter($adjustments['active_sub_aspects'], fn($active) => $active === true));
+        return array_keys(array_filter($adjustments['active_sub_aspects'], fn ($active) => $active === true));
     }
 
     /**
