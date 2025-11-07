@@ -4,6 +4,7 @@ namespace App\Livewire\Pages\GeneralReport;
 
 use App\Models\Aspect;
 use App\Models\AssessmentEvent;
+use App\Services\DynamicStandardService;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -82,9 +83,54 @@ class Statistic extends Component
 
         $aspectId = (int) $this->aspectId;
 
-        // Get standard rating from master aspect
-        $aspect = Aspect::query()->where('id', $aspectId)->first();
-        $this->standardRating = (float) ($aspect?->standard_rating ?? 0.0);
+        // Get aspect data with category type and sub-aspects
+        $aspect = Aspect::query()
+            ->with(['categoryType', 'subAspects'])
+            ->where('id', $aspectId)
+            ->first();
+
+        if (! $aspect) {
+            return;
+        }
+
+        // Get position to access template_id
+        $position = $event->positionFormations()
+            ->find($positionFormationId);
+
+        if (! $position || ! $position->template_id) {
+            return;
+        }
+
+        // Get adjusted standard rating from session or database using DynamicStandardService
+        $standardService = app(DynamicStandardService::class);
+
+        // For Potensi category, calculate based on sub-aspects
+        if ($aspect->categoryType && $aspect->categoryType->code === 'potensi' && $aspect->subAspects && $aspect->subAspects->count() > 0) {
+            $subAspectRatingSum = 0;
+            $activeSubAspectsCount = 0;
+
+            foreach ($aspect->subAspects as $subAspect) {
+                // Check if sub-aspect is active
+                if (! $standardService->isSubAspectActive($position->template_id, $subAspect->code)) {
+                    continue; // Skip inactive sub-aspects
+                }
+
+                // Get adjusted sub-aspect rating from session
+                $subRating = $standardService->getSubAspectRating($position->template_id, $subAspect->code);
+                $subAspectRatingSum += $subRating;
+                $activeSubAspectsCount++;
+            }
+
+            // Calculate average of active sub-aspects
+            if ($activeSubAspectsCount > 0) {
+                $this->standardRating = $subAspectRatingSum / $activeSubAspectsCount;
+            } else {
+                $this->standardRating = 0.0;
+            }
+        } else {
+            // For Kompetensi or aspects without sub-aspects, use aspect rating directly
+            $this->standardRating = $standardService->getAspectRating($position->template_id, $aspect->code);
+        }
 
         // Build distribution (bucket 1..5) - FILTER by position
         // Use CASE WHEN to match the classification table ranges:
