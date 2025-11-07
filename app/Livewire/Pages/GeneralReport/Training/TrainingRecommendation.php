@@ -44,6 +44,8 @@ class TrainingRecommendation extends Component
 
     public float $standardRating = 0;
 
+    public float $originalStandardRating = 0;
+
     // CACHE PROPERTIES - untuk menyimpan hasil kalkulasi
     private ?float $adjustedStandardsCache = null;
     private ?\Illuminate\Support\Collection $aspectPriorityCache = null;
@@ -85,7 +87,7 @@ class TrainingRecommendation extends Component
         $this->clearCache(); // Clear cache saat event berubah
 
         // Reset data
-        $this->reset(['selectedEvent', 'aspectId', 'selectedAspect', 'totalParticipants', 'recommendedCount', 'notRecommendedCount', 'averageRating', 'standardRating']);
+        $this->reset(['selectedEvent', 'aspectId', 'selectedAspect', 'totalParticipants', 'recommendedCount', 'notRecommendedCount', 'averageRating', 'standardRating', 'originalStandardRating']);
     }
 
     /**
@@ -97,7 +99,7 @@ class TrainingRecommendation extends Component
         $this->clearCache(); // Clear cache saat position berubah
 
         // Reset data (aspect will auto-reset)
-        $this->reset(['aspectId', 'selectedAspect', 'totalParticipants', 'recommendedCount', 'notRecommendedCount', 'averageRating', 'standardRating']);
+        $this->reset(['aspectId', 'selectedAspect', 'totalParticipants', 'recommendedCount', 'notRecommendedCount', 'averageRating', 'standardRating', 'originalStandardRating']);
     }
 
     /**
@@ -108,7 +110,7 @@ class TrainingRecommendation extends Component
         $this->aspectId = $aspectId;
 
         if (! $aspectId) {
-            $this->reset(['selectedAspect', 'totalParticipants', 'recommendedCount', 'notRecommendedCount', 'averageRating', 'standardRating']);
+            $this->reset(['selectedAspect', 'totalParticipants', 'recommendedCount', 'notRecommendedCount', 'averageRating', 'standardRating', 'originalStandardRating']);
 
             return;
         }
@@ -129,6 +131,9 @@ class TrainingRecommendation extends Component
         // Persist to session
         session(['training_recommendation.tolerance' => $tolerance]);
 
+        // Clear cache when tolerance changes
+        $this->clearCache();
+
         // Recalculate summary data with new tolerance
         if ($this->eventCode && $this->aspectId) {
             $this->calculateSummaryData();
@@ -146,15 +151,6 @@ class TrainingRecommendation extends Component
         $this->perPage = $this->perPage === 'all' ? 999999 : (int) $this->perPage;
         $this->resetPage();
         $this->clearCache(); // Clear cache saat perPage berubah
-    }
-
-    /**
-     * Clear all caches
-     */
-    private function clearCache(): void
-    {
-        $this->adjustedStandardsCache = null;
-        $this->aspectPriorityCache = null;
     }
 
     /**
@@ -186,6 +182,15 @@ class TrainingRecommendation extends Component
     }
 
     /**
+     * Clear all caches
+     */
+    private function clearCache(): void
+    {
+        $this->adjustedStandardsCache = null;
+        $this->aspectPriorityCache = null;
+    }
+
+    /**
      * Calculate summary data (total, recommended count, average rating)
      */
     private function calculateSummaryData(): void
@@ -198,6 +203,9 @@ class TrainingRecommendation extends Component
 
         // Get adjusted standard rating from session or database
         $adjustedStandardRating = $this->getAdjustedStandardRating($this->selectedAspect->id, $positionFormationId);
+
+        // Get original standard rating from session
+        $this->originalStandardRating = $this->getOriginalStandardRating($this->selectedAspect->id, $positionFormationId);
 
         $this->standardRating = $adjustedStandardRating;
 
@@ -232,16 +240,11 @@ class TrainingRecommendation extends Component
     }
 
     /**
-     * Get adjusted standard rating from session or database
-     * OPTIMIZED: Cache result untuk menghindari kalkulasi berulang
+     * Get original standard rating from session or database
+     * For Potensi category, calculate average from active sub-aspects
      */
-    private function getAdjustedStandardRating(int $aspectId, int $positionFormationId): float
+    private function getOriginalStandardRating(int $aspectId, int $positionFormationId): float
     {
-        // Gunakan cache jika sudah ada
-        if ($this->adjustedStandardsCache !== null) {
-            return $this->adjustedStandardsCache;
-        }
-
         // Get selected position with template
         $position = $this->selectedEvent->positionFormations()
             ->with('template')
@@ -254,12 +257,51 @@ class TrainingRecommendation extends Component
         $templateId = $position->template_id;
         $standardService = app(DynamicStandardService::class);
 
-        // Get aspect rating from session or database
-        $aspectRating = $standardService->getAspectRating($templateId, $this->selectedAspect->code);
+        // Check if aspect belongs to Potensi category and has sub-aspects
+        $aspect = Aspect::with('categoryType', 'subAspects')->find($aspectId);
+        if ($aspect && $aspect->categoryType->code === 'potensi' && $aspect->subAspects->count() > 0) {
+            // Calculate average from active sub-aspects
+            $subAspectRatingSum = 0;
+            $activeSubAspectsCount = 0;
+
+            foreach ($aspect->subAspects as $subAspect) {
+                // Check if sub-aspect is active
+                if (!$standardService->isSubAspectActive($templateId, $subAspect->code)) {
+                    continue; // Skip inactive sub-aspects
+                }
+
+                // Get adjusted sub-aspect rating from session
+                $subRating = $standardService->getSubAspectRating($templateId, $subAspect->code);
+                $subAspectRatingSum += $subRating;
+                $activeSubAspectsCount++;
+            }
+
+            if ($activeSubAspectsCount > 0) {
+                return $subAspectRatingSum / $activeSubAspectsCount;
+            }
+        }
+
+        // For Kompetensi or aspects without sub-aspects, use aspect rating
+        return $standardService->getAspectRating($templateId, $this->selectedAspect->code);
+    }
+
+    /**
+     * Get adjusted standard rating from session or database
+     * OPTIMIZED: Cache result untuk menghindari kalkulasi berulang
+     */
+    private function getAdjustedStandardRating(int $aspectId, int $positionFormationId): float
+    {
+        // Gunakan cache jika sudah ada
+        if ($this->adjustedStandardsCache !== null) {
+            return $this->adjustedStandardsCache;
+        }
+
+        // Get original standard rating
+        $originalStandardRating = $this->getOriginalStandardRating($aspectId, $positionFormationId);
 
         // Calculate adjusted standard based on tolerance
         $toleranceFactor = 1 - ($this->tolerancePercentage / 100);
-        $adjustedStandardRating = $aspectRating * $toleranceFactor;
+        $adjustedStandardRating = $originalStandardRating * $toleranceFactor;
 
         // Cache result
         $this->adjustedStandardsCache = $adjustedStandardRating;
@@ -388,7 +430,7 @@ class TrainingRecommendation extends Component
 
         // Get all aspects for the selected position's template
         $aspects = Aspect::where('template_id', $templateId)
-            ->with('categoryType')
+            ->with('categoryType', 'subAspects')
             ->orderBy('category_type_id', 'asc')
             ->orderBy('order', 'asc')
             ->get();
@@ -414,7 +456,28 @@ class TrainingRecommendation extends Component
             $averageRating = $totalRating / $assessments->count();
 
             // Get adjusted standard rating from session or database
-            $aspectRating = $standardService->getAspectRating($templateId, $aspect->code);
+            // For Potensi category, calculate average from active sub-aspects
+            if ($aspect->categoryType->code === 'potensi' && $aspect->subAspects->count() > 0) {
+                $subAspectRatingSum = 0;
+                $activeSubAspectsCount = 0;
+
+                foreach ($aspect->subAspects as $subAspect) {
+                    // Check if sub-aspect is active
+                    if (!$standardService->isSubAspectActive($templateId, $subAspect->code)) {
+                        continue; // Skip inactive sub-aspects
+                    }
+
+                    // Get adjusted sub-aspect rating from session
+                    $subRating = $standardService->getSubAspectRating($templateId, $subAspect->code);
+                    $subAspectRatingSum += $subRating;
+                    $activeSubAspectsCount++;
+                }
+
+                $aspectRating = $activeSubAspectsCount > 0 ? $subAspectRatingSum / $activeSubAspectsCount : 0;
+            } else {
+                // For Kompetensi or aspects without sub-aspects, use aspect rating
+                $aspectRating = $standardService->getAspectRating($templateId, $aspect->code);
+            }
 
             // Calculate adjusted standard based on tolerance
             $toleranceFactor = 1 - ($this->tolerancePercentage / 100);
