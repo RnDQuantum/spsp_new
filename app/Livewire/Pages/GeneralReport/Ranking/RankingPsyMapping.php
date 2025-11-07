@@ -48,6 +48,11 @@ class RankingPsyMapping extends Component
         ],
     ];
 
+    // CACHE PROPERTIES - untuk menyimpan hasil kalkulasi
+    private ?array $adjustedStandardsCache = null;
+    private ?array $participantsCache = null;
+    private ?array $aggregatesCache = null;
+
     protected $listeners = [
         'tolerance-updated' => 'handleToleranceUpdate',
         'event-selected' => 'handleEventSelected',
@@ -65,6 +70,7 @@ class RankingPsyMapping extends Component
     public function updatedPerPage(): void
     {
         $this->resetPage();
+        $this->clearCache(); // Clear cache saat perPage berubah
 
         // Refresh chart data
         $this->prepareChartData();
@@ -87,6 +93,7 @@ class RankingPsyMapping extends Component
     public function handleEventSelected(?string $eventCode): void
     {
         $this->resetPage();
+        $this->clearCache(); // Clear cache saat event berubah
 
         // Refresh chart data
         $this->prepareChartData();
@@ -109,6 +116,7 @@ class RankingPsyMapping extends Component
     public function handlePositionSelected(?int $positionFormationId): void
     {
         $this->resetPage();
+        $this->clearCache(); // Clear cache saat position berubah
 
         // Refresh chart data
         $this->prepareChartData();
@@ -131,6 +139,8 @@ class RankingPsyMapping extends Component
     public function handleToleranceUpdate(int $tolerance): void
     {
         $this->tolerancePercentage = $tolerance;
+        // Note: Tidak perlu clearCache() karena adjustedStandards tidak berubah,
+        // hanya toleranceFactor yang berubah (dihitung on-the-fly)
 
         // Refresh chart data with new tolerance
         $this->prepareChartData();
@@ -151,8 +161,18 @@ class RankingPsyMapping extends Component
     }
 
     /**
+     * Clear all caches
+     */
+    private function clearCache(): void
+    {
+        $this->adjustedStandardsCache = null;
+        $this->participantsCache = null;
+        $this->aggregatesCache = null;
+    }
+
+    /**
      * Get adjusted standard values from session or database
-     * This method applies dynamic standard adjustments if they exist
+     * OPTIMIZED: Cache result untuk menghindari kalkulasi berulang
      */
     private function getAdjustedStandardValues(
         int $templateId,
@@ -160,24 +180,31 @@ class RankingPsyMapping extends Component
         float $originalStandardRating,
         float $originalStandardScore
     ): array {
+        // Gunakan cache jika sudah ada
+        if ($this->adjustedStandardsCache !== null) {
+            return $this->adjustedStandardsCache;
+        }
+
         $standardService = app(DynamicStandardService::class);
 
         // Check if there are any adjustments for potensi category
         if (!$standardService->hasCategoryAdjustments($templateId, 'potensi')) {
             // No adjustments, return original values
-            return [
+            $this->adjustedStandardsCache = [
                 'standard_rating' => $originalStandardRating,
                 'standard_score' => $originalStandardScore,
             ];
+            return $this->adjustedStandardsCache;
         }
 
         // Recalculate based on adjusted standards from session
         $adjustedRating = 0;
         $adjustedScore = 0;
 
-        // Get all aspects data
+        // Get all aspects data ONCE
         $aspects = Aspect::whereIn('id', $potensiAspectIds)
             ->with('subAspects')
+            ->orderBy('order')
             ->get();
 
         foreach ($aspects as $aspect) {
@@ -216,18 +243,29 @@ class RankingPsyMapping extends Component
             $adjustedScore += ($aspectRating * $aspectWeight);
         }
 
-        return [
+        // Cache result
+        $this->adjustedStandardsCache = [
             'standard_rating' => $adjustedRating,
             'standard_score' => $adjustedScore,
         ];
+
+        return $this->adjustedStandardsCache;
     }
 
-    private function buildRankings(): ?LengthAwarePaginator
+    /**
+     * Get all aggregates data ONCE and cache it
+     * OPTIMIZED: Avoid multiple queries
+     */
+    private function getAggregatesData(): ?array
     {
+        if ($this->aggregatesCache !== null) {
+            return $this->aggregatesCache;
+        }
+
         $eventCode = session('filter.event_code');
         $positionFormationId = session('filter.position_formation_id');
 
-        if (! $eventCode || ! $positionFormationId) {
+        if (!$eventCode || !$positionFormationId) {
             return null;
         }
 
@@ -235,7 +273,7 @@ class RankingPsyMapping extends Component
             ->where('code', $eventCode)
             ->first();
 
-        if (! $event) {
+        if (!$event) {
             return null;
         }
 
@@ -244,7 +282,7 @@ class RankingPsyMapping extends Component
             ->with('template')
             ->find($positionFormationId);
 
-        if (! $position || ! $position->template) {
+        if (!$position || !$position->template) {
             return null;
         }
 
@@ -254,7 +292,7 @@ class RankingPsyMapping extends Component
             ->where('code', 'potensi')
             ->first();
 
-        if (! $potensiCategory) {
+        if (!$potensiCategory) {
             return null;
         }
 
@@ -268,8 +306,8 @@ class RankingPsyMapping extends Component
             return null;
         }
 
-        // Aggregate by participant in DB - FILTER by position
-        $query = AspectAssessment::query()
+        // Get ALL aggregates at once
+        $aggregates = AspectAssessment::query()
             ->selectRaw('participant_id, SUM(standard_rating) as sum_original_standard_rating, SUM(standard_score) as sum_original_standard_score, SUM(individual_rating) as sum_individual_rating, SUM(individual_score) as sum_individual_score')
             ->where('event_id', $event->id)
             ->where('position_formation_id', $positionFormationId)
@@ -277,68 +315,78 @@ class RankingPsyMapping extends Component
             ->groupBy('participant_id')
             ->orderByDesc('sum_individual_score')
             ->orderByDesc('sum_individual_rating')
-            ->orderBy('participant_id');
+            ->orderBy('participant_id')
+            ->get();
+
+        // Get ALL participants at once (avoid N+1)
+        $participantIds = $aggregates->pluck('participant_id')->unique()->all();
+        $participants = Participant::with('positionFormation')
+            ->whereIn('id', $participantIds)
+            ->get()
+            ->keyBy('id');
+
+        // Get adjusted standards ONCE
+        $firstAggregate = $aggregates->first();
+        if (!$firstAggregate) {
+            return null;
+        }
+
+        $adjustedStandards = $this->getAdjustedStandardValues(
+            $position->template_id,
+            $potensiAspectIds,
+            (float) $firstAggregate->sum_original_standard_rating,
+            (float) $firstAggregate->sum_original_standard_score
+        );
+
+        // Cache everything
+        $this->aggregatesCache = [
+            'event' => $event,
+            'position' => $position,
+            'potensiAspectIds' => $potensiAspectIds,
+            'aggregates' => $aggregates,
+            'participants' => $participants,
+            'adjustedStandards' => $adjustedStandards,
+        ];
+
+        return $this->aggregatesCache;
+    }
+
+    private function buildRankings(): ?LengthAwarePaginator
+    {
+        $data = $this->getAggregatesData();
+
+        if (!$data) {
+            return null;
+        }
+
+        $aggregates = $data['aggregates'];
+        $participants = $data['participants'];
+        $originalStandardRating = $data['adjustedStandards']['standard_rating'];
+        $originalStandardScore = $data['adjustedStandards']['standard_score'];
+
+        // Calculate adjusted standard based on tolerance ONCE
+        $toleranceFactor = 1 - ($this->tolerancePercentage / 100);
+        $adjustedStandardRating = $originalStandardRating * $toleranceFactor;
+        $adjustedStandardScore = $originalStandardScore * $toleranceFactor;
 
         // Check if "Show All" is selected
         if ($this->perPage === 0) {
-            // Get all data without pagination
-            $allData = $query->get();
-
-            $items = collect($allData)->values()->map(function ($row, int $index) use ($position, $potensiAspectIds): array {
-                $participant = Participant::with('positionFormation')->find($row->participant_id);
-
-                // Get original values from database
-                $dbStandardRating = (float) $row->sum_original_standard_rating;
-                $dbStandardScore = (float) $row->sum_original_standard_score;
-                $individualRating = (float) $row->sum_individual_rating;
-                $individualScore = (float) $row->sum_individual_score;
-
-                // Get adjusted standard values from session (if any adjustments exist)
-                $adjustedStandards = $this->getAdjustedStandardValues(
-                    $position->template_id,
-                    $potensiAspectIds,
-                    $dbStandardRating,
-                    $dbStandardScore
+            $items = $aggregates->map(function ($row, int $index) use (
+                $participants,
+                $originalStandardRating,
+                $originalStandardScore,
+                $adjustedStandardRating,
+                $adjustedStandardScore
+            ): array {
+                return $this->mapAggregateToRankingItem(
+                    $row,
+                    $index,
+                    $participants,
+                    $originalStandardRating,
+                    $originalStandardScore,
+                    $adjustedStandardRating,
+                    $adjustedStandardScore
                 );
-
-                // Use adjusted standards for calculation
-                $originalStandardRating = $adjustedStandards['standard_rating'];
-                $originalStandardScore = $adjustedStandards['standard_score'];
-
-                // Calculate adjusted standard based on tolerance
-                $toleranceFactor = 1 - ($this->tolerancePercentage / 100);
-                $adjustedStandardRating = $originalStandardRating * $toleranceFactor;
-                $adjustedStandardScore = $originalStandardScore * $toleranceFactor;
-
-                // Calculate gap based on adjusted standard
-                $adjustedGapRating = $individualRating - $adjustedStandardRating;
-                $adjustedGapScore = $individualScore - $adjustedStandardScore;
-
-                // Calculate original gap (at tolerance 0)
-                $originalGapScore = $individualScore - $originalStandardScore;
-
-                // Calculate percentage based on adjusted standard
-                $adjustedPercentage = $adjustedStandardScore > 0
-                    ? ($individualScore / $adjustedStandardScore) * 100
-                    : 0;
-
-                return [
-                    'rank' => $index + 1,
-                    'nip' => $participant?->skb_number ?? $participant?->test_number ?? '-',
-                    'name' => $participant?->name ?? '-',
-                    'position' => $participant?->positionFormation?->name ?? '-',
-                    'original_standard_rating' => round($originalStandardRating, 2),
-                    'original_standard_score' => round($originalStandardScore, 2),
-                    'standard_rating' => round($adjustedStandardRating, 2),
-                    'standard_score' => round($adjustedStandardScore, 2),
-                    'individual_rating' => round($individualRating, 2),
-                    'individual_score' => round($individualScore, 2),
-                    'gap_rating' => round($adjustedGapRating, 2),
-                    'gap_score' => round($adjustedGapScore, 2),
-                    'percentage_score' => round($adjustedPercentage, 2),
-                    'conclusion' => $this->getConclusionText($originalGapScore, $adjustedGapScore),
-                    'matrix' => 1,
-                ];
             })->all();
 
             $totalItems = count($items);
@@ -346,84 +394,91 @@ class RankingPsyMapping extends Component
             return new LengthAwarePaginator(
                 $items,
                 $totalItems,
-                $totalItems > 0 ? $totalItems : 1, // perPage
-                1, // currentPage
+                $totalItems > 0 ? $totalItems : 1,
+                1,
                 ['path' => request()->url(), 'query' => request()->query()]
             );
         }
 
         // Normal pagination
-        /** @var LengthAwarePaginator $paginator */
-        $paginator = $query->paginate($this->perPage, pageName: 'page')->withQueryString();
+        $currentPage = (int) request()->get('page', 1);
+        $offset = ($currentPage - 1) * $this->perPage;
 
-        $currentPage = (int) $paginator->currentPage();
-        $perPage = (int) $paginator->perPage();
-        $startRank = ($currentPage - 1) * $perPage;
+        $paginatedAggregates = $aggregates->slice($offset, $this->perPage)->values();
 
-        $items = collect($paginator->items())->values()->map(function ($row, int $index) use ($startRank, $position, $potensiAspectIds): array {
-            $participant = Participant::with('positionFormation')->find($row->participant_id);
-
-            // Get original values from database
-            $dbStandardRating = (float) $row->sum_original_standard_rating;
-            $dbStandardScore = (float) $row->sum_original_standard_score;
-            $individualRating = (float) $row->sum_individual_rating;
-            $individualScore = (float) $row->sum_individual_score;
-
-            // Get adjusted standard values from session (if any adjustments exist)
-            $adjustedStandards = $this->getAdjustedStandardValues(
-                $position->template_id,
-                $potensiAspectIds,
-                $dbStandardRating,
-                $dbStandardScore
+        $items = $paginatedAggregates->map(function ($row, int $index) use (
+            $offset,
+            $participants,
+            $originalStandardRating,
+            $originalStandardScore,
+            $adjustedStandardRating,
+            $adjustedStandardScore
+        ): array {
+            return $this->mapAggregateToRankingItem(
+                $row,
+                $offset + $index,
+                $participants,
+                $originalStandardRating,
+                $originalStandardScore,
+                $adjustedStandardRating,
+                $adjustedStandardScore
             );
-
-            // Use adjusted standards for calculation
-            $originalStandardRating = $adjustedStandards['standard_rating'];
-            $originalStandardScore = $adjustedStandards['standard_score'];
-
-            // Calculate adjusted standard based on tolerance
-            $toleranceFactor = 1 - ($this->tolerancePercentage / 100);
-            $adjustedStandardRating = $originalStandardRating * $toleranceFactor;
-            $adjustedStandardScore = $originalStandardScore * $toleranceFactor;
-
-            // Calculate gap based on adjusted standard
-            $adjustedGapRating = $individualRating - $adjustedStandardRating;
-            $adjustedGapScore = $individualScore - $adjustedStandardScore;
-
-            // Calculate original gap (at tolerance 0)
-            $originalGapScore = $individualScore - $originalStandardScore;
-
-            // Calculate percentage based on adjusted standard
-            $adjustedPercentage = $adjustedStandardScore > 0
-                ? ($individualScore / $adjustedStandardScore) * 100
-                : 0;
-
-            return [
-                'rank' => $startRank + $index + 1,
-                'nip' => $participant?->skb_number ?? $participant?->test_number ?? '-',
-                'name' => $participant?->name ?? '-',
-                'position' => $participant?->positionFormation?->name ?? '-',
-                'original_standard_rating' => round($originalStandardRating, 2),
-                'original_standard_score' => round($originalStandardScore, 2),
-                'standard_rating' => round($adjustedStandardRating, 2),
-                'standard_score' => round($adjustedStandardScore, 2),
-                'individual_rating' => round($individualRating, 2),
-                'individual_score' => round($individualScore, 2),
-                'gap_rating' => round($adjustedGapRating, 2),
-                'gap_score' => round($adjustedGapScore, 2),
-                'percentage_score' => round($adjustedPercentage, 2),
-                'conclusion' => $this->getConclusionText($originalGapScore, $adjustedGapScore),
-                'matrix' => 1,
-            ];
         })->all();
 
         return new LengthAwarePaginator(
             $items,
-            $paginator->total(),
-            $paginator->perPage(),
-            $paginator->currentPage(),
-            ['path' => $paginator->path(), 'query' => request()->query()]
+            $aggregates->count(),
+            $this->perPage,
+            $currentPage,
+            ['path' => request()->url(), 'query' => request()->query()]
         );
+    }
+
+    /**
+     * Map aggregate data to ranking item
+     * OPTIMIZED: Extract to separate method to avoid duplication
+     */
+    private function mapAggregateToRankingItem(
+        $row,
+        int $index,
+        $participants,
+        float $originalStandardRating,
+        float $originalStandardScore,
+        float $adjustedStandardRating,
+        float $adjustedStandardScore
+    ): array {
+        $participant = $participants->get($row->participant_id);
+
+        $individualRating = (float) $row->sum_individual_rating;
+        $individualScore = (float) $row->sum_individual_score;
+
+        // Calculate gaps
+        $adjustedGapRating = $individualRating - $adjustedStandardRating;
+        $adjustedGapScore = $individualScore - $adjustedStandardScore;
+        $originalGapScore = $individualScore - $originalStandardScore;
+
+        // Calculate percentage based on adjusted standard
+        $adjustedPercentage = $adjustedStandardScore > 0
+            ? ($individualScore / $adjustedStandardScore) * 100
+            : 0;
+
+        return [
+            'rank' => $index + 1,
+            'nip' => $participant?->skb_number ?? $participant?->test_number ?? '-',
+            'name' => $participant?->name ?? '-',
+            'position' => $participant?->positionFormation?->name ?? '-',
+            'original_standard_rating' => round($originalStandardRating, 2),
+            'original_standard_score' => round($originalStandardScore, 2),
+            'standard_rating' => round($adjustedStandardRating, 2),
+            'standard_score' => round($adjustedStandardScore, 2),
+            'individual_rating' => round($individualRating, 2),
+            'individual_score' => round($individualScore, 2),
+            'gap_rating' => round($adjustedGapRating, 2),
+            'gap_score' => round($adjustedGapScore, 2),
+            'percentage_score' => round($adjustedPercentage, 2),
+            'conclusion' => $this->getConclusionText($originalGapScore, $adjustedGapScore),
+            'matrix' => 1,
+        ];
     }
 
     private function getConclusionText(float $originalGap, float $adjustedGap): string
@@ -451,81 +506,27 @@ class RankingPsyMapping extends Component
 
     public function getPassingSummary(): array
     {
-        // Summary across all participants for current event + position (not only current page)
-        $eventCode = session('filter.event_code');
-        $positionFormationId = session('filter.position_formation_id');
+        $data = $this->getAggregatesData();
 
-        if (! $eventCode || ! $positionFormationId) {
+        if (!$data) {
             return ['total' => 0, 'passing' => 0, 'percentage' => 0];
         }
 
-        $event = AssessmentEvent::where('code', $eventCode)->first();
-        if (! $event) {
-            return ['total' => 0, 'passing' => 0, 'percentage' => 0];
-        }
+        $aggregates = $data['aggregates'];
+        $originalStandardScore = $data['adjustedStandards']['standard_score'];
 
-        // Get selected position with template
-        $position = $event->positionFormations()
-            ->with('template')
-            ->find($positionFormationId);
-
-        if (! $position || ! $position->template) {
-            return ['total' => 0, 'passing' => 0, 'percentage' => 0];
-        }
-
-        // Get Potensi category from selected position's template
-        $potensiCategory = CategoryType::query()
-            ->where('template_id', $position->template_id)
-            ->where('code', 'potensi')
-            ->first();
-
-        if (! $potensiCategory) {
-            return ['total' => 0, 'passing' => 0, 'percentage' => 0];
-        }
-
-        $potensiAspectIds = Aspect::query()
-            ->where('category_type_id', $potensiCategory->id)
-            ->pluck('id')
-            ->all();
-
-        if (empty($potensiAspectIds)) {
-            return ['total' => 0, 'passing' => 0, 'percentage' => 0];
-        }
-
-        $aggregates = AspectAssessment::query()
-            ->selectRaw('participant_id, SUM(standard_score) as sum_original_standard_score, SUM(individual_score) as sum_individual_score, SUM(standard_rating) as sum_original_standard_rating')
-            ->where('event_id', $event->id)
-            ->where('position_formation_id', $positionFormationId)
-            ->whereIn('aspect_id', $potensiAspectIds)
-            ->groupBy('participant_id')
-            ->get();
+        // Calculate adjusted standard based on tolerance
+        $toleranceFactor = 1 - ($this->tolerancePercentage / 100);
+        $adjustedStandardScore = $originalStandardScore * $toleranceFactor;
 
         $total = $aggregates->count();
 
-        // Calculate passing based on new logic (Di Atas Standar or Memenuhi Standar)
-        $passing = $aggregates->filter(function ($r) use ($position, $potensiAspectIds) {
-            $dbStandardScore = (float) $r->sum_original_standard_score;
-            $dbStandardRating = (float) $r->sum_original_standard_rating;
+        // Calculate passing
+        $passing = $aggregates->filter(function ($r) use ($originalStandardScore, $adjustedStandardScore) {
             $individualScore = (float) $r->sum_individual_score;
 
-            // Get adjusted standard values from session (if any adjustments exist)
-            $adjustedStandards = $this->getAdjustedStandardValues(
-                $position->template_id,
-                $potensiAspectIds,
-                $dbStandardRating,
-                $dbStandardScore
-            );
-
-            $originalStandardScore = $adjustedStandards['standard_score'];
-
-            // Calculate original gap (at tolerance 0)
+            // Calculate gaps
             $originalGap = $individualScore - $originalStandardScore;
-
-            // Calculate adjusted standard based on tolerance
-            $toleranceFactor = 1 - ($this->tolerancePercentage / 100);
-            $adjustedStandardScore = $originalStandardScore * $toleranceFactor;
-
-            // Calculate adjusted gap
             $adjustedGap = $individualScore - $adjustedStandardScore;
 
             // Count as passing if original gap >= 0 OR adjusted gap >= 0
@@ -541,71 +542,13 @@ class RankingPsyMapping extends Component
 
     public function getStandardInfo(): ?array
     {
-        $eventCode = session('filter.event_code');
-        $positionFormationId = session('filter.position_formation_id');
+        $data = $this->getAggregatesData();
 
-        if (! $eventCode || ! $positionFormationId) {
+        if (!$data) {
             return null;
         }
 
-        $event = AssessmentEvent::where('code', $eventCode)->first();
-        if (! $event) {
-            return null;
-        }
-
-        // Get selected position with template
-        $position = $event->positionFormations()
-            ->with('template')
-            ->find($positionFormationId);
-
-        if (! $position || ! $position->template) {
-            return null;
-        }
-
-        // Get Potensi category from selected position's template
-        $potensiCategory = CategoryType::query()
-            ->where('template_id', $position->template_id)
-            ->where('code', 'potensi')
-            ->first();
-
-        if (! $potensiCategory) {
-            return null;
-        }
-
-        $potensiAspectIds = Aspect::query()
-            ->where('category_type_id', $potensiCategory->id)
-            ->pluck('id')
-            ->all();
-
-        if (empty($potensiAspectIds)) {
-            return null;
-        }
-
-        // Get standard scores (they should be same for all participants in this position, but we take first one)
-        $firstParticipant = AspectAssessment::query()
-            ->selectRaw('SUM(standard_score) as total_standard_score, SUM(standard_rating) as total_standard_rating')
-            ->where('event_id', $event->id)
-            ->where('position_formation_id', $positionFormationId)
-            ->whereIn('aspect_id', $potensiAspectIds)
-            ->groupBy('participant_id')
-            ->first();
-
-        if (! $firstParticipant) {
-            return null;
-        }
-
-        $dbStandardScore = (float) $firstParticipant->total_standard_score;
-        $dbStandardRating = (float) $firstParticipant->total_standard_rating;
-
-        // Get adjusted standard values from session (if any adjustments exist)
-        $adjustedStandards = $this->getAdjustedStandardValues(
-            $position->template_id,
-            $potensiAspectIds,
-            $dbStandardRating,
-            $dbStandardScore
-        );
-
-        $originalStandardScore = $adjustedStandards['standard_score'];
+        $originalStandardScore = $data['adjustedStandards']['standard_score'];
 
         // Calculate adjusted standard based on tolerance
         $toleranceFactor = 1 - $this->tolerancePercentage / 100;
@@ -619,76 +562,24 @@ class RankingPsyMapping extends Component
 
     public function getConclusionSummary(): array
     {
-        // Get conclusion summary for all participants in current event + position
-        $eventCode = session('filter.event_code');
-        $positionFormationId = session('filter.position_formation_id');
+        $data = $this->getAggregatesData();
 
-        if (! $eventCode || ! $positionFormationId) {
+        if (!$data) {
             return [];
         }
 
-        $event = AssessmentEvent::where('code', $eventCode)->first();
-        if (! $event) {
-            return [];
-        }
+        $aggregates = $data['aggregates'];
+        $originalStandardScore = $data['adjustedStandards']['standard_score'];
 
-        // Get selected position with template
-        $position = $event->positionFormations()
-            ->with('template')
-            ->find($positionFormationId);
-
-        if (! $position || ! $position->template) {
-            return [];
-        }
-
-        // Get Potensi category from selected position's template
-        $potensiCategory = CategoryType::query()
-            ->where('template_id', $position->template_id)
-            ->where('code', 'potensi')
-            ->first();
-
-        if (! $potensiCategory) {
-            return [];
-        }
-
-        $potensiAspectIds = Aspect::query()
-            ->where('category_type_id', $potensiCategory->id)
-            ->pluck('id')
-            ->all();
-
-        if (empty($potensiAspectIds)) {
-            return [];
-        }
-
-        $aggregates = AspectAssessment::query()
-            ->selectRaw('participant_id, SUM(standard_score) as sum_original_standard_score, SUM(individual_score) as sum_individual_score, SUM(standard_rating) as sum_original_standard_rating')
-            ->where('event_id', $event->id)
-            ->where('position_formation_id', $positionFormationId)
-            ->whereIn('aspect_id', $potensiAspectIds)
-            ->groupBy('participant_id')
-            ->get();
+        // Calculate adjusted standard based on tolerance
+        $toleranceFactor = 1 - ($this->tolerancePercentage / 100);
+        $adjustedStandardScore = $originalStandardScore * $toleranceFactor;
 
         // Initialize conclusions from config
         $conclusions = array_fill_keys(array_keys($this->conclusionConfig), 0);
 
         foreach ($aggregates as $r) {
-            $dbStandardScore = (float) $r->sum_original_standard_score;
-            $dbStandardRating = (float) $r->sum_original_standard_rating;
             $individualScore = (float) $r->sum_individual_score;
-
-            // Get adjusted standard values from session (if any adjustments exist)
-            $adjustedStandards = $this->getAdjustedStandardValues(
-                $position->template_id,
-                $potensiAspectIds,
-                $dbStandardRating,
-                $dbStandardScore
-            );
-
-            $originalStandardScore = $adjustedStandards['standard_score'];
-
-            // Calculate adjusted standard based on tolerance
-            $toleranceFactor = 1 - ($this->tolerancePercentage / 100);
-            $adjustedStandardScore = $originalStandardScore * $toleranceFactor;
 
             // Calculate gaps
             $originalGap = $individualScore - $originalStandardScore;
