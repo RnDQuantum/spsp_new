@@ -74,8 +74,9 @@
 
                     {{-- Adjustment Indicator --}}
                     @php
-                        $hasAdjustments = app(\App\Services\DynamicStandardService::class)->hasAdjustments(
+                        $hasAdjustments = app(\App\Services\DynamicStandardService::class)->hasCategoryAdjustments(
                             $selectedTemplate->id,
+                            'potensi'
                         );
                     @endphp
                     @if ($hasAdjustments)

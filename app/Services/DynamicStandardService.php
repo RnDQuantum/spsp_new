@@ -22,7 +22,7 @@ class DynamicStandardService
      */
     private function getSessionKey(int $templateId): string
     {
-        return self::SESSION_PREFIX.".{$templateId}";
+        return self::SESSION_PREFIX . ".{$templateId}";
     }
 
     /**
@@ -34,11 +34,69 @@ class DynamicStandardService
     }
 
     /**
-     * Check if template has any adjustments
+     * Check if specific category has any adjustments
      */
-    public function hasAdjustments(int $templateId): bool
+    public function hasCategoryAdjustments(int $templateId, string $categoryCode): bool
     {
-        return Session::has($this->getSessionKey($templateId));
+        $adjustments = $this->getAdjustments($templateId);
+
+        if (empty($adjustments)) {
+            return false;
+        }
+
+        // Load template to get aspect codes for this category
+        $template = AssessmentTemplate::with([
+            'categoryTypes' => fn($q) => $q->where('code', $categoryCode)->with('aspects.subAspects'),
+        ])->find($templateId);
+
+        if (! $template) {
+            return false;
+        }
+
+        $category = $template->categoryTypes->firstWhere('code', $categoryCode);
+        if (! $category) {
+            return false;
+        }
+
+        // Check category weight adjustment
+        if (isset($adjustments['category_weights'][$categoryCode])) {
+            return true;
+        }
+
+        // Check aspect-level adjustments for this category
+        foreach ($category->aspects as $aspect) {
+            // Check aspect weight
+            if (isset($adjustments['aspect_weights'][$aspect->code])) {
+                return true;
+            }
+
+            // Check aspect rating
+            if (isset($adjustments['aspect_ratings'][$aspect->code])) {
+                return true;
+            }
+
+            // Check aspect active status
+            if (isset($adjustments['active_aspects'][$aspect->code])) {
+                return true;
+            }
+
+            // Check sub-aspect adjustments (for Potensi)
+            if ($categoryCode === 'potensi' && $aspect->subAspects) {
+                foreach ($aspect->subAspects as $subAspect) {
+                    // Check sub-aspect rating
+                    if (isset($adjustments['sub_aspect_ratings'][$subAspect->code])) {
+                        return true;
+                    }
+
+                    // Check sub-aspect active status
+                    if (isset($adjustments['active_sub_aspects'][$subAspect->code])) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -175,11 +233,83 @@ class DynamicStandardService
     }
 
     /**
-     * Reset all adjustments for a template
+     * Reset adjustments for a specific category only
      */
-    public function resetAdjustments(int $templateId): void
+    public function resetCategoryAdjustments(int $templateId, string $categoryCode): void
     {
-        Session::forget($this->getSessionKey($templateId));
+        $adjustments = $this->getAdjustments($templateId);
+
+        if (empty($adjustments)) {
+            return; // Nothing to reset
+        }
+
+        // Load original template to get aspect codes for this category
+        $template = AssessmentTemplate::with([
+            'categoryTypes' => fn($q) => $q->where('code', $categoryCode)->with('aspects.subAspects'),
+        ])->find($templateId);
+
+        if (! $template) {
+            return;
+        }
+
+        $category = $template->categoryTypes->firstWhere('code', $categoryCode);
+        if (! $category) {
+            return;
+        }
+
+        // Remove category weight adjustment
+        if (isset($adjustments['category_weights'][$categoryCode])) {
+            unset($adjustments['category_weights'][$categoryCode]);
+        }
+
+        // Remove aspect-level adjustments for this category
+        foreach ($category->aspects as $aspect) {
+            // Remove aspect weight
+            if (isset($adjustments['aspect_weights'][$aspect->code])) {
+                unset($adjustments['aspect_weights'][$aspect->code]);
+            }
+
+            // Remove aspect rating
+            if (isset($adjustments['aspect_ratings'][$aspect->code])) {
+                unset($adjustments['aspect_ratings'][$aspect->code]);
+            }
+
+            // Remove aspect active status
+            if (isset($adjustments['active_aspects'][$aspect->code])) {
+                unset($adjustments['active_aspects'][$aspect->code]);
+            }
+
+            // Remove sub-aspect adjustments (for Potensi)
+            if ($categoryCode === 'potensi' && $aspect->subAspects) {
+                foreach ($aspect->subAspects as $subAspect) {
+                    // Remove sub-aspect rating
+                    if (isset($adjustments['sub_aspect_ratings'][$subAspect->code])) {
+                        unset($adjustments['sub_aspect_ratings'][$subAspect->code]);
+                    }
+
+                    // Remove sub-aspect active status
+                    if (isset($adjustments['active_sub_aspects'][$subAspect->code])) {
+                        unset($adjustments['active_sub_aspects'][$subAspect->code]);
+                    }
+                }
+            }
+        }
+
+        // If no adjustments left, remove the entire session
+        $hasRemainingAdjustments = ! empty($adjustments['category_weights'])
+            || ! empty($adjustments['aspect_weights'])
+            || ! empty($adjustments['aspect_ratings'])
+            || ! empty($adjustments['sub_aspect_ratings'])
+            || ! empty($adjustments['active_aspects'])
+            || ! empty($adjustments['active_sub_aspects']);
+
+        if (! $hasRemainingAdjustments) {
+            Session::forget($this->getSessionKey($templateId));
+        } else {
+            // Save the cleaned adjustments
+            $adjustments['adjusted_at'] = now()->toDateTimeString();
+            Session::put($this->getSessionKey($templateId), $adjustments);
+        }
     }
 
     /**
@@ -345,7 +475,7 @@ class DynamicStandardService
         }
 
         // Return only aspects where value is true
-        return array_keys(array_filter($adjustments['active_aspects'], fn ($active) => $active === true));
+        return array_keys(array_filter($adjustments['active_aspects'], fn($active) => $active === true));
     }
 
     /**
@@ -372,7 +502,7 @@ class DynamicStandardService
         }
 
         // Return only sub-aspects where value is true
-        return array_keys(array_filter($adjustments['active_sub_aspects'], fn ($active) => $active === true));
+        return array_keys(array_filter($adjustments['active_sub_aspects'], fn($active) => $active === true));
     }
 
     /**
@@ -500,8 +630,10 @@ class DynamicStandardService
                     $activeSubCount = 0;
 
                     foreach ($aspect->subAspects as $subAspect) {
-                        if (isset($data['active_sub_aspects'][$subAspect->code]) &&
-                            $data['active_sub_aspects'][$subAspect->code]) {
+                        if (
+                            isset($data['active_sub_aspects'][$subAspect->code]) &&
+                            $data['active_sub_aspects'][$subAspect->code]
+                        ) {
                             $activeSubCount++;
                         }
                     }
