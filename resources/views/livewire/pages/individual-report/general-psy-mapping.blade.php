@@ -388,11 +388,7 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                     class="text-center text-base font-bold mb-6 
                        text-gray-900 dark:text-white">
                     Profil Potensi Spider Plot Chart (Score)</div>
-                <div class="flex justify-center mb-6">
-                    <div style="width: 700px; height: 700px; position: relative;">
-                        <canvas id="spiderScoreChart-{{ $chartId }}"></canvas>
-                    </div>
-                </div>
+
 
                 <!-- Legend Score - DARK MODE READY -->
                 <!-- GANTI URUTAN LEGEND INI (sama seperti rating) -->
@@ -436,6 +432,11 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                         <span class="font-semibold" x-data
                             x-text="'Tolerance ' + $wire.tolerancePercentage + '%'"></span>
                     </span>
+                </div>
+                <div class="flex justify-center mb-6">
+                    <div style="width: 700px; height: 700px; position: relative;">
+                        <canvas id="spiderScoreChart-{{ $chartId }}"></canvas>
+                    </div>
                 </div>
             </div>
         @endif

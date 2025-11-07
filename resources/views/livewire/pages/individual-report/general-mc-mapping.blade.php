@@ -327,15 +327,11 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                 <div class="text-center text-base font-bold mb-6 
                        text-gray-900 dark:text-white">
                     Profil Kompetensi Spider Plot Chart (Rating)</div>
-                <div class="flex justify-center mb-6">
-                    <div style="width: 900px; height: 900px; position: relative;">
-                        <canvas id="spiderRatingChart-{{ $chartId }}"></canvas>
-                    </div>
-                </div>
+
 
                 <!-- Legend Rating - DARK MODE READY -->
                 <!-- GANTI URUTAN LEGEND INI -->
-                <div class="flex justify-center text-sm gap-8 mb-8" id="rating-legend-{{ $chartId }}">
+                <div class="flex justify-center text-sm gap-2 mb-2" id="rating-legend-{{ $chartId }}">
                     <!-- Dataset 0: Peserta - HIJAU -->
                     <span
                         class="legend-item flex items-center gap-2 cursor-pointer select-none 
@@ -376,6 +372,15 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                             x-text="'Tolerance ' + $wire.tolerancePercentage + '%'"></span>
                     </span>
                 </div>
+
+
+                <div class="flex justify-center mb-2">
+                    <div style="width: 900px; height: 900px; position: relative;">
+                        <canvas id="spiderRatingChart-{{ $chartId }}"></canvas>
+                    </div>
+                </div>
+
+
             </div>
         @endif
 
@@ -387,15 +392,11 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                     class="text-center text-base font-bold mb-6 
                        text-gray-900 dark:text-white">
                     Profil Kompetensi Spider Plot Chart (Score)</div>
-                <div class="flex justify-center mb-6">
-                    <div style="width: 900px; height: 900px; position: relative;">
-                        <canvas id="spiderScoreChart-{{ $chartId }}"></canvas>
-                    </div>
-                </div>
+
 
                 <!-- Legend Score - DARK MODE READY -->
                 <!-- GANTI URUTAN LEGEND INI -->
-                <div class="flex justify-center text-sm gap-8 mb-8" id="score-legend-{{ $chartId }}">
+                <div class="flex justify-center text-sm gap-8 mb-2" id="score-legend-{{ $chartId }}">
                     <!-- Dataset 0: Peserta - HIJAU -->
                     <span
                         class="legend-item flex items-center gap-2 cursor-pointer select-none 
@@ -436,6 +437,15 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                             x-text="'Tolerance ' + $wire.tolerancePercentage + '%'"></span>
                     </span>
                 </div>
+
+
+                <div class="flex justify-center mb-2">
+                    <div style="width: 900px; height: 900px; position: relative;">
+                        <canvas id="spiderScoreChart-{{ $chartId }}"></canvas>
+                    </div>
+                </div>
+
+
             </div>
         @endif
 
