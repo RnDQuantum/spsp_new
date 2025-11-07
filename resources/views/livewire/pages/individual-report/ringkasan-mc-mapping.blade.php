@@ -2,7 +2,7 @@
     <div class="mx-auto my-8 shadow overflow-hidden max-w-6xl bg-white dark:bg-gray-800">
 
         <!-- Header - DARK MODE READY -->
-        <div class="border-b-4 border-black py-4 bg-gray-200 dark:bg-gray-700">
+        <div class="border-b-4 border-black py-4 bg-gray-300 dark:bg-gray-600">
             <h1 class="text-center text-2xl font-bold uppercase tracking-wide text-black dark:text-white">
                 RINGKASAN KOMPETENSI
             </h1>
@@ -51,7 +51,7 @@
         <div class="px-6 pb-6 bg-white dark:bg-gray-800">
             <table class="min-w-full border-2 border-black text-sm">
                 <thead>
-                    <tr class="bg-gray-200 dark:bg-gray-700">
+                    <tr class="bg-gray-300 dark:bg-gray-600">
                         <th class="border-2 border-black px-3 py-3 font-bold text-center text-black dark:text-white w-10"
                             rowspan="2">
                             NO</th>
@@ -64,7 +64,7 @@
                             rowspan="2">
                             Kesimpulan</th>
                     </tr>
-                    <tr class="bg-gray-200 dark:bg-gray-700">
+                    <tr class="bg-gray-300 dark:bg-gray-600">
                         <th
                             class="border-2 border-black px-3 py-2 font-bold text-center text-black dark:text-white w-12">
                             1</th>
@@ -136,7 +136,6 @@ bg-gray-500 dark:bg-gray-500 font-bold text-white
                 <div class="flex items-center gap-3">
                     <div
                         class="w-8 h-6 bg-gray-500 border-2 border-black flex items-center justify-center font-bold text-gray-100">
-                        S
                     </div>
                     <span><em>Standar</em></span>
                 </div>

@@ -2,7 +2,7 @@
 
     @if ($showHeader)
         <!-- Header - DARK MODE READY -->
-        <div class="border-b-4 border-black py-4 bg-white dark:bg-gray-700">
+        <div class="border-b-4 border-black py-4 bg-gray-300 dark:bg-gray-600">
             <h1 class="text-center text-2xl font-bold uppercase tracking-wide text-black dark:text-white">
                 RINGKASAN HASIL ASSESSMENT
             </h1>
@@ -81,7 +81,7 @@
         <div class="px-6 pb-6 bg-white dark:bg-gray-800 overflow-x-auto">
             <table class="min-w-full border-2 border-black text-sm text-gray-900 dark:text-gray-200 mt-6">
                 <thead>
-                    <tr class="bg-cyan-200 dark:bg-gray-700">
+                    <tr class="bg-gray-300 dark:bg-gray-600">
                         <th class="border-2 border-black px-3 py-3 font-bold text-center text-black dark:text-white"
                             style="width: 40px;">NO</th>
                         <th class="border-2 border-black px-3 py-3 font-bold text-center text-black dark:text-white"
@@ -216,7 +216,8 @@
 
                     <!-- Total Row - DARK MODE READY -->
                     @if ($finalAssessment)
-                        <tr class="bg-black text-white hover:bg-black dark:hover:bg-black">
+                        <tr
+                            class="bg-gray-300 dark:bg-gray-600 text-black dark:text-white hover:bg-black dark:hover:bg-black">
                             <td class="border-2 border-black px-3 py-3 text-center" colspan="2"><strong>TOTAL
                                     SKOR</strong></td>
                             <td class="border-2 border-black px-3 py-3 text-center">
