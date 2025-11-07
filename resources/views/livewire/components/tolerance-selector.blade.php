@@ -1,6 +1,6 @@
 <div>
     <!-- Tolerance Selector Section - DARK MODE READY -->
-    <div class="p-4 bg-yellow-50 dark:bg-gray-800/50 border-b-2 border-yellow-300 dark:border-yellow-400/30">
+    <div class="p-4 bg-white dark:bg-gray-800">
         <div class="flex items-center justify-between max-w-6xl mx-auto">
             <!-- Tolerance Dropdown -->
             <div class="flex items-center gap-4">

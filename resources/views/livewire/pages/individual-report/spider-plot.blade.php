@@ -2,7 +2,7 @@
     <div class="mx-auto my-8 shadow overflow-hidden max-w-6xl bg-white dark:bg-gray-800" style="max-width: 1400px;">
 
         <!-- Header - DARK MODE READY -->
-        <div class="border-b-4 border-black py-3 bg-sky-200 dark:bg-gray-700">
+        <div class="border-b-4 border-black py-3 bg-gray-300 dark:bg-gray-600">
             <h1 class="text-center text-lg font-bold uppercase tracking-wide text-gray-900 dark:text-white">
                 SPIDER PLOT ANALYSIS
             </h1>

@@ -3,7 +3,7 @@
 
         @if ($showHeader)
             <!-- Header - DARK MODE READY -->
-            <div class="border-b-4 border-black py-3 bg-sky-200 dark:bg-gray-700">
+            <div class="border-b-4 border-black py-3 bg-gray-300 dark:bg-gray-600">
                 <h1
                     class="text-center text-lg font-bold uppercase tracking-wide
                            text-gray-900 dark:text-white">
@@ -45,63 +45,63 @@
                     <thead>
                         <tr class="bg-sky-200 dark:bg-gray-700 text-gray-900 dark:text-white">
                             <th class="border border-black px-3 py-2 font-semibold 
-                                   bg-white dark:bg-gray-800"
+                                   bg-gray-300 dark:bg-gray-600"
                                 rowspan="2">
                                 No</th>
                             <th class="border border-black px-3 py-2 font-semibold 
-                                   bg-white dark:bg-gray-800"
+                                   bg-gray-300 dark:bg-gray-600"
                                 rowspan="2">
                                 Atribut/Attribute</th>
                             <th class="border border-black px-3 py-2 font-semibold 
-                                   bg-white dark:bg-gray-800"
+                                   bg-gray-300 dark:bg-gray-600"
                                 rowspan="2">
                                 Bobot %<br>100</th>
                             <th class="border border-black px-3 py-2 font-semibold 
-                                   bg-white dark:bg-gray-800"
+                                   bg-gray-300 dark:bg-gray-600"
                                 colspan="2">
                                 <span x-data
                                     x-text="$wire.tolerancePercentage > 0 ? 'Standard (-' + $wire.tolerancePercentage + '%)' : 'Standard'"
                                     class="text-gray-900 dark:text-white"></span>
                             </th>
                             <th class="border border-black px-3 py-2 font-semibold 
-                                   bg-white dark:bg-gray-800"
+                                   bg-gray-300 dark:bg-gray-600"
                                 colspan="2">Individu</th>
                             <th class="border border-black px-3 py-2 font-semibold 
-                                   bg-white dark:bg-gray-800"
+                                   bg-gray-300 dark:bg-gray-600"
                                 colspan="2">Gap</th>
                             <th class="border border-black px-3 py-2 font-semibold 
-                                   bg-white dark:bg-gray-800"
+                                   bg-gray-300 dark:bg-gray-600"
                                 rowspan="2">
                                 Prosentase<br>Kesesuaian</th>
                             <th class="border border-black px-3 py-2 font-semibold 
-                                   bg-white dark:bg-gray-800"
+                                   bg-gray-300 dark:bg-gray-600"
                                 rowspan="2">
                                 Kesimpulan/Conclusion</th>
                         </tr>
                         <tr class="bg-sky-200 dark:bg-gray-700 text-gray-900 dark:text-white">
                             <th
                                 class="border border-black px-3 py-1 font-semibold 
-                                   bg-white dark:bg-gray-800">
+                                   bg-gray-300 dark:bg-gray-600">
                                 Rating/<br>Level</th>
                             <th
                                 class="border border-black px-3 py-1 font-semibold 
-                                   bg-white dark:bg-gray-800">
+                                   bg-gray-300 dark:bg-gray-600">
                                 Score</th>
                             <th
                                 class="border border-black px-3 py-1 font-semibold 
-                                   bg-white dark:bg-gray-800">
+                                   bg-gray-300 dark:bg-gray-600">
                                 Rating/<br>Level</th>
                             <th
                                 class="border border-black px-3 py-1 font-semibold 
-                                   bg-white dark:bg-gray-800">
+                                   bg-gray-300 dark:bg-gray-600">
                                 Score</th>
                             <th
                                 class="border border-black px-3 py-1 font-semibold 
-                                   bg-white dark:bg-gray-800">
+                                   bg-gray-300 dark:bg-gray-600">
                                 Rating/<br>Level</th>
                             <th
                                 class="border border-black px-3 py-0 font-semibold 
-                                   bg-white dark:bg-gray-800">
+                                   bg-gray-300 dark:bg-gray-600">
                                 Score</th>
                         </tr>
                     </thead>
@@ -171,7 +171,7 @@ $c = trim(strtoupper($aspect['conclusion_text'])); @endphp
                         @endforeach
 
                         <!-- Total Rating Row -->
-                        <tr class="font-bold bg-sky-100 dark:bg-gray-600">
+                        <tr class="font-bold bg-gray-300 dark:bg-gray-600">
                             <td class="border border-black px-3 py-2 text-center 
                                    text-gray-900 dark:text-white"
                                 colspan="3">Total Rating</td>
@@ -204,7 +204,7 @@ $c = trim(strtoupper($overallConclusion)); @endphp
                         </tr>
 
                         <!-- Total Score Row -->
-                        <tr class="font-bold bg-sky-100 dark:bg-gray-600">
+                        <tr class="font-bold bg-gray-300 dark:bg-gray-600">
                             <td class="border border-black px-3 py-2 text-center 
                                    text-gray-900 dark:text-white"
                                 colspan="3">Total Score</td>
@@ -247,8 +247,7 @@ $c = trim(strtoupper($overallConclusion)); @endphp
             @endphp
 
             @if ($rankingInfo)
-                <div
-                    class="px-6 py-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-700 dark:to-gray-700 border-t-2 border-black dark:border-gray-600">
+                <div class="px-6 py-4 bg-gray-300 dark:bg-gray-600 border-t-2 border-black dark:border-gray-600">
                     <div class="max-w-4xl mx-auto">
                         <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
                             <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor"
@@ -308,9 +307,8 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                         </div>
 
                         <!-- Additional Info -->
-                        <div
-                            class="mt-4 bg-blue-100 dark:bg-blue-800 border border-blue-200 dark:border-blue-600 rounded-lg p-3">
-                            <div class="text-sm text-blue-800 dark:text-blue-200">
+                        <div class="mt-4 bg-gray-300 dark:bg-gray-600 rounded-lg p-1">
+                            <div class="text-sm text-gray-800 dark:text-gray-200">
                                 <strong>Keterangan:</strong> Ranking berdasarkan total Individual Score dari semua aspek
                                 dalam kategori Kompetensi,
                                 dibandingkan dengan peserta lain di event yang sama pada posisi
@@ -329,15 +327,11 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                 <div class="text-center text-base font-bold mb-6 
                        text-gray-900 dark:text-white">
                     Profil Kompetensi Spider Plot Chart (Rating)</div>
-                <div class="flex justify-center mb-6">
-                    <div style="width: 900px; height: 900px; position: relative;">
-                        <canvas id="spiderRatingChart-{{ $chartId }}"></canvas>
-                    </div>
-                </div>
+
 
                 <!-- Legend Rating - DARK MODE READY -->
                 <!-- GANTI URUTAN LEGEND INI -->
-                <div class="flex justify-center text-sm gap-8 mb-8" id="rating-legend-{{ $chartId }}">
+                <div class="flex justify-center text-sm gap-2 mb-2" id="rating-legend-{{ $chartId }}">
                     <!-- Dataset 0: Peserta - HIJAU -->
                     <span
                         class="legend-item flex items-center gap-2 cursor-pointer select-none 
@@ -378,6 +372,15 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                             x-text="'Tolerance ' + $wire.tolerancePercentage + '%'"></span>
                     </span>
                 </div>
+
+
+                <div class="flex justify-center mb-2">
+                    <div style="width: 900px; height: 900px; position: relative;">
+                        <canvas id="spiderRatingChart-{{ $chartId }}"></canvas>
+                    </div>
+                </div>
+
+
             </div>
         @endif
 
@@ -389,15 +392,11 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                     class="text-center text-base font-bold mb-6 
                        text-gray-900 dark:text-white">
                     Profil Kompetensi Spider Plot Chart (Score)</div>
-                <div class="flex justify-center mb-6">
-                    <div style="width: 900px; height: 900px; position: relative;">
-                        <canvas id="spiderScoreChart-{{ $chartId }}"></canvas>
-                    </div>
-                </div>
+
 
                 <!-- Legend Score - DARK MODE READY -->
                 <!-- GANTI URUTAN LEGEND INI -->
-                <div class="flex justify-center text-sm gap-8 mb-8" id="score-legend-{{ $chartId }}">
+                <div class="flex justify-center text-sm gap-8 mb-2" id="score-legend-{{ $chartId }}">
                     <!-- Dataset 0: Peserta - HIJAU -->
                     <span
                         class="legend-item flex items-center gap-2 cursor-pointer select-none 
@@ -438,6 +437,15 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                             x-text="'Tolerance ' + $wire.tolerancePercentage + '%'"></span>
                     </span>
                 </div>
+
+
+                <div class="flex justify-center mb-2">
+                    <div style="width: 900px; height: 900px; position: relative;">
+                        <canvas id="spiderScoreChart-{{ $chartId }}"></canvas>
+                    </div>
+                </div>
+
+
             </div>
         @endif
 
