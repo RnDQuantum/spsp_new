@@ -19,13 +19,7 @@
                 <div class="mt-3 pt-3 border-t border-gray-200 dark:border-gray-600">
                     <div class="flex items-start gap-2 text-sm text-gray-600 dark:text-gray-300">
                         <span class="font-semibold">📄 Template:</span>
-                        <div>
-                            <div class="font-semibold text-gray-900 dark:text-gray-100">{{ $selectedTemplate->name }}
-                            </div>
-                            @if ($selectedTemplate->description)
-                                <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                    {{ $selectedTemplate->description }}</div>
-                            @endif
+                        <div class="font-semibold text-gray-900 dark:text-gray-100">{{ $selectedTemplate->name }}
                         </div>
                     </div>
                     @if ($selectedEvent)
@@ -53,7 +47,8 @@
                                 ->first();
                             $potensiOriginal = $potensiCategory?->weight_percentage ?? 50;
                             $kompetensiOriginal = $kompetensiCategory?->weight_percentage ?? 50;
-                            $isWeightAdjusted = ($potensiWeight !== $potensiOriginal) || ($kompetensiWeight !== $kompetensiOriginal);
+                            $isWeightAdjusted =
+                                $potensiWeight !== $potensiOriginal || $kompetensiWeight !== $kompetensiOriginal;
                         @endphp
                         <button wire:click="openEditCategoryWeights" type="button"
                             class="px-4 py-2 text-sm font-medium {{ $isWeightAdjusted ? 'text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-900/30 border-amber-400 dark:border-amber-600' : 'text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600' }} border rounded-lg hover:bg-opacity-80 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
@@ -101,8 +96,9 @@
 
                     {{-- Adjustment Indicator --}}
                     @php
-                        $hasAdjustments = app(\App\Services\DynamicStandardService::class)->hasAdjustments(
+                        $hasAdjustments = app(\App\Services\DynamicStandardService::class)->hasCategoryAdjustments(
                             $selectedTemplate->id,
+                            'potensi',
                         );
                     @endphp
                     @if ($hasAdjustments)
@@ -376,7 +372,8 @@
     @if ($showEditCategoryWeightsModal)
         <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog"
             aria-modal="true">
-            <div class="fixed inset-0 bg-gray-900/75 dark:bg-gray-900/90 transition-opacity" wire:click="closeCategoryWeightsModal">
+            <div class="fixed inset-0 bg-gray-900/75 dark:bg-gray-900/90 transition-opacity"
+                wire:click="closeCategoryWeightsModal">
             </div>
             <div class="flex min-h-full items-center justify-center p-4">
                 <div class="relative w-full max-w-lg bg-white dark:bg-gray-800 rounded-lg shadow-xl">
@@ -390,7 +387,8 @@
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                 Bobot Potensi (%):
                             </label>
-                            <input type="number" wire:model.live="editingPotensiWeight" min="0" max="100"
+                            <input type="number" wire:model.live="editingPotensiWeight" min="0"
+                                max="100"
                                 class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
                             <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
                                 Nilai asli: {{ $originalPotensiWeight }}%
@@ -402,7 +400,8 @@
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                 Bobot Kompetensi (%):
                             </label>
-                            <input type="number" wire:model.live="editingKompetensiWeight" min="0" max="100"
+                            <input type="number" wire:model.live="editingKompetensiWeight" min="0"
+                                max="100"
                                 class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
                             <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
                                 Nilai asli: {{ $originalKompetensiWeight }}%
@@ -410,16 +409,19 @@
                         </div>
 
                         {{-- Total Display --}}
-                        <div class="p-4 rounded-lg {{ ($editingPotensiWeight + $editingKompetensiWeight) === 100 ? 'bg-green-100 dark:bg-green-900/30' : 'bg-red-100 dark:bg-red-900/30' }}">
+                        <div
+                            class="p-4 rounded-lg {{ $editingPotensiWeight + $editingKompetensiWeight === 100 ? 'bg-green-100 dark:bg-green-900/30' : 'bg-red-100 dark:bg-red-900/30' }}">
                             <div class="flex items-center justify-between">
-                                <span class="font-semibold {{ ($editingPotensiWeight + $editingKompetensiWeight) === 100 ? 'text-green-800 dark:text-green-300' : 'text-red-800 dark:text-red-300' }}">
+                                <span
+                                    class="font-semibold {{ $editingPotensiWeight + $editingKompetensiWeight === 100 ? 'text-green-800 dark:text-green-300' : 'text-red-800 dark:text-red-300' }}">
                                     Total:
                                 </span>
-                                <span class="font-bold text-lg {{ ($editingPotensiWeight + $editingKompetensiWeight) === 100 ? 'text-green-800 dark:text-green-300' : 'text-red-800 dark:text-red-300' }}">
+                                <span
+                                    class="font-bold text-lg {{ $editingPotensiWeight + $editingKompetensiWeight === 100 ? 'text-green-800 dark:text-green-300' : 'text-red-800 dark:text-red-300' }}">
                                     {{ $editingPotensiWeight + $editingKompetensiWeight }}%
                                 </span>
                             </div>
-                            @if (($editingPotensiWeight + $editingKompetensiWeight) !== 100)
+                            @if ($editingPotensiWeight + $editingKompetensiWeight !== 100)
                                 <p class="text-sm text-red-700 dark:text-red-400 mt-2">
                                     ⚠️ Total harus 100%
                                 </p>
@@ -432,7 +434,7 @@
                             Batal
                         </button>
                         <button wire:click="saveCategoryWeights" type="button"
-                            {{ ($editingPotensiWeight + $editingKompetensiWeight) !== 100 ? 'disabled' : '' }}
+                            {{ $editingPotensiWeight + $editingKompetensiWeight !== 100 ? 'disabled' : '' }}
                             class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed">
                             Simpan
                         </button>

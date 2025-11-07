@@ -127,7 +127,8 @@
     .dark .rating-cell-standard-3,
     .dark .rating-cell-standard-4,
     .dark .rating-cell-standard-5 {
-        background: #1a1c1e;
+        /* background: #1a1c1e; */
+        background: #1F2937;
         /* Abu-abu sedang untuk dark mode */
         color: #f9fafb;
         /* Text terang */
@@ -190,10 +191,11 @@
     }
 </style>
 
-<div class="bg-white dark:bg-gray-900 rounded-lg shadow-md overflow-hidden max-w-7xl mx-auto my-8">
+<div
+    class="bg-white dark:bg-gray-900 border-1 border-gray-400 dark:border-gray-800 rounded-lg overflow-hidden max-w-7xl mx-auto my-8">
     <!-- Header - DARK MODE READY -->
     @if ($showHeader)
-        <div class="border-b-4 border-black dark:border-gray-300 py-3 bg-gray-100 dark:bg-gray-800">
+        <div class="border-b-4 border-black dark:border-gray-300 py-3 bg-gray-300 dark:bg-gray-600">
             <h1 class="text-center text-lg font-bold uppercase tracking-wide text-black dark:text-white">
                 GENERAL MATCHING - ASPEK PSIKOLOGI
             </h1>
@@ -268,49 +270,49 @@
     <div class="overflow-x-auto">
         <table class="w-full border-collapse">
             <thead>
-                <tr class="bg-gray-100 dark:bg-gray-800">
-                    <th class="border border-gray-300 dark:border-gray-600 px-4 py-2 text-center text-sm font-bold text-black dark:text-white col-number"
+                <tr class="bg-gray-300 dark:bg-gray-600">
+                    <th class="border border-gray-400 dark:border-gray-800 px-4 py-2 text-center text-sm font-bold text-black dark:text-white col-number"
                         rowspan="3">NO.</th>
-                    <th class="border border-gray-300 dark:border-gray-600 px-4 py-2 text-center text-sm font-bold text-black dark:text-white"
+                    <th class="border border-gray-400 dark:border-gray-800 px-4 py-2 text-center text-sm font-bold text-black dark:text-white"
                         rowspan="3">ASPEK</th>
-                    <th class="border border-gray-300 dark:border-gray-600 px-2 py-2 text-center text-sm font-bold text-black dark:text-white"
+                    <th class="border border-gray-400 dark:border-gray-800 px-2 py-2 text-center text-sm font-bold text-black dark:text-white"
                         rowspan="3">
                         STANDARD</th>
-                    <th class="border border-gray-300 dark:border-gray-600 px-2 py-2 text-center text-xs font-bold text-black dark:text-white range-scale"
+                    <th class="border border-gray-400 dark:border-gray-800 px-2 py-2 text-center text-xs font-bold text-black dark:text-white range-scale"
                         colspan="5">RATING</th>
                 </tr>
-                <tr class="bg-gray-100 dark:bg-gray-800">
+                <tr class="bg-gray-300 dark:bg-gray-600">
                     <th
-                        class="border border-gray-300 dark:border-gray-600 px-2 py-1 text-center text-xs text-black dark:text-white ">
+                        class="border border-gray-400 dark:border-gray-800 px-2 py-1 text-center text-xs text-black dark:text-white ">
                         1</th>
                     <th
-                        class="border border-gray-300 dark:border-gray-600 px-2 py-1 text-center text-xs text-black dark:text-white ">
+                        class="border border-gray-400 dark:border-gray-800 px-2 py-1 text-center text-xs text-black dark:text-white ">
                         2</th>
                     <th
-                        class="border border-gray-300 dark:border-gray-600 px-2 py-1 text-center text-xs text-black dark:text-white ">
+                        class="border border-gray-400 dark:border-gray-800 px-2 py-1 text-center text-xs text-black dark:text-white ">
                         3</th>
                     <th
-                        class="border border-gray-300 dark:border-gray-600 px-2 py-1 text-center text-xs text-black dark:text-white ">
+                        class="border border-gray-400 dark:border-gray-800 px-2 py-1 text-center text-xs text-black dark:text-white ">
                         4</th>
                     <th
-                        class="border border-gray-300 dark:border-gray-600 px-2 py-1 text-center text-xs text-black dark:text-white ">
+                        class="border border-gray-400 dark:border-gray-800 px-2 py-1 text-center text-xs text-black dark:text-white ">
                         5</th>
                 </tr>
                 <tr class="bg-blue-100 dark:bg-gray-700">
                     <th
-                        class="border border-gray-300 dark:border-gray-600 px-2 py-1 text-center text-xs text-white range-scale rating-cell-1">
+                        class="border border-gray-400 dark:border-gray-800 px-2 py-1 text-center text-xs text-white range-scale rating-cell-1">
                         Rendah</th>
                     <th
-                        class="border border-gray-300 dark:border-gray-600 px-2 py-1 text-center text-xs text-white range-scale rating-cell-2">
+                        class="border border-gray-400 dark:border-gray-800 px-2 py-1 text-center text-xs text-white range-scale rating-cell-2">
                         Kurang</th>
                     <th
-                        class="border border-gray-300 dark:border-gray-600 px-2 py-1 text-center text-xs text-white range-scale rating-cell-3">
+                        class="border border-gray-400 dark:border-gray-800 px-2 py-1 text-center text-xs text-white range-scale rating-cell-3">
                         Cukup</th>
                     <th
-                        class="border border-gray-300 dark:border-gray-600 px-2 py-1 text-center text-xs text-white range-scale rating-cell-4">
+                        class="border border-gray-400 dark:border-gray-800 px-2 py-1 text-center text-xs text-white range-scale rating-cell-4">
                         Baik</th>
                     <th
-                        class="border border-gray-300 dark:border-gray-600 px-2 py-1 text-center text-xs text-white range-scale rating-cell-5">
+                        class="border border-gray-400 dark:border-gray-800 px-2 py-1 text-center text-xs text-white range-scale rating-cell-5">
                         Baik Sekali</th>
                 </tr>
             </thead>

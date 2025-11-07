@@ -201,7 +201,7 @@ class StandardPsikometrik extends Component
     }
 
     /**
-     * PHASE 2C: Reset all adjustments
+     * PHASE 2C: Reset adjustments for Potensi category only
      */
     public function resetAdjustments(): void
     {
@@ -209,7 +209,7 @@ class StandardPsikometrik extends Component
             return;
         }
 
-        app(DynamicStandardService::class)->resetAdjustments($this->selectedTemplate->id);
+        app(DynamicStandardService::class)->resetCategoryAdjustments($this->selectedTemplate->id, 'potensi');
         $this->dispatch('standard-adjusted', templateId: $this->selectedTemplate->id);
     }
 
@@ -408,7 +408,7 @@ class StandardPsikometrik extends Component
 
                     // PHASE 2C: Get adjusted sub-aspect rating
                     $subAspectRating = $dynamicService->getSubAspectRating($templateId, $subAspect->code);
-                    $subAspectOriginalRating = $subAspect->standard_rating;
+                    $subAspectOriginalRating = (int) $subAspect->standard_rating;
 
                     $subAspectsData[] = [
                         'code' => $subAspect->code,

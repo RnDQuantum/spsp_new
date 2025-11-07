@@ -2,8 +2,10 @@
 
 namespace App\Livewire\Pages\GeneralReport\Ranking;
 
+use App\Models\Aspect;
 use App\Models\AssessmentEvent;
 use App\Models\CategoryType;
+use App\Services\DynamicStandardService;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Layout;
@@ -49,6 +51,11 @@ class RekapRankingAssessment extends Component
         ],
     ];
 
+    // CACHE PROPERTIES - untuk menyimpan hasil kalkulasi
+    private ?array $adjustedStandardsCache = null;
+
+    private ?array $aggregatesCache = null;
+
     protected $listeners = [
         'event-selected' => 'handleEventSelected',
         'position-selected' => 'handlePositionSelected',
@@ -68,19 +75,13 @@ class RekapRankingAssessment extends Component
     public function updatedPerPage(): void
     {
         $this->resetPage();
+        $this->clearCache(); // Clear cache saat perPage berubah
     }
 
     public function handleEventSelected(?string $eventCode): void
     {
         $this->resetPage();
-
-        // JANGAN refresh data di sini!
-        // Position akan auto-reset dan trigger handlePositionSelected
-    }
-
-    public function handlePositionSelected(?int $positionFormationId): void
-    {
-        $this->resetPage();
+        $this->clearCache(); // Clear cache saat event berubah
 
         // Refresh data di sini
         $this->loadWeights();
@@ -101,8 +102,147 @@ class RekapRankingAssessment extends Component
         ]);
     }
 
-    private function getStandardInfo(): ?array
+    public function handlePositionSelected(?int $positionFormationId): void
     {
+        $this->resetPage();
+        $this->clearCache(); // Clear cache saat position berubah
+
+        // Refresh data di sini
+        $this->loadWeights();
+        $this->prepareChartData();
+
+        $summary = $this->getPassingSummary();
+        $this->dispatch('summary-updated', [
+            'passing' => $summary['passing'],
+            'total' => $summary['total'],
+            'percentage' => $summary['percentage'],
+        ]);
+
+        // Dispatch chart update event
+        $this->dispatch('pieChartDataUpdated', [
+            'labels' => $this->chartLabels,
+            'data' => $this->chartData,
+            'colors' => $this->chartColors,
+        ]);
+    }
+
+    /**
+     * Clear all caches
+     */
+    private function clearCache(): void
+    {
+        $this->adjustedStandardsCache = null;
+        $this->aggregatesCache = null;
+    }
+
+    /**
+     * Get adjusted standard values from session or database for both categories
+     * OPTIMIZED: Cache result untuk menghindari kalkulasi berulang
+     */
+    private function getAdjustedStandardValues(
+        int $templateId,
+        array $potensiAspectIds,
+        array $kompetensiAspectIds,
+        float $originalPotensiStandardScore,
+        float $originalKompetensiStandardScore
+    ): array {
+        // Gunakan cache jika sudah ada
+        if ($this->adjustedStandardsCache !== null) {
+            return $this->adjustedStandardsCache;
+        }
+
+        $standardService = app(DynamicStandardService::class);
+
+        // Check adjustments for both categories
+        $hasPotensiAdjustments = $standardService->hasCategoryAdjustments($templateId, 'potensi');
+        $hasKompetensiAdjustments = $standardService->hasCategoryAdjustments($templateId, 'kompetensi');
+
+        // Initialize with original values
+        $adjustedPotensiScore = $originalPotensiStandardScore;
+        $adjustedKompetensiScore = $originalKompetensiStandardScore;
+
+        // Recalculate Potensi if there are adjustments
+        if ($hasPotensiAdjustments) {
+            $potensiScore = 0;
+            $aspects = Aspect::whereIn('id', $potensiAspectIds)
+                ->with('subAspects')
+                ->orderBy('order')
+                ->get();
+
+            foreach ($aspects as $aspect) {
+                if (! $standardService->isAspectActive($templateId, $aspect->code)) {
+                    continue;
+                }
+
+                $aspectWeight = $standardService->getAspectWeight($templateId, $aspect->code);
+                $aspectRating = $standardService->getAspectRating($templateId, $aspect->code);
+
+                // For Potensi, calculate based on sub-aspects if they exist
+                if ($aspect->subAspects && $aspect->subAspects->count() > 0) {
+                    $subAspectRatingSum = 0;
+                    $activeSubAspectsCount = 0;
+
+                    foreach ($aspect->subAspects as $subAspect) {
+                        if (! $standardService->isSubAspectActive($templateId, $subAspect->code)) {
+                            continue;
+                        }
+
+                        $subRating = $standardService->getSubAspectRating($templateId, $subAspect->code);
+                        $subAspectRatingSum += $subRating;
+                        $activeSubAspectsCount++;
+                    }
+
+                    if ($activeSubAspectsCount > 0) {
+                        $aspectRating = $subAspectRatingSum / $activeSubAspectsCount;
+                    }
+                }
+
+                $potensiScore += ($aspectRating * $aspectWeight);
+            }
+
+            $adjustedPotensiScore = $potensiScore;
+        }
+
+        // Recalculate Kompetensi if there are adjustments
+        if ($hasKompetensiAdjustments) {
+            $kompetensiScore = 0;
+            $aspects = Aspect::whereIn('id', $kompetensiAspectIds)
+                ->orderBy('order')
+                ->get();
+
+            foreach ($aspects as $aspect) {
+                if (! $standardService->isAspectActive($templateId, $aspect->code)) {
+                    continue;
+                }
+
+                $aspectWeight = $standardService->getAspectWeight($templateId, $aspect->code);
+                $aspectRating = $standardService->getAspectRating($templateId, $aspect->code);
+
+                $kompetensiScore += ($aspectRating * $aspectWeight);
+            }
+
+            $adjustedKompetensiScore = $kompetensiScore;
+        }
+
+        // Cache result
+        $this->adjustedStandardsCache = [
+            'potensi_standard_score' => $adjustedPotensiScore,
+            'kompetensi_standard_score' => $adjustedKompetensiScore,
+        ];
+
+        return $this->adjustedStandardsCache;
+    }
+
+    /**
+     * Get all aggregates data ONCE and cache it
+     * OPTIMIZED: Avoid multiple queries
+     */
+    private function getAggregatesData(): ?array
+    {
+        if ($this->aggregatesCache !== null) {
+            return $this->aggregatesCache;
+        }
+
         $eventCode = session('filter.event_code');
         $positionFormationId = session('filter.position_formation_id');
 
@@ -134,22 +274,70 @@ class RekapRankingAssessment extends Component
         $potensiId = (int) $potensi->id;
         $kompetensiId = (int) $kompetensi->id;
 
-        // Get average standard scores (they should be same for all participants in this position, but we take first one)
-        $firstParticipant = DB::table('aspect_assessments as aa')
+        // Get aspect IDs for both categories
+        $potensiAspectIds = Aspect::where('category_type_id', $potensiId)
+            ->orderBy('order')
+            ->pluck('id')
+            ->all();
+
+        $kompetensiAspectIds = Aspect::where('category_type_id', $kompetensiId)
+            ->orderBy('order')
+            ->pluck('id')
+            ->all();
+
+        // Get ALL aggregates at once
+        $aggregates = DB::table('aspect_assessments as aa')
             ->join('aspects as a', 'a.id', '=', 'aa.aspect_id')
             ->where('aa.event_id', $event->id)
             ->where('aa.position_formation_id', $positionFormationId)
             ->groupBy('aa.participant_id')
+            ->selectRaw('aa.participant_id as participant_id')
+            ->selectRaw('SUM(CASE WHEN a.category_type_id = ? THEN aa.individual_score ELSE 0 END) as potensi_individual_score', [$potensiId])
             ->selectRaw('SUM(CASE WHEN a.category_type_id = ? THEN aa.standard_score ELSE 0 END) as potensi_standard_score', [$potensiId])
+            ->selectRaw('SUM(CASE WHEN a.category_type_id = ? THEN aa.individual_score ELSE 0 END) as kompetensi_individual_score', [$kompetensiId])
             ->selectRaw('SUM(CASE WHEN a.category_type_id = ? THEN aa.standard_score ELSE 0 END) as kompetensi_standard_score', [$kompetensiId])
-            ->first();
+            ->get();
 
-        if (! $firstParticipant) {
+        if ($aggregates->isEmpty()) {
             return null;
         }
 
-        $potStd = (float) $firstParticipant->potensi_standard_score;
-        $komStd = (float) $firstParticipant->kompetensi_standard_score;
+        // Get adjusted standards ONCE
+        $firstAggregate = $aggregates->first();
+        $adjustedStandards = $this->getAdjustedStandardValues(
+            $position->template_id,
+            $potensiAspectIds,
+            $kompetensiAspectIds,
+            (float) $firstAggregate->potensi_standard_score,
+            (float) $firstAggregate->kompetensi_standard_score
+        );
+
+        // Cache everything
+        $this->aggregatesCache = [
+            'event' => $event,
+            'position' => $position,
+            'potensi' => $potensi,
+            'kompetensi' => $kompetensi,
+            'potensiId' => $potensiId,
+            'kompetensiId' => $kompetensiId,
+            'aggregates' => $aggregates,
+            'adjustedStandards' => $adjustedStandards,
+        ];
+
+        return $this->aggregatesCache;
+    }
+
+    private function getStandardInfo(): ?array
+    {
+        $data = $this->getAggregatesData();
+
+        if (! $data) {
+            return null;
+        }
+
+        $adjustedStandards = $data['adjustedStandards'];
+        $potStd = $adjustedStandards['potensi_standard_score'];
+        $komStd = $adjustedStandards['kompetensi_standard_score'];
 
         // Calculate adjusted standard based on tolerance
         $toleranceFactor = 1 - $this->tolerancePercentage / 100;
@@ -254,175 +442,9 @@ class RekapRankingAssessment extends Component
 
     public function render()
     {
-        $rows = null;
-        $standardInfo = $this->getStandardInfo();
-
-        $eventCode = session('filter.event_code');
-        $positionFormationId = session('filter.position_formation_id');
-
-        if ($eventCode && $positionFormationId && ($this->potensiWeight + $this->kompetensiWeight) > 0) {
-            $event = AssessmentEvent::where('code', $eventCode)->first();
-
-            if ($event) {
-                // Get selected position with template
-                $position = $event->positionFormations()
-                    ->with('template')
-                    ->find($positionFormationId);
-
-                if ($position?->template) {
-                    // Get categories from selected position's template
-                    $potensi = CategoryType::where('template_id', $position->template_id)->where('code', 'potensi')->first();
-                    $kompetensi = CategoryType::where('template_id', $position->template_id)->where('code', 'kompetensi')->first();
-
-                    if ($potensi && $kompetensi) {
-                        $potensiId = (int) $potensi->id;
-                        $kompetensiId = (int) $kompetensi->id;
-
-                        // Aggregate skor per peserta untuk kedua kategori melalui aspect_assessments + aspects - FILTER by position
-                        $baseQuery = DB::table('aspect_assessments as aa')
-                            ->join('aspects as a', 'a.id', '=', 'aa.aspect_id')
-                            ->where('aa.event_id', $event->id)
-                            ->where('aa.position_formation_id', $positionFormationId)
-                            ->groupBy('aa.participant_id')
-                            ->selectRaw('aa.participant_id as participant_id')
-                            ->selectRaw('SUM(CASE WHEN a.category_type_id = ? THEN aa.individual_score ELSE 0 END) as potensi_individual_score', [$potensiId])
-                            ->selectRaw('SUM(CASE WHEN a.category_type_id = ? THEN aa.standard_score ELSE 0 END) as potensi_standard_score', [$potensiId])
-                            ->selectRaw('SUM(CASE WHEN a.category_type_id = ? THEN aa.individual_score ELSE 0 END) as kompetensi_individual_score', [$kompetensiId])
-                            ->selectRaw('SUM(CASE WHEN a.category_type_id = ? THEN aa.standard_score ELSE 0 END) as kompetensi_standard_score', [$kompetensiId]);
-
-                        // Hitung ordering berdasarkan total weighted individual
-                        $orderingQuery = DB::query()->fromSub($baseQuery, 't')
-                            ->select('*')
-                            ->selectRaw('? * potensi_individual_score / 100 + ? * kompetensi_individual_score / 100 as total_weighted_individual', [$this->potensiWeight, $this->kompetensiWeight])
-                            ->orderByDesc('total_weighted_individual')
-                            ->orderBy('participant_id');
-
-                        // Handle "all" perPage option
-                        if ($this->perPage === 'all') {
-                            $allData = $orderingQuery->get();
-                            $items = collect($allData)->values()->map(function ($row, int $index) {
-                                $participant = DB::table('participants')->where('id', $row->participant_id)->first();
-
-                                // Get original values from database
-                                $potInd = (float) $row->potensi_individual_score;
-                                $potStd = (float) $row->potensi_standard_score;
-                                $komInd = (float) $row->kompetensi_individual_score;
-                                $komStd = (float) $row->kompetensi_standard_score;
-
-                                // Calculate adjusted standard based on tolerance
-                                $toleranceFactor = 1 - ($this->tolerancePercentage / 100);
-                                $adjustedPotStd = $potStd * $toleranceFactor;
-                                $adjustedKomStd = $komStd * $toleranceFactor;
-
-                                // Individual scores
-                                $totalInd = $potInd + $komInd;
-                                $weightedPot = $potInd * ($this->potensiWeight / 100);
-                                $weightedKom = $komInd * ($this->kompetensiWeight / 100);
-                                $totalWeightedInd = $weightedPot + $weightedKom;
-
-                                // Adjusted standard scores
-                                $weightedPotStd = $adjustedPotStd * ($this->potensiWeight / 100);
-                                $weightedKomStd = $adjustedKomStd * ($this->kompetensiWeight / 100);
-                                $totalWeightedStd = $weightedPotStd + $weightedKomStd;
-
-                                // Calculate original gap (at tolerance 0)
-                                $originalWeightedStd = $potStd * ($this->potensiWeight / 100) + $komStd * ($this->kompetensiWeight / 100);
-                                $originalGap = $totalWeightedInd - $originalWeightedStd;
-
-                                // Gap calculation based on adjusted standard
-                                $adjustedGap = $totalWeightedInd - $totalWeightedStd;
-                                $conclusion = $this->getConclusionText($originalGap, $adjustedGap);
-
-                                return [
-                                    'rank' => $index + 1,
-                                    'name' => $participant->name ?? '-',
-                                    'psy_individual' => round($potInd, 2),
-                                    'mc_individual' => round($komInd, 2),
-                                    'total_individual' => round($totalInd, 2),
-                                    'psy_weighted' => round($weightedPot, 2),
-                                    'mc_weighted' => round($weightedKom, 2),
-                                    'total_weighted_individual' => round($totalWeightedInd, 2),
-                                    'gap' => round($adjustedGap, 2),
-                                    'conclusion' => $conclusion,
-                                ];
-                            })->all();
-
-                            $rows = new LengthAwarePaginator(
-                                $items,
-                                count($items),
-                                count($items),
-                                1,
-                                ['path' => request()->url(), 'query' => request()->query()]
-                            );
-                        } else {
-                            /** @var LengthAwarePaginator $paginator */
-                            $paginator = $orderingQuery->paginate((int)$this->perPage)->withQueryString();
-
-                            $currentPage = (int) $paginator->currentPage();
-                            $perPage = (int) $paginator->perPage();
-                            $startRank = ($currentPage - 1) * $perPage;
-
-                            $items = collect($paginator->items())->values()->map(function ($row, int $index) use ($startRank) {
-                                $participant = DB::table('participants')->where('id', $row->participant_id)->first();
-
-                                // Get original values from database
-                                $potInd = (float) $row->potensi_individual_score;
-                                $potStd = (float) $row->potensi_standard_score;
-                                $komInd = (float) $row->kompetensi_individual_score;
-                                $komStd = (float) $row->kompetensi_standard_score;
-
-                                // Calculate adjusted standard based on tolerance
-                                $toleranceFactor = 1 - ($this->tolerancePercentage / 100);
-                                $adjustedPotStd = $potStd * $toleranceFactor;
-                                $adjustedKomStd = $komStd * $toleranceFactor;
-
-                                // Individual scores
-                                $totalInd = $potInd + $komInd;
-                                $weightedPot = $potInd * ($this->potensiWeight / 100);
-                                $weightedKom = $komInd * ($this->kompetensiWeight / 100);
-                                $totalWeightedInd = $weightedPot + $weightedKom;
-
-                                // Adjusted standard scores
-                                $weightedPotStd = $adjustedPotStd * ($this->potensiWeight / 100);
-                                $weightedKomStd = $adjustedKomStd * ($this->kompetensiWeight / 100);
-                                $totalWeightedStd = $weightedPotStd + $weightedKomStd;
-
-                                // Calculate original gap (at tolerance 0)
-                                $originalWeightedStd = $potStd * ($this->potensiWeight / 100) + $komStd * ($this->kompetensiWeight / 100);
-                                $originalGap = $totalWeightedInd - $originalWeightedStd;
-
-                                // Gap calculation based on adjusted standard
-                                $adjustedGap = $totalWeightedInd - $totalWeightedStd;
-                                $conclusion = $this->getConclusionText($originalGap, $adjustedGap);
-
-                                return [
-                                    'rank' => $startRank + $index + 1,
-                                    'name' => $participant->name ?? '-',
-                                    'psy_individual' => round($potInd, 2),
-                                    'mc_individual' => round($komInd, 2),
-                                    'total_individual' => round($totalInd, 2),
-                                    'psy_weighted' => round($weightedPot, 2),
-                                    'mc_weighted' => round($weightedKom, 2),
-                                    'total_weighted_individual' => round($totalWeightedInd, 2),
-                                    'gap' => round($adjustedGap, 2),
-                                    'conclusion' => $conclusion,
-                                ];
-                            })->all();
-
-                            $rows = new LengthAwarePaginator(
-                                $items,
-                                $paginator->total(),
-                                $paginator->perPage(),
-                                $paginator->currentPage(),
-                                ['path' => $paginator->path(), 'query' => request()->query()]
-                            );
-                        }
-                    }
-                }
-            }
-        }
-
+        $rows = $this->buildRankings();
         $conclusionSummary = $this->getConclusionSummary();
+        $standardInfo = $this->getStandardInfo();
 
         return view('livewire.pages.general-report.rekap-ranking-assessment', [
             'potensiWeight' => $this->potensiWeight,
@@ -435,62 +457,28 @@ class RekapRankingAssessment extends Component
 
     public function getPassingSummary(): array
     {
-        $eventCode = session('filter.event_code');
-        $positionFormationId = session('filter.position_formation_id');
+        $data = $this->getAggregatesData();
 
-        if (! $eventCode || ! $positionFormationId || ($this->potensiWeight + $this->kompetensiWeight) === 0) {
+        if (! $data) {
             return ['total' => 0, 'passing' => 0, 'percentage' => 0];
         }
 
-        $event = AssessmentEvent::where('code', $eventCode)->first();
-        if (! $event) {
-            return ['total' => 0, 'passing' => 0, 'percentage' => 0];
-        }
+        $aggregates = $data['aggregates'];
+        $adjustedStandards = $data['adjustedStandards'];
+        $potStd = $adjustedStandards['potensi_standard_score'];
+        $komStd = $adjustedStandards['kompetensi_standard_score'];
 
-        // Get selected position with template
-        $position = $event->positionFormations()
-            ->with('template')
-            ->find($positionFormationId);
+        // Calculate adjusted standard based on tolerance
+        $toleranceFactor = 1 - ($this->tolerancePercentage / 100);
+        $adjustedPotStd = $potStd * $toleranceFactor;
+        $adjustedKomStd = $komStd * $toleranceFactor;
 
-        if (! $position?->template) {
-            return ['total' => 0, 'passing' => 0, 'percentage' => 0];
-        }
-
-        // Get categories from selected position's template
-        $potensi = CategoryType::where('template_id', $position->template_id)->where('code', 'potensi')->first();
-        $kompetensi = CategoryType::where('template_id', $position->template_id)->where('code', 'kompetensi')->first();
-        if (! $potensi || ! $kompetensi) {
-            return ['total' => 0, 'passing' => 0, 'percentage' => 0];
-        }
-
-        $potensiId = (int) $potensi->id;
-        $kompetensiId = (int) $kompetensi->id;
-
-        $baseQuery = DB::table('aspect_assessments as aa')
-            ->join('aspects as a', 'a.id', '=', 'aa.aspect_id')
-            ->where('aa.event_id', $event->id)
-            ->where('aa.position_formation_id', $positionFormationId)
-            ->groupBy('aa.participant_id')
-            ->selectRaw('aa.participant_id as participant_id')
-            ->selectRaw('SUM(CASE WHEN a.category_type_id = ? THEN aa.individual_score ELSE 0 END) as potensi_individual_score', [$potensiId])
-            ->selectRaw('SUM(CASE WHEN a.category_type_id = ? THEN aa.standard_score ELSE 0 END) as potensi_standard_score', [$potensiId])
-            ->selectRaw('SUM(CASE WHEN a.category_type_id = ? THEN aa.individual_score ELSE 0 END) as kompetensi_individual_score', [$kompetensiId])
-            ->selectRaw('SUM(CASE WHEN a.category_type_id = ? THEN aa.standard_score ELSE 0 END) as kompetensi_standard_score', [$kompetensiId]);
-
-        $all = $baseQuery->get();
-
-        $total = $all->count();
+        $total = $aggregates->count();
         $passing = 0;
-        foreach ($all as $row) {
-            $potInd = (float) $row->potensi_individual_score;
-            $potStd = (float) $row->potensi_standard_score;
-            $komInd = (float) $row->kompetensi_individual_score;
-            $komStd = (float) $row->kompetensi_standard_score;
 
-            // Calculate adjusted standard based on tolerance
-            $toleranceFactor = 1 - ($this->tolerancePercentage / 100);
-            $adjustedPotStd = $potStd * $toleranceFactor;
-            $adjustedKomStd = $komStd * $toleranceFactor;
+        foreach ($aggregates as $row) {
+            $potInd = (float) $row->potensi_individual_score;
+            $komInd = (float) $row->kompetensi_individual_score;
 
             $weightedPot = $potInd * ($this->potensiWeight / 100);
             $weightedKom = $komInd * ($this->kompetensiWeight / 100);
@@ -521,67 +509,28 @@ class RekapRankingAssessment extends Component
 
     public function getConclusionSummary(): array
     {
-        // Get conclusion summary for all participants in current event + position
-        $eventCode = session('filter.event_code');
-        $positionFormationId = session('filter.position_formation_id');
+        $data = $this->getAggregatesData();
 
-        if (! $eventCode || ! $positionFormationId || ($this->potensiWeight + $this->kompetensiWeight) === 0) {
+        if (! $data) {
             return [];
         }
 
-        $event = AssessmentEvent::where('code', $eventCode)->first();
-        if (! $event) {
-            return [];
-        }
+        $aggregates = $data['aggregates'];
+        $adjustedStandards = $data['adjustedStandards'];
+        $potStd = $adjustedStandards['potensi_standard_score'];
+        $komStd = $adjustedStandards['kompetensi_standard_score'];
 
-        // Get selected position with template
-        $position = $event->positionFormations()
-            ->with('template')
-            ->find($positionFormationId);
+        // Calculate adjusted standard based on tolerance
+        $toleranceFactor = 1 - ($this->tolerancePercentage / 100);
+        $adjustedPotStd = $potStd * $toleranceFactor;
+        $adjustedKomStd = $komStd * $toleranceFactor;
 
-        if (! $position?->template) {
-            return [];
-        }
+        // Initialize conclusions from config
+        $conclusions = array_fill_keys(array_keys($this->conclusionConfig), 0);
 
-        // Get categories from selected position's template
-        $potensi = CategoryType::where('template_id', $position->template_id)->where('code', 'potensi')->first();
-        $kompetensi = CategoryType::where('template_id', $position->template_id)->where('code', 'kompetensi')->first();
-        if (! $potensi || ! $kompetensi) {
-            return [];
-        }
-
-        $potensiId = (int) $potensi->id;
-        $kompetensiId = (int) $kompetensi->id;
-
-        $baseQuery = DB::table('aspect_assessments as aa')
-            ->join('aspects as a', 'a.id', '=', 'aa.aspect_id')
-            ->where('aa.event_id', $event->id)
-            ->where('aa.position_formation_id', $positionFormationId)
-            ->groupBy('aa.participant_id')
-            ->selectRaw('aa.participant_id as participant_id')
-            ->selectRaw('SUM(CASE WHEN a.category_type_id = ? THEN aa.individual_score ELSE 0 END) as potensi_individual_score', [$potensiId])
-            ->selectRaw('SUM(CASE WHEN a.category_type_id = ? THEN aa.standard_score ELSE 0 END) as potensi_standard_score', [$potensiId])
-            ->selectRaw('SUM(CASE WHEN a.category_type_id = ? THEN aa.individual_score ELSE 0 END) as kompetensi_individual_score', [$kompetensiId])
-            ->selectRaw('SUM(CASE WHEN a.category_type_id = ? THEN aa.standard_score ELSE 0 END) as kompetensi_standard_score', [$kompetensiId]);
-
-        $all = $baseQuery->get();
-
-        $conclusions = [
-            'Di Atas Standar' => 0,
-            'Memenuhi Standar' => 0,
-            'Di Bawah Standar' => 0,
-        ];
-
-        foreach ($all as $row) {
+        foreach ($aggregates as $row) {
             $potInd = (float) $row->potensi_individual_score;
-            $potStd = (float) $row->potensi_standard_score;
             $komInd = (float) $row->kompetensi_individual_score;
-            $komStd = (float) $row->kompetensi_standard_score;
-
-            // Calculate adjusted standard based on tolerance
-            $toleranceFactor = 1 - ($this->tolerancePercentage / 100);
-            $adjustedPotStd = $potStd * $toleranceFactor;
-            $adjustedKomStd = $komStd * $toleranceFactor;
 
             $weightedPot = $potInd * ($this->potensiWeight / 100);
             $weightedKom = $komInd * ($this->kompetensiWeight / 100);
@@ -597,12 +546,124 @@ class RekapRankingAssessment extends Component
 
             $adjustedGap = $totalWeightedInd - $totalWeightedStd;
 
-            // Determine conclusion based on new logic
+            // Determine conclusion
             $conclusion = $this->getConclusionText($originalGap, $adjustedGap);
             $conclusions[$conclusion]++;
         }
 
         return $conclusions;
+    }
+
+    private function buildRankings(): ?LengthAwarePaginator
+    {
+        $data = $this->getAggregatesData();
+
+        if (! $data) {
+            return null;
+        }
+
+        $aggregates = $data['aggregates'];
+        $adjustedStandards = $data['adjustedStandards'];
+        $potStd = $adjustedStandards['potensi_standard_score'];
+        $komStd = $adjustedStandards['kompetensi_standard_score'];
+
+        // Calculate adjusted standard based on tolerance ONCE
+        $toleranceFactor = 1 - ($this->tolerancePercentage / 100);
+        $adjustedPotStd = $potStd * $toleranceFactor;
+        $adjustedKomStd = $komStd * $toleranceFactor;
+
+        // Sort aggregates by total weighted individual score
+        $sortedAggregates = $aggregates->sortByDesc(function ($row) {
+            $potInd = (float) $row->potensi_individual_score;
+            $komInd = (float) $row->kompetensi_individual_score;
+
+            return ($potInd * ($this->potensiWeight / 100)) + ($komInd * ($this->kompetensiWeight / 100));
+        })->values();
+
+        // Check if "Show All" is selected
+        if ($this->perPage === 'all' || $this->perPage === 0) {
+            $items = $sortedAggregates->map(function ($row, int $index) use ($adjustedPotStd, $adjustedKomStd): array {
+                return $this->mapAggregateToRankingItem($row, $index, $adjustedPotStd, $adjustedKomStd);
+            })->all();
+
+            $totalItems = count($items);
+
+            return new LengthAwarePaginator(
+                $items,
+                $totalItems,
+                $totalItems > 0 ? $totalItems : 1,
+                1,
+                ['path' => request()->url(), 'query' => request()->query()]
+            );
+        }
+
+        // Normal pagination
+        $currentPage = (int) request()->get('page', 1);
+        $offset = ($currentPage - 1) * $this->perPage;
+
+        $paginatedAggregates = $sortedAggregates->slice($offset, $this->perPage)->values();
+
+        $items = $paginatedAggregates->map(function ($row, int $index) use ($offset, $adjustedPotStd, $adjustedKomStd): array {
+            return $this->mapAggregateToRankingItem($row, $offset + $index, $adjustedPotStd, $adjustedKomStd);
+        })->all();
+
+        return new LengthAwarePaginator(
+            $items,
+            $sortedAggregates->count(),
+            $this->perPage,
+            $currentPage,
+            ['path' => request()->url(), 'query' => request()->query()]
+        );
+    }
+
+    /**
+     * Map aggregate data to ranking item
+     * OPTIMIZED: Extract to separate method to avoid duplication
+     */
+    private function mapAggregateToRankingItem(
+        $row,
+        int $index,
+        float $adjustedPotStd,
+        float $adjustedKomStd
+    ): array {
+        $participant = DB::table('participants')->where('id', $row->participant_id)->first();
+
+        $potInd = (float) $row->potensi_individual_score;
+        $potStd = (float) $row->potensi_standard_score;
+        $komInd = (float) $row->kompetensi_individual_score;
+        $komStd = (float) $row->kompetensi_standard_score;
+
+        // Individual scores
+        $totalInd = $potInd + $komInd;
+        $weightedPot = $potInd * ($this->potensiWeight / 100);
+        $weightedKom = $komInd * ($this->kompetensiWeight / 100);
+        $totalWeightedInd = $weightedPot + $weightedKom;
+
+        // Adjusted standard scores
+        $weightedPotStd = $adjustedPotStd * ($this->potensiWeight / 100);
+        $weightedKomStd = $adjustedKomStd * ($this->kompetensiWeight / 100);
+        $totalWeightedStd = $weightedPotStd + $weightedKomStd;
+
+        // Calculate original gap (at tolerance 0)
+        $originalWeightedStd = $potStd * ($this->potensiWeight / 100) + $komStd * ($this->kompetensiWeight / 100);
+        $originalGap = $totalWeightedInd - $originalWeightedStd;
+
+        // Gap calculation based on adjusted standard
+        $adjustedGap = $totalWeightedInd - $totalWeightedStd;
+        $conclusion = $this->getConclusionText($originalGap, $adjustedGap);
+
+        return [
+            'rank' => $index + 1,
+            'name' => $participant->name ?? '-',
+            'psy_individual' => round($potInd, 2),
+            'mc_individual' => round($komInd, 2),
+            'total_individual' => round($totalInd, 2),
+            'psy_weighted' => round($weightedPot, 2),
+            'mc_weighted' => round($weightedKom, 2),
+            'total_weighted_individual' => round($totalWeightedInd, 2),
+            'gap' => round($adjustedGap, 2),
+            'conclusion' => $conclusion,
+        ];
     }
 
     private function getConclusionText(float $originalGap, float $adjustedGap): string

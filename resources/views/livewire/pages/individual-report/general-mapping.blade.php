@@ -1,7 +1,7 @@
 <div>
     <div class="bg-white dark:bg-gray-800 mx-auto my-8 shadow overflow-hidden" style="max-width: 1400px;">
         <!-- Header -->
-        <div class="border-b-4 border-black dark:border-gray-300 py-3 bg-sky-200 dark:bg-gray-700">
+        <div class="border-b-4 border-black dark:border-gray-300 py-3 bg-gray-300 dark:bg-gray-600">
             <h1 class="text-center text-lg font-bold uppercase tracking-wide text-gray-900 dark:text-gray-100">
                 GENERAL MAPPING
             </h1>
@@ -29,7 +29,7 @@
         <div class="p-4 overflow-x-auto">
             <table class="min-w-full border border-black dark:border-gray-300 text-xs text-gray-900 dark:text-gray-100">
                 <thead>
-                    <tr class="bg-sky-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                    <tr class="bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-gray-100">
                         <th class="border border-black dark:border-gray-300 px-3 py-2 font-semibold" rowspan="2">No
                         </th>
                         <th class="border border-black dark:border-gray-300 px-3 py-2 font-semibold" rowspan="2">
@@ -50,7 +50,7 @@
                         <th class="border border-black dark:border-gray-300 px-3 py-2 font-semibold" rowspan="2">
                             Kesimpulan/Conclusion</th>
                     </tr>
-                    <tr class="bg-sky-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                    <tr class="bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-gray-100">
                         <th class="border border-black dark:border-gray-300 px-3 py-1 font-semibold">Rating/<br>Level
                         </th>
                         <th class="border border-black dark:border-gray-300 px-3 py-1 font-semibold">Score</th>
@@ -109,7 +109,7 @@ $c = trim(strtoupper($aspect['conclusion_text'])); @endphp
                     @endforeach
 
                     <!-- Total Rating Row -->
-                    <tr class="font-bold bg-sky-100 dark:bg-gray-600">
+                    <tr class="font-bold bg-gray-300 dark:bg-gray-600">
                         <td class="border border-black dark:border-gray-300 px-3 py-2 text-center" colspan="3">Total
                             Rating</td>
                         <td class="border border-black dark:border-gray-300 px-3 py-2 text-center">
@@ -135,7 +135,7 @@ $c = trim(strtoupper($overallConclusion)); @endphp
                     </tr>
 
                     <!-- Total Score Row -->
-                    <tr class="font-bold bg-sky-100 dark:bg-gray-600">
+                    <tr class="font-bold bg-gray-300 dark:bg-gray-600">
                         <td class="border border-black dark:border-gray-300 px-3 py-2 text-center" colspan="3">Total
                             Score</td>
                         <td class="border border-black dark:border-gray-300 px-3 py-2 bg-black"></td>
@@ -170,8 +170,7 @@ $c = trim(strtoupper($overallConclusion)); @endphp
             @endphp
 
             @if ($rankingInfo)
-                <div
-                    class="px-6 py-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-700 dark:to-gray-700 border-t-2 border-black dark:border-gray-600">
+                <div class="px-6 py-4 bg-gray-300 dark:bg-gray-600 border-t-2 border-black dark:border-gray-600">
                     <div class="max-w-5xl mx-auto">
                         <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
                             <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor"
@@ -243,9 +242,8 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                         </div>
 
                         <!-- Additional Info -->
-                        <div
-                            class="mt-4 bg-blue-100 dark:bg-blue-800 border border-blue-200 dark:border-blue-600 rounded-lg p-3">
-                            <div class="text-sm text-blue-800 dark:text-blue-200">
+                        <div class="mt-4 bg-gray-300 dark:bg-gray-600 rounded-lg p-1">
+                            <div class="text-sm text-gray-800 dark:text-gray-200">
                                 <strong>Keterangan:</strong> Ranking berdasarkan <strong>Total Weighted Individual
                                     Score</strong> dari kombinasi:
                                 <br>

@@ -5,6 +5,7 @@ namespace App\Livewire\Components;
 use App\Models\Aspect;
 use App\Models\AssessmentEvent;
 use App\Models\CategoryType;
+use App\Services\DynamicStandardService;
 use Livewire\Component;
 
 class AspectSelector extends Component
@@ -114,6 +115,7 @@ class AspectSelector extends Component
 
     /**
      * Load available aspects based on event and position from session
+     * Filter to show only active aspects based on session adjustments
      */
     private function loadAvailableAspects(): void
     {
@@ -153,15 +155,25 @@ class AspectSelector extends Component
             ->where('aspects.template_id', $position->template_id)
             ->orderByRaw("CASE WHEN LOWER(category_types.code) = 'potensi' THEN 0 ELSE 1 END")
             ->orderBy('aspects.order')
-            ->get(['aspects.id', 'aspects.name', 'aspects.category_type_id']);
+            ->get(['aspects.id', 'aspects.name', 'aspects.code', 'aspects.category_type_id']);
 
-        $this->availableAspects = $aspects->map(function ($a) use ($categoryIdToCode) {
-            return [
-                'id' => (int) $a->id,
-                'name' => (string) $a->name,
-                'category' => (string) ($categoryIdToCode[$a->category_type_id] ?? ''),
-            ];
-        })->all();
+        // Filter only active aspects based on session adjustments
+        $standardService = app(DynamicStandardService::class);
+
+        $this->availableAspects = $aspects
+            ->filter(function ($aspect) use ($position, $standardService) {
+                // Check if aspect is active in session
+                return $standardService->isAspectActive($position->template_id, $aspect->code);
+            })
+            ->map(function ($a) use ($categoryIdToCode) {
+                return [
+                    'id' => (int) $a->id,
+                    'name' => (string) $a->name,
+                    'category' => (string) ($categoryIdToCode[$a->category_type_id] ?? ''),
+                ];
+            })
+            ->values()
+            ->all();
     }
 
     /**
