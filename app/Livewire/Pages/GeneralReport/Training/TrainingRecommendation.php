@@ -454,6 +454,11 @@ class TrainingRecommendation extends Component
         $aspectData = [];
 
         foreach ($aspects as $aspect) {
+            // FIXED: Check if aspect is active from session
+            if (! $standardService->isAspectActive($templateId, $aspect->code)) {
+                continue; // Skip inactive aspects
+            }
+
             // Get assessments from grouped collection
             $assessments = $assessmentsGrouped->get($aspect->id, collect());
 
