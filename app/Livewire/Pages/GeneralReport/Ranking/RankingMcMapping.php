@@ -287,14 +287,14 @@ class RankingMcMapping extends Component
 
         // Get ALL aggregates at once
         $aggregates = AspectAssessment::query()
-            ->selectRaw('participant_id, SUM(standard_rating) as sum_original_standard_rating, SUM(standard_score) as sum_original_standard_score, SUM(individual_rating) as sum_individual_rating, SUM(individual_score) as sum_individual_score')
-            ->where('event_id', $event->id)
-            ->where('position_formation_id', $positionFormationId)
-            ->whereIn('aspect_id', $kompetensiAspectIds)
-            ->groupBy('participant_id')
+            ->selectRaw('aspect_assessments.participant_id, SUM(standard_rating) as sum_original_standard_rating, SUM(standard_score) as sum_original_standard_score, SUM(individual_rating) as sum_individual_rating, SUM(individual_score) as sum_individual_score')
+            ->join('participants', 'participants.id', '=', 'aspect_assessments.participant_id')
+            ->where('aspect_assessments.event_id', $event->id)
+            ->where('aspect_assessments.position_formation_id', $positionFormationId)
+            ->whereIn('aspect_assessments.aspect_id', $kompetensiAspectIds)
+            ->groupBy('aspect_assessments.participant_id', 'participants.name')
             ->orderByDesc('sum_individual_score')
-            ->orderByDesc('sum_individual_rating')
-            ->orderBy('participant_id')
+            ->orderByRaw('LOWER(participants.name) ASC')
             ->get();
 
         // Get ALL participants at once (avoid N+1)
