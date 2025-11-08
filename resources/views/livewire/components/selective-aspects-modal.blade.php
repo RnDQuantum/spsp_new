@@ -229,14 +229,8 @@
                             </div>
 
                             {{-- Footer --}}
-                            <div class="px-6 py-4 flex items-center justify-between">
-                                <div class="text-sm text-gray-500 dark:text-gray-400">
-                                    <span class="font-medium">Total Bobot:</span>
-                                    <span
-                                        class="ml-2 font-bold {{ $this->totalWeight === 100 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }}">
-                                        {{ $this->totalWeight }}%
-                                    </span>
-                                </div>
+                            <div class="px-6 py-4 flex items-center justify-end">
+
                                 <div class="flex items-center gap-3">
                                     <button @click="closeModal()" type="button"
                                         class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-all">
