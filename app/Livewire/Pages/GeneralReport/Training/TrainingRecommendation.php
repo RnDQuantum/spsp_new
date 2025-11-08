@@ -5,7 +5,6 @@ namespace App\Livewire\Pages\GeneralReport\Training;
 use App\Models\Aspect;
 use App\Models\AspectAssessment;
 use App\Models\AssessmentEvent;
-use App\Models\CategoryType;
 use App\Models\Participant;
 use App\Services\DynamicStandardService;
 use Livewire\Attributes\Layout;
@@ -16,7 +15,6 @@ use Livewire\WithPagination;
 class TrainingRecommendation extends Component
 {
     use WithPagination;
-
 
     public ?AssessmentEvent $selectedEvent = null;
 
@@ -48,6 +46,7 @@ class TrainingRecommendation extends Component
 
     // CACHE PROPERTIES - untuk menyimpan hasil kalkulasi
     private ?float $adjustedStandardsCache = null;
+
     private ?\Illuminate\Support\Collection $aspectPriorityCache = null;
 
     /**
@@ -155,23 +154,28 @@ class TrainingRecommendation extends Component
 
     /**
      * Load event and aspect from database
+     * OPTIMIZED: Reduce queries with eager loading
      */
     private function loadEventAndAspect(): void
     {
         $eventCode = session('filter.event_code');
         $positionFormationId = session('filter.position_formation_id');
 
-        if ($eventCode) {
-            $this->selectedEvent = AssessmentEvent::with('positionFormations.template')
-                ->where('code', $eventCode)
-                ->first();
+        if (! $eventCode) {
+            return;
         }
 
+        // OPTIMIZED: Load event with position and template in one query
+        $this->selectedEvent = AssessmentEvent::query()
+            ->where('code', $eventCode)
+            ->with(['positionFormations' => function ($query) use ($positionFormationId) {
+                $query->where('id', $positionFormationId)
+                    ->with('template');
+            }])
+            ->first();
+
         if ($this->aspectId && $this->selectedEvent && $positionFormationId) {
-            // Get selected position with template
-            $position = $this->selectedEvent->positionFormations()
-                ->with('template')
-                ->find($positionFormationId);
+            $position = $this->selectedEvent->positionFormations->first();
 
             if ($position?->template) {
                 $this->selectedAspect = Aspect::where('id', $this->aspectId)
@@ -250,7 +254,7 @@ class TrainingRecommendation extends Component
             ->with('template')
             ->find($positionFormationId);
 
-        if (!$position || !$position->template) {
+        if (! $position || ! $position->template) {
             return (float) $this->selectedAspect->standard_rating;
         }
 
@@ -266,7 +270,7 @@ class TrainingRecommendation extends Component
 
             foreach ($aspect->subAspects as $subAspect) {
                 // Check if sub-aspect is active
-                if (!$standardService->isSubAspectActive($templateId, $subAspect->code)) {
+                if (! $standardService->isSubAspectActive($templateId, $subAspect->code)) {
                     continue; // Skip inactive sub-aspects
                 }
 
@@ -361,7 +365,10 @@ class TrainingRecommendation extends Component
             $paginator->total(),
             $paginator->perPage(),
             $paginator->currentPage(),
-            ['path' => $paginator->path(), 'query' => request()->query()]
+            [
+                'path' => \Illuminate\Pagination\LengthAwarePaginator::resolveCurrentPath(),
+                'pageName' => 'page',
+            ]
         );
     }
 
@@ -435,25 +442,27 @@ class TrainingRecommendation extends Component
             ->orderBy('order', 'asc')
             ->get();
 
+        // OPTIMIZED: Get all assessments at once to avoid N+1
+        $aspectIds = $aspects->pluck('id')->all();
+        $assessmentsGrouped = AspectAssessment::query()
+            ->where('event_id', $this->selectedEvent->id)
+            ->where('position_formation_id', $positionFormationId)
+            ->whereIn('aspect_id', $aspectIds)
+            ->get()
+            ->groupBy('aspect_id');
+
         $aspectData = [];
 
         foreach ($aspects as $aspect) {
-            // Get all assessments for this aspect in this event and position
-            $assessments = AspectAssessment::where('event_id', $this->selectedEvent->id)
-                ->where('position_formation_id', $positionFormationId)
-                ->where('aspect_id', $aspect->id)
-                ->get();
+            // Get assessments from grouped collection
+            $assessments = $assessmentsGrouped->get($aspect->id, collect());
 
             if ($assessments->isEmpty()) {
                 continue;
             }
 
             // Calculate average rating for this aspect
-            $totalRating = 0;
-            foreach ($assessments as $assessment) {
-                $totalRating += (float) $assessment->individual_rating;
-            }
-            $averageRating = $totalRating / $assessments->count();
+            $averageRating = $assessments->avg('individual_rating');
 
             // Get adjusted standard rating from session or database
             // For Potensi category, calculate average from active sub-aspects
@@ -463,7 +472,7 @@ class TrainingRecommendation extends Component
 
                 foreach ($aspect->subAspects as $subAspect) {
                     // Check if sub-aspect is active
-                    if (!$standardService->isSubAspectActive($templateId, $subAspect->code)) {
+                    if (! $standardService->isSubAspectActive($templateId, $subAspect->code)) {
                         continue; // Skip inactive sub-aspects
                     }
 
