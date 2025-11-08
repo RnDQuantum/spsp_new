@@ -5,7 +5,6 @@ namespace App\Livewire\Pages\GeneralReport\Ranking;
 use App\Models\Aspect;
 use App\Models\AspectAssessment;
 use App\Models\AssessmentEvent;
-use App\Models\CategoryType;
 use App\Models\Participant;
 use App\Services\DynamicStandardService;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -50,8 +49,6 @@ class RankingMcMapping extends Component
 
     // CACHE PROPERTIES - untuk menyimpan hasil kalkulasi
     private ?array $adjustedStandardsCache = null;
-
-    private ?array $participantsCache = null;
 
     private ?array $aggregatesCache = null;
 
@@ -168,7 +165,6 @@ class RankingMcMapping extends Component
     private function clearCache(): void
     {
         $this->adjustedStandardsCache = null;
-        $this->participantsCache = null;
         $this->aggregatesCache = null;
     }
 
@@ -251,28 +247,29 @@ class RankingMcMapping extends Component
             return null;
         }
 
+        // OPTIMIZED: Get event with position and template in one query
         $event = AssessmentEvent::query()
             ->where('code', $eventCode)
+            ->with(['positionFormations' => function ($query) use ($positionFormationId) {
+                $query->where('id', $positionFormationId)
+                    ->with(['template.categoryTypes' => function ($q) {
+                        $q->where('code', 'kompetensi');
+                    }]);
+            }])
             ->first();
 
         if (! $event) {
             return null;
         }
 
-        // Get selected position with template
-        $position = $event->positionFormations()
-            ->with('template')
-            ->find($positionFormationId);
+        $position = $event->positionFormations->first();
 
         if (! $position || ! $position->template) {
             return null;
         }
 
-        // Get Kompetensi category from selected position's template
-        $kompetensiCategory = CategoryType::query()
-            ->where('template_id', $position->template_id)
-            ->where('code', 'kompetensi')
-            ->first();
+        // Get Kompetensi category from eager loaded data
+        $kompetensiCategory = $position->template->categoryTypes->first();
 
         if (! $kompetensiCategory) {
             return null;
@@ -401,12 +398,15 @@ class RankingMcMapping extends Component
                 $totalItems,
                 $totalItems > 0 ? $totalItems : 1,
                 1,
-                ['path' => request()->url(), 'query' => request()->query()]
+                [
+                    'path' => LengthAwarePaginator::resolveCurrentPath(),
+                    'pageName' => 'page',
+                ]
             );
         }
 
         // Normal pagination
-        $currentPage = (int) request()->get('page', 1);
+        $currentPage = $this->getPage();
         $offset = ($currentPage - 1) * $this->perPage;
 
         $paginatedAggregates = $aggregates->slice($offset, $this->perPage)->values();
@@ -435,7 +435,10 @@ class RankingMcMapping extends Component
             $aggregates->count(),
             $this->perPage,
             $currentPage,
-            ['path' => request()->url(), 'query' => request()->query()]
+            [
+                'path' => LengthAwarePaginator::resolveCurrentPath(),
+                'pageName' => 'page',
+            ]
         );
     }
 
