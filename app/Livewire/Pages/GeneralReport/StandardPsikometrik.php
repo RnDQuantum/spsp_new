@@ -58,22 +58,11 @@ class StandardPsikometrik extends Component
 
     public bool $showEditCategoryWeightModal = false;
 
-    public bool $showEditCategoryWeightsModal = false;
-
     public string $editingField = '';
 
     public int|float|null $editingValue = null;
 
     public int|float|null $editingOriginalValue = null;
-
-    // Category weights editing
-    public int $editingPotensiWeight = 0;
-
-    public int $editingKompetensiWeight = 0;
-
-    public int $originalPotensiWeight = 0;
-
-    public int $originalKompetensiWeight = 0;
 
     public function mount(): void
     {
@@ -253,83 +242,6 @@ class StandardPsikometrik extends Component
         $this->editingField = '';
         $this->editingValue = null;
         $this->editingOriginalValue = null;
-    }
-
-    /**
-     * Open modal to edit both category weights (Potensi + Kompetensi)
-     */
-    public function openEditCategoryWeights(): void
-    {
-        if (! $this->selectedTemplate) {
-            return;
-        }
-
-        $dynamicService = app(DynamicStandardService::class);
-
-        // Get current weights (adjusted or original)
-        $this->editingPotensiWeight = $dynamicService->getCategoryWeight(
-            $this->selectedTemplate->id,
-            'potensi'
-        );
-        $this->editingKompetensiWeight = $dynamicService->getCategoryWeight(
-            $this->selectedTemplate->id,
-            'kompetensi'
-        );
-
-        // Get original weights from database
-        $potensiCategory = CategoryType::where('template_id', $this->selectedTemplate->id)
-            ->where('code', 'potensi')
-            ->first();
-        $kompetensiCategory = CategoryType::where('template_id', $this->selectedTemplate->id)
-            ->where('code', 'kompetensi')
-            ->first();
-
-        $this->originalPotensiWeight = $potensiCategory?->weight_percentage ?? 50;
-        $this->originalKompetensiWeight = $kompetensiCategory?->weight_percentage ?? 50;
-
-        $this->showEditCategoryWeightsModal = true;
-    }
-
-    /**
-     * Save both category weights with validation
-     */
-    public function saveCategoryWeights(): void
-    {
-        if (! $this->selectedTemplate) {
-            return;
-        }
-
-        // Validate total is 100
-        $total = $this->editingPotensiWeight + $this->editingKompetensiWeight;
-        if ($total !== 100) {
-            return;
-        }
-
-        $dynamicService = app(DynamicStandardService::class);
-
-        // Save both category weights
-        $dynamicService->saveBothCategoryWeights(
-            $this->selectedTemplate->id,
-            'potensi',
-            $this->editingPotensiWeight,
-            'kompetensi',
-            $this->editingKompetensiWeight
-        );
-
-        $this->showEditCategoryWeightsModal = false;
-        $this->dispatch('standard-adjusted', templateId: $this->selectedTemplate->id);
-    }
-
-    /**
-     * Close category weights modal
-     */
-    public function closeCategoryWeightsModal(): void
-    {
-        $this->showEditCategoryWeightsModal = false;
-        $this->editingPotensiWeight = 0;
-        $this->editingKompetensiWeight = 0;
-        $this->originalPotensiWeight = 0;
-        $this->originalKompetensiWeight = 0;
     }
 
     /**
