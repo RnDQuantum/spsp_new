@@ -44,16 +44,36 @@ class StandardMc extends Component
 
     public int $maxScore = 0;
 
+    // CACHE PROPERTIES - untuk menyimpan hasil kalkulasi
+    private ?array $categoryDataCache = null;
+
+    private ?array $chartDataCache = null;
+
+    private ?array $totalsCache = null;
+
+    private ?int $maxScoreCache = null;
+
     // PHASE 2C: Modal states for inline editing
     public bool $showEditRatingModal = false;
 
     public bool $showEditCategoryWeightModal = false;
+
+    public bool $showEditCategoryWeightsModal = false;
 
     public string $editingField = '';
 
     public int|float|null $editingValue = null;
 
     public int|float|null $editingOriginalValue = null;
+
+    // Category weights editing
+    public int $editingPotensiWeight = 0;
+
+    public int $editingKompetensiWeight = 0;
+
+    public int $originalPotensiWeight = 0;
+
+    public int $originalKompetensiWeight = 0;
 
     public function mount(): void
     {
@@ -63,16 +83,29 @@ class StandardMc extends Component
         $this->loadStandardData();
     }
 
+    /**
+     * Clear all caches
+     */
+    private function clearCache(): void
+    {
+        $this->categoryDataCache = null;
+        $this->chartDataCache = null;
+        $this->totalsCache = null;
+        $this->maxScoreCache = null;
+    }
+
     public function handleEventSelected(?string $eventCode): void
     {
         // Event changed, position will be auto-reset by PositionSelector
         // Wait for position to be selected before updating chart
+        $this->clearCache();
     }
 
     public function handlePositionSelected(?int $positionFormationId): void
     {
         // Position selected, now we have both event and position
         // Load data with the new filters
+        $this->clearCache();
         $this->loadStandardData();
 
         // Dispatch event to update charts
@@ -92,6 +125,7 @@ class StandardMc extends Component
     {
         // Only refresh if same template
         if ($this->selectedTemplate && $this->selectedTemplate->id === $templateId) {
+            $this->clearCache();
             $this->loadStandardData();
 
             // Re-dispatch chart update
@@ -190,7 +224,7 @@ class StandardMc extends Component
     }
 
     /**
-     * PHASE 2C: Reset adjustments for Kompetensi category only
+     * PHASE 2C: Reset adjustments (both category weights + Kompetensi aspects)
      */
     public function resetAdjustments(): void
     {
@@ -198,7 +232,14 @@ class StandardMc extends Component
             return;
         }
 
-        app(DynamicStandardService::class)->resetCategoryAdjustments($this->selectedTemplate->id, 'kompetensi');
+        $dynamicService = app(DynamicStandardService::class);
+
+        // Reset Kompetensi category adjustments (aspects, ratings)
+        $dynamicService->resetCategoryAdjustments($this->selectedTemplate->id, 'kompetensi');
+
+        // Reset both category weights
+        $dynamicService->resetCategoryWeights($this->selectedTemplate->id);
+
         $this->dispatch('standard-adjusted', templateId: $this->selectedTemplate->id);
     }
 
@@ -215,10 +256,98 @@ class StandardMc extends Component
     }
 
     /**
+     * Open modal to edit both category weights (Potensi + Kompetensi)
+     */
+    public function openEditCategoryWeights(): void
+    {
+        if (! $this->selectedTemplate) {
+            return;
+        }
+
+        $dynamicService = app(DynamicStandardService::class);
+
+        // Get current weights (adjusted or original)
+        $this->editingPotensiWeight = $dynamicService->getCategoryWeight(
+            $this->selectedTemplate->id,
+            'potensi'
+        );
+        $this->editingKompetensiWeight = $dynamicService->getCategoryWeight(
+            $this->selectedTemplate->id,
+            'kompetensi'
+        );
+
+        // Get original weights from database
+        $potensiCategory = CategoryType::where('template_id', $this->selectedTemplate->id)
+            ->where('code', 'potensi')
+            ->first();
+        $kompetensiCategory = CategoryType::where('template_id', $this->selectedTemplate->id)
+            ->where('code', 'kompetensi')
+            ->first();
+
+        $this->originalPotensiWeight = $potensiCategory?->weight_percentage ?? 50;
+        $this->originalKompetensiWeight = $kompetensiCategory?->weight_percentage ?? 50;
+
+        $this->showEditCategoryWeightsModal = true;
+    }
+
+    /**
+     * Save both category weights with validation
+     */
+    public function saveCategoryWeights(): void
+    {
+        if (! $this->selectedTemplate) {
+            return;
+        }
+
+        // Validate total is 100
+        $total = $this->editingPotensiWeight + $this->editingKompetensiWeight;
+        if ($total !== 100) {
+            return;
+        }
+
+        $dynamicService = app(DynamicStandardService::class);
+
+        // Save both category weights
+        $dynamicService->saveBothCategoryWeights(
+            $this->selectedTemplate->id,
+            'potensi',
+            $this->editingPotensiWeight,
+            'kompetensi',
+            $this->editingKompetensiWeight
+        );
+
+        $this->showEditCategoryWeightsModal = false;
+        $this->dispatch('standard-adjusted', templateId: $this->selectedTemplate->id);
+    }
+
+    /**
+     * Close category weights modal
+     */
+    public function closeCategoryWeightsModal(): void
+    {
+        $this->showEditCategoryWeightsModal = false;
+        $this->editingPotensiWeight = 0;
+        $this->editingKompetensiWeight = 0;
+        $this->originalPotensiWeight = 0;
+        $this->originalKompetensiWeight = 0;
+    }
+
+    /**
      * PHASE 2C: Load standard data with DynamicStandardService integration
+     * OPTIMIZED: Use caching to avoid recalculating data
      */
     private function loadStandardData(): void
     {
+        // Check if data already cached
+        if ($this->categoryDataCache !== null) {
+            $this->categoryData = $this->categoryDataCache;
+            $this->totals = $this->totalsCache ?? [];
+            $this->chartData = $this->chartDataCache ?? [];
+            $this->maxScore = $this->maxScoreCache ?? 0;
+
+            return;
+        }
+
         $this->categoryData = [];
         $this->totals = [
             'total_aspects' => 0,
@@ -268,7 +397,14 @@ class StandardMc extends Component
 
         $templateId = $this->selectedTemplate->id;
 
+        // OPTIMIZED: Get DynamicStandardService instance ONCE
+        $dynamicService = app(DynamicStandardService::class);
+
+        // OPTIMIZED: Check if there are adjustments - skip complex calculation if not needed
+        $hasAdjustments = $dynamicService->hasCategoryAdjustments($templateId, 'kompetensi');
+
         // Load ONLY Kompetensi category type with aspects from selected position's template
+        // OPTIMIZED: Eager load all relationships in one query
         $categories = CategoryType::query()
             ->where('template_id', $templateId)
             ->where('code', 'kompetensi')
@@ -291,23 +427,28 @@ class StandardMc extends Component
             $categoryStandardRatingSum = 0.0;
             $categoryScoreSum = 0.0;
 
-            // PHASE 2C: Get adjusted category weight
-            $dynamicService = app(DynamicStandardService::class);
-            $categoryWeight = $dynamicService->getCategoryWeight($templateId, $category->code);
+            // OPTIMIZED: Get adjusted category weight (dynamicService already instantiated)
+            $categoryWeight = $hasAdjustments
+                ? $dynamicService->getCategoryWeight($templateId, $category->code)
+                : $category->weight_percentage;
             $categoryOriginalWeight = $category->weight_percentage;
 
             foreach ($category->aspects as $aspect) {
-                // PHASE 2C: Check if aspect is active
-                if (! $dynamicService->isAspectActive($templateId, $aspect->code)) {
+                // OPTIMIZED: Check if aspect is active (only if has adjustments)
+                if ($hasAdjustments && ! $dynamicService->isAspectActive($templateId, $aspect->code)) {
                     continue; // Skip inactive aspects
                 }
 
-                // PHASE 2C: Get adjusted aspect weight
-                $aspectWeight = $dynamicService->getAspectWeight($templateId, $aspect->code);
+                // OPTIMIZED: Get adjusted aspect weight (only if has adjustments)
+                $aspectWeight = $hasAdjustments
+                    ? $dynamicService->getAspectWeight($templateId, $aspect->code)
+                    : $aspect->weight_percentage;
                 $aspectOriginalWeight = $aspect->weight_percentage;
 
-                // PHASE 2C: Get adjusted aspect rating (Kompetensi - direct rating)
-                $aspectRating = $dynamicService->getAspectRating($templateId, $aspect->code);
+                // OPTIMIZED: Get adjusted aspect rating (only if has adjustments)
+                $aspectRating = $hasAdjustments
+                    ? $dynamicService->getAspectRating($templateId, $aspect->code)
+                    : (float) $aspect->standard_rating;
                 $aspectOriginalRating = (float) $aspect->standard_rating;
 
                 // Calculate aspect score: rating × adjusted weight
@@ -356,7 +497,7 @@ class StandardMc extends Component
                 'is_weight_adjusted' => $categoryWeight !== $categoryOriginalWeight,
                 'attribute_count' => $categoryAspectCount,
                 'standard_rating' => $categoryAvgRating,
-                'score' => $categoryScoreSum,
+                'score' => round($categoryScoreSum, 2),
                 'aspects' => $aspectsData,
             ];
 
@@ -368,11 +509,17 @@ class StandardMc extends Component
 
         $this->totals = [
             'total_aspects' => $totalAspects,
-            'total_weight' => $totalWeight,
+            'total_weight' => round($totalWeight, 2),
             'total_standard_rating_sum' => round($totalStandardRatingSum, 2),
             'total_rating_sum' => round($totalAspectRatingSum, 2), // Sum of aspect average ratings
             'total_score' => round($totalScore, 2),
         ];
+
+        // OPTIMIZED: Cache the results
+        $this->categoryDataCache = $this->categoryData;
+        $this->chartDataCache = $this->chartData;
+        $this->totalsCache = $this->totals;
+        $this->maxScoreCache = $this->maxScore;
     }
 
     public function render()
