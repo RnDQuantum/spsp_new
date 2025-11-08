@@ -5,7 +5,6 @@ namespace App\Livewire\Pages\GeneralReport\Ranking;
 use App\Models\Aspect;
 use App\Models\AssessmentEvent;
 use App\Models\AssessmentTemplate;
-use App\Models\CategoryType;
 use App\Services\DynamicStandardService;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
@@ -259,23 +258,32 @@ class RekapRankingAssessment extends Component
             return null;
         }
 
-        $event = AssessmentEvent::where('code', $eventCode)->first();
+        // OPTIMIZED: Get event with position, template and categories in one query
+        $event = AssessmentEvent::query()
+            ->where('code', $eventCode)
+            ->with(['positionFormations' => function ($query) use ($positionFormationId) {
+                $query->where('id', $positionFormationId)
+                    ->with(['template.categoryTypes' => function ($q) {
+                        $q->whereIn('code', ['potensi', 'kompetensi']);
+                    }]);
+            }])
+            ->first();
+
         if (! $event) {
             return null;
         }
 
-        // Get selected position with template
-        $position = $event->positionFormations()
-            ->with('template')
-            ->find($positionFormationId);
+        $position = $event->positionFormations->first();
 
         if (! $position || ! $position->template) {
             return null;
         }
 
-        // Get categories from selected position's template
-        $potensi = CategoryType::where('template_id', $position->template_id)->where('code', 'potensi')->first();
-        $kompetensi = CategoryType::where('template_id', $position->template_id)->where('code', 'kompetensi')->first();
+        // Get categories from eager loaded data
+        $categories = $position->template->categoryTypes->keyBy('code');
+        $potensi = $categories->get('potensi');
+        $kompetensi = $categories->get('kompetensi');
+
         if (! $potensi || ! $kompetensi) {
             return null;
         }
@@ -435,18 +443,22 @@ class RekapRankingAssessment extends Component
             return;
         }
 
+        // OPTIMIZED: Get event with position, template and categories in one query
         $event = AssessmentEvent::query()
             ->where('code', $eventCode)
+            ->with(['positionFormations' => function ($query) use ($positionFormationId) {
+                $query->where('id', $positionFormationId)
+                    ->with(['template.categoryTypes' => function ($q) {
+                        $q->whereIn('code', ['potensi', 'kompetensi']);
+                    }]);
+            }])
             ->first();
 
         if (! $event) {
             return;
         }
 
-        // Get selected position with template
-        $position = $event->positionFormations()
-            ->with('template')
-            ->find($positionFormationId);
+        $position = $event->positionFormations->first();
 
         if (! $position || ! $position->template) {
             $this->selectedTemplate = null;
@@ -458,16 +470,10 @@ class RekapRankingAssessment extends Component
 
         $standardService = app(DynamicStandardService::class);
 
-        // Get category weights from selected position's template (with session adjustments)
-        $potensi = CategoryType::query()
-            ->where('template_id', $position->template_id)
-            ->where('code', 'potensi')
-            ->first();
-
-        $kompetensi = CategoryType::query()
-            ->where('template_id', $position->template_id)
-            ->where('code', 'kompetensi')
-            ->first();
+        // Get categories from eager loaded data
+        $categories = $position->template->categoryTypes->keyBy('code');
+        $potensi = $categories->get('potensi');
+        $kompetensi = $categories->get('kompetensi');
 
         // Use adjusted weights from session if available
         $this->potensiWeight = $potensi
@@ -636,10 +642,17 @@ class RekapRankingAssessment extends Component
             return ($potInd * ($this->potensiWeight / 100)) + ($komInd * ($this->kompetensiWeight / 100));
         })->values();
 
+        // OPTIMIZED: Get all participants at once to avoid N+1
+        $participantIds = $sortedAggregates->pluck('participant_id')->unique()->all();
+        $participants = DB::table('participants')
+            ->whereIn('id', $participantIds)
+            ->get()
+            ->keyBy('id');
+
         // Check if "Show All" is selected
         if ($this->perPage === 'all' || $this->perPage === 0) {
-            $items = $sortedAggregates->map(function ($row, int $index) use ($adjustedPotStd, $adjustedKomStd): array {
-                return $this->mapAggregateToRankingItem($row, $index, $adjustedPotStd, $adjustedKomStd);
+            $items = $sortedAggregates->map(function ($row, int $index) use ($adjustedPotStd, $adjustedKomStd, $participants): array {
+                return $this->mapAggregateToRankingItem($row, $index, $adjustedPotStd, $adjustedKomStd, $participants);
             })->all();
 
             $totalItems = count($items);
@@ -649,18 +662,21 @@ class RekapRankingAssessment extends Component
                 $totalItems,
                 $totalItems > 0 ? $totalItems : 1,
                 1,
-                ['path' => request()->url(), 'query' => request()->query()]
+                [
+                    'path' => LengthAwarePaginator::resolveCurrentPath(),
+                    'pageName' => 'page',
+                ]
             );
         }
 
         // Normal pagination
-        $currentPage = (int) request()->get('page', 1);
+        $currentPage = $this->getPage();
         $offset = ($currentPage - 1) * $this->perPage;
 
         $paginatedAggregates = $sortedAggregates->slice($offset, $this->perPage)->values();
 
-        $items = $paginatedAggregates->map(function ($row, int $index) use ($offset, $adjustedPotStd, $adjustedKomStd): array {
-            return $this->mapAggregateToRankingItem($row, $offset + $index, $adjustedPotStd, $adjustedKomStd);
+        $items = $paginatedAggregates->map(function ($row, int $index) use ($offset, $adjustedPotStd, $adjustedKomStd, $participants): array {
+            return $this->mapAggregateToRankingItem($row, $offset + $index, $adjustedPotStd, $adjustedKomStd, $participants);
         })->all();
 
         return new LengthAwarePaginator(
@@ -668,7 +684,10 @@ class RekapRankingAssessment extends Component
             $sortedAggregates->count(),
             $this->perPage,
             $currentPage,
-            ['path' => request()->url(), 'query' => request()->query()]
+            [
+                'path' => LengthAwarePaginator::resolveCurrentPath(),
+                'pageName' => 'page',
+            ]
         );
     }
 
@@ -680,9 +699,10 @@ class RekapRankingAssessment extends Component
         $row,
         int $index,
         float $adjustedPotStd,
-        float $adjustedKomStd
+        float $adjustedKomStd,
+        $participants
     ): array {
-        $participant = DB::table('participants')->where('id', $row->participant_id)->first();
+        $participant = $participants->get($row->participant_id);
 
         $potInd = (float) $row->potensi_individual_score;
         $potStd = (float) $row->potensi_standard_score;
