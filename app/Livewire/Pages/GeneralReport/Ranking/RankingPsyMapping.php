@@ -5,7 +5,6 @@ namespace App\Livewire\Pages\GeneralReport\Ranking;
 use App\Models\Aspect;
 use App\Models\AspectAssessment;
 use App\Models\AssessmentEvent;
-use App\Models\CategoryType;
 use App\Models\Participant;
 use App\Services\DynamicStandardService;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -50,8 +49,6 @@ class RankingPsyMapping extends Component
 
     // CACHE PROPERTIES - untuk menyimpan hasil kalkulasi
     private ?array $adjustedStandardsCache = null;
-
-    private ?array $participantsCache = null;
 
     private ?array $aggregatesCache = null;
 
@@ -168,7 +165,6 @@ class RankingPsyMapping extends Component
     private function clearCache(): void
     {
         $this->adjustedStandardsCache = null;
-        $this->participantsCache = null;
         $this->aggregatesCache = null;
     }
 
@@ -275,28 +271,29 @@ class RankingPsyMapping extends Component
             return null;
         }
 
+        // OPTIMIZED: Get event with position and template in one query
         $event = AssessmentEvent::query()
             ->where('code', $eventCode)
+            ->with(['positionFormations' => function ($query) use ($positionFormationId) {
+                $query->where('id', $positionFormationId)
+                    ->with(['template.categoryTypes' => function ($q) {
+                        $q->where('code', 'potensi');
+                    }]);
+            }])
             ->first();
 
         if (! $event) {
             return null;
         }
 
-        // Get selected position with template
-        $position = $event->positionFormations()
-            ->with('template')
-            ->find($positionFormationId);
+        $position = $event->positionFormations->first();
 
         if (! $position || ! $position->template) {
             return null;
         }
 
-        // Get Potensi category from selected position's template
-        $potensiCategory = CategoryType::query()
-            ->where('template_id', $position->template_id)
-            ->where('code', 'potensi')
-            ->first();
+        // Get Potensi category from eager loaded data
+        $potensiCategory = $position->template->categoryTypes->first();
 
         if (! $potensiCategory) {
             return null;
@@ -402,12 +399,15 @@ class RankingPsyMapping extends Component
                 $totalItems,
                 $totalItems > 0 ? $totalItems : 1,
                 1,
-                ['path' => request()->url(), 'query' => request()->query()]
+                [
+                    'path' => LengthAwarePaginator::resolveCurrentPath(),
+                    'pageName' => 'page',
+                ]
             );
         }
 
         // Normal pagination
-        $currentPage = (int) request()->get('page', 1);
+        $currentPage = $this->getPage();
         $offset = ($currentPage - 1) * $this->perPage;
 
         $paginatedAggregates = $aggregates->slice($offset, $this->perPage)->values();
@@ -436,7 +436,10 @@ class RankingPsyMapping extends Component
             $aggregates->count(),
             $this->perPage,
             $currentPage,
-            ['path' => request()->url(), 'query' => request()->query()]
+            [
+                'path' => LengthAwarePaginator::resolveCurrentPath(),
+                'pageName' => 'page',
+            ]
         );
     }
 
