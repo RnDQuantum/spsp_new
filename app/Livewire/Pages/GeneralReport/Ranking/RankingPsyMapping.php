@@ -50,7 +50,9 @@ class RankingPsyMapping extends Component
 
     // CACHE PROPERTIES - untuk menyimpan hasil kalkulasi
     private ?array $adjustedStandardsCache = null;
+
     private ?array $participantsCache = null;
+
     private ?array $aggregatesCache = null;
 
     protected $listeners = [
@@ -188,12 +190,13 @@ class RankingPsyMapping extends Component
         $standardService = app(DynamicStandardService::class);
 
         // Check if there are any adjustments for potensi category
-        if (!$standardService->hasCategoryAdjustments($templateId, 'potensi')) {
+        if (! $standardService->hasCategoryAdjustments($templateId, 'potensi')) {
             // No adjustments, return original values
             $this->adjustedStandardsCache = [
                 'standard_rating' => $originalStandardRating,
                 'standard_score' => $originalStandardScore,
             ];
+
             return $this->adjustedStandardsCache;
         }
 
@@ -209,7 +212,7 @@ class RankingPsyMapping extends Component
 
         foreach ($aspects as $aspect) {
             // Check if aspect is active
-            if (!$standardService->isAspectActive($templateId, $aspect->code)) {
+            if (! $standardService->isAspectActive($templateId, $aspect->code)) {
                 continue; // Skip inactive aspects
             }
 
@@ -224,7 +227,7 @@ class RankingPsyMapping extends Component
 
                 foreach ($aspect->subAspects as $subAspect) {
                     // Check if sub-aspect is active
-                    if (!$standardService->isSubAspectActive($templateId, $subAspect->code)) {
+                    if (! $standardService->isSubAspectActive($templateId, $subAspect->code)) {
                         continue; // Skip inactive sub-aspects
                     }
 
@@ -235,12 +238,15 @@ class RankingPsyMapping extends Component
                 }
 
                 if ($activeSubAspectsCount > 0) {
-                    $aspectRating = $subAspectRatingSum / $activeSubAspectsCount;
+                    // FIXED: Round aspect rating to match StandardPsikometrik calculation
+                    $aspectRating = round($subAspectRatingSum / $activeSubAspectsCount, 2);
                 }
             }
 
             $adjustedRating += $aspectRating;
-            $adjustedScore += ($aspectRating * $aspectWeight);
+            // FIXED: Round aspect score to match StandardPsikometrik calculation
+            $aspectScore = round($aspectRating * $aspectWeight, 2);
+            $adjustedScore += $aspectScore;
         }
 
         // Cache result
@@ -265,7 +271,7 @@ class RankingPsyMapping extends Component
         $eventCode = session('filter.event_code');
         $positionFormationId = session('filter.position_formation_id');
 
-        if (!$eventCode || !$positionFormationId) {
+        if (! $eventCode || ! $positionFormationId) {
             return null;
         }
 
@@ -273,7 +279,7 @@ class RankingPsyMapping extends Component
             ->where('code', $eventCode)
             ->first();
 
-        if (!$event) {
+        if (! $event) {
             return null;
         }
 
@@ -282,7 +288,7 @@ class RankingPsyMapping extends Component
             ->with('template')
             ->find($positionFormationId);
 
-        if (!$position || !$position->template) {
+        if (! $position || ! $position->template) {
             return null;
         }
 
@@ -292,7 +298,7 @@ class RankingPsyMapping extends Component
             ->where('code', 'potensi')
             ->first();
 
-        if (!$potensiCategory) {
+        if (! $potensiCategory) {
             return null;
         }
 
@@ -327,7 +333,7 @@ class RankingPsyMapping extends Component
 
         // Get adjusted standards ONCE
         $firstAggregate = $aggregates->first();
-        if (!$firstAggregate) {
+        if (! $firstAggregate) {
             return null;
         }
 
@@ -355,7 +361,7 @@ class RankingPsyMapping extends Component
     {
         $data = $this->getAggregatesData();
 
-        if (!$data) {
+        if (! $data) {
             return null;
         }
 
@@ -508,7 +514,7 @@ class RankingPsyMapping extends Component
     {
         $data = $this->getAggregatesData();
 
-        if (!$data) {
+        if (! $data) {
             return ['total' => 0, 'passing' => 0, 'percentage' => 0];
         }
 
@@ -544,7 +550,7 @@ class RankingPsyMapping extends Component
     {
         $data = $this->getAggregatesData();
 
-        if (!$data) {
+        if (! $data) {
             return null;
         }
 
@@ -564,7 +570,7 @@ class RankingPsyMapping extends Component
     {
         $data = $this->getAggregatesData();
 
-        if (!$data) {
+        if (! $data) {
             return [];
         }
 

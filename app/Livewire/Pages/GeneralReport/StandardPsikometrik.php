@@ -44,6 +44,15 @@ class StandardPsikometrik extends Component
     // Unique chart ID
     public string $chartId = '';
 
+    // CACHE PROPERTIES - untuk menyimpan hasil kalkulasi
+    private ?array $categoryDataCache = null;
+
+    private ?array $chartDataCache = null;
+
+    private ?array $totalsCache = null;
+
+    private ?int $maxScoreCache = null;
+
     // PHASE 2C: Modal states for inline editing
     public bool $showEditRatingModal = false;
 
@@ -74,16 +83,29 @@ class StandardPsikometrik extends Component
         $this->loadStandardData();
     }
 
+    /**
+     * Clear all caches
+     */
+    private function clearCache(): void
+    {
+        $this->categoryDataCache = null;
+        $this->chartDataCache = null;
+        $this->totalsCache = null;
+        $this->maxScoreCache = null;
+    }
+
     public function handleEventSelected(?string $eventCode): void
     {
         // Event changed, position will be auto-reset by PositionSelector
         // Wait for position to be selected before updating chart
+        $this->clearCache();
     }
 
     public function handlePositionSelected(?int $positionFormationId): void
     {
         // Position selected, now we have both event and position
         // Load data with the new filters
+        $this->clearCache();
         $this->loadStandardData();
 
         // Dispatch event to update charts
@@ -103,6 +125,7 @@ class StandardPsikometrik extends Component
     {
         // Only refresh if same template
         if ($this->selectedTemplate && $this->selectedTemplate->id === $templateId) {
+            $this->clearCache();
             $this->loadStandardData();
 
             // Re-dispatch chart update
@@ -311,9 +334,20 @@ class StandardPsikometrik extends Component
 
     /**
      * PHASE 2C: Load standard data with DynamicStandardService integration
+     * OPTIMIZED: Use caching to avoid recalculating data
      */
     private function loadStandardData(): void
     {
+        // Check if data already cached
+        if ($this->categoryDataCache !== null) {
+            $this->categoryData = $this->categoryDataCache;
+            $this->totals = $this->totalsCache ?? [];
+            $this->chartData = $this->chartDataCache ?? [];
+            $this->maxScore = $this->maxScoreCache ?? 0;
+
+            return;
+        }
+
         $this->categoryData = [];
         $this->totals = [
             'total_aspects' => 0,
@@ -363,7 +397,14 @@ class StandardPsikometrik extends Component
 
         $templateId = $this->selectedTemplate->id;
 
+        // OPTIMIZED: Get DynamicStandardService instance ONCE
+        $dynamicService = app(DynamicStandardService::class);
+
+        // OPTIMIZED: Check if there are adjustments - skip complex calculation if not needed
+        $hasAdjustments = $dynamicService->hasCategoryAdjustments($templateId, 'potensi');
+
         // Load ONLY Potensi category type with aspects and sub-aspects from selected position's template
+        // OPTIMIZED: Eager load all relationships in one query
         $categories = CategoryType::query()
             ->where('template_id', $templateId)
             ->where('code', 'potensi')
@@ -388,19 +429,22 @@ class StandardPsikometrik extends Component
             $categoryScoreSum = 0.0;
             $categorySubAspectStandardSum = 0.0;
 
-            // PHASE 2C: Get adjusted category weight
-            $dynamicService = app(DynamicStandardService::class);
-            $categoryWeight = $dynamicService->getCategoryWeight($templateId, $category->code);
+            // OPTIMIZED: Get adjusted category weight (dynamicService already instantiated)
+            $categoryWeight = $hasAdjustments
+                ? $dynamicService->getCategoryWeight($templateId, $category->code)
+                : $category->weight_percentage;
             $categoryOriginalWeight = $category->weight_percentage;
 
             foreach ($category->aspects as $aspect) {
-                // PHASE 2C: Check if aspect is active
-                if (! $dynamicService->isAspectActive($templateId, $aspect->code)) {
+                // OPTIMIZED: Check if aspect is active (only if has adjustments)
+                if ($hasAdjustments && ! $dynamicService->isAspectActive($templateId, $aspect->code)) {
                     continue; // Skip inactive aspects
                 }
 
-                // PHASE 2C: Get adjusted aspect weight
-                $aspectWeight = $dynamicService->getAspectWeight($templateId, $aspect->code);
+                // OPTIMIZED: Get adjusted aspect weight (only if has adjustments)
+                $aspectWeight = $hasAdjustments
+                    ? $dynamicService->getAspectWeight($templateId, $aspect->code)
+                    : $aspect->weight_percentage;
                 $aspectOriginalWeight = $aspect->weight_percentage;
 
                 $subAspectsData = [];
@@ -408,13 +452,15 @@ class StandardPsikometrik extends Component
                 $activeSubAspectsStandardSum = 0;
 
                 foreach ($aspect->subAspects as $subAspect) {
-                    // PHASE 2C: Check if sub-aspect is active
-                    if (! $dynamicService->isSubAspectActive($templateId, $subAspect->code)) {
+                    // OPTIMIZED: Check if sub-aspect is active (only if has adjustments)
+                    if ($hasAdjustments && ! $dynamicService->isSubAspectActive($templateId, $subAspect->code)) {
                         continue; // Skip inactive sub-aspects
                     }
 
-                    // PHASE 2C: Get adjusted sub-aspect rating
-                    $subAspectRating = $dynamicService->getSubAspectRating($templateId, $subAspect->code);
+                    // OPTIMIZED: Get adjusted sub-aspect rating (only if has adjustments)
+                    $subAspectRating = $hasAdjustments
+                        ? $dynamicService->getSubAspectRating($templateId, $subAspect->code)
+                        : (int) $subAspect->standard_rating;
                     $subAspectOriginalRating = (int) $subAspect->standard_rating;
 
                     $subAspectsData[] = [
@@ -432,7 +478,9 @@ class StandardPsikometrik extends Component
                 // Calculate aspect average rating from ACTIVE sub-aspects
                 $aspectAvgRating = $activeSubAspectsCount > 0
                     ? round($activeSubAspectsStandardSum / $activeSubAspectsCount, 2)
-                    : $dynamicService->getAspectRating($templateId, $aspect->code);
+                    : ($hasAdjustments
+                        ? $dynamicService->getAspectRating($templateId, $aspect->code)
+                        : (float) $aspect->standard_rating);
 
                 // Calculate aspect score: rating × adjusted weight
                 $aspectScore = round($aspectAvgRating * $aspectWeight, 2);
@@ -497,6 +545,12 @@ class StandardPsikometrik extends Component
             'total_rating_sum' => round($totalAspectRatingSum, 2), // Sum of aspect average ratings
             'total_score' => round($totalScore, 2),
         ];
+
+        // OPTIMIZED: Cache the results
+        $this->categoryDataCache = $this->categoryData;
+        $this->chartDataCache = $this->chartData;
+        $this->totalsCache = $this->totals;
+        $this->maxScoreCache = $this->maxScore;
     }
 
     public function render()
