@@ -4,6 +4,7 @@ namespace App\Livewire\Pages\GeneralReport\Ranking;
 
 use App\Models\Aspect;
 use App\Models\AssessmentEvent;
+use App\Models\AssessmentTemplate;
 use App\Models\CategoryType;
 use App\Services\DynamicStandardService;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -16,6 +17,8 @@ use Livewire\WithPagination;
 class RekapRankingAssessment extends Component
 {
     use WithPagination;
+
+    public ?AssessmentTemplate $selectedTemplate = null;
 
     public int $potensiWeight = 0;
 
@@ -60,6 +63,7 @@ class RekapRankingAssessment extends Component
         'event-selected' => 'handleEventSelected',
         'position-selected' => 'handlePositionSelected',
         'tolerance-updated' => 'handleToleranceUpdate',
+        'standard-adjusted' => 'handleStandardUpdate',
     ];
 
     public function mount(): void
@@ -371,6 +375,32 @@ class RekapRankingAssessment extends Component
         ];
     }
 
+    public function handleStandardUpdate(int $templateId): void
+    {
+        // Clear cache when standards are adjusted
+        $this->clearCache();
+
+        // Reload weights (in case category weights were adjusted)
+        $this->loadWeights();
+
+        // Refresh chart data
+        $this->prepareChartData();
+
+        $summary = $this->getPassingSummary();
+        $this->dispatch('summary-updated', [
+            'passing' => $summary['passing'],
+            'total' => $summary['total'],
+            'percentage' => $summary['percentage'],
+        ]);
+
+        // Dispatch chart update event
+        $this->dispatch('pieChartDataUpdated', [
+            'labels' => $this->chartLabels,
+            'data' => $this->chartData,
+            'colors' => $this->chartColors,
+        ]);
+    }
+
     public function handleToleranceUpdate(int $tolerance): void
     {
         $this->tolerancePercentage = $tolerance;
@@ -419,8 +449,12 @@ class RekapRankingAssessment extends Component
             ->find($positionFormationId);
 
         if (! $position || ! $position->template) {
+            $this->selectedTemplate = null;
+
             return;
         }
+
+        $this->selectedTemplate = $position->template;
 
         $standardService = app(DynamicStandardService::class);
 
