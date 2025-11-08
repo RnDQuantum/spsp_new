@@ -309,13 +309,23 @@ class RankingPsyMapping extends Component
             return null;
         }
 
-        // Get ALL aggregates at once
+        // CRITICAL FIX: Get ONLY active aspect IDs to filter individual scores
+        // This ensures disabled aspects are excluded from BOTH standard AND individual calculations
+        $standardService = app(DynamicStandardService::class);
+        $activePotensiIds = $standardService->getActiveAspectIds($position->template_id, 'potensi');
+
+        // Fallback to all IDs if no adjustments (performance optimization)
+        if (empty($activePotensiIds)) {
+            $activePotensiIds = $potensiAspectIds;
+        }
+
+        // Get aggregates - FILTER by active aspect IDs only
         $aggregates = AspectAssessment::query()
             ->selectRaw('aspect_assessments.participant_id, SUM(standard_rating) as sum_original_standard_rating, SUM(standard_score) as sum_original_standard_score, SUM(individual_rating) as sum_individual_rating, SUM(individual_score) as sum_individual_score')
             ->join('participants', 'participants.id', '=', 'aspect_assessments.participant_id')
             ->where('aspect_assessments.event_id', $event->id)
             ->where('aspect_assessments.position_formation_id', $positionFormationId)
-            ->whereIn('aspect_assessments.aspect_id', $potensiAspectIds)
+            ->whereIn('aspect_assessments.aspect_id', $activePotensiIds) // ✅ CRITICAL: Filter active only
             ->groupBy('aspect_assessments.participant_id', 'participants.name')
             ->orderByDesc('sum_individual_score')
             ->orderByRaw('LOWER(participants.name) ASC')

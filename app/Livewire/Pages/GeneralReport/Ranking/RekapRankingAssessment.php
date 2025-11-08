@@ -302,17 +302,32 @@ class RekapRankingAssessment extends Component
             ->pluck('id')
             ->all();
 
-        // Get ALL aggregates at once
+        // CRITICAL FIX: Get ONLY active aspect IDs to filter individual scores
+        // This ensures disabled aspects are excluded from BOTH standard AND individual calculations
+        $standardService = app(DynamicStandardService::class);
+        $activePotensiIds = $standardService->getActiveAspectIds($position->template_id, 'potensi');
+        $activeKompetensiIds = $standardService->getActiveAspectIds($position->template_id, 'kompetensi');
+
+        // Fallback to all IDs if no adjustments (performance optimization)
+        if (empty($activePotensiIds)) {
+            $activePotensiIds = $potensiAspectIds;
+        }
+        if (empty($activeKompetensiIds)) {
+            $activeKompetensiIds = $kompetensiAspectIds;
+        }
+
+        // Get aggregates - FILTER by active aspect IDs only
         $aggregates = DB::table('aspect_assessments as aa')
             ->join('aspects as a', 'a.id', '=', 'aa.aspect_id')
             ->where('aa.event_id', $event->id)
             ->where('aa.position_formation_id', $positionFormationId)
+            ->whereIn('aa.aspect_id', array_merge($activePotensiIds, $activeKompetensiIds)) // ✅ CRITICAL: Filter active only
             ->groupBy('aa.participant_id')
             ->selectRaw('aa.participant_id as participant_id')
-            ->selectRaw('SUM(CASE WHEN a.category_type_id = ? THEN aa.individual_score ELSE 0 END) as potensi_individual_score', [$potensiId])
-            ->selectRaw('SUM(CASE WHEN a.category_type_id = ? THEN aa.standard_score ELSE 0 END) as potensi_standard_score', [$potensiId])
-            ->selectRaw('SUM(CASE WHEN a.category_type_id = ? THEN aa.individual_score ELSE 0 END) as kompetensi_individual_score', [$kompetensiId])
-            ->selectRaw('SUM(CASE WHEN a.category_type_id = ? THEN aa.standard_score ELSE 0 END) as kompetensi_standard_score', [$kompetensiId])
+            ->selectRaw('SUM(CASE WHEN a.id IN ('.implode(',', $activePotensiIds ?: [0]).') THEN aa.individual_score ELSE 0 END) as potensi_individual_score')
+            ->selectRaw('SUM(CASE WHEN a.id IN ('.implode(',', $activePotensiIds ?: [0]).') THEN aa.standard_score ELSE 0 END) as potensi_standard_score')
+            ->selectRaw('SUM(CASE WHEN a.id IN ('.implode(',', $activeKompetensiIds ?: [0]).') THEN aa.individual_score ELSE 0 END) as kompetensi_individual_score')
+            ->selectRaw('SUM(CASE WHEN a.id IN ('.implode(',', $activeKompetensiIds ?: [0]).') THEN aa.standard_score ELSE 0 END) as kompetensi_standard_score')
             ->get();
 
         if ($aggregates->isEmpty()) {

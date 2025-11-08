@@ -759,4 +759,33 @@ class DynamicStandardService
 
         return $counts;
     }
+
+    /**
+     * Get active aspect IDs for a category
+     *
+     * CRITICAL: This method is used to filter individual scores in ranking/report pages.
+     * When aspects are disabled via SelectiveAspectsModal, their individual scores
+     * MUST be excluded from calculations to match the adjusted standard scores.
+     *
+     * @param  int  $templateId  The assessment template ID
+     * @param  string  $categoryCode  'potensi' or 'kompetensi'
+     * @return array Array of active aspect IDs (integers)
+     */
+    public function getActiveAspectIds(int $templateId, string $categoryCode): array
+    {
+        // Get all aspects for this category
+        $aspects = Aspect::where('template_id', $templateId)
+            ->whereHas('categoryType', fn ($q) => $q->where('code', $categoryCode))
+            ->get();
+
+        // Filter only active aspects
+        $activeIds = [];
+        foreach ($aspects as $aspect) {
+            if ($this->isAspectActive($templateId, $aspect->code)) {
+                $activeIds[] = $aspect->id;
+            }
+        }
+
+        return $activeIds;
+    }
 }
