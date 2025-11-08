@@ -220,7 +220,9 @@ class RankingMcMapping extends Component
             $aspectRating = $standardService->getAspectRating($templateId, $aspect->code);
 
             $adjustedRating += $aspectRating;
-            $adjustedScore += ($aspectRating * $aspectWeight);
+            // FIXED: Round aspect score to match StandardMc calculation
+            $aspectScore = round($aspectRating * $aspectWeight, 2);
+            $adjustedScore += $aspectScore;
         }
 
         // Cache result

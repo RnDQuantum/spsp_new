@@ -161,29 +161,72 @@
                         class="text-sm font-normal text-blue-600 dark:text-blue-400"></span>
                 </h3>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <!-- Psychology Standard -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <!-- Psychology Original Standard -->
                     <div class="bg-white dark:bg-gray-800 border border-blue-200 dark:border-blue-600 rounded-lg p-3">
-                        <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Standar Psychology
-                            {{ $potensiWeight }}%</div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Standar Original Psychology</div>
                         <div class="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                            {{ number_format($standardInfo['psy_standard'], 2) }}</div>
+                            {{ number_format($standardInfo['psy_original_standard'], 2) }}</div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            (Bobot {{ $potensiWeight }}% = {{ number_format($standardInfo['psy_original_standard'] * $potensiWeight / 100, 2) }})
+                        </div>
                     </div>
 
-                    <!-- Management Competency Standard -->
+                    <!-- Management Competency Original Standard -->
                     <div class="bg-white dark:bg-gray-800 border border-blue-200 dark:border-blue-600 rounded-lg p-3">
-                        <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Standar Kompetensi
-                            {{ $kompetensiWeight }}%</div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Standar Original Kompetensi</div>
                         <div class="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                            {{ number_format($standardInfo['mc_standard'], 2) }}</div>
+                            {{ number_format($standardInfo['mc_original_standard'], 2) }}</div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            (Bobot {{ $kompetensiWeight }}% = {{ number_format($standardInfo['mc_original_standard'] * $kompetensiWeight / 100, 2) }})
+                        </div>
                     </div>
+                </div>
 
-                    <!-- Total Standard -->
-                    <div
-                        class="bg-white dark:bg-gray-800 border border-indigo-300 dark:border-indigo-600 rounded-lg p-3">
-                        <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Total Standar (Adjusted)</div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Psychology Adjusted Standard -->
+                    <div class="bg-white dark:bg-gray-800 border border-indigo-300 dark:border-indigo-600 rounded-lg p-3">
+                        <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Standar Adjusted Psychology
+                            <span x-data
+                                x-text="$wire.tolerancePercentage > 0 ? '(-' + $wire.tolerancePercentage + '%)' : ''"></span>
+                        </div>
                         <div class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
-                            {{ number_format($standardInfo['total_standard'], 2) }}</div>
+                            {{ number_format($standardInfo['psy_adjusted_standard'], 2) }}</div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            (Bobot {{ $potensiWeight }}% = {{ number_format($standardInfo['psy_standard'], 2) }})
+                        </div>
+                    </div>
+
+                    <!-- Management Competency Adjusted Standard -->
+                    <div class="bg-white dark:bg-gray-800 border border-indigo-300 dark:border-indigo-600 rounded-lg p-3">
+                        <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Standar Adjusted Kompetensi
+                            <span x-data
+                                x-text="$wire.tolerancePercentage > 0 ? '(-' + $wire.tolerancePercentage + '%)' : ''"></span>
+                        </div>
+                        <div class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
+                            {{ number_format($standardInfo['mc_adjusted_standard'], 2) }}</div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            (Bobot {{ $kompetensiWeight }}% = {{ number_format($standardInfo['mc_standard'], 2) }})
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Total Standard Summary -->
+                <div class="mt-4 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900 dark:to-purple-900 border-2 border-indigo-300 dark:border-indigo-600 rounded-lg p-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="text-center">
+                            <div class="text-sm text-gray-600 dark:text-gray-300 mb-1">Total Standar Original</div>
+                            <div class="text-3xl font-bold text-gray-900 dark:text-gray-100">
+                                {{ number_format($standardInfo['total_original_standard'], 2) }}</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-sm text-gray-600 dark:text-gray-300 mb-1">Total Standar Adjusted
+                                <span x-data
+                                    x-text="$wire.tolerancePercentage > 0 ? '(-' + $wire.tolerancePercentage + '%)' : ''"></span>
+                            </div>
+                            <div class="text-3xl font-bold text-indigo-600 dark:text-indigo-400">
+                                {{ number_format($standardInfo['total_standard'], 2) }}</div>
+                        </div>
                     </div>
                 </div>
             </div>

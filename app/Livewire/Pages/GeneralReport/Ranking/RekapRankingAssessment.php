@@ -193,11 +193,14 @@ class RekapRankingAssessment extends Component
                     }
 
                     if ($activeSubAspectsCount > 0) {
-                        $aspectRating = $subAspectRatingSum / $activeSubAspectsCount;
+                        // FIXED: Round aspect rating to match StandardPsikometrik calculation
+                        $aspectRating = round($subAspectRatingSum / $activeSubAspectsCount, 2);
                     }
                 }
 
-                $potensiScore += ($aspectRating * $aspectWeight);
+                // FIXED: Round aspect score to match StandardPsikometrik calculation
+                $aspectScore = round($aspectRating * $aspectWeight, 2);
+                $potensiScore += $aspectScore;
             }
 
             $adjustedPotensiScore = $potensiScore;
@@ -218,7 +221,9 @@ class RekapRankingAssessment extends Component
                 $aspectWeight = $standardService->getAspectWeight($templateId, $aspect->code);
                 $aspectRating = $standardService->getAspectRating($templateId, $aspect->code);
 
-                $kompetensiScore += ($aspectRating * $aspectWeight);
+                // FIXED: Round aspect score to match StandardMc calculation
+                $aspectScore = round($aspectRating * $aspectWeight, 2);
+                $kompetensiScore += $aspectScore;
             }
 
             $adjustedKompetensiScore = $kompetensiScore;
@@ -350,6 +355,16 @@ class RekapRankingAssessment extends Component
         $totalWeightedStd = $weightedPotStd + $weightedKomStd;
 
         return [
+            // Original standards (from session, BEFORE tolerance and weighting)
+            'psy_original_standard' => round($potStd, 2),
+            'mc_original_standard' => round($komStd, 2),
+            'total_original_standard' => round($potStd * ($this->potensiWeight / 100) + $komStd * ($this->kompetensiWeight / 100), 2),
+
+            // Adjusted standards (AFTER tolerance, BEFORE weighting)
+            'psy_adjusted_standard' => round($adjustedPotStd, 2),
+            'mc_adjusted_standard' => round($adjustedKomStd, 2),
+
+            // Weighted standards (AFTER both tolerance AND weighting) - used for GAP calculation
             'psy_standard' => round($weightedPotStd, 2),
             'mc_standard' => round($weightedKomStd, 2),
             'total_standard' => round($totalWeightedStd, 2),
@@ -407,7 +422,9 @@ class RekapRankingAssessment extends Component
             return;
         }
 
-        // Get category weights from selected position's template
+        $standardService = app(DynamicStandardService::class);
+
+        // Get category weights from selected position's template (with session adjustments)
         $potensi = CategoryType::query()
             ->where('template_id', $position->template_id)
             ->where('code', 'potensi')
@@ -418,8 +435,13 @@ class RekapRankingAssessment extends Component
             ->where('code', 'kompetensi')
             ->first();
 
-        $this->potensiWeight = (int) ($potensi?->weight_percentage ?? 0);
-        $this->kompetensiWeight = (int) ($kompetensi?->weight_percentage ?? 0);
+        // Use adjusted weights from session if available
+        $this->potensiWeight = $potensi
+            ? $standardService->getCategoryWeight($position->template_id, 'potensi')
+            : 0;
+        $this->kompetensiWeight = $kompetensi
+            ? $standardService->getCategoryWeight($position->template_id, 'kompetensi')
+            : 0;
     }
 
     private function prepareChartData(): void
