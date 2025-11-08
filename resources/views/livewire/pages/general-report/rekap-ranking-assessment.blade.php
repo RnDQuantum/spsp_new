@@ -207,10 +207,10 @@
 
                         <!-- Total Standard -->
                         <div
-                            class="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900 dark:to-blue-800 border-2 border-blue-400 dark:border-blue-500 rounded-lg p-4">
+                            class="bg-white dark:bg-gray-800 border-2 border-blue-300 dark:border-blue-600 rounded-lg p-4">
                             <div class="text-xs text-gray-600 dark:text-gray-300 mb-1 font-semibold">TOTAL STANDAR
                             </div>
-                            <div class="text-3xl font-bold text-blue-700 dark:text-blue-300">
+                            <div class="text-3xl font-bold text-blue-600 dark:text-blue-400">
                                 {{ number_format($standardInfo['total_original_standard'], 2) }}
                             </div>
                         </div>
@@ -227,7 +227,7 @@
 
                         <!-- Psychology Adjusted -->
                         <div
-                            class="bg-white dark:bg-gray-800 border-2 border-indigo-300 dark:border-indigo-600 rounded-lg p-4">
+                            class="bg-white dark:bg-gray-800 border-2 border-blue-300 dark:border-blue-600 rounded-lg p-4">
                             <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Psychology</div>
                             <div class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
                                 {{ number_format($standardInfo['psy_adjusted_standard'], 2) }}
@@ -240,7 +240,7 @@
 
                         <!-- Kompetensi Adjusted -->
                         <div
-                            class="bg-white dark:bg-gray-800 border-2 border-indigo-300 dark:border-indigo-600 rounded-lg p-4">
+                            class="bg-white dark:bg-gray-800 border-2 border-blue-300 dark:border-blue-600 rounded-lg p-4">
                             <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Kompetensi</div>
                             <div class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
                                 {{ number_format($standardInfo['mc_adjusted_standard'], 2) }}
@@ -253,10 +253,10 @@
 
                         <!-- Total Adjusted -->
                         <div
-                            class="bg-gradient-to-br from-indigo-50 to-purple-100 dark:from-indigo-900 dark:to-purple-800 border-2 border-indigo-400 dark:border-indigo-500 rounded-lg p-4">
+                            class="bg-white dark:bg-gray-800 border-2 border-blue-300 dark:border-blue-600 rounded-lg p-4">
                             <div class="text-xs text-gray-600 dark:text-gray-300 mb-1 font-semibold">TOTAL STANDAR
                                 ADJUSTED</div>
-                            <div class="text-3xl font-bold text-indigo-700 dark:text-indigo-300">
+                            <div class="text-3xl font-bold text-indigo-600 dark:text-indigo-400">
                                 {{ number_format($standardInfo['total_standard'], 2) }}
                             </div>
                         </div>
