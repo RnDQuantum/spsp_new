@@ -80,16 +80,16 @@
     <div class="overflow-hidden shadow rounded-lg mb-8 border border-gray-200 dark:border-gray-700">
         <div class="overflow-x-auto">
             <table class="w-full divide-y divide-gray-200 dark:divide-gray-700 border-collapse">
-                <thead class="bg-gray-50 dark:bg-gray-700">
+                <thead class="bg-gray-300 dark:bg-gray-600">
                     <tr>
                         <th
-                            class="py-3 px-4 text-center text-sm font-semibold text-gray-900 dark:text-white border border-gray-200 dark:border-gray-600 w-16">
+                            class="py-3 px-4 text-center text-sm font-semibold text-gray-900 dark:text-white  border border-gray-200 dark:border-gray-500 w-16">
                             ID
                         </th>
 
                         <!-- KODE PROYEK - Sortable -->
                         <th
-                            class="py-3 px-4 text-center text-sm font-semibold text-gray-900 dark:text-white border border-gray-200 dark:border-gray-600 w-32">
+                            class="py-3 px-4 text-center text-sm font-semibold text-gray-900 dark:text-white border border-gray-200 dark:border-gray-500 w-32">
                             <button wire:click="sortBy('kode_proyek')"
                                 class="flex items-center justify-center w-full hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                                 <span>KODE PROYEK</span>
@@ -238,10 +238,10 @@
                             </button>
                         </th>
 
-                        <th
+                        {{-- <th
                             class="py-3 px-4 text-center text-sm font-semibold text-gray-900 dark:text-white border border-gray-200 dark:border-gray-600 w-24">
                             AKSI
-                        </th>
+                        </th> --}}
                     </tr>
                 </thead>
                 <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
@@ -340,7 +340,7 @@
                                 </td>
 
                                 <!-- AKSI -->
-                                <td class="py-4 px-4 text-center border border-gray-200 dark:border-gray-600 w-24">
+                                {{-- <td class="py-4 px-4 text-center border border-gray-200 dark:border-gray-600 w-24">
                                     <div class="flex justify-center space-x-2">
                                         <button type="button"
                                             class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
@@ -364,7 +364,7 @@
                                             </svg>
                                         </button>
                                     </div>
-                                </td>
+                                </td> --}}
                             </tr>
                         @endforeach
                     @else

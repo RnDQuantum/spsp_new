@@ -18,7 +18,7 @@
             @if ($selectedTemplate)
                 <div class="mt-3 pt-3 border-t border-gray-200 dark:border-gray-600">
                     <div class="flex items-start gap-2 text-sm text-gray-600 dark:text-gray-300">
-                        <span class="font-semibold">📄 Template:</span>
+                        <span class="font-semibold">📄 Standar:</span>
                         <div class="font-semibold text-gray-900 dark:text-gray-100">{{ $selectedTemplate->name }}
                         </div>
                     </div>
@@ -101,7 +101,7 @@
 
         {{-- Header Title --}}
         <div
-            class="text-center font-bold uppercase mb-4 text-sm bg-blue-200 dark:bg-blue-900 py-2 border border-black dark:border-gray-600">
+            class="text-center font-bold uppercase mb-4 text-sm bg-gray-300 dark:bg-gray-600 py-2 border border-black dark:border-gray-600">
             STANDAR PEMETAAN POTENSI INDIVIDU "STATIC PRIBADI SPIDER PLOT"
         </div>
 
@@ -116,22 +116,22 @@
             <table class="w-full border border-black dark:border-gray-600 text-xs mb-4">
                 <tr>
                     <td
-                        class="border border-black dark:border-gray-600 px-2 py-1 bg-blue-100 dark:bg-blue-900 font-semibold w-1/5">
+                        class="border border-black dark:border-gray-600 px-2 py-1 bg-gray-300 dark:bg-gray-600 font-semibold w-1/5">
                         Perusahaan/Lembaga</td>
                     <td class="border border-black dark:border-gray-600 px-2 py-1 w-2/5">
                         {{ strtoupper($selectedEvent->institution->name ?? 'N/A') }}</td>
                     <td
-                        class="border border-black dark:border-gray-600 px-2 py-1 bg-blue-100 dark:bg-blue-900 font-semibold w-1/6">
+                        class="border border-black dark:border-gray-600 px-2 py-1 bg-gray-300 dark:bg-gray-600 font-semibold w-1/6">
                     </td>
                     <td class="border border-black dark:border-gray-600 px-2 py-1 w-1/6"></td>
                 </tr>
                 <tr>
                     <td
-                        class="border border-black dark:border-gray-600 px-2 py-1 bg-blue-100 dark:bg-blue-900 font-semibold">
+                        class="border border-black dark:border-gray-600 px-2 py-1 bg-gray-300 dark:bg-gray-600 font-semibold">
                         Standard Penilaian</td>
                     <td class="border border-black dark:border-gray-600 px-2 py-1">{{ $selectedTemplate->name }}</td>
                     <td
-                        class="border border-black dark:border-gray-600 px-2 py-1 bg-blue-100 dark:bg-blue-900 font-semibold">
+                        class="border border-black dark:border-gray-600 px-2 py-1 bg-gray-300 dark:bg-gray-600 font-semibold">
                         Kode:</td>
                     <td class="border border-black dark:border-gray-600 px-2 py-1 text-center">
                         {{ $selectedTemplate->code }}</td>
@@ -144,7 +144,7 @@
             <div class="mt-4 mb-4">
                 <table class="w-full border border-black dark:border-gray-600 text-xs">
                     <thead>
-                        <tr class="bg-blue-100 dark:bg-blue-900">
+                        <tr class="bg-gray-300 dark:bg-gray-600">
                             <th class="border border-black dark:border-gray-600 px-2 py-2 w-12">No.</th>
                             <th class="border border-black dark:border-gray-600 px-2 py-2">ATRIBUT</th>
                             <th class="border border-black dark:border-gray-600 px-2 py-2 w-24">NILAI STANDAR</th>
@@ -230,7 +230,7 @@
                         @endforeach
 
                         {{-- TOTAL --}}
-                        <tr class="bg-blue-100 dark:bg-blue-900 font-bold">
+                        <tr class="bg-gray-300 dark:bg-gray-600 font-bold">
                             <td class="border border-black dark:border-gray-600 px-2 py-2 text-center" colspan="2">
                                 JUMLAH</td>
                             <td class="border border-black dark:border-gray-600 px-2 py-2 text-center">
@@ -263,17 +263,17 @@
 
             {{-- Tabel Mapping Summary --}}
             <div
-                class="mb-2 mt-6 font-bold text-xs bg-blue-100 dark:bg-blue-900 border border-black dark:border-gray-600 px-2 py-2 text-center">
+                class="mb-2 mt-6 font-bold text-xs bg-gray-300 dark:bg-gray-600 border border-black dark:border-gray-600 px-2 py-2 text-center">
                 ATRIBUT POTENSI MAPPING
             </div>
             <table class="w-full border border-black dark:border-gray-600 text-xs mb-4">
                 <thead>
-                    <tr class="bg-blue-100 dark:bg-blue-900">
+                    <tr class="bg-gray-300 dark:bg-gray-600">
                         <th class="border border-black dark:border-gray-600 px-2 py-2 w-12">No.</th>
                         <th class="border border-black dark:border-gray-600 px-2 py-2">ATRIBUT</th>
                         <th class="border border-black dark:border-gray-600 px-2 py-2 w-24">JUMLAH ATRIBUT</th>
                         <th class="border border-black dark:border-gray-600 px-2 py-2 w-20">BOBOT (%)</th>
-                        <th class="border border-black dark:border-gray-600 px-2 py-2 w-24">RATING Rata-Rata</th>
+                        <th class="border border-black dark:border-gray-600 px-2 py-2 w-24">RATING <br>Rata-Rata</th>
                         <th class="border border-black dark:border-gray-600 px-2 py-2 w-20">SKOR</th>
                     </tr>
                 </thead>
@@ -298,7 +298,7 @@
                     @endforeach
                 </tbody>
                 <tfoot>
-                    <tr class="font-bold bg-blue-100 dark:bg-blue-900">
+                    <tr class="font-bold bg-gray-300 dark:bg-gray-600">
                         <td class="border border-black dark:border-gray-600 px-2 py-2 text-center" colspan="2">
                             Jumlah
                         </td>
