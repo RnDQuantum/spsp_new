@@ -78,8 +78,8 @@
 
     @if ($showTable)
         <!-- Table Section - DARK MODE READY -->
-        <div class="px-6 pb-6 bg-white dark:bg-gray-800 overflow-x-auto">
-            <table class="min-w-full border-2 border-black text-sm text-gray-900 dark:text-gray-200 mt-6">
+        <div class=" bg-black dark:bg-gray-800 overflow-x-auto">
+            <table class="min-w-full border-2 border-black text-sm text-gray-900 dark:text-gray-200">
                 <thead>
                     <tr class="bg-gray-300 dark:bg-gray-600">
                         <th class="border-2 border-black px-3 py-3 font-bold text-center text-black dark:text-white"
@@ -216,8 +216,7 @@
 
                     <!-- Total Row - DARK MODE READY -->
                     @if ($finalAssessment)
-                        <tr
-                            class="bg-gray-300 dark:bg-gray-600 text-black dark:text-white hover:bg-black dark:hover:bg-black">
+                        <tr class="bg-gray-300 dark:bg-gray-600 text-black dark:text-white">
                             <td class="border-2 border-black px-3 py-3 text-center" colspan="2"><strong>TOTAL
                                     SKOR</strong></td>
                             <td class="border-2 border-black px-3 py-3 text-center">
@@ -271,7 +270,7 @@
 
         <!-- Conclusion Section - DARK MODE READY -->
         @if ($finalAssessment)
-            <div class="px-6 pb-6 bg-white dark:bg-gray-800">
+            <div class="mt-6 bg-white dark:bg-gray-800">
                 <table class="min-w-full border-2 border-black">
                     <tr>
                         <td class="border-2 border-black px-4 py-4 font-bold text-center text-gray-900 dark:text-gray-200 bg-white dark:bg-gray-800"

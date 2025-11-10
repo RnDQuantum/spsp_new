@@ -346,11 +346,11 @@
                                     <div class="absolute right-0 top-0 bottom-0 flex items-center pr-2">
                                         <div class="rating-display text-right">
                                             <div class="percentage">{{ $aspect['percentage'] }}%</div>
-                                            <div
+                                            {{-- <div
                                                 class="rating-comparison {{ $aspect['individual_rating'] >= $aspect['standard_rating'] ? 'above-standard' : 'below-standard' }}">
                                                 {{ number_format($aspect['individual_rating'], 2, ',', '.') }} /
                                                 {{ number_format($aspect['standard_rating'], 2, ',', '.') }}
-                                            </div>
+                                            </div> --}}
                                         </div>
                                     </div>
                                 </div>
@@ -428,11 +428,11 @@
                                     <div class="absolute right-0 top-0 bottom-0 flex items-center pr-2">
                                         <div class="rating-display text-right">
                                             <div class="percentage">{{ $aspect['percentage'] }}%</div>
-                                            <div
+                                            {{-- <div
                                                 class="rating-comparison {{ $aspect['individual_rating'] >= $aspect['standard_rating'] ? 'above-standard' : 'below-standard' }}">
                                                 {{ number_format($aspect['individual_rating'], 2, ',', '.') }} /
                                                 {{ number_format($aspect['standard_rating'], 2, ',', '.') }}
-                                            </div>
+                                            </div> --}}
                                         </div>
                                     </div>
                                 </div>

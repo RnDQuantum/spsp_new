@@ -12,7 +12,7 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
-#[Layout('components.layouts.app', ['title' => 'Final Report'])]
+#[Layout('components.layouts.app', ['title' => 'LAPORAN INDIVIDU'])]
 class FinalReport extends Component
 {
     public $eventCode;

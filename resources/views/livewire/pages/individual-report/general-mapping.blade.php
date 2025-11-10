@@ -9,11 +9,11 @@
                 {{ $participant->name }}
             </p>
             <p class="text-center text-sm font-semibold text-gray-700 dark:text-gray-300 mt-1">
-                {{ $participant->event->name }}
+                {{ $participant->event->name }} | {{ $participant->positionFormation->name }} -
+                {{ $participant->positionFormation->template->name }}
             </p>
-            <p class="text-center text-sm font-semibold text-gray-700 dark:text-gray-300 mt-1">
-                {{ $participant->positionFormation->name }} - {{ $participant->positionFormation->template->name }}
-            </p>
+            {{-- <p class="text-center text-sm font-semibold text-gray-700 dark:text-gray-300 mt-1">
+            </p> --}}
         </div>
 
         <!-- Tolerance Selector Component -->
@@ -266,14 +266,10 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
             id="chart-rating-{{ $chartId }}">
             <div class="text-center text-base font-bold mb-6 text-gray-900 dark:text-gray-100">Profil Pribadi Spider
                 Plot Chart (Rating)</div>
-            <div class="flex justify-center mb-6">
-                <div style="width: 900px; height: 900px; position: relative;">
-                    <canvas id="spiderRatingChart-{{ $chartId }}"></canvas>
-                </div>
-            </div>
+
 
             <!-- Legend -->
-            <div class="flex justify-center text-sm gap-8 text-gray-900 dark:text-gray-100 mb-8"
+            <div class="flex justify-center text-sm gap-8 text-gray-900 dark:text-gray-100 mb-2"
                 id="rating-legend-{{ $chartId }}">
                 <!-- GANTI URUTAN LEGEND INI -->
                 <span class="legend-item ... " data-chart="rating" data-dataset="0">
@@ -290,6 +286,15 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                         x-text="'Tolerance ' + $wire.tolerancePercentage + '%'"></span>
                 </span>
             </div>
+
+
+            <div class="flex justify-center mb-6">
+                <div style="width: 900px; height: 900px; position: relative;">
+                    <canvas id="spiderRatingChart-{{ $chartId }}"></canvas>
+                </div>
+            </div>
+
+
 
             <script>
                 (function() {
@@ -603,14 +608,9 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
             id="chart-score-{{ $chartId }}">
             <div class="text-center text-base font-bold mb-6 text-gray-900 dark:text-gray-100">Profil Pribadi Spider
                 Plot Chart (Score)</div>
-            <div class="flex justify-center mb-6">
-                <div style="width: 900px; height: 900px; position: relative;">
-                    <canvas id="spiderScoreChart-{{ $chartId }}"></canvas>
-                </div>
-            </div>
 
             <!-- Legend -->
-            <div class="flex justify-center text-sm gap-8 text-gray-900 dark:text-gray-100 mb-8"
+            <div class="flex justify-center text-sm gap-8 text-gray-900 dark:text-gray-100 mb-0"
                 id="score-legend-{{ $chartId }}">
                 <!-- GANTI URUTAN LEGEND INI -->
                 <span class="legend-item ... " data-chart="rating" data-dataset="0">
@@ -626,6 +626,12 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                     <span class="font-semibold ..." x-data
                         x-text="'Tolerance ' + $wire.tolerancePercentage + '%'"></span>
                 </span>
+            </div>
+
+            <div class="flex justify-center mb-6">
+                <div style="width: 900px; height: 900px; position: relative;">
+                    <canvas id="spiderScoreChart-{{ $chartId }}"></canvas>
+                </div>
             </div>
 
             <script>
