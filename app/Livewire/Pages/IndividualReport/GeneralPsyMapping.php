@@ -10,7 +10,7 @@ use App\Models\Participant;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
-#[Layout('components.layouts.app', ['title' => 'Psychological Mapping'])]
+#[Layout('components.layouts.app', ['title' => 'Psychology Mapping'])]
 class GeneralPsyMapping extends Component
 {
     public ?Participant $participant = null;
@@ -104,7 +104,7 @@ class GeneralPsyMapping extends Component
         }
 
         // Generate unique chart ID
-        $this->chartId = 'generalPsyMapping'.uniqid();
+        $this->chartId = 'generalPsyMapping' . uniqid();
 
         // Load tolerance from session
         $this->tolerancePercentage = session('individual_report.tolerance', 10);

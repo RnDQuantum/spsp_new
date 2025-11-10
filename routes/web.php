@@ -50,7 +50,7 @@ Route::middleware(['auth', 'institution.access'])->group(function () {
     // Individual Report Route - Ringkasan MC Mapping (Kompetensi Summary)
     Route::get('/ringkasan-mc-mapping/{eventCode}/{testNumber}', App\Livewire\Pages\IndividualReport\RingkasanMcMapping::class)->name('ringkasan_mc_mapping');
 
-    // Individual Report Route - Ringkasan Assessment
+    // Individual Report Route - Ringkasan Asesmen
     Route::get('/ringkasan-assessment/{eventCode}/{testNumber}', App\Livewire\Pages\IndividualReport\RingkasanAssessment::class)->name('ringkasan_assessment');
 
     // General report Routes

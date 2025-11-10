@@ -2,14 +2,15 @@
     <div class="bg-white dark:bg-gray-800 mx-auto my-8 shadow overflow-hidden" style="max-width: 1400px;">
         <!-- Header -->
         <div class="border-b-4 border-black dark:border-gray-300 py-3 bg-gray-300 dark:bg-gray-600">
-            <h1 class="text-center text-lg font-bold uppercase tracking-wide text-gray-900 dark:text-gray-100">
+            <h1 class="text-center text-lg font-bold uppercase tracking-wide text-gray-900 dark:text-gray-100 italic">
                 GENERAL MAPPING
             </h1>
             <p class="text-center text-sm font-semibold text-gray-700 dark:text-gray-300 mt-1">
                 {{ $participant->name }}
             </p>
             <p class="text-center text-sm font-semibold text-gray-700 dark:text-gray-300 mt-1">
-                {{ $participant->event->name }} | {{ $participant->positionFormation->name }} -
+                {{ $participant->event->name }}<br>
+                {{ $participant->positionFormation->name }} -
                 {{ $participant->positionFormation->template->name }}
             </p>
             {{-- <p class="text-center text-sm font-semibold text-gray-700 dark:text-gray-300 mt-1">
@@ -33,33 +34,33 @@
                         <th class="border border-black dark:border-gray-300 px-3 py-2 font-semibold" rowspan="2">No
                         </th>
                         <th class="border border-black dark:border-gray-300 px-3 py-2 font-semibold" rowspan="2">
-                            Atribut/Attribute
+                            Atribut
                         </th>
                         <th class="border border-black dark:border-gray-300 px-3 py-2 font-semibold" rowspan="2">
                             Bobot %<br>200</th>
                         <th class="border border-black dark:border-gray-300 px-3 py-2 font-semibold" colspan="2">
                             <span x-data
-                                x-text="$wire.tolerancePercentage > 0 ? 'Standard (-' + $wire.tolerancePercentage + '%)' : 'Standard'"></span>
+                                x-text="$wire.tolerancePercentage > 0 ? 'Standar (-' + $wire.tolerancePercentage + '%)' : 'Standar'"></span>
                         </th>
                         <th class="border border-black dark:border-gray-300 px-3 py-2 font-semibold" colspan="2">
                             Individu</th>
                         <th class="border border-black dark:border-gray-300 px-3 py-2 font-semibold" colspan="2">Gap
                         </th>
                         <th class="border border-black dark:border-gray-300 px-3 py-2 font-semibold" rowspan="2">
-                            Prosentase<br>Kesesuaian</th>
+                            Persentase<br>Kesesuaian</th>
                         <th class="border border-black dark:border-gray-300 px-3 py-2 font-semibold" rowspan="2">
-                            Kesimpulan/Conclusion</th>
+                            Kesimpulan</th>
                     </tr>
                     <tr class="bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-gray-100">
-                        <th class="border border-black dark:border-gray-300 px-3 py-1 font-semibold">Rating/<br>Level
+                        <th class="border border-black dark:border-gray-300 px-3 py-1 font-semibold">Rating
                         </th>
-                        <th class="border border-black dark:border-gray-300 px-3 py-1 font-semibold">Score</th>
-                        <th class="border border-black dark:border-gray-300 px-3 py-1 font-semibold">Rating/<br>Level
+                        <th class="border border-black dark:border-gray-300 px-3 py-1 font-semibold">Skor</th>
+                        <th class="border border-black dark:border-gray-300 px-3 py-1 font-semibold">Rating
                         </th>
-                        <th class="border border-black dark:border-gray-300 px-3 py-1 font-semibold">Score</th>
-                        <th class="border border-black dark:border-gray-300 px-3 py-1 font-semibold">Rating/<br>Level
+                        <th class="border border-black dark:border-gray-300 px-3 py-1 font-semibold">Skor</th>
+                        <th class="border border-black dark:border-gray-300 px-3 py-1 font-semibold">Rating
                         </th>
-                        <th class="border border-black dark:border-gray-300 px-3 py-0 font-semibold">Score</th>
+                        <th class="border border-black dark:border-gray-300 px-3 py-0 font-semibold">Skor</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -137,7 +138,7 @@ $c = trim(strtoupper($overallConclusion)); @endphp
                     <!-- Total Score Row -->
                     <tr class="font-bold bg-gray-300 dark:bg-gray-600">
                         <td class="border border-black dark:border-gray-300 px-3 py-2 text-center" colspan="3">Total
-                            Score</td>
+                            Skor</td>
                         <td class="border border-black dark:border-gray-300 px-3 py-2 bg-black"></td>
                         <td class="border border-black dark:border-gray-300 px-3 py-2 text-center">
                             {{ number_format($totalStandardScore, 2) }}</td>
@@ -173,12 +174,7 @@ $c = trim(strtoupper($overallConclusion)); @endphp
                 <div class="px-6 py-4 bg-gray-300 dark:bg-gray-600 border-t-2 border-black dark:border-gray-600">
                     <div class="max-w-5xl mx-auto">
                         <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
-                            <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z">
-                                </path>
-                            </svg>
+                            <i class="fa-solid fa-circle-check"></i>
                             Ranking Peserta - Skor Gabungan (Weighted)
                         </h3>
 
@@ -196,7 +192,7 @@ $c = trim(strtoupper($overallConclusion)); @endphp
                             <div
                                 class="bg-white dark:bg-gray-800 border-2 border-blue-300 dark:border-blue-600 rounded-lg p-4 text-center">
                                 <div class="text-sm text-gray-500 dark:text-gray-400 mb-2">Total Peserta</div>
-                                <div class="text-4xl font-bold text-indigo-600 dark:text-indigo-400">
+                                <div class="text-4xl font-bold text-blue-600 dark:text-blue-400">
                                     {{ $rankingInfo['total'] }}
                                 </div>
                                 <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
@@ -208,10 +204,10 @@ $c = trim(strtoupper($overallConclusion)); @endphp
                             <div
                                 class="bg-white dark:bg-gray-800 border-2 border-blue-300 dark:border-blue-600 rounded-lg p-4 text-center">
                                 <div class="text-sm text-gray-500 dark:text-gray-400 mb-2">Bobot Penilaian</div>
-                                <div class="text-sm font-bold text-indigo-600 dark:text-indigo-400">
+                                <div class="text-sm font-bold text-blue-600 dark:text-blue-400">
                                     Potensi: {{ $rankingInfo['potensi_weight'] }}%
                                 </div>
-                                <div class="text-sm font-bold text-indigo-600 dark:text-indigo-400">
+                                <div class="text-sm font-bold text-blue-600 dark:text-blue-400">
                                     Kompetensi: {{ $rankingInfo['kompetensi_weight'] }}%
                                 </div>
                             </div>

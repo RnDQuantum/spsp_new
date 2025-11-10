@@ -9,7 +9,7 @@ use App\Models\Participant;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
-#[Layout('components.layouts.app', ['title' => 'Ringkasan Assessment'])]
+#[Layout('components.layouts.app', ['title' => 'Ringkasan Hasil Asesmen'])]
 class RingkasanAssessment extends Component
 {
     // Participant info

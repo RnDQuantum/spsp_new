@@ -4,7 +4,7 @@
         <!-- Header - DARK MODE READY -->
         <div class="border-b-4 border-black py-4 bg-gray-300 dark:bg-gray-600">
             <h1 class="text-center text-2xl font-bold uppercase tracking-wide text-black dark:text-white">
-                RINGKASAN KOMPETENSI
+                RINGKASAN KOMPETENSI MANAJERIAL
             </h1>
         </div>
 
@@ -42,7 +42,8 @@
                     <td class="py-1 font-semibold text-black dark:text-gray-200">Tanggal Tes</td>
                     <td class="py-1 text-black dark:text-gray-200">:</td>
                     <td class="py-1 text-black dark:text-gray-200">
-                        {{ $participant->assessmentEvent->start_date?->format('d F Y') ?? '-' }}</td>
+                        {{ \Carbon\Carbon::parse($participant->assessment_date)->translatedFormat('d F Y') ?? ($participant->assessmentEvent->start_date?->format('d F Y') ?? '-') }}
+                    </td>
                 </tr>
             </table>
         </div>
@@ -131,7 +132,7 @@ bg-gray-500 dark:bg-gray-500 font-bold text-white
 
         <!-- Legend - DARK MODE READY -->
         <div class="px-6 pb-6 bg-white dark:bg-gray-800">
-            <div class="text-sm font-bold mb-2 text-black dark:text-white">Note :</div>
+            <div class="text-sm font-bold mb-2 text-black dark:text-white">Catatan :</div>
             <div class="grid grid-cols-1 gap-2 text-sm text-black dark:text-gray-200">
                 <div class="flex items-center gap-3">
                     <div

@@ -2,7 +2,7 @@
     <!-- Header Section -->
     <div class="border-b-4 border-black dark:border-gray-600 py-4 bg-white dark:bg-gray-800">
         <h1 class="text-center text-2xl font-bold uppercase tracking-wide text-black dark:text-white">
-            RANKING REKAP SKOR PENILAIAN AKHIR ASSESSMENT
+            REKAP PERINGKAT SKOR PENILAIAN AKHIR ASESMEN
         </h1>
 
         <!-- Event Filter -->
@@ -46,7 +46,7 @@
         <div class="flex justify-between items-center mb-4 mt-6">
             <div class="flex items-center gap-3">
                 <label for="perPage" class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Show:
+                    Tampilkan:
                 </label>
                 <select wire:model.live="perPage" id="perPage"
                     class="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
@@ -54,60 +54,60 @@
                     <option value="25">25</option>
                     <option value="50">50</option>
                     <option value="100">100</option>
-                    <option value="all">All</option>
+                    <option value="all">Semua</option>
                 </select>
-                <span class="text-sm text-gray-600 dark:text-gray-400">entries</span>
+                <span class="text-sm text-gray-600 dark:text-gray-400">Data</span>
             </div>
 
             @if (isset($rows) && $rows)
                 <div class="text-sm text-gray-600 dark:text-gray-400">
-                    Showing
+                    Menampilkan
                     <span class="font-semibold text-gray-900 dark:text-gray-100">
                         {{ $rows->firstItem() ?? 0 }}
                     </span>
-                    to
+                    -
                     <span class="font-semibold text-gray-900 dark:text-gray-100">
                         {{ $rows->lastItem() ?? 0 }}
                     </span>
-                    of
+                    dari
                     <span class="font-semibold text-gray-900 dark:text-gray-100">
                         {{ $rows->total() }}
                     </span>
-                    results
+                    data
                 </div>
             @endif
         </div>
 
         <table class="min-w-full border-2 border-black dark:border-gray-600 text-sm text-gray-900 dark:text-gray-100">
             <thead>
-                <tr class="bg-cyan-200 dark:bg-cyan-700">
-                    <th class="border-2 border-black dark:border-gray-600 px-2 py-2 text-center align-middle"
+                <tr class="bg-gray-300 dark:bg-gray-600">
+                    <th class="border-2 border-black dark:border-gray-500 px-2 py-2 text-center align-middle"
                         rowspan="2">NO</th>
-                    <th class="border-2 border-black dark:border-gray-600 px-2 py-2 text-center align-middle"
+                    <th class="border-2 border-black dark:border-gray-500 px-2 py-2 text-center align-middle"
                         rowspan="2">NAMA</th>
-                    <th class="border-2 border-black dark:border-gray-600 px-2 py-2 text-center" colspan="2">SKOR
+                    <th class="border-2 border-black dark:border-gray-500 px-2 py-2 text-center" colspan="2">SKOR
                         INDIVIDU</th>
-                    <th class="border-2 border-black dark:border-gray-600 px-2 py-2 text-center align-middle"
+                    <th class="border-2 border-black dark:border-gray-500 px-2 py-2 text-center align-middle"
                         rowspan="2">TOTAL SKOR
                     </th>
-                    <th class="border-2 border-black dark:border-gray-600 px-2 py-2 text-center" colspan="2">SKOR
+                    <th class="border-2 border-black dark:border-gray-500 px-2 py-2 text-center" colspan="2">SKOR
                         PENILAIAN AKHIR</th>
-                    <th class="border-2 border-black dark:border-gray-600 px-2 py-2 text-center align-middle"
+                    <th class="border-2 border-black dark:border-gray-500 px-2 py-2 text-center align-middle"
                         rowspan="2">TOTAL SKOR
                     </th>
-                    <th class="border-2 border-black dark:border-gray-600 px-2 py-2 text-center align-middle"
+                    <th class="border-2 border-black dark:border-gray-500 px-2 py-2 text-center align-middle"
                         rowspan="2">GAP</th>
-                    <th class="border-2 border-black dark:border-gray-600 px-2 py-2 text-center align-middle"
+                    <th class="border-2 border-black dark:border-gray-500 px-2 py-2 text-center align-middle"
                         rowspan="2">KESIMPULAN
                     </th>
                 </tr>
-                <tr class="bg-cyan-200 dark:bg-cyan-700">
-                    <th class="border-2 border-black dark:border-gray-600 px-2 py-2 text-center">PSYCHOLOGY</th>
-                    <th class="border-2 border-black dark:border-gray-600 px-2 py-2 text-center">KOMPETENSI MANAGERIAL
+                <tr class="bg-gray-300 dark:bg-gray-600">
+                    <th class="border-2 border-black dark:border-gray-500 px-2 py-2 text-center">PSYCHOLOGY</th>
+                    <th class="border-2 border-black dark:border-gray-500 px-2 py-2 text-center">KOMPETENSI MANAGERIAL
                     </th>
-                    <th class="border-2 border-black dark:border-gray-600 px-2 py-2 text-center">PSYCHOLOGY
+                    <th class="border-2 border-black dark:border-gray-500 px-2 py-2 text-center">PSYCHOLOGY
                         {{ $potensiWeight }}%</th>
-                    <th class="border-2 border-black dark:border-gray-600 px-2 py-2 text-center">KOMPETENSI MANAGERIAL
+                    <th class="border-2 border-black dark:border-gray-500 px-2 py-2 text-center">KOMPETENSI MANAGERIAL
                         {{ $kompetensiWeight }}%</th>
                 </tr>
             </thead>
@@ -159,10 +159,9 @@
     <!-- Standard & Threshold Info Box -->
     @if ($standardInfo)
         <div class="px-6 pb-6 bg-white dark:bg-gray-900">
-            <div
-                class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900 dark:to-indigo-900 border-2 border-blue-300 dark:border-blue-600 rounded-lg p-4 shadow-sm">
+            <div class="bg-white dark:bg-gray-800 rounded-lg p-3">
                 <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2">
-                    <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor"
+                    <svg class="w-5 h-5 text-gray-900 dark:text-gray-100" fill="none" stroke="currentColor"
                         viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z">
@@ -171,7 +170,7 @@
                     Informasi Standar
                     <span x-data
                         x-text="$wire.tolerancePercentage > 0 ? '(Toleransi -' + $wire.tolerancePercentage + '%)' : '(Tanpa Toleransi)'"
-                        class="text-sm font-normal text-blue-600 dark:text-blue-400"></span>
+                        class="text-sm font-normal text-gray-900 dark:text-gray-100"></span>
                 </h3>
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -182,35 +181,37 @@
                         </h4>
 
                         <!-- Psychology Standard -->
-                        <div class="bg-white dark:bg-gray-800 border-2 border-blue-300 dark:border-blue-600 rounded-lg p-4">
+                        <div
+                            class="bg-white dark:bg-gray-800 border-1 border-gray-400 dark:border-gray-300 rounded-lg p-3">
                             <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Psychology</div>
-                            <div class="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                            <div class="text-2xl font-bold text-gray-900 dark:text-gray-100">
                                 {{ number_format($standardInfo['psy_original_standard'], 2) }}
                             </div>
                             <div class="text-xs text-gray-500 dark:text-gray-400 mt-2">
                                 Bobot {{ $potensiWeight }}% = <span
-                                    class="font-semibold text-gray-900 dark:text-gray-100">{{ number_format($standardInfo['psy_original_standard'] * $potensiWeight / 100, 2) }}</span>
+                                    class="font-semibold text-gray-900 dark:text-gray-100">{{ number_format(($standardInfo['psy_original_standard'] * $potensiWeight) / 100, 2) }}</span>
                             </div>
                         </div>
 
                         <!-- Kompetensi Standard -->
-                        <div class="bg-white dark:bg-gray-800 border-2 border-blue-300 dark:border-blue-600 rounded-lg p-4">
+                        <div
+                            class="bg-white dark:bg-gray-800 border-1 border-gray-400 dark:border-gray-300 rounded-lg p-3">
                             <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Kompetensi</div>
-                            <div class="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                            <div class="text-2xl font-bold text-gray-900 dark:text-gray-100">
                                 {{ number_format($standardInfo['mc_original_standard'], 2) }}
                             </div>
                             <div class="text-xs text-gray-500 dark:text-gray-400 mt-2">
                                 Bobot {{ $kompetensiWeight }}% = <span
-                                    class="font-semibold text-gray-900 dark:text-gray-100">{{ number_format($standardInfo['mc_original_standard'] * $kompetensiWeight / 100, 2) }}</span>
+                                    class="font-semibold text-gray-900 dark:text-gray-100">{{ number_format(($standardInfo['mc_original_standard'] * $kompetensiWeight) / 100, 2) }}</span>
                             </div>
                         </div>
 
                         <!-- Total Standard -->
                         <div
-                            class="bg-white dark:bg-gray-800 border-2 border-blue-300 dark:border-blue-600 rounded-lg p-4">
+                            class="bg-white dark:bg-gray-800 border-1 border-gray-400 dark:border-gray-300 rounded-lg p-3">
                             <div class="text-xs text-gray-600 dark:text-gray-300 mb-1 font-semibold">TOTAL STANDAR
                             </div>
-                            <div class="text-3xl font-bold text-blue-600 dark:text-blue-400">
+                            <div class="text-3xl font-bold text-gray-900 dark:text-gray-100">
                                 {{ number_format($standardInfo['total_original_standard'], 2) }}
                             </div>
                         </div>
@@ -222,14 +223,14 @@
                             Standar Adjusted
                             <span x-data
                                 x-text="$wire.tolerancePercentage > 0 ? '(Toleransi -' + $wire.tolerancePercentage + '%)' : ''"
-                                class="text-indigo-600 dark:text-indigo-400"></span>
+                                class="text-gray-900 dark:text-gray-100"></span>
                         </h4>
 
                         <!-- Psychology Adjusted -->
                         <div
-                            class="bg-white dark:bg-gray-800 border-2 border-blue-300 dark:border-blue-600 rounded-lg p-4">
+                            class="bg-white dark:bg-gray-800 border-1 border-gray-400 dark:border-gray-300 rounded-lg p-3">
                             <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Psychology</div>
-                            <div class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
+                            <div class="text-2xl font-bold text-gray-900 dark:text-gray-100">
                                 {{ number_format($standardInfo['psy_adjusted_standard'], 2) }}
                             </div>
                             <div class="text-xs text-gray-500 dark:text-gray-400 mt-2">
@@ -240,9 +241,9 @@
 
                         <!-- Kompetensi Adjusted -->
                         <div
-                            class="bg-white dark:bg-gray-800 border-2 border-blue-300 dark:border-blue-600 rounded-lg p-4">
+                            class="bg-white dark:bg-gray-800 border-1 border-gray-400 dark:border-gray-300 rounded-lg p-3">
                             <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Kompetensi</div>
-                            <div class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
+                            <div class="text-2xl font-bold text-gray-900 dark:text-gray-100">
                                 {{ number_format($standardInfo['mc_adjusted_standard'], 2) }}
                             </div>
                             <div class="text-xs text-gray-500 dark:text-gray-400 mt-2">
@@ -253,10 +254,10 @@
 
                         <!-- Total Adjusted -->
                         <div
-                            class="bg-white dark:bg-gray-800 border-2 border-blue-300 dark:border-blue-600 rounded-lg p-4">
+                            class="bg-white dark:bg-gray-800 border-1 border-gray-400 dark:border-gray-300 rounded-lg p-3">
                             <div class="text-xs text-gray-600 dark:text-gray-300 mb-1 font-semibold">TOTAL STANDAR
                                 ADJUSTED</div>
-                            <div class="text-3xl font-bold text-indigo-600 dark:text-indigo-400">
+                            <div class="text-3xl font-bold text-gray-900 dark:text-gray-100">
                                 {{ number_format($standardInfo['total_standard'], 2) }}
                             </div>
                         </div>
@@ -293,7 +294,7 @@
                         <div class="text-sm {{ $textColor }} font-semibold leading-tight mb-2">
                             {{ $conclusion }}
                         </div>
-                        <div class="text-xs {{ $textColor }} font-medium">{{ $rangeText }}</div>
+                        {{-- <div class="text-xs {{ $textColor }} font-medium">{{ $rangeText }}</div> --}}
                     </div>
                 @endforeach
             </div>
@@ -313,11 +314,12 @@
                         <div class="text-sm text-gray-600 dark:text-gray-400">Total Peserta</div>
                     </div>
                     <div>
-                        <div class="text-lg font-bold text-green-600 dark:text-green-400">{{ $passingCount }}</div>
+                        <div class="text-lg font-bold text-gray-900 dark:text-gray-100">{{ $passingCount }}</div>
                         <div class="text-sm text-gray-600 dark:text-gray-400">Lulus</div>
                     </div>
                     <div>
-                        <div class="text-lg font-bold text-blue-600 dark:text-blue-400">{{ $passingPercentage }}%</div>
+                        <div class="text-lg font-bold text-gray-900 dark:text-gray-100">{{ $passingPercentage }}%
+                        </div>
                         <div class="text-sm text-gray-600 dark:text-gray-400">Tingkat Kelulusan</div>
                     </div>
                 </div>
@@ -326,21 +328,17 @@
             <!-- Keterangan Rentang Nilai -->
             <div class="mt-4 bg-blue-50 dark:bg-blue-900 border border-blue-200 dark:border-blue-600 rounded-lg p-3">
                 <div class="text-sm text-blue-800 dark:text-blue-200">
-                    <strong>Keterangan:</strong> Kesimpulan berdasarkan Gap (Total Weighted Individual - Total
+                    {{-- <strong>Keterangan:</strong> Kesimpulan berdasarkan Gap (Total Weighted Individual - Total
                     Weighted Standard)
                     <span x-data
                         x-text="$wire.tolerancePercentage > 0 ? 'dengan toleransi ' + $wire.tolerancePercentage + '%' : 'tanpa toleransi'"></span>.
-                    <br>
-                    <strong>Rumus:</strong>
+                    <br> --}}
                     <ul class="list-disc ml-6 mt-1">
-                        <li>Original Gap = Total Weighted Individual - Original Weighted Standard (Tolerance 0%)</li>
-                        <li>Adjusted Gap = Total Weighted Individual - Adjusted Weighted Standard (Tolerance dikurangi)
-                        </li>
-                        <li><strong>Di Atas Standar:</strong> Original Gap ≥ 0 (melebihi standar asli)</li>
-                        <li><strong>Memenuhi Standar:</strong> Adjusted Gap ≥ 0 (melebihi standar adjusted, di bawah
-                            standar
-                            asli)</li>
-                        <li><strong>Di Bawah Standar:</strong> Adjusted Gap < 0 (masih di bawah standar adjusted)</li>
+                        <li><strong>Di Atas Standar:</strong> ≥ Standar tanpa Toleransi (0%)</li>
+                        <li><strong>Memenuhi Standar:</strong> Masuk ke dalam <strong>Standar yang telah diberi
+                                oleransi</strong></li>
+                        <li><strong>Di Bawah Standar:</strong>
+                            < Standar maupun standar yang telah diberi toleransi</li>
                     </ul>
                 </div>
             </div>
@@ -367,7 +365,7 @@
                             }
                         }
                     }" x-init="$nextTick(() => refreshChart())"
-                        class="border border-gray-300 dark:border-gray-600 p-6 rounded-lg bg-gray-50 dark:bg-gray-800 transition-shadow duration-300 hover:shadow-xl">
+                        class="border border-gray-300 dark:border-gray-600 p-2 rounded-lg bg-gray-50 dark:bg-gray-800 transition-shadow duration-300 hover:shadow-xl">
                         <div wire:ignore>
                             <canvas id="conclusionPieChart" class="w-full h-full"></canvas>
                         </div>
@@ -403,12 +401,9 @@
 
                                         // Determine color based on conclusion
                                         $bgColor = match ($conclusion) {
-                                            'Di Atas Standar'
-                                                => 'bg-green-100 dark:bg-green-900 border-green-300 dark:border-green-600',
-                                            'Memenuhi Standar'
-                                                => 'bg-blue-100 dark:bg-blue-900 border-blue-300 dark:border-blue-600',
-                                            'Di Bawah Standar'
-                                                => 'bg-red-100 dark:bg-red-900 border-red-300 dark:border-red-600',
+                                            'Di Atas Standar' => 'bg-green-600 ',
+                                            'Memenuhi Standar' => 'bg-yellow-500 text-black font-bold',
+                                            'Di Bawah Standar' => 'bg-red-600',
                                             default
                                                 => 'bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600',
                                         };
@@ -471,6 +466,9 @@
                 backgroundColor: colors,
                 borderColor: '#ffffff',
                 borderWidth: 2,
+                datalabels: {
+                    display: false
+                },
                 // Hover effects
                 hoverBackgroundColor: colors.map(color => {
                     // Lighten color on hover
@@ -547,60 +545,60 @@
                         }
                     },
                     // Menggunakan chartjs-plugin-datalabels untuk label yang lebih jelas
-                    datalabels: {
-                        // Posisikan label di luar chart
-                        anchor: 'end',
-                        align: 'end',
-                        offset: 10,
+                    // datalabels: {
+                    //     // Posisikan label di luar chart
+                    //     anchor: 'end',
+                    //     align: 'end',
+                    //     offset: 10,
 
-                        // Style untuk background label
-                        backgroundColor: function(context) {
-                            return 'rgba(255, 255, 255, 0.95)';
-                        },
-                        borderColor: function(context) {
-                            return context.dataset.backgroundColor[context.dataIndex];
-                        },
-                        borderWidth: 2,
-                        borderRadius: 4,
+                    //     // Style untuk background label
+                    //     backgroundColor: function(context) {
+                    //         return 'rgba(255, 255, 255, 0.95)';
+                    //     },
+                    //     borderColor: function(context) {
+                    //         return context.dataset.backgroundColor[context.dataIndex];
+                    //     },
+                    //     borderWidth: 2,
+                    //     borderRadius: 4,
 
-                        // Style text
-                        color: '#000',
-                        font: {
-                            weight: 'bold',
-                            size: 13
-                        },
+                    //     // Style text
+                    //     color: '#000',
+                    //     font: {
+                    //         weight: 'bold',
+                    //         size: 13
+                    //     },
 
-                        // Padding di dalam box label
-                        padding: 6,
+                    //     // Padding di dalam box label
+                    //     padding: 6,
 
-                        // Formatter untuk menampilkan nilai dan persentase
-                        formatter: function(value, context) {
-                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                            const percentage = total > 0 ? ((value / total) * 100).toFixed(2) : '0.00';
+                    //     // Formatter untuk menampilkan nilai dan persentase
+                    //     formatter: function(value, context) {
+                    //         const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                    //         const percentage = total > 0 ? ((value / total) * 100).toFixed(2) : '0.00';
 
-                            // Skip label jika value = 0 (kecuali index pertama)
-                            if (value === 0 && context.dataIndex !== 0) {
-                                return '';
-                            }
+                    //         // Skip label jika value = 0 (kecuali index pertama)
+                    //         if (value === 0 && context.dataIndex !== 0) {
+                    //             return '';
+                    //         }
 
-                            return `${value} orang\n${percentage}%`;
-                        },
+                    //         return `${value} orang\n${percentage}%`;
+                    //     },
 
-                        // Tampilkan hanya jika value > 0 atau index pertama
-                        display: function(context) {
-                            return context.dataset.data[context.dataIndex] > 0 || context.dataIndex === 0;
-                        },
+                    //     // Tampilkan hanya jika value > 0 atau index pertama
+                    //     display: function(context) {
+                    //         return context.dataset.data[context.dataIndex] > 0 || context.dataIndex === 0;
+                    //     },
 
-                        // Style text alignment
-                        textAlign: 'center',
+                    //     // Style text alignment
+                    //     textAlign: 'center',
 
-                        // Tambahkan line connector dari chart ke label
-                        listeners: {
-                            enter: function(context) {
-                                // Optional: bisa tambahkan interaktivitas
-                            }
-                        }
-                    }
+                    //     // Tambahkan line connector dari chart ke label
+                    //     listeners: {
+                    //         enter: function(context) {
+                    //             // Optional: bisa tambahkan interaktivitas
+                    //         }
+                    //     }
+                    // }
                 }
             }
         };

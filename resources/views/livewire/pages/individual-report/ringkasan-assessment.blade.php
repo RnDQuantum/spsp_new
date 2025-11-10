@@ -4,7 +4,7 @@
         <!-- Header - DARK MODE READY -->
         <div class="border-b-4 border-black py-4 bg-gray-300 dark:bg-gray-600">
             <h1 class="text-center text-2xl font-bold uppercase tracking-wide text-black dark:text-white">
-                RINGKASAN HASIL ASSESSMENT
+                RINGKASAN HASIL ASESMEN
             </h1>
         </div>
     @endif
@@ -25,51 +25,42 @@
         <div class="p-6 bg-gray-100 dark:bg-gray-700">
             <table class="w-full text-sm text-gray-900 dark:text-gray-200">
                 <tr>
-                    <td class="py-2 font-semibold text-gray-900 dark:text-gray-200" style="width: 150px;">Nomor Tes</td>
-                    <td class="py-2 text-gray-900 dark:text-gray-200" style="width: 20px;">:</td>
-                    <td class="py-2 text-gray-900 dark:text-gray-200">{{ $participant->test_number }}</td>
+                    <td class="py-1 font-semibold text-gray-900 dark:text-gray-200" style="width: 150px;">Nomor Tes</td>
+                    <td class="py-1 text-gray-900 dark:text-gray-200" style="width: 20px;">:</td>
+                    <td class="py-1 text-gray-900 dark:text-gray-200">{{ $participant->test_number }}</td>
                 </tr>
                 <tr>
-                    <td class="py-2 font-semibold text-gray-900 dark:text-gray-200">Nomor SKB</td>
-                    <td class="py-2 text-gray-900 dark:text-gray-200">:</td>
-                    <td class="py-2 text-gray-900 dark:text-gray-200">{{ $participant->skb_number }}</td>
+                    <td class="py-1 font-semibold text-gray-900 dark:text-gray-200">Nomor SKB</td>
+                    <td class="py-1 text-gray-900 dark:text-gray-200">:</td>
+                    <td class="py-1 text-gray-900 dark:text-gray-200">{{ $participant->skb_number }}</td>
                 </tr>
                 <tr>
-                    <td class="py-2 font-semibold text-gray-900 dark:text-gray-200">Nama</td>
-                    <td class="py-2 text-gray-900 dark:text-gray-200">:</td>
-                    <td class="py-2 text-gray-900 dark:text-gray-200">{{ $participant->name }}</td>
+                    <td class="py-1 font-semibold text-gray-900 dark:text-gray-200">Nama</td>
+                    <td class="py-1 text-gray-900 dark:text-gray-200">:</td>
+                    <td class="py-1 text-gray-900 dark:text-gray-200">{{ $participant->name }}</td>
                 </tr>
-            </table>
-
-            <div class="mt-4"></div>
-
-            <table class="w-full text-sm text-gray-900 dark:text-gray-200">
                 <tr>
-                    <td class="py-2 font-semibold text-gray-900 dark:text-gray-200" style="width: 150px;">Formasi
+                    <td class="py-1 font-semibold text-gray-900 dark:text-gray-200" style="width: 150px;">Formasi
                         Jabatan
                     </td>
-                    <td class="py-2 text-gray-900 dark:text-gray-200" style="width: 20px;">:</td>
-                    <td class="py-2 text-gray-900 dark:text-gray-200">{{ $participant->positionFormation->name }}</td>
+                    <td class="py-1 text-gray-900 dark:text-gray-200" style="width: 20px;">:</td>
+                    <td class="py-1 text-gray-900 dark:text-gray-200">{{ $participant->positionFormation->name }}</td>
                 </tr>
-            </table>
-
-            <div class="mt-4"></div>
-
-            <table class="w-full text-sm text-gray-900 dark:text-gray-200">
                 <tr>
-                    <td class="py-2 font-semibold text-gray-900 dark:text-gray-200" style="width: 150px;">Standar
+                    <td class="py-1 font-semibold text-gray-900 dark:text-gray-200" style="width: 150px;">Standar
                         Penilaian
                     </td>
-                    <td class="py-2 text-gray-900 dark:text-gray-200" style="width: 20px;">:</td>
-                    <td class="py-2 text-gray-900 dark:text-gray-200">
+                    <td class="py-1 text-gray-900 dark:text-gray-200" style="width: 20px;">:</td>
+                    <td class="py-1 text-gray-900 dark:text-gray-200">
                         {{ $participant->positionFormation->template->name }}
                     </td>
                 </tr>
                 <tr>
-                    <td class="py-2 font-semibold text-gray-900 dark:text-gray-200">Tanggal Tes</td>
-                    <td class="py-2 text-gray-900 dark:text-gray-200">:</td>
-                    <td class="py-2 text-gray-900 dark:text-gray-200">
-                        {{ $participant->assessment_date->format('d F Y') }}
+                    <td class="font-semibold text-gray-900 dark:text-gray-200">Tanggal Tes</td>
+                    <td class=" text-gray-900 dark:text-gray-200">:</td>
+                    <td class=" text-gray-900 dark:text-gray-200">
+                        {{ \Carbon\Carbon::parse($participant->assessment_date)->translatedFormat('d F Y') }}
+
                     </td>
                 </tr>
             </table>

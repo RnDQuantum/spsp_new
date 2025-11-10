@@ -46,7 +46,8 @@
                 <!-- Chart Kompetensi (Nonagon) -->
                 <div class="bg-white dark:bg-gray-700 p-6 rounded-lg shadow border border-gray-200 dark:border-gray-600"
                     wire:ignore>
-                    <h3 class="text-lg text-center font-semibold text-gray-800 dark:text-white mb-4">Managerial Potency
+                    <h3 class="text-lg text-center font-semibold text-gray-800 dark:text-white mb-4">Managerial
+                        Competency
                         Mapping (Rating)</h3>
                     <div class="relative" style="height: 600px;">
                         <canvas id="kompetensiChart-{{ $kompetensiChartId }}"></canvas>
@@ -250,10 +251,11 @@
                                 pointLabels: {
                                     color: colors.pointLabels,
                                     font: {
-                                        size: 12,
-                                        weight: '600'
+                                        size: 14,
+                                        weight: '400'
                                     },
-                                    z: 3 // Gunakan z-index 3 bukan 1000
+                                    z: 3,
+                                    padding: 16 // Gunakan z-index 3 bukan 1000
                                 },
                                 grid: {
                                     color: colors.grid,
@@ -438,10 +440,11 @@
                                 pointLabels: {
                                     color: colors.pointLabels,
                                     font: {
-                                        size: 12,
-                                        weight: '600'
+                                        size: 14,
+                                        weight: '400'
                                     },
-                                    z: 3 // Gunakan z-index 3 bukan 1000
+                                    z: 3,
+                                    padding: 16 // Gunakan z-index 3 bukan 1000
                                 },
                                 grid: {
                                     color: colors.grid,
@@ -625,10 +628,11 @@
                                 pointLabels: {
                                     color: colors.pointLabels,
                                     font: {
-                                        size: 12,
-                                        weight: '600'
+                                        size: 14,
+                                        weight: '400'
                                     },
-                                    z: 3 // Gunakan z-index 3 bukan 1000
+                                    z: 3,
+                                    padding: 16 // Gunakan z-index 3 bukan 1000
                                 },
                                 grid: {
                                     color: colors.grid,

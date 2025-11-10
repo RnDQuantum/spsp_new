@@ -6,7 +6,7 @@
             <div class="border-b-4 border-black py-3 bg-gray-300 dark:bg-gray-600">
                 <h1
                     class="text-center text-lg font-bold uppercase tracking-wide
-                           text-gray-900 dark:text-white">
+                           text-gray-900 dark:text-white italic">
                     MANAGERIAL COMPETENCY MAPPING
                 </h1>
                 <p
@@ -51,7 +51,7 @@
                             <th class="border border-black px-3 py-2 font-semibold 
                                    bg-gray-300 dark:bg-gray-600"
                                 rowspan="2">
-                                Atribut/Attribute</th>
+                                Atribut</th>
                             <th class="border border-black px-3 py-2 font-semibold 
                                    bg-gray-300 dark:bg-gray-600"
                                 rowspan="2">
@@ -72,37 +72,37 @@
                             <th class="border border-black px-3 py-2 font-semibold 
                                    bg-gray-300 dark:bg-gray-600"
                                 rowspan="2">
-                                Prosentase<br>Kesesuaian</th>
+                                Persentase<br>Kesesuaian</th>
                             <th class="border border-black px-3 py-2 font-semibold 
                                    bg-gray-300 dark:bg-gray-600"
                                 rowspan="2">
-                                Kesimpulan/Conclusion</th>
+                                Kesimpulan</th>
                         </tr>
                         <tr class="bg-sky-200 dark:bg-gray-700 text-gray-900 dark:text-white">
                             <th
                                 class="border border-black px-3 py-1 font-semibold 
                                    bg-gray-300 dark:bg-gray-600">
-                                Rating/<br>Level</th>
+                                Rating</th>
                             <th
                                 class="border border-black px-3 py-1 font-semibold 
                                    bg-gray-300 dark:bg-gray-600">
-                                Score</th>
+                                Skor</th>
                             <th
                                 class="border border-black px-3 py-1 font-semibold 
                                    bg-gray-300 dark:bg-gray-600">
-                                Rating/<br>Level</th>
+                                Rating</th>
                             <th
                                 class="border border-black px-3 py-1 font-semibold 
                                    bg-gray-300 dark:bg-gray-600">
-                                Score</th>
+                                Skor</th>
                             <th
                                 class="border border-black px-3 py-1 font-semibold 
                                    bg-gray-300 dark:bg-gray-600">
-                                Rating/<br>Level</th>
+                                Rating</th>
                             <th
                                 class="border border-black px-3 py-0 font-semibold 
                                    bg-gray-300 dark:bg-gray-600">
-                                Score</th>
+                                Skor</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -157,7 +157,7 @@
                                     {{ $percentage }}%
                                 </td>
                                 <td
-                                    class="border border-white px-3 py-2 text-center
+                                    class="border border-black px-3 py-2 text-center
                                 @php
 $c = trim(strtoupper($aspect['conclusion_text'])); @endphp
 
@@ -191,7 +191,7 @@ $c = trim(strtoupper($aspect['conclusion_text'])); @endphp
                                    text-gray-900 dark:text-white">
                                 {{ number_format($totalGapRating, 2) }}</td>
                             <td class="border border-black px-3 py-2 bg-black"></td>
-                            <td class="border border-white px-3 py-2 text-center font-bold
+                            <td class="border border-black px-3 py-2 text-center font-bold
                                 @php
 $c = trim(strtoupper($overallConclusion)); @endphp
                                 @if ($c === 'DI ATAS STANDAR') bg-green-600 text-white
@@ -207,7 +207,7 @@ $c = trim(strtoupper($overallConclusion)); @endphp
                         <tr class="font-bold bg-gray-300 dark:bg-gray-600">
                             <td class="border border-black px-3 py-2 text-center 
                                    text-gray-900 dark:text-white"
-                                colspan="3">Total Score</td>
+                                colspan="3">Total Skor</td>
                             <td class="border border-black px-3 py-2 bg-black"></td>
                             <td
                                 class="border border-black px-3 py-2 text-center 
@@ -224,7 +224,7 @@ $c = trim(strtoupper($overallConclusion)); @endphp
                                 class="border border-black px-3 py-2 text-center
                                    text-gray-900 dark:text-white">
                                 {{ number_format($totalGapScore, 2) }}</td>
-                            <td class="border border-white px-3 py-2 text-center font-bold
+                            <td class="border border-black px-3 py-2 text-center font-bold
                                 @php
 $c = trim(strtoupper($overallConclusion)); @endphp
                                 @if ($c === 'DI ATAS STANDAR') bg-green-600 text-white
@@ -256,7 +256,7 @@ $c = trim(strtoupper($overallConclusion)); @endphp
                                     d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z">
                                 </path>
                             </svg>
-                            Ranking Peserta - Kategori Kompetensi
+                            Peringkat Peserta - Kategori Kompetensi
                         </h3>
 
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -273,7 +273,7 @@ $c = trim(strtoupper($overallConclusion)); @endphp
                             <div
                                 class="bg-white dark:bg-gray-800 border-2 border-blue-300 dark:border-blue-600 rounded-lg p-4 text-center">
                                 <div class="text-sm text-gray-500 dark:text-gray-400 mb-2">Total Peserta</div>
-                                <div class="text-4xl font-bold text-indigo-600 dark:text-indigo-400">
+                                <div class="text-4xl font-bold text-blue-600 dark:text-blue-400">
                                     {{ $rankingInfo['total'] }}
                                 </div>
                                 <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
@@ -656,7 +656,7 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                                             stepSize: 1,
                                             color: colors.ticks,
                                             font: {
-                                                size: 11,
+                                                size: 14,
                                                 weight: 'bold'
                                             },
                                             backdropColor: colors.tickBg,
@@ -665,11 +665,12 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                                         },
                                         pointLabels: {
                                             font: {
-                                                size: 11,
-                                                weight: '600'
+                                                size: 14,
+                                                weight: '400'
                                             },
                                             color: colors.labels,
-                                            z: 3 // Tambahkan z-index
+                                            z: 3,
+                                            padding: 16 // Tambahkan z-index
                                         },
                                         grid: {
                                             color: colors.grid,
@@ -854,7 +855,7 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                                             stepSize: 20,
                                             color: colors.ticks,
                                             font: {
-                                                size: 11,
+                                                size: 14,
                                                 weight: 'bold'
                                             },
                                             backdropColor: colors.tickBg,
@@ -863,11 +864,12 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                                         },
                                         pointLabels: {
                                             font: {
-                                                size: 11,
-                                                weight: '600'
+                                                size: 14,
+                                                weight: '400'
                                             },
                                             color: colors.labels,
-                                            z: 3 // Tambahkan z-index
+                                            z: 3,
+                                            padding: 16 // Tambahkan z-index
                                         },
                                         grid: {
                                             color: colors.grid,

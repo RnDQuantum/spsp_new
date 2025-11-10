@@ -12,7 +12,7 @@ use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-#[Layout('components.layouts.app', ['title' => 'Ranking Rekap Skor Penilaian Akhir Assessment'])]
+#[Layout('components.layouts.app', ['title' => 'Rekap Peringkat Skor Penilaian Akhir Asesmen'])]
 class RekapRankingAssessment extends Component
 {
     use WithPagination;
@@ -38,17 +38,17 @@ class RekapRankingAssessment extends Component
     public array $conclusionConfig = [
         'Di Atas Standar' => [
             'chartColor' => '#16a34a',      // green-600
-            'tailwindClass' => 'bg-green-600 text-white',
+            'tailwindClass' => 'bg-green-600 text-white border-none',
             'rangeText' => 'Original Gap ≥ 0',
         ],
         'Memenuhi Standar' => [
             'chartColor' => '#facc15',      // yellow-400
-            'tailwindClass' => 'bg-yellow-400 text-gray-900',
+            'tailwindClass' => 'bg-yellow-400 text-gray-900 border-none',
             'rangeText' => 'Adjusted Gap ≥ 0',
         ],
         'Di Bawah Standar' => [
             'chartColor' => '#dc2626',      // red-600
-            'tailwindClass' => 'bg-red-600 text-white',
+            'tailwindClass' => 'bg-red-600 text-white border-none',
             'rangeText' => 'Adjusted Gap < 0',
         ],
     ];
@@ -324,10 +324,10 @@ class RekapRankingAssessment extends Component
             ->whereIn('aa.aspect_id', array_merge($activePotensiIds, $activeKompetensiIds)) // ✅ CRITICAL: Filter active only
             ->groupBy('aa.participant_id')
             ->selectRaw('aa.participant_id as participant_id')
-            ->selectRaw('SUM(CASE WHEN a.id IN ('.implode(',', $activePotensiIds ?: [0]).') THEN aa.individual_score ELSE 0 END) as potensi_individual_score')
-            ->selectRaw('SUM(CASE WHEN a.id IN ('.implode(',', $activePotensiIds ?: [0]).') THEN aa.standard_score ELSE 0 END) as potensi_standard_score')
-            ->selectRaw('SUM(CASE WHEN a.id IN ('.implode(',', $activeKompetensiIds ?: [0]).') THEN aa.individual_score ELSE 0 END) as kompetensi_individual_score')
-            ->selectRaw('SUM(CASE WHEN a.id IN ('.implode(',', $activeKompetensiIds ?: [0]).') THEN aa.standard_score ELSE 0 END) as kompetensi_standard_score')
+            ->selectRaw('SUM(CASE WHEN a.id IN (' . implode(',', $activePotensiIds ?: [0]) . ') THEN aa.individual_score ELSE 0 END) as potensi_individual_score')
+            ->selectRaw('SUM(CASE WHEN a.id IN (' . implode(',', $activePotensiIds ?: [0]) . ') THEN aa.standard_score ELSE 0 END) as potensi_standard_score')
+            ->selectRaw('SUM(CASE WHEN a.id IN (' . implode(',', $activeKompetensiIds ?: [0]) . ') THEN aa.individual_score ELSE 0 END) as kompetensi_individual_score')
+            ->selectRaw('SUM(CASE WHEN a.id IN (' . implode(',', $activeKompetensiIds ?: [0]) . ') THEN aa.standard_score ELSE 0 END) as kompetensi_standard_score')
             ->get();
 
         if ($aggregates->isEmpty()) {

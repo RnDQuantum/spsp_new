@@ -1,4 +1,4 @@
-<div class="mt-8 mb-8 px-6 border border-gray-300 shadow-2xl rounded-lg">
+<div class="mt-8 mb-8 px-6 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 shadow-2xl rounded-lg">
     <div class="mb-8">
         <h1 class="text-3xl text-center font-bold text-gray-900 dark:text-white mt-8">LAPORAN INDIVIDU</h1>
         <div class="text-center mt-4">
@@ -32,10 +32,10 @@
 
     {{-- Biodata Section --}}
     <div class="mb-8">
-        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">BIODATA PESERTA</h2>
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4 pl-5">BIODATA PESERTA</h2>
 
         <div
-            class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 flex flex-col md:flex-row md:items-start md:justify-between">
+            class="bg-white dark:bg-gray-800 rounded-lg p-6 flex flex-col md:flex-row md:items-start md:justify-between">
             {{-- Tabel Biodata --}}
             <div class="w-full md:w-2/3">
                 <table class="w-full border-collapse">
@@ -72,9 +72,10 @@
                             </td>
                         </tr>
                         <tr>
-                            <td class="py-1 font-medium text-gray-700 dark:text-gray-300">Tanggal Assessment</td>
+                            <td class="py-1 font-medium text-gray-700 dark:text-gray-300">Tanggal Asesmen</td>
                             <td class="py-1 text-gray-900 dark:text-white">
-                                {{ $participant->assessment_date->format('d F Y') }}
+                                {{ \Carbon\Carbon::parse($participant->assessment_date)->translatedFormat('d F Y') }}
+
                             </td>
                         </tr>
                     </tbody>
@@ -104,7 +105,7 @@
 
     {{-- Psychology Mapping Section --}}
     <div class="mb-8">
-        <h2 class="text-2xl text-center font-bold text-gray-900 dark:text-white mb-4">Pemetaan Psikologi</h2>
+        <h2 class="text-2xl text-center font-bold text-gray-900 dark:text-white italic">Psychology Mapping</h2>
         <livewire:pages.individual-report.general-psy-mapping :eventCode="$eventCode" :testNumber="$testNumber" :isStandalone="false"
             :showHeader="false" :showInfoSection="false" :showTable="true" :showRatingChart="true" :showScoreChart="true"
             :showRankingInfo="false" :key="'psy-mapping-' . $eventCode . '-' . $testNumber" />
@@ -125,7 +126,8 @@
 
     {{-- Managerial Competency Mapping Section --}}
     <div class="mb-8">
-        <h2 class="text-2xl text-center font-bold text-gray-900 dark:text-white mb-4">Managerial Competency Mapping</h2>
+        <h2 class="text-2xl text-center font-bold text-gray-900 dark:text-white italic">Managerial Competency
+            Mapping</h2>
         <livewire:pages.individual-report.general-mc-mapping :eventCode="$eventCode" :testNumber="$testNumber" :isStandalone="false"
             :showHeader="false" :showInfoSection="false" :showTable="true" :showRatingChart="true" :showScoreChart="true"
             :showRankingInfo="false" :key="'mc-mapping-' . $eventCode . '-' . $testNumber" />
@@ -138,9 +140,9 @@
             :isStandalone="false" :showHeader="false" :showPotensi="false" :showKompetensi="true" :key="'interpretation-kompetensi-' . $eventCode . '-' . $testNumber" />
     </div>
 
-    {{-- Ringkasan Assessment Section - Table Only --}}
+    {{-- Ringkasan Asesmen Section - Table Only --}}
     <div class="mb-8">
-        <h2 class="text-2xl text-center font-bold text-gray-900 dark:text-white mb-4">Ringkasan Hasil Assessment</h2>
+        <h2 class="text-2xl text-center font-bold text-gray-900 dark:text-white mb-4">Ringkasan Hasil Asesmen</h2>
         <livewire:pages.individual-report.ringkasan-assessment :eventCode="$eventCode" :testNumber="$testNumber" :isStandalone="false"
             :showHeader="false" :showBiodata="false" :showInfoSection="false" :showTable="true" :key="'ringkasan-assessment-' . $eventCode . '-' . $testNumber" />
     </div>

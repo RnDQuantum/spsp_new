@@ -282,7 +282,7 @@
                                 ])>
                                 <div class="flex items-start gap-2">
                                     <i class="fa-solid fa-circle-dot text-xs mt-0.5 flex-shrink-0"></i>
-                                    <span class="flex-1 leading-tight">Ringkasan Managerial Potency Mapping</span>
+                                    <span class="flex-1 leading-tight">Ringkasan Pemetaan Kompetensi Manajerial</span>
                                 </div>
                             </a>
                         @else
@@ -290,7 +290,7 @@
                                 class="block px-3 py-2 text-xs rounded-lg transition-all duration-200 text-gray-400 dark:text-gray-600 cursor-not-allowed">
                                 <div class="flex items-start gap-2">
                                     <i class="fa-solid fa-circle-dot text-xs mt-0.5 flex-shrink-0"></i>
-                                    <span class="flex-1 leading-tight">Ringkasan Managerial Potency Mapping</span>
+                                    <span class="flex-1 leading-tight">Ringkasan Pemetaan Kompetensi Manajerial</span>
                                 </div>
                             </span>
                         @endif
@@ -307,7 +307,7 @@
                                 ])>
                                 <div class="flex items-start gap-2">
                                     <i class="fa-solid fa-circle-dot text-xs mt-0.5 flex-shrink-0"></i>
-                                    <span class="flex-1 leading-tight">Ringkasan Hasil Assessment Individu</span>
+                                    <span class="flex-1 leading-tight">Ringkasan Hasil Asesmen Individu</span>
                                 </div>
                             </a>
                         @else
@@ -315,7 +315,7 @@
                                 class="block px-3 py-2 text-xs rounded-lg transition-all duration-200 text-gray-400 dark:text-gray-600 cursor-not-allowed">
                                 <div class="flex items-start gap-2">
                                     <i class="fa-solid fa-circle-dot text-xs mt-0.5 flex-shrink-0"></i>
-                                    <span class="flex-1 leading-tight">Ringkasan Hasil Assessment Individu</span>
+                                    <span class="flex-1 leading-tight">Ringkasan Hasil Asesmen Individu</span>
                                 </div>
                             </span>
                         @endif
@@ -383,7 +383,7 @@
                             ])>
                             <div class="flex items-start gap-2">
                                 <i class="fa-solid fa-circle-dot text-xs mt-0.5 flex-shrink-0"></i>
-                                <span class="flex-1 leading-tight">Ranking Psychology Mapping</span>
+                                <span class="flex-1 leading-tight">Peringkat Pemetaan Psikologi</span>
                             </div>
                         </a>
                         <a wire:navigate href="{{ route('ranking-mc-mapping') }}" role="menuitem"
@@ -396,7 +396,7 @@
                             ])>
                             <div class="flex items-start gap-2">
                                 <i class="fa-solid fa-circle-dot text-xs mt-0.5 flex-shrink-0"></i>
-                                <span class="flex-1 leading-tight">Ranking Managerial Competency Mapping</span>
+                                <span class="flex-1 leading-tight">Peringkat Pemetaan Kompetensi Manajerial</span>
                             </div>
                         </a>
                         <a wire:navigate href="{{ route('rekap-ranking-assessment') }}" role="menuitem"
@@ -409,7 +409,7 @@
                             ])>
                             <div class="flex items-start gap-2">
                                 <i class="fa-solid fa-circle-dot text-xs mt-0.5 flex-shrink-0"></i>
-                                <span class="flex-1 leading-tight">Ranking Ringkasan Hasil Assessment</span>
+                                <span class="flex-1 leading-tight">Ranking Ringkasan Hasil Asesmen</span>
                             </div>
                         </a>
                         <a wire:navigate href="{{ route('statistic') }}" role="menuitem"

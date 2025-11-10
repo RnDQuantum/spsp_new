@@ -9,7 +9,7 @@ use App\Models\Participant;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
-#[Layout('components.layouts.app', ['title' => 'Ringkasan Kompetensi'])]
+#[Layout('components.layouts.app', ['title' => 'Ringkasan Kompetensi Manajerial'])]
 class RingkasanMcMapping extends Component
 {
     public ?Participant $participant = null;
@@ -62,7 +62,7 @@ class RingkasanMcMapping extends Component
             ->orderBy('aspect_id')
             ->get();
 
-        $this->aspectsData = $aspectAssessments->map(fn ($assessment, $index) => [
+        $this->aspectsData = $aspectAssessments->map(fn($assessment, $index) => [
             'number' => $index + 1,
             'name' => $assessment->aspect->name,
             'individual_rating' => $assessment->individual_rating,

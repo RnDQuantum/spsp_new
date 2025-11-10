@@ -197,7 +197,7 @@
     @if ($showHeader)
         <div class="border-b-4 border-black dark:border-gray-300 py-3 bg-gray-300 dark:bg-gray-600">
             <h1 class="text-center text-lg font-bold uppercase tracking-wide text-black dark:text-white">
-                GENERAL MATCHING - ASPEK PSIKOLOGI
+                <i>GENERAL MATCHING</i> - ASPEK PSIKOLOGI
             </h1>
         </div>
     @endif
@@ -232,19 +232,21 @@
                 <div class="grid grid-cols-3">
                     <div class="px-4 py-2 text-sm text-black dark:text-gray-200">Tanggal Tes</div>
                     <div class="px-4 py-2 text-sm col-span-2 text-black dark:text-gray-200">:
-                        {{ $participant->assessment_date->format('d F Y') }}</div>
+                        {{-- {{ $participant->assessment_date->format('d F Y') }}</div> --}}
+                        {{ \Carbon\Carbon::parse($participant->assessment_date)->translatedFormat('d F Y') }}
+                    </div>
                 </div>
             </div>
 
             <!-- Right Column - JOB PERSON MATCH -->
             <div class="flex flex-col">
                 <div class="grid grid-cols-2 border-b border-gray-300 dark:border-gray-600">
-                    <div class="px-4 py-2 text-sm text-black dark:text-gray-200">Standar/Standard</div>
+                    <div class="px-4 py-2 text-sm text-black dark:text-gray-200">Standar Penilaian</div>
                     <div class="px-4 py-2 text-sm text-black dark:text-gray-200">:
                         {{ $participant->positionFormation->template->name }}</div>
                 </div>
                 <div class="grid grid-cols-2 border-b border-gray-300 dark:border-gray-600">
-                    <div class="px-4 py-2 text-sm text-black dark:text-gray-200">Event</div>
+                    <div class="px-4 py-2 text-sm text-black dark:text-gray-200">Kegiatan</div>
                     <div class="px-4 py-2 text-sm text-black dark:text-gray-200">:
                         {{ $participant->assessmentEvent->name }}
                     </div>
@@ -277,7 +279,7 @@
                         rowspan="3">ASPEK</th>
                     <th class="border border-gray-400 dark:border-gray-800 px-2 py-2 text-center text-sm font-bold text-black dark:text-white"
                         rowspan="3">
-                        STANDARD</th>
+                        STANDAR</th>
                     <th class="border border-gray-400 dark:border-gray-800 px-2 py-2 text-center text-xs font-bold text-black dark:text-white range-scale"
                         colspan="5">RATING</th>
                 </tr>

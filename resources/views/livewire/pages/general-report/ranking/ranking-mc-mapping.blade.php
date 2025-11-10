@@ -2,7 +2,7 @@
     <!-- Header Section -->
     <div class="border-b-4 border-black dark:border-gray-600 py-4 bg-white dark:bg-gray-800">
         <h1 class="text-center text-2xl font-bold uppercase tracking-wide text-black dark:text-white">
-            RANKING SKOR GENERAL COMPETENCY MAPPING
+            PERINGKAT SKOR <i>MANAGERIAL COMPETENCY MAPPING</i>
         </h1>
 
         <!-- Event Filter -->
@@ -32,7 +32,7 @@
         <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
                 <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Show entries:
+                    Lihat Data:
                 </label>
                 <select wire:model.live="perPage"
                     class="border-2 border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
@@ -46,19 +46,19 @@
 
             @if ($rankings && $rankings->total() > 0)
                 <div class="text-sm text-gray-600 dark:text-gray-400">
-                    Showing
+                    Menampilkan
                     <span class="font-semibold text-gray-900 dark:text-gray-100">
                         {{ $rankings->firstItem() ?? 0 }}
                     </span>
-                    to
+                    -
                     <span class="font-semibold text-gray-900 dark:text-gray-100">
                         {{ $rankings->lastItem() ?? 0 }}
                     </span>
-                    of
+                    dari
                     <span class="font-semibold text-gray-900 dark:text-gray-100">
                         {{ $rankings->total() }}
                     </span>
-                    entries
+                    Data
                 </div>
             @endif
         </div>
@@ -70,7 +70,8 @@
             class="min-w-full border-2 border-black dark:border-gray-600 text-sm text-gray-900 dark:text-gray-100 mt-6">
             <thead>
                 <tr class="bg-gray-200 dark:bg-gray-700">
-                    <th class="border-2 border-black dark:border-gray-600 px-3 py-3 text-center" rowspan="2">Ranking
+                    <th class="border-2 border-black dark:border-gray-600 px-3 py-3 text-center" rowspan="2">
+                        Peringkat
                     </th>
                     <th class="border-2 border-black dark:border-gray-600 px-3 py-3 text-center" rowspan="2">NIP</th>
                     <th class="border-2 border-black dark:border-gray-600 px-3 py-3 text-center" rowspan="2">Nama
@@ -85,17 +86,17 @@
                     </th>
                     <th class="border-2 border-black dark:border-gray-600 px-3 py-3 text-center" colspan="2">Gap</th>
                     <th class="border-2 border-black dark:border-gray-600 px-3 py-3 text-center" rowspan="2">
-                        Prosentase<br>Kesesuaian</th>
+                        Persentase<br>Kesesuaian</th>
                     <th class="border-2 border-black dark:border-gray-600 px-3 py-3 text-center" rowspan="2">
-                        Kesimpulan/Conclusion</th>
+                        Kesimpulan</th>
                 </tr>
                 <tr class="bg-gray-200 dark:bg-gray-700">
-                    <th class="border-2 border-black dark:border-gray-600 px-3 py-1 font-semibold">Rating/<br>Level</th>
-                    <th class="border-2 border-black dark:border-gray-600 px-3 py-1 font-semibold">Score</th>
-                    <th class="border-2 border-black dark:border-gray-600 px-3 py-1 font-semibold">Rating/<br>Level</th>
-                    <th class="border-2 border-black dark:border-gray-600 px-3 py-1 font-semibold">Score</th>
-                    <th class="border-2 border-black dark:border-gray-600 px-3 py-1 font-semibold">Rating/<br>Level</th>
-                    <th class="border-2 border-black dark:border-gray-600 px-3 py-1 font-semibold">Score</th>
+                    <th class="border-2 border-black dark:border-gray-600 px-3 py-1 font-semibold">Rating</th>
+                    <th class="border-2 border-black dark:border-gray-600 px-3 py-1 font-semibold">Skor</th>
+                    <th class="border-2 border-black dark:border-gray-600 px-3 py-1 font-semibold">Rating</th>
+                    <th class="border-2 border-black dark:border-gray-600 px-3 py-1 font-semibold">Skor</th>
+                    <th class="border-2 border-black dark:border-gray-600 px-3 py-1 font-semibold">Rating</th>
+                    <th class="border-2 border-black dark:border-gray-600 px-3 py-1 font-semibold">Skor</th>
                 </tr>
             </thead>
             <tbody>
@@ -158,11 +159,10 @@ $c = trim(strtoupper($row['conclusion'])); @endphp
 
     <!-- Standard & Threshold Info Box -->
     @if ($standardInfo)
-        <div class="px-6 pb-6 bg-white dark:bg-gray-900">
-            <div
-                class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900 dark:to-indigo-900 border-2 border-blue-300 dark:border-blue-600 rounded-lg p-4 shadow-sm">
+        <div class="px-6 pb-6">
+            <div class="rounded-lg p-4 shadow-sm">
                 <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2">
-                    <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor"
+                    <svg class="w-5 h-5 text-black dark:text-gray-200" fill="none" stroke="currentColor"
                         viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z">
@@ -171,25 +171,24 @@ $c = trim(strtoupper($row['conclusion'])); @endphp
                     Informasi Standar
                     <span x-data
                         x-text="$wire.tolerancePercentage > 0 ? '(Toleransi -' + $wire.tolerancePercentage + '%)' : '(Tanpa Toleransi)'"
-                        class="text-sm font-normal text-blue-600 dark:text-blue-400"></span>
+                        class="text-sm font-normal text-black dark:text-gray-200"></span>
                 </h3>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <!-- Original Standard -->
-                    <div class="bg-white dark:bg-gray-800 border border-blue-200 dark:border-blue-600 rounded-lg p-3">
-                        <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Standar Original</div>
+                    <div class="bg-white dark:bg-gray-800 border-1 border-gray-400 dark:border-gray-300 rounded-lg p-3">
+                        <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Standar</div>
                         <div class="text-2xl font-bold text-gray-900 dark:text-gray-100">
                             {{ number_format($standardInfo['original_standard'], 2) }}</div>
                     </div>
 
                     <!-- Adjusted Standard -->
-                    <div
-                        class="bg-white dark:bg-gray-800 border border-indigo-300 dark:border-indigo-600 rounded-lg p-3">
-                        <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Standar Adjusted
+                    <div class="bg-white dark:bg-gray-800 border-1 border-gray-400 dark:border-gray-300 rounded-lg p-3">
+                        <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Standar yang diberi Toleransi
                             <span x-data
                                 x-text="$wire.tolerancePercentage > 0 ? '(-' + $wire.tolerancePercentage + '%)' : ''"></span>
                         </div>
-                        <div class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
+                        <div class="text-2xl font-bold text-gray-900 dark:text-gray-100">
                             {{ number_format($standardInfo['adjusted_standard'], 2) }}</div>
                     </div>
                 </div>
@@ -215,13 +214,13 @@ $c = trim(strtoupper($row['conclusion'])); @endphp
                         // Determine colors based on conclusion (same as table labels)
                         $c = trim(strtoupper($conclusion));
                         if ($c === 'DI ATAS STANDAR') {
-                            $bgColor = 'bg-green-600';
+                            $bgColor = 'bg-green-600 border-none';
                             $textColor = 'text-white';
                         } elseif ($c === 'MEMENUHI STANDAR') {
-                            $bgColor = 'bg-yellow-400';
+                            $bgColor = 'bg-yellow-400 border-none';
                             $textColor = 'text-gray-900';
                         } elseif ($c === 'DI BAWAH STANDAR') {
-                            $bgColor = 'bg-red-600';
+                            $bgColor = 'bg-red-600 border-none';
                             $textColor = 'text-white';
                         } else {
                             $bgColor = 'bg-gray-100 border-gray-300';
@@ -235,7 +234,7 @@ $c = trim(strtoupper($row['conclusion'])); @endphp
                         <div class="text-sm {{ $textColor }} font-semibold leading-tight mb-2">
                             {{ $conclusion }}
                         </div>
-                        <div class="text-xs {{ $textColor }} font-medium">{{ $rangeText }}</div>
+                        {{-- <div class="text-xs {{ $textColor }} font-medium">{{ $rangeText }}</div> --}}
                     </div>
                 @endforeach
             </div>
@@ -255,11 +254,11 @@ $c = trim(strtoupper($row['conclusion'])); @endphp
                         <div class="text-sm text-gray-600 dark:text-gray-300">Total Peserta</div>
                     </div>
                     <div>
-                        <div class="text-lg font-bold text-green-600 dark:text-green-400">{{ $passingCount }}</div>
+                        <div class="text-lg font-bold text-gray-900 dark:text-gray-100">{{ $passingCount }}</div>
                         <div class="text-sm text-gray-600 dark:text-gray-300">Lulus</div>
                     </div>
                     <div>
-                        <div class="text-lg font-bold text-blue-600 dark:text-blue-400">{{ $passingPercentage }}%
+                        <div class="text-lg font-bold text-gray-900 dark:text-gray-100">{{ $passingPercentage }}%
                         </div>
                         <div class="text-sm text-gray-600 dark:text-gray-300">Tingkat Kelulusan</div>
                     </div>
@@ -269,19 +268,16 @@ $c = trim(strtoupper($row['conclusion'])); @endphp
             <!-- Keterangan Rentang Nilai -->
             <div class="mt-4 bg-blue-50 dark:bg-blue-900 border border-blue-200 dark:border-blue-600 rounded-lg p-3">
                 <div class="text-sm text-blue-800 dark:text-blue-200">
-                    <strong>Keterangan:</strong> Kesimpulan berdasarkan Gap (Individual Score - Standard)
+                    {{-- <strong>Keterangan:</strong> Kesimpulan berdasarkan Gap (Individual Score - Standard)
                     <span x-data
                         x-text="$wire.tolerancePercentage > 0 ? 'dengan toleransi ' + $wire.tolerancePercentage + '%' : 'tanpa toleransi'"></span>.
-                    <br>
-                    <strong>Rumus:</strong>
+                    <br> --}}
                     <ul class="list-disc ml-6 mt-1">
-                        <li>Original Gap = Individual Score - Original Standard (Tolerance 0%)</li>
-                        <li>Adjusted Gap = Individual Score - Adjusted Standard (Tolerance dikurangi)</li>
-                        <li><strong>Di Atas Standar:</strong> Original Gap ≥ 0 (melebihi standar asli)</li>
-                        <li><strong>Memenuhi Standar:</strong> Adjusted Gap ≥ 0 (melebihi standar adjusted, di bawah
-                            standar
-                            asli)</li>
-                        <li><strong>Di Bawah Standar:</strong> Adjusted Gap < 0 (masih di bawah standar adjusted)</li>
+                        <li><strong>Di Atas Standar:</strong> ≥ Standar tanpa Toleransi (0%)</li>
+                        <li><strong>Memenuhi Standar:</strong> Masuk ke dalam <strong>Standar yang telah diberi
+                                oleransi</strong></li>
+                        <li><strong>Di Bawah Standar:</strong>
+                            < Standar maupun standar yang telah diberi toleransi</li>
                     </ul>
                 </div>
             </div>
@@ -292,14 +288,15 @@ $c = trim(strtoupper($row['conclusion'])); @endphp
     @if (!empty($conclusionSummary))
         <div class="mt-8 border-t-2 border-black dark:border-gray-600 pt-6 bg-white dark:bg-gray-900">
             <div class="px-6 pb-6">
-                <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100 mb-6 text-center">Capacity Building
+                <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100 mb-6 text-center italic">Capacity
+                    Building
                     General Competency
                     Mapping</h3>
 
                 <!-- Content Grid -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
                     <!-- Chart Section -->
-                    <div class="border border-gray-300 dark:border-gray-600 p-6 rounded-lg bg-gray-50 dark:bg-gray-800 transition-shadow duration-300 hover:shadow-xl"
+                    <div class="border border-gray-300 dark:border-gray-600 p-2 rounded-lg bg-gray-50 dark:bg-gray-800 transition-shadow duration-300 hover:shadow-xl"
                         x-data="{
                             refreshChart() {
                                 const labels = @js($chartLabels);
@@ -329,7 +326,7 @@ $c = trim(strtoupper($row['conclusion'])); @endphp
                                         JUMLAH</th>
                                     <th
                                         class="border-2 border-gray-400 dark:border-gray-500 px-4 py-3 text-center font-bold">
-                                        PROSENTASE
+                                        PERSENTASE
                                     </th>
                                 </tr>
                             </thead>
@@ -345,13 +342,13 @@ $c = trim(strtoupper($row['conclusion'])); @endphp
                                         // Determine colors based on conclusion (same as table labels)
                                         $c = trim(strtoupper($conclusion));
                                         if ($c === 'DI ATAS STANDAR') {
-                                            $bgColor = 'bg-green-600';
+                                            $bgColor = 'bg-green-600 border-none';
                                             $textColor = 'text-white';
                                         } elseif ($c === 'MEMENUHI STANDAR') {
-                                            $bgColor = 'bg-yellow-400';
+                                            $bgColor = 'bg-yellow-400 border-none';
                                             $textColor = 'text-gray-900';
                                         } elseif ($c === 'DI BAWAH STANDAR') {
-                                            $bgColor = 'bg-red-600';
+                                            $bgColor = 'bg-red-600 border-none';
                                             $textColor = 'text-white';
                                         } else {
                                             $bgColor = 'bg-gray-100';
@@ -416,6 +413,9 @@ $c = trim(strtoupper($row['conclusion'])); @endphp
                 backgroundColor: colors,
                 borderColor: '#ffffff',
                 borderWidth: 2,
+                datalabels: {
+                    display: false
+                },
                 // Hover effects
                 hoverBackgroundColor: colors.map(color => {
                     // Lighten color on hover
@@ -492,60 +492,60 @@ $c = trim(strtoupper($row['conclusion'])); @endphp
                         }
                     },
                     // Menggunakan chartjs-plugin-datalabels untuk label yang lebih jelas
-                    datalabels: {
-                        // Posisikan label di luar chart
-                        anchor: 'end',
-                        align: 'end',
-                        offset: 10,
+                    // datalabels: {
+                    //     // Posisikan label di luar chart
+                    //     anchor: 'end',
+                    //     align: 'end',
+                    //     offset: 10,
 
-                        // Style untuk background label
-                        backgroundColor: function(context) {
-                            return 'rgba(255, 255, 255, 0.95)';
-                        },
-                        borderColor: function(context) {
-                            return context.dataset.backgroundColor[context.dataIndex];
-                        },
-                        borderWidth: 2,
-                        borderRadius: 4,
+                    //     // Style untuk background label
+                    //     backgroundColor: function(context) {
+                    //         return 'rgba(255, 255, 255, 0.95)';
+                    //     },
+                    //     borderColor: function(context) {
+                    //         return context.dataset.backgroundColor[context.dataIndex];
+                    //     },
+                    //     borderWidth: 2,
+                    //     borderRadius: 4,
 
-                        // Style text
-                        color: '#000',
-                        font: {
-                            weight: 'bold',
-                            size: 13
-                        },
+                    //     // Style text
+                    //     color: '#000',
+                    //     font: {
+                    //         weight: 'bold',
+                    //         size: 13
+                    //     },
 
-                        // Padding di dalam box label
-                        padding: 6,
+                    //     // Padding di dalam box label
+                    //     padding: 6,
 
-                        // Formatter untuk menampilkan nilai dan persentase
-                        formatter: function(value, context) {
-                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                            const percentage = total > 0 ? ((value / total) * 100).toFixed(2) : '0.00';
+                    //     // Formatter untuk menampilkan nilai dan persentase
+                    //     formatter: function(value, context) {
+                    //         const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                    //         const percentage = total > 0 ? ((value / total) * 100).toFixed(2) : '0.00';
 
-                            // Skip label jika value = 0 (kecuali index pertama)
-                            if (value === 0 && context.dataIndex !== 0) {
-                                return '';
-                            }
+                    //         // Skip label jika value = 0 (kecuali index pertama)
+                    //         if (value === 0 && context.dataIndex !== 0) {
+                    //             return '';
+                    //         }
 
-                            return `${value} orang\n${percentage}%`;
-                        },
+                    //         return `${value} orang\n${percentage}%`;
+                    //     },
 
-                        // Tampilkan hanya jika value > 0 atau index pertama
-                        display: function(context) {
-                            return context.dataset.data[context.dataIndex] > 0 || context.dataIndex === 0;
-                        },
+                    //     // Tampilkan hanya jika value > 0 atau index pertama
+                    //     display: function(context) {
+                    //         return context.dataset.data[context.dataIndex] > 0 || context.dataIndex === 0;
+                    //     },
 
-                        // Style text alignment
-                        textAlign: 'center',
+                    //     // Style text alignment
+                    //     textAlign: 'center',
 
-                        // Tambahkan line connector dari chart ke label
-                        listeners: {
-                            enter: function(context) {
-                                // Optional: bisa tambahkan interaktivitas
-                            }
-                        }
-                    }
+                    //     // Tambahkan line connector dari chart ke label
+                    //     listeners: {
+                    //         enter: function(context) {
+                    //             // Optional: bisa tambahkan interaktivitas
+                    //         }
+                    //     }
+                    // }
                 }
             }
         };
