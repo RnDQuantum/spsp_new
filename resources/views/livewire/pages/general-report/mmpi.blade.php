@@ -118,7 +118,7 @@
 
                         <!-- NO. TEST - Sortable -->
                         <th
-                            class="py-3 px-4 text-center text-sm font-semibold text-gray-900 dark:text-white border border-gray-200 dark:border-gray-600 w-32">
+                            class="py-3 px-4 text-center text-sm font-semibold text-gray-900 dark:text-white border border-gray-200 dark:border-gray-500 w-32">
                             <button wire:click="sortBy('no_test')"
                                 class="flex items-center justify-center w-full hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                                 <span>NO. TEST</span>
@@ -146,43 +146,43 @@
                         </th>
 
                         <th
-                            class="py-3 px-4 text-center text-sm font-semibold text-gray-900 dark:text-white border border-gray-200 dark:border-gray-600 w-56">
+                            class="py-3 px-4 text-center text-sm font-semibold text-gray-900 dark:text-white border border-gray-200 dark:border-gray-500 min-w-[150px]">
                             VALIDITAS
                         </th>
 
                         <th
-                            class="py-3 px-4 text-center text-sm font-semibold text-gray-900 dark:text-white border border-gray-200 dark:border-gray-600 w-72">
+                            class="py-3 px-4 text-center text-sm font-semibold text-gray-900 dark:text-white border border-gray-200 dark:border-gray-500 min-w-[320px]">
                             INTERNAL
                         </th>
 
                         <th
-                            class="py-3 px-4 text-center text-sm font-semibold text-gray-900 dark:text-white border border-gray-200 dark:border-gray-600 w-72">
+                            class="py-3 px-4 text-center text-sm font-semibold text-gray-900 dark:text-white border border-gray-200 dark:border-gray-500 min-w-[350px]">
                             INTERPERSONAL
                         </th>
 
                         <th
-                            class="py-3 px-4 text-center text-sm font-semibold text-gray-900 dark:text-white border border-gray-200 dark:border-gray-600 w-72">
+                            class="py-3 px-4 text-center text-sm font-semibold text-gray-900 dark:text-white border border-gray-200 dark:border-gray-500 min-w-[350px]">
                             KAP. KERJA
                         </th>
 
                         <th
-                            class="py-3 px-4 text-center text-sm font-semibold text-gray-900 dark:text-white border border-gray-200 dark:border-gray-600 w-56">
+                            class="py-3 px-4 text-center text-sm font-semibold text-gray-900 dark:text-white border border-gray-200 dark:border-gray-500 min-w-[200px]">
                             KLINIK
                         </th>
 
                         <th
-                            class="py-3 px-4 text-center text-sm font-semibold text-gray-900 dark:text-white border border-gray-200 dark:border-gray-600 w-72">
+                            class="py-3 px-4 text-center text-sm font-semibold text-gray-900 dark:text-white border border-gray-200 dark:border-gray-500 min-w-[350px]">
                             KESIMPULAN
                         </th>
 
                         <th
-                            class="py-3 px-4 text-center text-sm font-semibold text-gray-900 dark:text-white border border-gray-200 dark:border-gray-600 w-72">
+                            class="py-3 px-4 text-center text-sm font-semibold text-gray-900 dark:text-white border border-gray-200 dark:border-gray-500 min-w-[250px]">
                             PSIKOGRAM
                         </th>
 
                         <!-- NILAI PQ - Sortable -->
                         <th
-                            class="py-3 px-4 text-center text-sm font-semibold text-gray-900 dark:text-white border border-gray-200 dark:border-gray-600 w-24">
+                            class="py-3 px-4 text-center text-sm font-semibold text-gray-900 dark:text-white border border-gray-200 dark:border-gray-500 min-w-[100px]">
                             <button wire:click="sortBy('nilai_pq')"
                                 class="flex items-center justify-center w-full hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                                 <span>NILAI PQ</span>
@@ -211,7 +211,7 @@
 
                         <!-- TINGKAT STRES - Sortable -->
                         <th
-                            class="py-3 px-4 text-center text-sm font-semibold text-gray-900 dark:text-white border border-gray-200 dark:border-gray-600 w-32">
+                            class="py-3 px-4 text-center text-sm font-semibold text-gray-900 dark:text-white border border-gray-200 dark:border-gray-500 w-32">
                             <button wire:click="sortBy('tingkat_stres')"
                                 class="flex items-center justify-center w-full hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                                 <span>TINGKAT STRES</span>

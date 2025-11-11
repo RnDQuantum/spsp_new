@@ -57,7 +57,7 @@
                             <option value="25">25</option>
                             <option value="50">50</option>
                             <option value="100">100</option>
-                            <option value="0">All</option>
+                            <option value="0">Semua</option>
                         </select>
                     </div>
 
@@ -131,7 +131,7 @@
         @if (!$readyToLoad)
             <div class="overflow-x-auto">
                 <table class="w-full">
-                    <thead class="bg-gray-50 dark:bg-gray-700">
+                    <thead class="bg-gray-300 dark:bg-gray-600">
                         <tr>
                             <th
                                 class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
@@ -213,16 +213,16 @@
             <!-- Actual Table Content -->
             <div class="overflow-x-auto">
                 <table class="w-full">
-                    <thead class="bg-gray-50 dark:bg-gray-700">
+                    <thead class="bg-gray-300 dark:bg-gray-600">
                         <tr>
                             <th
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-800 dark:text-gray-200 uppercase tracking-wider">
                                 No.
                             </th>
 
                             <!-- Sortable Headers -->
                             <th wire:click="sort('skb_number')"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-800 dark:text-gray-200 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
                                 <div class="flex items-center space-x-1 select-none">
                                     <span>NIP</span>
                                     <span class="text-gray-400">
@@ -252,7 +252,7 @@
                             </th>
 
                             <th wire:click="sort('name')"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-800 dark:text-gray-200 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
                                 <div class="flex items-center space-x-1 select-none">
                                     <span>Nama</span>
                                     <span class="text-gray-400">
@@ -282,7 +282,7 @@
                             </th>
 
                             <th wire:click="sort('email')"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-800 dark:text-gray-200 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
                                 <div class="flex items-center space-x-1 select-none">
                                     <span>Email</span>
                                     <span class="text-gray-400">
@@ -312,7 +312,7 @@
                             </th>
 
                             <th wire:click="sort('phone')"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-800 dark:text-gray-200 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
                                 <div class="flex items-center space-x-1 select-none">
                                     <span>Telepon</span>
                                     <span class="text-gray-400">
@@ -342,7 +342,7 @@
                             </th>
 
                             <th wire:click="sort('gender')"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-800 dark:text-gray-200 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
                                 <div class="flex items-center space-x-1 select-none">
                                     <span>Jenis Kelamin</span>
                                     <span class="text-gray-400">
@@ -372,7 +372,7 @@
                             </th>
 
                             <th wire:click="sort('event_code')"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-800 dark:text-gray-200 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
                                 <div class="flex items-center space-x-1 select-none">
                                     <span>Kode Proyek</span>
                                     <span class="text-gray-400">
@@ -402,7 +402,7 @@
                             </th>
 
                             <th wire:click="sort('batch_name')"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-800 dark:text-gray-200 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
                                 <div class="flex items-center space-x-1 select-none">
                                     <span>Batch</span>
                                     <span class="text-gray-400">
@@ -432,7 +432,7 @@
                             </th>
 
                             <th wire:click="sort('position_name')"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-800 dark:text-gray-200 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
                                 <div class="flex items-center space-x-1 select-none">
                                     <span>Posisi</span>
                                     <span class="text-gray-400">
@@ -462,7 +462,7 @@
                             </th>
 
                             <th wire:click="sort('assessment_date')"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-800 dark:text-gray-200 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
                                 <div class="flex items-center space-x-1 select-none">
                                     <span>Tgl Assessment</span>
                                     <span class="text-gray-400">
@@ -492,7 +492,7 @@
                             </th>
 
                             <th wire:click="sort('test_number')"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-800 dark:text-gray-200 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
                                 <div class="flex items-center space-x-1 select-none">
                                     <span>No. Test</span>
                                     <span class="text-gray-400">

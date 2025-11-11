@@ -35,7 +35,7 @@
     <div class="bg-white dark:bg-gray-900 mx-auto my-8 shadow-lg dark:shadow-gray-800/50 overflow-hidden"
         style="max-width: 1400px;">
         <!-- Header - DARK MODE READY -->
-        <div class="border-b-4 border-black dark:border-gray-300 py-3 bg-sky-200 dark:bg-gray-800">
+        <div class="border-b-4 border-black dark:border-gray-300 py-3 bg-gray-300 dark:bg-gray-600">
             <h1 class="text-center text-lg font-bold uppercase tracking-wide text-gray-900 dark:text-gray-100">
                 SPIDER PLOT ANALYSIS - DASHBOARD
             </h1>
