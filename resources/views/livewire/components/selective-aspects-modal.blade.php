@@ -1,4 +1,4 @@
-{{-- Selective Aspects Modal - UX Optimized: Checkbox-only interaction --}}
+{{-- Selective Aspects Modal - Fixed: No body scroll --}}
 <div>
     {{-- Modal Container with Alpine.js for instant display --}}
     <div x-data="selectiveAspectsModal()" x-on:open-selection-modal-instant.window="openModal()"
@@ -16,7 +16,7 @@
             <div class="fixed inset-0 bg-gray-900/75 dark:bg-gray-900/90 transition-opacity" aria-hidden="true"
                 @click="closeModal()"></div>
 
-            {{-- Modal Content Container --}}
+            {{-- Modal Content Container - FIXED: Added max height constraint --}}
             <div class="flex min-h-full items-center justify-center p-4">
                 <div @click.away="closeModal()" x-transition:enter="transition ease-out duration-200"
                     x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
@@ -24,7 +24,7 @@
                     x-transition:leave="transition ease-in duration-150"
                     x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
                     x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                    class="relative w-full max-w-4xl bg-white dark:bg-gray-800 rounded-lg shadow-xl transform transition-all">
+                    class="relative w-full max-w-4xl max-h-[90vh] bg-white dark:bg-gray-800 rounded-lg shadow-xl transform transition-all flex flex-col">
                     {{-- Loading State --}}
                     <div x-show="loading && !dataReady" class="p-12">
                         <div class="flex flex-col items-center justify-center space-y-4">
@@ -40,10 +40,11 @@
                     </div>
 
                     {{-- Actual Modal Content --}}
-                    <div x-show="!loading || dataReady" style="display: none;">
+                    <div x-show="!loading || dataReady" style="display: none;"
+                        class="flex flex-col h-full overflow-hidden">
                         @if ($dataLoaded)
-                        {{-- Header --}}
-                        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                        {{-- Header - FIXED: Added flex-shrink-0 --}}
+                        <div class="flex-shrink-0 px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                             <div class="flex items-center justify-between">
                                 <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
                                     Pilih Aspek & Sub-Aspek {{ ucfirst($categoryCode) }} untuk Analisis
@@ -74,12 +75,12 @@
                             </div>
                         </div>
 
-                        {{-- Body with Scrollable Content --}}
-                        <div class="px-6 py-4 max-h-[60vh] overflow-y-auto custom-scrollbar">
+                        {{-- Body with Scrollable Content - FIXED: Changed to flex-1 and overflow-y-auto --}}
+                        <div class="flex-1 px-6 py-4 overflow-y-auto custom-scrollbar">
                             @forelse ($this->templateAspects as $aspect)
                             <div
                                 class="mb-4 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden hover:shadow-md transition-shadow">
-                                {{-- Aspect Row - OPTIMIZED: Removed cursor-pointer and for attribute --}}
+                                {{-- Aspect Row --}}
                                 <div class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700/50">
                                     {{-- Checkbox - Only clickable area --}}
                                     <input type="checkbox" wire:model.live="selectedAspects.{{ $aspect->code }}"
@@ -100,7 +101,7 @@
                                     </button>
                                     @endif
 
-                                    {{-- Aspect Name - REMOVED: for attribute and cursor-pointer --}}
+                                    {{-- Aspect Name --}}
                                     <div class="flex-1">
                                         <span
                                             class="font-semibold text-gray-900 dark:text-gray-100 {{ !($selectedAspects[$aspect->code] ?? true) ? 'line-through opacity-50' : '' }}">
@@ -134,14 +135,14 @@
                                         @foreach ($aspect->subAspects as $subAspect)
                                         <div
                                             class="flex items-center gap-3 py-1 hover:bg-gray-50 dark:hover:bg-gray-700/30 rounded transition-colors">
-                                            {{-- Sub-Aspect Checkbox - Only clickable area --}}
+                                            {{-- Sub-Aspect Checkbox --}}
                                             <input type="checkbox"
                                                 wire:model.live="selectedSubAspects.{{ $aspect->code }}.{{ $subAspect->code }}"
                                                 id="subaspect_{{ $aspect->code }}_{{ $subAspect->code }}"
                                                 class="w-4 h-4 rounded text-blue-600 focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 transition-all cursor-pointer"
                                                 {{ !($selectedAspects[$aspect->code] ?? true) ? 'disabled' : '' }}>
 
-                                            {{-- Sub-Aspect Name - REMOVED: for attribute and cursor-pointer --}}
+                                            {{-- Sub-Aspect Name --}}
                                             <div class="flex-1">
                                                 <span
                                                     class="text-sm text-gray-700 dark:text-gray-300 {{ !($selectedAspects[$aspect->code] ?? true) || !($selectedSubAspects[$aspect->code][$subAspect->code] ?? true) ? 'line-through opacity-50' : '' }}">
@@ -168,16 +169,16 @@
                             @endforelse
                         </div>
 
-                        {{-- Enhanced Validation Section with Real-time Feedback --}}
+                        {{-- Enhanced Validation Section - FIXED: Added flex-shrink-0 --}}
                         <div
-                            class="px-6 py-3 bg-gray-50 dark:bg-gray-700/50 border-t border-b border-gray-200 dark:border-gray-700">
-                            <div class="space-y-3">
+                            class="flex-shrink-0 px-6 py-3 bg-gray-50 dark:bg-gray-700/50 border-t border-b border-gray-200 dark:border-gray-700">
+                            <div class="grid grid-cols-2 gap-3">
                                 {{-- Active Aspects Counter --}}
-                                <div class="flex items-center justify-between p-3 rounded-lg transition-all duration-200"
+                                <div class="flex items-center justify-between p-2 rounded-lg transition-all duration-200"
                                     :class="isValidActiveCount ? 'bg-green-50 dark:bg-green-900/20' : 'bg-amber-50 dark:bg-amber-900/20'">
-                                    <div class="flex items-center gap-3">
+                                    <div class="flex items-center gap-2">
                                         <svg :class="isValidActiveCount ? 'text-green-600 dark:text-green-400' : 'text-amber-600 dark:text-amber-400'"
-                                            class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                            class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                                             <path fill-rule="evenodd"
                                                 d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
                                                 clip-rule="evenodd" x-show="isValidActiveCount"></path>
@@ -191,7 +192,7 @@
                                         </span>
                                     </div>
                                     <div class="flex items-center gap-2">
-                                        <span class="text-lg font-bold"
+                                        <span class="text-sm font-bold"
                                             :class="isValidActiveCount ? 'text-green-800 dark:text-green-300' : 'text-amber-800 dark:text-amber-300'"
                                             x-text="activeCount + '/' + {{ $this->totalAspectsCount }}">
                                         </span>
@@ -203,83 +204,45 @@
                                 </div>
 
                                 {{-- Total Weight Display --}}
-                                <div class="flex items-center justify-between p-4 rounded-lg transition-all duration-200"
+                                <div class="flex items-center justify-between p-2 rounded-lg transition-all duration-200"
                                     :class="isValidWeight ? 'bg-green-100 dark:bg-green-900/30' : 'bg-amber-100 dark:bg-amber-900/30'">
-                                    <div class="flex items-center gap-3">
+                                    <div class="flex items-center gap-2">
                                         <svg :class="isValidWeight ? 'text-green-600 dark:text-green-400' : 'text-amber-600 dark:text-amber-400'"
-                                            class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"
+                                            class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"
                                             x-show="isValidWeight">
                                             <path fill-rule="evenodd"
                                                 d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
                                                 clip-rule="evenodd"></path>
                                         </svg>
-                                        <svg class="w-5 h-5 text-amber-600 dark:text-amber-400" fill="currentColor"
+                                        <svg class="w-4 h-4 text-amber-600 dark:text-amber-400" fill="currentColor"
                                             viewBox="0 0 20 20" x-show="!isValidWeight">
                                             <path fill-rule="evenodd"
                                                 d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
                                                 clip-rule="evenodd"></path>
                                         </svg>
-                                        <span class="font-semibold transition-colors"
+                                        <span class="font-semibold text-sm transition-colors"
                                             :class="isValidWeight ? 'text-green-800 dark:text-green-300' : 'text-amber-800 dark:text-amber-300'">
                                             Total Bobot:
                                         </span>
                                     </div>
-                                    <div class="flex flex-col items-end">
-                                        <div class="flex items-center gap-2">
-                                            <span class="font-bold text-2xl transition-colors"
-                                                :class="isValidWeight ? 'text-green-800 dark:text-green-300' : 'text-amber-800 dark:text-amber-300'"
-                                                x-text="totalWeight + '%'">
-                                            </span>
-                                        </div>
-                                        <div x-show="!isValidWeight" class="mt-1">
-                                            <span class="text-xs font-medium"
-                                                :class="weightDifference > 0 ? 'text-red-600 dark:text-red-400' : 'text-amber-600 dark:text-amber-400'">
-                                                <span x-show="weightDifference > 0">Kelebihan <strong
-                                                        x-text="weightDifference"></strong>%</span>
-                                                <span x-show="weightDifference < 0">Kurang <strong
-                                                        x-text="Math.abs(weightDifference)"></strong>%</span>
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {{-- Sub-Aspects Validation (Potensi only) --}}
-                                @if ($categoryCode === 'potensi')
-                                <div x-data="{ 
-                                        hasInvalidSubAspects: {{ json_encode($this->validationResult['errors']) }}.some(e => e.includes('sub-aspek')) 
-                                    }" x-show="!hasInvalidSubAspects || activeCount > 0"
-                                    class="flex items-center gap-2 p-2 rounded text-xs"
-                                    :class="!hasInvalidSubAspects ? 'text-green-700 dark:text-green-400' : 'text-amber-700 dark:text-amber-400'">
-                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"
-                                        x-show="!hasInvalidSubAspects">
-                                        <path fill-rule="evenodd"
-                                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                                            clip-rule="evenodd"></path>
-                                    </svg>
-                                    <span x-show="!hasInvalidSubAspects">✓ Semua aspek aktif memiliki minimal 1
-                                        sub-aspek</span>
-                                </div>
-                                @endif
-
-                                {{-- Overall Status Badge --}}
-                                <div class="pt-2 flex items-center justify-center">
-                                    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full transition-all"
-                                        :class="isFullyValid ? 'bg-green-600 dark:bg-green-700 text-white' : 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300'">
-                                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"
-                                            x-show="isFullyValid">
-                                            <path fill-rule="evenodd"
-                                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                                                clip-rule="evenodd"></path>
-                                        </svg>
-                                        <span class="font-semibold text-sm"
-                                            x-text="isFullyValid ? 'Siap Diterapkan!' : 'Belum Valid'"></span>
+                                    <div class="flex items-center gap-2">
+                                        <span class="font-bold text-lg transition-colors"
+                                            :class="isValidWeight ? 'text-green-800 dark:text-green-300' : 'text-amber-800 dark:text-amber-300'"
+                                            x-text="totalWeight + '%'">
+                                        </span>
+                                        <span x-show="!isValidWeight" class="text-xs font-medium"
+                                            :class="weightDifference > 0 ? 'text-red-600 dark:text-red-400' : 'text-amber-600 dark:text-amber-400'">
+                                            <span x-show="weightDifference > 0"
+                                                x-text="'+' + weightDifference + '%'"></span>
+                                            <span x-show="weightDifference < 0" x-text="weightDifference + '%'"></span>
+                                        </span>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        {{-- Footer --}}
-                        <div class="px-6 py-4 flex items-center justify-end">
+                        {{-- Footer - FIXED: Added flex-shrink-0 --}}
+                        <div class="flex-shrink-0 px-6 py-3 flex items-center justify-end">
                             <div class="flex items-center gap-3">
                                 <button @click="closeModal()" type="button"
                                     class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-all">
@@ -350,7 +313,6 @@
                     message: ''
                 },
 
-                // ✅ NEW: Computed properties untuk real-time validation
                 get activeCount() {
                     return Object.values(this.$wire.selectedAspects || {})
                         .filter(v => v === true).length;
@@ -437,19 +399,6 @@
         .custom-scrollbar::-webkit-scrollbar-track {
             background: rgba(0, 0, 0, 0.1);
             border-radius: 4px;
-        }
-
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 4px;
-        }
-
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: rgba(0, 0, 0, 0.5);
-        }
-
-        .dark .custom-scrollbar::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.1);
         }
 
         .dark .custom-scrollbar::-webkit-scrollbar-thumb {
