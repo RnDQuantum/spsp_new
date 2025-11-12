@@ -78,6 +78,11 @@ class SelectiveAspectsModal extends Component
         // Show modal immediately
         $this->show = true;
 
+        // ✅ CRITICAL FIX: Reset state jika template berbeda
+        if ($this->templateId !== $templateId || $this->categoryCode !== $categoryCode) {
+            $this->resetState(); // Clear semua data lama
+        }
+
         // Always load fresh data when opening modal to ensure state is up-to-date
         // (especially after external changes like reset)
         if (!$this->dataLoaded || $this->templateId !== $templateId || $this->categoryCode !== $categoryCode) {
