@@ -31,6 +31,8 @@ class CategoryWeightEditor extends Component
     protected $listeners = [
         'open-category-weight-editor' => 'openModal',
         'standard-adjusted' => 'refresh',
+        'position-selected' => 'handleFilterChanged',
+        'event-selected' => 'handleFilterChanged',
     ];
 
     public function mount(?int $templateId = null, string $categoryCode1 = 'potensi', string $categoryCode2 = 'kompetensi'): void
@@ -38,6 +40,29 @@ class CategoryWeightEditor extends Component
         $this->templateId = $templateId;
         $this->categoryCode1 = $categoryCode1;
         $this->categoryCode2 = $categoryCode2;
+    }
+
+    /**
+     * Handle filter changes (event or position selection)
+     * This will update the template ID when filters change
+     */
+    public function handleFilterChanged(): void
+    {
+        // Get current template ID from session filters
+        $eventCode = session('filter.event_code');
+        $positionFormationId = session('filter.position_formation_id');
+
+        if ($eventCode && $positionFormationId) {
+            $event = \App\Models\AssessmentEvent::where('code', $eventCode)->first();
+            if ($event) {
+                $position = $event->positionFormations()->where('id', $positionFormationId)->first();
+                if ($position && $position->template) {
+                    $this->templateId = $position->template->id;
+                }
+            }
+        } else {
+            $this->templateId = null;
+        }
     }
 
     /**
