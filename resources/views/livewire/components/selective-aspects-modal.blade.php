@@ -168,81 +168,143 @@
                             @endforelse
                         </div>
 
-                        {{-- Validation Section --}}
+                        {{-- Enhanced Validation Section with Real-time Feedback --}}
                         <div
                             class="px-6 py-3 bg-gray-50 dark:bg-gray-700/50 border-t border-b border-gray-200 dark:border-gray-700">
-                            <div class="text-sm space-y-1">
-                                @if ($this->validationResult['valid'])
-                                {{-- Valid State --}}
-                                <div class="flex items-center gap-2 text-green-700 dark:text-green-400">
-                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                            <div class="space-y-3">
+                                {{-- Active Aspects Counter --}}
+                                <div class="flex items-center justify-between p-3 rounded-lg transition-all duration-200"
+                                    :class="isValidActiveCount ? 'bg-green-50 dark:bg-green-900/20' : 'bg-amber-50 dark:bg-amber-900/20'">
+                                    <div class="flex items-center gap-3">
+                                        <svg :class="isValidActiveCount ? 'text-green-600 dark:text-green-400' : 'text-amber-600 dark:text-amber-400'"
+                                            class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd"
+                                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                                clip-rule="evenodd" x-show="isValidActiveCount"></path>
+                                            <path fill-rule="evenodd"
+                                                d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                                                clip-rule="evenodd" x-show="!isValidActiveCount"></path>
+                                        </svg>
+                                        <span class="text-sm font-medium"
+                                            :class="isValidActiveCount ? 'text-green-800 dark:text-green-300' : 'text-amber-800 dark:text-amber-300'">
+                                            Aspek Aktif:
+                                        </span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-lg font-bold"
+                                            :class="isValidActiveCount ? 'text-green-800 dark:text-green-300' : 'text-amber-800 dark:text-amber-300'"
+                                            x-text="activeCount + '/' + {{ $this->totalAspectsCount }}">
+                                        </span>
+                                        <span class="text-xs px-2 py-0.5 rounded-full"
+                                            :class="isValidActiveCount ? 'bg-green-200 dark:bg-green-800 text-green-800 dark:text-green-200' : 'bg-amber-200 dark:bg-amber-800 text-amber-800 dark:text-amber-200'">
+                                            Min: 3
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {{-- Total Weight Display --}}
+                                <div class="flex items-center justify-between p-4 rounded-lg transition-all duration-200"
+                                    :class="isValidWeight ? 'bg-green-100 dark:bg-green-900/30' : 'bg-amber-100 dark:bg-amber-900/30'">
+                                    <div class="flex items-center gap-3">
+                                        <svg :class="isValidWeight ? 'text-green-600 dark:text-green-400' : 'text-amber-600 dark:text-amber-400'"
+                                            class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"
+                                            x-show="isValidWeight">
+                                            <path fill-rule="evenodd"
+                                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                                clip-rule="evenodd"></path>
+                                        </svg>
+                                        <svg class="w-5 h-5 text-amber-600 dark:text-amber-400" fill="currentColor"
+                                            viewBox="0 0 20 20" x-show="!isValidWeight">
+                                            <path fill-rule="evenodd"
+                                                d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                                                clip-rule="evenodd"></path>
+                                        </svg>
+                                        <span class="font-semibold transition-colors"
+                                            :class="isValidWeight ? 'text-green-800 dark:text-green-300' : 'text-amber-800 dark:text-amber-300'">
+                                            Total Bobot:
+                                        </span>
+                                    </div>
+                                    <div class="flex flex-col items-end">
+                                        <div class="flex items-center gap-2">
+                                            <span class="font-bold text-2xl transition-colors"
+                                                :class="isValidWeight ? 'text-green-800 dark:text-green-300' : 'text-amber-800 dark:text-amber-300'"
+                                                x-text="totalWeight + '%'">
+                                            </span>
+                                        </div>
+                                        <div x-show="!isValidWeight" class="mt-1">
+                                            <span class="text-xs font-medium"
+                                                :class="weightDifference > 0 ? 'text-red-600 dark:text-red-400' : 'text-amber-600 dark:text-amber-400'">
+                                                <span x-show="weightDifference > 0">Kelebihan <strong
+                                                        x-text="weightDifference"></strong>%</span>
+                                                <span x-show="weightDifference < 0">Kurang <strong
+                                                        x-text="Math.abs(weightDifference)"></strong>%</span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {{-- Sub-Aspects Validation (Potensi only) --}}
+                                @if ($categoryCode === 'potensi')
+                                <div x-data="{ 
+                                        hasInvalidSubAspects: {{ json_encode($this->validationResult['errors']) }}.some(e => e.includes('sub-aspek')) 
+                                    }" x-show="!hasInvalidSubAspects || activeCount > 0"
+                                    class="flex items-center gap-2 p-2 rounded text-xs"
+                                    :class="!hasInvalidSubAspects ? 'text-green-700 dark:text-green-400' : 'text-amber-700 dark:text-amber-400'">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"
+                                        x-show="!hasInvalidSubAspects">
                                         <path fill-rule="evenodd"
                                             d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
                                             clip-rule="evenodd"></path>
                                     </svg>
-                                    <span class="font-semibold">Validasi Berhasil!</span>
-                                </div>
-                                <div class="ml-7 space-y-1 text-gray-600 dark:text-gray-400">
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-green-600">✓</span>
-                                        Total Bobot: {{ $this->totalWeight }}%
-                                        <span class="text-xs text-green-600 dark:text-green-400">(Valid -
-                                            100%)</span>
-                                    </div>
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-green-600">✓</span>
-                                        Aspek Aktif:
-                                        {{ $this->activeAspectsCount }}/{{ $this->totalAspectsCount }}
-                                        <span class="text-xs text-green-600 dark:text-green-400">(Minimal
-                                            3)</span>
-                                    </div>
-                                    @if ($categoryCode === 'potensi')
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-green-600">✓</span>
-                                        Sub-Aspek: Semua aspek aktif memiliki minimal 1 sub-aspek
-                                    </div>
-                                    @endif
-                                </div>
-                                @else
-                                {{-- Invalid State with Alert --}}
-                                <div x-data="{ showErrors: true }"
-                                    class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md p-3">
-                                    <div class="flex items-start gap-2 text-red-700 dark:text-red-400">
-                                        <svg class="w-5 h-5 mt-0.5 flex-shrink-0" fill="currentColor"
-                                            viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd"
-                                                d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                                                clip-rule="evenodd"></path>
-                                        </svg>
-                                        <div class="flex-1">
-                                            <div class="font-semibold mb-1">Perbaiki kesalahan berikut:</div>
-                                            <ul class="list-disc list-inside space-y-1 text-sm">
-                                                @foreach ($this->validationResult['errors'] as $error)
-                                                <li>{{ $error }}</li>
-                                                @endforeach
-                                            </ul>
-                                        </div>
-                                    </div>
+                                    <span x-show="!hasInvalidSubAspects">✓ Semua aspek aktif memiliki minimal 1
+                                        sub-aspek</span>
                                 </div>
                                 @endif
+
+                                {{-- Overall Status Badge --}}
+                                <div class="pt-2 flex items-center justify-center">
+                                    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full transition-all"
+                                        :class="isFullyValid ? 'bg-green-600 dark:bg-green-700 text-white' : 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300'">
+                                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"
+                                            x-show="isFullyValid">
+                                            <path fill-rule="evenodd"
+                                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                                clip-rule="evenodd"></path>
+                                        </svg>
+                                        <span class="font-semibold text-sm"
+                                            x-text="isFullyValid ? 'Siap Diterapkan!' : 'Belum Valid'"></span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
                         {{-- Footer --}}
                         <div class="px-6 py-4 flex items-center justify-end">
-
                             <div class="flex items-center gap-3">
                                 <button @click="closeModal()" type="button"
                                     class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-all">
                                     Batal
                                 </button>
-                                <button wire:click="applySelection" wire:loading.attr="disabled"
-                                    wire:loading.class="opacity-50 cursor-wait" type="button"
-                                    class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all {{ !$this->validationResult['valid'] ? 'opacity-50 cursor-not-allowed' : '' }}"
-                                    {{ !$this->validationResult['valid'] ? 'disabled' : '' }}>
-                                    <span wire:loading.remove wire:target="applySelection">Terapkan
-                                        Perubahan</span>
-                                    <span wire:loading wire:target="applySelection">Menyimpan...</span>
+
+                                <button wire:click="applySelection" :disabled="!isFullyValid"
+                                    wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-wait"
+                                    type="button"
+                                    class="px-4 py-2 text-sm font-medium text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all disabled:cursor-not-allowed"
+                                    :class="isFullyValid ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-400 dark:bg-gray-600 opacity-50'">
+                                    <span wire:loading.remove wire:target="applySelection">
+                                        <span x-show="isFullyValid">✓ Terapkan Perubahan</span>
+                                        <span x-show="!isFullyValid">⚠ Perbaiki Error Dulu</span>
+                                    </span>
+                                    <span wire:loading wire:target="applySelection" class="flex items-center gap-2">
+                                        <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                                stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor"
+                                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                            </path>
+                                        </svg>
+                                        Menyimpan...
+                                    </span>
                                 </button>
                             </div>
                         </div>
@@ -288,8 +350,37 @@
                     message: ''
                 },
 
+                // ✅ NEW: Computed properties untuk real-time validation
+                get activeCount() {
+                    return Object.values(this.$wire.selectedAspects || {})
+                        .filter(v => v === true).length;
+                },
+
+                get totalWeight() {
+                    const weights = this.$wire.aspectWeights || {};
+                    const selected = this.$wire.selectedAspects || {};
+                    return Object.entries(weights)
+                        .filter(([code, _]) => selected[code] === true)
+                        .reduce((sum, [_, weight]) => sum + Number(weight || 0), 0);
+                },
+
+                get isValidActiveCount() {
+                    return this.activeCount >= 3;
+                },
+
+                get isValidWeight() {
+                    return this.totalWeight === 100;
+                },
+
+                get isFullyValid() {
+                    return this.isValidActiveCount && this.isValidWeight;
+                },
+
+                get weightDifference() {
+                    return this.totalWeight - 100;
+                },
+
                 init() {
-                    // Listen for close-modal event
                     this.$watch('$wire.show', (value) => {
                         if (!value) {
                             this.isOpen = false;
@@ -328,10 +419,9 @@
                     this.toast.type = 'success';
                     this.toast.message = message;
                     this.toast.show = true;
-                    // Close modal after showing success
                     setTimeout(() => {
                         this.toast.show = false;
-                        this.isOpen = false; // Close modal
+                        this.isOpen = false;
                     }, 2000);
                 }
             }
