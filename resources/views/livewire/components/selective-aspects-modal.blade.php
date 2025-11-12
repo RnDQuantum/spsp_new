@@ -1,4 +1,4 @@
-{{-- Selective Aspects Modal - Optimized for instant display --}}
+{{-- Selective Aspects Modal - UX Optimized: Checkbox-only interaction --}}
 <div>
     {{-- Modal Container with Alpine.js for instant display --}}
     <div x-data="selectiveAspectsModal()" x-on:open-selection-modal-instant.window="openModal()"
@@ -42,210 +42,210 @@
                     {{-- Actual Modal Content --}}
                     <div x-show="!loading || dataReady" style="display: none;">
                         @if ($dataLoaded)
-                            {{-- Header --}}
-                            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                                <div class="flex items-center justify-between">
-                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                                        Pilih Aspek & Sub-Aspek {{ ucfirst($categoryCode) }} untuk Analisis
-                                    </h3>
-                                    <button @click="closeModal()" type="button"
-                                        class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 transition-colors">
-                                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        {{-- Header --}}
+                        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                                    Pilih Aspek & Sub-Aspek {{ ucfirst($categoryCode) }} untuk Analisis
+                                </h3>
+                                <button @click="closeModal()" type="button"
+                                    class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 transition-colors">
+                                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </button>
+                            </div>
+
+                            {{-- Bulk Actions --}}
+                            <div class="flex items-center gap-3 mt-3">
+                                <button wire:click="selectAll" type="button"
+                                    class="px-3 py-1.5 text-sm bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 rounded-md hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors">
+                                    ✓ Pilih Semua
+                                </button>
+                                <button wire:click="deselectAll" type="button"
+                                    class="px-3 py-1.5 text-sm bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+                                    ✗ Hapus Semua
+                                </button>
+                                <button wire:click="autoDistributeWeights" type="button"
+                                    class="px-3 py-1.5 text-sm bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 rounded-md hover:bg-green-200 dark:hover:bg-green-900/50 transition-colors">
+                                    ⚖ Distribusi Bobot Otomatis
+                                </button>
+                            </div>
+                        </div>
+
+                        {{-- Body with Scrollable Content --}}
+                        <div class="px-6 py-4 max-h-[60vh] overflow-y-auto custom-scrollbar">
+                            @forelse ($this->templateAspects as $aspect)
+                            <div
+                                class="mb-4 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden hover:shadow-md transition-shadow">
+                                {{-- Aspect Row - OPTIMIZED: Removed cursor-pointer and for attribute --}}
+                                <div class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700/50">
+                                    {{-- Checkbox - Only clickable area --}}
+                                    <input type="checkbox" wire:model.live="selectedAspects.{{ $aspect->code }}"
+                                        id="aspect_{{ $aspect->code }}"
+                                        class="w-5 h-5 rounded text-blue-600 focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 transition-all cursor-pointer">
+
+                                    {{-- Expand/Collapse Button (for Potensi) --}}
+                                    @if ($categoryCode === 'potensi' && $aspect->subAspects &&
+                                    $aspect->subAspects->count() > 0)
+                                    <button wire:click="toggleExpand('{{ $aspect->code }}')" type="button"
+                                        class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 transition-colors"
+                                        aria-label="Toggle sub-aspects">
+                                        <svg class="w-5 h-5 transform transition-transform duration-200 {{ $expandedAspects[$aspect->code] ?? false ? 'rotate-90' : '' }}"
+                                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M6 18L18 6M6 6l12 12"></path>
+                                                d="M9 5l7 7-7 7"></path>
                                         </svg>
                                     </button>
-                                </div>
+                                    @endif
 
-                                {{-- Bulk Actions --}}
-                                <div class="flex items-center gap-3 mt-3">
-                                    <button wire:click="selectAll" type="button"
-                                        class="px-3 py-1.5 text-sm bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 rounded-md hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors">
-                                        ✓ Pilih Semua
-                                    </button>
-                                    <button wire:click="deselectAll" type="button"
-                                        class="px-3 py-1.5 text-sm bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
-                                        ✗ Hapus Semua
-                                    </button>
-                                    <button wire:click="autoDistributeWeights" type="button"
-                                        class="px-3 py-1.5 text-sm bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 rounded-md hover:bg-green-200 dark:hover:bg-green-900/50 transition-colors">
-                                        ⚖ Distribusi Bobot Otomatis
-                                    </button>
-                                </div>
-                            </div>
-
-                            {{-- Body with Scrollable Content --}}
-                            <div class="px-6 py-4 max-h-[60vh] overflow-y-auto custom-scrollbar">
-                                @forelse ($this->templateAspects as $aspect)
-                                    <div
-                                        class="mb-4 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden hover:shadow-md transition-shadow">
-                                        {{-- Aspect Row --}}
-                                        <div class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700/50">
-                                            {{-- Checkbox --}}
-                                            <input type="checkbox" wire:model.live="selectedAspects.{{ $aspect->code }}"
-                                                id="aspect_{{ $aspect->code }}"
-                                                class="w-5 h-5 rounded text-blue-600 focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 transition-all">
-
-                                            {{-- Expand/Collapse Button (for Potensi) --}}
-                                            @if ($categoryCode === 'potensi' && $aspect->subAspects && $aspect->subAspects->count() > 0)
-                                                <button wire:click="toggleExpand('{{ $aspect->code }}')" type="button"
-                                                    class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 transition-colors"
-                                                    aria-label="Toggle sub-aspects">
-                                                    <svg class="w-5 h-5 transform transition-transform duration-200 {{ $expandedAspects[$aspect->code] ?? false ? 'rotate-90' : '' }}"
-                                                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                            stroke-width="2" d="M9 5l7 7-7 7"></path>
-                                                    </svg>
-                                                </button>
-                                            @endif
-
-                                            {{-- Aspect Name --}}
-                                            <label for="aspect_{{ $aspect->code }}" class="flex-1 cursor-pointer">
-                                                <span
-                                                    class="font-semibold text-gray-900 dark:text-gray-100 {{ !($selectedAspects[$aspect->code] ?? true) ? 'line-through opacity-50' : '' }}">
-                                                    {{ $aspect->name }}
-                                                </span>
-                                                @if ($aspect->subAspects && $aspect->subAspects->count() > 0)
-                                                    <span class="text-xs text-gray-500 dark:text-gray-400 ml-2">
-                                                        ({{ $aspect->subAspects->count() }} sub-aspek)
-                                                    </span>
-                                                @endif
-                                            </label>
-
-                                            {{-- Weight Input --}}
-                                            <div class="flex items-center gap-2">
-                                                <input type="number"
-                                                    wire:model.blur="aspectWeights.{{ $aspect->code }}" min="0"
-                                                    max="100"
-                                                    class="w-20 px-2 py-1 text-center border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all {{ !($selectedAspects[$aspect->code] ?? true) ? 'opacity-50 cursor-not-allowed' : '' }}"
-                                                    {{ !($selectedAspects[$aspect->code] ?? true) ? 'disabled' : '' }}>
-                                                <span class="text-sm text-gray-600 dark:text-gray-400">%</span>
-                                            </div>
-                                        </div>
-
-                                        {{-- Sub-Aspects (for Potensi) --}}
-                                        @if ($categoryCode === 'potensi' && $aspect->subAspects && $aspect->subAspects->count() > 0)
-                                            <div x-data="{ show: {{ $expandedAspects[$aspect->code] ?? false ? 'true' : 'false' }} }" x-show="show" wire:ignore.self x-collapse
-                                                class="border-t border-gray-200 dark:border-gray-700">
-                                                @if ($expandedAspects[$aspect->code] ?? false)
-                                                    <div class="p-3 pl-12 space-y-2 bg-white dark:bg-gray-800">
-                                                        @foreach ($aspect->subAspects as $subAspect)
-                                                            <div
-                                                                class="flex items-center gap-3 py-1 hover:bg-gray-50 dark:hover:bg-gray-700/30 rounded transition-colors">
-                                                                {{-- Sub-Aspect Checkbox --}}
-                                                                <input type="checkbox"
-                                                                    wire:model.live="selectedSubAspects.{{ $aspect->code }}.{{ $subAspect->code }}"
-                                                                    id="subaspect_{{ $aspect->code }}_{{ $subAspect->code }}"
-                                                                    class="w-4 h-4 rounded text-blue-600 focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 transition-all"
-                                                                    {{ !($selectedAspects[$aspect->code] ?? true) ? 'disabled' : '' }}>
-
-                                                                {{-- Sub-Aspect Name --}}
-                                                                <label
-                                                                    for="subaspect_{{ $aspect->code }}_{{ $subAspect->code }}"
-                                                                    class="flex-1 cursor-pointer">
-                                                                    <span
-                                                                        class="text-sm text-gray-700 dark:text-gray-300 {{ !($selectedAspects[$aspect->code] ?? true) || !($selectedSubAspects[$aspect->code][$subAspect->code] ?? true) ? 'line-through opacity-50' : '' }}">
-                                                                        {{ $subAspect->name }}
-                                                                    </span>
-                                                                </label>
-
-                                                                {{-- Standard Rating Display --}}
-                                                                <div
-                                                                    class="text-xs text-gray-500 dark:text-gray-400 px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded">
-                                                                    Rating: {{ $subAspect->standard_rating }}
-                                                                </div>
-                                                            </div>
-                                                        @endforeach
-                                                    </div>
-                                                @endif
-                                            </div>
+                                    {{-- Aspect Name - REMOVED: for attribute and cursor-pointer --}}
+                                    <div class="flex-1">
+                                        <span
+                                            class="font-semibold text-gray-900 dark:text-gray-100 {{ !($selectedAspects[$aspect->code] ?? true) ? 'line-through opacity-50' : '' }}">
+                                            {{ $aspect->name }}
+                                        </span>
+                                        @if ($aspect->subAspects && $aspect->subAspects->count() > 0)
+                                        <span class="text-xs text-gray-500 dark:text-gray-400 ml-2">
+                                            ({{ $aspect->subAspects->count() }} sub-aspek)
+                                        </span>
                                         @endif
                                     </div>
-                                @empty
-                                    <div class="text-center py-8 text-gray-500 dark:text-gray-400">
-                                        Tidak ada aspek ditemukan untuk kategori ini.
-                                    </div>
-                                @endforelse
-                            </div>
 
-                            {{-- Validation Section --}}
-                            <div
-                                class="px-6 py-3 bg-gray-50 dark:bg-gray-700/50 border-t border-b border-gray-200 dark:border-gray-700">
-                                <div class="text-sm space-y-1">
-                                    @if ($this->validationResult['valid'])
-                                        {{-- Valid State --}}
-                                        <div class="flex items-center gap-2 text-green-700 dark:text-green-400">
-                                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd"
-                                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                                                    clip-rule="evenodd"></path>
-                                            </svg>
-                                            <span class="font-semibold">Validasi Berhasil!</span>
-                                        </div>
-                                        <div class="ml-7 space-y-1 text-gray-600 dark:text-gray-400">
-                                            <div class="flex items-center gap-2">
-                                                <span class="text-green-600">✓</span>
-                                                Total Bobot: {{ $this->totalWeight }}%
-                                                <span class="text-xs text-green-600 dark:text-green-400">(Valid -
-                                                    100%)</span>
+                                    {{-- Weight Input --}}
+                                    <div class="flex items-center gap-2">
+                                        <input type="number" wire:model.blur="aspectWeights.{{ $aspect->code }}" min="0"
+                                            max="100"
+                                            class="w-20 px-2 py-1 text-center border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all {{ !($selectedAspects[$aspect->code] ?? true) ? 'opacity-50 cursor-not-allowed' : '' }}"
+                                            {{ !($selectedAspects[$aspect->code] ?? true) ? 'disabled' : '' }}>
+                                        <span class="text-sm text-gray-600 dark:text-gray-400">%</span>
+                                    </div>
+                                </div>
+
+                                {{-- Sub-Aspects (for Potensi) --}}
+                                @if ($categoryCode === 'potensi' && $aspect->subAspects && $aspect->subAspects->count()
+                                > 0)
+                                <div x-data="{ show: {{ $expandedAspects[$aspect->code] ?? false ? 'true' : 'false' }} }"
+                                    x-show="show" wire:ignore.self x-collapse
+                                    class="border-t border-gray-200 dark:border-gray-700">
+                                    @if ($expandedAspects[$aspect->code] ?? false)
+                                    <div class="p-3 pl-12 space-y-2 bg-white dark:bg-gray-800">
+                                        @foreach ($aspect->subAspects as $subAspect)
+                                        <div
+                                            class="flex items-center gap-3 py-1 hover:bg-gray-50 dark:hover:bg-gray-700/30 rounded transition-colors">
+                                            {{-- Sub-Aspect Checkbox - Only clickable area --}}
+                                            <input type="checkbox"
+                                                wire:model.live="selectedSubAspects.{{ $aspect->code }}.{{ $subAspect->code }}"
+                                                id="subaspect_{{ $aspect->code }}_{{ $subAspect->code }}"
+                                                class="w-4 h-4 rounded text-blue-600 focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 transition-all cursor-pointer"
+                                                {{ !($selectedAspects[$aspect->code] ?? true) ? 'disabled' : '' }}>
+
+                                            {{-- Sub-Aspect Name - REMOVED: for attribute and cursor-pointer --}}
+                                            <div class="flex-1">
+                                                <span
+                                                    class="text-sm text-gray-700 dark:text-gray-300 {{ !($selectedAspects[$aspect->code] ?? true) || !($selectedSubAspects[$aspect->code][$subAspect->code] ?? true) ? 'line-through opacity-50' : '' }}">
+                                                    {{ $subAspect->name }}
+                                                </span>
                                             </div>
-                                            <div class="flex items-center gap-2">
-                                                <span class="text-green-600">✓</span>
-                                                Aspek Aktif:
-                                                {{ $this->activeAspectsCount }}/{{ $this->totalAspectsCount }}
-                                                <span class="text-xs text-green-600 dark:text-green-400">(Minimal
-                                                    3)</span>
-                                            </div>
-                                            @if ($categoryCode === 'potensi')
-                                                <div class="flex items-center gap-2">
-                                                    <span class="text-green-600">✓</span>
-                                                    Sub-Aspek: Semua aspek aktif memiliki minimal 1 sub-aspek
-                                                </div>
-                                            @endif
-                                        </div>
-                                    @else
-                                        {{-- Invalid State with Alert --}}
-                                        <div x-data="{ showErrors: true }"
-                                            class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md p-3">
-                                            <div class="flex items-start gap-2 text-red-700 dark:text-red-400">
-                                                <svg class="w-5 h-5 mt-0.5 flex-shrink-0" fill="currentColor"
-                                                    viewBox="0 0 20 20">
-                                                    <path fill-rule="evenodd"
-                                                        d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                                                        clip-rule="evenodd"></path>
-                                                </svg>
-                                                <div class="flex-1">
-                                                    <div class="font-semibold mb-1">Perbaiki kesalahan berikut:</div>
-                                                    <ul class="list-disc list-inside space-y-1 text-sm">
-                                                        @foreach ($this->validationResult['errors'] as $error)
-                                                            <li>{{ $error }}</li>
-                                                        @endforeach
-                                                    </ul>
-                                                </div>
+
+                                            {{-- Standard Rating Display --}}
+                                            <div
+                                                class="text-xs text-gray-500 dark:text-gray-400 px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded">
+                                                Rating: {{ $subAspect->standard_rating }}
                                             </div>
                                         </div>
+                                        @endforeach
+                                    </div>
                                     @endif
                                 </div>
+                                @endif
                             </div>
+                            @empty
+                            <div class="text-center py-8 text-gray-500 dark:text-gray-400">
+                                Tidak ada aspek ditemukan untuk kategori ini.
+                            </div>
+                            @endforelse
+                        </div>
 
-                            {{-- Footer --}}
-                            <div class="px-6 py-4 flex items-center justify-end">
-
-                                <div class="flex items-center gap-3">
-                                    <button @click="closeModal()" type="button"
-                                        class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-all">
-                                        Batal
-                                    </button>
-                                    <button wire:click="applySelection" wire:loading.attr="disabled"
-                                        wire:loading.class="opacity-50 cursor-wait" type="button"
-                                        class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all {{ !$this->validationResult['valid'] ? 'opacity-50 cursor-not-allowed' : '' }}"
-                                        {{ !$this->validationResult['valid'] ? 'disabled' : '' }}>
-                                        <span wire:loading.remove wire:target="applySelection">Terapkan
-                                            Perubahan</span>
-                                        <span wire:loading wire:target="applySelection">Menyimpan...</span>
-                                    </button>
+                        {{-- Validation Section --}}
+                        <div
+                            class="px-6 py-3 bg-gray-50 dark:bg-gray-700/50 border-t border-b border-gray-200 dark:border-gray-700">
+                            <div class="text-sm space-y-1">
+                                @if ($this->validationResult['valid'])
+                                {{-- Valid State --}}
+                                <div class="flex items-center gap-2 text-green-700 dark:text-green-400">
+                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd"
+                                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                            clip-rule="evenodd"></path>
+                                    </svg>
+                                    <span class="font-semibold">Validasi Berhasil!</span>
                                 </div>
+                                <div class="ml-7 space-y-1 text-gray-600 dark:text-gray-400">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-green-600">✓</span>
+                                        Total Bobot: {{ $this->totalWeight }}%
+                                        <span class="text-xs text-green-600 dark:text-green-400">(Valid -
+                                            100%)</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-green-600">✓</span>
+                                        Aspek Aktif:
+                                        {{ $this->activeAspectsCount }}/{{ $this->totalAspectsCount }}
+                                        <span class="text-xs text-green-600 dark:text-green-400">(Minimal
+                                            3)</span>
+                                    </div>
+                                    @if ($categoryCode === 'potensi')
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-green-600">✓</span>
+                                        Sub-Aspek: Semua aspek aktif memiliki minimal 1 sub-aspek
+                                    </div>
+                                    @endif
+                                </div>
+                                @else
+                                {{-- Invalid State with Alert --}}
+                                <div x-data="{ showErrors: true }"
+                                    class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md p-3">
+                                    <div class="flex items-start gap-2 text-red-700 dark:text-red-400">
+                                        <svg class="w-5 h-5 mt-0.5 flex-shrink-0" fill="currentColor"
+                                            viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd"
+                                                d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                                                clip-rule="evenodd"></path>
+                                        </svg>
+                                        <div class="flex-1">
+                                            <div class="font-semibold mb-1">Perbaiki kesalahan berikut:</div>
+                                            <ul class="list-disc list-inside space-y-1 text-sm">
+                                                @foreach ($this->validationResult['errors'] as $error)
+                                                <li>{{ $error }}</li>
+                                                @endforeach
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                @endif
                             </div>
+                        </div>
+
+                        {{-- Footer --}}
+                        <div class="px-6 py-4 flex items-center justify-end">
+
+                            <div class="flex items-center gap-3">
+                                <button @click="closeModal()" type="button"
+                                    class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-all">
+                                    Batal
+                                </button>
+                                <button wire:click="applySelection" wire:loading.attr="disabled"
+                                    wire:loading.class="opacity-50 cursor-wait" type="button"
+                                    class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all {{ !$this->validationResult['valid'] ? 'opacity-50 cursor-not-allowed' : '' }}"
+                                    {{ !$this->validationResult['valid'] ? 'disabled' : '' }}>
+                                    <span wire:loading.remove wire:target="applySelection">Terapkan
+                                        Perubahan</span>
+                                    <span wire:loading wire:target="applySelection">Menyimpan...</span>
+                                </button>
+                            </div>
+                        </div>
                         @endif
                     </div>
                 </div>
