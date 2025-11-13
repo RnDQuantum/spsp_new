@@ -333,7 +333,10 @@
         subtitle="Sesuaikan nilai rating sub-aspek kompetensi" class="backdrop-blur">
         <div class="space-y-4">
             <x-mary-input class="text-xl !outline-none" label="Rating (1-5)" wire:model="editingValue" type="number"
-                min="1" max="5" />
+                min="1" max="5" step="1" />
+            @error('editingValue')
+            <p class="text-sm text-red-600 dark:text-red-400 mt-1">{{ $message }}</p>
+            @enderror
             <p class="text-sm text-gray-500 dark:text-gray-400">
                 Nilai asli: {{ $editingOriginalValue }}
             </p>

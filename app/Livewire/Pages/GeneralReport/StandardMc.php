@@ -173,6 +173,7 @@ class StandardMc extends Component
             return;
         }
 
+        $this->resetErrorBag(); // Clear any previous errors
         $this->editingField = $aspectCode;
         $this->editingValue = (int) $currentRating; // Convert to int for Kompetensi
         $this->editingOriginalValue = \App\Models\Aspect::where('template_id', $this->selectedTemplate->id)
@@ -187,6 +188,13 @@ class StandardMc extends Component
     public function saveAspectRating(): void
     {
         if (! $this->selectedTemplate || ! is_int($this->editingValue)) {
+            return;
+        }
+
+        // Validate rating must be between 1 and 5
+        if ($this->editingValue < 1 || $this->editingValue > 5) {
+            $this->addError('editingValue', 'Rating harus antara 1 sampai 5.');
+
             return;
         }
 
@@ -237,6 +245,7 @@ class StandardMc extends Component
      */
     public function closeModal(): void
     {
+        $this->resetErrorBag(); // Clear any errors when closing modal
         $this->showEditRatingModal = false;
         $this->showEditCategoryWeightModal = false;
         $this->editingField = '';

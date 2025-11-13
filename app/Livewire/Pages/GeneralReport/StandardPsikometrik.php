@@ -173,6 +173,7 @@ class StandardPsikometrik extends Component
             return;
         }
 
+        $this->resetErrorBag(); // Clear any previous errors
         $this->editingField = $subAspectCode;
         $this->editingValue = $currentRating;
         $this->editingOriginalValue = \App\Models\SubAspect::whereHas('aspect', function ($query) {
@@ -187,6 +188,13 @@ class StandardPsikometrik extends Component
     public function saveSubAspectRating(): void
     {
         if (! $this->selectedTemplate || ! is_int($this->editingValue)) {
+            return;
+        }
+
+        // Validate rating must be between 1 and 5
+        if ($this->editingValue < 1 || $this->editingValue > 5) {
+            $this->addError('editingValue', 'Rating harus antara 1 sampai 5.');
+
             return;
         }
 
@@ -237,6 +245,7 @@ class StandardPsikometrik extends Component
      */
     public function closeModal(): void
     {
+        $this->resetErrorBag(); // Clear any errors when closing modal
         $this->showEditRatingModal = false;
         $this->showEditCategoryWeightModal = false;
         $this->editingField = '';
