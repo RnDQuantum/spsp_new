@@ -7,6 +7,7 @@ use App\Models\AspectAssessment;
 use App\Models\CategoryAssessment;
 use App\Models\CategoryType;
 use App\Models\Participant;
+use App\Services\DynamicStandardService;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -44,6 +45,11 @@ class GeneralPsyMapping extends Component
 
     // Unique chart ID
     public string $chartId = '';
+
+    // CACHE PROPERTIES - untuk menyimpan hasil kalkulasi
+    private ?array $aspectsDataCache = null;
+
+    private ?array $participantRankingCache = null;
 
     // Data for charts
     public $chartLabels = [];
@@ -104,7 +110,7 @@ class GeneralPsyMapping extends Component
         }
 
         // Generate unique chart ID
-        $this->chartId = 'generalPsyMapping' . uniqid();
+        $this->chartId = 'generalPsyMapping'.uniqid();
 
         // Load tolerance from session
         $this->tolerancePercentage = session('individual_report.tolerance', 10);
@@ -145,8 +151,24 @@ class GeneralPsyMapping extends Component
         $this->prepareChartData();
     }
 
+    /**
+     * Clear all caches
+     */
+    private function clearCache(): void
+    {
+        $this->aspectsDataCache = null;
+        $this->participantRankingCache = null;
+    }
+
     private function loadAspectsData(): void
     {
+        // OPTIMIZED: Check cache first
+        if ($this->aspectsDataCache !== null) {
+            $this->aspectsData = $this->aspectsDataCache;
+
+            return;
+        }
+
         $allAspects = [];
 
         // Load Potensi aspects only
@@ -156,27 +178,87 @@ class GeneralPsyMapping extends Component
         }
 
         $this->aspectsData = $allAspects;
+
+        // OPTIMIZED: Cache the result
+        $this->aspectsDataCache = $allAspects;
     }
 
     private function loadCategoryAspects(int $categoryTypeId): array
     {
-        $aspectIds = Aspect::where('category_type_id', $categoryTypeId)
-            ->orderBy('order')
-            ->pluck('id')
-            ->toArray();
+        $template = $this->participant->positionFormation->template;
+        $standardService = app(DynamicStandardService::class);
 
-        $aspectAssessments = AspectAssessment::with('aspect')
+        // CRITICAL FIX: Get ONLY active aspect IDs to filter individual scores
+        // This ensures disabled aspects are excluded from BOTH standard AND individual calculations
+        $activeAspectIds = $standardService->getActiveAspectIds($template->id, 'potensi');
+
+        // Fallback to all IDs if no adjustments (performance optimization)
+        if (empty($activeAspectIds)) {
+            $activeAspectIds = Aspect::where('category_type_id', $categoryTypeId)
+                ->orderBy('order')
+                ->pluck('id')
+                ->toArray();
+        }
+
+        // OPTIMIZED: Get aspect assessments filtered by ACTIVE aspects only
+        // CRITICAL: Also eager load sub-aspects to recalculate ratings
+        $aspectAssessments = AspectAssessment::with([
+            'aspect.subAspects',
+            'subAspectAssessments.subAspect',
+        ])
             ->where('participant_id', $this->participant->id)
-            ->whereIn('aspect_id', $aspectIds)
+            ->whereIn('aspect_id', $activeAspectIds) // ✅ CRITICAL: Filter active only
             ->orderBy('aspect_id')
             ->get();
 
-        return $aspectAssessments->map(function ($assessment) {
-            // 1. Get original values from database
-            $originalStandardRating = (float) $assessment->standard_rating;
-            $originalStandardScore = (float) $assessment->standard_score;
-            $individualRating = (float) $assessment->individual_rating;
-            $individualScore = (float) $assessment->individual_score;
+        return $aspectAssessments->map(function ($assessment) use ($template, $standardService) {
+            // CRITICAL FIX: For Potensi aspects, recalculate rating based on ACTIVE sub-aspects only
+            $aspect = $assessment->aspect;
+
+            // Get adjusted weight from session (CRITICAL FIX #1)
+            $adjustedWeight = $standardService->getAspectWeight($template->id, $aspect->code);
+
+            // Recalculate standard rating based on ACTIVE sub-aspects (CRITICAL FIX #2)
+            $recalculatedStandardRating = null;
+            $recalculatedIndividualRating = null;
+
+            if ($aspect->subAspects && $aspect->subAspects->count() > 0) {
+                // This is a Potensi aspect with sub-aspects
+                $activeSubAspectsStandardSum = 0;
+                $activeSubAspectsIndividualSum = 0;
+                $activeSubAspectsCount = 0;
+
+                foreach ($assessment->subAspectAssessments as $subAssessment) {
+                    // Check if sub-aspect is active
+                    if (! $standardService->isSubAspectActive($template->id, $subAssessment->subAspect->code)) {
+                        continue; // Skip inactive sub-aspects
+                    }
+
+                    // Get adjusted sub-aspect standard rating from session
+                    $adjustedSubStandardRating = $standardService->getSubAspectRating(
+                        $template->id,
+                        $subAssessment->subAspect->code
+                    );
+
+                    $activeSubAspectsStandardSum += $adjustedSubStandardRating;
+                    $activeSubAspectsIndividualSum += $subAssessment->individual_rating;
+                    $activeSubAspectsCount++;
+                }
+
+                if ($activeSubAspectsCount > 0) {
+                    // FIXED: Round to 2 decimals to match StandardPsikometrik
+                    $recalculatedStandardRating = round($activeSubAspectsStandardSum / $activeSubAspectsCount, 2);
+                    $recalculatedIndividualRating = round($activeSubAspectsIndividualSum / $activeSubAspectsCount, 2);
+                }
+            }
+
+            // Use recalculated ratings if available, otherwise use database values
+            $originalStandardRating = $recalculatedStandardRating ?? (float) $assessment->standard_rating;
+            $individualRating = $recalculatedIndividualRating ?? (float) $assessment->individual_rating;
+
+            // Recalculate scores with adjusted weight
+            $originalStandardScore = round($originalStandardRating * $adjustedWeight, 2);
+            $individualScore = round($individualRating * $adjustedWeight, 2);
 
             // 2. Calculate adjusted standard based on tolerance
             $toleranceFactor = 1 - ($this->tolerancePercentage / 100);
@@ -196,9 +278,14 @@ class GeneralPsyMapping extends Component
                 ? ($individualScore / $adjustedStandardScore) * 100
                 : 0;
 
+            // Get original weight for comparison
+            $originalWeight = $aspect->weight_percentage;
+
             return [
-                'name' => $assessment->aspect->name,
-                'weight_percentage' => $assessment->aspect->weight_percentage,
+                'name' => $aspect->name,
+                'weight_percentage' => $adjustedWeight, // ✅ CRITICAL: Use adjusted weight from session
+                'original_weight' => $originalWeight, // For reference/display
+                'is_weight_adjusted' => $adjustedWeight !== $originalWeight, // Flag for UI
                 'original_standard_rating' => $originalStandardRating,
                 'original_standard_score' => $originalStandardScore,
                 'standard_rating' => $adjustedStandardRating,
@@ -237,6 +324,16 @@ class GeneralPsyMapping extends Component
             $this->totalOriginalStandardScore += $aspect['original_standard_score'];
             $this->totalOriginalGapScore += $aspect['original_gap_score'];
         }
+
+        // FIXED: Round all totals to 2 decimals for consistency
+        $this->totalStandardRating = round($this->totalStandardRating, 2);
+        $this->totalStandardScore = round($this->totalStandardScore, 2);
+        $this->totalIndividualRating = round($this->totalIndividualRating, 2);
+        $this->totalIndividualScore = round($this->totalIndividualScore, 2);
+        $this->totalGapRating = round($this->totalGapRating, 2);
+        $this->totalGapScore = round($this->totalGapScore, 2);
+        $this->totalOriginalStandardScore = round($this->totalOriginalStandardScore, 2);
+        $this->totalOriginalGapScore = round($this->totalOriginalGapScore, 2);
 
         // Determine overall conclusion based on gap-based logic
         $this->overallConclusion = $this->getOverallConclusion($this->totalOriginalGapScore, $this->totalGapScore);
@@ -307,6 +404,11 @@ class GeneralPsyMapping extends Component
     {
         $this->tolerancePercentage = $tolerance;
 
+        // OPTIMIZED: Clear cache before reloading (tolerance affects calculations, not data structure)
+        // Note: We clear cache even though tolerance doesn't affect active aspects,
+        // because it affects calculated values (adjusted standards)
+        $this->clearCache();
+
         // Reload aspects data with new tolerance
         $this->loadAspectsData();
 
@@ -368,9 +470,15 @@ class GeneralPsyMapping extends Component
 
     /**
      * Get participant ranking information in Potensi category
+     * OPTIMIZED: Use cache and active aspect filtering
      */
     public function getParticipantRanking(): ?array
     {
+        // OPTIMIZED: Check cache first
+        if ($this->participantRankingCache !== null) {
+            return $this->participantRankingCache;
+        }
+
         if (! $this->participant || ! $this->potensiCategory) {
             return null;
         }
@@ -382,23 +490,32 @@ class GeneralPsyMapping extends Component
             return null;
         }
 
-        // Get all aspect IDs for Potensi category
-        $potensiAspectIds = Aspect::query()
-            ->where('category_type_id', $this->potensiCategory->id)
-            ->orderBy('order')
-            ->pluck('id')
-            ->all();
+        $template = $this->participant->positionFormation->template;
+        $standardService = app(DynamicStandardService::class);
+
+        // CRITICAL FIX: Get ONLY active aspect IDs to ensure consistency with RankingPsyMapping
+        $potensiAspectIds = $standardService->getActiveAspectIds($template->id, 'potensi');
+
+        // Fallback to all IDs if no adjustments (performance optimization)
+        if (empty($potensiAspectIds)) {
+            $potensiAspectIds = Aspect::query()
+                ->where('category_type_id', $this->potensiCategory->id)
+                ->orderBy('order')
+                ->pluck('id')
+                ->all();
+        }
 
         if (empty($potensiAspectIds)) {
             return null;
         }
 
-        // Get all participants with their scores for the same event and position
+        // OPTIMIZED: Get all participants with their scores for the same event and position
+        // Filter by ACTIVE aspects only for consistency
         $allParticipants = AspectAssessment::query()
             ->selectRaw('participant_id, SUM(standard_score) as sum_original_standard_score, SUM(individual_rating) as sum_individual_rating, SUM(individual_score) as sum_individual_score')
             ->where('event_id', $event->id)
             ->where('position_formation_id', $positionFormationId)
-            ->whereIn('aspect_id', $potensiAspectIds)
+            ->whereIn('aspect_id', $potensiAspectIds) // ✅ CRITICAL: Filter active only
             ->groupBy('participant_id')
             ->orderByDesc('sum_individual_score')
             ->orderByDesc('sum_individual_rating')
@@ -443,11 +560,14 @@ class GeneralPsyMapping extends Component
             return null;
         }
 
-        return [
+        // OPTIMIZED: Cache the result
+        $this->participantRankingCache = [
             'rank' => $rank,
             'total' => $totalParticipants,
             'conclusion' => $conclusion,
         ];
+
+        return $this->participantRankingCache;
     }
 
     public function render()
