@@ -2,12 +2,10 @@
 
 namespace App\Livewire\Pages\IndividualReport;
 
-use App\Models\Aspect;
-use App\Models\AspectAssessment;
 use App\Models\CategoryAssessment;
 use App\Models\CategoryType;
 use App\Models\Participant;
-use App\Services\DynamicStandardService;
+use App\Services\IndividualAssessmentService;
 use App\Services\RankingService;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -184,123 +182,20 @@ class GeneralPsyMapping extends Component
         $this->aspectsDataCache = $allAspects;
     }
 
+    /**
+     * Load aspects data for a category
+     * REFACTORED: Use IndividualAssessmentService for consistent calculation
+     */
     private function loadCategoryAspects(int $categoryTypeId): array
     {
-        $template = $this->participant->positionFormation->template;
-        $standardService = app(DynamicStandardService::class);
+        // Use IndividualAssessmentService for consistent calculation
+        $service = app(IndividualAssessmentService::class);
 
-        // CRITICAL FIX: Get ONLY active aspect IDs to filter individual scores
-        // This ensures disabled aspects are excluded from BOTH standard AND individual calculations
-        $activeAspectIds = $standardService->getActiveAspectIds($template->id, 'potensi');
-
-        // Fallback to all IDs if no adjustments (performance optimization)
-        if (empty($activeAspectIds)) {
-            $activeAspectIds = Aspect::where('category_type_id', $categoryTypeId)
-                ->orderBy('order')
-                ->pluck('id')
-                ->toArray();
-        }
-
-        // OPTIMIZED: Get aspect assessments filtered by ACTIVE aspects only
-        // CRITICAL: Also eager load sub-aspects to recalculate ratings
-        $aspectAssessments = AspectAssessment::with([
-            'aspect.subAspects',
-            'subAspectAssessments.subAspect',
-        ])
-            ->where('participant_id', $this->participant->id)
-            ->whereIn('aspect_id', $activeAspectIds) // ✅ CRITICAL: Filter active only
-            ->orderBy('aspect_id')
-            ->get();
-
-        return $aspectAssessments->map(function ($assessment) use ($template, $standardService) {
-            // CRITICAL FIX: For Potensi aspects, recalculate rating based on ACTIVE sub-aspects only
-            $aspect = $assessment->aspect;
-
-            // Get adjusted weight from session (CRITICAL FIX #1)
-            $adjustedWeight = $standardService->getAspectWeight($template->id, $aspect->code);
-
-            // Recalculate standard rating based on ACTIVE sub-aspects (CRITICAL FIX #2)
-            $recalculatedStandardRating = null;
-            $recalculatedIndividualRating = null;
-
-            if ($aspect->subAspects && $aspect->subAspects->count() > 0) {
-                // This is a Potensi aspect with sub-aspects
-                $activeSubAspectsStandardSum = 0;
-                $activeSubAspectsIndividualSum = 0;
-                $activeSubAspectsCount = 0;
-
-                foreach ($assessment->subAspectAssessments as $subAssessment) {
-                    // Check if sub-aspect is active
-                    if (! $standardService->isSubAspectActive($template->id, $subAssessment->subAspect->code)) {
-                        continue; // Skip inactive sub-aspects
-                    }
-
-                    // Get adjusted sub-aspect standard rating from session
-                    $adjustedSubStandardRating = $standardService->getSubAspectRating(
-                        $template->id,
-                        $subAssessment->subAspect->code
-                    );
-
-                    $activeSubAspectsStandardSum += $adjustedSubStandardRating;
-                    $activeSubAspectsIndividualSum += $subAssessment->individual_rating;
-                    $activeSubAspectsCount++;
-                }
-
-                if ($activeSubAspectsCount > 0) {
-                    // FIXED: Round to 2 decimals to match StandardPsikometrik
-                    $recalculatedStandardRating = round($activeSubAspectsStandardSum / $activeSubAspectsCount, 2);
-                    $recalculatedIndividualRating = round($activeSubAspectsIndividualSum / $activeSubAspectsCount, 2);
-                }
-            }
-
-            // Use recalculated ratings if available, otherwise use database values
-            $originalStandardRating = $recalculatedStandardRating ?? (float) $assessment->standard_rating;
-            $individualRating = $recalculatedIndividualRating ?? (float) $assessment->individual_rating;
-
-            // Recalculate scores with adjusted weight
-            $originalStandardScore = round($originalStandardRating * $adjustedWeight, 2);
-            $individualScore = round($individualRating * $adjustedWeight, 2);
-
-            // 2. Calculate adjusted standard based on tolerance
-            $toleranceFactor = 1 - ($this->tolerancePercentage / 100);
-            $adjustedStandardRating = $originalStandardRating * $toleranceFactor;
-            $adjustedStandardScore = $originalStandardScore * $toleranceFactor;
-
-            // 3. Calculate original gap (at tolerance 0%)
-            $originalGapRating = $individualRating - $originalStandardRating;
-            $originalGapScore = $individualScore - $originalStandardScore;
-
-            // 4. Calculate adjusted gap (with tolerance)
-            $adjustedGapRating = $individualRating - $adjustedStandardRating;
-            $adjustedGapScore = $individualScore - $adjustedStandardScore;
-
-            // 5. Calculate percentage based on adjusted standard
-            $adjustedPercentage = $adjustedStandardScore > 0
-                ? ($individualScore / $adjustedStandardScore) * 100
-                : 0;
-
-            // Get original weight for comparison
-            $originalWeight = $aspect->weight_percentage;
-
-            return [
-                'name' => $aspect->name,
-                'weight_percentage' => $adjustedWeight, // ✅ CRITICAL: Use adjusted weight from session
-                'original_weight' => $originalWeight, // For reference/display
-                'is_weight_adjusted' => $adjustedWeight !== $originalWeight, // Flag for UI
-                'original_standard_rating' => $originalStandardRating,
-                'original_standard_score' => $originalStandardScore,
-                'standard_rating' => $adjustedStandardRating,
-                'standard_score' => $adjustedStandardScore,
-                'individual_rating' => $individualRating,
-                'individual_score' => $individualScore,
-                'gap_rating' => $adjustedGapRating,
-                'gap_score' => $adjustedGapScore,
-                'original_gap_rating' => $originalGapRating,
-                'original_gap_score' => $originalGapScore,
-                'percentage_score' => $adjustedPercentage,
-                'conclusion_text' => $this->getConclusionText($originalGapScore, $adjustedGapScore),
-            ];
-        })->toArray();
+        return $service->getAspectAssessments(
+            $this->participant->id,
+            $categoryTypeId,
+            $this->tolerancePercentage
+        )->toArray();
     }
 
     private function calculateTotals(): void

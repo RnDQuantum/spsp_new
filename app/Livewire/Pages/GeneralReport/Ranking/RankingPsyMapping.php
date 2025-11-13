@@ -66,82 +66,43 @@ class RankingPsyMapping extends Component
     public function updatedPerPage(): void
     {
         $this->resetPage();
-        $this->clearCache(); // Clear cache saat perPage berubah
-
-        // Refresh chart data
-        $this->prepareChartData();
-
-        $summary = $this->getPassingSummary();
-        $this->dispatch('summary-updated', [
-            'passing' => $summary['passing'],
-            'total' => $summary['total'],
-            'percentage' => $summary['percentage'],
-        ]);
-
-        // Dispatch chart update event
-        $this->dispatch('pieChartDataUpdated', [
-            'labels' => $this->chartLabels,
-            'data' => $this->chartData,
-            'colors' => $this->chartColors,
-        ]);
+        $this->clearCache();
+        $this->refreshData();
     }
 
-    public function handleEventSelected(?string $eventCode): void
+    public function handleEventSelected(): void
     {
         $this->resetPage();
-        $this->clearCache(); // Clear cache saat event berubah
-
-        // Refresh chart data
-        $this->prepareChartData();
-
-        $summary = $this->getPassingSummary();
-        $this->dispatch('summary-updated', [
-            'passing' => $summary['passing'],
-            'total' => $summary['total'],
-            'percentage' => $summary['percentage'],
-        ]);
-
-        // Dispatch chart update event
-        $this->dispatch('pieChartDataUpdated', [
-            'labels' => $this->chartLabels,
-            'data' => $this->chartData,
-            'colors' => $this->chartColors,
-        ]);
+        $this->clearCache();
+        $this->refreshData();
     }
 
-    public function handlePositionSelected(?int $positionFormationId): void
+    public function handlePositionSelected(): void
     {
         $this->resetPage();
-        $this->clearCache(); // Clear cache saat position berubah
-
-        // Refresh chart data
-        $this->prepareChartData();
-
-        $summary = $this->getPassingSummary();
-        $this->dispatch('summary-updated', [
-            'passing' => $summary['passing'],
-            'total' => $summary['total'],
-            'percentage' => $summary['percentage'],
-        ]);
-
-        // Dispatch chart update event
-        $this->dispatch('pieChartDataUpdated', [
-            'labels' => $this->chartLabels,
-            'data' => $this->chartData,
-            'colors' => $this->chartColors,
-        ]);
+        $this->clearCache();
+        $this->refreshData();
     }
 
     public function handleToleranceUpdate(int $tolerance): void
     {
         $this->tolerancePercentage = $tolerance;
-        // Note: Tidak perlu clearCache() karena adjustedStandards tidak berubah,
-        // hanya toleranceFactor yang berubah (dihitung on-the-fly)
+        $this->clearCache();
+        $this->refreshData();
+    }
 
-        // Refresh chart data with new tolerance
+    /**
+     * Refresh all data and dispatch update events
+     */
+    private function refreshData(): void
+    {
+        // Refresh chart data
         $this->prepareChartData();
 
+        // Get updated summary
         $summary = $this->getPassingSummary();
+
+        // Dispatch summary update event
         $this->dispatch('summary-updated', [
             'passing' => $summary['passing'],
             'total' => $summary['total'],
