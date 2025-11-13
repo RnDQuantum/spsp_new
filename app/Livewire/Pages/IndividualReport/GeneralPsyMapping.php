@@ -8,6 +8,7 @@ use App\Models\CategoryAssessment;
 use App\Models\CategoryType;
 use App\Models\Participant;
 use App\Services\DynamicStandardService;
+use App\Services\RankingService;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -470,7 +471,7 @@ class GeneralPsyMapping extends Component
 
     /**
      * Get participant ranking information in Potensi category
-     * OPTIMIZED: Use cache and active aspect filtering
+     * REFACTORED: Use RankingService for consistency
      */
     public function getParticipantRanking(): ?array
     {
@@ -485,87 +486,29 @@ class GeneralPsyMapping extends Component
 
         $event = $this->participant->assessmentEvent;
         $positionFormationId = $this->participant->position_formation_id;
-
-        if (! $event) {
-            return null;
-        }
-
         $template = $this->participant->positionFormation->template;
-        $standardService = app(DynamicStandardService::class);
 
-        // CRITICAL FIX: Get ONLY active aspect IDs to ensure consistency with RankingPsyMapping
-        $potensiAspectIds = $standardService->getActiveAspectIds($template->id, 'potensi');
-
-        // Fallback to all IDs if no adjustments (performance optimization)
-        if (empty($potensiAspectIds)) {
-            $potensiAspectIds = Aspect::query()
-                ->where('category_type_id', $this->potensiCategory->id)
-                ->orderBy('order')
-                ->pluck('id')
-                ->all();
-        }
-
-        if (empty($potensiAspectIds)) {
+        if (! $event || ! $template) {
             return null;
         }
 
-        // OPTIMIZED: Get all participants with their scores for the same event and position
-        // Filter by ACTIVE aspects only for consistency
-        $allParticipants = AspectAssessment::query()
-            ->selectRaw('participant_id, SUM(standard_score) as sum_original_standard_score, SUM(individual_rating) as sum_individual_rating, SUM(individual_score) as sum_individual_score')
-            ->where('event_id', $event->id)
-            ->where('position_formation_id', $positionFormationId)
-            ->whereIn('aspect_id', $potensiAspectIds) // ✅ CRITICAL: Filter active only
-            ->groupBy('participant_id')
-            ->orderByDesc('sum_individual_score')
-            ->orderByDesc('sum_individual_rating')
-            ->orderBy('participant_id')
-            ->get();
+        // Use RankingService for consistent ranking calculation
+        $rankingService = app(RankingService::class);
+        $ranking = $rankingService->getParticipantRank(
+            $this->participant->id,
+            $event->id,
+            $positionFormationId,
+            $template->id,
+            'potensi',
+            $this->tolerancePercentage
+        );
 
-        $totalParticipants = $allParticipants->count();
-
-        // Find current participant's rank and calculate conclusion
-        $rank = null;
-        $conclusion = null;
-        foreach ($allParticipants as $index => $participant) {
-            if ($participant->participant_id === $this->participant->id) {
-                $rank = $index + 1;
-
-                // Calculate conclusion using gap-based logic
-                $originalStandardScore = (float) $participant->sum_original_standard_score;
-                $individualScore = (float) $participant->sum_individual_score;
-
-                // Calculate adjusted standard based on tolerance
-                $toleranceFactor = 1 - ($this->tolerancePercentage / 100);
-                $adjustedStandardScore = $originalStandardScore * $toleranceFactor;
-
-                // Calculate gaps
-                $originalGap = $individualScore - $originalStandardScore;
-                $adjustedGap = $individualScore - $adjustedStandardScore;
-
-                // Determine conclusion using gap-based logic (no threshold)
-                if ($originalGap >= 0) {
-                    $conclusion = 'Di Atas Standar';
-                } elseif ($adjustedGap >= 0) {
-                    $conclusion = 'Memenuhi Standar';
-                } else {
-                    $conclusion = 'Di Bawah Standar';
-                }
-
-                break;
-            }
-        }
-
-        if ($rank === null) {
+        if (! $ranking) {
             return null;
         }
 
         // OPTIMIZED: Cache the result
-        $this->participantRankingCache = [
-            'rank' => $rank,
-            'total' => $totalParticipants,
-            'conclusion' => $conclusion,
-        ];
+        $this->participantRankingCache = $ranking;
 
         return $this->participantRankingCache;
     }
