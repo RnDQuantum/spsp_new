@@ -7,6 +7,7 @@ use App\Models\AspectAssessment;
 use App\Models\CategoryType;
 use App\Models\FinalAssessment;
 use App\Models\Participant;
+use App\Services\DynamicStandardService;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -30,6 +31,11 @@ class GeneralMatching extends Component
 
     // Job match percentage (from final assessment)
     public $jobMatchPercentage = 0;
+
+    // CACHE PROPERTIES - untuk menyimpan hasil kalkulasi
+    private ?array $potensiAspectsCache = null;
+
+    private ?array $kompetensiAspectsCache = null;
 
     // ADD: Public properties untuk support child component
     public $eventCode;
@@ -109,6 +115,15 @@ class GeneralMatching extends Component
         $this->calculateJobMatchPercentage();
     }
 
+    /**
+     * Clear all caches
+     */
+    private function clearCache(): void
+    {
+        $this->potensiAspectsCache = null;
+        $this->kompetensiAspectsCache = null;
+    }
+
     private function calculateJobMatchPercentage(): void
     {
         $allPercentages = [];
@@ -133,25 +148,44 @@ class GeneralMatching extends Component
 
     private function loadAspectsForCategory(int $categoryTypeId, string $propertyName): void
     {
-        // Get aspect IDs for this category
-        $aspectIds = Aspect::where('category_type_id', $categoryTypeId)
-            ->pluck('id')
-            ->toArray();
+        // OPTIMIZED: Check cache first
+        $cacheProperty = $propertyName.'Cache';
+        if ($this->$cacheProperty !== null) {
+            $this->$propertyName = $this->$cacheProperty;
 
-        // Load aspect assessments with sub-aspects
+            return;
+        }
+
+        $template = $this->participant->positionFormation->template;
+        $standardService = app(DynamicStandardService::class);
+
+        // Determine category code from property name
+        $categoryCode = str_contains($propertyName, 'potensi') ? 'potensi' : 'kompetensi';
+
+        // CRITICAL FIX: Get ONLY active aspect IDs to filter individual scores
+        $activeAspectIds = $standardService->getActiveAspectIds($template->id, $categoryCode);
+
+        // Fallback to all IDs if no adjustments
+        if (empty($activeAspectIds)) {
+            $activeAspectIds = Aspect::where('category_type_id', $categoryTypeId)
+                ->pluck('id')
+                ->toArray();
+        }
+
+        // OPTIMIZED: Load aspect assessments with sub-aspects filtered by ACTIVE aspects only
         $aspectAssessments = AspectAssessment::with([
             'aspect.subAspects',
             'subAspectAssessments.subAspect',
         ])
             ->where('participant_id', $this->participant->id)
-            ->whereIn('aspect_id', $aspectIds)
+            ->whereIn('aspect_id', $activeAspectIds) // ✅ CRITICAL: Filter active only
             ->orderBy('aspect_id')
             ->get();
 
         // Process each aspect
-        $this->$propertyName = $aspectAssessments->map(function ($assessment) {
-            // Calculate percentage using generalized logic
-            $percentage = $this->calculateAspectPercentage($assessment);
+        $result = $aspectAssessments->map(function ($assessment) use ($template, $standardService) {
+            // Calculate percentage using generalized logic with adjusted ratings
+            $percentage = $this->calculateAspectPercentage($assessment, $template, $standardService);
 
             return [
                 'name' => $assessment->aspect->name,
@@ -160,52 +194,102 @@ class GeneralMatching extends Component
                 'individual_rating' => $assessment->individual_rating,
                 'standard_rating' => $assessment->standard_rating,
                 'description' => $assessment->aspect->description,
-                'sub_aspects' => $this->loadSubAspects($assessment),
+                'sub_aspects' => $this->loadSubAspects($assessment, $template, $standardService),
             ];
         })->toArray();
+
+        // OPTIMIZED: Cache the result
+        $this->$cacheProperty = $result;
+        $this->$propertyName = $result;
     }
 
-    private function calculateAspectPercentage(AspectAssessment $assessment): float
-    {
+    private function calculateAspectPercentage(
+        AspectAssessment $assessment,
+        $template,
+        DynamicStandardService $standardService
+    ): float {
+        $aspect = $assessment->aspect;
+
         // Check if aspect has sub-aspects
         if ($assessment->subAspectAssessments->isNotEmpty()) {
-            // Calculate based on sub-aspects (for Potensi or any category with sub-aspects)
+            // Calculate based on ACTIVE sub-aspects only (for Potensi)
             $totalValue = 0;
-            $subAspectCount = $assessment->subAspectAssessments->count();
+            $activeSubAspectCount = 0;
 
             foreach ($assessment->subAspectAssessments as $subAssessment) {
+                // CRITICAL: Check if sub-aspect is active
+                if (! $standardService->isSubAspectActive($template->id, $subAssessment->subAspect->code)) {
+                    continue; // Skip inactive sub-aspects
+                }
+
+                // Get adjusted standard rating from session
+                $adjustedStandardRating = $standardService->getSubAspectRating(
+                    $template->id,
+                    $subAssessment->subAspect->code
+                );
+
+                // Individual rating stays the same (from database)
+                $individualRating = $subAssessment->individual_rating;
+
                 // If individual >= standard, value = 1.0 (full contribution)
                 // If individual < standard, value = individual / standard (proportional)
-                if ($subAssessment->individual_rating >= $subAssessment->standard_rating) {
+                if ($individualRating >= $adjustedStandardRating) {
                     $totalValue += 1.0;
                 } else {
-                    $totalValue += $subAssessment->individual_rating / $subAssessment->standard_rating;
+                    $totalValue += $individualRating / $adjustedStandardRating;
                 }
+
+                $activeSubAspectCount++;
             }
 
-            // Average of all sub-aspects, then convert to percentage
-            return ($totalValue / $subAspectCount) * 100;
+            // Average of ACTIVE sub-aspects, then convert to percentage
+            if ($activeSubAspectCount > 0) {
+                return ($totalValue / $activeSubAspectCount) * 100;
+            }
+
+            return 0;
         } else {
-            // Calculate based on aspect-level rating (for Kompetensi or any category without sub-aspects)
+            // Calculate based on aspect-level rating (for Kompetensi)
+            // Get adjusted standard rating from session
+            $adjustedStandardRating = $standardService->getAspectRating($template->id, $aspect->code);
+            $individualRating = $assessment->individual_rating;
+
             // Apply the same logic: if individual >= standard, return 100%
-            if ($assessment->individual_rating >= $assessment->standard_rating) {
+            if ($individualRating >= $adjustedStandardRating) {
                 return 100;
             } else {
-                return ($assessment->individual_rating / $assessment->standard_rating) * 100;
+                return ($individualRating / $adjustedStandardRating) * 100;
             }
         }
     }
 
-    private function loadSubAspects(AspectAssessment $aspectAssessment): array
-    {
-        return $aspectAssessment->subAspectAssessments->map(function ($subAssessment) {
-            return [
-                'name' => $subAssessment->subAspect->name,
-                'individual_rating' => $subAssessment->individual_rating,
-                'standard_rating' => $subAssessment->standard_rating,
-                'rating_label' => $subAssessment->rating_label,
-            ];
-        })->toArray();
+    private function loadSubAspects(
+        AspectAssessment $aspectAssessment,
+        $template,
+        DynamicStandardService $standardService
+    ): array {
+        return $aspectAssessment->subAspectAssessments
+            ->filter(function ($subAssessment) use ($template, $standardService) {
+                // CRITICAL: Filter only ACTIVE sub-aspects
+                return $standardService->isSubAspectActive($template->id, $subAssessment->subAspect->code);
+            })
+            ->map(function ($subAssessment) use ($template, $standardService) {
+                // Get adjusted standard rating from session
+                $adjustedStandardRating = $standardService->getSubAspectRating(
+                    $template->id,
+                    $subAssessment->subAspect->code
+                );
+
+                return [
+                    'name' => $subAssessment->subAspect->name,
+                    'individual_rating' => $subAssessment->individual_rating,
+                    'standard_rating' => $adjustedStandardRating, // ✅ Use adjusted rating
+                    'original_standard_rating' => $subAssessment->standard_rating, // Keep original for reference
+                    'rating_label' => $subAssessment->rating_label,
+                ];
+            })
+            ->values() // Reset array keys after filter
+            ->toArray();
     }
 
     public function getAspectPercentage(string $aspectCode): int
