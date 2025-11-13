@@ -7,6 +7,7 @@ namespace App\Livewire\Components;
 use App\Models\AssessmentTemplate;
 use App\Services\DynamicStandardService;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\On;
 use Livewire\Component;
 
 class SelectiveAspectsModal extends Component
@@ -29,18 +30,11 @@ class SelectiveAspectsModal extends Component
     // Cache template data
     private ?object $cachedTemplate = null;
 
-    protected $listeners = [
-        'openSelectionModal' => 'open',
-        'preloadModalData' => 'preload',
-        'standard-adjusted' => 'handleStandardAdjusted',
-    ];
-
     /**
      * Mount component
      */
     public function mount(): void
     {
-        // Initialize empty state to prevent errors
         $this->resetState();
     }
 
@@ -54,50 +48,39 @@ class SelectiveAspectsModal extends Component
         $this->aspectWeights = [];
         $this->expandedAspects = [];
         $this->dataLoaded = false;
+        $this->cachedTemplate = null;
     }
 
     /**
-     * Preload modal data (optional - for better performance)
+     * Listen to open modal event
      */
-    public function preload(int $templateId, string $categoryCode = 'potensi'): void
-    {
-        if ($this->templateId === $templateId && $this->categoryCode === $categoryCode) {
-            return; // Already loaded
-        }
-
-        $this->templateId = $templateId;
-        $this->categoryCode = $categoryCode;
-        $this->loadSelectionData();
-    }
-
-    /**
-     * Open modal and load data
-     */
+    #[On('openSelectionModal')]
     public function open(int $templateId, string $categoryCode = 'potensi'): void
     {
-        // Show modal immediately
-        $this->show = true;
-
-        // ✅ CRITICAL FIX: Reset state jika template berbeda
+        // Reset state if different template
         if ($this->templateId !== $templateId || $this->categoryCode !== $categoryCode) {
-            $this->resetState(); // Clear semua data lama
-        }
-
-        // Always load fresh data when opening modal to ensure state is up-to-date
-        // (especially after external changes like reset)
-        if (!$this->dataLoaded || $this->templateId !== $templateId || $this->categoryCode !== $categoryCode) {
+            $this->resetState();
             $this->templateId = $templateId;
             $this->categoryCode = $categoryCode;
         }
 
-        // Dispatch event to show loading state
-        $this->dispatch('modal-loading');
+        // Show modal
+        $this->show = true;
 
-        // Always load data to ensure fresh state
+        // Load data
         $this->loadSelectionData();
+    }
 
-        // Dispatch event that data is ready
-        $this->dispatch('modal-ready');
+    /**
+     * Listen to standard adjusted event from other components
+     */
+    #[On('standard-adjusted')]
+    public function handleStandardAdjusted(int $templateId): void
+    {
+        // Only refresh if same template and modal is open
+        if ($this->templateId === $templateId && $this->show) {
+            $this->loadSelectionData();
+        }
     }
 
     /**
@@ -127,7 +110,7 @@ class SelectiveAspectsModal extends Component
             // Cache template for computed properties
             $this->cachedTemplate = $template;
 
-            // Initialize selection state from session (or default to all active)
+            // Initialize selection state from session
             foreach ($template->aspects as $aspect) {
                 $isActive = $dynamicService->isAspectActive($this->templateId, $aspect->code);
                 $this->selectedAspects[$aspect->code] = $isActive;
@@ -169,26 +152,18 @@ class SelectiveAspectsModal extends Component
             $this->aspectWeights[$key] = 0;
         } else {
             // If checked and weight is 0, set a default weight
-            if ($this->aspectWeights[$key] === 0) {
-                // Distribute weight evenly among active aspects
+            if (($this->aspectWeights[$key] ?? 0) === 0) {
                 $activeCount = $this->activeAspectsCount;
                 if ($activeCount > 0) {
-                    $defaultWeight = intval(100 / $activeCount);
-                    $this->aspectWeights[$key] = $defaultWeight;
+                    $this->aspectWeights[$key] = intval(100 / $activeCount);
                 }
             }
 
-            // Auto-check at least one sub-aspect if none selected
+            // Auto-check at least one sub-aspect if none selected (for Potensi)
             if ($this->categoryCode === 'potensi' && isset($this->selectedSubAspects[$key])) {
-                $hasActiveSubAspect = false;
-                foreach ($this->selectedSubAspects[$key] as $subCode => $isActive) {
-                    if ($isActive) {
-                        $hasActiveSubAspect = true;
-                        break;
-                    }
-                }
+                $hasActiveSubAspect = collect($this->selectedSubAspects[$key])->contains(true);
+
                 if (!$hasActiveSubAspect) {
-                    // Auto-select first sub-aspect
                     $firstKey = array_key_first($this->selectedSubAspects[$key]);
                     if ($firstKey) {
                         $this->selectedSubAspects[$key][$firstKey] = true;
@@ -275,55 +250,42 @@ class SelectiveAspectsModal extends Component
         $validation = $this->validationResult;
 
         if (!$validation['valid']) {
-            // Show validation errors via toast or alert
+            // Dispatch validation error event for toast
             $this->dispatch('show-validation-error', errors: $validation['errors']);
             return;
         }
 
-        // Save to session via DynamicStandardService
-        $dynamicService = app(DynamicStandardService::class);
+        try {
+            // Save to session via DynamicStandardService
+            $dynamicService = app(DynamicStandardService::class);
 
-        $dataToSave = [
-            'active_aspects' => $this->selectedAspects,
-            'aspect_weights' => $this->aspectWeights,
-        ];
+            $dataToSave = [
+                'active_aspects' => $this->selectedAspects,
+                'aspect_weights' => $this->aspectWeights,
+            ];
 
-        if ($this->categoryCode === 'potensi') {
-            $dataToSave['active_sub_aspects'] = [];
-            foreach ($this->selectedSubAspects as $aspectCode => $subAspects) {
-                foreach ($subAspects as $subCode => $isActive) {
-                    $dataToSave['active_sub_aspects'][$subCode] = $isActive;
+            if ($this->categoryCode === 'potensi') {
+                $dataToSave['active_sub_aspects'] = [];
+                foreach ($this->selectedSubAspects as $aspectCode => $subAspects) {
+                    foreach ($subAspects as $subCode => $isActive) {
+                        $dataToSave['active_sub_aspects'][$subCode] = $isActive;
+                    }
                 }
             }
-        }
 
-        $dynamicService->saveBulkSelection($this->templateId, $dataToSave);
+            $dynamicService->saveBulkSelection($this->templateId, $dataToSave);
 
-        // Show success message FIRST before closing
-        $this->dispatch('show-success', message: 'Perubahan berhasil diterapkan');
+            // Show success message
+            $this->dispatch('show-success', message: 'Perubahan berhasil diterapkan!');
 
-        // Close modal
-        $this->show = false;
+            // Close modal after short delay (handled by Alpine toast)
+            $this->show = false;
 
-        // Dispatch event to parent component to refresh data
-        // Use dispatch()->to() for targeted dispatch or global dispatch
-        $this->dispatch('standard-adjusted', templateId: $this->templateId)->self();
-
-        // Also dispatch directly to parent component
-        $this->dispatch('handleStandardUpdate', templateId: $this->templateId);
-
-        // Dispatch browser event to close modal via Alpine
-        $this->dispatch('close-modal');
-    }
-
-    /**
-     * Handle standard adjusted event - refresh modal data
-     */
-    public function handleStandardAdjusted(int $templateId): void
-    {
-        // Only refresh if same template
-        if ($this->templateId === $templateId) {
-            $this->loadSelectionData();
+            // Notify parent component to refresh data
+            $this->dispatch('standard-adjusted', templateId: $this->templateId);
+        } catch (\Exception $e) {
+            logger()->error('Failed to apply selection: ' . $e->getMessage());
+            $this->dispatch('show-validation-error', errors: ['Gagal menyimpan perubahan. Silakan coba lagi.']);
         }
     }
 
@@ -333,8 +295,6 @@ class SelectiveAspectsModal extends Component
     public function close(): void
     {
         $this->show = false;
-        // Reset state after small delay to avoid flicker
-        $this->dispatch('modal-closed');
     }
 
     /**
@@ -377,9 +337,8 @@ class SelectiveAspectsModal extends Component
         }
 
         // Check total weight must be 100%
-        $totalWeight = $this->totalWeight;
-        if ($totalWeight !== 100 && $this->activeAspectsCount > 0) {
-            $errors[] = 'Total bobot harus 100% (saat ini: ' . $totalWeight . '%)';
+        if ($this->totalWeight !== 100 && $this->activeAspectsCount > 0) {
+            $errors[] = 'Total bobot harus 100% (saat ini: ' . $this->totalWeight . '%)';
         }
 
         // For Potensi, check each active aspect has at least 1 active sub-aspect
@@ -412,7 +371,7 @@ class SelectiveAspectsModal extends Component
         $total = 0;
         foreach ($this->aspectWeights as $code => $weight) {
             if ($this->selectedAspects[$code] ?? false) {
-                $total += $weight;
+                $total += (int) $weight;
             }
         }
         return $total;
