@@ -183,17 +183,29 @@ class GeneralMatching extends Component
             ->get();
 
         // Process each aspect
-        $result = $aspectAssessments->map(function ($assessment) use ($template, $standardService) {
+        $result = $aspectAssessments->map(function ($assessment) use ($template, $standardService, $categoryCode) {
+            $aspect = $assessment->aspect;
+
             // Calculate percentage using generalized logic with adjusted ratings
             $percentage = $this->calculateAspectPercentage($assessment, $template, $standardService);
 
+            // CRITICAL FIX: Get adjusted standard rating based on category
+            if ($categoryCode === 'potensi') {
+                // For Potensi: Recalculate from active sub-aspects
+                $adjustedStandardRating = $this->getPotensiAspectStandardRating($assessment, $template, $standardService);
+            } else {
+                // For Kompetensi: Get adjusted rating from session
+                $adjustedStandardRating = $standardService->getAspectRating($template->id, $aspect->code);
+            }
+
             return [
-                'name' => $assessment->aspect->name,
-                'code' => $assessment->aspect->code,
+                'name' => $aspect->name,
+                'code' => $aspect->code,
                 'percentage' => round($percentage), // Standard rounding (5-9 up, 0-4 down)
                 'individual_rating' => $assessment->individual_rating,
-                'standard_rating' => $assessment->standard_rating,
-                'description' => $assessment->aspect->description,
+                'standard_rating' => $adjustedStandardRating, // ✅ FIXED: Use adjusted rating
+                'original_standard_rating' => $assessment->standard_rating, // Keep original for reference
+                'description' => $aspect->description,
                 'sub_aspects' => $this->loadSubAspects($assessment, $template, $standardService),
             ];
         })->toArray();
@@ -201,6 +213,45 @@ class GeneralMatching extends Component
         // OPTIMIZED: Cache the result
         $this->$cacheProperty = $result;
         $this->$propertyName = $result;
+    }
+
+    /**
+     * Get Potensi aspect standard rating by averaging active sub-aspects
+     */
+    private function getPotensiAspectStandardRating(
+        AspectAssessment $assessment,
+        $template,
+        DynamicStandardService $standardService
+    ): float {
+        if ($assessment->subAspectAssessments->isEmpty()) {
+            // No sub-aspects, use aspect rating from session
+            return $standardService->getAspectRating($template->id, $assessment->aspect->code);
+        }
+
+        $totalRating = 0;
+        $activeCount = 0;
+
+        foreach ($assessment->subAspectAssessments as $subAssessment) {
+            // Check if sub-aspect is active
+            if (! $standardService->isSubAspectActive($template->id, $subAssessment->subAspect->code)) {
+                continue;
+            }
+
+            // Get adjusted sub-aspect rating
+            $adjustedRating = $standardService->getSubAspectRating(
+                $template->id,
+                $subAssessment->subAspect->code
+            );
+
+            $totalRating += $adjustedRating;
+            $activeCount++;
+        }
+
+        if ($activeCount > 0) {
+            return round($totalRating / $activeCount, 2);
+        }
+
+        return 0;
     }
 
     private function calculateAspectPercentage(
