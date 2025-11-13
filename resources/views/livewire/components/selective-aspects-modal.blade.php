@@ -29,19 +29,13 @@
             {{-- Actual Modal Content: Mary modal will handle backdrop and centering --}}
             <div x-show="!loading || dataReady" style="display: none;" class="flex flex-col h-full overflow-hidden">
                 @if ($dataLoaded)
-                {{-- Header - FIXED: Added flex-shrink-0 --}}
-                <div class="flex-shrink-0 px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                {{-- Header - FIXED: sticky so body scrolls only --}}
+                <div
+                    class="flex-shrink-0 sticky top-0 z-20 px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
                     <div class="flex items-center justify-between">
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
                             Pilih Aspek & Sub-Aspek {{ ucfirst($categoryCode) }} untuk Analisis
                         </h3>
-                        <button @click="closeModal()" type="button"
-                            class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 transition-colors">
-                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M6 18L18 6M6 6l12 12"></path>
-                            </svg>
-                        </button>
                     </div>
 
                     {{-- Bulk Actions --}}
@@ -224,8 +218,9 @@
                     </div>
                 </div>
 
-                {{-- Footer - FIXED: Added flex-shrink-0 --}}
-                <div class="flex-shrink-0 px-6 py-3 flex items-center justify-end">
+                {{-- Footer - FIXED: sticky so body scrolls only --}}
+                <div
+                    class="flex-shrink-0 sticky bottom-0 z-20 px-6 py-3 flex items-center justify-end bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
                     <div class="flex items-center gap-3">
                         <button @click="closeModal()" type="button"
                             class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-all">
