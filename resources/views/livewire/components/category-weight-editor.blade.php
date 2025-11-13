@@ -1,15 +1,16 @@
 <div>
     {{-- Button to trigger modal --}}
-    <button wire:click="openModal" type="button"
-        class="px-4 py-2 text-sm font-medium {{ $weights['isAdjusted'] ? 'text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-900/30 border-amber-400 dark:border-amber-600' : 'text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600' }} border rounded-lg hover:bg-opacity-80 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+    <x-mary-button wire:click="openModal" :class="$weights['isAdjusted'] 
+        ? 'bg-amber-100 dark:bg-amber-900/30 border-amber-400 dark:border-amber-600 text-amber-700 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-900/40' 
+        : 'btn-outline'" spinner="openModal">
         <span class="flex items-center gap-2">
-            📊 Bobot Standar: {{ $weights['name1'] }} {{ $weights['weight1'] }}% | {{ $weights['name2'] }}
-            {{ $weights['weight2'] }}%
+            📊 Bobot Standar: {{ $weights['name1'] }} {{ $weights['weight1'] }}% | {{ $weights['name2'] }} {{
+            $weights['weight2'] }}%
             @if ($weights['isAdjusted'])
             <span class="text-xs">(disesuaikan)</span>
             @endif
         </span>
-    </button>
+    </x-mary-button>
 
     {{-- Mary UI Modal with x-mary- prefix --}}
     <x-mary-modal wire:model="showModal" title="Edit Bobot Kategori" subtitle="Total bobot harus 100%" separator

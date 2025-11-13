@@ -36,40 +36,27 @@
                 <div class="flex items-center gap-3">
                     {{-- Category Weight Editor Component --}}
                     @livewire('components.category-weight-editor', [
-                        'templateId' => $selectedTemplate->id,
-                        'categoryCode1' => 'potensi',
-                        'categoryCode2' => 'kompetensi',
+                    'templateId' => $selectedTemplate->id,
+                    'categoryCode1' => 'potensi',
+                    'categoryCode2' => 'kompetensi',
                     ])
                 </div>
 
                 <div class="flex items-center gap-3">
-                    {{-- Optimized button with instant modal display --}}
-                    <button x-data @click="
-                                $dispatch('open-selection-modal-instant');
-                                $wire.openSelectionModal();
-                            " type="button"
-                        class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                        wire:loading.attr="disabled" wire:loading.class="opacity-75">
+                    {{-- Optimized button with instant modal display using Mary UI with custom content --}}
+                    <x-mary-button x-data @click="
+                        $dispatch('open-selection-modal-instant');
+                        $wire.openSelectionModal();" class="btn-primary" spinner="openSelectionModal">
                         <span class="flex items-center gap-2">
-                            <span wire:loading.remove wire:target="openSelectionModal">🎯 Pilih Aspek
-                                Kompetensi</span>
-                            <span wire:loading wire:target="openSelectionModal" class="flex items-center">
-                                <svg class="animate-spin h-4 w-4 text-white mr-1" fill="none" viewBox="0 0 24 24">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
-                                        stroke-width="4"></circle>
-                                    <path class="opacity-75" fill="currentColor"
-                                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                                    </path>
-                                </svg>
-                                Memuat...
-                            </span>
+                            🎯 Pilih Aspek Kompetensi
                         </span>
-                    </button>
+                    </x-mary-button>
 
-                    <button wire:click="resetAdjustments" type="button"
-                        class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-all">
-                        ↻ Reset ke Default
-                    </button>
+                    <x-mary-button wire:click="resetAdjustments" class="btn-outline" spinner="resetAdjustments">
+                        <span class="flex items-center gap-2">
+                            ↻ Reset ke Default
+                        </span>
+                    </x-mary-button>
                 </div>
 
                 {{-- Adjustment Indicator --}}
@@ -313,39 +300,21 @@
     {{-- PHASE 2C: Inline Edit Modals --}}
 
     {{-- Edit Aspect Rating Modal --}}
-    @if ($showEditRatingModal)
-    <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-        <div class="fixed inset-0 bg-gray-900/75 dark:bg-gray-900/90 transition-opacity" wire:click="closeModal">
+    <x-mary-modal wire:model="showEditRatingModal" title="Edit Rating Aspek"
+        subtitle="Sesuaikan nilai rating aspek kompetensi" class="backdrop-blur">
+        <div class="space-y-4">
+            <x-mary-input class="text-xl !outline-none" label="Rating (1-5)" wire:model="editingValue" type="number"
+                min="1" max="5" />
+            <p class="text-sm text-gray-500 dark:text-gray-400">
+                Rating Standar: {{ $editingOriginalValue }}
+            </p>
         </div>
-        <div class="flex min-h-full items-center justify-center p-4">
-            <div class="relative w-full max-w-md bg-white dark:bg-gray-800 rounded-lg shadow-xl">
-                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Edit Rating Aspek</h3>
-                </div>
-                <div class="px-6 py-4">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Rating (1-5):
-                    </label>
-                    <input type="number" wire:model="editingValue" min="1" max="5"
-                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
-                    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                        Nilai asli: {{ $editingOriginalValue }}
-                    </p>
-                </div>
-                <div class="px-6 py-4 flex items-center justify-end gap-3">
-                    <button wire:click="closeModal" type="button"
-                        class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600">
-                        Batal
-                    </button>
-                    <button wire:click="saveAspectRating" type="button"
-                        class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700">
-                        Simpan
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-    @endif
+        <x-slot:actions>
+            <x-mary-button label="Batal" wire:click="closeModal" class="btn-outline" />
+            <x-mary-button label="Simpan" wire:click="saveAspectRating" class="btn-primary"
+                spinner="saveAspectRating" />
+        </x-slot:actions>
+    </x-mary-modal>
 
     @if (count($chartData['labels']) > 0)
     <script>
