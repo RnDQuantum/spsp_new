@@ -7,6 +7,7 @@ use App\Models\CategoryType;
 use App\Models\Participant;
 use App\Services\DynamicStandardService;
 use App\Services\IndividualAssessmentService;
+use App\Services\RankingService;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -50,6 +51,8 @@ class GeneralMapping extends Component
     private ?array $aspectsDataCache = null;
 
     private ?array $finalAssessmentCache = null;
+
+    private ?array $participantRankingCache = null;
 
     // Unique chart ID
     public string $chartId = '';
@@ -151,6 +154,7 @@ class GeneralMapping extends Component
     {
         $this->aspectsDataCache = null;
         $this->finalAssessmentCache = null;
+        $this->participantRankingCache = null;
     }
 
     private function loadAspectsData(): void
@@ -380,6 +384,11 @@ class GeneralMapping extends Component
      */
     public function getParticipantRanking(): ?array
     {
+        // Check cache first
+        if ($this->participantRankingCache !== null) {
+            return $this->participantRankingCache;
+        }
+
         if (! $this->participant || ! $this->potensiCategory || ! $this->kompetensiCategory) {
             return null;
         }
@@ -401,35 +410,80 @@ class GeneralMapping extends Component
             return null;
         }
 
-        // Use IndividualAssessmentService to get all participants' final assessments
-        $service = app(IndividualAssessmentService::class);
+        // OPTIMIZED: Use RankingService to get per-category rankings, then combine
+        $rankingService = app(RankingService::class);
 
-        // Get all participants in same event and position
-        $allParticipants = Participant::where('event_id', $event->id)
-            ->where('position_formation_id', $positionFormationId)
-            ->get();
+        // Get rankings for both categories
+        $potensiRankings = $rankingService->getRankings(
+            $event->id,
+            $positionFormationId,
+            $template->id,
+            'potensi',
+            $this->tolerancePercentage
+        );
 
-        if ($allParticipants->isEmpty()) {
+        $kompetensiRankings = $rankingService->getRankings(
+            $event->id,
+            $positionFormationId,
+            $template->id,
+            'kompetensi',
+            $this->tolerancePercentage
+        );
+
+        if ($potensiRankings->isEmpty() || $kompetensiRankings->isEmpty()) {
             return null;
         }
 
-        // Calculate weighted scores for all participants
+        // Get participant names in one query
+        $participantIds = $potensiRankings->pluck('participant_id')->unique()->toArray();
+        $participantNames = Participant::whereIn('id', $participantIds)
+            ->pluck('name', 'id')
+            ->toArray();
+
+        // Combine scores with category weights
         $participantScores = [];
-        foreach ($allParticipants as $participant) {
-            $finalAssessment = $service->getFinalAssessment(
-                $participant->id,
-                $this->tolerancePercentage
-            );
+        foreach ($potensiRankings as $potensiRank) {
+            $participantId = $potensiRank['participant_id'];
+
+            // Find corresponding kompetensi score
+            $kompetensiRank = $kompetensiRankings->firstWhere('participant_id', $participantId);
+            if (! $kompetensiRank) {
+                continue;
+            }
+
+            // Calculate weighted total score
+            $weightedPotensiScore = $potensiRank['individual_score'] * ($potensiWeight / 100);
+            $weightedKompetensiScore = $kompetensiRank['individual_score'] * ($kompetensiWeight / 100);
+            $totalIndividualScore = $weightedPotensiScore + $weightedKompetensiScore;
+
+            // Calculate weighted standard score (with tolerance)
+            $weightedPotensiStd = $potensiRank['adjusted_standard_score'] * ($potensiWeight / 100);
+            $weightedKompetensiStd = $kompetensiRank['adjusted_standard_score'] * ($kompetensiWeight / 100);
+            $totalStandardScore = $weightedPotensiStd + $weightedKompetensiStd;
+
+            // Calculate weighted original standard score
+            $weightedOrigPotensiStd = $potensiRank['original_standard_score'] * ($potensiWeight / 100);
+            $weightedOrigKompetensiStd = $kompetensiRank['original_standard_score'] * ($kompetensiWeight / 100);
+            $totalOriginalStandardScore = $weightedOrigPotensiStd + $weightedOrigKompetensiStd;
+
+            // Calculate gaps
+            $totalGapScore = $totalIndividualScore - $totalStandardScore;
+            $totalOriginalGapScore = $totalIndividualScore - $totalOriginalStandardScore;
+
+            // Determine conclusion
+            $conclusion = $totalOriginalGapScore >= 0
+                ? 'Di Atas Standar'
+                : ($totalGapScore >= 0 ? 'Memenuhi Standar' : 'Di Bawah Standar');
 
             $participantScores[] = [
-                'participant_id' => $participant->id,
-                'participant_name' => $participant->name,
-                'total_individual_score' => $finalAssessment['total_individual_score'],
-                'total_standard_score' => $finalAssessment['total_standard_score'],
-                'total_original_standard_score' => $finalAssessment['total_original_standard_score'],
-                'total_gap_score' => $finalAssessment['total_gap_score'],
-                'total_original_gap_score' => $finalAssessment['total_original_gap_score'],
-                'final_conclusion' => $finalAssessment['final_conclusion'],
+                'participant_id' => $participantId,
+                'participant_name' => $participantNames[$participantId] ?? '',
+                'total_individual_score' => $totalIndividualScore,
+                'total_standard_score' => $totalStandardScore,
+                'total_original_standard_score' => $totalOriginalStandardScore,
+                'total_gap_score' => $totalGapScore,
+                'total_original_gap_score' => $totalOriginalGapScore,
+                'final_conclusion' => $conclusion,
             ];
         }
 
@@ -458,13 +512,18 @@ class GeneralMapping extends Component
             return null;
         }
 
-        return [
+        $result = [
             'rank' => $rank,
             'total' => count($participantScores),
             'conclusion' => $conclusion,
             'potensi_weight' => $potensiWeight,
             'kompetensi_weight' => $kompetensiWeight,
         ];
+
+        // Cache the result
+        $this->participantRankingCache = $result;
+
+        return $result;
     }
 
     public function render()

@@ -60,8 +60,8 @@
 │                                                                  │
 │  Individual Reports:              Ranking Reports:               │
 │  • GeneralPsyMapping ✅           • RankingPsyMapping ✅         │
-│  • GeneralMcMapping              • RankingMcMapping             │
-│  • GeneralMapping                • RekapRankingAssessment       │
+│  • GeneralMcMapping ✅            • RankingMcMapping ✅          │
+│  • GeneralMapping ✅              • RekapRankingAssessment       │
 │                                                                  │
 │  Cache Management:                                               │
 │  • Cache data per request                                        │
@@ -1150,19 +1150,18 @@ Session::get("individual_report.tolerance");
 |-----------|--------------|----------------|----------------|--------|
 | GeneralPsyMapping | ✅ IndividualAssessmentService | ✅ `standard-adjusted` | ~123 lines | ✅ Done |
 | GeneralMcMapping | ✅ IndividualAssessmentService | ✅ `standard-adjusted` | ~161 lines | ✅ Done |
-| GeneralMapping | ❌ Manual calculation | ❌ Need listener | - | 🔴 Todo |
+| GeneralMapping | ✅ IndividualAssessmentService + RankingService | ✅ `standard-adjusted` | ~100 lines | ✅ Done |
 | RankingPsyMapping | ✅ RankingService | ✅ `standard-adjusted` | ~180 lines | ✅ Done |
 | RankingMcMapping | ✅ RankingService | ✅ `standard-adjusted` | ~193 lines | ✅ Done |
 | RekapRankingAssessment | ❌ Mixed | ❌ Need listener | - | 🔴 Todo |
 
-**Progress**: 4 of 6 components migrated (66%)
-**Total Code Reduction**: ~657 lines removed
+**Progress**: 5 of 6 components migrated (83%)
+**Total Code Reduction**: ~757 lines removed
 
 ### 🚀 Next Steps
 
-1. Migrate GeneralMapping to IndividualAssessmentService
-2. Migrate RekapRankingAssessment to services
-3. Update exports (PDF/Excel) if needed
+1. Migrate RekapRankingAssessment to services
+2. Update exports (PDF/Excel) if needed
 
 ---
 
