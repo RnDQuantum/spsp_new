@@ -334,9 +334,10 @@ class IndividualAssessmentService
         $potensiAssessment = $this->getCategoryAssessment($participantId, 'potensi', $tolerancePercentage);
         $kompetensiAssessment = $this->getCategoryAssessment($participantId, 'kompetensi', $tolerancePercentage);
 
-        // Get weights from template
-        $potensiWeight = $potensiCategory->weight_percentage;
-        $kompetensiWeight = $kompetensiCategory->weight_percentage;
+        // Get weights from DynamicStandardService (with fallback to original)
+        $standardService = app(DynamicStandardService::class);
+        $potensiWeight = $standardService->getCategoryWeight($template->id, 'potensi');
+        $kompetensiWeight = $standardService->getCategoryWeight($template->id, 'kompetensi');
 
         // Calculate weighted scores
         $totalStandardScore = round(
