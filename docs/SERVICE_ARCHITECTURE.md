@@ -1146,25 +1146,26 @@ Session::get("individual_report.tolerance");
 
 ### 🎯 Migration Status
 
-| Component | Service Used | Listener Added | Status |
-|-----------|--------------|----------------|--------|
-| GeneralPsyMapping | ✅ IndividualAssessmentService | ✅ Has listener | ✅ Done |
-| GeneralMcMapping | ❌ Manual calculation | ❌ Need both | 🔴 Todo |
-| GeneralMapping | ❌ Manual calculation | ❌ Need both | 🔴 Todo |
-| RankingPsyMapping | ✅ RankingService | ✅ Has listener | ✅ Done |
-| RankingMcMapping | ❌ Manual calculation | ❌ Need both | 🔴 Todo |
-| RekapRankingAssessment | ❌ Mixed | ❌ Need both | 🔴 Todo |
+| Component | Service Used | Listener Added | Code Reduction | Status |
+|-----------|--------------|----------------|----------------|--------|
+| GeneralPsyMapping | ✅ IndividualAssessmentService | ✅ `standard-adjusted` | ~123 lines | ✅ Done |
+| GeneralMcMapping | ✅ IndividualAssessmentService | ✅ `standard-adjusted` | ~161 lines | ✅ Done |
+| GeneralMapping | ❌ Manual calculation | ❌ Need listener | - | 🔴 Todo |
+| RankingPsyMapping | ✅ RankingService | ✅ `standard-adjusted` | ~180 lines | ✅ Done |
+| RankingMcMapping | ✅ RankingService | ✅ `standard-adjusted` | ~193 lines | ✅ Done |
+| RekapRankingAssessment | ❌ Mixed | ❌ Need listener | - | 🔴 Todo |
+
+**Progress**: 4 of 6 components migrated (66%)
+**Total Code Reduction**: ~657 lines removed
 
 ### 🚀 Next Steps
 
-1. Migrate GeneralMcMapping to IndividualAssessmentService
-2. Migrate GeneralMapping to IndividualAssessmentService
-3. Migrate RankingMcMapping to RankingService
-4. Migrate RekapRankingAssessment to services
-5. Update exports (PDF/Excel)
+1. Migrate GeneralMapping to IndividualAssessmentService
+2. Migrate RekapRankingAssessment to services
+3. Update exports (PDF/Excel) if needed
 
 ---
 
-**Document Version**: 1.1
-**Last Updated**: 2025-01-15
+**Document Version**: 1.2
+**Last Updated**: 2025-01-14
 **Maintainer**: Development Team
