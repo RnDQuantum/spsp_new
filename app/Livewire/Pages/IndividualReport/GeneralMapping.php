@@ -5,6 +5,7 @@ namespace App\Livewire\Pages\IndividualReport;
 use App\Models\CategoryAssessment;
 use App\Models\CategoryType;
 use App\Models\Participant;
+use App\Services\ConclusionService;
 use App\Services\IndividualAssessmentService;
 use App\Services\RankingService;
 use Livewire\Attributes\Layout;
@@ -45,6 +46,9 @@ class GeneralMapping extends Component
 
     // Tolerance percentage (loaded from session)
     public int $tolerancePercentage = 10;
+
+    // Conclusion configuration (from ConclusionService)
+    public array $conclusionConfig = [];
 
     // Cache properties
     private ?array $aspectsDataCache = null;
@@ -99,6 +103,9 @@ class GeneralMapping extends Component
 
         // Load tolerance from session
         $this->tolerancePercentage = session('individual_report.tolerance', 10);
+
+        // Load conclusion configuration from ConclusionService
+        $this->conclusionConfig = ConclusionService::getGapConclusionConfig();
 
         // Load participant
         $this->participant = Participant::with([

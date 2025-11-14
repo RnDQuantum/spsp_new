@@ -43,6 +43,9 @@ class GeneralPsyMapping extends Component
     // Tolerance percentage (loaded from session)
     public int $tolerancePercentage = 10;
 
+    // Conclusion configuration (from ConclusionService)
+    public array $conclusionConfig = [];
+
     // Unique chart ID
     public string $chartId = '';
 
@@ -114,6 +117,9 @@ class GeneralPsyMapping extends Component
 
         // Load tolerance from session
         $this->tolerancePercentage = session('individual_report.tolerance', 10);
+
+        // Load conclusion configuration from ConclusionService
+        $this->conclusionConfig = ConclusionService::getGapConclusionConfig();
 
         // Load participant
         $this->participant = Participant::with([
