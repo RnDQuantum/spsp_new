@@ -67,7 +67,7 @@
                     @foreach ($aspectsData as $aspect)
                         <tr>
                             <td class="border border-black dark:border-gray-300 px-3 py-2 text-center">
-                                {{ $aspect['order'] }}</td>
+                                {{ $loop->iteration }}</td>
                             <td class="border border-black dark:border-gray-300 px-3 py-2">{{ $aspect['name'] }}</td>
                             <td class="border border-black dark:border-gray-300 px-3 py-2 text-center">
                                 {{ $aspect['weight_percentage'] }}</td>
