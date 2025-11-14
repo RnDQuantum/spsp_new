@@ -5,6 +5,7 @@ namespace App\Livewire\Pages\IndividualReport;
 use App\Models\CategoryAssessment;
 use App\Models\CategoryType;
 use App\Models\Participant;
+use App\Services\ConclusionService;
 use App\Services\IndividualAssessmentService;
 use App\Services\RankingService;
 use Livewire\Attributes\Layout;
@@ -232,7 +233,7 @@ class GeneralMcMapping extends Component
         $this->totalOriginalGapScore = round($this->totalOriginalGapScore, 2);
 
         // Determine overall conclusion based on gap-based logic
-        $this->overallConclusion = $this->getOverallConclusion($this->totalOriginalGapScore, $this->totalGapScore);
+        $this->overallConclusion = ConclusionService::getGapBasedConclusion($this->totalOriginalGapScore, $this->totalGapScore);
     }
 
     private function prepareChartData(): void
@@ -254,28 +255,6 @@ class GeneralMcMapping extends Component
             $this->chartOriginalStandardScores[] = round($aspect['original_standard_score'], 2);
             $this->chartStandardScores[] = round($aspect['standard_score'], 2);
             $this->chartIndividualScores[] = round($aspect['individual_score'], 2);
-        }
-    }
-
-    private function getConclusionText(float $originalGap, float $adjustedGap): string
-    {
-        if ($originalGap >= 0) {
-            return 'Di Atas Standar';
-        } elseif ($adjustedGap >= 0) {
-            return 'Memenuhi Standar';
-        } else {
-            return 'Di Bawah Standar';
-        }
-    }
-
-    private function getOverallConclusion(float $totalOriginalGapScore, float $totalAdjustedGapScore): string
-    {
-        if ($totalOriginalGapScore >= 0) {
-            return 'Di Atas Standar';
-        } elseif ($totalAdjustedGapScore >= 0) {
-            return 'Memenuhi Standar';
-        } else {
-            return 'Di Bawah Standar';
         }
     }
 
@@ -303,9 +282,7 @@ class GeneralMcMapping extends Component
     {
         $this->tolerancePercentage = $tolerance;
 
-        // OPTIMIZED: Clear cache before reloading (tolerance affects calculations, not data structure)
-        // Note: We clear cache even though tolerance doesn't affect active aspects,
-        // because it affects calculated values (adjusted standards)
+        // OPTIMIZED: Clear cache before reloading
         $this->clearCache();
 
         // Reload aspects data with new tolerance
@@ -338,8 +315,6 @@ class GeneralMcMapping extends Component
             'total' => $summary['total'],
             'percentage' => $summary['percentage'],
         ]);
-
-        // Note: Ranking info will automatically update on next render due to reactive call in view
     }
 
     /**
