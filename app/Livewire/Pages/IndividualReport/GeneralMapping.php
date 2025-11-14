@@ -5,7 +5,6 @@ namespace App\Livewire\Pages\IndividualReport;
 use App\Models\CategoryAssessment;
 use App\Models\CategoryType;
 use App\Models\Participant;
-use App\Services\DynamicStandardService;
 use App\Services\IndividualAssessmentService;
 use App\Services\RankingService;
 use Livewire\Attributes\Layout;
@@ -381,6 +380,7 @@ class GeneralMapping extends Component
 
     /**
      * Get participant ranking information for combined Potensi + Kompetensi weighted score
+     * REFACTORED: Use RankingService for consistent calculation
      */
     public function getParticipantRanking(): ?array
     {
@@ -401,129 +401,24 @@ class GeneralMapping extends Component
             return null;
         }
 
-        // Get category weights from DynamicStandardService (with fallback to DB)
-        $standardService = app(DynamicStandardService::class);
-        $potensiWeight = $standardService->getCategoryWeight($template->id, 'potensi');
-        $kompetensiWeight = $standardService->getCategoryWeight($template->id, 'kompetensi');
-
-        if (($potensiWeight + $kompetensiWeight) === 0) {
-            return null;
-        }
-
-        // OPTIMIZED: Use RankingService to get per-category rankings, then combine
+        // Use RankingService for consistent combined ranking calculation
         $rankingService = app(RankingService::class);
-
-        // Get rankings for both categories
-        $potensiRankings = $rankingService->getRankings(
+        $ranking = $rankingService->getParticipantCombinedRank(
+            $this->participant->id,
             $event->id,
             $positionFormationId,
             $template->id,
-            'potensi',
             $this->tolerancePercentage
         );
 
-        $kompetensiRankings = $rankingService->getRankings(
-            $event->id,
-            $positionFormationId,
-            $template->id,
-            'kompetensi',
-            $this->tolerancePercentage
-        );
-
-        if ($potensiRankings->isEmpty() || $kompetensiRankings->isEmpty()) {
+        if (! $ranking) {
             return null;
         }
-
-        // Get participant names in one query
-        $participantIds = $potensiRankings->pluck('participant_id')->unique()->toArray();
-        $participantNames = Participant::whereIn('id', $participantIds)
-            ->pluck('name', 'id')
-            ->toArray();
-
-        // Combine scores with category weights
-        $participantScores = [];
-        foreach ($potensiRankings as $potensiRank) {
-            $participantId = $potensiRank['participant_id'];
-
-            // Find corresponding kompetensi score
-            $kompetensiRank = $kompetensiRankings->firstWhere('participant_id', $participantId);
-            if (! $kompetensiRank) {
-                continue;
-            }
-
-            // Calculate weighted total score
-            $weightedPotensiScore = $potensiRank['individual_score'] * ($potensiWeight / 100);
-            $weightedKompetensiScore = $kompetensiRank['individual_score'] * ($kompetensiWeight / 100);
-            $totalIndividualScore = $weightedPotensiScore + $weightedKompetensiScore;
-
-            // Calculate weighted standard score (with tolerance)
-            $weightedPotensiStd = $potensiRank['adjusted_standard_score'] * ($potensiWeight / 100);
-            $weightedKompetensiStd = $kompetensiRank['adjusted_standard_score'] * ($kompetensiWeight / 100);
-            $totalStandardScore = $weightedPotensiStd + $weightedKompetensiStd;
-
-            // Calculate weighted original standard score
-            $weightedOrigPotensiStd = $potensiRank['original_standard_score'] * ($potensiWeight / 100);
-            $weightedOrigKompetensiStd = $kompetensiRank['original_standard_score'] * ($kompetensiWeight / 100);
-            $totalOriginalStandardScore = $weightedOrigPotensiStd + $weightedOrigKompetensiStd;
-
-            // Calculate gaps
-            $totalGapScore = $totalIndividualScore - $totalStandardScore;
-            $totalOriginalGapScore = $totalIndividualScore - $totalOriginalStandardScore;
-
-            // Determine conclusion
-            $conclusion = $totalOriginalGapScore >= 0
-                ? 'Di Atas Standar'
-                : ($totalGapScore >= 0 ? 'Memenuhi Standar' : 'Di Bawah Standar');
-
-            $participantScores[] = [
-                'participant_id' => $participantId,
-                'participant_name' => $participantNames[$participantId] ?? '',
-                'total_individual_score' => $totalIndividualScore,
-                'total_standard_score' => $totalStandardScore,
-                'total_original_standard_score' => $totalOriginalStandardScore,
-                'total_gap_score' => $totalGapScore,
-                'total_original_gap_score' => $totalOriginalGapScore,
-                'final_conclusion' => $conclusion,
-            ];
-        }
-
-        // Sort by total_individual_score DESC, then participant_name ASC (tiebreaker)
-        usort($participantScores, function ($a, $b) {
-            $scoreDiff = $b['total_individual_score'] - $a['total_individual_score'];
-            if (abs($scoreDiff) > 0.001) { // Float comparison with tolerance
-                return $scoreDiff > 0 ? 1 : -1;
-            }
-
-            return strcmp($a['participant_name'], $b['participant_name']);
-        });
-
-        // Find current participant's rank
-        $rank = null;
-        $conclusion = null;
-        foreach ($participantScores as $index => $score) {
-            if ($score['participant_id'] === $this->participant->id) {
-                $rank = $index + 1;
-                $conclusion = $score['final_conclusion'];
-                break;
-            }
-        }
-
-        if ($rank === null) {
-            return null;
-        }
-
-        $result = [
-            'rank' => $rank,
-            'total' => count($participantScores),
-            'conclusion' => $conclusion,
-            'potensi_weight' => $potensiWeight,
-            'kompetensi_weight' => $kompetensiWeight,
-        ];
 
         // Cache the result
-        $this->participantRankingCache = $result;
+        $this->participantRankingCache = $ranking;
 
-        return $result;
+        return $ranking;
     }
 
     public function render()

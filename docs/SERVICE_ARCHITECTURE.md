@@ -222,7 +222,7 @@ getFinalAssessment(
 **Key Methods**:
 
 ```php
-// Get all participant rankings
+// Get all participant rankings (single category)
 getRankings(
     int $eventId,
     int $positionFormationId,
@@ -247,7 +247,7 @@ getRankings(
     'conclusion' => 'Di Atas Standar',
 ]
 
-// Get specific participant rank
+// Get specific participant rank (single category)
 getParticipantRank(
     int $participantId,
     int $eventId,
@@ -266,6 +266,49 @@ getParticipantRank(
     'individual_score' => 370.0,
     'adjusted_standard_score' => 360.0,
     'adjusted_gap_score' => 10.0,
+]
+
+// Get combined rankings (Potensi + Kompetensi weighted)
+getCombinedRankings(
+    int $eventId,
+    int $positionFormationId,
+    int $templateId,
+    int $tolerancePercentage = 10
+): Collection
+
+// Returns:
+[
+    'rank' => 1,
+    'participant_id' => 123,
+    'participant_name' => 'John Doe',
+    'total_individual_score' => 450.0,      // Weighted
+    'total_standard_score' => 400.0,        // Weighted with tolerance
+    'total_original_standard_score' => 420.0, // Weighted original
+    'total_gap_score' => 50.0,
+    'total_original_gap_score' => 30.0,
+    'percentage' => 112.5,
+    'conclusion' => 'Di Atas Standar',
+    'potensi_weight' => 60,
+    'kompetensi_weight' => 40,
+]
+
+// Get specific participant combined rank
+getParticipantCombinedRank(
+    int $participantId,
+    int $eventId,
+    int $positionFormationId,
+    int $templateId,
+    int $tolerancePercentage = 10
+): ?array
+
+// Returns:
+[
+    'rank' => 5,
+    'total' => 20,
+    'conclusion' => 'Memenuhi Standar',
+    'percentage' => 92.5,
+    'potensi_weight' => 60,
+    'kompetensi_weight' => 40,
 ]
 
 // Helper methods
@@ -1103,8 +1146,10 @@ $rankings = AspectAssessment::query()
 | Individual aspect details | IndividualAssessmentService | `getAspectAssessments()` |
 | Category totals (Potensi/Kompetensi) | IndividualAssessmentService | `getCategoryAssessment()` |
 | Final combined score | IndividualAssessmentService | `getFinalAssessment()` |
-| All participants ranking | RankingService | `getRankings()` |
-| Single participant rank | RankingService | `getParticipantRank()` |
+| All participants ranking (single category) | RankingService | `getRankings()` |
+| Single participant rank (single category) | RankingService | `getParticipantRank()` |
+| **Combined ranking (Potensi + Kompetensi)** | **RankingService** | **`getCombinedRankings()`** |
+| **Single participant combined rank** | **RankingService** | **`getParticipantCombinedRank()`** |
 | Passing summary | RankingService | `getPassingSummary()` |
 | Edit standard values | DynamicStandardService | `save...()` methods |
 | Check adjustments | DynamicStandardService | `hasCategoryAdjustments()` |
@@ -1150,13 +1195,13 @@ Session::get("individual_report.tolerance");
 |-----------|--------------|----------------|----------------|--------|
 | GeneralPsyMapping | ✅ IndividualAssessmentService | ✅ `standard-adjusted` | ~123 lines | ✅ Done |
 | GeneralMcMapping | ✅ IndividualAssessmentService | ✅ `standard-adjusted` | ~161 lines | ✅ Done |
-| GeneralMapping | ✅ IndividualAssessmentService + RankingService | ✅ `standard-adjusted` | ~100 lines | ✅ Done |
+| GeneralMapping | ✅ IndividualAssessmentService + RankingService (Combined) | ✅ `standard-adjusted` | ~100 lines | ✅ Done |
 | RankingPsyMapping | ✅ RankingService | ✅ `standard-adjusted` | ~180 lines | ✅ Done |
 | RankingMcMapping | ✅ RankingService | ✅ `standard-adjusted` | ~193 lines | ✅ Done |
 | RekapRankingAssessment | ❌ Mixed | ❌ Need listener | - | 🔴 Todo |
 
 **Progress**: 5 of 6 components migrated (83%)
-**Total Code Reduction**: ~757 lines removed
+**Total Code Reduction**: ~857 lines removed (includes combined ranking refactor)
 
 ### 🚀 Next Steps
 
@@ -1165,6 +1210,6 @@ Session::get("individual_report.tolerance");
 
 ---
 
-**Document Version**: 1.2
-**Last Updated**: 2025-01-14
+**Document Version**: 1.3
+**Last Updated**: 2025-01-15
 **Maintainer**: Development Team

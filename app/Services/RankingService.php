@@ -499,4 +499,171 @@ class RankingService
             'Di Bawah Standar' => $rankings->where('conclusion', 'Di Bawah Standar')->count(),
         ];
     }
+
+    /**
+     * Get combined rankings for Potensi + Kompetensi with category weights
+     *
+     * This method calculates weighted total scores from both categories and ranks
+     * all participants based on the combined score.
+     *
+     * @param  int  $eventId  Assessment event ID
+     * @param  int  $positionFormationId  Position formation ID
+     * @param  int  $templateId  Assessment template ID
+     * @param  int  $tolerancePercentage  Tolerance percentage (0-100)
+     * @return Collection Collection of combined ranking items
+     */
+    public function getCombinedRankings(
+        int $eventId,
+        int $positionFormationId,
+        int $templateId,
+        int $tolerancePercentage = 10
+    ): Collection {
+        // Get category weights from DynamicStandardService
+        $standardService = app(DynamicStandardService::class);
+        $potensiWeight = $standardService->getCategoryWeight($templateId, 'potensi');
+        $kompetensiWeight = $standardService->getCategoryWeight($templateId, 'kompetensi');
+
+        if (($potensiWeight + $kompetensiWeight) === 0) {
+            return collect();
+        }
+
+        // Get rankings for both categories
+        $potensiRankings = $this->getRankings(
+            $eventId,
+            $positionFormationId,
+            $templateId,
+            'potensi',
+            $tolerancePercentage
+        );
+
+        $kompetensiRankings = $this->getRankings(
+            $eventId,
+            $positionFormationId,
+            $templateId,
+            'kompetensi',
+            $tolerancePercentage
+        );
+
+        if ($potensiRankings->isEmpty() || $kompetensiRankings->isEmpty()) {
+            return collect();
+        }
+
+        // Get participant names in one query
+        $participantIds = $potensiRankings->pluck('participant_id')->unique()->toArray();
+        $participantNames = \App\Models\Participant::whereIn('id', $participantIds)
+            ->pluck('name', 'id')
+            ->toArray();
+
+        // Combine scores with category weights
+        $participantScores = [];
+        foreach ($potensiRankings as $potensiRank) {
+            $participantId = $potensiRank['participant_id'];
+
+            // Find corresponding kompetensi score
+            $kompetensiRank = $kompetensiRankings->firstWhere('participant_id', $participantId);
+            if (! $kompetensiRank) {
+                continue;
+            }
+
+            // Calculate weighted total score
+            $weightedPotensiScore = $potensiRank['individual_score'] * ($potensiWeight / 100);
+            $weightedKompetensiScore = $kompetensiRank['individual_score'] * ($kompetensiWeight / 100);
+            $totalIndividualScore = round($weightedPotensiScore + $weightedKompetensiScore, 2);
+
+            // Calculate weighted standard score (with tolerance)
+            $weightedPotensiStd = $potensiRank['adjusted_standard_score'] * ($potensiWeight / 100);
+            $weightedKompetensiStd = $kompetensiRank['adjusted_standard_score'] * ($kompetensiWeight / 100);
+            $totalStandardScore = round($weightedPotensiStd + $weightedKompetensiStd, 2);
+
+            // Calculate weighted original standard score
+            $weightedOrigPotensiStd = $potensiRank['original_standard_score'] * ($potensiWeight / 100);
+            $weightedOrigKompetensiStd = $kompetensiRank['original_standard_score'] * ($kompetensiWeight / 100);
+            $totalOriginalStandardScore = round($weightedOrigPotensiStd + $weightedOrigKompetensiStd, 2);
+
+            // Calculate gaps
+            $totalGapScore = round($totalIndividualScore - $totalStandardScore, 2);
+            $totalOriginalGapScore = round($totalIndividualScore - $totalOriginalStandardScore, 2);
+
+            // Calculate percentage
+            $percentage = $totalStandardScore > 0
+                ? ($totalIndividualScore / $totalStandardScore) * 100
+                : 0;
+
+            // Determine conclusion using same logic as IndividualAssessmentService
+            $conclusion = $this->getConclusionText($totalOriginalGapScore, $totalGapScore);
+
+            $participantScores[] = [
+                'participant_id' => $participantId,
+                'participant_name' => $participantNames[$participantId] ?? '',
+                'total_individual_score' => $totalIndividualScore,
+                'total_standard_score' => $totalStandardScore,
+                'total_original_standard_score' => $totalOriginalStandardScore,
+                'total_gap_score' => $totalGapScore,
+                'total_original_gap_score' => $totalOriginalGapScore,
+                'percentage' => round($percentage, 2),
+                'conclusion' => $conclusion,
+                'potensi_weight' => $potensiWeight,
+                'kompetensi_weight' => $kompetensiWeight,
+            ];
+        }
+
+        // Sort by total_individual_score DESC, then participant_name ASC (tiebreaker)
+        $rankings = collect($participantScores)
+            ->sortBy([
+                ['total_individual_score', 'desc'],
+                ['participant_name', 'asc'],
+            ])
+            ->values();
+
+        // Add rank number
+        return $rankings->map(function ($row, $index) {
+            return array_merge($row, ['rank' => $index + 1]);
+        });
+    }
+
+    /**
+     * Get specific participant's combined rank (Potensi + Kompetensi)
+     *
+     * @param  int  $participantId  Participant ID
+     * @param  int  $eventId  Assessment event ID
+     * @param  int  $positionFormationId  Position formation ID
+     * @param  int  $templateId  Assessment template ID
+     * @param  int  $tolerancePercentage  Tolerance percentage (0-100)
+     * @return array|null Array with keys: rank, total, conclusion, percentage, potensi_weight, kompetensi_weight
+     */
+    public function getParticipantCombinedRank(
+        int $participantId,
+        int $eventId,
+        int $positionFormationId,
+        int $templateId,
+        int $tolerancePercentage = 10
+    ): ?array {
+        // Get all combined rankings
+        $rankings = $this->getCombinedRankings(
+            $eventId,
+            $positionFormationId,
+            $templateId,
+            $tolerancePercentage
+        );
+
+        if ($rankings->isEmpty()) {
+            return null;
+        }
+
+        // Find participant's ranking
+        $participantRanking = $rankings->firstWhere('participant_id', $participantId);
+
+        if (! $participantRanking) {
+            return null;
+        }
+
+        return [
+            'rank' => $participantRanking['rank'],
+            'total' => $rankings->count(),
+            'conclusion' => $participantRanking['conclusion'],
+            'percentage' => $participantRanking['percentage'],
+            'potensi_weight' => $participantRanking['potensi_weight'],
+            'kompetensi_weight' => $participantRanking['kompetensi_weight'],
+        ];
+    }
 }
