@@ -19,9 +19,10 @@ use Illuminate\Support\Collection;
  *
  * Key Features:
  * 1. Integrates with DynamicStandardService for session adjustments
- * 2. Consistent ordering: Score DESC → Name ASC
- * 3. Recalculates standards from active aspects/sub-aspects
- * 4. Supports tolerance adjustment
+ * 2. Integrates with ConclusionService for conclusion categorization
+ * 3. Consistent ordering: Score DESC → Name ASC
+ * 4. Recalculates standards from active aspects/sub-aspects
+ * 5. Supports tolerance adjustment
  */
 class RankingService
 {
@@ -160,7 +161,7 @@ class RankingService
                 'adjusted_gap_rating' => round($adjustedGapRating, 2),
                 'adjusted_gap_score' => round($adjustedGapScore, 2),
                 'percentage' => round($percentage, 2),
-                'conclusion' => $this->getConclusionText($originalGapScore, $adjustedGapScore),
+                'conclusion' => ConclusionService::getGapBasedConclusion($originalGapScore, $adjustedGapScore),
             ];
         });
     }
@@ -441,29 +442,6 @@ class RankingService
     }
 
     /**
-     * Determine conclusion text based on gaps
-     *
-     * Logic:
-     * - If original gap >= 0: "Di Atas Standar"
-     * - Else if adjusted gap >= 0: "Memenuhi Standar"
-     * - Else: "Di Bawah Standar"
-     *
-     * @param  float  $originalGap  Gap score at 0% tolerance
-     * @param  float  $adjustedGap  Gap score with tolerance applied
-     * @return string Conclusion text
-     */
-    private function getConclusionText(float $originalGap, float $adjustedGap): string
-    {
-        if ($originalGap >= 0) {
-            return 'Di Atas Standar';
-        } elseif ($adjustedGap >= 0) {
-            return 'Memenuhi Standar';
-        } else {
-            return 'Di Bawah Standar';
-        }
-    }
-
-    /**
      * Get passing summary statistics
      *
      * @param  Collection  $rankings  Rankings collection from getRankings()
@@ -590,7 +568,7 @@ class RankingService
                 : 0;
 
             // Determine conclusion using same logic as IndividualAssessmentService
-            $conclusion = $this->getConclusionText($totalOriginalGapScore, $totalGapScore);
+            $conclusion = ConclusionService::getGapBasedConclusion($totalOriginalGapScore, $totalGapScore);
 
             $participantScores[] = [
                 'participant_id' => $participantId,

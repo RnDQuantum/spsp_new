@@ -19,6 +19,7 @@ use Illuminate\Support\Collection;
  *
  * Works with:
  * - DynamicStandardService (for session adjustments)
+ * - ConclusionService (for conclusion categorization)
  * - RankingService (for ranking info)
  *
  * Used by:
@@ -170,7 +171,7 @@ class IndividualAssessmentService
             'original_gap_rating' => round($originalGapRating, 2),
             'original_gap_score' => round($originalGapScore, 2),
             'percentage_score' => round($adjustedPercentage, 2),
-            'conclusion_text' => $this->getConclusionText($originalGapScore, $adjustedGapScore),
+            'conclusion_text' => ConclusionService::getGapBasedConclusion($originalGapScore, $adjustedGapScore),
         ];
     }
 
@@ -282,7 +283,7 @@ class IndividualAssessmentService
         }
 
         // Determine overall conclusion
-        $overallConclusion = $this->getOverallConclusion($totalOriginalGapScore, $totalGapScore);
+        $overallConclusion = ConclusionService::getGapBasedConclusion($totalOriginalGapScore, $totalGapScore);
 
         return [
             'category_code' => $categoryCode,
@@ -321,15 +322,6 @@ class IndividualAssessmentService
         $participant = Participant::with('positionFormation.template')->findOrFail($participantId);
         $template = $participant->positionFormation->template;
 
-        // Get category types with weights
-        $potensiCategory = CategoryType::where('template_id', $template->id)
-            ->where('code', 'potensi')
-            ->firstOrFail();
-
-        $kompetensiCategory = CategoryType::where('template_id', $template->id)
-            ->where('code', 'kompetensi')
-            ->firstOrFail();
-
         // Get category assessments
         $potensiAssessment = $this->getCategoryAssessment($participantId, 'potensi', $tolerancePercentage);
         $kompetensiAssessment = $this->getCategoryAssessment($participantId, 'kompetensi', $tolerancePercentage);
@@ -367,8 +359,8 @@ class IndividualAssessmentService
             ? ($totalIndividualScore / $totalStandardScore) * 100
             : 0;
 
-        // Determine final conclusion
-        $finalConclusion = $this->getFinalConclusion($achievementPercentage);
+        // FIXED: Use gap-based conclusion (not percentage-based)
+        $finalConclusion = ConclusionService::getGapBasedConclusion($totalOriginalGapScore, $totalGapScore);
 
         return [
             'participant_id' => $participantId,
@@ -387,59 +379,6 @@ class IndividualAssessmentService
             'achievement_percentage' => round($achievementPercentage, 2),
             'final_conclusion' => $finalConclusion,
         ];
-    }
-
-    /**
-     * Get conclusion text based on gaps
-     *
-     * @param  float  $originalGap  Gap at 0% tolerance
-     * @param  float  $adjustedGap  Gap with tolerance applied
-     * @return string Conclusion text
-     */
-    private function getConclusionText(float $originalGap, float $adjustedGap): string
-    {
-        if ($originalGap >= 0) {
-            return 'Di Atas Standar';
-        } elseif ($adjustedGap >= 0) {
-            return 'Memenuhi Standar';
-        } else {
-            return 'Di Bawah Standar';
-        }
-    }
-
-    /**
-     * Get overall conclusion for category
-     *
-     * @param  float  $totalOriginalGapScore  Total original gap score
-     * @param  float  $totalAdjustedGapScore  Total adjusted gap score
-     * @return string Overall conclusion
-     */
-    private function getOverallConclusion(float $totalOriginalGapScore, float $totalAdjustedGapScore): string
-    {
-        if ($totalOriginalGapScore >= 0) {
-            return 'Di Atas Standar';
-        } elseif ($totalAdjustedGapScore >= 0) {
-            return 'Memenuhi Standar';
-        } else {
-            return 'Di Bawah Standar';
-        }
-    }
-
-    /**
-     * Get final conclusion based on achievement percentage
-     *
-     * @param  float  $achievementPercentage  Achievement percentage
-     * @return string Final conclusion
-     */
-    private function getFinalConclusion(float $achievementPercentage): string
-    {
-        if ($achievementPercentage < 80) {
-            return 'Tidak Memenuhi Syarat';
-        } elseif ($achievementPercentage < 90) {
-            return 'Masih Memenuhi Syarat';
-        } else {
-            return 'Memenuhi Syarat';
-        }
     }
 
     /**
