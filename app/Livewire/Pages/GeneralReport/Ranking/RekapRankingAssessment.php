@@ -4,6 +4,7 @@ namespace App\Livewire\Pages\GeneralReport\Ranking;
 
 use App\Models\AssessmentEvent;
 use App\Models\AssessmentTemplate;
+use App\Services\ConclusionService;
 use App\Services\DynamicStandardService;
 use App\Services\RankingService;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -33,24 +34,8 @@ class RekapRankingAssessment extends Component
 
     public array $chartColors = [];
 
-    // Conclusion configuration - single source of truth
-    public array $conclusionConfig = [
-        'Di Atas Standar' => [
-            'chartColor' => '#16a34a',      // green-600
-            'tailwindClass' => 'bg-green-600 text-white border-none',
-            'rangeText' => 'Original Gap ≥ 0',
-        ],
-        'Memenuhi Standar' => [
-            'chartColor' => '#facc15',      // yellow-400
-            'tailwindClass' => 'bg-yellow-400 text-gray-900 border-none',
-            'rangeText' => 'Adjusted Gap ≥ 0',
-        ],
-        'Di Bawah Standar' => [
-            'chartColor' => '#dc2626',      // red-600
-            'tailwindClass' => 'bg-red-600 text-white border-none',
-            'rangeText' => 'Adjusted Gap < 0',
-        ],
-    ];
+    // Conclusion configuration - loaded from ConclusionService
+    public array $conclusionConfig = [];
 
     // CACHE PROPERTIES - untuk menyimpan hasil service calls
     private ?\Illuminate\Support\Collection $rankingsCache = null;
@@ -65,6 +50,10 @@ class RekapRankingAssessment extends Component
     public function mount(): void
     {
         $this->tolerancePercentage = session('individual_report.tolerance', 10);
+
+        // Load conclusion configuration from ConclusionService
+        $this->conclusionConfig = ConclusionService::getGapConclusionConfig();
+
 
         $this->loadWeights();
 
