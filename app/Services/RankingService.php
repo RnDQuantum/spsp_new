@@ -49,25 +49,70 @@ class RankingService
             return collect();
         }
 
-        // Get aggregates with CONSISTENT ordering
-        $aggregates = AspectAssessment::query()
-            ->selectRaw('
-                aspect_assessments.participant_id,
-                SUM(aspect_assessments.individual_rating) as sum_individual_rating,
-                SUM(aspect_assessments.individual_score) as sum_individual_score
-            ')
+        $standardService = app(DynamicStandardService::class);
+
+        // Get aspect assessments with aspect data for recalculation
+        $assessments = AspectAssessment::query()
+            ->with(['aspect.subAspects', 'subAspectAssessments.subAspect'])
             ->join('participants', 'participants.id', '=', 'aspect_assessments.participant_id')
             ->where('aspect_assessments.event_id', $eventId)
             ->where('aspect_assessments.position_formation_id', $positionFormationId)
             ->whereIn('aspect_assessments.aspect_id', $activeAspectIds)
-            ->groupBy('aspect_assessments.participant_id', 'participants.name')
-            ->orderByDesc('sum_individual_score')
-            ->orderByRaw('LOWER(participants.name) ASC') // ✅ CONSISTENT: Name as tiebreaker
+            ->select('aspect_assessments.*', 'participants.name as participant_name')
+            ->orderBy('participants.name')
             ->get();
 
-        if ($aggregates->isEmpty()) {
+        if ($assessments->isEmpty()) {
             return collect();
         }
+
+        // Group by participant and recalculate scores with adjusted weights
+        $participantScores = [];
+
+        foreach ($assessments as $assessment) {
+            $participantId = $assessment->participant_id;
+            $aspect = $assessment->aspect;
+
+            if (! isset($participantScores[$participantId])) {
+                $participantScores[$participantId] = [
+                    'participant_id' => $participantId,
+                    'participant_name' => $assessment->participant_name,
+                    'individual_rating' => 0,
+                    'individual_score' => 0,
+                ];
+            }
+
+            // Get adjusted weight from session
+            $adjustedWeight = $standardService->getAspectWeight($templateId, $aspect->code);
+
+            // Recalculate individual rating based on category
+            if ($categoryCode === 'potensi') {
+                // For Potensi: calculate from active sub-aspects
+                $individualRating = $this->calculatePotensiIndividualRating(
+                    $assessment,
+                    $templateId,
+                    $standardService
+                );
+            } else {
+                // For Kompetensi: use direct rating
+                $individualRating = (float) $assessment->individual_rating;
+            }
+
+            // Recalculate individual score with adjusted weight
+            $individualScore = round($individualRating * $adjustedWeight, 2);
+
+            // Accumulate
+            $participantScores[$participantId]['individual_rating'] += $individualRating;
+            $participantScores[$participantId]['individual_score'] += $individualScore;
+        }
+
+        // Convert to collection and sort by score DESC, then name ASC (tiebreaker)
+        $rankings = collect($participantScores)
+            ->sortBy([
+                ['individual_score', 'desc'],
+                ['participant_name', 'asc'],
+            ])
+            ->values();
 
         // Get adjusted standard values ONCE for all participants
         $adjustedStandards = $this->calculateAdjustedStandards(
@@ -81,14 +126,14 @@ class RankingService
         $adjustedStandardRating = $adjustedStandards['standard_rating'] * $toleranceFactor;
         $adjustedStandardScore = $adjustedStandards['standard_score'] * $toleranceFactor;
 
-        // Map to ranking items
-        return $aggregates->map(function ($row, $index) use (
+        // Map to ranking items with calculated values
+        return $rankings->map(function ($row, $index) use (
             $adjustedStandards,
             $adjustedStandardRating,
             $adjustedStandardScore
         ) {
-            $individualRating = (float) $row->sum_individual_rating;
-            $individualScore = (float) $row->sum_individual_score;
+            $individualRating = round($row['individual_rating'], 2);
+            $individualScore = round($row['individual_score'], 2);
 
             // Calculate gaps
             $originalGapRating = $individualRating - $adjustedStandards['standard_rating'];
@@ -103,9 +148,9 @@ class RankingService
 
             return [
                 'rank' => $index + 1,
-                'participant_id' => $row->participant_id,
-                'individual_rating' => round($individualRating, 2),
-                'individual_score' => round($individualScore, 2),
+                'participant_id' => $row['participant_id'],
+                'individual_rating' => $individualRating,
+                'individual_score' => $individualScore,
                 'original_standard_rating' => round($adjustedStandards['standard_rating'], 2),
                 'original_standard_score' => round($adjustedStandards['standard_score'], 2),
                 'adjusted_standard_rating' => round($adjustedStandardRating, 2),
@@ -319,6 +364,47 @@ class RankingService
 
         // Fallback to session rating if no active sub-aspects
         return $standardService->getAspectRating($templateId, $aspect->code);
+    }
+
+    /**
+     * Calculate Potensi individual rating from active sub-aspects
+     *
+     * @param  \App\Models\AspectAssessment  $assessment  Aspect assessment
+     * @param  int  $templateId  Template ID
+     * @param  DynamicStandardService  $standardService  Standard service instance
+     * @return float Calculated individual rating
+     */
+    private function calculatePotensiIndividualRating(
+        $assessment,
+        int $templateId,
+        DynamicStandardService $standardService
+    ): float {
+        $aspect = $assessment->aspect;
+
+        if (! $aspect->subAspects || $aspect->subAspects->count() === 0) {
+            // No sub-aspects, use direct individual rating
+            return (float) $assessment->individual_rating;
+        }
+
+        $subAspectIndividualSum = 0;
+        $activeSubAspectsCount = 0;
+
+        foreach ($assessment->subAspectAssessments as $subAssessment) {
+            // Check if sub-aspect is active
+            if (! $standardService->isSubAspectActive($templateId, $subAssessment->subAspect->code)) {
+                continue; // Skip inactive sub-aspects
+            }
+
+            $subAspectIndividualSum += $subAssessment->individual_rating;
+            $activeSubAspectsCount++;
+        }
+
+        if ($activeSubAspectsCount > 0) {
+            return round($subAspectIndividualSum / $activeSubAspectsCount, 2);
+        }
+
+        // Fallback to direct rating if no active sub-aspects
+        return (float) $assessment->individual_rating;
     }
 
     /**

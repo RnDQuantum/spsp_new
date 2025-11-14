@@ -289,9 +289,12 @@ class GeneralPsyMapping extends Component
     }
 
     /**
-     * Listen to tolerance updates from ToleranceSelector component
+     * Listen to tolerance updates and standard adjustments
      */
-    protected $listeners = ['tolerance-updated' => 'handleToleranceUpdate'];
+    protected $listeners = [
+        'tolerance-updated' => 'handleToleranceUpdate',
+        'standard-adjusted' => 'handleStandardUpdate',
+    ];
 
     /**
      * Handle tolerance update from child component
@@ -337,6 +340,45 @@ class GeneralPsyMapping extends Component
         ]);
 
         // Note: Ranking info will automatically update on next render due to reactive call in view
+    }
+
+    /**
+     * Handle standard adjustment from DynamicStandardService
+     */
+    public function handleStandardUpdate(int $templateId): void
+    {
+        // Validate same template
+        if ($this->participant->positionFormation->template_id !== $templateId) {
+            return;
+        }
+
+        // Clear cache & reload with adjusted standards
+        $this->clearCache();
+        $this->loadAspectsData();
+        $this->calculateTotals();
+        $this->prepareChartData();
+
+        // Get updated summary statistics
+        $summary = $this->getPassingSummary();
+
+        // Dispatch event to update charts with new adjusted standards
+        $this->dispatch('chartDataUpdated', [
+            'tolerance' => $this->tolerancePercentage,
+            'labels' => $this->chartLabels,
+            'originalStandardRatings' => $this->chartOriginalStandardRatings,
+            'standardRatings' => $this->chartStandardRatings,
+            'individualRatings' => $this->chartIndividualRatings,
+            'originalStandardScores' => $this->chartOriginalStandardScores,
+            'standardScores' => $this->chartStandardScores,
+            'individualScores' => $this->chartIndividualScores,
+        ]);
+
+        // Dispatch event to update summary statistics
+        $this->dispatch('summary-updated', [
+            'passing' => $summary['passing'],
+            'total' => $summary['total'],
+            'percentage' => $summary['percentage'],
+        ]);
     }
 
     /**

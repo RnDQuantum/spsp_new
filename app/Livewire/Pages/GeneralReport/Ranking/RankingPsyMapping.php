@@ -53,6 +53,7 @@ class RankingPsyMapping extends Component
         'tolerance-updated' => 'handleToleranceUpdate',
         'event-selected' => 'handleEventSelected',
         'position-selected' => 'handlePositionSelected',
+        'standard-adjusted' => 'handleStandardUpdate',
     ];
 
     public function mount(): void
@@ -87,6 +88,23 @@ class RankingPsyMapping extends Component
     public function handleToleranceUpdate(int $tolerance): void
     {
         $this->tolerancePercentage = $tolerance;
+        $this->clearCache();
+        $this->refreshData();
+    }
+
+    /**
+     * Handle standard adjustment from DynamicStandardService
+     */
+    public function handleStandardUpdate(int $templateId): void
+    {
+        $data = $this->getEventData();
+
+        // Validate same template
+        if (! $data || $data['position']->template_id !== $templateId) {
+            return;
+        }
+
+        // Clear cache & reload with adjusted standards
         $this->clearCache();
         $this->refreshData();
     }

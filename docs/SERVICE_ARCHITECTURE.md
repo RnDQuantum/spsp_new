@@ -1,7 +1,7 @@
 # Service Architecture: Assessment Calculation System
 
-> **Version**: 1.0
-> **Last Updated**: 2025-01-14
+> **Version**: 1.1
+> **Last Updated**: 2025-01-15
 > **Purpose**: Single Source of Truth untuk kalkulasi assessment (Individual & Ranking)
 
 ---
@@ -273,11 +273,18 @@ getPassingSummary(Collection $rankings): array
 getConclusionSummary(Collection $rankings): array
 ```
 
+**Calculation Logic**:
+- ✅ Recalculates individual scores with adjusted weights from session (not from database)
+- ✅ Filters inactive sub-aspects for Potensi category
+- ✅ Consistent with IndividualAssessmentService calculation
+
 **Ordering Logic**:
 ```php
 // CONSISTENT: Score DESC → Name ASC (tiebreaker)
-->orderByDesc('sum_individual_score')
-->orderByRaw('LOWER(participants.name) ASC')
+->sortBy([
+    ['individual_score', 'desc'],
+    ['participant_name', 'asc'],
+])
 ```
 
 ---
@@ -1106,10 +1113,10 @@ $rankings = AspectAssessment::query()
 
 | Event | Dispatched By | Listened By | Purpose |
 |-------|---------------|-------------|---------|
-| `'standard-adjusted'` | StandardPsikometrik, StandardMc | All individual/ranking reports | Notify of standard changes |
-| `'tolerance-updated'` | ToleranceSelector | All reports | Notify of tolerance changes |
-| `'event-selected'` | EventSelector | All reports | Filter data by event |
-| `'position-selected'` | PositionSelector | All reports | Filter data by position |
+| `'standard-adjusted'` | StandardPsikometrik, StandardMc | GeneralPsyMapping, RankingPsyMapping | Notify of standard changes |
+| `'tolerance-updated'` | ToleranceSelector | GeneralPsyMapping, RankingPsyMapping | Notify of tolerance changes |
+| `'event-selected'` | EventSelector | RankingPsyMapping | Filter data by event |
+| `'position-selected'` | PositionSelector | RankingPsyMapping | Filter data by position |
 
 ### Session Keys
 
@@ -1141,7 +1148,7 @@ Session::get("individual_report.tolerance");
 
 | Component | Service Used | Listener Added | Status |
 |-----------|--------------|----------------|--------|
-| GeneralPsyMapping | ✅ IndividualAssessmentService | ❌ Need 'standard-adjusted' | 🟡 Partial |
+| GeneralPsyMapping | ✅ IndividualAssessmentService | ✅ Has listener | ✅ Done |
 | GeneralMcMapping | ❌ Manual calculation | ❌ Need both | 🔴 Todo |
 | GeneralMapping | ❌ Manual calculation | ❌ Need both | 🔴 Todo |
 | RankingPsyMapping | ✅ RankingService | ✅ Has listener | ✅ Done |
@@ -1150,14 +1157,14 @@ Session::get("individual_report.tolerance");
 
 ### 🚀 Next Steps
 
-1. Add `'standard-adjusted'` listener to GeneralPsyMapping
-2. Migrate GeneralMcMapping to IndividualAssessmentService
-3. Migrate GeneralMapping to IndividualAssessmentService
-4. Complete ranking reports migration
+1. Migrate GeneralMcMapping to IndividualAssessmentService
+2. Migrate GeneralMapping to IndividualAssessmentService
+3. Migrate RankingMcMapping to RankingService
+4. Migrate RekapRankingAssessment to services
 5. Update exports (PDF/Excel)
 
 ---
 
-**Document Version**: 1.0
-**Last Updated**: 2025-01-14
+**Document Version**: 1.1
+**Last Updated**: 2025-01-15
 **Maintainer**: Development Team
