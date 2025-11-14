@@ -126,18 +126,10 @@
                         {{ number_format($row['gap_score'], 2) }}</td>
                     <td class="border-2 border-black dark:border-gray-600 px-3 py-2 text-center">
                         {{ number_format($row['percentage_score'], 2) }}%</td>
-                    <td class="border-2 border-black dark:border-gray-600 px-3 py-2 text-center
-                                @php
-$c = trim(strtoupper($row['conclusion'])); @endphp
-
-                                @if ($c === 'DI ATAS STANDAR') bg-green-600 text-white font-bold
-                                @elseif ($c === 'MEMENUHI STANDAR')
-                                    bg-yellow-400 text-gray-900 font-bold
-                                @elseif ($c === 'DI BAWAH STANDAR')
-                                    bg-red-600 text-white font-bold
-                                @else
-                                    bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-white @endif">
+                    <td
+                        class="border-2 border-black dark:border-gray-600 px-3 py-2 text-center font-bold {{ $conclusionConfig[$row['conclusion']]['tailwindClass'] ?? 'bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-white' }}">
                         {{ $row['conclusion'] }}
+                    </td>
                 </tr>
                 @endforeach
                 @else
@@ -206,35 +198,16 @@ $c = trim(strtoupper($row['conclusion'])); @endphp
             @php
             $totalParticipants = array_sum($conclusionSummary);
             $percentage = $totalParticipants > 0 ? round(($count / $totalParticipants) * 100, 1) : 0;
-
-            // Get range text from conclusionConfig
-            $config = $this->conclusionConfig[$conclusion] ?? null;
-            $rangeText = $config['rangeText'] ?? '-';
-
-            // Determine colors based on conclusion (same as table labels)
-            $c = trim(strtoupper($conclusion));
-            if ($c === 'DI ATAS STANDAR') {
-            $bgColor = 'bg-green-600 border-none';
-            $textColor = 'text-white';
-            } elseif ($c === 'MEMENUHI STANDAR') {
-            $bgColor = 'bg-yellow-400 border-none';
-            $textColor = 'text-gray-900';
-            } elseif ($c === 'DI BAWAH STANDAR') {
-            $bgColor = 'bg-red-600 border-none';
-            $textColor = 'text-white';
-            } else {
-            $bgColor = 'bg-gray-100 border-gray-300';
-            $textColor = 'text-gray-800';
-            }
+            $tailwindClass = $conclusionConfig[$conclusion]['tailwindClass'] ?? 'bg-gray-100 border-gray-300
+            text-gray-800';
             @endphp
 
-            <div class="border-2 {{ $bgColor }} rounded-lg p-4 text-center">
-                <div class="text-3xl font-bold {{ $textColor }}">{{ $count }}</div>
-                <div class="text-sm {{ $textColor }} mb-2">{{ $percentage }}%</div>
-                <div class="text-sm {{ $textColor }} font-semibold leading-tight mb-2">
+            <div class="border-2 border-none rounded-lg p-4 text-center {{ $tailwindClass }}">
+                <div class="text-3xl font-bold">{{ $count }}</div>
+                <div class="text-sm mb-2">{{ $percentage }}%</div>
+                <div class="text-sm font-semibold leading-tight mb-2">
                     {{ $conclusion }}
                 </div>
-                {{-- <div class="text-xs {{ $textColor }} font-medium">{{ $rangeText }}</div> --}}
             </div>
             @endforeach
         </div>
@@ -331,34 +304,17 @@ $c = trim(strtoupper($row['conclusion'])); @endphp
                             </tr>
                         </thead>
                         <tbody class="bg-white dark:bg-gray-800">
-                            @php
-                            $totalParticipants = array_sum($conclusionSummary);
-                            @endphp
                             @foreach ($conclusionSummary as $conclusion => $count)
                             @php
-                            $percentage =
-                            $totalParticipants > 0 ? round(($count / $totalParticipants) * 100, 2) : 0;
-
-                            // Determine colors based on conclusion (same as table labels)
-                            $c = trim(strtoupper($conclusion));
-                            if ($c === 'DI ATAS STANDAR') {
-                            $bgColor = 'bg-green-600';
-                            $textColor = 'text-white';
-                            } elseif ($c === 'MEMENUHI STANDAR') {
-                            $bgColor = 'bg-yellow-400';
-                            $textColor = 'text-gray-900';
-                            } elseif ($c === 'DI BAWAH STANDAR') {
-                            $bgColor = 'bg-red-600';
-                            $textColor = 'text-white';
-                            } else {
-                            $bgColor = 'bg-gray-100';
-                            $textColor = 'text-gray-800';
-                            }
+                            $percentage = $totalParticipants > 0 ? round(($count / $totalParticipants) * 100, 2) : 0;
+                            $tailwindClass = $conclusionConfig[$conclusion]['tailwindClass'] ?? 'bg-gray-100
+                            text-gray-800';
                             @endphp
                             <tr>
                                 <td
-                                    class="border-2 border-gray-400 dark:border-gray-500 px-4 py-3 {{ $bgColor }} {{ $textColor }} font-bold">
-                                    {{ $conclusion }}</td>
+                                    class="border-2 border-gray-400 dark:border-gray-500 px-4 py-3 font-bold {{ $tailwindClass }}">
+                                    {{ $conclusion }}
+                                </td>
                                 <td class="border-2 border-gray-400 dark:border-gray-500 px-4 py-3 text-center">
                                     {{ $count }}
                                     orang

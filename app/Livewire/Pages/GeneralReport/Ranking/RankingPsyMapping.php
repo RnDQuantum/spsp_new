@@ -5,6 +5,7 @@ namespace App\Livewire\Pages\GeneralReport\Ranking;
 use App\Models\AssessmentEvent;
 use App\Models\Participant;
 use App\Services\RankingService;
+use App\Services\ConclusionService;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Layout;
@@ -27,24 +28,7 @@ class RankingPsyMapping extends Component
 
     public array $chartColors = [];
 
-    // Conclusion configuration - single source of truth
-    public array $conclusionConfig = [
-        'Di Atas Standar' => [
-            'chartColor' => '#16a34a',      // green-600
-            'tailwindClass' => 'bg-green-600 text-white',
-            'rangeText' => 'Original Gap ≥ 0',
-        ],
-        'Memenuhi Standar' => [
-            'chartColor' => '#facc15',      // yellow-400
-            'tailwindClass' => 'bg-yellow-400 text-gray-900',
-            'rangeText' => 'Adjusted Gap ≥ 0',
-        ],
-        'Di Bawah Standar' => [
-            'chartColor' => '#dc2626',      // red-600
-            'tailwindClass' => 'bg-red-600 text-white',
-            'rangeText' => 'Adjusted Gap < 0',
-        ],
-    ];
+    public array $conclusionConfig = [];
 
     // CACHE PROPERTIES - untuk menyimpan hasil kalkulasi
     private ?Collection $rankingsCache = null;
@@ -59,6 +43,9 @@ class RankingPsyMapping extends Component
     public function mount(): void
     {
         $this->tolerancePercentage = session('individual_report.tolerance', 10);
+
+        // Load conclusion configuration from ConclusionService
+        $this->conclusionConfig = ConclusionService::getGapConclusionConfig();
 
         // Prepare chart data
         $this->prepareChartData();
