@@ -2,12 +2,11 @@
 
 namespace App\Livewire\Pages\IndividualReport;
 
-use App\Models\Aspect;
-use App\Models\AspectAssessment;
 use App\Models\CategoryAssessment;
 use App\Models\CategoryType;
 use App\Models\Participant;
-use App\Services\DynamicStandardService;
+use App\Services\IndividualAssessmentService;
+use App\Services\RankingService;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -183,84 +182,20 @@ class GeneralMcMapping extends Component
         $this->aspectsDataCache = $allAspects;
     }
 
+    /**
+     * Load aspects data for a category
+     * REFACTORED: Use IndividualAssessmentService for consistent calculation
+     */
     private function loadCategoryAspects(int $categoryTypeId): array
     {
-        $template = $this->participant->positionFormation->template;
-        $standardService = app(DynamicStandardService::class);
+        // Use IndividualAssessmentService for consistent calculation
+        $service = app(IndividualAssessmentService::class);
 
-        // CRITICAL FIX: Get ONLY active aspect IDs to filter individual scores
-        // This ensures disabled aspects are excluded from BOTH standard AND individual calculations
-        $activeAspectIds = $standardService->getActiveAspectIds($template->id, 'kompetensi');
-
-        // Fallback to all IDs if no adjustments (performance optimization)
-        if (empty($activeAspectIds)) {
-            $activeAspectIds = Aspect::where('category_type_id', $categoryTypeId)
-                ->orderBy('order')
-                ->pluck('id')
-                ->toArray();
-        }
-
-        // OPTIMIZED: Get aspect assessments filtered by ACTIVE aspects only
-        $aspectAssessments = AspectAssessment::with('aspect')
-            ->where('participant_id', $this->participant->id)
-            ->whereIn('aspect_id', $activeAspectIds) // ✅ CRITICAL: Filter active only
-            ->orderBy('aspect_id')
-            ->get();
-
-        return $aspectAssessments->map(function ($assessment) use ($template, $standardService) {
-            $aspect = $assessment->aspect;
-
-            // Get adjusted weight from session (CRITICAL FIX #1)
-            $adjustedWeight = $standardService->getAspectWeight($template->id, $aspect->code);
-
-            // CRITICAL FIX #2: For Kompetensi, get adjusted aspect rating from session
-            $originalStandardRating = $standardService->getAspectRating($template->id, $aspect->code);
-            $individualRating = (float) $assessment->individual_rating;
-
-            // Recalculate scores with adjusted weight
-            $originalStandardScore = round($originalStandardRating * $adjustedWeight, 2);
-            $individualScore = round($individualRating * $adjustedWeight, 2);
-
-            // 2. Calculate adjusted standard based on tolerance
-            $toleranceFactor = 1 - ($this->tolerancePercentage / 100);
-            $adjustedStandardRating = $originalStandardRating * $toleranceFactor;
-            $adjustedStandardScore = $originalStandardScore * $toleranceFactor;
-
-            // 3. Calculate original gap (at tolerance 0%)
-            $originalGapRating = $individualRating - $originalStandardRating;
-            $originalGapScore = $individualScore - $originalStandardScore;
-
-            // 4. Calculate adjusted gap (with tolerance)
-            $adjustedGapRating = $individualRating - $adjustedStandardRating;
-            $adjustedGapScore = $individualScore - $adjustedStandardScore;
-
-            // 5. Calculate percentage based on adjusted standard
-            $adjustedPercentage = $adjustedStandardScore > 0
-                ? ($individualScore / $adjustedStandardScore) * 100
-                : 0;
-
-            // Get original weight for comparison
-            $originalWeight = $aspect->weight_percentage;
-
-            return [
-                'name' => $aspect->name,
-                'weight_percentage' => $adjustedWeight, // ✅ CRITICAL: Use adjusted weight from session
-                'original_weight' => $originalWeight, // For reference/display
-                'is_weight_adjusted' => $adjustedWeight !== $originalWeight, // Flag for UI
-                'original_standard_rating' => $originalStandardRating,
-                'original_standard_score' => $originalStandardScore,
-                'standard_rating' => $adjustedStandardRating,
-                'standard_score' => $adjustedStandardScore,
-                'individual_rating' => $individualRating,
-                'individual_score' => $individualScore,
-                'gap_rating' => $adjustedGapRating,
-                'gap_score' => $adjustedGapScore,
-                'original_gap_rating' => $originalGapRating,
-                'original_gap_score' => $originalGapScore,
-                'percentage_score' => $adjustedPercentage,
-                'conclusion_text' => $this->getConclusionText($originalGapScore, $adjustedGapScore),
-            ];
-        })->toArray();
+        return $service->getAspectAssessments(
+            $this->participant->id,
+            $categoryTypeId,
+            $this->tolerancePercentage
+        )->toArray();
     }
 
     private function calculateTotals(): void
@@ -354,9 +289,12 @@ class GeneralMcMapping extends Component
     }
 
     /**
-     * Listen to tolerance updates from ToleranceSelector component
+     * Listen to tolerance updates and standard adjustments
      */
-    protected $listeners = ['tolerance-updated' => 'handleToleranceUpdate'];
+    protected $listeners = [
+        'tolerance-updated' => 'handleToleranceUpdate',
+        'standard-adjusted' => 'handleStandardUpdate',
+    ];
 
     /**
      * Handle tolerance update from child component
@@ -400,6 +338,47 @@ class GeneralMcMapping extends Component
             'total' => $summary['total'],
             'percentage' => $summary['percentage'],
         ]);
+
+        // Note: Ranking info will automatically update on next render due to reactive call in view
+    }
+
+    /**
+     * Handle standard adjustment from DynamicStandardService
+     */
+    public function handleStandardUpdate(int $templateId): void
+    {
+        // Validate same template
+        if ($this->participant->positionFormation->template_id !== $templateId) {
+            return;
+        }
+
+        // Clear cache & reload with adjusted standards
+        $this->clearCache();
+        $this->loadAspectsData();
+        $this->calculateTotals();
+        $this->prepareChartData();
+
+        // Get updated summary statistics
+        $summary = $this->getPassingSummary();
+
+        // Dispatch event to update charts with new adjusted standards
+        $this->dispatch('chartDataUpdated', [
+            'tolerance' => $this->tolerancePercentage,
+            'labels' => $this->chartLabels,
+            'originalStandardRatings' => $this->chartOriginalStandardRatings,
+            'standardRatings' => $this->chartStandardRatings,
+            'individualRatings' => $this->chartIndividualRatings,
+            'originalStandardScores' => $this->chartOriginalStandardScores,
+            'standardScores' => $this->chartStandardScores,
+            'individualScores' => $this->chartIndividualScores,
+        ]);
+
+        // Dispatch event to update summary statistics
+        $this->dispatch('summary-updated', [
+            'passing' => $summary['passing'],
+            'total' => $summary['total'],
+            'percentage' => $summary['percentage'],
+        ]);
     }
 
     /**
@@ -429,7 +408,7 @@ class GeneralMcMapping extends Component
 
     /**
      * Get participant ranking information in Kompetensi category
-     * OPTIMIZED: Use cache and active aspect filtering
+     * REFACTORED: Use RankingService for consistency
      */
     public function getParticipantRanking(): ?array
     {
@@ -444,87 +423,29 @@ class GeneralMcMapping extends Component
 
         $event = $this->participant->assessmentEvent;
         $positionFormationId = $this->participant->position_formation_id;
-
-        if (! $event) {
-            return null;
-        }
-
         $template = $this->participant->positionFormation->template;
-        $standardService = app(DynamicStandardService::class);
 
-        // CRITICAL FIX: Get ONLY active aspect IDs to ensure consistency with RankingMcMapping
-        $kompetensiAspectIds = $standardService->getActiveAspectIds($template->id, 'kompetensi');
-
-        // Fallback to all IDs if no adjustments (performance optimization)
-        if (empty($kompetensiAspectIds)) {
-            $kompetensiAspectIds = Aspect::query()
-                ->where('category_type_id', $this->kompetensiCategory->id)
-                ->orderBy('order')
-                ->pluck('id')
-                ->all();
-        }
-
-        if (empty($kompetensiAspectIds)) {
+        if (! $event || ! $template) {
             return null;
         }
 
-        // OPTIMIZED: Get all participants with their scores for the same event and position
-        // Filter by ACTIVE aspects only for consistency
-        $allParticipants = AspectAssessment::query()
-            ->selectRaw('participant_id, SUM(standard_score) as sum_original_standard_score, SUM(individual_rating) as sum_individual_rating, SUM(individual_score) as sum_individual_score')
-            ->where('event_id', $event->id)
-            ->where('position_formation_id', $positionFormationId)
-            ->whereIn('aspect_id', $kompetensiAspectIds) // ✅ CRITICAL: Filter active only
-            ->groupBy('participant_id')
-            ->orderByDesc('sum_individual_score')
-            ->orderByDesc('sum_individual_rating')
-            ->orderBy('participant_id')
-            ->get();
+        // Use RankingService for consistent ranking calculation
+        $rankingService = app(RankingService::class);
+        $ranking = $rankingService->getParticipantRank(
+            $this->participant->id,
+            $event->id,
+            $positionFormationId,
+            $template->id,
+            'kompetensi',
+            $this->tolerancePercentage
+        );
 
-        $totalParticipants = $allParticipants->count();
-
-        // Find current participant's rank and calculate conclusion
-        $rank = null;
-        $conclusion = null;
-        foreach ($allParticipants as $index => $participant) {
-            if ($participant->participant_id === $this->participant->id) {
-                $rank = $index + 1;
-
-                // Calculate conclusion using gap-based logic
-                $originalStandardScore = (float) $participant->sum_original_standard_score;
-                $individualScore = (float) $participant->sum_individual_score;
-
-                // Calculate adjusted standard based on tolerance
-                $toleranceFactor = 1 - ($this->tolerancePercentage / 100);
-                $adjustedStandardScore = $originalStandardScore * $toleranceFactor;
-
-                // Calculate gaps
-                $originalGap = $individualScore - $originalStandardScore;
-                $adjustedGap = $individualScore - $adjustedStandardScore;
-
-                // Determine conclusion using gap-based logic (no threshold)
-                if ($originalGap >= 0) {
-                    $conclusion = 'Di Atas Standar';
-                } elseif ($adjustedGap >= 0) {
-                    $conclusion = 'Memenuhi Standar';
-                } else {
-                    $conclusion = 'Di Bawah Standar';
-                }
-
-                break;
-            }
-        }
-
-        if ($rank === null) {
+        if (! $ranking) {
             return null;
         }
 
         // OPTIMIZED: Cache the result
-        $this->participantRankingCache = [
-            'rank' => $rank,
-            'total' => $totalParticipants,
-            'conclusion' => $conclusion,
-        ];
+        $this->participantRankingCache = $ranking;
 
         return $this->participantRankingCache;
     }
