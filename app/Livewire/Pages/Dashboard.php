@@ -121,15 +121,16 @@ class Dashboard extends Component
     {
         Log::info('Dashboard: handleEventSelected called', ['eventCode' => $eventCode]);
 
-        // Check if participant was selected before
-        $previousParticipantId = session('filter.participant_id');
+        // Clear cache before reload
+        $this->clearCache();
 
-        if ($previousParticipantId !== null) {
-            // Case 2: We had a participant selected, will be reset to null
-            $this->showLoading('Memuat data event dan mereset filter...');
-            $this->js('setTimeout(() => window.location.reload(), 800)');
-        }
-        // Case 1: No participant was selected, just load silently
+        // Reload data with new event filter
+        $this->loadDashboardData();
+
+        // Dispatch chart update
+        $this->dispatchChartUpdate();
+
+        Log::info('Dashboard: Event filter updated successfully');
     }
 
     /**
@@ -139,15 +140,16 @@ class Dashboard extends Component
     {
         Log::info('Dashboard: handlePositionSelected called', ['positionFormationId' => $positionFormationId]);
 
-        // Check if participant was selected before
-        $previousParticipantId = session('filter.participant_id');
+        // Clear cache before reload
+        $this->clearCache();
 
-        if ($previousParticipantId !== null) {
-            // Case 2: We had a participant selected, will be reset to null
-            $this->showLoading('Memuat data jabatan dan mereset filter...');
-            $this->js('setTimeout(() => window.location.reload(), 800)');
-        }
-        // Case 1: No participant was selected, just load silently
+        // Reload data with new position filter
+        $this->loadDashboardData();
+
+        // Dispatch chart update
+        $this->dispatchChartUpdate();
+
+        Log::info('Dashboard: Position filter updated successfully');
     }
 
     /**
@@ -157,25 +159,19 @@ class Dashboard extends Component
     {
         Log::info('Dashboard: handleParticipantSelected called', ['participantId' => $participantId]);
 
-        // Check if we're transitioning from null to selected
-        $wasNull = $this->participant === null;
-        $willBeSelected = $participantId !== null;
+        // Clear cache before reload
+        $this->clearCache();
 
-        Log::info('Dashboard: Participant transition check', [
-            'wasNull' => $wasNull,
-            'willBeSelected' => $willBeSelected,
+        // Load data with new participant filter
+        $this->loadDashboardData();
+
+        // Dispatch chart update (chart.update() will handle initialization if needed)
+        $this->dispatchChartUpdate();
+
+        Log::info('Dashboard: Participant filter updated successfully', [
             'participantId' => $participantId,
+            'hasParticipant' => $this->participant !== null,
         ]);
-
-        if ($wasNull && $willBeSelected) {
-            $this->showLoading('Memuat data peserta dan menginisialisasi chart...');
-            // Trigger smooth reload for chart initialization
-            $this->js('setTimeout(() => window.location.reload(), 1000)');
-        } else {
-            // Load data normally
-            $this->loadDashboardData();
-            $this->dispatchChartUpdate();
-        }
     }
 
     /**
@@ -185,11 +181,16 @@ class Dashboard extends Component
     {
         Log::info('Dashboard: handleParticipantReset called');
 
-        // Show loading state
-        $this->showLoading('Mereset filter peserta dan memuat data standar...');
+        // Clear cache before reload
+        $this->clearCache();
 
-        // Trigger reload to show standard data
-        $this->js('setTimeout(() => window.location.reload(), 800)');
+        // Reload data (will show standard data since participant is null)
+        $this->loadDashboardData();
+
+        // Dispatch chart update
+        $this->dispatchChartUpdate();
+
+        Log::info('Dashboard: Participant filter reset, showing standard data');
     }
 
     /**

@@ -1,9 +1,4 @@
 <div>
-    @if (session('force_reload'))
-        <script>
-            window.location.reload();
-        </script>
-    @endif
     <!-- Loading Overlay - DARK MODE READY -->
     @if ($isLoading)
         <div
@@ -178,29 +173,15 @@
                         setupLivewireListeners();
                     });
 
-                    // Handle loading states and smooth transitions
+                    // Handle loading states (for tolerance updates only)
                     document.addEventListener('livewire:init', function() {
                         Livewire.on('showLoading', function(message) {
                             console.log('Loading started:', message);
-
-                            // Add smooth transition class to body
-                            document.body.style.transition = 'opacity 0.3s ease-in-out';
-                            document.body.style.opacity = '0.8';
                         });
 
                         Livewire.on('hideLoading', function() {
                             console.log('Loading finished');
-
-                            // Restore body opacity
-                            document.body.style.opacity = '1';
                         });
-                    });
-
-                    // Smooth page reload without additional loading overlay
-                    window.addEventListener('beforeunload', function() {
-                        // Just add a subtle transition effect
-                        document.body.style.transition = 'opacity 0.2s ease-out';
-                        document.body.style.opacity = '0.7';
                     });
 
                     // Dark mode colors
@@ -1063,6 +1044,314 @@
                     }
 
                     // ========================================
+                    // DYNAMIC CHART INITIALIZATION WITH DATA
+                    // ========================================
+                    function initializePotensiChartWithData(data, hasParticipant, tolerancePercentage, participantName) {
+                        const ctxPotensi = document.getElementById('potensiChart-{{ $potensiChartId }}');
+                        if (!ctxPotensi) return;
+
+                        const theme = getCurrentTheme();
+                        const colors = theme === 'dark' ? darkModeColors : lightModeColors;
+
+                        const datasets = hasParticipant ? [
+                            // Peserta (hijau)
+                            {
+                                label: participantName || 'Peserta',
+                                data: data.individualRatings,
+                                fill: true,
+                                backgroundColor: '#5db010',
+                                borderColor: '#8fd006',
+                                pointBackgroundColor: '#8fd006',
+                                pointBorderColor: '#fff',
+                                borderWidth: 2.5,
+                                pointRadius: 4,
+                                pointBorderWidth: 2,
+                                datalabels: { display: false }
+                            },
+                            // Standard (merah)
+                            {
+                                label: 'Standard',
+                                data: data.standardRatings,
+                                borderColor: '#b50505',
+                                backgroundColor: '#b50505',
+                                borderWidth: 2,
+                                pointRadius: 3,
+                                fill: true,
+                                datalabels: { display: false }
+                            },
+                            // Tolerance (kuning)
+                            {
+                                label: `Tolerance ${tolerancePercentage}%`,
+                                data: data.originalStandardRatings,
+                                fill: true,
+                                backgroundColor: '#fafa05',
+                                borderColor: '#e6d105',
+                                pointBackgroundColor: '#e6d105',
+                                pointBorderColor: '#fff',
+                                borderWidth: 2.5,
+                                pointRadius: 4,
+                                datalabels: { display: false }
+                            }
+                        ] : [
+                            // Standard (hijau)
+                            {
+                                label: 'Standard',
+                                data: data.standardRatings,
+                                fill: true,
+                                backgroundColor: '#5db010',
+                                borderColor: '#8fd006',
+                                pointBackgroundColor: '#8fd006',
+                                borderWidth: 2.5,
+                                pointRadius: 4,
+                                datalabels: { display: false }
+                            },
+                            // Tolerance (kuning)
+                            {
+                                label: `Tolerance ${tolerancePercentage}%`,
+                                data: data.originalStandardRatings,
+                                fill: true,
+                                backgroundColor: '#fafa05',
+                                borderColor: '#e6d105',
+                                borderWidth: 2,
+                                pointRadius: 3,
+                                datalabels: { display: false }
+                            }
+                        ];
+
+                        window.potensiChart_{{ $potensiChartId }} = new Chart(ctxPotensi.getContext('2d'), {
+                            type: 'radar',
+                            data: {
+                                labels: data.labels,
+                                datasets: datasets
+                            },
+                            options: {
+                                scales: {
+                                    r: {
+                                        beginAtZero: true,
+                                        min: 0,
+                                        max: 5,
+                                        ticks: {
+                                            display: false,
+                                            stepSize: 1,
+                                            color: colors.text,
+                                            font: { size: 16 }
+                                        },
+                                        grid: { color: colors.grid },
+                                        pointLabels: { color: colors.pointLabels, font: { size: 16 } },
+                                        angleLines: { color: colors.grid }
+                                    }
+                                },
+                                plugins: {
+                                    legend: { display: true, position: 'top', labels: { color: colors.legend, font: { size: 16 } } },
+                                    datalabels: { display: true }
+                                },
+                                responsive: true,
+                                maintainAspectRatio: false
+                            },
+                            plugins: [{
+                                id: 'shiftTicks',
+                                afterDraw: (chart) => {
+                                    const { ctx, scales } = chart;
+                                    const scale = scales.r;
+                                    ctx.save();
+                                    ctx.font = '16px sans-serif';
+                                    ctx.fillStyle = scale.options.ticks.color;
+                                    ctx.textAlign = 'center';
+                                    scale.ticks.forEach(tick => {
+                                        const radius = scale.getDistanceFromCenterForValue(tick.value);
+                                        ctx.fillText(tick.value, scale.xCenter + 10, scale.yCenter - radius);
+                                    });
+                                    ctx.restore();
+                                }
+                            }]
+                        });
+                    }
+
+                    function initializeKompetensiChartWithData(data, hasParticipant, tolerancePercentage, participantName) {
+                        const ctxKompetensi = document.getElementById('kompetensiChart-{{ $kompetensiChartId }}');
+                        if (!ctxKompetensi) return;
+
+                        const theme = getCurrentTheme();
+                        const colors = theme === 'dark' ? darkModeColors : lightModeColors;
+
+                        const datasets = hasParticipant ? [
+                            {
+                                label: participantName || 'Peserta',
+                                data: data.individualRatings,
+                                fill: true,
+                                backgroundColor: '#5db010',
+                                borderColor: '#8fd006',
+                                borderWidth: 2.5,
+                                pointRadius: 4,
+                                datalabels: { display: false }
+                            },
+                            {
+                                label: 'Standard',
+                                data: data.standardRatings,
+                                borderColor: '#b50505',
+                                backgroundColor: '#b50505',
+                                borderWidth: 2,
+                                fill: true,
+                                datalabels: { display: false }
+                            },
+                            {
+                                label: `Tolerance ${tolerancePercentage}%`,
+                                data: data.originalStandardRatings,
+                                fill: true,
+                                backgroundColor: '#fafa05',
+                                borderColor: '#e6d105',
+                                borderWidth: 2.5,
+                                datalabels: { display: false }
+                            }
+                        ] : [
+                            {
+                                label: 'Standard',
+                                data: data.standardRatings,
+                                fill: true,
+                                backgroundColor: '#5db010',
+                                borderColor: '#8fd006',
+                                borderWidth: 2.5,
+                                datalabels: { display: false }
+                            },
+                            {
+                                label: `Tolerance ${tolerancePercentage}%`,
+                                data: data.originalStandardRatings,
+                                fill: true,
+                                backgroundColor: '#fafa05',
+                                borderColor: '#e6d105',
+                                borderWidth: 2,
+                                datalabels: { display: false }
+                            }
+                        ];
+
+                        window.kompetensiChart_{{ $kompetensiChartId }} = new Chart(ctxKompetensi.getContext('2d'), {
+                            type: 'radar',
+                            data: { labels: data.labels, datasets: datasets },
+                            options: {
+                                scales: {
+                                    r: {
+                                        beginAtZero: true,
+                                        min: 0,
+                                        max: 5,
+                                        ticks: { display: false, color: colors.text, font: { size: 16 } },
+                                        grid: { color: colors.grid },
+                                        pointLabels: { color: colors.pointLabels, font: { size: 16 } }
+                                    }
+                                },
+                                plugins: { legend: { display: true, labels: { color: colors.legend, font: { size: 16 } } } },
+                                responsive: true,
+                                maintainAspectRatio: false
+                            },
+                            plugins: [{
+                                id: 'shiftTicks',
+                                afterDraw: (chart) => {
+                                    const { ctx, scales } = chart;
+                                    ctx.save();
+                                    ctx.font = '16px sans-serif';
+                                    ctx.fillStyle = scales.r.options.ticks.color;
+                                    ctx.textAlign = 'center';
+                                    scales.r.ticks.forEach(tick => {
+                                        const radius = scales.r.getDistanceFromCenterForValue(tick.value);
+                                        ctx.fillText(tick.value, scales.r.xCenter + 10, scales.r.yCenter - radius);
+                                    });
+                                    ctx.restore();
+                                }
+                            }]
+                        });
+                    }
+
+                    function initializeGeneralChartWithData(data, hasParticipant, tolerancePercentage, participantName) {
+                        const ctxGeneral = document.getElementById('generalChart-{{ $generalChartId }}');
+                        if (!ctxGeneral) return;
+
+                        const theme = getCurrentTheme();
+                        const colors = theme === 'dark' ? darkModeColors : lightModeColors;
+
+                        const datasets = hasParticipant ? [
+                            {
+                                label: participantName || 'Peserta',
+                                data: data.individualRatings,
+                                fill: true,
+                                backgroundColor: '#5db010',
+                                borderColor: '#8fd006',
+                                borderWidth: 2.5,
+                                datalabels: { display: false }
+                            },
+                            {
+                                label: 'Standard',
+                                data: data.standardRatings,
+                                borderColor: '#b50505',
+                                backgroundColor: '#b50505',
+                                fill: true,
+                                datalabels: { display: false }
+                            },
+                            {
+                                label: `Tolerance ${tolerancePercentage}%`,
+                                data: data.originalStandardRatings,
+                                fill: true,
+                                backgroundColor: '#fafa05',
+                                borderColor: '#e6d105',
+                                datalabels: { display: false }
+                            }
+                        ] : [
+                            {
+                                label: 'Standard',
+                                data: data.standardRatings,
+                                fill: true,
+                                backgroundColor: '#5db010',
+                                borderColor: '#8fd006',
+                                datalabels: { display: false }
+                            },
+                            {
+                                label: `Tolerance ${tolerancePercentage}%`,
+                                data: data.originalStandardRatings,
+                                fill: true,
+                                backgroundColor: '#fafa05',
+                                borderColor: '#e6d105',
+                                datalabels: { display: false }
+                            }
+                        ];
+
+                        window.generalChart_{{ $generalChartId }} = new Chart(ctxGeneral.getContext('2d'), {
+                            type: 'radar',
+                            data: { labels: data.labels, datasets: datasets },
+                            options: {
+                                scales: {
+                                    r: {
+                                        beginAtZero: true,
+                                        min: 0,
+                                        max: 5,
+                                        ticks: { display: false, color: colors.text, font: { size: 16 } },
+                                        grid: { color: colors.grid },
+                                        pointLabels: { color: colors.pointLabels, font: { size: 16 } }
+                                    }
+                                },
+                                plugins: { legend: { display: true, labels: { color: colors.legend, font: { size: 16 } } } },
+                                responsive: true,
+                                maintainAspectRatio: false
+                            },
+                            plugins: [{
+                                id: 'shiftTicks',
+                                afterDraw: (chart) => {
+                                    const { ctx, scales } = chart;
+                                    ctx.save();
+                                    ctx.font = '16px sans-serif';
+                                    ctx.fillStyle = scales.r.options.ticks.color;
+                                    ctx.textAlign = 'center';
+                                    scales.r.ticks.forEach(tick => {
+                                        const radius = scales.r.getDistanceFromCenterForValue(tick.value);
+                                        ctx.fillText(tick.value, scales.r.xCenter + 10, scales.r.yCenter - radius);
+                                    });
+                                    ctx.restore();
+                                }
+                            }]
+                        });
+                    }
+
+                    // Store latest chart data globally for reinitialization
+                    let latestChartData = null;
+
+                    // ========================================
                     // LIVEWIRE LISTENERS - UPDATE CHARTS
                     // ========================================
                     function setupLivewireListeners() {
@@ -1073,6 +1362,9 @@
                                 if (!chartData) return;
 
                                 console.log('Chart data updated:', chartData);
+
+                                // Store latest data for potential reinitialization
+                                latestChartData = chartData;
 
                                 const hasParticipant = chartData.hasParticipant;
                                 const participantName = chartData.participantName;
@@ -1085,7 +1377,8 @@
                                         chartData.potensi,
                                         hasParticipant,
                                         tolerancePercentage,
-                                        participantName
+                                        participantName,
+                                        'potensi'
                                     );
                                 }
 
@@ -1096,7 +1389,8 @@
                                         chartData.kompetensi,
                                         hasParticipant,
                                         tolerancePercentage,
-                                        participantName
+                                        participantName,
+                                        'kompetensi'
                                     );
                                 }
 
@@ -1107,7 +1401,8 @@
                                         chartData.general,
                                         hasParticipant,
                                         tolerancePercentage,
-                                        participantName
+                                        participantName,
+                                        'general'
                                     );
                                 }
                             } catch (e) {
@@ -1116,27 +1411,93 @@
                         });
                     }
 
-                    // Helper function to update chart in-place
-                    function updateChart(chart, data, hasParticipant, tolerancePercentage, participantName) {
-                        chart.data.labels = data.labels;
+                    // Helper function to reinitialize specific chart with new data
+                    function reinitializeChartWithData(chartType, data, hasParticipant, tolerancePercentage, participantName) {
+                        console.log(`Reinitializing ${chartType} chart with new dataset structure...`);
 
-                        if (hasParticipant) {
-                            // Update ketiga dataset (peserta, standar, toleransi)
-                            chart.data.datasets[0].label = participantName || 'Peserta';
-                            chart.data.datasets[0].data = data.individualRatings;
-                            chart.data.datasets[1].label = 'Standard'; // UBAH DARI: `Tolerance ${tolerancePercentage}%`
-                            chart.data.datasets[1].data = data.standardRatings; // nilai setelah toleransi
-                            chart.data.datasets[2].label = `Tolerance ${tolerancePercentage}%`; // UBAH DARI: 'Standard'
-                            chart.data.datasets[2].data = data.originalStandardRatings; // nilai asli
-                        } else {
-                            // Update standar dan toleransi (tidak ada peserta) - tidak ada perubahan
-                            chart.data.datasets[0].label = `Standard`;
-                            chart.data.datasets[0].data = data.standardRatings;
-                            chart.data.datasets[1].label = `Tolerance ${tolerancePercentage}%`;
-                            chart.data.datasets[1].data = data.originalStandardRatings;
+                        if (chartType === 'potensi') {
+                            if (window.potensiChart_{{ $potensiChartId }}) {
+                                window.potensiChart_{{ $potensiChartId }}.destroy();
+                            }
+                            initializePotensiChartWithData(data, hasParticipant, tolerancePercentage, participantName);
+                        } else if (chartType === 'kompetensi') {
+                            if (window.kompetensiChart_{{ $kompetensiChartId }}) {
+                                window.kompetensiChart_{{ $kompetensiChartId }}.destroy();
+                            }
+                            initializeKompetensiChartWithData(data, hasParticipant, tolerancePercentage, participantName);
+                        } else if (chartType === 'general') {
+                            if (window.generalChart_{{ $generalChartId }}) {
+                                window.generalChart_{{ $generalChartId }}.destroy();
+                            }
+                            initializeGeneralChartWithData(data, hasParticipant, tolerancePercentage, participantName);
+                        }
+                    }
+
+                    // Helper function to update chart in-place
+                    function updateChart(chart, data, hasParticipant, tolerancePercentage, participantName, chartType) {
+                        // Safety check: if chart not initialized, reinitialize
+                        if (!chart || !chart.data) {
+                            console.warn('Chart not initialized, reinitializing...');
+                            reinitializeChartWithData(chartType, data, hasParticipant, tolerancePercentage, participantName);
+                            return;
                         }
 
-                        chart.update('active');
+                        // Safety check: validate data
+                        if (!data || !data.labels || !Array.isArray(data.labels)) {
+                            console.error('Invalid chart data received:', data);
+                            return;
+                        }
+
+                        try {
+                            // Check if dataset count changed (2 vs 3)
+                            const currentDatasetCount = chart.data.datasets.length;
+                            const requiredDatasetCount = hasParticipant ? 3 : 2;
+
+                            if (currentDatasetCount !== requiredDatasetCount) {
+                                // Dataset count changed - must reinitialize chart
+                                console.log(`Dataset count changed (${currentDatasetCount} → ${requiredDatasetCount}), reinitializing ${chartType} chart...`);
+                                reinitializeChartWithData(chartType, data, hasParticipant, tolerancePercentage, participantName);
+                                return;
+                            }
+
+                            // Update chart data (dataset count matches)
+                            chart.data.labels = data.labels;
+
+                            if (hasParticipant) {
+                                // Update ketiga dataset (peserta, standar, toleransi)
+                                if (chart.data.datasets[0]) {
+                                    chart.data.datasets[0].label = participantName || 'Peserta';
+                                    chart.data.datasets[0].data = data.individualRatings;
+                                }
+                                if (chart.data.datasets[1]) {
+                                    chart.data.datasets[1].label = 'Standard';
+                                    chart.data.datasets[1].data = data.standardRatings;
+                                }
+                                if (chart.data.datasets[2]) {
+                                    chart.data.datasets[2].label = `Tolerance ${tolerancePercentage}%`;
+                                    chart.data.datasets[2].data = data.originalStandardRatings;
+                                }
+                            } else {
+                                // Update standar dan toleransi (tidak ada peserta)
+                                if (chart.data.datasets[0]) {
+                                    chart.data.datasets[0].label = 'Standard';
+                                    chart.data.datasets[0].data = data.standardRatings;
+                                }
+                                if (chart.data.datasets[1]) {
+                                    chart.data.datasets[1].label = `Tolerance ${tolerancePercentage}%`;
+                                    chart.data.datasets[1].data = data.originalStandardRatings;
+                                }
+                            }
+
+                            // Smooth update with animation
+                            chart.update('active');
+                            console.log(`${chartType} chart updated successfully`);
+                        } catch (error) {
+                            console.error(`Error updating ${chartType} chart:`, error);
+                            // Fallback: reinitialize chart
+                            console.log(`Attempting to reinitialize ${chartType} chart...`);
+                            reinitializeChartWithData(chartType, data, hasParticipant, tolerancePercentage, participantName);
+                        }
                     }
 
                     // DARK MODE TOGGLE LISTENER
