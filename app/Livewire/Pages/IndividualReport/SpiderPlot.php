@@ -1,12 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Livewire\Pages\IndividualReport;
 
-use App\Models\Aspect;
-use App\Models\AspectAssessment;
 use App\Models\CategoryAssessment;
 use App\Models\CategoryType;
 use App\Models\Participant;
+use App\Services\IndividualAssessmentService;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -67,6 +68,11 @@ class SpiderPlot extends Component
 
     public $allAspectsData = [];
 
+    // Cache properties for performance optimization
+    private ?array $potensiAspectsDataCache = null;
+
+    private ?array $kompetensiAspectsDataCache = null;
+
     public function mount($eventCode, $testNumber): void
     {
         // Generate unique chart IDs
@@ -120,49 +126,70 @@ class SpiderPlot extends Component
         $this->prepareChartData();
     }
 
+    /**
+     * Clear all caches
+     */
+    private function clearCache(): void
+    {
+        $this->potensiAspectsDataCache = null;
+        $this->kompetensiAspectsDataCache = null;
+    }
+
+    /**
+     * Load aspects data using IndividualAssessmentService
+     */
     private function loadAspectsData(): void
     {
         // Load Potensi aspects
         if ($this->potensiCategory) {
-            $this->potensiAspectsData = $this->loadCategoryAspects($this->potensiCategory->id);
+            // Check cache first
+            if ($this->potensiAspectsDataCache !== null) {
+                $this->potensiAspectsData = $this->potensiAspectsDataCache;
+            } else {
+                // Cache miss - load from service
+                $this->potensiAspectsData = $this->loadCategoryAspects($this->potensiCategory->id);
+                $this->potensiAspectsDataCache = $this->potensiAspectsData;
+            }
         }
 
         // Load Kompetensi aspects
         if ($this->kompetensiCategory) {
-            $this->kompetensiAspectsData = $this->loadCategoryAspects($this->kompetensiCategory->id);
+            // Check cache first
+            if ($this->kompetensiAspectsDataCache !== null) {
+                $this->kompetensiAspectsData = $this->kompetensiAspectsDataCache;
+            } else {
+                // Cache miss - load from service
+                $this->kompetensiAspectsData = $this->loadCategoryAspects($this->kompetensiCategory->id);
+                $this->kompetensiAspectsDataCache = $this->kompetensiAspectsData;
+            }
         }
 
         // Combine all aspects
         $this->allAspectsData = array_merge($this->potensiAspectsData, $this->kompetensiAspectsData);
     }
 
+    /**
+     * Load category aspects using IndividualAssessmentService
+     * This replaces manual calculation with service layer
+     */
     private function loadCategoryAspects(int $categoryTypeId): array
     {
-        $aspectIds = Aspect::where('category_type_id', $categoryTypeId)
-            ->orderBy('order')
-            ->pluck('id')
-            ->toArray();
+        $service = app(IndividualAssessmentService::class);
 
-        $aspectAssessments = AspectAssessment::with('aspect')
-            ->where('participant_id', $this->participant->id)
-            ->whereIn('aspect_id', $aspectIds)
-            ->orderBy('aspect_id')
-            ->get();
+        // Get aspect assessments from service (already adjusted with session values)
+        $aspectAssessments = $service->getAspectAssessments(
+            $this->participant->id,
+            $categoryTypeId,
+            $this->tolerancePercentage
+        );
 
+        // Transform to format needed for spider chart
         return $aspectAssessments->map(function ($assessment) {
-            // 1. Get original values from database
-            $originalStandardRating = (float) $assessment->standard_rating;
-            $individualRating = (float) $assessment->individual_rating;
-
-            // 2. Calculate adjusted standard based on tolerance
-            $toleranceFactor = 1 - ($this->tolerancePercentage / 100);
-            $adjustedStandardRating = $originalStandardRating * $toleranceFactor;
-
             return [
-                'name' => $assessment->aspect->name,
-                'original_standard_rating' => $originalStandardRating,
-                'standard_rating' => $adjustedStandardRating,
-                'individual_rating' => $individualRating,
+                'name' => $assessment['name'],
+                'original_standard_rating' => $assessment['original_standard_rating'],
+                'standard_rating' => $assessment['standard_rating'],
+                'individual_rating' => $assessment['individual_rating'],
             ];
         })->toArray();
     }
@@ -211,16 +238,22 @@ class SpiderPlot extends Component
     }
 
     /**
-     * Listen to tolerance updates from ToleranceSelector component
+     * Listen to events from other components
      */
-    protected $listeners = ['tolerance-updated' => 'handleToleranceUpdate'];
+    protected $listeners = [
+        'tolerance-updated' => 'handleToleranceUpdate',
+        'standard-adjusted' => 'handleStandardUpdate',
+    ];
 
     /**
-     * Handle tolerance update from child component
+     * Handle tolerance update from ToleranceSelector component
      */
     public function handleToleranceUpdate(int $tolerance): void
     {
         $this->tolerancePercentage = $tolerance;
+
+        // Clear cache before reload
+        $this->clearCache();
 
         // Reload aspects data with new tolerance
         $this->loadAspectsData();
@@ -256,6 +289,60 @@ class SpiderPlot extends Component
         ]);
 
         // Dispatch event to update summary statistics in ToleranceSelector
+        $this->dispatch('summary-updated', [
+            'passing' => $summary['passing'],
+            'total' => $summary['total'],
+            'percentage' => $summary['percentage'],
+        ]);
+    }
+
+    /**
+     * Handle standard adjustment from StandardPsikometrik/StandardMc components
+     */
+    public function handleStandardUpdate(int $templateId): void
+    {
+        // Validate same template
+        if ($this->participant->positionFormation->template_id !== $templateId) {
+            return;
+        }
+
+        // Clear cache before reload
+        $this->clearCache();
+
+        // Reload aspects data (will read fresh from session via service)
+        $this->loadAspectsData();
+
+        // Update chart data
+        $this->prepareChartData();
+
+        // Get updated summary statistics
+        $summary = $this->getPassingSummary();
+
+        // Dispatch events to update all charts
+        $this->dispatch('chartDataUpdated', [
+            'chartType' => 'all',
+            'tolerance' => $this->tolerancePercentage,
+            'potensi' => [
+                'labels' => $this->potensiLabels,
+                'originalStandardRatings' => $this->potensiOriginalStandardRatings,
+                'standardRatings' => $this->potensiStandardRatings,
+                'individualRatings' => $this->potensiIndividualRatings,
+            ],
+            'kompetensi' => [
+                'labels' => $this->kompetensiLabels,
+                'originalStandardRatings' => $this->kompetensiOriginalStandardRatings,
+                'standardRatings' => $this->kompetensiStandardRatings,
+                'individualRatings' => $this->kompetensiIndividualRatings,
+            ],
+            'general' => [
+                'labels' => $this->generalLabels,
+                'originalStandardRatings' => $this->generalOriginalStandardRatings,
+                'standardRatings' => $this->generalStandardRatings,
+                'individualRatings' => $this->generalIndividualRatings,
+            ],
+        ]);
+
+        // Dispatch event to update summary statistics
         $this->dispatch('summary-updated', [
             'passing' => $summary['passing'],
             'total' => $summary['total'],
