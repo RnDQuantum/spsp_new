@@ -1066,7 +1066,9 @@
                                 borderWidth: 2.5,
                                 pointRadius: 4,
                                 pointBorderWidth: 2,
-                                datalabels: { display: false }
+                                datalabels: {
+                                    display: false
+                                }
                             },
                             // Standard (merah)
                             {
@@ -1076,8 +1078,13 @@
                                 backgroundColor: '#b50505',
                                 borderWidth: 2,
                                 pointRadius: 3,
+                                pointBackgroundColor: '#9a0404',
+                                pointBorderColor: '#fff',
+                                pointBorderWidth: 2,
                                 fill: true,
-                                datalabels: { display: false }
+                                datalabels: {
+                                    display: false
+                                }
                             },
                             // Tolerance (kuning)
                             {
@@ -1090,7 +1097,10 @@
                                 pointBorderColor: '#fff',
                                 borderWidth: 2.5,
                                 pointRadius: 4,
-                                datalabels: { display: false }
+                                pointBorderWidth: 2,
+                                datalabels: {
+                                    display: false
+                                }
                             }
                         ] : [
                             // Standard (hijau)
@@ -1101,9 +1111,13 @@
                                 backgroundColor: '#5db010',
                                 borderColor: '#8fd006',
                                 pointBackgroundColor: '#8fd006',
+                                pointBorderColor: '#fff',
                                 borderWidth: 2.5,
                                 pointRadius: 4,
-                                datalabels: { display: false }
+                                pointBorderWidth: 2,
+                                datalabels: {
+                                    display: false
+                                }
                             },
                             // Tolerance (kuning)
                             {
@@ -1112,9 +1126,14 @@
                                 fill: true,
                                 backgroundColor: '#fafa05',
                                 borderColor: '#e6d105',
+                                pointBackgroundColor: '#e6d105',
+                                pointBorderColor: '#fff',
                                 borderWidth: 2,
                                 pointRadius: 3,
-                                datalabels: { display: false }
+                                pointBorderWidth: 2,
+                                datalabels: {
+                                    display: false
+                                }
                             }
                         ];
 
@@ -1132,47 +1151,81 @@
                                         max: 5,
                                         ticks: {
                                             display: false,
-                                            stepSize: 1,
+                                            stepSize: 1, // ✅ FIX 1: Tambah stepSize
                                             color: colors.text,
-                                            font: { size: 16 },
-                                            z: 10
+                                            font: {
+                                                size: 16
+                                            },
+                                            backdropColor: 'transparent',
+                                            showLabelBackdrop: false,
+                                            z: 2
                                         },
                                         grid: {
                                             color: colors.grid,
-                                            circular: true,
-                                            z: 10
+                                            z: 1
+                                            // ✅ FIX 2: HAPUS circular: true agar chart TEGAS
                                         },
                                         pointLabels: {
                                             color: colors.pointLabels,
-                                            font: { size: 16 },
-                                            z: 10
+                                            font: {
+                                                size: 16
+                                            },
+                                            z: 3
                                         },
                                         angleLines: {
                                             color: colors.grid,
-                                            z: 10
+                                            z: 1
                                         }
                                     }
                                 },
                                 plugins: {
-                                    legend: { display: true, position: 'top', labels: { color: colors.legend, font: { size: 16 } } },
-                                    datalabels: { display: true }
+                                    legend: {
+                                        display: true,
+                                        position: 'top',
+                                        labels: {
+                                            color: colors.legend,
+                                            font: {
+                                                size: 16
+                                            }
+                                        }
+                                    },
+                                    datalabels: {
+                                        display: true
+                                    }
                                 },
                                 responsive: true,
-                                maintainAspectRatio: false
+                                maintainAspectRatio: false,
+                                backgroundColor: colors.background
                             },
                             plugins: [{
                                 id: 'shiftTicks',
                                 afterDraw: (chart) => {
-                                    const { ctx, scales } = chart;
+                                    const {
+                                        ctx,
+                                        scales
+                                    } = chart;
                                     const scale = scales.r;
+                                    const ticks = scale.ticks;
+                                    const yCenter = scale.yCenter;
+                                    const xCenter = scale.xCenter;
+
                                     ctx.save();
-                                    ctx.font = '16px sans-serif';
-                                    ctx.fillStyle = scale.options.ticks.color;
+                                    ctx.font = scale.options.ticks.font.size + 'px sans-serif';
+                                    ctx.fillStyle = scale.options.ticks.color || '#000';
                                     ctx.textAlign = 'center';
-                                    scale.ticks.forEach(tick => {
-                                        const radius = scale.getDistanceFromCenterForValue(tick.value);
-                                        ctx.fillText(tick.value, scale.xCenter + 10, scale.yCenter - radius);
+                                    ctx.textBaseline = 'middle';
+
+                                    const offsetX = 10;
+                                    const offsetY = 0;
+
+                                    ticks.forEach((tick) => {
+                                        const value = tick.value;
+                                        const radius = scale.getDistanceFromCenterForValue(value);
+                                        const labelY = yCenter - radius - offsetY;
+                                        const labelX = xCenter + offsetX;
+                                        ctx.fillText(value, labelX, labelY);
                                     });
+
                                     ctx.restore();
                                 }
                             }]
@@ -1186,16 +1239,22 @@
                         const theme = getCurrentTheme();
                         const colors = theme === 'dark' ? darkModeColors : lightModeColors;
 
-                        const datasets = hasParticipant ? [
-                            {
+                        const datasets = hasParticipant ? [{
                                 label: participantName || 'Peserta',
                                 data: data.individualRatings,
                                 fill: true,
                                 backgroundColor: '#5db010',
                                 borderColor: '#8fd006',
+                                pointBackgroundColor: '#8fd006',
+                                pointBorderColor: '#fff',
+                                pointHoverBackgroundColor: '#fff',
+                                pointHoverBorderColor: '#8fd006',
                                 borderWidth: 2.5,
                                 pointRadius: 4,
-                                datalabels: { display: false }
+                                pointBorderWidth: 2,
+                                datalabels: {
+                                    display: false
+                                }
                             },
                             {
                                 label: 'Standard',
@@ -1203,8 +1262,14 @@
                                 borderColor: '#b50505',
                                 backgroundColor: '#b50505',
                                 borderWidth: 2,
+                                pointRadius: 3,
+                                pointBackgroundColor: '#9a0404',
+                                pointBorderColor: '#fff',
+                                pointBorderWidth: 2,
                                 fill: true,
-                                datalabels: { display: false }
+                                datalabels: {
+                                    display: false
+                                }
                             },
                             {
                                 label: `Tolerance ${tolerancePercentage}%`,
@@ -1212,18 +1277,31 @@
                                 fill: true,
                                 backgroundColor: '#fafa05',
                                 borderColor: '#e6d105',
+                                pointBackgroundColor: '#e6d105',
+                                pointBorderColor: '#fff',
+                                pointHoverBackgroundColor: '#fff',
+                                pointHoverBorderColor: '#e6d105',
                                 borderWidth: 2.5,
-                                datalabels: { display: false }
+                                pointRadius: 4,
+                                pointBorderWidth: 2,
+                                datalabels: {
+                                    display: false
+                                }
                             }
-                        ] : [
-                            {
+                        ] : [{
                                 label: 'Standard',
                                 data: data.standardRatings,
                                 fill: true,
                                 backgroundColor: '#5db010',
                                 borderColor: '#8fd006',
+                                pointBackgroundColor: '#8fd006',
+                                pointBorderColor: '#fff',
                                 borderWidth: 2.5,
-                                datalabels: { display: false }
+                                pointRadius: 4,
+                                pointBorderWidth: 2,
+                                datalabels: {
+                                    display: false
+                                }
                             },
                             {
                                 label: `Tolerance ${tolerancePercentage}%`,
@@ -1231,41 +1309,99 @@
                                 fill: true,
                                 backgroundColor: '#fafa05',
                                 borderColor: '#e6d105',
+                                pointBackgroundColor: '#e6d105',
+                                pointBorderColor: '#fff',
                                 borderWidth: 2,
-                                datalabels: { display: false }
+                                pointRadius: 3,
+                                pointBorderWidth: 2,
+                                datalabels: {
+                                    display: false
+                                }
                             }
                         ];
 
                         window.kompetensiChart_{{ $kompetensiChartId }} = new Chart(ctxKompetensi.getContext('2d'), {
                             type: 'radar',
-                            data: { labels: data.labels, datasets: datasets },
+                            data: {
+                                labels: data.labels,
+                                datasets: datasets
+                            },
                             options: {
                                 scales: {
                                     r: {
                                         beginAtZero: true,
                                         min: 0,
                                         max: 5,
-                                        ticks: { display: false, color: colors.text, font: { size: 16 }, z: 10 },
-                                        grid: { color: colors.grid, circular: true, z: 10 },
-                                        pointLabels: { color: colors.pointLabels, font: { size: 16 }, z: 10 },
-                                        angleLines: { color: colors.grid, z: 10 }
+                                        ticks: {
+                                            display: false,
+                                            stepSize: 1, // ✅ FIX 1: Tambah stepSize
+                                            color: colors.text,
+                                            font: {
+                                                size: 16
+                                            },
+                                            backdropColor: 'transparent',
+                                            showLabelBackdrop: false,
+                                            z: 2
+                                        },
+                                        grid: {
+                                            color: colors.grid,
+                                            z: 1
+                                            // ✅ FIX 2: HAPUS circular: true
+                                        },
+                                        pointLabels: {
+                                            color: colors.pointLabels,
+                                            font: {
+                                                size: 16
+                                            },
+                                            z: 3
+                                        },
+                                        angleLines: {
+                                            color: colors.grid,
+                                            z: 1
+                                        }
                                     }
                                 },
-                                plugins: { legend: { display: true, labels: { color: colors.legend, font: { size: 16 } } } },
+                                plugins: {
+                                    legend: {
+                                        display: true,
+                                        labels: {
+                                            color: colors.legend,
+                                            font: {
+                                                size: 16
+                                            }
+                                        }
+                                    },
+                                    datalabels: {
+                                        display: true
+                                    }
+                                },
                                 responsive: true,
-                                maintainAspectRatio: false
+                                maintainAspectRatio: false,
+                                backgroundColor: colors.background
                             },
                             plugins: [{
                                 id: 'shiftTicks',
                                 afterDraw: (chart) => {
-                                    const { ctx, scales } = chart;
+                                    const {
+                                        ctx,
+                                        scales
+                                    } = chart;
+                                    const scale = scales.r;
                                     ctx.save();
                                     ctx.font = '16px sans-serif';
-                                    ctx.fillStyle = scales.r.options.ticks.color;
+                                    ctx.fillStyle = scale.options.ticks.color;
                                     ctx.textAlign = 'center';
-                                    scales.r.ticks.forEach(tick => {
-                                        const radius = scales.r.getDistanceFromCenterForValue(tick.value);
-                                        ctx.fillText(tick.value, scales.r.xCenter + 10, scales.r.yCenter - radius);
+                                    ctx.textBaseline = 'middle';
+
+                                    const offsetX = 10;
+                                    const offsetY = 0;
+
+                                    scale.ticks.forEach(tick => {
+                                        const radius = scale.getDistanceFromCenterForValue(tick
+                                            .value);
+                                        const labelY = scale.yCenter - radius - offsetY;
+                                        const labelX = scale.xCenter + offsetX;
+                                        ctx.fillText(tick.value, labelX, labelY);
                                     });
                                     ctx.restore();
                                 }
@@ -1280,23 +1416,37 @@
                         const theme = getCurrentTheme();
                         const colors = theme === 'dark' ? darkModeColors : lightModeColors;
 
-                        const datasets = hasParticipant ? [
-                            {
+                        const datasets = hasParticipant ? [{
                                 label: participantName || 'Peserta',
                                 data: data.individualRatings,
                                 fill: true,
                                 backgroundColor: '#5db010',
                                 borderColor: '#8fd006',
+                                pointBackgroundColor: '#8fd006',
+                                pointBorderColor: '#fff',
+                                pointHoverBackgroundColor: '#fff',
+                                pointHoverBorderColor: '#8fd006',
                                 borderWidth: 2.5,
-                                datalabels: { display: false }
+                                pointRadius: 4,
+                                pointBorderWidth: 2,
+                                datalabels: {
+                                    display: false
+                                }
                             },
                             {
                                 label: 'Standard',
                                 data: data.standardRatings,
                                 borderColor: '#b50505',
                                 backgroundColor: '#b50505',
+                                borderWidth: 2,
+                                pointRadius: 3,
+                                pointBackgroundColor: '#9a0404',
+                                pointBorderColor: '#fff',
+                                pointBorderWidth: 2,
                                 fill: true,
-                                datalabels: { display: false }
+                                datalabels: {
+                                    display: false
+                                }
                             },
                             {
                                 label: `Tolerance ${tolerancePercentage}%`,
@@ -1304,16 +1454,31 @@
                                 fill: true,
                                 backgroundColor: '#fafa05',
                                 borderColor: '#e6d105',
-                                datalabels: { display: false }
+                                pointBackgroundColor: '#e6d105',
+                                pointBorderColor: '#fff',
+                                pointHoverBackgroundColor: '#fff',
+                                pointHoverBorderColor: '#e6d105',
+                                borderWidth: 2.5,
+                                pointRadius: 4,
+                                pointBorderWidth: 2,
+                                datalabels: {
+                                    display: false
+                                }
                             }
-                        ] : [
-                            {
+                        ] : [{
                                 label: 'Standard',
                                 data: data.standardRatings,
                                 fill: true,
                                 backgroundColor: '#5db010',
                                 borderColor: '#8fd006',
-                                datalabels: { display: false }
+                                pointBackgroundColor: '#8fd006',
+                                pointBorderColor: '#fff',
+                                borderWidth: 2.5,
+                                pointRadius: 4,
+                                pointBorderWidth: 2,
+                                datalabels: {
+                                    display: false
+                                }
                             },
                             {
                                 label: `Tolerance ${tolerancePercentage}%`,
@@ -1321,46 +1486,106 @@
                                 fill: true,
                                 backgroundColor: '#fafa05',
                                 borderColor: '#e6d105',
-                                datalabels: { display: false }
+                                pointBackgroundColor: '#e6d105',
+                                pointBorderColor: '#fff',
+                                borderWidth: 2,
+                                pointRadius: 3,
+                                pointBorderWidth: 2,
+                                datalabels: {
+                                    display: false
+                                }
                             }
                         ];
 
                         window.generalChart_{{ $generalChartId }} = new Chart(ctxGeneral.getContext('2d'), {
                             type: 'radar',
-                            data: { labels: data.labels, datasets: datasets },
+                            data: {
+                                labels: data.labels,
+                                datasets: datasets
+                            },
                             options: {
                                 scales: {
                                     r: {
                                         beginAtZero: true,
                                         min: 0,
                                         max: 5,
-                                        ticks: { display: false, color: colors.text, font: { size: 16 }, z: 10 },
-                                        grid: { color: colors.grid, circular: true, z: 10 },
-                                        pointLabels: { color: colors.pointLabels, font: { size: 16 }, z: 10 },
-                                        angleLines: { color: colors.grid, z: 10 }
+                                        ticks: {
+                                            display: false,
+                                            stepSize: 1, // ✅ FIX 1: Tambah stepSize
+                                            color: colors.text,
+                                            font: {
+                                                size: 16
+                                            },
+                                            backdropColor: 'transparent',
+                                            showLabelBackdrop: false,
+                                            z: 2
+                                        },
+                                        grid: {
+                                            color: colors.grid,
+                                            z: 1
+                                            // ✅ FIX 2: HAPUS circular: true
+                                        },
+                                        pointLabels: {
+                                            color: colors.pointLabels,
+                                            font: {
+                                                size: 16
+                                            },
+                                            z: 3
+                                        },
+                                        angleLines: {
+                                            color: colors.grid,
+                                            z: 1
+                                        }
                                     }
                                 },
-                                plugins: { legend: { display: true, labels: { color: colors.legend, font: { size: 16 } } } },
+                                plugins: {
+                                    legend: {
+                                        display: true,
+                                        labels: {
+                                            color: colors.legend,
+                                            font: {
+                                                size: 16
+                                            }
+                                        }
+                                    },
+                                    datalabels: {
+                                        display: true
+                                    }
+                                },
                                 responsive: true,
-                                maintainAspectRatio: false
+                                maintainAspectRatio: false,
+                                backgroundColor: colors.background
                             },
                             plugins: [{
                                 id: 'shiftTicks',
                                 afterDraw: (chart) => {
-                                    const { ctx, scales } = chart;
+                                    const {
+                                        ctx,
+                                        scales
+                                    } = chart;
+                                    const scale = scales.r;
                                     ctx.save();
                                     ctx.font = '16px sans-serif';
-                                    ctx.fillStyle = scales.r.options.ticks.color;
+                                    ctx.fillStyle = scale.options.ticks.color;
                                     ctx.textAlign = 'center';
-                                    scales.r.ticks.forEach(tick => {
-                                        const radius = scales.r.getDistanceFromCenterForValue(tick.value);
-                                        ctx.fillText(tick.value, scales.r.xCenter + 10, scales.r.yCenter - radius);
+                                    ctx.textBaseline = 'middle';
+
+                                    const offsetX = 10;
+                                    const offsetY = 0;
+
+                                    scale.ticks.forEach(tick => {
+                                        const radius = scale.getDistanceFromCenterForValue(tick
+                                            .value);
+                                        const labelY = scale.yCenter - radius - offsetY;
+                                        const labelX = scale.xCenter + offsetX;
+                                        ctx.fillText(tick.value, labelX, labelY);
                                     });
                                     ctx.restore();
                                 }
                             }]
                         });
                     }
+
 
                     // Store latest chart data globally for reinitialization
                     let latestChartData = null;
@@ -1426,7 +1651,8 @@
                     }
 
                     // Helper function to reinitialize specific chart with new data
-                    function reinitializeChartWithData(chartType, data, hasParticipant, tolerancePercentage, participantName) {
+                    function reinitializeChartWithData(chartType, data, hasParticipant, tolerancePercentage,
+                        participantName) {
                         console.log(`[${chartType}] Reinitializing chart with new dataset structure...`, {
                             hasParticipant,
                             participantName,
@@ -1468,7 +1694,8 @@
                         // Safety check: if chart not initialized, reinitialize
                         if (!chart || !chart.data) {
                             console.warn(`[${chartType}] Chart not initialized, reinitializing...`);
-                            reinitializeChartWithData(chartType, data, hasParticipant, tolerancePercentage, participantName);
+                            reinitializeChartWithData(chartType, data, hasParticipant, tolerancePercentage,
+                                participantName);
                             return;
                         }
 
@@ -1491,8 +1718,11 @@
 
                             if (currentDatasetCount !== requiredDatasetCount) {
                                 // Dataset count changed - must reinitialize chart
-                                console.log(`[${chartType}] Dataset count changed (${currentDatasetCount} → ${requiredDatasetCount}), reinitializing...`);
-                                reinitializeChartWithData(chartType, data, hasParticipant, tolerancePercentage, participantName);
+                                console.log(
+                                    `[${chartType}] Dataset count changed (${currentDatasetCount} → ${requiredDatasetCount}), reinitializing...`
+                                );
+                                reinitializeChartWithData(chartType, data, hasParticipant, tolerancePercentage,
+                                    participantName);
                                 return;
                             }
 
@@ -1532,7 +1762,8 @@
                             console.error(`Error updating ${chartType} chart:`, error);
                             // Fallback: reinitialize chart
                             console.log(`Attempting to reinitialize ${chartType} chart...`);
-                            reinitializeChartWithData(chartType, data, hasParticipant, tolerancePercentage, participantName);
+                            reinitializeChartWithData(chartType, data, hasParticipant, tolerancePercentage,
+                                participantName);
                         }
                     }
 
@@ -1594,7 +1825,9 @@
                             Livewire.on('hideLoading', function() {
                                 console.log('Loading finished');
                             });
-                        }, { once: true });
+                        }, {
+                            once: true
+                        });
                     }
 
                     // Run on initial page load
@@ -1603,7 +1836,8 @@
                     // Support for wire:navigate - reinitialize when navigated to dashboard
                     document.addEventListener('livewire:navigated', function() {
                         // Check if we're on dashboard page by looking for chart elements
-                        const isDashboardPage = document.getElementById('potensiChart-{{ $potensiChartId }}') !== null;
+                        const isDashboardPage = document.getElementById('potensiChart-{{ $potensiChartId }}') !==
+                            null;
 
                         if (isDashboardPage) {
                             console.log('[Dashboard] Navigated to dashboard page, reinitializing...');
@@ -1613,7 +1847,8 @@
 
                     // Cleanup charts when navigating away
                     document.addEventListener('livewire:navigating', function() {
-                        const isDashboardPage = document.getElementById('potensiChart-{{ $potensiChartId }}') !== null;
+                        const isDashboardPage = document.getElementById('potensiChart-{{ $potensiChartId }}') !==
+                            null;
 
                         if (isDashboardPage) {
                             console.log('[Dashboard] Navigating away from dashboard, cleaning up...');
