@@ -83,26 +83,14 @@ class ParticipantSelector extends Component
      */
     public function handlePositionSelected(?int $positionFormationId): void
     {
-        $previousParticipantId = $this->participantId;
+        // Reset participant when position changes (don't preserve)
+        $this->participantId = null;
+        session()->forget('filter.participant_id');
 
         // Reload participants for new position
         $this->loadAvailableParticipants();
 
-        // Preserve participant if still available; otherwise leave empty
-        if ($previousParticipantId && $this->isValidParticipantId($previousParticipantId)) {
-            $this->participantId = $previousParticipantId;
-        } else {
-            $this->participantId = null;
-        }
-
-        // Update session
-        if ($this->participantId) {
-            session(['filter.participant_id' => $this->participantId]);
-        } else {
-            session()->forget('filter.participant_id');
-        }
-
-        // Dispatch event to parent
+        // Dispatch event to parent that participant was reset
         $this->dispatch('participant-selected', participantId: $this->participantId);
     }
 

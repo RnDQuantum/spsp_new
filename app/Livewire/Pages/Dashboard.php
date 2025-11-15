@@ -305,7 +305,8 @@ class Dashboard extends Component
                 $this->prepareChartData();
             }
         } else {
-            // No participant selected, show only standard data
+            // No participant selected, reset participant and show only standard data
+            $this->participant = null; // ← EXPLICIT RESET!
             $this->loadStandardAspectsData();
             $this->prepareStandardChartData();
 

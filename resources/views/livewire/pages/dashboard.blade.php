@@ -1134,11 +1134,23 @@
                                             display: false,
                                             stepSize: 1,
                                             color: colors.text,
-                                            font: { size: 16 }
+                                            font: { size: 16 },
+                                            z: 10
                                         },
-                                        grid: { color: colors.grid },
-                                        pointLabels: { color: colors.pointLabels, font: { size: 16 } },
-                                        angleLines: { color: colors.grid }
+                                        grid: {
+                                            color: colors.grid,
+                                            circular: true,
+                                            z: 10
+                                        },
+                                        pointLabels: {
+                                            color: colors.pointLabels,
+                                            font: { size: 16 },
+                                            z: 10
+                                        },
+                                        angleLines: {
+                                            color: colors.grid,
+                                            z: 10
+                                        }
                                     }
                                 },
                                 plugins: {
@@ -1233,9 +1245,10 @@
                                         beginAtZero: true,
                                         min: 0,
                                         max: 5,
-                                        ticks: { display: false, color: colors.text, font: { size: 16 } },
-                                        grid: { color: colors.grid },
-                                        pointLabels: { color: colors.pointLabels, font: { size: 16 } }
+                                        ticks: { display: false, color: colors.text, font: { size: 16 }, z: 10 },
+                                        grid: { color: colors.grid, circular: true, z: 10 },
+                                        pointLabels: { color: colors.pointLabels, font: { size: 16 }, z: 10 },
+                                        angleLines: { color: colors.grid, z: 10 }
                                     }
                                 },
                                 plugins: { legend: { display: true, labels: { color: colors.legend, font: { size: 16 } } } },
@@ -1321,9 +1334,10 @@
                                         beginAtZero: true,
                                         min: 0,
                                         max: 5,
-                                        ticks: { display: false, color: colors.text, font: { size: 16 } },
-                                        grid: { color: colors.grid },
-                                        pointLabels: { color: colors.pointLabels, font: { size: 16 } }
+                                        ticks: { display: false, color: colors.text, font: { size: 16 }, z: 10 },
+                                        grid: { color: colors.grid, circular: true, z: 10 },
+                                        pointLabels: { color: colors.pointLabels, font: { size: 16 }, z: 10 },
+                                        angleLines: { color: colors.grid, z: 10 }
                                     }
                                 },
                                 plugins: { legend: { display: true, labels: { color: colors.legend, font: { size: 16 } } } },
@@ -1371,7 +1385,7 @@
                                 const tolerancePercentage = chartData.tolerancePercentage;
 
                                 // Update Potensi Chart
-                                if (window.potensiChart_{{ $potensiChartId }} && chartData.potensi) {
+                                if (chartData.potensi) {
                                     updateChart(
                                         window.potensiChart_{{ $potensiChartId }},
                                         chartData.potensi,
@@ -1383,7 +1397,7 @@
                                 }
 
                                 // Update Kompetensi Chart
-                                if (window.kompetensiChart_{{ $kompetensiChartId }} && chartData.kompetensi) {
+                                if (chartData.kompetensi) {
                                     updateChart(
                                         window.kompetensiChart_{{ $kompetensiChartId }},
                                         chartData.kompetensi,
@@ -1395,7 +1409,7 @@
                                 }
 
                                 // Update General Chart
-                                if (window.generalChart_{{ $generalChartId }} && chartData.general) {
+                                if (chartData.general) {
                                     updateChart(
                                         window.generalChart_{{ $generalChartId }},
                                         chartData.general,
@@ -1413,38 +1427,54 @@
 
                     // Helper function to reinitialize specific chart with new data
                     function reinitializeChartWithData(chartType, data, hasParticipant, tolerancePercentage, participantName) {
-                        console.log(`Reinitializing ${chartType} chart with new dataset structure...`);
+                        console.log(`[${chartType}] Reinitializing chart with new dataset structure...`, {
+                            hasParticipant,
+                            participantName,
+                            datasetCount: hasParticipant ? 3 : 2
+                        });
 
                         if (chartType === 'potensi') {
                             if (window.potensiChart_{{ $potensiChartId }}) {
+                                console.log('[potensi] Destroying old chart...');
                                 window.potensiChart_{{ $potensiChartId }}.destroy();
                             }
                             initializePotensiChartWithData(data, hasParticipant, tolerancePercentage, participantName);
+                            console.log('[potensi] New chart initialized with', hasParticipant ? 3 : 2, 'datasets');
                         } else if (chartType === 'kompetensi') {
                             if (window.kompetensiChart_{{ $kompetensiChartId }}) {
+                                console.log('[kompetensi] Destroying old chart...');
                                 window.kompetensiChart_{{ $kompetensiChartId }}.destroy();
                             }
                             initializeKompetensiChartWithData(data, hasParticipant, tolerancePercentage, participantName);
+                            console.log('[kompetensi] New chart initialized with', hasParticipant ? 3 : 2, 'datasets');
                         } else if (chartType === 'general') {
                             if (window.generalChart_{{ $generalChartId }}) {
+                                console.log('[general] Destroying old chart...');
                                 window.generalChart_{{ $generalChartId }}.destroy();
                             }
                             initializeGeneralChartWithData(data, hasParticipant, tolerancePercentage, participantName);
+                            console.log('[general] New chart initialized with', hasParticipant ? 3 : 2, 'datasets');
                         }
                     }
 
                     // Helper function to update chart in-place
                     function updateChart(chart, data, hasParticipant, tolerancePercentage, participantName, chartType) {
+                        console.log(`[${chartType}] updateChart called`, {
+                            hasChart: !!chart,
+                            hasParticipant,
+                            dataLabelsCount: data?.labels?.length
+                        });
+
                         // Safety check: if chart not initialized, reinitialize
                         if (!chart || !chart.data) {
-                            console.warn('Chart not initialized, reinitializing...');
+                            console.warn(`[${chartType}] Chart not initialized, reinitializing...`);
                             reinitializeChartWithData(chartType, data, hasParticipant, tolerancePercentage, participantName);
                             return;
                         }
 
                         // Safety check: validate data
                         if (!data || !data.labels || !Array.isArray(data.labels)) {
-                            console.error('Invalid chart data received:', data);
+                            console.error(`[${chartType}] Invalid chart data received:`, data);
                             return;
                         }
 
@@ -1453,9 +1483,15 @@
                             const currentDatasetCount = chart.data.datasets.length;
                             const requiredDatasetCount = hasParticipant ? 3 : 2;
 
+                            console.log(`[${chartType}] Dataset check:`, {
+                                current: currentDatasetCount,
+                                required: requiredDatasetCount,
+                                needsReinit: currentDatasetCount !== requiredDatasetCount
+                            });
+
                             if (currentDatasetCount !== requiredDatasetCount) {
                                 // Dataset count changed - must reinitialize chart
-                                console.log(`Dataset count changed (${currentDatasetCount} → ${requiredDatasetCount}), reinitializing ${chartType} chart...`);
+                                console.log(`[${chartType}] Dataset count changed (${currentDatasetCount} → ${requiredDatasetCount}), reinitializing...`);
                                 reinitializeChartWithData(chartType, data, hasParticipant, tolerancePercentage, participantName);
                                 return;
                             }
