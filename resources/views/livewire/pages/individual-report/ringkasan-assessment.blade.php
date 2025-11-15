@@ -81,11 +81,11 @@
                         </th>
                         <th class="border-2 border-black px-3 py-3 font-bold text-center text-black dark:text-white"
                             style="width: 100px;">
-                            Standar Rating
+                            Standar Skor
                         </th>
                         <th class="border-2 border-black px-3 py-3 font-bold text-center text-black dark:text-white"
                             style="width: 100px;">
-                            Rating Individu
+                            Skor Individu
                         </th>
                         <th class="border-2 border-black px-3 py-3 font-bold text-center text-black dark:text-white"
                             style="width: 100px;">
@@ -112,146 +112,134 @@
                 </thead>
                 <tbody>
                     <!-- Potensi Row -->
-                    @if ($potensiAssessment && $potensiCategory)
+                    @if ($potensiData)
+                        @php
+                            // Calculate weighted scores for Potensi
+                            $potensiWeight = $finalAssessmentData['potensi_weight'];
+                            $potensiStandardAkhir = round($potensiData['total_standard_score'] * ($potensiWeight / 100), 2);
+                            $potensiIndividuAkhir = round($potensiData['total_individual_score'] * ($potensiWeight / 100), 2);
+                            $potensiGapAkhir = round($potensiIndividuAkhir - $potensiStandardAkhir, 2);
+                        @endphp
                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                             <td
                                 class="border-2 border-black px-3 py-3 text-center text-gray-900 dark:text-gray-200 bg-white dark:bg-gray-800">
                                 1</td>
                             <td
                                 class="border-2 border-black px-3 py-3 text-gray-900 dark:text-gray-200 bg-white dark:bg-gray-800">
-                                {{ $potensiCategory->name }}</td>
+                                {{ $potensiData['category_name'] }}</td>
                             <td
                                 class="border-2 border-black px-3 py-3 text-center text-gray-900 dark:text-gray-200 bg-white dark:bg-gray-800">
-                                {{ number_format($potensiAssessment->total_standard_rating, 2, ',', '.') }}
+                                {{ number_format($potensiData['total_original_standard_score'], 2, ',', '.') }}
                             </td>
                             <td
                                 class="border-2 border-black px-3 py-3 text-center text-gray-900 dark:text-gray-200 bg-white dark:bg-gray-800">
-                                {{ number_format($potensiAssessment->total_individual_rating, 2, ',', '.') }}
+                                {{ number_format($potensiData['total_individual_score'], 2, ',', '.') }}
                             </td>
                             <td
                                 class="border-2 border-black px-3 py-3 text-center text-gray-900 dark:text-gray-200 bg-white dark:bg-gray-800">
-                                {{ $potensiCategory->weight_percentage }}%
+                                {{ $potensiWeight }}%
                             </td>
                             <td
                                 class="border-2 border-black px-3 py-3 text-center text-gray-900 dark:text-gray-200 bg-white dark:bg-gray-800">
-                                {{ number_format($this->getAdjustedPotensiStandardScore(), 2, ',', '.') }}
+                                {{ number_format($potensiStandardAkhir, 2, ',', '.') }}
                             </td>
                             <td
                                 class="border-2 border-black px-3 py-3 text-center text-gray-900 dark:text-gray-200 bg-white dark:bg-gray-800">
-                                {{ number_format($potensiAssessment->total_individual_score, 2, ',', '.') }}
+                                {{ number_format($potensiIndividuAkhir, 2, ',', '.') }}
                             </td>
                             <td
                                 class="border-2 border-black px-3 py-3 text-center text-gray-900 dark:text-gray-200 bg-white dark:bg-gray-800">
-                                {{ number_format($this->getAdjustedPotensiGap(), 2, ',', '.') }}
+                                {{ number_format($potensiGapAkhir, 2, ',', '.') }}
                             </td>
                             <td
-                                class="border-2 border-black px-3 py-3 text-center font-bold
-                            @if ($this->getPotensiConclusion() == 'Di Atas Standar') bg-green-600 text-white
-                            @elseif($this->getPotensiConclusion() == 'Memenuhi Standar')
-                                bg-yellow-400 text-gray-900
-                            @elseif($this->getPotensiConclusion() == 'Di Bawah Standar')
-                                bg-red-600 text-white
-                            @else
-                                bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-white @endif">
-                                {{ $this->getPotensiConclusion() }}
+                                class="border-2 border-black px-3 py-3 text-center font-bold {{ \App\Services\ConclusionService::getTailwindClass($potensiData['overall_conclusion']) }}">
+                                {{ $potensiData['overall_conclusion'] }}
                             </td>
                         </tr>
                     @endif
 
                     <!-- Kompetensi Row -->
-                    @if ($kompetensiAssessment && $kompetensiCategory)
+                    @if ($kompetensiData)
+                        @php
+                            // Calculate weighted scores for Kompetensi
+                            $kompetensiWeight = $finalAssessmentData['kompetensi_weight'];
+                            $kompetensiStandardAkhir = round($kompetensiData['total_standard_score'] * ($kompetensiWeight / 100), 2);
+                            $kompetensiIndividuAkhir = round($kompetensiData['total_individual_score'] * ($kompetensiWeight / 100), 2);
+                            $kompetensiGapAkhir = round($kompetensiIndividuAkhir - $kompetensiStandardAkhir, 2);
+                        @endphp
                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                             <td
                                 class="border-2 border-black px-3 py-3 text-center text-gray-900 dark:text-gray-200 bg-white dark:bg-gray-800">
                                 2</td>
                             <td
                                 class="border-2 border-black px-3 py-3 text-gray-900 dark:text-gray-200 bg-white dark:bg-gray-800">
-                                {{ $kompetensiCategory->name }}</td>
+                                {{ $kompetensiData['category_name'] }}</td>
                             <td
                                 class="border-2 border-black px-3 py-3 text-center text-gray-900 dark:text-gray-200 bg-white dark:bg-gray-800">
-                                {{ number_format($kompetensiAssessment->total_standard_rating, 2, ',', '.') }}
+                                {{ number_format($kompetensiData['total_original_standard_score'], 2, ',', '.') }}
                             </td>
                             <td
                                 class="border-2 border-black px-3 py-3 text-center text-gray-900 dark:text-gray-200 bg-white dark:bg-gray-800">
-                                {{ number_format($kompetensiAssessment->total_individual_rating, 2, ',', '.') }}
+                                {{ number_format($kompetensiData['total_individual_score'], 2, ',', '.') }}
                             </td>
                             <td
                                 class="border-2 border-black px-3 py-3 text-center text-gray-900 dark:text-gray-200 bg-white dark:bg-gray-800">
-                                {{ $kompetensiCategory->weight_percentage }}%
+                                {{ $kompetensiWeight }}%
                             </td>
                             <td
                                 class="border-2 border-black px-3 py-3 text-center text-gray-900 dark:text-gray-200 bg-white dark:bg-gray-800">
-                                {{ number_format($this->getAdjustedKompetensiStandardScore(), 2, ',', '.') }}
+                                {{ number_format($kompetensiStandardAkhir, 2, ',', '.') }}
                             </td>
                             <td
                                 class="border-2 border-black px-3 py-3 text-center text-gray-900 dark:text-gray-200 bg-white dark:bg-gray-800">
-                                {{ number_format($kompetensiAssessment->total_individual_score, 2, ',', '.') }}
+                                {{ number_format($kompetensiIndividuAkhir, 2, ',', '.') }}
                             </td>
                             <td
                                 class="border-2 border-black px-3 py-3 text-center text-gray-900 dark:text-gray-200 bg-white dark:bg-gray-800">
-                                {{ number_format($this->getAdjustedKompetensiGap(), 2, ',', '.') }}
+                                {{ number_format($kompetensiGapAkhir, 2, ',', '.') }}
                             </td>
                             <td
-                                class="border-2 border-black px-3 py-3 text-center font-bold
-                            @if ($this->getKompetensiConclusion() == 'Di Atas Standar') bg-green-600 text-white
-                            @elseif($this->getKompetensiConclusion() == 'Memenuhi Standar')
-                                bg-yellow-400 text-gray-900
-                            @elseif($this->getKompetensiConclusion() == 'Di Bawah Standar')
-                                bg-red-600 text-white
-                            @else
-                                bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-white @endif">
-                                {{ $this->getKompetensiConclusion() }}
+                                class="border-2 border-black px-3 py-3 text-center font-bold {{ \App\Services\ConclusionService::getTailwindClass($kompetensiData['overall_conclusion']) }}">
+                                {{ $kompetensiData['overall_conclusion'] }}
                             </td>
                         </tr>
                     @endif
 
                     <!-- Total Row - DARK MODE READY -->
-                    @if ($finalAssessment)
+                    @if ($finalAssessmentData)
+                        @php
+                            // Total = Sum of weighted scores (already calculated in service)
+                            $totalStandardSkorSebelumBobot = ($potensiData['total_original_standard_score'] ?? 0) + ($kompetensiData['total_original_standard_score'] ?? 0);
+                            $totalIndividuSkorSebelumBobot = ($potensiData['total_individual_score'] ?? 0) + ($kompetensiData['total_individual_score'] ?? 0);
+                        @endphp
                         <tr class="bg-gray-300 dark:bg-gray-600 text-black dark:text-white">
                             <td class="border-2 border-black px-3 py-3 text-center" colspan="2"><strong>TOTAL
                                     SKOR</strong></td>
                             <td class="border-2 border-black px-3 py-3 text-center">
                                 <strong>
-                                    {{ number_format(
-                                        ($potensiAssessment?->total_standard_rating ?? 0) + ($kompetensiAssessment?->total_standard_rating ?? 0),
-                                        2,
-                                        ',',
-                                        '.',
-                                    ) }}
+                                    {{ number_format($totalStandardSkorSebelumBobot, 2, ',', '.') }}
                                 </strong>
                             </td>
                             <td class="border-2 border-black px-3 py-3 text-center">
                                 <strong>
-                                    {{ number_format(
-                                        ($potensiAssessment?->total_individual_rating ?? 0) + ($kompetensiAssessment?->total_individual_rating ?? 0),
-                                        2,
-                                        ',',
-                                        '.',
-                                    ) }}
+                                    {{ number_format($totalIndividuSkorSebelumBobot, 2, ',', '.') }}
                                 </strong>
                             </td>
                             <td class="border-2 border-black px-3 py-3 text-center"><strong>100%</strong></td>
                             <td class="border-2 border-black px-3 py-3 text-center">
-                                <strong>{{ number_format($this->getAdjustedTotalStandardScore(), 2, ',', '.') }}</strong>
+                                <strong>{{ number_format($finalAssessmentData['total_standard_score'], 2, ',', '.') }}</strong>
                             </td>
                             <td class="border-2 border-black px-3 py-3 text-center">
-                                <strong>{{ number_format($finalAssessment->total_individual_score, 2, ',', '.') }}</strong>
+                                <strong>{{ number_format($finalAssessmentData['total_individual_score'], 2, ',', '.') }}</strong>
                             </td>
                             <td class="border-2 border-black px-3 py-3 text-center">
                                 <strong>
-                                    {{ number_format($this->getAdjustedTotalGap(), 2, ',', '.') }}
+                                    {{ number_format($finalAssessmentData['total_gap_score'], 2, ',', '.') }}
                                 </strong>
                             </td>
                             <td
-                                class="border-2 border-black px-3 py-3 text-center font-bold
-                            @if ($this->getTotalConclusionInTable() == 'Di Atas Standar') bg-green-600 text-white
-                            @elseif($this->getTotalConclusionInTable() == 'Memenuhi Standar')
-                                bg-yellow-400 text-gray-900
-                            @elseif($this->getTotalConclusionInTable() == 'Di Bawah Standar')
-                                bg-red-600 text-white
-                            @else
-                                bg-gray-600 text-white @endif">
-                                {{ $this->getTotalConclusionInTable() }}
+                                class="border-2 border-black px-3 py-3 text-center font-bold {{ \App\Services\ConclusionService::getTailwindClass($finalAssessmentData['final_conclusion']) }}">
+                                {{ $finalAssessmentData['final_conclusion'] }}
                             </td>
                         </tr>
                     @endif
@@ -260,7 +248,7 @@
         </div>
 
         <!-- Conclusion Section - DARK MODE READY -->
-        @if ($finalAssessment)
+        @if ($finalAssessmentData)
             <div class="mt-6 bg-white dark:bg-gray-800">
                 <table class="min-w-full border-2 border-black">
                     <tr>
@@ -269,14 +257,7 @@
                             KESIMPULAN :
                         </td>
                         <td
-                            class="border-2 border-black px-4 py-4 text-center font-bold text-lg
-                        @if ($this->getFinalConclusionText() == 'Sangat Potensial') bg-green-600 text-white
-                        @elseif($this->getFinalConclusionText() == 'Potensial')
-                            bg-yellow-400 text-gray-900
-                        @elseif($this->getFinalConclusionText() == 'Kurang Potensial')
-                            bg-red-600 text-white
-                        @else
-                            bg-red-600 text-white @endif">
+                            class="border-2 border-black px-4 py-4 text-center font-bold text-lg {{ \App\Services\ConclusionService::getTailwindClass($this->getFinalConclusionText(), 'potensial') }}">
                             {{ $this->getFinalConclusionText() }}
                         </td>
                     </tr>

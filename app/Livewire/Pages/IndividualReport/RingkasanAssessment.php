@@ -2,10 +2,9 @@
 
 namespace App\Livewire\Pages\IndividualReport;
 
-use App\Models\CategoryAssessment;
-use App\Models\CategoryType;
-use App\Models\FinalAssessment;
 use App\Models\Participant;
+use App\Services\ConclusionService;
+use App\Services\IndividualAssessmentService;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -15,22 +14,20 @@ class RingkasanAssessment extends Component
     // Participant info
     public ?Participant $participant = null;
 
-    public ?FinalAssessment $finalAssessment = null;
+    // Assessment data from service
+    public ?array $finalAssessmentData = null;
 
-    // Category assessments
-    public ?CategoryAssessment $potensiAssessment = null;
+    public ?array $potensiData = null;
 
-    public ?CategoryAssessment $kompetensiAssessment = null;
-
-    // Category types for weights
-    public ?CategoryType $potensiCategory = null;
-
-    public ?CategoryType $kompetensiCategory = null;
+    public ?array $kompetensiData = null;
 
     // Tolerance percentage (default 10%)
     public int $tolerancePercentage = 10;
 
-    // ADD: Public properties untuk support child component
+    // CACHE: Store service results
+    private ?array $finalAssessmentCache = null;
+
+    // Public properties untuk support child component
     public $eventCode;
 
     public $testNumber;
@@ -48,24 +45,12 @@ class RingkasanAssessment extends Component
     public $showTable = true;
 
     /**
-     * Get adjusted standard score for a category
+     * Listen to tolerance updates and standard adjustments
      */
-    private function getAdjustedStandardScore(float $originalStandardScore): float
-    {
-        $toleranceFactor = 1 - ($this->tolerancePercentage / 100);
-
-        return $originalStandardScore * $toleranceFactor;
-    }
-
-    /**
-     * Get adjusted gap score
-     */
-    private function getAdjustedGap(float $individualScore, float $originalStandardScore): float
-    {
-        $adjustedStandard = $this->getAdjustedStandardScore($originalStandardScore);
-
-        return $individualScore - $adjustedStandard;
-    }
+    protected $listeners = [
+        'tolerance-updated' => 'handleToleranceUpdate',
+        'standard-adjusted' => 'handleStandardUpdate',
+    ];
 
     public function mount($eventCode = null, $testNumber = null, $showHeader = true, $showBiodata = true, $showInfoSection = true, $showTable = true): void
     {
@@ -102,214 +87,60 @@ class RingkasanAssessment extends Component
             ->where('test_number', $this->testNumber)
             ->firstOrFail();
 
-        // Get template from position
-        $template = $this->participant->positionFormation->template;
-
-        // Get category types for this template
-        $this->potensiCategory = CategoryType::where('template_id', $template->id)
-            ->where('code', 'potensi')
-            ->first();
-
-        $this->kompetensiCategory = CategoryType::where('template_id', $template->id)
-            ->where('code', 'kompetensi')
-            ->first();
-
-        // Load category assessments
-        if ($this->potensiCategory) {
-            $this->potensiAssessment = CategoryAssessment::where('participant_id', $this->participant->id)
-                ->where('category_type_id', $this->potensiCategory->id)
-                ->first();
-        }
-
-        if ($this->kompetensiCategory) {
-            $this->kompetensiAssessment = CategoryAssessment::where('participant_id', $this->participant->id)
-                ->where('category_type_id', $this->kompetensiCategory->id)
-                ->first();
-        }
-
-        // Load final assessment
-        $this->finalAssessment = FinalAssessment::where('participant_id', $this->participant->id)->first();
-    }
-
-    public function getPotensiConclusion(): string
-    {
-        if (! $this->potensiAssessment) {
-            return 'Tidak Ikut Assessment';
-        }
-
-        // Get original values
-        $individualScore = $this->potensiAssessment->total_individual_score;
-        $originalStandardScore = $this->potensiAssessment->total_standard_score;
-
-        // Calculate original gap (at tolerance 0%)
-        $originalGap = $individualScore - $originalStandardScore;
-
-        // Check if not participating: original gap = -standard (individual is 0)
-        if ($originalGap == -$originalStandardScore) {
-            return 'Tidak Ikut Assessment';
-        }
-
-        // Calculate adjusted gap (with tolerance applied)
-        $adjustedGap = $this->getAdjustedGap($individualScore, $originalStandardScore);
-
-        // Original gap >= 0: Di Atas Standar (exceeds original standard)
-        if ($originalGap >= 0) {
-            return 'Di Atas Standar';
-        }
-
-        // Adjusted gap >= 0: Memenuhi Standar (exceeds adjusted standard, below original)
-        if ($adjustedGap >= 0) {
-            return 'Memenuhi Standar';
-        }
-
-        // Otherwise: Di Bawah Standar
-        return 'Di Bawah Standar';
-    }
-
-    public function getKompetensiConclusion(): string
-    {
-        if (! $this->kompetensiAssessment) {
-            return 'Tidak Ikut Assessment';
-        }
-
-        // Get original values
-        $individualScore = $this->kompetensiAssessment->total_individual_score;
-        $originalStandardScore = $this->kompetensiAssessment->total_standard_score;
-
-        // Calculate original gap (at tolerance 0%)
-        $originalGap = $individualScore - $originalStandardScore;
-
-        // Check if not participating: original gap = -standard (individual is 0)
-        if ($originalGap == -$originalStandardScore) {
-            return 'Tidak Ikut Assessment';
-        }
-
-        // Calculate adjusted gap (with tolerance applied)
-        $adjustedGap = $this->getAdjustedGap($individualScore, $originalStandardScore);
-
-        // Original gap >= 0: Di Atas Standar (exceeds original standard)
-        if ($originalGap >= 0) {
-            return 'Di Atas Standar';
-        }
-
-        // Adjusted gap >= 0: Memenuhi Standar (exceeds adjusted standard, below original)
-        if ($adjustedGap >= 0) {
-            return 'Memenuhi Standar';
-        }
-
-        // Otherwise: Di Bawah Standar
-        return 'Di Bawah Standar';
-    }
-
-    public function getConclusionColorClass(?string $conclusionCode): string
-    {
-        if (! $conclusionCode) {
-            return 'bg-gray-300 text-black';
-        }
-
-        return match ($conclusionCode) {
-            // Standard conclusions (3-color scheme: green-yellow-red)
-            'Di Atas Standar' => 'bg-green-600 text-white',
-            'Memenuhi Standar' => 'bg-yellow-400 text-black',
-            'Di Bawah Standar' => 'bg-red-600 text-white',
-            // Default
-            'Tidak Ikut Assessment' => 'bg-gray-300 text-black',
-            default => 'bg-gray-300 text-black',
-        };
-    }
-
-    public function getFinalConclusionColorClass(?string $conclusionCode): string
-    {
-        if (! $conclusionCode) {
-            return 'bg-gray-300 text-black';
-        }
-
-        return match ($conclusionCode) {
-            'TMS' => 'bg-red-600 text-white',
-            'MMS' => 'bg-yellow-400 text-black',
-            'MS' => 'bg-green-500 text-white',
-            default => 'bg-gray-300 text-black',
-        };
-    }
-
-    public function getTotalConclusionInTable(): string
-    {
-        if (! $this->finalAssessment) {
-            return 'Tidak Ikut Assessment';
-        }
-
-        // Get original values
-        $totalIndividualScore = (float) $this->finalAssessment->total_individual_score;
-        $originalTotalStandardScore = (float) $this->finalAssessment->total_standard_score;
-
-        // Calculate original gap (at tolerance 0%)
-        $originalGap = $totalIndividualScore - $originalTotalStandardScore;
-
-        // Check if not participating: original gap = -standard (individual is 0)
-        if ($originalGap == -$originalTotalStandardScore) {
-            return 'Tidak Ikut Assessment';
-        }
-
-        // Calculate adjusted gap (with tolerance applied)
-        $adjustedGap = $this->getAdjustedGap($totalIndividualScore, $originalTotalStandardScore);
-
-        // Original gap >= 0: Di Atas Standar (exceeds original standard)
-        if ($originalGap >= 0) {
-            return 'Di Atas Standar';
-        }
-
-        // Adjusted gap >= 0: Memenuhi Standar (exceeds adjusted standard, below original)
-        if ($adjustedGap >= 0) {
-            return 'Memenuhi Standar';
-        }
-
-        // Otherwise: Di Bawah Standar
-        return 'Di Bawah Standar';
-    }
-
-    public function getTotalConclusionColorClass(): string
-    {
-        $conclusion = $this->getTotalConclusionInTable();
-
-        return match ($conclusion) {
-            'Di Atas Standar' => 'bg-green-600 text-white',
-            'Memenuhi Standar' => 'bg-yellow-400 text-black',
-            'Di Bawah Standar' => 'bg-red-600 text-white',
-            'Tidak Ikut Assessment' => 'bg-gray-300 text-black',
-            default => 'bg-gray-300 text-black',
-        };
-    }
-
-    public function getFinalConclusionText(): string
-    {
-        // Get table conclusion
-        $tableConclusion = $this->getTotalConclusionInTable();
-
-        // Based on table conclusion, determine final conclusion (3 categories only)
-        return match ($tableConclusion) {
-            'Di Atas Standar' => 'Sangat Potensial',
-            'Memenuhi Standar' => 'Potensial',
-            'Di Bawah Standar' => 'Kurang Potensial',
-            default => 'Kurang Potensial',
-        };
-    }
-
-    public function getFinalConclusionColorClassByGap(): string
-    {
-        $finalConclusion = $this->getFinalConclusionText();
-
-        return match ($finalConclusion) {
-            'Sangat Potensial' => 'bg-green-600 text-white',
-            'Potensial' => 'bg-yellow-400 text-black',
-            'Kurang Potensial' => 'bg-red-600 text-white',
-            default => 'bg-red-600 text-white',
-        };
+        // Load assessment data from service
+        $this->loadFinalAssessment();
     }
 
     /**
-     * Listen to tolerance updates from ToleranceSelector component
+     * Clear all caches
      */
-    protected $listeners = ['tolerance-updated' => 'handleToleranceUpdate'];
+    private function clearCache(): void
+    {
+        $this->finalAssessmentCache = null;
+    }
+
+    /**
+     * Load final assessment data from IndividualAssessmentService
+     */
+    private function loadFinalAssessment(): void
+    {
+        // OPTIMIZED: Check cache first
+        if ($this->finalAssessmentCache !== null) {
+            $this->finalAssessmentData = $this->finalAssessmentCache;
+            $this->extractCategoryData();
+
+            return;
+        }
+
+        // Use IndividualAssessmentService for consistent calculation
+        $service = app(IndividualAssessmentService::class);
+        $this->finalAssessmentData = $service->getFinalAssessment(
+            $this->participant->id,
+            $this->tolerancePercentage
+        );
+
+        // OPTIMIZED: Cache the result
+        $this->finalAssessmentCache = $this->finalAssessmentData;
+
+        // Extract category data for easy access in view
+        $this->extractCategoryData();
+    }
+
+    /**
+     * Extract category data for view
+     */
+    private function extractCategoryData(): void
+    {
+        if (! $this->finalAssessmentData) {
+            $this->potensiData = null;
+            $this->kompetensiData = null;
+
+            return;
+        }
+
+        $this->potensiData = $this->finalAssessmentData['potensi'] ?? null;
+        $this->kompetensiData = $this->finalAssessmentData['kompetensi'] ?? null;
+    }
 
     /**
      * Handle tolerance update from child component
@@ -317,6 +148,12 @@ class RingkasanAssessment extends Component
     public function handleToleranceUpdate(int $tolerance): void
     {
         $this->tolerancePercentage = $tolerance;
+
+        // OPTIMIZED: Clear cache before reloading
+        $this->clearCache();
+
+        // Reload data with new tolerance
+        $this->loadFinalAssessment();
 
         // Get updated summary statistics
         $summary = $this->getPassingSummary();
@@ -330,69 +167,28 @@ class RingkasanAssessment extends Component
     }
 
     /**
-     * Public methods to get adjusted values for view
+     * Handle standard adjustment from DynamicStandardService
      */
-    public function getAdjustedPotensiStandardScore(): float
+    public function handleStandardUpdate(int $templateId): void
     {
-        if (! $this->potensiAssessment) {
-            return 0;
+        // Validate same template
+        if ($this->participant->positionFormation->template_id !== $templateId) {
+            return;
         }
 
-        return $this->getAdjustedStandardScore((float) $this->potensiAssessment->total_standard_score);
-    }
+        // Clear cache & reload with adjusted standards
+        $this->clearCache();
+        $this->loadFinalAssessment();
 
-    public function getAdjustedPotensiGap(): float
-    {
-        if (! $this->potensiAssessment) {
-            return 0;
-        }
+        // Get updated summary statistics
+        $summary = $this->getPassingSummary();
 
-        return $this->getAdjustedGap(
-            (float) $this->potensiAssessment->total_individual_score,
-            (float) $this->potensiAssessment->total_standard_score
-        );
-    }
-
-    public function getAdjustedKompetensiStandardScore(): float
-    {
-        if (! $this->kompetensiAssessment) {
-            return 0;
-        }
-
-        return $this->getAdjustedStandardScore((float) $this->kompetensiAssessment->total_standard_score);
-    }
-
-    public function getAdjustedKompetensiGap(): float
-    {
-        if (! $this->kompetensiAssessment) {
-            return 0;
-        }
-
-        return $this->getAdjustedGap(
-            (float) $this->kompetensiAssessment->total_individual_score,
-            (float) $this->kompetensiAssessment->total_standard_score
-        );
-    }
-
-    public function getAdjustedTotalStandardScore(): float
-    {
-        if (! $this->finalAssessment) {
-            return 0;
-        }
-
-        return $this->getAdjustedStandardScore((float) $this->finalAssessment->total_standard_score);
-    }
-
-    public function getAdjustedTotalGap(): float
-    {
-        if (! $this->finalAssessment) {
-            return 0;
-        }
-
-        return $this->getAdjustedGap(
-            (float) $this->finalAssessment->total_individual_score,
-            (float) $this->finalAssessment->total_standard_score
-        );
+        // Dispatch event to update summary statistics
+        $this->dispatch('summary-updated', [
+            'passing' => $summary['passing'],
+            'total' => $summary['total'],
+            'percentage' => $summary['percentage'],
+        ]);
     }
 
     /**
@@ -404,18 +200,18 @@ class RingkasanAssessment extends Component
         $total = 0;
 
         // Check Potensi
-        if ($this->potensiAssessment) {
+        if ($this->potensiData) {
             $total++;
-            $potensiConclusion = $this->getPotensiConclusion();
+            $potensiConclusion = $this->potensiData['overall_conclusion'] ?? 'Di Bawah Standar';
             if (in_array($potensiConclusion, ['Di Atas Standar', 'Memenuhi Standar'])) {
                 $passing++;
             }
         }
 
         // Check Kompetensi
-        if ($this->kompetensiAssessment) {
+        if ($this->kompetensiData) {
             $total++;
-            $kompetensiConclusion = $this->getKompetensiConclusion();
+            $kompetensiConclusion = $this->kompetensiData['overall_conclusion'] ?? 'Di Bawah Standar';
             if (in_array($kompetensiConclusion, ['Di Atas Standar', 'Memenuhi Standar'])) {
                 $passing++;
             }
@@ -426,6 +222,22 @@ class RingkasanAssessment extends Component
             'passing' => $passing,
             'percentage' => $total > 0 ? round(($passing / $total) * 100) : 0,
         ];
+    }
+
+    /**
+     * Get final conclusion text (Potensial-based mapping)
+     * Used in conclusion section below the table
+     */
+    public function getFinalConclusionText(): string
+    {
+        if (! $this->finalAssessmentData) {
+            return 'Kurang Potensial';
+        }
+
+        $gapConclusion = $this->finalAssessmentData['final_conclusion'] ?? 'Di Bawah Standar';
+
+        // Use ConclusionService to map gap-based to potensial-based
+        return ConclusionService::getPotensialConclusion($gapConclusion);
     }
 
     public function render()
