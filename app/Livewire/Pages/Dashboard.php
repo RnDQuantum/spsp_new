@@ -3,10 +3,11 @@
 namespace App\Livewire\Pages;
 
 use App\Models\Aspect;
-use App\Models\AspectAssessment;
 use App\Models\CategoryAssessment;
 use App\Models\CategoryType;
 use App\Models\Participant;
+use App\Services\DynamicStandardService;
+use App\Services\IndividualAssessmentService;
 use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -73,6 +74,11 @@ class Dashboard extends Component
 
     public string $loadingMessage = 'Memuat data...';
 
+    // Cache properties
+    private ?array $potensiAspectsDataCache = null;
+
+    private ?array $kompetensiAspectsDataCache = null;
+
     /**
      * Listen to filter changes
      */
@@ -82,6 +88,7 @@ class Dashboard extends Component
         'participant-selected' => 'handleParticipantSelected',
         'participant-reset' => 'handleParticipantReset',
         'tolerance-updated' => 'handleToleranceUpdate',
+        'standard-adjusted' => 'handleStandardUpdate',
     ];
 
     public function mount(): void
@@ -183,6 +190,66 @@ class Dashboard extends Component
 
         // Trigger reload to show standard data
         $this->js('setTimeout(() => window.location.reload(), 800)');
+    }
+
+    /**
+     * Handle standard adjustment from other components
+     */
+    public function handleStandardUpdate(int $templateId): void
+    {
+        Log::info('Dashboard: handleStandardUpdate called', ['templateId' => $templateId]);
+
+        // Get current template ID to validate
+        $currentTemplateId = null;
+        if ($this->participant) {
+            $currentTemplateId = $this->participant->positionFormation->template_id;
+        } else {
+            $positionFormationId = session('filter.position_formation_id');
+            if ($positionFormationId) {
+                $position = \App\Models\PositionFormation::with('template')->find($positionFormationId);
+                $currentTemplateId = $position?->template->id;
+            }
+        }
+
+        // Only update if same template
+        if ($currentTemplateId !== $templateId) {
+            Log::info('Dashboard: Template ID mismatch, skipping update', [
+                'currentTemplateId' => $currentTemplateId,
+                'eventTemplateId' => $templateId,
+            ]);
+
+            return;
+        }
+
+        Log::info('Dashboard: Updating data after standard adjustment');
+
+        // Clear cache
+        $this->clearCache();
+
+        // Reload data
+        if ($this->participant) {
+            $this->loadAspectsData();
+            $this->prepareChartData();
+        } else {
+            $this->loadStandardAspectsData();
+            $this->prepareStandardChartData();
+        }
+
+        // Dispatch chart update
+        $this->dispatchChartUpdate();
+
+        Log::info('Dashboard: Data updated after standard adjustment');
+    }
+
+    /**
+     * Clear all caches
+     */
+    private function clearCache(): void
+    {
+        $this->potensiAspectsDataCache = null;
+        $this->kompetensiAspectsDataCache = null;
+
+        Log::info('Dashboard: Cache cleared');
     }
 
     /**
@@ -334,66 +401,65 @@ class Dashboard extends Component
             'tolerancePercentage' => $this->tolerancePercentage,
         ]);
 
-        // Load Potensi aspects
+        // Check cache first
+        if ($this->potensiAspectsDataCache !== null && $this->kompetensiAspectsDataCache !== null) {
+            $this->potensiAspectsData = $this->potensiAspectsDataCache;
+            $this->kompetensiAspectsData = $this->kompetensiAspectsDataCache;
+            $this->allAspectsData = array_merge($this->potensiAspectsData, $this->kompetensiAspectsData);
+            Log::info('Dashboard: Using cached data');
+
+            return;
+        }
+
+        $service = app(IndividualAssessmentService::class);
+
+        // Load Potensi aspects using service
         if ($this->potensiCategory) {
-            $this->potensiAspectsData = $this->loadCategoryAspects($this->potensiCategory->id);
+            $potensiAspects = $service->getAspectAssessments(
+                $this->participant->id,
+                $this->potensiCategory->id,
+                $this->tolerancePercentage
+            );
+
+            $this->potensiAspectsData = $potensiAspects->map(function ($aspect) {
+                return [
+                    'name' => $aspect['name'],
+                    'original_standard_rating' => $aspect['original_standard_rating'],
+                    'standard_rating' => $aspect['standard_rating'],
+                    'individual_rating' => $aspect['individual_rating'],
+                ];
+            })->toArray();
+
             Log::info('Dashboard: Potensi aspects loaded (participant)', ['count' => count($this->potensiAspectsData)]);
         }
 
-        // Load Kompetensi aspects
+        // Load Kompetensi aspects using service
         if ($this->kompetensiCategory) {
-            $this->kompetensiAspectsData = $this->loadCategoryAspects($this->kompetensiCategory->id);
+            $kompetensiAspects = $service->getAspectAssessments(
+                $this->participant->id,
+                $this->kompetensiCategory->id,
+                $this->tolerancePercentage
+            );
+
+            $this->kompetensiAspectsData = $kompetensiAspects->map(function ($aspect) {
+                return [
+                    'name' => $aspect['name'],
+                    'original_standard_rating' => $aspect['original_standard_rating'],
+                    'standard_rating' => $aspect['standard_rating'],
+                    'individual_rating' => $aspect['individual_rating'],
+                ];
+            })->toArray();
+
             Log::info('Dashboard: Kompetensi aspects loaded (participant)', ['count' => count($this->kompetensiAspectsData)]);
         }
+
+        // Store in cache
+        $this->potensiAspectsDataCache = $this->potensiAspectsData;
+        $this->kompetensiAspectsDataCache = $this->kompetensiAspectsData;
 
         // Combine all aspects
         $this->allAspectsData = array_merge($this->potensiAspectsData, $this->kompetensiAspectsData);
         Log::info('Dashboard: All aspects merged (participant)', ['count' => count($this->allAspectsData)]);
-    }
-
-    /**
-     * Load category aspects for participant
-     */
-    private function loadCategoryAspects(int $categoryTypeId): array
-    {
-        $aspectIds = Aspect::where('category_type_id', $categoryTypeId)
-            ->orderBy('order')
-            ->pluck('id')
-            ->toArray();
-
-        Log::info('Dashboard: loadCategoryAspects - aspects found', [
-            'categoryTypeId' => $categoryTypeId,
-            'aspectIdsCount' => count($aspectIds),
-            'participantId' => $this->participant->id,
-        ]);
-
-        $aspectAssessments = AspectAssessment::with('aspect')
-            ->where('participant_id', $this->participant->id)
-            ->whereIn('aspect_id', $aspectIds)
-            ->orderBy('aspect_id')
-            ->get();
-
-        Log::info('Dashboard: loadCategoryAspects - assessments found', [
-            'categoryTypeId' => $categoryTypeId,
-            'assessmentsCount' => $aspectAssessments->count(),
-        ]);
-
-        return $aspectAssessments->map(function ($assessment) {
-            // 1. Get original values from database
-            $originalStandardRating = (float) $assessment->standard_rating;
-            $individualRating = (float) $assessment->individual_rating;
-
-            // 2. Calculate adjusted standard based on tolerance
-            $toleranceFactor = 1 - $this->tolerancePercentage / 100;
-            $adjustedStandardRating = $originalStandardRating * $toleranceFactor;
-
-            return [
-                'name' => $assessment->aspect->name,
-                'original_standard_rating' => $originalStandardRating,
-                'standard_rating' => $adjustedStandardRating,
-                'individual_rating' => $individualRating,
-            ];
-        })->toArray();
     }
 
     /**
@@ -405,17 +471,54 @@ class Dashboard extends Component
             'tolerancePercentage' => $this->tolerancePercentage,
         ]);
 
+        // Check cache first
+        if ($this->potensiAspectsDataCache !== null && $this->kompetensiAspectsDataCache !== null) {
+            $this->potensiAspectsData = $this->potensiAspectsDataCache;
+            $this->kompetensiAspectsData = $this->kompetensiAspectsDataCache;
+            $this->allAspectsData = array_merge($this->potensiAspectsData, $this->kompetensiAspectsData);
+            Log::info('Dashboard: Using cached standard data');
+
+            return;
+        }
+
+        $positionFormationId = session('filter.position_formation_id');
+        if (! $positionFormationId) {
+            return;
+        }
+
+        $position = \App\Models\PositionFormation::with('template')->find($positionFormationId);
+        if (! $position || ! $position->template) {
+            return;
+        }
+
+        $standardService = app(DynamicStandardService::class);
+        $templateId = $position->template->id;
+
         // Load Potensi aspects
         if ($this->potensiCategory) {
-            $this->potensiAspectsData = $this->loadStandardCategoryAspects($this->potensiCategory->id);
+            $this->potensiAspectsData = $this->loadStandardCategoryAspects(
+                $this->potensiCategory->id,
+                $templateId,
+                $standardService,
+                'potensi'
+            );
             Log::info('Dashboard: Potensi aspects loaded', ['count' => count($this->potensiAspectsData)]);
         }
 
         // Load Kompetensi aspects
         if ($this->kompetensiCategory) {
-            $this->kompetensiAspectsData = $this->loadStandardCategoryAspects($this->kompetensiCategory->id);
+            $this->kompetensiAspectsData = $this->loadStandardCategoryAspects(
+                $this->kompetensiCategory->id,
+                $templateId,
+                $standardService,
+                'kompetensi'
+            );
             Log::info('Dashboard: Kompetensi aspects loaded', ['count' => count($this->kompetensiAspectsData)]);
         }
+
+        // Store in cache
+        $this->potensiAspectsDataCache = $this->potensiAspectsData;
+        $this->kompetensiAspectsDataCache = $this->kompetensiAspectsData;
 
         // Combine all aspects
         $this->allAspectsData = array_merge($this->potensiAspectsData, $this->kompetensiAspectsData);
@@ -424,23 +527,63 @@ class Dashboard extends Component
 
     /**
      * Load standard category aspects (no participant data)
+     * Uses DynamicStandardService to get adjusted ratings from session
      */
-    private function loadStandardCategoryAspects(int $categoryTypeId): array
-    {
-        $aspects = Aspect::where('category_type_id', $categoryTypeId)
+    private function loadStandardCategoryAspects(
+        int $categoryTypeId,
+        int $templateId,
+        DynamicStandardService $standardService,
+        string $categoryCode
+    ): array {
+        $activeAspectIds = $standardService->getActiveAspectIds($templateId, $categoryCode);
+
+        // Fallback to all IDs if no adjustments
+        if (empty($activeAspectIds)) {
+            $activeAspectIds = Aspect::where('category_type_id', $categoryTypeId)
+                ->orderBy('order')
+                ->pluck('id')
+                ->toArray();
+        }
+
+        $aspects = Aspect::whereIn('id', $activeAspectIds)
+            ->with('subAspects')
             ->orderBy('order')
-            ->get(['id', 'name', 'standard_rating']);
+            ->get();
 
         Log::info('Dashboard: loadStandardCategoryAspects', [
             'categoryTypeId' => $categoryTypeId,
+            'categoryCode' => $categoryCode,
             'aspectsCount' => $aspects->count(),
         ]);
 
-        return $aspects->map(function ($aspect) {
-            $originalStandardRating = (float) $aspect->standard_rating;
+        $toleranceFactor = 1 - ($this->tolerancePercentage / 100);
 
-            // Calculate adjusted standard based on tolerance
-            $toleranceFactor = 1 - ($this->tolerancePercentage / 100);
+        return $aspects->map(function ($aspect) use ($templateId, $standardService, $categoryCode, $toleranceFactor) {
+            // Get adjusted aspect rating from session
+            if ($categoryCode === 'potensi' && $aspect->subAspects && $aspect->subAspects->count() > 0) {
+                // For Potensi: Calculate from active sub-aspects
+                $subAspectRatingSum = 0;
+                $activeSubAspectsCount = 0;
+
+                foreach ($aspect->subAspects as $subAspect) {
+                    if (! $standardService->isSubAspectActive($templateId, $subAspect->code)) {
+                        continue;
+                    }
+
+                    $adjustedSubRating = $standardService->getSubAspectRating($templateId, $subAspect->code);
+                    $subAspectRatingSum += $adjustedSubRating;
+                    $activeSubAspectsCount++;
+                }
+
+                $originalStandardRating = $activeSubAspectsCount > 0
+                    ? round($subAspectRatingSum / $activeSubAspectsCount, 2)
+                    : (float) $aspect->standard_rating;
+            } else {
+                // For Kompetensi: Use direct rating from session
+                $originalStandardRating = $standardService->getAspectRating($templateId, $aspect->code);
+            }
+
+            // Apply tolerance
             $adjustedStandardRating = $originalStandardRating * $toleranceFactor;
 
             return [
@@ -590,6 +733,9 @@ class Dashboard extends Component
 
         $this->tolerancePercentage = $tolerance;
 
+        // Clear cache before reload
+        $this->clearCache();
+
         // Reload aspects data with new tolerance
         if ($this->participant) {
             $this->loadAspectsData();
@@ -640,6 +786,7 @@ class Dashboard extends Component
 
     /**
      * Get summary statistics for passing aspects
+     * Note: For participant data, we count aspects where individual >= adjusted standard
      */
     public function getPassingSummary(): array
     {
@@ -647,15 +794,12 @@ class Dashboard extends Component
         $passingAspects = 0;
 
         foreach ($this->allAspectsData as $aspect) {
-            // Calculate percentage based on adjusted standard (already calculated in aspect data)
+            // Get values from aspect data
             $adjustedStandard = $aspect['standard_rating'];
             $individual = $aspect['individual_rating'];
 
-            // Calculate percentage: (individual / adjusted) * 100
-            $percentage = $adjustedStandard > 0 ? ($individual / $adjustedStandard) * 100 : 0;
-
-            // Count as passing if percentage >= 100% (meets or exceeds adjusted standard)
-            if ($percentage >= 100) {
+            // Count as passing if individual >= adjusted standard (accounting for tolerance)
+            if ($individual >= $adjustedStandard) {
                 $passingAspects++;
             }
         }
