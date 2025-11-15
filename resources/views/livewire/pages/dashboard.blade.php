@@ -140,49 +140,11 @@
         @push('scripts')
             <script>
                 (function() {
-                    // Wait for Chart.js to be available
-                    function waitForChartJs(callback) {
-                        if (typeof Chart !== 'undefined') {
-                            callback();
-                        } else {
-                            setTimeout(() => waitForChartJs(callback), 50);
-                        }
-                    }
+                    'use strict';
 
-                    // Initialize all charts
-                    function initCharts() {
-                        console.log('Initializing charts...');
-                        initializePotensiChart();
-                        initializeKompetensiChart();
-                        initializeGeneralChart();
-                    }
-
-                    function waitForLivewire(callback) {
-                        if (window.Livewire) {
-                            callback();
-                        } else {
-                            setTimeout(() => waitForLivewire(callback), 100);
-                        }
-                    }
-
-                    // Initialize charts on page load
-                    waitForChartJs(initCharts);
-
-                    // Setup Livewire event listeners
-                    waitForLivewire(function() {
-                        setupLivewireListeners();
-                    });
-
-                    // Handle loading states (for tolerance updates only)
-                    document.addEventListener('livewire:init', function() {
-                        Livewire.on('showLoading', function(message) {
-                            console.log('Loading started:', message);
-                        });
-
-                        Livewire.on('hideLoading', function() {
-                            console.log('Loading finished');
-                        });
-                    });
+                    // ========================================
+                    // STEP 1: DEFINE ALL CONSTANTS FIRST
+                    // ========================================
 
                     // Dark mode colors
                     const darkModeColors = {
@@ -205,6 +167,44 @@
                     // Get current theme
                     function getCurrentTheme() {
                         return document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+                    }
+
+                    // ========================================
+                    // STEP 2: UTILITY FUNCTIONS
+                    // ========================================
+
+                    // Wait for Chart.js to be available
+                    function waitForChartJs(callback) {
+                        if (typeof Chart !== 'undefined') {
+                            callback();
+                        } else {
+                            setTimeout(() => waitForChartJs(callback), 50);
+                        }
+                    }
+
+                    function waitForLivewire(callback) {
+                        if (window.Livewire) {
+                            callback();
+                        } else {
+                            setTimeout(() => waitForLivewire(callback), 100);
+                        }
+                    }
+
+                    // Cleanup function to destroy all charts
+                    function cleanupCharts() {
+                        console.log('[Dashboard] Cleaning up charts...');
+                        if (window.potensiChart_{{ $potensiChartId }}) {
+                            window.potensiChart_{{ $potensiChartId }}.destroy();
+                            window.potensiChart_{{ $potensiChartId }} = null;
+                        }
+                        if (window.kompetensiChart_{{ $kompetensiChartId }}) {
+                            window.kompetensiChart_{{ $kompetensiChartId }}.destroy();
+                            window.kompetensiChart_{{ $kompetensiChartId }} = null;
+                        }
+                        if (window.generalChart_{{ $generalChartId }}) {
+                            window.generalChart_{{ $generalChartId }}.destroy();
+                            window.generalChart_{{ $generalChartId }} = null;
+                        }
                     }
 
                     // ========================================
@@ -1558,7 +1558,68 @@
                         });
                     }
 
-                    setupDarkModeListener();
+                    // ========================================
+                    // INITIALIZATION & WIRE:NAVIGATE SUPPORT
+                    // ========================================
+
+                    // Initialize all charts
+                    function initCharts() {
+                        console.log('[Dashboard] Initializing charts...');
+                        initializePotensiChart();
+                        initializeKompetensiChart();
+                        initializeGeneralChart();
+                    }
+
+                    // Main initialization function
+                    function initDashboard() {
+                        console.log('[Dashboard] Dashboard page loaded');
+
+                        // Initialize charts when Chart.js is ready
+                        waitForChartJs(initCharts);
+
+                        // Setup Livewire event listeners
+                        waitForLivewire(function() {
+                            setupLivewireListeners();
+                        });
+
+                        // Setup dark mode listener
+                        setupDarkModeListener();
+
+                        // Handle loading states (for tolerance updates only)
+                        document.addEventListener('livewire:init', function() {
+                            Livewire.on('showLoading', function(message) {
+                                console.log('Loading started:', message);
+                            });
+
+                            Livewire.on('hideLoading', function() {
+                                console.log('Loading finished');
+                            });
+                        }, { once: true });
+                    }
+
+                    // Run on initial page load
+                    initDashboard();
+
+                    // Support for wire:navigate - reinitialize when navigated to dashboard
+                    document.addEventListener('livewire:navigated', function() {
+                        // Check if we're on dashboard page by looking for chart elements
+                        const isDashboardPage = document.getElementById('potensiChart-{{ $potensiChartId }}') !== null;
+
+                        if (isDashboardPage) {
+                            console.log('[Dashboard] Navigated to dashboard page, reinitializing...');
+                            initDashboard();
+                        }
+                    });
+
+                    // Cleanup charts when navigating away
+                    document.addEventListener('livewire:navigating', function() {
+                        const isDashboardPage = document.getElementById('potensiChart-{{ $potensiChartId }}') !== null;
+
+                        if (isDashboardPage) {
+                            console.log('[Dashboard] Navigating away from dashboard, cleaning up...');
+                            cleanupCharts();
+                        }
+                    });
                 })();
             </script>
         @endpush

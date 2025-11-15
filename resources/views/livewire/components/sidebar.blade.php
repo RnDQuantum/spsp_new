@@ -81,14 +81,14 @@
             <nav x-ref="sidebarNav" @scroll.debounce.500ms="saveScrollPosition()"
                 class="flex-1 px-3 py-4 overflow-y-auto space-y-1">
                 <!-- Dashboard -->
-                <a href="/dashboard" x-tooltip.raw="minimized ? 'Dashboard' : null" @class([
-                    'group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200',
-                    'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border-l-4 border-blue-700 dark:border-blue-400' => $this->isActiveRoute(
-                        'dashboard'),
-                    'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' => !$this->isActiveRoute(
-                        'dashboard'),
-                ])
-                    :class="minimized ? 'justify-center px-2' : ''">
+                <a wire:navigate href="/dashboard" x-tooltip.raw="minimized ? 'Dashboard' : null"
+                    @class([
+                        'group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200',
+                        'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border-l-4 border-blue-700 dark:border-blue-400' => $this->isActiveRoute(
+                            'dashboard'),
+                        'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' => !$this->isActiveRoute(
+                            'dashboard'),
+                    ]) :class="minimized ? 'justify-center px-2' : ''">
                     <i class="fa-solid fa-house w-5 text-center" :class="!minimized && 'mr-3'"></i>
                     <span x-show="!minimized" x-transition:enter="transition ease-out duration-200"
                         x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">Dashboard</span>
