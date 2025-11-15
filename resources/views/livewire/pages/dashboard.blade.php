@@ -1,32 +1,4 @@
 <div>
-    <!-- Loading Overlay - DARK MODE READY -->
-    @if ($isLoading)
-        <div
-            class="fixed inset-0 bg-black bg-opacity-50 dark:bg-gray-900 dark:bg-opacity-80 flex items-center justify-center z-50">
-            <div class="bg-white dark:bg-gray-800 rounded-lg p-8 shadow-xl max-w-md mx-4">
-                <div class="text-center">
-                    <!-- Animated Spinner -->
-                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-
-                    <!-- Loading Message -->
-                    <p class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">{{ $loadingMessage }}</p>
-                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Mohon tunggu sebentar...</p>
-
-                    <!-- Simple Status Indicator -->
-                    <div class="flex items-center justify-center space-x-2">
-                        <div class="flex space-x-1">
-                            <div class="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
-                            <div class="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style="animation-delay: 0.1s">
-                            </div>
-                            <div class="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style="animation-delay: 0.2s">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    @endif
-
     <div class="bg-white dark:bg-gray-900 mx-auto my-8 shadow-lg dark:shadow-gray-800/50 overflow-hidden"
         style="max-width: 1400px;">
         <!-- Header - DARK MODE READY -->
@@ -1816,18 +1788,7 @@
                         // Setup dark mode listener
                         setupDarkModeListener();
 
-                        // Handle loading states (for tolerance updates only)
-                        document.addEventListener('livewire:init', function() {
-                            Livewire.on('showLoading', function(message) {
-                                console.log('Loading started:', message);
-                            });
 
-                            Livewire.on('hideLoading', function() {
-                                console.log('Loading finished');
-                            });
-                        }, {
-                            once: true
-                        });
                     }
 
                     // Run on initial page load

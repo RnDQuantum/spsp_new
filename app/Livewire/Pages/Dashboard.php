@@ -69,10 +69,7 @@ class Dashboard extends Component
 
     public $allAspectsData = [];
 
-    // Loading states
-    public bool $isLoading = false;
 
-    public string $loadingMessage = 'Memuat data...';
 
     // Cache properties
     private ?array $potensiAspectsDataCache = null;
@@ -94,9 +91,9 @@ class Dashboard extends Component
     public function mount(): void
     {
         // Generate static chart IDs (same across re-renders)
-        $this->potensiChartId = 'potensiSpider'.uniqid();
-        $this->kompetensiChartId = 'kompetensiSpider'.uniqid();
-        $this->generalChartId = 'generalSpider'.uniqid();
+        $this->potensiChartId = 'potensiSpider' . uniqid();
+        $this->kompetensiChartId = 'kompetensiSpider' . uniqid();
+        $this->generalChartId = 'generalSpider' . uniqid();
 
         // Load tolerance from session
         $this->tolerancePercentage = session('individual_report.tolerance', 10);
@@ -731,8 +728,6 @@ class Dashboard extends Component
      */
     public function handleToleranceUpdate(int $tolerance): void
     {
-        $this->showLoading('Memperbarui toleransi...');
-
         $this->tolerancePercentage = $tolerance;
 
         // Clear cache before reload
@@ -781,9 +776,6 @@ class Dashboard extends Component
             'total' => $summary['total'],
             'percentage' => $summary['percentage'],
         ]);
-
-        // Hide loading after everything is done
-        $this->hideLoading();
     }
 
     /**
@@ -813,24 +805,7 @@ class Dashboard extends Component
         ];
     }
 
-    /**
-     * Show loading state
-     */
-    private function showLoading(string $message = 'Memuat data...'): void
-    {
-        $this->isLoading = true;
-        $this->loadingMessage = $message;
-        $this->dispatch('showLoading', message: $message);
-    }
 
-    /**
-     * Hide loading state
-     */
-    private function hideLoading(): void
-    {
-        $this->isLoading = false;
-        $this->dispatch('hideLoading');
-    }
 
     public function render()
     {
