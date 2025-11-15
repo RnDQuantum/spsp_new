@@ -113,13 +113,6 @@
                 <tbody>
                     <!-- Potensi Row -->
                     @if ($potensiData)
-                        @php
-                            // Calculate weighted scores for Potensi
-                            $potensiWeight = $finalAssessmentData['potensi_weight'];
-                            $potensiStandardAkhir = round($potensiData['total_standard_score'] * ($potensiWeight / 100), 2);
-                            $potensiIndividuAkhir = round($potensiData['total_individual_score'] * ($potensiWeight / 100), 2);
-                            $potensiGapAkhir = round($potensiIndividuAkhir - $potensiStandardAkhir, 2);
-                        @endphp
                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                             <td
                                 class="border-2 border-black px-3 py-3 text-center text-gray-900 dark:text-gray-200 bg-white dark:bg-gray-800">
@@ -137,19 +130,19 @@
                             </td>
                             <td
                                 class="border-2 border-black px-3 py-3 text-center text-gray-900 dark:text-gray-200 bg-white dark:bg-gray-800">
-                                {{ $potensiWeight }}%
+                                {{ $potensiData['category_weight'] }}%
                             </td>
                             <td
                                 class="border-2 border-black px-3 py-3 text-center text-gray-900 dark:text-gray-200 bg-white dark:bg-gray-800">
-                                {{ number_format($potensiStandardAkhir, 2, ',', '.') }}
+                                {{ number_format($potensiData['weighted_standard_score'], 2, ',', '.') }}
                             </td>
                             <td
                                 class="border-2 border-black px-3 py-3 text-center text-gray-900 dark:text-gray-200 bg-white dark:bg-gray-800">
-                                {{ number_format($potensiIndividuAkhir, 2, ',', '.') }}
+                                {{ number_format($potensiData['weighted_individual_score'], 2, ',', '.') }}
                             </td>
                             <td
                                 class="border-2 border-black px-3 py-3 text-center text-gray-900 dark:text-gray-200 bg-white dark:bg-gray-800">
-                                {{ number_format($potensiGapAkhir, 2, ',', '.') }}
+                                {{ number_format($potensiData['weighted_gap_score'], 2, ',', '.') }}
                             </td>
                             <td
                                 class="border-2 border-black px-3 py-3 text-center font-bold {{ \App\Services\ConclusionService::getTailwindClass($potensiData['overall_conclusion']) }}">
@@ -160,13 +153,6 @@
 
                     <!-- Kompetensi Row -->
                     @if ($kompetensiData)
-                        @php
-                            // Calculate weighted scores for Kompetensi
-                            $kompetensiWeight = $finalAssessmentData['kompetensi_weight'];
-                            $kompetensiStandardAkhir = round($kompetensiData['total_standard_score'] * ($kompetensiWeight / 100), 2);
-                            $kompetensiIndividuAkhir = round($kompetensiData['total_individual_score'] * ($kompetensiWeight / 100), 2);
-                            $kompetensiGapAkhir = round($kompetensiIndividuAkhir - $kompetensiStandardAkhir, 2);
-                        @endphp
                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                             <td
                                 class="border-2 border-black px-3 py-3 text-center text-gray-900 dark:text-gray-200 bg-white dark:bg-gray-800">
@@ -184,19 +170,19 @@
                             </td>
                             <td
                                 class="border-2 border-black px-3 py-3 text-center text-gray-900 dark:text-gray-200 bg-white dark:bg-gray-800">
-                                {{ $kompetensiWeight }}%
+                                {{ $kompetensiData['category_weight'] }}%
                             </td>
                             <td
                                 class="border-2 border-black px-3 py-3 text-center text-gray-900 dark:text-gray-200 bg-white dark:bg-gray-800">
-                                {{ number_format($kompetensiStandardAkhir, 2, ',', '.') }}
+                                {{ number_format($kompetensiData['weighted_standard_score'], 2, ',', '.') }}
                             </td>
                             <td
                                 class="border-2 border-black px-3 py-3 text-center text-gray-900 dark:text-gray-200 bg-white dark:bg-gray-800">
-                                {{ number_format($kompetensiIndividuAkhir, 2, ',', '.') }}
+                                {{ number_format($kompetensiData['weighted_individual_score'], 2, ',', '.') }}
                             </td>
                             <td
                                 class="border-2 border-black px-3 py-3 text-center text-gray-900 dark:text-gray-200 bg-white dark:bg-gray-800">
-                                {{ number_format($kompetensiGapAkhir, 2, ',', '.') }}
+                                {{ number_format($kompetensiData['weighted_gap_score'], 2, ',', '.') }}
                             </td>
                             <td
                                 class="border-2 border-black px-3 py-3 text-center font-bold {{ \App\Services\ConclusionService::getTailwindClass($kompetensiData['overall_conclusion']) }}">

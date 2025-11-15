@@ -282,12 +282,22 @@ class IndividualAssessmentService
             $totalOriginalGapScore += $aspect['original_gap_score'];
         }
 
+        // Get category weight from DynamicStandardService
+        $standardService = app(DynamicStandardService::class);
+        $categoryWeight = $standardService->getCategoryWeight($template->id, $categoryCode);
+
+        // Calculate weighted scores (multiplied by category weight)
+        $weightedStandardScore = round($totalStandardScore * ($categoryWeight / 100), 2);
+        $weightedIndividualScore = round($totalIndividualScore * ($categoryWeight / 100), 2);
+        $weightedGapScore = round($weightedIndividualScore - $weightedStandardScore, 2);
+
         // Determine overall conclusion
         $overallConclusion = ConclusionService::getGapBasedConclusion($totalOriginalGapScore, $totalGapScore);
 
         return [
             'category_code' => $categoryCode,
             'category_name' => $category->name,
+            'category_weight' => $categoryWeight,
             'aspect_count' => $aspectAssessments->count(),
             'total_standard_rating' => round($totalStandardRating, 2),
             'total_standard_score' => round($totalStandardScore, 2),
@@ -298,6 +308,10 @@ class IndividualAssessmentService
             'total_original_standard_score' => round($totalOriginalStandardScore, 2),
             'total_original_gap_score' => round($totalOriginalGapScore, 2),
             'overall_conclusion' => $overallConclusion,
+            // NEW: Weighted scores (after applying category weight)
+            'weighted_standard_score' => $weightedStandardScore,
+            'weighted_individual_score' => $weightedIndividualScore,
+            'weighted_gap_score' => $weightedGapScore,
             'aspects' => $aspectAssessments,
         ];
     }
