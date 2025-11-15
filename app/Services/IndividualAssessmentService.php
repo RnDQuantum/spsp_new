@@ -416,4 +416,307 @@ class IndividualAssessmentService
             'percentage' => $totalAspects > 0 ? round(($passingAspects / $totalAspects) * 100) : 0,
         ];
     }
+
+    /**
+     * Get aspect matching data for GeneralMatching component
+     *
+     * Returns detailed aspect data with matching percentages:
+     * - For Potensi: Sub-aspect level details with individual matching percentages
+     * - For Kompetensi: Aspect level details with matching percentages
+     *
+     * Matching percentage logic:
+     * - If individual >= standard: 100%
+     * - Else: (individual / standard) × 100
+     *
+     * @param  int  $participantId  Participant ID
+     * @param  int  $categoryTypeId  Category type ID (Potensi or Kompetensi)
+     * @return Collection Collection of aspect matching data
+     */
+    public function getAspectMatchingData(
+        int $participantId,
+        int $categoryTypeId
+    ): Collection {
+        $participant = Participant::with('positionFormation.template')->findOrFail($participantId);
+        $template = $participant->positionFormation->template;
+        $standardService = app(DynamicStandardService::class);
+
+        // Get category code
+        $category = CategoryType::findOrFail($categoryTypeId);
+        $categoryCode = $category->code;
+
+        // Get active aspect IDs
+        $activeAspectIds = $standardService->getActiveAspectIds($template->id, $categoryCode);
+
+        // Fallback to all IDs if no adjustments
+        if (empty($activeAspectIds)) {
+            $activeAspectIds = \App\Models\Aspect::where('category_type_id', $categoryTypeId)
+                ->orderBy('order')
+                ->pluck('id')
+                ->toArray();
+        }
+
+        // Get aspect assessments with relationships
+        $aspectAssessments = AspectAssessment::with([
+            'aspect.subAspects',
+            'subAspectAssessments.subAspect',
+        ])
+            ->where('participant_id', $participantId)
+            ->whereIn('aspect_id', $activeAspectIds)
+            ->orderBy('aspect_id')
+            ->get();
+
+        // Process each assessment
+        return $aspectAssessments->map(function ($assessment) use ($template, $standardService, $categoryCode) {
+            return $this->calculateAspectMatching(
+                $assessment,
+                $template->id,
+                $categoryCode,
+                $standardService
+            );
+        });
+    }
+
+    /**
+     * Calculate aspect matching data with sub-aspect details
+     *
+     * @param  AspectAssessment  $assessment  Aspect assessment model
+     * @param  int  $templateId  Template ID
+     * @param  string  $categoryCode  Category code ('potensi' or 'kompetensi')
+     * @param  DynamicStandardService  $standardService  Standard service instance
+     * @return array Matching data
+     */
+    private function calculateAspectMatching(
+        AspectAssessment $assessment,
+        int $templateId,
+        string $categoryCode,
+        DynamicStandardService $standardService
+    ): array {
+        $aspect = $assessment->aspect;
+
+        // Calculate aspect-level matching percentage and ratings
+        if ($categoryCode === 'potensi') {
+            // Potensi: Calculate from active sub-aspects
+            [$standardRating, $individualRating, $matchingPercentage] = $this->calculatePotensiMatching(
+                $assessment,
+                $templateId,
+                $standardService
+            );
+        } else {
+            // Kompetensi: Use direct ratings
+            $standardRating = $standardService->getAspectRating($templateId, $aspect->code);
+            $individualRating = (float) $assessment->individual_rating;
+            $matchingPercentage = $this->calculateMatchingPercentage($individualRating, $standardRating);
+        }
+
+        // Load sub-aspects data (for Potensi)
+        $subAspects = [];
+        if ($categoryCode === 'potensi' && $assessment->subAspectAssessments->isNotEmpty()) {
+            $subAspects = $this->getSubAspectMatchingData(
+                $assessment,
+                $templateId,
+                $standardService
+            );
+        }
+
+        return [
+            'name' => $aspect->name,
+            'code' => $aspect->code,
+            'description' => $aspect->description,
+            'percentage' => round($matchingPercentage),
+            'individual_rating' => round($individualRating, 2),
+            'standard_rating' => round($standardRating, 2),
+            'original_standard_rating' => (float) $assessment->standard_rating,
+            'sub_aspects' => $subAspects,
+        ];
+    }
+
+    /**
+     * Calculate Potensi aspect matching from active sub-aspects
+     *
+     * @param  AspectAssessment  $assessment  Aspect assessment
+     * @param  int  $templateId  Template ID
+     * @param  DynamicStandardService  $standardService  Standard service
+     * @return array [standardRating, individualRating, matchingPercentage]
+     */
+    private function calculatePotensiMatching(
+        AspectAssessment $assessment,
+        int $templateId,
+        DynamicStandardService $standardService
+    ): array {
+        $aspect = $assessment->aspect;
+
+        if (! $aspect->subAspects || $aspect->subAspects->count() === 0) {
+            // No sub-aspects, use aspect-level ratings
+            $standardRating = $standardService->getAspectRating($templateId, $aspect->code);
+            $individualRating = (float) $assessment->individual_rating;
+            $matchingPercentage = $this->calculateMatchingPercentage($individualRating, $standardRating);
+
+            return [$standardRating, $individualRating, $matchingPercentage];
+        }
+
+        // Calculate from active sub-aspects
+        $totalMatchingValue = 0;
+        $activeSubAspectsStandardSum = 0;
+        $activeSubAspectsIndividualSum = 0;
+        $activeSubAspectsCount = 0;
+
+        foreach ($assessment->subAspectAssessments as $subAssessment) {
+            // Check if sub-aspect is active
+            if (! $standardService->isSubAspectActive($templateId, $subAssessment->subAspect->code)) {
+                continue; // Skip inactive sub-aspects
+            }
+
+            // Get adjusted sub-aspect standard rating from session
+            $adjustedSubStandardRating = $standardService->getSubAspectRating(
+                $templateId,
+                $subAssessment->subAspect->code
+            );
+
+            $subIndividualRating = $subAssessment->individual_rating;
+
+            // Calculate matching value for this sub-aspect
+            if ($subIndividualRating >= $adjustedSubStandardRating) {
+                $totalMatchingValue += 1.0;
+            } else {
+                $totalMatchingValue += $subIndividualRating / $adjustedSubStandardRating;
+            }
+
+            $activeSubAspectsStandardSum += $adjustedSubStandardRating;
+            $activeSubAspectsIndividualSum += $subIndividualRating;
+            $activeSubAspectsCount++;
+        }
+
+        if ($activeSubAspectsCount > 0) {
+            $standardRating = round($activeSubAspectsStandardSum / $activeSubAspectsCount, 2);
+            $individualRating = round($activeSubAspectsIndividualSum / $activeSubAspectsCount, 2);
+            $matchingPercentage = ($totalMatchingValue / $activeSubAspectsCount) * 100;
+
+            return [$standardRating, $individualRating, $matchingPercentage];
+        }
+
+        // No active sub-aspects, return zeros
+        return [0, 0, 0];
+    }
+
+    /**
+     * Get sub-aspect matching data (for Potensi)
+     *
+     * @param  AspectAssessment  $assessment  Aspect assessment
+     * @param  int  $templateId  Template ID
+     * @param  DynamicStandardService  $standardService  Standard service
+     * @return array Array of sub-aspect matching data
+     */
+    private function getSubAspectMatchingData(
+        AspectAssessment $assessment,
+        int $templateId,
+        DynamicStandardService $standardService
+    ): array {
+        return $assessment->subAspectAssessments
+            ->filter(function ($subAssessment) use ($templateId, $standardService) {
+                // Only include active sub-aspects
+                return $standardService->isSubAspectActive($templateId, $subAssessment->subAspect->code);
+            })
+            ->map(function ($subAssessment) use ($templateId, $standardService) {
+                // Get adjusted standard rating from session
+                $adjustedStandardRating = $standardService->getSubAspectRating(
+                    $templateId,
+                    $subAssessment->subAspect->code
+                );
+
+                return [
+                    'name' => $subAssessment->subAspect->name,
+                    'individual_rating' => $subAssessment->individual_rating,
+                    'standard_rating' => $adjustedStandardRating,
+                    'original_standard_rating' => $subAssessment->standard_rating,
+                    'rating_label' => $subAssessment->rating_label,
+                ];
+            })
+            ->values() // Reset array keys after filter
+            ->toArray();
+    }
+
+    /**
+     * Calculate matching percentage
+     *
+     * Logic: If individual >= standard → 100%
+     *        Else → (individual / standard) × 100
+     *
+     * @param  float  $individualRating  Individual rating
+     * @param  float  $standardRating  Standard rating
+     * @return float Matching percentage
+     */
+    private function calculateMatchingPercentage(float $individualRating, float $standardRating): float
+    {
+        if ($standardRating <= 0) {
+            return 0;
+        }
+
+        if ($individualRating >= $standardRating) {
+            return 100.0;
+        }
+
+        return ($individualRating / $standardRating) * 100;
+    }
+
+    /**
+     * Get job matching percentage (average of all aspect matching percentages)
+     *
+     * @param  int  $participantId  Participant ID
+     * @return array Array with keys: job_match_percentage, potensi_percentage, kompetensi_percentage
+     */
+    public function getJobMatchingPercentage(int $participantId): array
+    {
+        $participant = Participant::with('positionFormation.template')->findOrFail($participantId);
+        $template = $participant->positionFormation->template;
+
+        // Get category types
+        $potensiCategory = CategoryType::where('template_id', $template->id)
+            ->where('code', 'potensi')
+            ->first();
+
+        $kompetensiCategory = CategoryType::where('template_id', $template->id)
+            ->where('code', 'kompetensi')
+            ->first();
+
+        $allPercentages = [];
+        $potensiPercentages = [];
+        $kompetensiPercentages = [];
+
+        // Get Potensi matching data
+        if ($potensiCategory) {
+            $potensiAspects = $this->getAspectMatchingData($participantId, $potensiCategory->id);
+            foreach ($potensiAspects as $aspect) {
+                $allPercentages[] = $aspect['percentage'];
+                $potensiPercentages[] = $aspect['percentage'];
+            }
+        }
+
+        // Get Kompetensi matching data
+        if ($kompetensiCategory) {
+            $kompetensiAspects = $this->getAspectMatchingData($participantId, $kompetensiCategory->id);
+            foreach ($kompetensiAspects as $aspect) {
+                $allPercentages[] = $aspect['percentage'];
+                $kompetensiPercentages[] = $aspect['percentage'];
+            }
+        }
+
+        // Calculate averages
+        $jobMatchPercentage = count($allPercentages) > 0
+            ? round(array_sum($allPercentages) / count($allPercentages))
+            : 0;
+
+        $potensiAverage = count($potensiPercentages) > 0
+            ? round(array_sum($potensiPercentages) / count($potensiPercentages))
+            : 0;
+
+        $kompetensiAverage = count($kompetensiPercentages) > 0
+            ? round(array_sum($kompetensiPercentages) / count($kompetensiPercentages))
+            : 0;
+
+        return [
+            'job_match_percentage' => $jobMatchPercentage,
+            'potensi_percentage' => $potensiAverage,
+            'kompetensi_percentage' => $kompetensiAverage,
+        ];
+    }
 }

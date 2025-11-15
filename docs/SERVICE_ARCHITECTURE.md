@@ -1,8 +1,8 @@
 # Service Architecture: Assessment Calculation System
 
-> **Version**: 1.1
+> **Version**: 1.2
 > **Last Updated**: 2025-01-15
-> **Purpose**: Single Source of Truth untuk kalkulasi assessment (Individual & Ranking)
+> **Purpose**: Single Source of Truth untuk kalkulasi assessment (Individual, Ranking & Matching)
 
 ---
 
@@ -53,6 +53,7 @@
 │ • Category totals    │              │ • Participant ranks  │
 │ • Final scores       │              │ • Conclusion summary │
 │ • Tolerance support  │              │ • Sorting logic      │
+│ • Matching % logic   │              │                      │
 └──────────┬───────────┘              └──────────┬───────────┘
            ↓                                      ↓
 ┌─────────────────────────────────────────────────────────────────┐
@@ -61,7 +62,8 @@
 │  Individual Reports:              Ranking Reports:               │
 │  • GeneralPsyMapping ✅           • RankingPsyMapping ✅         │
 │  • GeneralMcMapping ✅            • RankingMcMapping ✅          │
-│  • GeneralMapping ✅              • RekapRankingAssessment       │
+│  • GeneralMapping ✅              • RekapRankingAssessment ✅    │
+│  • GeneralMatching ✅                                            │
 │                                                                  │
 │  Cache Management:                                               │
 │  • Cache data per request                                        │
@@ -127,12 +129,12 @@ Session::get("standard_adjustment.{$templateId}") = [
 
 **Location**: `app/Services/IndividualAssessmentService.php`
 
-**Responsibility**: Single Source of Truth untuk kalkulasi assessment individual participant
+**Responsibility**: Single Source of Truth untuk kalkulasi assessment individual participant dan matching percentages
 
 **Key Methods**:
 
 ```php
-// Aspect-level detail
+// Aspect-level detail (untuk gap-based reports)
 getAspectAssessments(
     int $participantId,
     int $categoryTypeId,
@@ -161,6 +163,42 @@ getAspectAssessments(
     'conclusion_text' => 'Di Atas Standar',
 ]
 
+// Aspect matching data (untuk matching reports)
+getAspectMatchingData(
+    int $participantId,
+    int $categoryTypeId
+): Collection
+
+// Returns array dengan struktur:
+[
+    'name' => 'Aspek Potensi 1',
+    'code' => 'asp_pot_01',
+    'description' => '...',
+    'percentage' => 85,                     // Matching %
+    'individual_rating' => 4.5,
+    'standard_rating' => 4.0,               // Adjusted from session
+    'original_standard_rating' => 3.5,      // Original from DB
+    'sub_aspects' => [                      // For Potensi only
+        [
+            'name' => 'Sub Aspect 1',
+            'individual_rating' => 5,
+            'standard_rating' => 4,         // Adjusted
+            'original_standard_rating' => 3,
+            'rating_label' => 'Sangat Baik'
+        ]
+    ]
+]
+
+// Job matching percentage (average of all aspects)
+getJobMatchingPercentage(int $participantId): array
+
+// Returns:
+[
+    'job_match_percentage' => 85,
+    'potensi_percentage' => 82,
+    'kompetensi_percentage' => 88,
+]
+
 // Category-level totals
 getCategoryAssessment(
     int $participantId,
@@ -168,43 +206,16 @@ getCategoryAssessment(
     int $tolerancePercentage = 10
 ): array
 
-// Returns:
-[
-    'category_code' => 'potensi',
-    'category_name' => 'Potensi',
-    'aspect_count' => 5,
-    'total_standard_rating' => 20.0,
-    'total_standard_score' => 200.0,
-    'total_individual_rating' => 22.5,
-    'total_individual_score' => 225.0,
-    'total_gap_rating' => 2.5,
-    'total_gap_score' => 25.0,
-    'overall_conclusion' => 'Di Atas Standar',
-    'aspects' => [...], // Array dari getAspectAssessments()
-]
-
 // Final assessment (Potensi + Kompetensi combined)
 getFinalAssessment(
     int $participantId,
     int $tolerancePercentage = 10
 ): array
-
-// Returns:
-[
-    'participant_id' => 123,
-    'template_id' => 1,
-    'tolerance_percentage' => 10,
-    'potensi_weight' => 60,              // Adjusted
-    'kompetensi_weight' => 40,           // Adjusted
-    'potensi' => [...],                  // getCategoryAssessment('potensi')
-    'kompetensi' => [...],               // getCategoryAssessment('kompetensi')
-    'total_standard_score' => 400.0,     // Weighted sum
-    'total_individual_score' => 450.0,   // Weighted sum
-    'total_gap_score' => 50.0,
-    'achievement_percentage' => 112.5,
-    'final_conclusion' => 'Memenuhi Syarat',
-]
 ```
+
+**Matching Percentage Logic**:
+- If `individual >= standard` → **100%**
+- Else → `(individual / standard) × 100`
 
 **Integration dengan DynamicStandardService**:
 - ✅ Selalu baca dari `DynamicStandardService` untuk setiap request
@@ -1143,13 +1154,15 @@ $rankings = AspectAssessment::query()
 
 | Use Case | Service | Method |
 |----------|---------|--------|
-| Individual aspect details | IndividualAssessmentService | `getAspectAssessments()` |
+| Individual aspect details (gap-based) | IndividualAssessmentService | `getAspectAssessments()` |
+| **Aspect matching data (% based)** | **IndividualAssessmentService** | **`getAspectMatchingData()`** |
+| **Job matching percentage** | **IndividualAssessmentService** | **`getJobMatchingPercentage()`** |
 | Category totals (Potensi/Kompetensi) | IndividualAssessmentService | `getCategoryAssessment()` |
 | Final combined score | IndividualAssessmentService | `getFinalAssessment()` |
 | All participants ranking (single category) | RankingService | `getRankings()` |
 | Single participant rank (single category) | RankingService | `getParticipantRank()` |
-| **Combined ranking (Potensi + Kompetensi)** | **RankingService** | **`getCombinedRankings()`** |
-| **Single participant combined rank** | **RankingService** | **`getParticipantCombinedRank()`** |
+| Combined ranking (Potensi + Kompetensi) | RankingService | `getCombinedRankings()` |
+| Single participant combined rank | RankingService | `getParticipantCombinedRank()` |
 | Passing summary | RankingService | `getPassingSummary()` |
 | Edit standard values | DynamicStandardService | `save...()` methods |
 | Check adjustments | DynamicStandardService | `hasCategoryAdjustments()` |
@@ -1158,10 +1171,10 @@ $rankings = AspectAssessment::query()
 
 | Event | Dispatched By | Listened By | Purpose |
 |-------|---------------|-------------|---------|
-| `'standard-adjusted'` | StandardPsikometrik, StandardMc | GeneralPsyMapping, RankingPsyMapping | Notify of standard changes |
-| `'tolerance-updated'` | ToleranceSelector | GeneralPsyMapping, RankingPsyMapping | Notify of tolerance changes |
-| `'event-selected'` | EventSelector | RankingPsyMapping | Filter data by event |
-| `'position-selected'` | PositionSelector | RankingPsyMapping | Filter data by position |
+| `'standard-adjusted'` | StandardPsikometrik, StandardMc | All report components | Notify of standard changes |
+| `'tolerance-updated'` | ToleranceSelector | GeneralPsyMapping, GeneralMcMapping | Notify of tolerance changes |
+| `'event-selected'` | EventSelector | RankingPsyMapping, RankingMcMapping | Filter data by event |
+| `'position-selected'` | PositionSelector | RankingPsyMapping, RankingMcMapping | Filter data by position |
 
 ### Session Keys
 
@@ -1195,22 +1208,22 @@ Session::get("individual_report.tolerance");
 |-----------|--------------|----------------|----------------|--------|
 | GeneralPsyMapping | ✅ IndividualAssessmentService | ✅ `standard-adjusted` | ~123 lines | ✅ Done |
 | GeneralMcMapping | ✅ IndividualAssessmentService | ✅ `standard-adjusted` | ~161 lines | ✅ Done |
-| GeneralMapping | ✅ IndividualAssessmentService + RankingService (Combined) | ✅ `standard-adjusted` | ~100 lines | ✅ Done |
+| GeneralMapping | ✅ IndividualAssessmentService + RankingService | ✅ `standard-adjusted` | ~100 lines | ✅ Done |
+| GeneralMatching | ✅ IndividualAssessmentService (Matching) | ✅ `standard-adjusted` | ~171 lines | ✅ Done |
 | RankingPsyMapping | ✅ RankingService | ✅ `standard-adjusted` | ~180 lines | ✅ Done |
 | RankingMcMapping | ✅ RankingService | ✅ `standard-adjusted` | ~193 lines | ✅ Done |
 | RekapRankingAssessment | ✅ RankingService (Combined) | ✅ `standard-adjusted` | ~228 lines | ✅ Done |
 
-**Progress**: 6 of 6 components migrated (100%) ✅
-**Total Code Reduction**: ~1,085 lines removed (includes combined ranking refactor)
+**Progress**: 7 of 7 components migrated (100%) ✅
+**Total Code Reduction**: ~1,256 lines removed
 
 ### 🚀 Next Steps
 
-1. ✅ ~~Migrate RekapRankingAssessment to services~~ **COMPLETED**
-2. Update exports (PDF/Excel) if needed
-3. Consider adding integration tests for service layer
+1. Update exports (PDF/Excel) if needed
+2. Consider adding integration tests for service layer
 
 ---
 
-**Document Version**: 1.4
-**Last Updated**: 2025-01-14
+**Document Version**: 1.2
+**Last Updated**: 2025-01-15
 **Maintainer**: Development Team
