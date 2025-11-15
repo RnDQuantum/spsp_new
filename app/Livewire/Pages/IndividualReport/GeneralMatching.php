@@ -207,11 +207,6 @@ class GeneralMatching extends Component
 
     public function render()
     {
-        // Jika standalone, gunakan layout. Jika child, tidak pakai layout
-        if ($this->isStandalone) {
-            return view('livewire.pages.individual-report.general-matching');
-        }
-
         return view('livewire.pages.individual-report.general-matching');
     }
 }
