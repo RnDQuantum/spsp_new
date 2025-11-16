@@ -8,6 +8,8 @@ use App\Models\CategoryType;
 use App\Models\FinalAssessment;
 use App\Models\Participant;
 use App\Models\PsychologicalTest;
+use App\Services\ConclusionService;
+use App\Services\IndividualAssessmentService;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -41,6 +43,9 @@ class FinalReport extends Component
 
     // Tolerance percentage (default 10%)
     public int $tolerancePercentage = 10;
+
+    // Cache for final assessment data from service
+    private ?array $finalAssessmentDataCache = null;
 
     public function mount($eventCode, $testNumber): void
     {
@@ -105,6 +110,43 @@ class FinalReport extends Component
     }
 
     /**
+     * Clear all caches
+     */
+    private function clearCache(): void
+    {
+        $this->finalAssessmentDataCache = null;
+    }
+
+    /**
+     * Load final assessment data from service with caching
+     */
+    private function loadFinalAssessmentData(): ?array
+    {
+        // Check cache first
+        if ($this->finalAssessmentDataCache !== null) {
+            return $this->finalAssessmentDataCache;
+        }
+
+        // Call service to get fresh data
+        $service = app(IndividualAssessmentService::class);
+
+        try {
+            $data = $service->getFinalAssessment(
+                $this->participant->id,
+                $this->tolerancePercentage
+            );
+
+            // Cache the result
+            $this->finalAssessmentDataCache = $data;
+
+            return $data;
+        } catch (\Exception $e) {
+            // If error, return null
+            return null;
+        }
+    }
+
+    /**
      * Listen for tolerance updates from ToleranceSelector component
      */
     #[On('tolerance-updated')]
@@ -112,88 +154,75 @@ class FinalReport extends Component
     {
         $this->tolerancePercentage = $tolerance;
 
-        // Redirect to reload the page with new tolerance
-        $this->redirect(route('final_report', [
-            'eventCode' => $this->eventCode,
-            'testNumber' => $this->testNumber,
-        ]), navigate: true);
+        // Clear cache - Livewire will auto re-render
+        $this->clearCache();
     }
 
     /**
-     * Get adjusted standard score for a category
+     * Listen for standard adjustments
      */
-    private function getAdjustedStandardScore(float $originalStandardScore): float
+    #[On('standard-adjusted')]
+    public function handleStandardUpdate(int $templateId): void
     {
-        $toleranceFactor = 1 - ($this->tolerancePercentage / 100);
+        // Validate same template
+        if ($this->participant->positionFormation->template_id !== $templateId) {
+            return;
+        }
 
-        return $originalStandardScore * $toleranceFactor;
-    }
-
-    /**
-     * Get adjusted gap score
-     */
-    private function getAdjustedGap(float $individualScore, float $originalStandardScore): float
-    {
-        $adjustedStandard = $this->getAdjustedStandardScore($originalStandardScore);
-
-        return $individualScore - $adjustedStandard;
+        // Clear cache - Livewire will auto re-render
+        $this->clearCache();
     }
 
     /**
      * Get final conclusion text based on tolerance
-     * Maps table conclusion to final "Potensial" labels
+     * Uses IndividualAssessmentService and ConclusionService
      */
     public function getFinalConclusionText(): string
     {
-        if (! $this->finalAssessment) {
+        // Load data from service
+        $data = $this->loadFinalAssessmentData();
+
+        // If no data, participant not participating
+        if (! $data) {
             return 'Tidak Ikut Assessment';
         }
-
-        // Get original values
-        $totalIndividualScore = (float) $this->finalAssessment->total_individual_score;
-        $originalTotalStandardScore = (float) $this->finalAssessment->total_standard_score;
-        $originalTotalGapScore = $totalIndividualScore - $originalTotalStandardScore;
 
         // Check if not participating: original gap = -standard (individual is 0)
-        if ($originalTotalGapScore == -$originalTotalStandardScore) {
+        $originalGap = $data['total_original_gap_score'] ?? 0;
+        $originalStandard = $data['total_original_standard_score'] ?? 0;
+
+        if ($originalGap == -$originalStandard) {
             return 'Tidak Ikut Assessment';
         }
 
-        // Calculate adjusted gap based on tolerance
-        $adjustedTotalGap = $this->getAdjustedGap($totalIndividualScore, $originalTotalStandardScore);
+        // Get gap-based conclusion from service data
+        $adjustedGap = $data['total_gap_score'] ?? 0;
 
-        // Determine table conclusion first (3 categories)
-        if ($originalTotalGapScore > 0) {
-            $tableConclusion = 'Di Atas Standar';
-        } elseif ($adjustedTotalGap >= 0) {
-            $tableConclusion = 'Memenuhi Standar';
-        } else {
-            $tableConclusion = 'Di Bawah Standar';
-        }
+        // Use ConclusionService to get gap-based conclusion
+        $gapConclusion = ConclusionService::getGapBasedConclusion(
+            $originalGap,
+            $adjustedGap
+        );
 
-        // Map table conclusion to final "Potensial" labels (same as RingkasanAssessment)
-        return match ($tableConclusion) {
-            'Di Atas Standar' => 'Sangat Potensial',
-            'Memenuhi Standar' => 'Potensial',
-            'Di Bawah Standar' => 'Kurang Potensial',
-            default => 'Kurang Potensial',
-        };
+        // Map to potensial conclusion using ConclusionService
+        return ConclusionService::getPotensialConclusion($gapConclusion);
     }
 
     /**
      * Get final conclusion color class
+     * Uses ConclusionService for consistent styling
      */
     public function getFinalConclusionColorClass(): string
     {
         $finalConclusion = $this->getFinalConclusionText();
 
-        return match ($finalConclusion) {
-            'Sangat Potensial' => 'bg-green-600 text-white',
-            'Potensial' => 'bg-yellow-400 text-gray-900',
-            'Kurang Potensial' => 'bg-red-600 text-white',
-            'Tidak Ikut Assessment' => 'bg-gray-300 text-black',
-            default => 'bg-gray-300 text-black',
-        };
+        // Special case for "Tidak Ikut Assessment"
+        if ($finalConclusion === 'Tidak Ikut Assessment') {
+            return 'bg-gray-300 text-black';
+        }
+
+        // Use ConclusionService for potensial conclusions
+        return ConclusionService::getTailwindClass($finalConclusion, 'potensial');
     }
 
     public function render()
