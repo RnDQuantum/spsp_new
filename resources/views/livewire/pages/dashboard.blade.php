@@ -1,4 +1,9 @@
 <div>
+    @if (session('force_reload'))
+        <script>
+            window.location.reload();
+        </script>
+    @endif
     <div class="bg-white dark:bg-gray-900 mx-auto my-8 shadow-lg dark:shadow-gray-800/50 overflow-hidden"
         style="max-width: 1400px;">
         <!-- Header - DARK MODE READY -->
