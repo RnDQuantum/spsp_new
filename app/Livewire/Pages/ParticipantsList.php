@@ -4,7 +4,6 @@ namespace App\Livewire\Pages;
 
 use App\Models\AssessmentEvent;
 use App\Models\Participant;
-use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -28,6 +27,7 @@ class ParticipantsList extends Component
 
     // Add sorting properties
     public string $sortField = 'name';
+
     public string $sortDirection = 'asc';
 
     public function mount(): void
@@ -124,6 +124,15 @@ class ParticipantsList extends Component
             'positionFormation:id,name,code',
         ]);
 
+        // Filter by institution through assessment_events relationship
+        // Admin can see all, clients only see their institution's participants
+        $user = auth()->user();
+        if ($user && ! $user->isAdmin() && $user->institution_id) {
+            $query->whereHas('assessmentEvent', function ($q) use ($user) {
+                $q->where('institution_id', $user->institution_id);
+            });
+        }
+
         // Filter berdasarkan assessment event yang dipilih
         if ($this->selectedEventId) {
             $query->where('event_id', $this->selectedEventId);
@@ -132,9 +141,9 @@ class ParticipantsList extends Component
         // Filter berdasarkan search (nama, NIP jika ada)
         if ($this->search) {
             $query->where(function ($q) {
-                $q->where('name', 'like', '%' . $this->search . '%')
-                    ->orWhere('test_number', 'like', '%' . $this->search . '%')
-                    ->orWhere('skb_number', 'like', '%' . $this->search . '%');
+                $q->where('name', 'like', '%'.$this->search.'%')
+                    ->orWhere('test_number', 'like', '%'.$this->search.'%')
+                    ->orWhere('skb_number', 'like', '%'.$this->search.'%');
             });
         }
 
@@ -164,6 +173,7 @@ class ParticipantsList extends Component
         // Handle "All" option
         if ($this->perPage === 0) {
             $results = $query->get();
+
             return new \Illuminate\Pagination\LengthAwarePaginator(
                 $results,
                 $results->count(),
@@ -210,13 +220,13 @@ class ParticipantsList extends Component
         session()->put([
             'filter.event_code' => $participant->assessmentEvent->code,
             'filter.position_formation_id' => $participant->position_formation_id,
-            'filter.participant_id' => $participant->id
+            'filter.participant_id' => $participant->id,
         ]);
 
         // Redirect ke halaman detail dengan eventCode dan testNumber
         $this->redirect(route('participant_detail', [
             'eventCode' => $participant->assessmentEvent->code,
-            'testNumber' => $participant->test_number
+            'testNumber' => $participant->test_number,
         ]));
     }
 
