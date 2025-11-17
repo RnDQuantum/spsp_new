@@ -7,6 +7,8 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Login - {{ config('app.name') }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @livewireStyles
+
     <style>
         /* Force dark mode visibility */
         .dark input[type="email"],
@@ -62,21 +64,20 @@
 
                 {{-- Error Messages --}}
                 @if ($errors->any())
-                    <div
-                        class="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-                        <div class="flex items-start">
-                            <svg class="w-5 h-5 text-red-600 dark:text-red-400 mt-0.5 mr-3" fill="none"
-                                stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                            </svg>
-                            <ul class="list-disc list-inside text-sm text-red-800 dark:text-red-200">
-                                @foreach ($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
+                <div class="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                    <div class="flex items-start">
+                        <svg class="w-5 h-5 text-red-600 dark:text-red-400 mt-0.5 mr-3" fill="none"
+                            stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        <ul class="list-disc list-inside text-sm text-red-800 dark:text-red-200">
+                            @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
                     </div>
+                </div>
                 @endif
 
                 {{-- Email Input --}}
@@ -139,15 +140,61 @@
                     </template>
                 </button>
             </form>
-
             {{-- Default Credentials Info --}}
             <div
                 class="mt-6 text-center text-sm bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg border border-gray-200 dark:border-gray-600">
-                <span class="font-medium text-gray-700 dark:text-gray-300">Default:</span>
-                <span class="text-gray-600 dark:text-gray-400">admin@example.com / password</span>
+                <!-- Default -->
+                <div class="mb-2" x-data="{ clicked: false }">
+                    <span class="font-medium text-gray-700 dark:text-gray-300">Default:</span>
+
+                    <span @click="
+                document.getElementById('email').value = 'admin@example.com';
+                document.getElementById('password').value = 'password';
+                clicked = true;
+                setTimeout(() => clicked = false, 2000);
+            " class="text-gray-600 dark:text-gray-400 cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 transition-colors relative inline-flex items-center"
+                        title="Click to auto-fill">
+                        admin@example.com / password
+                        <span x-show="clicked" x-transition class="ml-1 text-green-600 text-xs">✓</span>
+                    </span>
+                </div>
+
+                <!-- Client 1 -->
+                <div class="mb-2" x-data="{ clicked: false }">
+                    <span class="font-medium text-gray-700 dark:text-gray-300">Client 1:</span>
+
+                    <span @click="
+                document.getElementById('email').value = 'kemenkes@example.com';
+                document.getElementById('password').value = 'password';
+                clicked = true;
+                setTimeout(() => clicked = false, 2000);
+            " class="text-gray-600 dark:text-gray-400 cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 transition-colors relative inline-flex items-center"
+                        title="Click to auto-fill">
+                        kemenkes@example.com / password
+                        <span x-show="clicked" x-transition class="ml-1 text-green-600 text-xs">✓</span>
+                    </span>
+                </div>
+
+                <!-- Client 2 -->
+                <div class="mb-2" x-data="{ clicked: false }">
+                    <span class="font-medium text-gray-700 dark:text-gray-300">Client 2:</span>
+
+                    <span @click="
+                document.getElementById('email').value = 'kejaksaan@example.com';
+                document.getElementById('password').value = 'password';
+                clicked = true;
+                setTimeout(() => clicked = false, 2000);
+            " class="text-gray-600 dark:text-gray-400 cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 transition-colors relative inline-flex items-center"
+                        title="Click to auto-fill">
+                        kejaksaan@example.com / password
+                        <span x-show="clicked" x-transition class="ml-1 text-green-600 text-xs">✓</span>
+                    </span>
+                </div>
             </div>
         </div>
     </div>
+    @livewireScripts
+    @stack('scripts')
 </body>
 
 </html>
