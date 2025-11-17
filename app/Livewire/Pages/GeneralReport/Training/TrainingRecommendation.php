@@ -3,10 +3,8 @@
 namespace App\Livewire\Pages\GeneralReport\Training;
 
 use App\Models\Aspect;
-use App\Models\AspectAssessment;
 use App\Models\AssessmentEvent;
-use App\Models\Participant;
-use App\Services\DynamicStandardService;
+use App\Services\TrainingRecommendationService;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -22,7 +20,6 @@ class TrainingRecommendation extends Component
 
     public ?int $aspectId = null;
 
-    // Add missing eventCode property
     public ?string $eventCode = null;
 
     // Tolerance percentage (loaded from session)
@@ -44,10 +41,12 @@ class TrainingRecommendation extends Component
 
     public float $originalStandardRating = 0;
 
-    // CACHE PROPERTIES - untuk menyimpan hasil kalkulasi
-    private ?float $adjustedStandardsCache = null;
+    // CACHE PROPERTIES - untuk menyimpan hasil service calls
+    private ?array $summaryCacheData = null;
 
-    private ?\Illuminate\Support\Collection $aspectPriorityCache = null;
+    private ?\Illuminate\Support\Collection $participantsCacheData = null;
+
+    private ?\Illuminate\Support\Collection $aspectPriorityCacheData = null;
 
     /**
      * Listen to filter component events
@@ -57,6 +56,7 @@ class TrainingRecommendation extends Component
         'position-selected' => 'handlePositionSelected',
         'aspect-selected' => 'handleAspectSelected',
         'tolerance-updated' => 'handleToleranceUpdate',
+        'standard-adjusted' => 'handleStandardUpdate',
     ];
 
     public function mount(): void
@@ -73,7 +73,7 @@ class TrainingRecommendation extends Component
 
         if ($this->eventCode && $positionFormationId && $this->aspectId) {
             $this->loadEventAndAspect();
-            $this->calculateSummaryData();
+            $this->loadSummaryData();
         }
     }
 
@@ -83,7 +83,7 @@ class TrainingRecommendation extends Component
     public function handleEventSelected(?string $eventCode): void
     {
         $this->resetPage();
-        $this->clearCache(); // Clear cache saat event berubah
+        $this->clearCache();
 
         // Reset data
         $this->reset(['selectedEvent', 'aspectId', 'selectedAspect', 'totalParticipants', 'recommendedCount', 'notRecommendedCount', 'averageRating', 'standardRating', 'originalStandardRating']);
@@ -95,7 +95,7 @@ class TrainingRecommendation extends Component
     public function handlePositionSelected(?int $positionFormationId): void
     {
         $this->resetPage();
-        $this->clearCache(); // Clear cache saat position berubah
+        $this->clearCache();
 
         // Reset data (aspect will auto-reset)
         $this->reset(['aspectId', 'selectedAspect', 'totalParticipants', 'recommendedCount', 'notRecommendedCount', 'averageRating', 'standardRating', 'originalStandardRating']);
@@ -116,8 +116,8 @@ class TrainingRecommendation extends Component
 
         $this->loadEventAndAspect();
         $this->resetPage();
-        $this->clearCache(); // Clear cache saat aspect berubah
-        $this->calculateSummaryData();
+        $this->clearCache();
+        $this->loadSummaryData();
     }
 
     /**
@@ -135,7 +135,7 @@ class TrainingRecommendation extends Component
 
         // Recalculate summary data with new tolerance
         if ($this->eventCode && $this->aspectId) {
-            $this->calculateSummaryData();
+            $this->loadSummaryData();
         }
 
         // Dispatch event to update summary statistics in ToleranceSelector
@@ -145,16 +145,40 @@ class TrainingRecommendation extends Component
         ]);
     }
 
+    /**
+     * Handle standard adjustment from StandardPsikometrik/StandardMc component
+     */
+    public function handleStandardUpdate(int $templateId): void
+    {
+        // Validate same template
+        $positionFormationId = session('filter.position_formation_id');
+        if (! $this->selectedEvent || ! $positionFormationId) {
+            return;
+        }
+
+        $position = $this->selectedEvent->positionFormations()
+            ->find($positionFormationId);
+
+        if (! $position || $position->template_id !== $templateId) {
+            return;
+        }
+
+        // Clear cache before reload
+        $this->clearCache();
+
+        // Reload data (will call service fresh with new session values)
+        $this->loadSummaryData();
+    }
+
     public function updatedPerPage()
     {
         $this->perPage = $this->perPage === 'all' ? 999999 : (int) $this->perPage;
         $this->resetPage();
-        $this->clearCache(); // Clear cache saat perPage berubah
+        $this->clearCache();
     }
 
     /**
      * Load event and aspect from database
-     * OPTIMIZED: Reduce queries with eager loading
      */
     private function loadEventAndAspect(): void
     {
@@ -165,7 +189,7 @@ class TrainingRecommendation extends Component
             return;
         }
 
-        // OPTIMIZED: Load event with position and template in one query
+        // Load event with position and template in one query
         $this->selectedEvent = AssessmentEvent::query()
             ->where('code', $eventCode)
             ->with(['positionFormations' => function ($query) use ($positionFormationId) {
@@ -190,14 +214,15 @@ class TrainingRecommendation extends Component
      */
     private function clearCache(): void
     {
-        $this->adjustedStandardsCache = null;
-        $this->aspectPriorityCache = null;
+        $this->summaryCacheData = null;
+        $this->participantsCacheData = null;
+        $this->aspectPriorityCacheData = null;
     }
 
     /**
-     * Calculate summary data (total, recommended count, average rating)
+     * Load summary data from TrainingRecommendationService
      */
-    private function calculateSummaryData(): void
+    private function loadSummaryData(): void
     {
         $positionFormationId = session('filter.position_formation_id');
 
@@ -205,118 +230,46 @@ class TrainingRecommendation extends Component
             return;
         }
 
-        // Get adjusted standard rating from session or database
-        $adjustedStandardRating = $this->getAdjustedStandardRating($this->selectedAspect->id, $positionFormationId);
+        // Check cache first
+        if ($this->summaryCacheData !== null) {
+            $this->applySummaryData($this->summaryCacheData);
 
-        // Get original standard rating from session
-        $this->originalStandardRating = $this->getOriginalStandardRating($this->selectedAspect->id, $positionFormationId);
-
-        $this->standardRating = $adjustedStandardRating;
-
-        // Get all aspect assessments for this event, position, and aspect
-        $assessments = AspectAssessment::where('event_id', $this->selectedEvent->id)
-            ->where('position_formation_id', $positionFormationId)
-            ->where('aspect_id', $this->selectedAspect->id)
-            ->get();
-
-        $this->totalParticipants = $assessments->count();
-        $this->recommendedCount = 0;
-        $this->notRecommendedCount = 0;
-        $totalRating = 0;
-
-        // Calculate summary statistics
-        foreach ($assessments as $assessment) {
-            $individualRating = (float) $assessment->individual_rating;
-            $totalRating += $individualRating;
-
-            // Participant is recommended for training if individual rating < adjusted standard
-            if ($individualRating < $adjustedStandardRating) {
-                $this->recommendedCount++;
-            } else {
-                $this->notRecommendedCount++;
-            }
+            return;
         }
 
-        // Calculate average rating
-        $this->averageRating = $this->totalParticipants > 0
-            ? round($totalRating / $this->totalParticipants, 2)
-            : 0;
-    }
-
-    /**
-     * Get original standard rating from session or database
-     * For Potensi category, calculate average from active sub-aspects
-     */
-    private function getOriginalStandardRating(int $aspectId, int $positionFormationId): float
-    {
-        // Get selected position with template
-        $position = $this->selectedEvent->positionFormations()
-            ->with('template')
-            ->find($positionFormationId);
-
-        if (! $position || ! $position->template) {
-            return (float) $this->selectedAspect->standard_rating;
-        }
-
-        $templateId = $position->template_id;
-        $standardService = app(DynamicStandardService::class);
-
-        // Check if aspect belongs to Potensi category and has sub-aspects
-        $aspect = Aspect::with('categoryType', 'subAspects')->find($aspectId);
-        if ($aspect && $aspect->categoryType->code === 'potensi' && $aspect->subAspects->count() > 0) {
-            // Calculate average from active sub-aspects
-            $subAspectRatingSum = 0;
-            $activeSubAspectsCount = 0;
-
-            foreach ($aspect->subAspects as $subAspect) {
-                // Check if sub-aspect is active
-                if (! $standardService->isSubAspectActive($templateId, $subAspect->code)) {
-                    continue; // Skip inactive sub-aspects
-                }
-
-                // Get adjusted sub-aspect rating from session
-                $subRating = $standardService->getSubAspectRating($templateId, $subAspect->code);
-                $subAspectRatingSum += $subRating;
-                $activeSubAspectsCount++;
-            }
-
-            if ($activeSubAspectsCount > 0) {
-                return $subAspectRatingSum / $activeSubAspectsCount;
-            }
-        }
-
-        // For Kompetensi or aspects without sub-aspects, use aspect rating
-        return $standardService->getAspectRating($templateId, $this->selectedAspect->code);
-    }
-
-    /**
-     * Get adjusted standard rating from session or database
-     * OPTIMIZED: Cache result untuk menghindari kalkulasi berulang
-     */
-    private function getAdjustedStandardRating(int $aspectId, int $positionFormationId): float
-    {
-        // Gunakan cache jika sudah ada
-        if ($this->adjustedStandardsCache !== null) {
-            return $this->adjustedStandardsCache;
-        }
-
-        // Get original standard rating
-        $originalStandardRating = $this->getOriginalStandardRating($aspectId, $positionFormationId);
-
-        // Calculate adjusted standard based on tolerance
-        $toleranceFactor = 1 - ($this->tolerancePercentage / 100);
-        $adjustedStandardRating = $originalStandardRating * $toleranceFactor;
+        // Call service
+        $service = app(TrainingRecommendationService::class);
+        $summary = $service->getTrainingSummary(
+            $this->selectedEvent->id,
+            $positionFormationId,
+            $this->selectedAspect->id,
+            $this->tolerancePercentage
+        );
 
         // Cache result
-        $this->adjustedStandardsCache = $adjustedStandardRating;
+        $this->summaryCacheData = $summary;
 
-        return $adjustedStandardRating;
+        // Apply to component properties
+        $this->applySummaryData($summary);
     }
 
     /**
-     * Build participants paginated list with tolerance calculation
+     * Apply summary data to component properties
      */
-    private function buildParticipantsPaginated()
+    private function applySummaryData(array $summary): void
+    {
+        $this->totalParticipants = $summary['total_participants'];
+        $this->recommendedCount = $summary['recommended_count'];
+        $this->notRecommendedCount = $summary['not_recommended_count'];
+        $this->averageRating = $summary['average_rating'];
+        $this->standardRating = $summary['standard_rating'];
+        $this->originalStandardRating = $summary['original_standard_rating'];
+    }
+
+    /**
+     * Get participants recommendation data (paginated)
+     */
+    private function getParticipantsPaginated()
     {
         $positionFormationId = session('filter.position_formation_id');
 
@@ -324,47 +277,82 @@ class TrainingRecommendation extends Component
             return null;
         }
 
-        // Get adjusted standard rating from session or database
-        $adjustedStandardRating = $this->getAdjustedStandardRating($this->selectedAspect->id, $positionFormationId);
+        // Check cache first
+        if ($this->participantsCacheData !== null) {
+            return $this->paginateCollection($this->participantsCacheData);
+        }
 
-        // Query with pagination, sorted by rating (lowest first) - FILTER by position
-        $query = AspectAssessment::query()
-            ->with(['participant.positionFormation'])
-            ->where('event_id', $this->selectedEvent->id)
-            ->where('position_formation_id', $positionFormationId)
-            ->where('aspect_id', $this->selectedAspect->id)
-            ->orderBy('individual_rating', 'asc');
+        // Call service
+        $service = app(TrainingRecommendationService::class);
+        $participants = $service->getParticipantsRecommendation(
+            $this->selectedEvent->id,
+            $positionFormationId,
+            $this->selectedAspect->id,
+            $this->tolerancePercentage
+        );
 
-        $paginator = $query->paginate($this->perPage, pageName: 'page')->withQueryString();
+        // Cache result
+        $this->participantsCacheData = $participants;
 
-        // Calculate priority number based on pagination
-        $currentPage = (int) $paginator->currentPage();
-        $perPage = (int) $paginator->perPage();
-        $startPriority = ($currentPage - 1) * $perPage;
+        return $this->paginateCollection($participants);
+    }
 
-        // Transform items
-        $items = collect($paginator->items())->values()->map(function ($assessment, int $index) use ($adjustedStandardRating, $startPriority) {
-            $individualRating = (float) $assessment->individual_rating;
+    /**
+     * Get aspect priority data from TrainingRecommendationService
+     */
+    private function getAspectPriorityData(): ?\Illuminate\Support\Collection
+    {
+        $positionFormationId = session('filter.position_formation_id');
 
-            // Participant is recommended for training if individual rating < adjusted standard
-            $isRecommended = $individualRating < $adjustedStandardRating;
+        if (! $this->selectedEvent || ! $positionFormationId) {
+            return null;
+        }
 
-            return [
-                'priority' => $startPriority + $index + 1,
-                'test_number' => $assessment->participant->test_number,
-                'name' => $assessment->participant->name,
-                'position' => $assessment->participant->positionFormation->name ?? '-',
-                'rating' => $individualRating,
-                'is_recommended' => $isRecommended,
-                'statement' => $isRecommended ? 'Recommended' : 'Not Recommended',
-            ];
-        })->all();
+        // Check cache first
+        if ($this->aspectPriorityCacheData !== null) {
+            return $this->aspectPriorityCacheData;
+        }
+
+        // Get selected position with template
+        $position = $this->selectedEvent->positionFormations()
+            ->with('template')
+            ->find($positionFormationId);
+
+        if (! $position?->template) {
+            return collect([]);
+        }
+
+        // Call service
+        $service = app(TrainingRecommendationService::class);
+        $aspectPriorities = $service->getAspectTrainingPriority(
+            $this->selectedEvent->id,
+            $positionFormationId,
+            $position->template_id,
+            $this->tolerancePercentage
+        );
+
+        // Cache result
+        $this->aspectPriorityCacheData = $aspectPriorities;
+
+        return $aspectPriorities;
+    }
+
+    /**
+     * Paginate a collection
+     */
+    private function paginateCollection(\Illuminate\Support\Collection $collection)
+    {
+        $perPage = $this->perPage === 'all' ? $collection->count() : (int) $this->perPage;
+        $currentPage = (int) $this->getPage();
+
+        // Slice collection for current page
+        $items = $collection->slice(($currentPage - 1) * $perPage, $perPage)->values()->all();
 
         return new \Illuminate\Pagination\LengthAwarePaginator(
             $items,
-            $paginator->total(),
-            $paginator->perPage(),
-            $paginator->currentPage(),
+            $collection->count(),
+            $perPage,
+            $currentPage,
             [
                 'path' => \Illuminate\Pagination\LengthAwarePaginator::resolveCurrentPath(),
                 'pageName' => 'page',
@@ -406,133 +394,10 @@ class TrainingRecommendation extends Component
             : 0;
     }
 
-    /**
-     * Build aspect priority data with gap analysis
-     * OPTIMIZED: Cache result untuk menghindari kalkulasi berulang
-     */
-    private function buildAspectPriorityData(): ?\Illuminate\Support\Collection
-    {
-        // Gunakan cache jika sudah ada
-        if ($this->aspectPriorityCache !== null) {
-            return $this->aspectPriorityCache;
-        }
-
-        $positionFormationId = session('filter.position_formation_id');
-
-        if (! $this->selectedEvent || ! $positionFormationId) {
-            return null;
-        }
-
-        // Get selected position with template
-        $position = $this->selectedEvent->positionFormations()
-            ->with('template')
-            ->find($positionFormationId);
-
-        if (! $position?->template) {
-            return collect([]);
-        }
-
-        $templateId = $position->template_id;
-        $standardService = app(DynamicStandardService::class);
-
-        // Get all aspects for the selected position's template
-        $aspects = Aspect::where('template_id', $templateId)
-            ->with('categoryType', 'subAspects')
-            ->orderBy('category_type_id', 'asc')
-            ->orderBy('order', 'asc')
-            ->get();
-
-        // OPTIMIZED: Get all assessments at once to avoid N+1
-        $aspectIds = $aspects->pluck('id')->all();
-        $assessmentsGrouped = AspectAssessment::query()
-            ->where('event_id', $this->selectedEvent->id)
-            ->where('position_formation_id', $positionFormationId)
-            ->whereIn('aspect_id', $aspectIds)
-            ->get()
-            ->groupBy('aspect_id');
-
-        $aspectData = [];
-
-        foreach ($aspects as $aspect) {
-            // FIXED: Check if aspect is active from session
-            if (! $standardService->isAspectActive($templateId, $aspect->code)) {
-                continue; // Skip inactive aspects
-            }
-
-            // Get assessments from grouped collection
-            $assessments = $assessmentsGrouped->get($aspect->id, collect());
-
-            if ($assessments->isEmpty()) {
-                continue;
-            }
-
-            // Calculate average rating for this aspect
-            $averageRating = $assessments->avg('individual_rating');
-
-            // Get adjusted standard rating from session or database
-            // For Potensi category, calculate average from active sub-aspects
-            if ($aspect->categoryType->code === 'potensi' && $aspect->subAspects->count() > 0) {
-                $subAspectRatingSum = 0;
-                $activeSubAspectsCount = 0;
-
-                foreach ($aspect->subAspects as $subAspect) {
-                    // Check if sub-aspect is active
-                    if (! $standardService->isSubAspectActive($templateId, $subAspect->code)) {
-                        continue; // Skip inactive sub-aspects
-                    }
-
-                    // Get adjusted sub-aspect rating from session
-                    $subRating = $standardService->getSubAspectRating($templateId, $subAspect->code);
-                    $subAspectRatingSum += $subRating;
-                    $activeSubAspectsCount++;
-                }
-
-                $aspectRating = $activeSubAspectsCount > 0 ? $subAspectRatingSum / $activeSubAspectsCount : 0;
-            } else {
-                // For Kompetensi or aspects without sub-aspects, use aspect rating
-                $aspectRating = $standardService->getAspectRating($templateId, $aspect->code);
-            }
-
-            // Calculate adjusted standard based on tolerance
-            $toleranceFactor = 1 - ($this->tolerancePercentage / 100);
-            $adjustedStandardRating = $aspectRating * $toleranceFactor;
-
-            // Calculate gap using adjusted standard
-            $gap = $averageRating - $adjustedStandardRating;
-
-            // Determine action (Pelatihan if gap < 0, Dipertahankan if gap >= 0)
-            $action = $gap < 0 ? 'Pelatihan' : 'Dipertahankan';
-
-            $aspectData[] = [
-                'aspect_name' => $aspect->name,
-                'original_standard_rating' => $aspectRating,
-                'adjusted_standard_rating' => round($adjustedStandardRating, 2),
-                'average_rating' => round($averageRating, 2),
-                'gap' => round($gap, 2),
-                'action' => $action,
-            ];
-        }
-
-        // Sort by gap (ascending - most negative first)
-        $collection = collect($aspectData)->sortBy('gap')->values();
-
-        // Add priority number
-        $result = $collection->map(function ($item, $index) {
-            $item['priority'] = $index + 1;
-
-            return $item;
-        });
-
-        // Cache result
-        $this->aspectPriorityCache = $result;
-
-        return $result;
-    }
-
     public function render()
     {
-        $participants = $this->buildParticipantsPaginated();
-        $aspectPriorities = $this->buildAspectPriorityData();
+        $participants = $this->getParticipantsPaginated();
+        $aspectPriorities = $this->getAspectPriorityData();
 
         return view('livewire.pages.general-report.training.training-recommendation', [
             'participants' => $participants,
