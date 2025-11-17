@@ -1,8 +1,8 @@
 # Service Architecture: Assessment Calculation System
 
-> **Version**: 1.2
-> **Last Updated**: 2025-01-15
-> **Purpose**: Single Source of Truth untuk kalkulasi assessment (Individual, Ranking & Matching)
+> **Version**: 1.3
+> **Last Updated**: 2025-01-17
+> **Purpose**: Single Source of Truth untuk kalkulasi assessment (Individual, Ranking, Matching & Statistics)
 
 ---
 

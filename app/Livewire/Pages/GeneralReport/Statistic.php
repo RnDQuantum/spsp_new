@@ -4,8 +4,7 @@ namespace App\Livewire\Pages\GeneralReport;
 
 use App\Models\Aspect;
 use App\Models\AssessmentEvent;
-use App\Services\DynamicStandardService;
-use Illuminate\Support\Facades\DB;
+use App\Services\StatisticService;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -27,6 +26,7 @@ class Statistic extends Component
         'event-selected' => 'handleEventSelected',
         'position-selected' => 'handlePositionSelected',
         'aspect-selected' => 'handleAspectSelected',
+        'standard-adjusted' => 'handleStandardUpdate',
     ];
 
     public function mount(): void
@@ -53,6 +53,61 @@ class Statistic extends Component
     {
         $this->aspectId = $aspectId;
         $this->refreshStatistics();
+        $this->dispatchChartUpdate();
+    }
+
+    public function handleStandardUpdate(int $templateId): void
+    {
+        // Refresh statistics when standard is adjusted
+        $this->refreshStatistics();
+        $this->dispatchChartUpdate();
+    }
+
+    private function refreshStatistics(): void
+    {
+        // Reset values
+        $this->distribution = [1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0];
+        $this->standardRating = 0.0;
+        $this->averageRating = 0.0;
+
+        // Get filter values from session
+        $eventCode = session('filter.event_code');
+        $positionFormationId = session('filter.position_formation_id');
+
+        if (! $eventCode || ! $positionFormationId || ! $this->aspectId) {
+            return;
+        }
+
+        // Get event
+        $event = AssessmentEvent::where('code', $eventCode)->first();
+        if (! $event) {
+            return;
+        }
+
+        // Get position to access template_id
+        $position = $event->positionFormations()->find($positionFormationId);
+        if (! $position || ! $position->template_id) {
+            return;
+        }
+
+        // Use StatisticService to get distribution data
+        $service = app(StatisticService::class);
+
+        $data = $service->getDistributionData(
+            $event->id,
+            $positionFormationId,
+            (int) $this->aspectId,
+            $position->template_id
+        );
+
+        // Update component properties
+        $this->distribution = $data['distribution'];
+        $this->standardRating = $data['standard_rating'];
+        $this->averageRating = $data['average_rating'];
+    }
+
+    private function dispatchChartUpdate(): void
+    {
         $this->dispatch('chartDataUpdated', [
             'chartId' => $this->chartId,
             'labels' => ['I', 'II', 'III', 'IV', 'V'],
@@ -63,120 +118,13 @@ class Statistic extends Component
         ]);
     }
 
-    private function refreshStatistics(): void
-    {
-        $this->distribution = [1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0];
-        $this->standardRating = 0.0;
-        $this->averageRating = 0.0;
-
-        $eventCode = session('filter.event_code');
-        $positionFormationId = session('filter.position_formation_id');
-
-        if (! $eventCode || ! $positionFormationId || ! $this->aspectId) {
-            return;
-        }
-
-        $event = AssessmentEvent::query()->where('code', $eventCode)->first();
-        if (! $event) {
-            return;
-        }
-
-        $aspectId = (int) $this->aspectId;
-
-        // Get aspect data with category type and sub-aspects
-        $aspect = Aspect::query()
-            ->with(['categoryType', 'subAspects'])
-            ->where('id', $aspectId)
-            ->first();
-
-        if (! $aspect) {
-            return;
-        }
-
-        // Get position to access template_id
-        $position = $event->positionFormations()
-            ->find($positionFormationId);
-
-        if (! $position || ! $position->template_id) {
-            return;
-        }
-
-        // Get adjusted standard rating from session or database using DynamicStandardService
-        $standardService = app(DynamicStandardService::class);
-
-        // For Potensi category, calculate based on sub-aspects
-        if ($aspect->categoryType && $aspect->categoryType->code === 'potensi' && $aspect->subAspects && $aspect->subAspects->count() > 0) {
-            $subAspectRatingSum = 0;
-            $activeSubAspectsCount = 0;
-
-            foreach ($aspect->subAspects as $subAspect) {
-                // Check if sub-aspect is active
-                if (! $standardService->isSubAspectActive($position->template_id, $subAspect->code)) {
-                    continue; // Skip inactive sub-aspects
-                }
-
-                // Get adjusted sub-aspect rating from session
-                $subRating = $standardService->getSubAspectRating($position->template_id, $subAspect->code);
-                $subAspectRatingSum += $subRating;
-                $activeSubAspectsCount++;
-            }
-
-            // Calculate average of active sub-aspects
-            if ($activeSubAspectsCount > 0) {
-                $this->standardRating = $subAspectRatingSum / $activeSubAspectsCount;
-            } else {
-                $this->standardRating = 0.0;
-            }
-        } else {
-            // For Kompetensi or aspects without sub-aspects, use aspect rating directly
-            $this->standardRating = $standardService->getAspectRating($position->template_id, $aspect->code);
-        }
-
-        // Build distribution (bucket 1..5) - FILTER by position
-        // Use CASE WHEN to match the classification table ranges:
-        // I: 1.00-1.80, II: 1.80-2.60, III: 2.60-3.40, IV: 3.40-4.20, V: 4.20-5.00
-        $rows = DB::table('aspect_assessments as aa')
-            ->where('aa.event_id', $event->id)
-            ->where('aa.position_formation_id', $positionFormationId)
-            ->where('aa.aspect_id', $aspectId)
-            ->selectRaw('
-                CASE
-                    WHEN aa.individual_rating >= 1.00 AND aa.individual_rating < 1.80 THEN 1
-                    WHEN aa.individual_rating >= 1.80 AND aa.individual_rating < 2.60 THEN 2
-                    WHEN aa.individual_rating >= 2.60 AND aa.individual_rating < 3.40 THEN 3
-                    WHEN aa.individual_rating >= 3.40 AND aa.individual_rating < 4.20 THEN 4
-                    WHEN aa.individual_rating >= 4.20 AND aa.individual_rating <= 5.00 THEN 5
-                    ELSE 0
-                END as bucket,
-                COUNT(*) as total
-            ')
-            ->groupBy('bucket')
-            ->get();
-
-        foreach ($rows as $row) {
-            $bucket = (int) $row->bucket;
-            if ($bucket >= 1 && $bucket <= 5) {
-                $this->distribution[$bucket] = (int) $row->total;
-            }
-        }
-
-        // Compute average aspect rating for this event/aspect/position
-        $avg = DB::table('aspect_assessments as aa')
-            ->where('aa.event_id', $event->id)
-            ->where('aa.position_formation_id', $positionFormationId)
-            ->where('aa.aspect_id', $aspectId)
-            ->avg('aa.individual_rating');
-
-        $this->averageRating = round((float) $avg, 2);
-    }
-
     private function getCurrentAspectName(): string
     {
         if (! $this->aspectId) {
             return '';
         }
 
-        $aspect = Aspect::query()->find((int) $this->aspectId);
+        $aspect = Aspect::find((int) $this->aspectId);
 
         return $aspect?->name ?? '';
     }
