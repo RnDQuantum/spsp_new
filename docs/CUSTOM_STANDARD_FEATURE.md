@@ -7,6 +7,83 @@
 
 ---
 
+## Quick Context (Untuk Sesi Baru)
+
+### Apa itu SPSP?
+
+**SPSP (Sistem Pemetaan & Statistik Psikologi)** adalah SaaS analytics dashboard untuk menampilkan hasil assessment psikologi. Data assessment (peserta, nilai, standar) di-import dari aplikasi utama Quantum via API.
+
+### Struktur Data Utama
+
+```
+Institution (Kejaksaan, BNN, dll)
+└── User (dengan institution_id untuk multi-tenancy)
+└── AssessmentEvent (Proyek: "Seleksi P3K Kemenkes 2025")
+    └── PositionFormation (Jabatan: "Analis Kebijakan")
+        └── template_id → AssessmentTemplate (Standar Quantum)
+        └── Participant (Peserta)
+            └── AspectAssessment (nilai per aspek)
+                └── SubAspectAssessment (nilai per sub-aspek)
+
+AssessmentTemplate (Standar Quantum)
+└── CategoryType (Potensi 50%, Kompetensi 50%)
+    └── Aspect (Kecerdasan 20%, Integritas 15%, dll)
+        └── SubAspect (hanya untuk Potensi)
+```
+
+### Relasi Penting
+
+- **1 Template → N Jabatan** (1 standar bisa dipakai banyak jabatan)
+- **1 Jabatan → 1 Template** (1 jabatan hanya punya 1 standar)
+- **User → Institution** (multi-tenancy via `institution_id`)
+
+### Services yang Sudah Ada
+
+1. **DynamicStandardService** (`app/Services/DynamicStandardService.php`)
+   - Mengelola **session-based adjustments** untuk analisis sementara
+   - Menyimpan: category weights, aspect weights/ratings, sub-aspect ratings, active status
+   - Data hilang setelah logout
+
+2. **IndividualAssessmentService** (`app/Services/IndividualAssessmentService.php`)
+   - Kalkulasi assessment individual (aspect scores, category totals, final scores)
+   - Membaca dari DynamicStandardService untuk nilai standar
+
+3. **RankingService** (`app/Services/RankingService.php`)
+   - Kalkulasi ranking semua peserta
+   - Membaca dari DynamicStandardService untuk nilai standar
+
+### Komponen Livewire Terkait
+
+- **StandardPsikometrik** - Halaman edit standar Potensi (sub-aspek & aspek)
+- **StandardMc** - Halaman edit standar Kompetensi (aspek saja)
+- **GeneralPsyMapping, GeneralMcMapping, GeneralMapping, GeneralMatching** - Report individual
+- **RankingPsyMapping, RankingMcMapping, RekapRankingAssessment** - Report ranking
+
+### Event System
+
+- `'standard-adjusted'` - Dispatch saat user edit standar via DynamicStandardService
+- `'tolerance-updated'` - Dispatch saat user ubah tolerance percentage
+- Semua report components listen ke events ini untuk reload data
+
+### Calculation Flow
+
+```
+Data Peserta (individual_rating di DB) → TIDAK BERUBAH
+                    +
+Nilai Standar (dari DynamicStandardService) → BISA DIUBAH
+                    ↓
+Calculate on-the-fly: scores, gaps, percentages
+```
+
+**Key Insight**: Database `aspect_assessments` menyimpan snapshot standar Quantum. Custom standard tidak mengubah database, hanya mengubah cara kalkulasi saat display.
+
+### Dokumentasi Terkait
+
+- `docs/SERVICE_ARCHITECTURE.md` - Detail lengkap service layer & calculation levels
+- `docs/DATABASE_STRUCTURE.md` - Struktur database (mungkin outdated)
+
+---
+
 ## Table of Contents
 
 1. [Executive Summary](#executive-summary)
@@ -799,6 +876,83 @@ php artisan make:model CustomStandard
 
 ---
 
+## Files to Read Before Implementation
+
+### Core Services (MUST READ)
+
+```
+app/Services/DynamicStandardService.php    ← Update priority chain di sini
+app/Services/IndividualAssessmentService.php  ← Tidak perlu diubah
+app/Services/RankingService.php            ← Tidak perlu diubah
+```
+
+### Livewire Components to Update
+
+```
+app/Livewire/Pages/GeneralReport/StandardPsikometrik.php  ← Tambah dropdown standar
+app/Livewire/Pages/GeneralReport/StandardMc.php           ← Tambah dropdown standar
+```
+
+### Report Components (Add Event Listener)
+
+```
+app/Livewire/Pages/GeneralReport/GeneralPsyMapping.php
+app/Livewire/Pages/GeneralReport/GeneralMcMapping.php
+app/Livewire/Pages/GeneralReport/GeneralMapping.php
+app/Livewire/Pages/GeneralReport/GeneralMatching.php
+app/Livewire/Pages/RankingReport/RankingPsyMapping.php
+app/Livewire/Pages/RankingReport/RankingMcMapping.php
+app/Livewire/Pages/RankingReport/RekapRankingAssessment.php
+```
+
+### Models
+
+```
+app/Models/AssessmentTemplate.php   ← Relasi ke CustomStandard
+app/Models/Institution.php          ← Relasi ke CustomStandard
+app/Models/User.php                 ← Untuk policy check (institution_id)
+```
+
+### Existing Documentation
+
+```
+docs/SERVICE_ARCHITECTURE.md        ← Pahami calculation flow
+docs/DATABASE_STRUCTURE.md          ← Struktur tabel existing
+```
+
+---
+
+## Current Implementation Status
+
+### Completed
+- [x] Documentation created (this file)
+
+### Phase 1: Foundation (Backend)
+- [ ] Create migration `create_custom_standards_table`
+- [ ] Create model `CustomStandard` with relationships
+- [ ] Create `CustomStandardService`
+- [ ] Update `DynamicStandardService` with priority chain
+- [ ] Create `CustomStandardPolicy`
+
+### Phase 2: Management UI
+- [ ] Create list page `/custom-standards`
+- [ ] Create form page `/custom-standards/create`
+- [ ] Create edit page `/custom-standards/{id}/edit`
+- [ ] Add validation (total weights = 100%)
+
+### Phase 3: Integration
+- [ ] Add dropdown to `StandardPsikometrik`
+- [ ] Add dropdown to `StandardMc`
+- [ ] Add `'standard-switched'` event
+- [ ] Update all report components to listen
+
+### Phase 4: Testing
+- [ ] Unit tests for services
+- [ ] Feature tests for CRUD
+- [ ] Integration tests for calculation
+
+---
+
 ## Changelog
 
 | Version | Date | Changes |
@@ -809,3 +963,13 @@ php artisan make:model CustomStandard
 
 **Document Status**: Ready for Review
 **Next Step**: Review & approval, then start implementation Phase 1
+
+---
+
+## How to Continue in New Session
+
+1. **Read this document first** - Contains all context needed
+2. **Check "Current Implementation Status"** - See what's done and what's next
+3. **Read "Files to Read Before Implementation"** - Understand existing code
+4. **Follow Implementation Plan** - Phase by phase
+5. **Update status checkboxes** - As you complete each task
