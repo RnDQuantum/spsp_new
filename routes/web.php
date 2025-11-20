@@ -81,4 +81,9 @@ Route::middleware(['auth', 'institution.access'])->group(function () {
     Route::get('/general-report/mmpi', App\Livewire\Pages\GeneralReport\MmpiResultsReport::class)->name('general-report.mmpi');
 
     Route::get('/final-report/{eventCode}/{testNumber}', App\Livewire\Pages\IndividualReport\FinalReport::class)->name('final_report');
+
+    // Custom Standards Routes
+    Route::get('/custom-standards', App\Livewire\Pages\CustomStandards\Index::class)->name('custom-standards.index');
+    Route::get('/custom-standards/create', App\Livewire\Pages\CustomStandards\Create::class)->name('custom-standards.create');
+    Route::get('/custom-standards/{customStandard}/edit', App\Livewire\Pages\CustomStandards\Edit::class)->name('custom-standards.edit');
 });
