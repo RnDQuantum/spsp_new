@@ -7,6 +7,7 @@ namespace App\Services;
 use App\Models\Aspect;
 use App\Models\AssessmentTemplate;
 use App\Models\CategoryType;
+use App\Models\CustomStandard;
 use App\Models\SubAspect;
 use Illuminate\Support\Facades\Session;
 
@@ -22,7 +23,7 @@ class DynamicStandardService
      */
     private function getSessionKey(int $templateId): string
     {
-        return self::SESSION_PREFIX . ".{$templateId}";
+        return self::SESSION_PREFIX.".{$templateId}";
     }
 
     /**
@@ -39,10 +40,8 @@ class DynamicStandardService
 
     /**
      * Get original value from database
-     * 
-     * @param string $type 'category_weight', 'aspect_weight', 'aspect_rating', 'sub_aspect_rating', 'aspect_active', 'sub_aspect_active'
-     * @param int $templateId
-     * @param string $code
+     *
+     * @param  string  $type  'category_weight', 'aspect_weight', 'aspect_rating', 'sub_aspect_rating', 'aspect_active', 'sub_aspect_active'
      * @return mixed
      */
     private function getOriginalValue(string $type, int $templateId, string $code)
@@ -108,12 +107,10 @@ class DynamicStandardService
 
     /**
      * Save adjustment only if different from original
-     * 
-     * @param string $adjustmentKey 'category_weights', 'aspect_weights', 'aspect_ratings', etc.
-     * @param string $type Type for getting original value
-     * @param int $templateId
-     * @param string $code
-     * @param mixed $value
+     *
+     * @param  string  $adjustmentKey  'category_weights', 'aspect_weights', 'aspect_ratings', etc.
+     * @param  string  $type  Type for getting original value
+     * @param  mixed  $value
      * @return bool True if saved, false if skipped (same as original)
      */
     private function saveAdjustmentIfDifferent(
@@ -140,6 +137,7 @@ class DynamicStandardService
 
                 $this->saveOrForgetAdjustments($templateId, $adjustments);
             }
+
             return false; // Not saved (same as original)
         }
 
@@ -148,6 +146,7 @@ class DynamicStandardService
         $adjustments['adjusted_at'] = now()->toDateTimeString();
 
         Session::put($this->getSessionKey($templateId), $adjustments);
+
         return true; // Saved
     }
 
@@ -157,14 +156,14 @@ class DynamicStandardService
     private function saveOrForgetAdjustments(int $templateId, array $adjustments): void
     {
         // Check if any real adjustments exist
-        $hasAdjustments = !empty($adjustments['category_weights'])
-            || !empty($adjustments['aspect_weights'])
-            || !empty($adjustments['aspect_ratings'])
-            || !empty($adjustments['sub_aspect_ratings'])
-            || !empty($adjustments['active_aspects'])
-            || !empty($adjustments['active_sub_aspects']);
+        $hasAdjustments = ! empty($adjustments['category_weights'])
+            || ! empty($adjustments['aspect_weights'])
+            || ! empty($adjustments['aspect_ratings'])
+            || ! empty($adjustments['sub_aspect_ratings'])
+            || ! empty($adjustments['active_aspects'])
+            || ! empty($adjustments['active_sub_aspects']);
 
-        if (!$hasAdjustments) {
+        if (! $hasAdjustments) {
             Session::forget($this->getSessionKey($templateId));
         } else {
             $adjustments['adjusted_at'] = now()->toDateTimeString();
@@ -226,6 +225,7 @@ class DynamicStandardService
             }
 
             $this->saveOrForgetAdjustments($templateId, $adjustments);
+
             return;
         }
 
@@ -313,6 +313,7 @@ class DynamicStandardService
             }
 
             $this->saveOrForgetAdjustments($templateId, $adjustments);
+
             return;
         }
 
@@ -342,6 +343,7 @@ class DynamicStandardService
             }
 
             $this->saveOrForgetAdjustments($templateId, $adjustments);
+
             return;
         }
 
@@ -449,7 +451,7 @@ class DynamicStandardService
 
         // Load template to get aspect codes for this category
         $template = AssessmentTemplate::with([
-            'categoryTypes' => fn($q) => $q->where('code', $categoryCode)->with('aspects.subAspects'),
+            'categoryTypes' => fn ($q) => $q->where('code', $categoryCode)->with('aspects.subAspects'),
         ])->find($templateId);
 
         if (! $template) {
@@ -504,57 +506,105 @@ class DynamicStandardService
 
     /**
      * Get category weight (adjusted or original)
+     * Priority: 1. Session adjustment, 2. Custom standard, 3. Quantum default
      */
     public function getCategoryWeight(int $templateId, string $categoryCode): int
     {
+        // Priority 1: Session adjustment
         $adjustments = $this->getAdjustments($templateId);
 
         if (isset($adjustments['category_weights'][$categoryCode])) {
             return (int) $adjustments['category_weights'][$categoryCode];
         }
 
+        // Priority 2: Custom standard
+        $customStandardId = Session::get("selected_standard.{$templateId}");
+        if ($customStandardId) {
+            $customStandard = CustomStandard::find($customStandardId);
+            if ($customStandard && isset($customStandard->category_weights[$categoryCode])) {
+                return (int) $customStandard->category_weights[$categoryCode];
+            }
+        }
+
+        // Priority 3: Quantum default
         return $this->getOriginalCategoryWeight($templateId, $categoryCode);
     }
 
     /**
      * Get aspect weight (adjusted or original)
+     * Priority: 1. Session adjustment, 2. Custom standard, 3. Quantum default
      */
     public function getAspectWeight(int $templateId, string $aspectCode): int
     {
+        // Priority 1: Session adjustment
         $adjustments = $this->getAdjustments($templateId);
 
         if (isset($adjustments['aspect_weights'][$aspectCode])) {
             return (int) $adjustments['aspect_weights'][$aspectCode];
         }
 
+        // Priority 2: Custom standard
+        $customStandardId = Session::get("selected_standard.{$templateId}");
+        if ($customStandardId) {
+            $customStandard = CustomStandard::find($customStandardId);
+            if ($customStandard && isset($customStandard->aspect_configs[$aspectCode]['weight'])) {
+                return (int) $customStandard->aspect_configs[$aspectCode]['weight'];
+            }
+        }
+
+        // Priority 3: Quantum default
         return $this->getOriginalAspectWeight($templateId, $aspectCode);
     }
 
     /**
      * Get aspect standard rating (adjusted or original)
+     * Priority: 1. Session adjustment, 2. Custom standard, 3. Quantum default
      */
     public function getAspectRating(int $templateId, string $aspectCode): float
     {
+        // Priority 1: Session adjustment
         $adjustments = $this->getAdjustments($templateId);
 
         if (isset($adjustments['aspect_ratings'][$aspectCode])) {
             return (float) $adjustments['aspect_ratings'][$aspectCode];
         }
 
+        // Priority 2: Custom standard
+        $customStandardId = Session::get("selected_standard.{$templateId}");
+        if ($customStandardId) {
+            $customStandard = CustomStandard::find($customStandardId);
+            if ($customStandard && isset($customStandard->aspect_configs[$aspectCode]['rating'])) {
+                return (float) $customStandard->aspect_configs[$aspectCode]['rating'];
+            }
+        }
+
+        // Priority 3: Quantum default
         return $this->getOriginalAspectRating($templateId, $aspectCode);
     }
 
     /**
      * Get sub-aspect standard rating (adjusted or original)
+     * Priority: 1. Session adjustment, 2. Custom standard, 3. Quantum default
      */
     public function getSubAspectRating(int $templateId, string $subAspectCode): int
     {
+        // Priority 1: Session adjustment
         $adjustments = $this->getAdjustments($templateId);
 
         if (isset($adjustments['sub_aspect_ratings'][$subAspectCode])) {
             return (int) $adjustments['sub_aspect_ratings'][$subAspectCode];
         }
 
+        // Priority 2: Custom standard
+        $customStandardId = Session::get("selected_standard.{$templateId}");
+        if ($customStandardId) {
+            $customStandard = CustomStandard::find($customStandardId);
+            if ($customStandard && isset($customStandard->sub_aspect_configs[$subAspectCode]['rating'])) {
+                return (int) $customStandard->sub_aspect_configs[$subAspectCode]['rating'];
+            }
+        }
+
+        // Priority 3: Quantum default
         return $this->getOriginalSubAspectRating($templateId, $subAspectCode);
     }
 
@@ -603,7 +653,7 @@ class DynamicStandardService
 
         // Load original template to get aspect codes for this category
         $template = AssessmentTemplate::with([
-            'categoryTypes' => fn($q) => $q->where('code', $categoryCode)->with('aspects.subAspects'),
+            'categoryTypes' => fn ($q) => $q->where('code', $categoryCode)->with('aspects.subAspects'),
         ])->find($templateId);
 
         if (! $template) {
@@ -741,32 +791,54 @@ class DynamicStandardService
 
     /**
      * Check if aspect is active (selected for analysis)
+     * Priority: 1. Session adjustment, 2. Custom standard, 3. Default (true)
      */
     public function isAspectActive(int $templateId, string $aspectCode): bool
     {
+        // Priority 1: Session adjustment
         $adjustments = $this->getAdjustments($templateId);
 
-        // If not set in session, default is active (true)
-        if (! isset($adjustments['active_aspects'][$aspectCode])) {
-            return true;
+        if (isset($adjustments['active_aspects'][$aspectCode])) {
+            return (bool) $adjustments['active_aspects'][$aspectCode];
         }
 
-        return (bool) $adjustments['active_aspects'][$aspectCode];
+        // Priority 2: Custom standard
+        $customStandardId = Session::get("selected_standard.{$templateId}");
+        if ($customStandardId) {
+            $customStandard = CustomStandard::find($customStandardId);
+            if ($customStandard && isset($customStandard->aspect_configs[$aspectCode]['active'])) {
+                return (bool) $customStandard->aspect_configs[$aspectCode]['active'];
+            }
+        }
+
+        // Priority 3: Default is active (true)
+        return true;
     }
 
     /**
      * Check if sub-aspect is active (selected for analysis)
+     * Priority: 1. Session adjustment, 2. Custom standard, 3. Default (true)
      */
     public function isSubAspectActive(int $templateId, string $subAspectCode): bool
     {
+        // Priority 1: Session adjustment
         $adjustments = $this->getAdjustments($templateId);
 
-        // If not set in session, default is active (true)
-        if (! isset($adjustments['active_sub_aspects'][$subAspectCode])) {
-            return true;
+        if (isset($adjustments['active_sub_aspects'][$subAspectCode])) {
+            return (bool) $adjustments['active_sub_aspects'][$subAspectCode];
         }
 
-        return (bool) $adjustments['active_sub_aspects'][$subAspectCode];
+        // Priority 2: Custom standard
+        $customStandardId = Session::get("selected_standard.{$templateId}");
+        if ($customStandardId) {
+            $customStandard = CustomStandard::find($customStandardId);
+            if ($customStandard && isset($customStandard->sub_aspect_configs[$subAspectCode]['active'])) {
+                return (bool) $customStandard->sub_aspect_configs[$subAspectCode]['active'];
+            }
+        }
+
+        // Priority 3: Default is active (true)
+        return true;
     }
 
     /**
@@ -779,11 +851,12 @@ class DynamicStandardService
         // If no active_aspects set, return all aspects as active
         if (! isset($adjustments['active_aspects'])) {
             $template = AssessmentTemplate::with('aspects')->findOrFail($templateId);
+
             return $template->aspects->pluck('code')->toArray();
         }
 
         // Return only aspects where value is true
-        return array_keys(array_filter($adjustments['active_aspects'], fn($active) => $active === true));
+        return array_keys(array_filter($adjustments['active_aspects'], fn ($active) => $active === true));
     }
 
     /**
@@ -808,7 +881,7 @@ class DynamicStandardService
         }
 
         // Return only sub-aspects where value is true
-        return array_keys(array_filter($adjustments['active_sub_aspects'], fn($active) => $active === true));
+        return array_keys(array_filter($adjustments['active_sub_aspects'], fn ($active) => $active === true));
     }
 
     /**
@@ -962,7 +1035,7 @@ class DynamicStandardService
     public function getActiveAspectIds(int $templateId, string $categoryCode): array
     {
         $aspects = Aspect::where('template_id', $templateId)
-            ->whereHas('categoryType', fn($q) => $q->where('code', $categoryCode))
+            ->whereHas('categoryType', fn ($q) => $q->where('code', $categoryCode))
             ->get();
 
         $activeIds = [];

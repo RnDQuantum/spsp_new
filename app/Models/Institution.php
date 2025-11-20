@@ -22,4 +22,9 @@ class Institution extends Model
     {
         return $this->hasMany(AssessmentEvent::class);
     }
+
+    public function customStandards(): HasMany
+    {
+        return $this->hasMany(CustomStandard::class);
+    }
 }

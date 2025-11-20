@@ -27,4 +27,9 @@ class AssessmentTemplate extends Model
     {
         return $this->hasMany(Aspect::class, 'template_id');
     }
+
+    public function customStandards(): HasMany
+    {
+        return $this->hasMany(CustomStandard::class, 'template_id');
+    }
 }
