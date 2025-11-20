@@ -18,7 +18,7 @@
             @if ($selectedTemplate)
                 <div class="mt-3 pt-3 border-t border-gray-200 dark:border-gray-600">
                     <div class="flex items-start gap-2 text-sm text-gray-600 dark:text-gray-300">
-                        <span class="font-semibold">📄 Standar:</span>
+                        <span class="font-semibold">📄 Template:</span>
                         <div class="font-semibold text-gray-900 dark:text-gray-100">{{ $selectedTemplate->name }}
                         </div>
                     </div>
@@ -27,6 +27,31 @@
                             <span class="font-semibold">🏢 Institusi:</span>
                             <span
                                 class="text-gray-900 dark:text-gray-100">{{ $selectedEvent->institution->name ?? 'N/A' }}</span>
+                        </div>
+                    @endif
+
+                    {{-- PHASE 3: Custom Standard Selector --}}
+                    @if (auth()->user()->institution_id)
+                        <div class="mt-3">
+                            <label for="customStandardSelect"
+                                class="block text-sm font-semibold text-gray-600 dark:text-gray-300 mb-2">
+                                Standar Penilaian:
+                            </label>
+                            <select id="customStandardSelect" wire:model.live="selectedCustomStandardId"
+                                wire:change="selectCustomStandard($event.target.value)"
+                                class="w-full md:w-96 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option value="">Quantum (Default)</option>
+                                @foreach ($availableCustomStandards as $standard)
+                                    <option value="{{ $standard['id'] }}">
+                                        {{ $standard['name'] }} ({{ $standard['code'] }})
+                                    </option>
+                                @endforeach
+                            </select>
+                            @if ($selectedCustomStandardId)
+                                <p class="mt-1 text-xs text-blue-600 dark:text-blue-400">
+                                    Menggunakan custom standard. Adjustment sementara akan direset.
+                                </p>
+                            @endif
                         </div>
                     @endif
                 </div>

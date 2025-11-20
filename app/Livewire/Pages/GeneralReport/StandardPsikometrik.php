@@ -5,6 +5,7 @@ namespace App\Livewire\Pages\GeneralReport;
 use App\Models\AssessmentEvent;
 use App\Models\AssessmentTemplate;
 use App\Models\CategoryType;
+use App\Services\CustomStandardService;
 use App\Services\DynamicStandardService;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -17,6 +18,7 @@ class StandardPsikometrik extends Component
         'position-selected' => 'handlePositionSelected',
         'standard-adjusted' => 'handleStandardUpdate',
         'handleStandardUpdate' => 'handleStandardUpdate',
+        'standard-switched' => 'handleStandardSwitch',
     ];
 
     public ?AssessmentEvent $selectedEvent = null;
@@ -44,6 +46,11 @@ class StandardPsikometrik extends Component
     // Unique chart ID
     public string $chartId = '';
 
+    // PHASE 3: Custom Standard Selection
+    public ?int $selectedCustomStandardId = null;
+
+    public array $availableCustomStandards = [];
+
     // CACHE PROPERTIES - untuk menyimpan hasil kalkulasi
     private ?array $categoryDataCache = null;
 
@@ -70,6 +77,7 @@ class StandardPsikometrik extends Component
         $this->chartId = 'standardPsikometrik'.uniqid();
 
         $this->loadStandardData();
+        $this->loadAvailableCustomStandards();
     }
 
     /**
@@ -96,6 +104,7 @@ class StandardPsikometrik extends Component
         // Load data with the new filters
         $this->clearCache();
         $this->loadStandardData();
+        $this->loadAvailableCustomStandards();
 
         // Dispatch event to update charts
         $this->dispatch('chartDataUpdated', [
@@ -251,6 +260,79 @@ class StandardPsikometrik extends Component
         $this->editingField = '';
         $this->editingValue = null;
         $this->editingOriginalValue = null;
+    }
+
+    /**
+     * PHASE 3: Load available custom standards for current institution and template
+     */
+    private function loadAvailableCustomStandards(): void
+    {
+        $this->availableCustomStandards = [];
+
+        if (! $this->selectedTemplate || ! auth()->user()->institution_id) {
+            return;
+        }
+
+        $customStandardService = app(CustomStandardService::class);
+
+        $this->availableCustomStandards = $customStandardService
+            ->getForInstitution(auth()->user()->institution_id, $this->selectedTemplate->id)
+            ->map(fn ($std) => [
+                'id' => $std->id,
+                'code' => $std->code,
+                'name' => $std->name,
+                'description' => $std->description,
+            ])
+            ->toArray();
+
+        // Load currently selected custom standard from session
+        $this->selectedCustomStandardId = $customStandardService->getSelected($this->selectedTemplate->id);
+    }
+
+    /**
+     * PHASE 3: Handle custom standard selection change
+     */
+    public function selectCustomStandard(?int $customStandardId): void
+    {
+        if (! $this->selectedTemplate) {
+            return;
+        }
+
+        $customStandardService = app(CustomStandardService::class);
+
+        // Save selection to session
+        $customStandardService->select($this->selectedTemplate->id, $customStandardId);
+
+        $this->selectedCustomStandardId = $customStandardId;
+
+        // Clear cache and reload data
+        $this->clearCache();
+        $this->loadStandardData();
+
+        // Dispatch event to notify other components
+        $this->dispatch('standard-switched', templateId: $this->selectedTemplate->id);
+    }
+
+    /**
+     * PHASE 3: Handle standard switch event from other components
+     */
+    public function handleStandardSwitch(int $templateId): void
+    {
+        // Only refresh if same template
+        if ($this->selectedTemplate && $this->selectedTemplate->id === $templateId) {
+            $this->clearCache();
+            $this->loadStandardData();
+            $this->loadAvailableCustomStandards();
+
+            // Re-dispatch chart update
+            $this->dispatch('chartDataUpdated', [
+                'labels' => $this->chartData['labels'],
+                'ratings' => $this->chartData['ratings'],
+                'scores' => $this->chartData['scores'],
+                'templateName' => $this->selectedTemplate?->name ?? 'Standard',
+                'maxScore' => $this->maxScore,
+            ]);
+        }
     }
 
     /**
