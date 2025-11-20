@@ -939,12 +939,19 @@ docs/DATABASE_STRUCTURE.md          ← Struktur tabel existing
 - [x] Create form page `/custom-standards/create`
 - [x] Create edit page `/custom-standards/{id}/edit`
 - [x] Add validation (total weights = 100%)
+- [x] Add template filter (institution-specific)
 
-### Phase 3: Integration
-- [ ] Add dropdown to `StandardPsikometrik`
-- [ ] Add dropdown to `StandardMc`
-- [ ] Add `'standard-switched'` event
-- [ ] Update all report components to listen
+### Phase 3: Integration (In Progress) ⏳
+- [x] Add dropdown to `StandardPsikometrik`
+- [x] Add dropdown to `StandardMc`
+- [x] Add `'standard-switched'` event dispatch
+- [x] Update `GeneralPsyMapping` to listen to standard-switched
+- [x] Update `GeneralMcMapping` to listen to standard-switched
+- [ ] Update `GeneralMapping` to listen to standard-switched
+- [ ] Update `GeneralMatching` to listen to standard-switched
+- [ ] Update `RankingPsyMapping` to listen to standard-switched
+- [ ] Update `RankingMcMapping` to listen to standard-switched
+- [ ] Update `RekapRankingAssessment` to listen to standard-switched
 
 ### Phase 4: Testing
 - [ ] Unit tests for services
@@ -953,8 +960,8 @@ docs/DATABASE_STRUCTURE.md          ← Struktur tabel existing
 
 ---
 
-**Document Status**: Phase 2 Complete
-**Next Step**: Start implementation Phase 3 (Integration)
+**Document Status**: Phase 3 In Progress (40% complete)
+**Next Step**: Continue updating remaining report components to listen to 'standard-switched' event
 
 ---
 

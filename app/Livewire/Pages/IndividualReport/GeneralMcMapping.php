@@ -273,6 +273,7 @@ class GeneralMcMapping extends Component
     protected $listeners = [
         'tolerance-updated' => 'handleToleranceUpdate',
         'standard-adjusted' => 'handleStandardUpdate',
+        'standard-switched' => 'handleStandardSwitch',
     ];
 
     /**
@@ -354,6 +355,15 @@ class GeneralMcMapping extends Component
             'total' => $summary['total'],
             'percentage' => $summary['percentage'],
         ]);
+    }
+
+    /**
+     * PHASE 3: Handle custom standard switch event
+     */
+    public function handleStandardSwitch(int $templateId): void
+    {
+        // Reuse the same logic as handleStandardUpdate
+        $this->handleStandardUpdate($templateId);
     }
 
     /**
