@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Pages\CustomStandards;
 
-use App\Models\AssessmentTemplate;
+use App\Concerns\ManagesCustomStandardForm;
 use App\Models\CustomStandard;
 use App\Services\CustomStandardService;
 use Livewire\Attributes\Layout;
@@ -11,26 +11,9 @@ use Livewire\Component;
 #[Layout('components.layouts.app', ['title' => 'Edit Custom Standard'])]
 class Edit extends Component
 {
+    use ManagesCustomStandardForm;
+
     public CustomStandard $customStandard;
-
-    // Form fields
-    public string $code = '';
-
-    public string $name = '';
-
-    public string $description = '';
-
-    // Template data
-    public array $categoryWeights = [];
-
-    public array $aspectConfigs = [];
-
-    public array $subAspectConfigs = [];
-
-    // For display
-    public array $potensiAspects = [];
-
-    public array $kompetensiAspects = [];
 
     public function mount(CustomStandard $customStandard): void
     {
@@ -44,50 +27,7 @@ class Edit extends Component
         $this->aspectConfigs = $customStandard->aspect_configs;
         $this->subAspectConfigs = $customStandard->sub_aspect_configs;
 
-        $this->loadAspectsForDisplay();
-    }
-
-    private function loadAspectsForDisplay(): void
-    {
-        $template = AssessmentTemplate::with([
-            'categoryTypes.aspects.subAspects',
-        ])->find($this->customStandard->template_id);
-
-        if (! $template) {
-            return;
-        }
-
-        $this->potensiAspects = [];
-        $this->kompetensiAspects = [];
-
-        foreach ($template->categoryTypes as $category) {
-            $aspects = $category->aspects->map(function ($aspect) use ($category) {
-                $aspectData = [
-                    'id' => $aspect->id,
-                    'code' => $aspect->code,
-                    'name' => $aspect->name,
-                    'sub_aspects' => [],
-                ];
-
-                if ($category->code === 'potensi') {
-                    $aspectData['sub_aspects'] = $aspect->subAspects->map(function ($subAspect) {
-                        return [
-                            'id' => $subAspect->id,
-                            'code' => $subAspect->code,
-                            'name' => $subAspect->name,
-                        ];
-                    })->toArray();
-                }
-
-                return $aspectData;
-            })->toArray();
-
-            if ($category->code === 'potensi') {
-                $this->potensiAspects = $aspects;
-            } else {
-                $this->kompetensiAspects = $aspects;
-            }
-        }
+        $this->loadAspectsForDisplay($customStandard->template_id);
     }
 
     public function save(CustomStandardService $service): mixed
@@ -107,11 +47,8 @@ class Edit extends Component
             return null;
         }
 
-        // Validate category weights sum
-        $totalCategoryWeight = array_sum($this->categoryWeights);
-        if ($totalCategoryWeight !== 100) {
-            $this->addError('categoryWeights', "Total bobot kategori harus 100% (saat ini: {$totalCategoryWeight}%)");
-
+        // Validate category weights
+        if (! $this->validateCategoryWeights()) {
             return null;
         }
 

@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Pages\CustomStandards;
 
+use App\Concerns\ManagesCustomStandardForm;
 use App\Models\AssessmentTemplate;
 use App\Services\CustomStandardService;
 use Illuminate\Support\Collection;
@@ -11,28 +12,11 @@ use Livewire\Component;
 #[Layout('components.layouts.app', ['title' => 'Buat Custom Standard'])]
 class Create extends Component
 {
-    // Form fields
+    use ManagesCustomStandardForm;
+
     public ?int $templateId = null;
 
-    public string $code = '';
-
-    public string $name = '';
-
-    public string $description = '';
-
-    // Template data
     public Collection $templates;
-
-    public array $categoryWeights = [];
-
-    public array $aspectConfigs = [];
-
-    public array $subAspectConfigs = [];
-
-    // For display
-    public array $potensiAspects = [];
-
-    public array $kompetensiAspects = [];
 
     public function mount(): void
     {
@@ -53,54 +37,7 @@ class Create extends Component
         $this->aspectConfigs = $defaults['aspect_configs'];
         $this->subAspectConfigs = $defaults['sub_aspect_configs'];
 
-        $this->loadAspectsForDisplay();
-    }
-
-    private function loadAspectsForDisplay(): void
-    {
-        if (! $this->templateId) {
-            return;
-        }
-
-        $template = AssessmentTemplate::with([
-            'categoryTypes.aspects.subAspects',
-        ])->find($this->templateId);
-
-        if (! $template) {
-            return;
-        }
-
-        $this->potensiAspects = [];
-        $this->kompetensiAspects = [];
-
-        foreach ($template->categoryTypes as $category) {
-            $aspects = $category->aspects->map(function ($aspect) use ($category) {
-                $aspectData = [
-                    'id' => $aspect->id,
-                    'code' => $aspect->code,
-                    'name' => $aspect->name,
-                    'sub_aspects' => [],
-                ];
-
-                if ($category->code === 'potensi') {
-                    $aspectData['sub_aspects'] = $aspect->subAspects->map(function ($subAspect) {
-                        return [
-                            'id' => $subAspect->id,
-                            'code' => $subAspect->code,
-                            'name' => $subAspect->name,
-                        ];
-                    })->toArray();
-                }
-
-                return $aspectData;
-            })->toArray();
-
-            if ($category->code === 'potensi') {
-                $this->potensiAspects = $aspects;
-            } else {
-                $this->kompetensiAspects = $aspects;
-            }
-        }
+        $this->loadAspectsForDisplay($this->templateId);
     }
 
     private function resetFormData(): void
@@ -136,11 +73,8 @@ class Create extends Component
             return null;
         }
 
-        // Validate category weights sum
-        $totalCategoryWeight = array_sum($this->categoryWeights);
-        if ($totalCategoryWeight !== 100) {
-            $this->addError('categoryWeights', "Total bobot kategori harus 100% (saat ini: {$totalCategoryWeight}%)");
-
+        // Validate category weights
+        if (! $this->validateCategoryWeights()) {
             return null;
         }
 
