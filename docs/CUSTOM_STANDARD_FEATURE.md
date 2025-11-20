@@ -683,6 +683,49 @@ All listening components:
 Each component: clearCache() → reload data → update UI
 ```
 
+### 5. Important: Adjustment vs Custom Standard Selection
+
+**CRITICAL DISTINCTION:**
+
+**A. Dropdown "Standar Penilaian" (Custom Standard Selector)**
+- Purpose: Memilih **ACUAN/BASELINE** mana yang dipakai
+- Options: "Quantum (Default)" atau custom standards lainnya
+- Effect: Ketika ganti acuan, **semua temporary adjustment harus di-reset**
+- Reason: Acuan berubah, jadi temporary adjustment tidak valid lagi
+
+**B. Badge "Standar Disesuaikan" (Adjustment Indicator)**
+- Purpose: Menunjukkan ada **temporary adjustment** di halaman ini
+- Appears when: User melakukan edit di halaman (kategori weight, aspek selection, rating edit)
+- Does NOT appear when: User hanya memilih custom standard dari dropdown
+- Logic: Badge hanya muncul jika `DynamicStandardService::hasCategoryAdjustments()` return true **DAN tidak sedang menggunakan custom standard**
+
+**Example Flow:**
+
+```
+Scenario 1: Switch Custom Standard
+1. User pilih "Standar Kejaksaan v1" dari dropdown
+2. System: Reset semua temporary adjustments
+3. System: Load data dari custom standard
+4. Badge "Standar Disesuaikan": TIDAK MUNCUL ✗
+
+Scenario 2: Edit di Halaman (with Quantum)
+1. User menggunakan "Quantum (Default)"
+2. User edit kategori weight Potensi: 60% → 70%
+3. System: Save ke temporary adjustment (session)
+4. Badge "Standar Disesuaikan": MUNCUL ✓
+
+Scenario 3: Edit di Halaman (with Custom Standard)
+1. User pilih "Standar Kejaksaan v1"
+2. User edit kategori weight Potensi: 60% → 70%
+3. System: Save ke temporary adjustment (session)
+4. Badge "Standar Disesuaikan": MUNCUL ✓
+```
+
+**Implementation Notes:**
+- `selectCustomStandard()` MUST call `resetCategoryAdjustments()` before loading
+- Badge check must distinguish between "using custom standard" vs "has temporary adjustments"
+- Priority chain: Custom Standard → Temporary Adjustments → Quantum Default
+
 ---
 
 ## Implementation Plan
@@ -942,9 +985,15 @@ docs/DATABASE_STRUCTURE.md          ← Struktur tabel existing
 - [x] Add template filter (institution-specific)
 
 ### Phase 3: Integration (In Progress) ⏳
+
+**PRIORITY: Complete StandardPsikometrik & StandardMc FIRST** (Core functionality)
 - [x] Add dropdown to `StandardPsikometrik`
 - [x] Add dropdown to `StandardMc`
+- [ ] **FIX: Reset temporary adjustments on custom standard switch**
+- [ ] **FIX: Badge logic - only show for temporary adjustments, not custom standard selection**
 - [x] Add `'standard-switched'` event dispatch
+
+**SECONDARY: Update other report components** (Can be done after core is working)
 - [x] Update `GeneralPsyMapping` to listen to standard-switched
 - [x] Update `GeneralMcMapping` to listen to standard-switched
 - [ ] Update `GeneralMapping` to listen to standard-switched
