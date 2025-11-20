@@ -310,4 +310,18 @@ class CustomStandardService
 
         return ! $query->exists();
     }
+
+    /**
+     * Get available templates for institution
+     * Only returns templates that are used by the institution's events
+     */
+    public function getAvailableTemplatesForInstitution(int $institutionId): \Illuminate\Support\Collection
+    {
+        return AssessmentTemplate::whereHas('positionFormations.assessmentEvent', function ($query) use ($institutionId) {
+            $query->where('institution_id', $institutionId);
+        })
+            ->distinct()
+            ->orderBy('name')
+            ->get();
+    }
 }

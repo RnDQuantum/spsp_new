@@ -18,9 +18,20 @@ class Create extends Component
 
     public Collection $templates;
 
-    public function mount(): void
+    public function mount(CustomStandardService $service): void
     {
-        $this->templates = AssessmentTemplate::orderBy('name')->get();
+        $user = auth()->user();
+
+        if (! $user->institution_id) {
+            abort(403, 'Anda tidak memiliki akses untuk membuat custom standard.');
+        }
+
+        // Only get templates that are used by this institution's events
+        $this->templates = $service->getAvailableTemplatesForInstitution($user->institution_id);
+
+        if ($this->templates->isEmpty()) {
+            session()->flash('warning', 'Tidak ada template yang tersedia. Silakan hubungi administrator.');
+        }
     }
 
     public function updatedTemplateId(CustomStandardService $service): void
