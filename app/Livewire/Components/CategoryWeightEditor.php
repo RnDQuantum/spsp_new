@@ -31,6 +31,7 @@ class CategoryWeightEditor extends Component
     protected $listeners = [
         'open-category-weight-editor' => 'openModal',
         'standard-adjusted' => 'refresh',
+        'standard-switched' => 'refresh',
         'position-selected' => 'handleFilterChanged',
         'event-selected' => 'handleFilterChanged',
     ];
