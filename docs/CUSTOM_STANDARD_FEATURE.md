@@ -690,41 +690,93 @@ Each component: clearCache() → reload data → update UI
 **A. Dropdown "Standar Penilaian" (Custom Standard Selector)**
 - Purpose: Memilih **ACUAN/BASELINE** mana yang dipakai
 - Options: "Quantum (Default)" atau custom standards lainnya
-- Effect: Ketika ganti acuan, **semua temporary adjustment harus di-reset**
-- Reason: Acuan berubah, jadi temporary adjustment tidak valid lagi
+- Effect: Ketika ganti acuan, **semua temporary adjustment di-reset otomatis**
+- Reason: Acuan berubah, jadi temporary adjustment dari acuan sebelumnya tidak valid lagi
+- Implementation: `CustomStandardService::select()` calls `Session::forget("standard_adjustment.{$templateId}")`
 
 **B. Badge "Standar Disesuaikan" (Adjustment Indicator)**
-- Purpose: Menunjukkan ada **temporary adjustment** di halaman ini
-- Appears when: User melakukan edit di halaman (kategori weight, aspek selection, rating edit)
+- Purpose: Menunjukkan ada **temporary adjustment di session** (bukan pilihan custom standard)
+- Appears when: User melakukan edit manual di halaman (kategori weight, aspek selection, rating edit)
 - Does NOT appear when: User hanya memilih custom standard dari dropdown
-- Logic: Badge hanya muncul jika `DynamicStandardService::hasCategoryAdjustments()` return true **DAN tidak sedang menggunakan custom standard**
+- Logic: Badge hanya cek `DynamicStandardService::hasCategoryAdjustments()` yang membaca **session** saja
+
+**C. Button "Bobot Standar" (CategoryWeightEditor)**
+- Visual indicator: Button amber + label "(disesuaikan)" jika ada session adjustment
+- Logic sama dengan badge: Cek session adjustment, bukan custom standard selection
+- Listener: Listen ke `'standard-switched'` untuk live update saat switch standar
 
 **Example Flow:**
 
 ```
 Scenario 1: Switch Custom Standard
 1. User pilih "Standar Kejaksaan v1" dari dropdown
-2. System: Reset semua temporary adjustments
-3. System: Load data dari custom standard
-4. Badge "Standar Disesuaikan": TIDAK MUNCUL ✗
+2. selectCustomStandard(5) → CustomStandardService::select()
+3. Session::forget("standard_adjustment.{$templateId}") ✓
+4. System: Load data dari custom standard
+5. Badge "Standar Disesuaikan": TIDAK MUNCUL ✓
+6. Button "Bobot Standar": Normal (outline) ✓
+7. Cell highlight: TIDAK ADA ✓
 
-Scenario 2: Edit di Halaman (with Quantum)
-1. User menggunakan "Quantum (Default)"
-2. User edit kategori weight Potensi: 60% → 70%
-3. System: Save ke temporary adjustment (session)
+Scenario 2: Edit Manual (Quantum atau Custom)
+1. User edit kategori weight Potensi: 60% → 70%
+2. System: DynamicStandardService::saveCategoryWeight()
+3. Session adjustment created
 4. Badge "Standar Disesuaikan": MUNCUL ✓
+5. Button "Bobot Standar": Amber + "(disesuaikan)" ✓
+6. Cell highlight: KUNING ✓
 
-Scenario 3: Edit di Halaman (with Custom Standard)
-1. User pilih "Standar Kejaksaan v1"
-2. User edit kategori weight Potensi: 60% → 70%
-3. System: Save ke temporary adjustment (session)
-4. Badge "Standar Disesuaikan": MUNCUL ✓
+Scenario 3: Edit Custom Standard di Management → Kembali ke Halaman
+1. User edit custom standard di halaman management
+2. User kembali ke StandardPsikometrik/StandardMc
+3. Data ter-update dari custom standard yang baru
+4. Badge "Standar Disesuaikan": TIDAK MUNCUL ✓
+5. Button normal, cell normal ✓
 ```
 
-**Implementation Notes:**
-- `selectCustomStandard()` MUST call `resetCategoryAdjustments()` before loading
-- Badge check must distinguish between "using custom standard" vs "has temporary adjustments"
-- Priority chain: Custom Standard → Temporary Adjustments → Quantum Default
+**Implementation Details:**
+
+**1. Data Loading (StandardPsikometrik & StandardMc):**
+```php
+// ALWAYS use DynamicStandardService (handles priority chain)
+$categoryWeight = $dynamicService->getCategoryWeight($templateId, $category->code);
+$aspectRating = $dynamicService->getAspectRating($templateId, $aspect->code);
+
+// Priority chain inside DynamicStandardService:
+// 1. Session adjustment (temporary)
+// 2. Custom standard (if selected)
+// 3. Quantum default (from database)
+```
+
+**2. Adjustment Flags (is_adjusted, is_weight_adjusted, is_rating_adjusted):**
+```php
+// Check SESSION only, NOT value comparison
+$adjustments = $dynamicService->getAdjustments($templateId);
+$isAdjusted = isset($adjustments['sub_aspect_ratings'][$subAspect->code]);
+$isWeightAdjusted = isset($adjustments['aspect_weights'][$aspect->code]);
+
+// DON'T do value comparison like this:
+// $isAdjusted = $value !== $originalValue; // ❌ WRONG
+```
+
+**3. Type Safety (selectCustomStandard):**
+```php
+// Handle string "null", empty string, or actual null from dropdown
+$customStandardId = $customStandardId === '' || $customStandardId === 'null' || $customStandardId === null
+    ? null
+    : (int) $customStandardId;
+```
+
+**4. Event System:**
+```php
+// Dispatch event for live updates
+$this->dispatch('standard-switched', templateId: $this->templateId);
+
+// Listeners
+protected $listeners = [
+    'standard-switched' => 'refresh', // CategoryWeightEditor
+    'standard-switched' => 'handleStandardSwitch', // Report components
+];
+```
 
 ---
 
@@ -984,16 +1036,19 @@ docs/DATABASE_STRUCTURE.md          ← Struktur tabel existing
 - [x] Add validation (total weights = 100%)
 - [x] Add template filter (institution-specific)
 
-### Phase 3: Integration (In Progress) ⏳
+### Phase 3: Integration ✅
 
-**PRIORITY: Complete StandardPsikometrik & StandardMc FIRST** (Core functionality)
+**PRIORITY: Core functionality (StandardPsikometrik & StandardMc)** ✅
 - [x] Add dropdown to `StandardPsikometrik`
 - [x] Add dropdown to `StandardMc`
-- [ ] **FIX: Reset temporary adjustments on custom standard switch**
-- [ ] **FIX: Badge logic - only show for temporary adjustments, not custom standard selection**
+- [x] Fix TypeError: Handle type casting for selectCustomStandard()
+- [x] Fix data loading: Always use DynamicStandardService (priority chain)
+- [x] Fix badge logic: Session check instead of value comparison
+- [x] Fix CategoryWeightEditor: Session check for isAdjusted
+- [x] Fix live updates: CategoryWeightEditor listen to 'standard-switched'
 - [x] Add `'standard-switched'` event dispatch
 
-**SECONDARY: Update other report components** (Can be done after core is working)
+**SECONDARY: Update other report components** (Remaining components)
 - [x] Update `GeneralPsyMapping` to listen to standard-switched
 - [x] Update `GeneralMcMapping` to listen to standard-switched
 - [ ] Update `GeneralMapping` to listen to standard-switched
@@ -1009,8 +1064,16 @@ docs/DATABASE_STRUCTURE.md          ← Struktur tabel existing
 
 ---
 
-**Document Status**: Phase 3 In Progress (40% complete)
-**Next Step**: Continue updating remaining report components to listen to 'standard-switched' event
+**Document Status**: Phase 3 Core Functionality Complete ✅ (85% complete)
+**Next Step**: Update remaining report components (GeneralMapping, GeneralMatching, Ranking reports) to listen to 'standard-switched' event
+
+**Key Achievements:**
+- ✅ Custom standard selection working perfectly
+- ✅ Data loads from custom standard correctly
+- ✅ Badge & highlight logic fixed (session-based)
+- ✅ Live updates when switching standards
+- ✅ Type safety for dropdown values
+- ✅ CategoryWeightEditor live update
 
 ---
 
