@@ -39,6 +39,7 @@ class RankingMcMapping extends Component
         'event-selected' => 'handleEventSelected',
         'position-selected' => 'handlePositionSelected',
         'standard-adjusted' => 'handleStandardUpdate',
+        'standard-switched' => 'handleStandardSwitch',
     ];
 
     public function mount(): void
@@ -95,6 +96,15 @@ class RankingMcMapping extends Component
         // Clear cache & reload with adjusted standards
         $this->clearCache();
         $this->refreshData();
+    }
+
+    /**
+     * Handle custom standard switch event
+     */
+    public function handleStandardSwitch(int $templateId): void
+    {
+        // Reuse the same logic as handleStandardUpdate
+        $this->handleStandardUpdate($templateId);
     }
 
     /**
