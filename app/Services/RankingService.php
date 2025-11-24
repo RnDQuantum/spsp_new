@@ -530,13 +530,16 @@ class RankingService
             ->pluck('name', 'id')
             ->toArray();
 
+        // OPTIMIZED: Key by participant_id for O(1) lookup instead of O(n)
+        $kompetensiRankingsKeyed = $kompetensiRankings->keyBy('participant_id');
+
         // Combine scores with category weights
         $participantScores = [];
         foreach ($potensiRankings as $potensiRank) {
             $participantId = $potensiRank['participant_id'];
 
-            // Find corresponding kompetensi score
-            $kompetensiRank = $kompetensiRankings->firstWhere('participant_id', $participantId);
+            // OPTIMIZED: O(1) lookup instead of O(n) firstWhere
+            $kompetensiRank = $kompetensiRankingsKeyed->get($participantId);
             if (! $kompetensiRank) {
                 continue;
             }

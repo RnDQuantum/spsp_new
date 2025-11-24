@@ -40,11 +40,18 @@ class RekapRankingAssessment extends Component
     // CACHE PROPERTIES - untuk menyimpan hasil service calls
     private ?\Illuminate\Support\Collection $rankingsCache = null;
 
+    private ?\Illuminate\Support\Collection $potensiRankingsCache = null;
+
+    private ?\Illuminate\Support\Collection $kompetensiRankingsCache = null;
+
+    private ?array $eventDataCache = null;
+
     protected $listeners = [
         'event-selected' => 'handleEventSelected',
         'position-selected' => 'handlePositionSelected',
         'tolerance-updated' => 'handleToleranceUpdate',
         'standard-adjusted' => 'handleStandardUpdate',
+        'standard-switched' => 'handleStandardSwitch',
     ];
 
     public function mount(): void
@@ -53,7 +60,6 @@ class RekapRankingAssessment extends Component
 
         // Load conclusion configuration from ConclusionService
         $this->conclusionConfig = ConclusionService::getGapConclusionConfig();
-
 
         $this->loadWeights();
 
@@ -121,22 +127,26 @@ class RekapRankingAssessment extends Component
     private function clearCache(): void
     {
         $this->rankingsCache = null;
+        $this->potensiRankingsCache = null;
+        $this->kompetensiRankingsCache = null;
+        $this->eventDataCache = null;
     }
 
     /**
-     * Get combined rankings from RankingService (with cache)
+     * Get event and position data (with cache)
+     * OPTIMIZED: Shared cache to avoid duplicate queries
      */
-    private function getRankings(): ?\Illuminate\Support\Collection
+    private function getEventData(): ?array
     {
         // Check cache first
-        if ($this->rankingsCache !== null) {
-            return $this->rankingsCache;
+        if ($this->eventDataCache !== null) {
+            return $this->eventDataCache;
         }
 
         $eventCode = session('filter.event_code');
         $positionFormationId = session('filter.position_formation_id');
 
-        if (! $eventCode || ! $positionFormationId || ($this->potensiWeight + $this->kompetensiWeight) === 0) {
+        if (! $eventCode || ! $positionFormationId) {
             return null;
         }
 
@@ -157,11 +167,44 @@ class RekapRankingAssessment extends Component
             return null;
         }
 
+        // Cache the result
+        $this->eventDataCache = [
+            'event' => $event,
+            'position' => $position,
+        ];
+
+        return $this->eventDataCache;
+    }
+
+    /**
+     * Get combined rankings from RankingService (with cache)
+     */
+    private function getRankings(): ?\Illuminate\Support\Collection
+    {
+        // Check cache first
+        if ($this->rankingsCache !== null) {
+            return $this->rankingsCache;
+        }
+
+        if (($this->potensiWeight + $this->kompetensiWeight) === 0) {
+            return null;
+        }
+
+        // OPTIMIZED: Use cached event data
+        $eventData = $this->getEventData();
+
+        if (! $eventData) {
+            return null;
+        }
+
+        $event = $eventData['event'];
+        $position = $eventData['position'];
+
         // Call RankingService to get combined rankings
         $rankingService = app(RankingService::class);
         $rankings = $rankingService->getCombinedRankings(
             $event->id,
-            $positionFormationId,
+            $position->id,
             $position->template_id,
             $this->tolerancePercentage
         );
@@ -173,7 +216,74 @@ class RekapRankingAssessment extends Component
     }
 
     /**
+     * Get Potensi rankings (with cache)
+     * OPTIMIZED: Cache to avoid duplicate queries
+     */
+    private function getPotensiRankings(): ?\Illuminate\Support\Collection
+    {
+        // Check cache first
+        if ($this->potensiRankingsCache !== null) {
+            return $this->potensiRankingsCache;
+        }
+
+        // OPTIMIZED: Use cached event data
+        $eventData = $this->getEventData();
+
+        if (! $eventData) {
+            return null;
+        }
+
+        $event = $eventData['event'];
+        $position = $eventData['position'];
+
+        $rankingService = app(RankingService::class);
+        $this->potensiRankingsCache = $rankingService->getRankings(
+            $event->id,
+            $position->id,
+            $position->template_id,
+            'potensi',
+            $this->tolerancePercentage
+        );
+
+        return $this->potensiRankingsCache;
+    }
+
+    /**
+     * Get Kompetensi rankings (with cache)
+     * OPTIMIZED: Cache to avoid duplicate queries
+     */
+    private function getKompetensiRankings(): ?\Illuminate\Support\Collection
+    {
+        // Check cache first
+        if ($this->kompetensiRankingsCache !== null) {
+            return $this->kompetensiRankingsCache;
+        }
+
+        // OPTIMIZED: Use cached event data
+        $eventData = $this->getEventData();
+
+        if (! $eventData) {
+            return null;
+        }
+
+        $event = $eventData['event'];
+        $position = $eventData['position'];
+
+        $rankingService = app(RankingService::class);
+        $this->kompetensiRankingsCache = $rankingService->getRankings(
+            $event->id,
+            $position->id,
+            $position->template_id,
+            'kompetensi',
+            $this->tolerancePercentage
+        );
+
+        return $this->kompetensiRankingsCache;
+    }
+
+    /**
      * Get standard info for display
+     * OPTIMIZED: Use cached rankings
      */
     private function getStandardInfo(): ?array
     {
@@ -183,43 +293,11 @@ class RekapRankingAssessment extends Component
             return null;
         }
 
-        // Calculate standard scores for Potensi and Kompetensi separately
-        // We need to call RankingService for each category to get category-specific standards
-        $eventCode = session('filter.event_code');
-        $positionFormationId = session('filter.position_formation_id');
+        // OPTIMIZED: Use cached rankings instead of querying again
+        $potensiRankings = $this->getPotensiRankings();
+        $kompetensiRankings = $this->getKompetensiRankings();
 
-        $event = AssessmentEvent::where('code', $eventCode)
-            ->with(['positionFormations' => function ($query) use ($positionFormationId) {
-                $query->where('id', $positionFormationId)->with('template');
-            }])
-            ->first();
-
-        if (! $event) {
-            return null;
-        }
-
-        $position = $event->positionFormations->first();
-        $rankingService = app(RankingService::class);
-
-        // Get Potensi rankings to extract standard
-        $potensiRankings = $rankingService->getRankings(
-            $event->id,
-            $positionFormationId,
-            $position->template_id,
-            'potensi',
-            $this->tolerancePercentage
-        );
-
-        // Get Kompetensi rankings to extract standard
-        $kompetensiRankings = $rankingService->getRankings(
-            $event->id,
-            $positionFormationId,
-            $position->template_id,
-            'kompetensi',
-            $this->tolerancePercentage
-        );
-
-        if ($potensiRankings->isEmpty() || $kompetensiRankings->isEmpty()) {
+        if (! $potensiRankings || $potensiRankings->isEmpty() || ! $kompetensiRankings || $kompetensiRankings->isEmpty()) {
             return null;
         }
 
@@ -277,6 +355,15 @@ class RekapRankingAssessment extends Component
             'data' => $this->chartData,
             'colors' => $this->chartColors,
         ]);
+    }
+
+    /**
+     * Handle custom standard switch event
+     */
+    public function handleStandardSwitch(int $templateId): void
+    {
+        // Reuse the same logic as handleStandardUpdate
+        $this->handleStandardUpdate($templateId);
     }
 
     public function handleToleranceUpdate(int $tolerance): void
@@ -424,6 +511,7 @@ class RekapRankingAssessment extends Component
 
     /**
      * Build rankings with pagination using RankingService
+     * OPTIMIZED: Use cached rankings
      */
     private function buildRankings(): ?LengthAwarePaginator
     {
@@ -433,39 +521,17 @@ class RekapRankingAssessment extends Component
             return null;
         }
 
-        // Get event and position info for calculating per-category scores
-        $eventCode = session('filter.event_code');
-        $positionFormationId = session('filter.position_formation_id');
+        // OPTIMIZED: Use cached rankings instead of querying again
+        $potensiRankings = $this->getPotensiRankings();
+        $kompetensiRankings = $this->getKompetensiRankings();
 
-        $event = AssessmentEvent::where('code', $eventCode)
-            ->with(['positionFormations' => function ($query) use ($positionFormationId) {
-                $query->where('id', $positionFormationId)->with('template');
-            }])
-            ->first();
-
-        if (! $event) {
+        if (! $potensiRankings || ! $kompetensiRankings) {
             return null;
         }
 
-        $position = $event->positionFormations->first();
-        $rankingService = app(RankingService::class);
-
-        // Get category-specific rankings for detailed scores
-        $potensiRankings = $rankingService->getRankings(
-            $event->id,
-            $positionFormationId,
-            $position->template_id,
-            'potensi',
-            $this->tolerancePercentage
-        )->keyBy('participant_id');
-
-        $kompetensiRankings = $rankingService->getRankings(
-            $event->id,
-            $positionFormationId,
-            $position->template_id,
-            'kompetensi',
-            $this->tolerancePercentage
-        )->keyBy('participant_id');
+        // Key by participant_id for fast lookup
+        $potensiRankings = $potensiRankings->keyBy('participant_id');
+        $kompetensiRankings = $kompetensiRankings->keyBy('participant_id');
 
         // Map combined rankings to view format
         $items = $rankings->map(function ($ranking) use ($potensiRankings, $kompetensiRankings) {
