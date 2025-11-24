@@ -50,6 +50,7 @@ class RingkasanAssessment extends Component
     protected $listeners = [
         'tolerance-updated' => 'handleToleranceUpdate',
         'standard-adjusted' => 'handleStandardUpdate',
+        'standard-switched' => 'handleStandardSwitch',
     ];
 
     public function mount($eventCode = null, $testNumber = null, $showHeader = true, $showBiodata = true, $showInfoSection = true, $showTable = true): void
@@ -189,6 +190,15 @@ class RingkasanAssessment extends Component
             'total' => $summary['total'],
             'percentage' => $summary['percentage'],
         ]);
+    }
+
+    /**
+     * PHASE 3: Handle custom standard switch event
+     */
+    public function handleStandardSwitch(int $templateId): void
+    {
+        // Reuse the same logic as handleStandardUpdate
+        $this->handleStandardUpdate($templateId);
     }
 
     /**

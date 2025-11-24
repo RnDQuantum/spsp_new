@@ -23,6 +23,7 @@ class RingkasanMcMapping extends Component
     // Event listeners
     protected $listeners = [
         'standard-adjusted' => 'handleStandardUpdate',
+        'standard-switched' => 'handleStandardSwitch',
     ];
 
     public function mount($eventCode, $testNumber): void
@@ -63,6 +64,15 @@ class RingkasanMcMapping extends Component
         // Clear cache & reload
         $this->clearCache();
         $this->loadAspectsData();
+    }
+
+    /**
+     * PHASE 3: Handle custom standard switch event
+     */
+    public function handleStandardSwitch(int $templateId): void
+    {
+        // Reuse the same logic as handleStandardUpdate
+        $this->handleStandardUpdate($templateId);
     }
 
     /**
