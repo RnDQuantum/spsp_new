@@ -86,6 +86,7 @@ class Dashboard extends Component
         'participant-reset' => 'handleParticipantReset',
         'tolerance-updated' => 'handleToleranceUpdate',
         'standard-adjusted' => 'handleStandardUpdate',
+        'standard-switched' => 'handleStandardUpdate', // Reuse same handler for custom standard switch
     ];
 
     public function mount(): void
