@@ -292,15 +292,20 @@ class StandardMc extends Component
     /**
      * PHASE 3: Handle custom standard selection change
      */
-    public function selectCustomStandard(?int $customStandardId): void
+    public function selectCustomStandard($customStandardId): void
     {
         if (! $this->selectedTemplate) {
             return;
         }
 
+        // FIX: Handle string "null", empty string, or actual null from dropdown
+        $customStandardId = $customStandardId === '' || $customStandardId === 'null' || $customStandardId === null
+            ? null
+            : (int) $customStandardId;
+
         $customStandardService = app(CustomStandardService::class);
 
-        // Save selection to session
+        // Save selection to session (this also resets temporary adjustments)
         $customStandardService->select($this->selectedTemplate->id, $customStandardId);
 
         $this->selectedCustomStandardId = $customStandardId;
@@ -400,11 +405,8 @@ class StandardMc extends Component
 
         $templateId = $this->selectedTemplate->id;
 
-        // OPTIMIZED: Get DynamicStandardService instance ONCE
+        // Get DynamicStandardService instance (handles priority: Session → Custom Standard → Quantum Default)
         $dynamicService = app(DynamicStandardService::class);
-
-        // OPTIMIZED: Check if there are adjustments - skip complex calculation if not needed
-        $hasAdjustments = $dynamicService->hasCategoryAdjustments($templateId, 'kompetensi');
 
         // Load ONLY Kompetensi category type with aspects from selected position's template
         // OPTIMIZED: Eager load all relationships in one query
@@ -430,28 +432,22 @@ class StandardMc extends Component
             $categoryStandardRatingSum = 0.0;
             $categoryScoreSum = 0.0;
 
-            // OPTIMIZED: Get adjusted category weight (dynamicService already instantiated)
-            $categoryWeight = $hasAdjustments
-                ? $dynamicService->getCategoryWeight($templateId, $category->code)
-                : $category->weight_percentage;
+            // Get category weight (Priority: Session → Custom Standard → Quantum Default)
+            $categoryWeight = $dynamicService->getCategoryWeight($templateId, $category->code);
             $categoryOriginalWeight = $category->weight_percentage;
 
             foreach ($category->aspects as $aspect) {
-                // OPTIMIZED: Check if aspect is active (only if has adjustments)
-                if ($hasAdjustments && ! $dynamicService->isAspectActive($templateId, $aspect->code)) {
+                // Check if aspect is active (Priority: Session → Custom Standard → Default true)
+                if (! $dynamicService->isAspectActive($templateId, $aspect->code)) {
                     continue; // Skip inactive aspects
                 }
 
-                // OPTIMIZED: Get adjusted aspect weight (only if has adjustments)
-                $aspectWeight = $hasAdjustments
-                    ? $dynamicService->getAspectWeight($templateId, $aspect->code)
-                    : $aspect->weight_percentage;
+                // Get aspect weight (Priority: Session → Custom Standard → Quantum Default)
+                $aspectWeight = $dynamicService->getAspectWeight($templateId, $aspect->code);
                 $aspectOriginalWeight = $aspect->weight_percentage;
 
-                // OPTIMIZED: Get adjusted aspect rating (only if has adjustments)
-                $aspectRating = $hasAdjustments
-                    ? $dynamicService->getAspectRating($templateId, $aspect->code)
-                    : (float) $aspect->standard_rating;
+                // Get aspect rating (Priority: Session → Custom Standard → Quantum Default)
+                $aspectRating = $dynamicService->getAspectRating($templateId, $aspect->code);
                 $aspectOriginalRating = (float) $aspect->standard_rating;
 
                 // Calculate aspect score: rating × adjusted weight

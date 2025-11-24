@@ -292,15 +292,20 @@ class StandardPsikometrik extends Component
     /**
      * PHASE 3: Handle custom standard selection change
      */
-    public function selectCustomStandard(?int $customStandardId): void
+    public function selectCustomStandard($customStandardId): void
     {
         if (! $this->selectedTemplate) {
             return;
         }
 
+        // FIX: Handle string "null", empty string, or actual null from dropdown
+        $customStandardId = $customStandardId === '' || $customStandardId === 'null' || $customStandardId === null
+            ? null
+            : (int) $customStandardId;
+
         $customStandardService = app(CustomStandardService::class);
 
-        // Save selection to session
+        // Save selection to session (this also resets temporary adjustments)
         $customStandardService->select($this->selectedTemplate->id, $customStandardId);
 
         $this->selectedCustomStandardId = $customStandardId;
@@ -400,11 +405,8 @@ class StandardPsikometrik extends Component
 
         $templateId = $this->selectedTemplate->id;
 
-        // OPTIMIZED: Get DynamicStandardService instance ONCE
+        // Get DynamicStandardService instance (handles priority: Session → Custom Standard → Quantum Default)
         $dynamicService = app(DynamicStandardService::class);
-
-        // OPTIMIZED: Check if there are adjustments - skip complex calculation if not needed
-        $hasAdjustments = $dynamicService->hasCategoryAdjustments($templateId, 'potensi');
 
         // Load ONLY Potensi category type with aspects and sub-aspects from selected position's template
         // OPTIMIZED: Eager load all relationships in one query
@@ -432,22 +434,18 @@ class StandardPsikometrik extends Component
             $categoryScoreSum = 0.0;
             $categorySubAspectStandardSum = 0.0;
 
-            // OPTIMIZED: Get adjusted category weight (dynamicService already instantiated)
-            $categoryWeight = $hasAdjustments
-                ? $dynamicService->getCategoryWeight($templateId, $category->code)
-                : $category->weight_percentage;
+            // Get category weight (Priority: Session → Custom Standard → Quantum Default)
+            $categoryWeight = $dynamicService->getCategoryWeight($templateId, $category->code);
             $categoryOriginalWeight = $category->weight_percentage;
 
             foreach ($category->aspects as $aspect) {
-                // OPTIMIZED: Check if aspect is active (only if has adjustments)
-                if ($hasAdjustments && ! $dynamicService->isAspectActive($templateId, $aspect->code)) {
+                // Check if aspect is active (Priority: Session → Custom Standard → Default true)
+                if (! $dynamicService->isAspectActive($templateId, $aspect->code)) {
                     continue; // Skip inactive aspects
                 }
 
-                // OPTIMIZED: Get adjusted aspect weight (only if has adjustments)
-                $aspectWeight = $hasAdjustments
-                    ? $dynamicService->getAspectWeight($templateId, $aspect->code)
-                    : $aspect->weight_percentage;
+                // Get aspect weight (Priority: Session → Custom Standard → Quantum Default)
+                $aspectWeight = $dynamicService->getAspectWeight($templateId, $aspect->code);
                 $aspectOriginalWeight = $aspect->weight_percentage;
 
                 $subAspectsData = [];
@@ -455,15 +453,13 @@ class StandardPsikometrik extends Component
                 $activeSubAspectsStandardSum = 0;
 
                 foreach ($aspect->subAspects as $subAspect) {
-                    // OPTIMIZED: Check if sub-aspect is active (only if has adjustments)
-                    if ($hasAdjustments && ! $dynamicService->isSubAspectActive($templateId, $subAspect->code)) {
+                    // Check if sub-aspect is active (Priority: Session → Custom Standard → Default true)
+                    if (! $dynamicService->isSubAspectActive($templateId, $subAspect->code)) {
                         continue; // Skip inactive sub-aspects
                     }
 
-                    // OPTIMIZED: Get adjusted sub-aspect rating (only if has adjustments)
-                    $subAspectRating = $hasAdjustments
-                        ? $dynamicService->getSubAspectRating($templateId, $subAspect->code)
-                        : (int) $subAspect->standard_rating;
+                    // Get sub-aspect rating (Priority: Session → Custom Standard → Quantum Default)
+                    $subAspectRating = $dynamicService->getSubAspectRating($templateId, $subAspect->code);
                     $subAspectOriginalRating = (int) $subAspect->standard_rating;
 
                     $subAspectsData[] = [
@@ -481,9 +477,7 @@ class StandardPsikometrik extends Component
                 // Calculate aspect average rating from ACTIVE sub-aspects
                 $aspectAvgRating = $activeSubAspectsCount > 0
                     ? round($activeSubAspectsStandardSum / $activeSubAspectsCount, 2)
-                    : ($hasAdjustments
-                        ? $dynamicService->getAspectRating($templateId, $aspect->code)
-                        : (float) $aspect->standard_rating);
+                    : $dynamicService->getAspectRating($templateId, $aspect->code);
 
                 // Calculate aspect score: rating × adjusted weight
                 $aspectScore = round($aspectAvgRating * $aspectWeight, 2);
