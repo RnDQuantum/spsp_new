@@ -55,6 +55,7 @@ class GeneralMatching extends Component
     // Event listeners
     protected $listeners = [
         'standard-adjusted' => 'handleStandardUpdate',
+        'standard-switched' => 'handleStandardSwitch',
     ];
 
     public function mount($eventCode, $testNumber, $showHeader = true, $showInfoSection = true, $showPotensi = true, $showKompetensi = true): void
@@ -121,6 +122,15 @@ class GeneralMatching extends Component
         // Clear cache & reload
         $this->clearCache();
         $this->loadMatchingData();
+    }
+
+    /**
+     * PHASE 3: Handle custom standard switch event
+     */
+    public function handleStandardSwitch(int $templateId): void
+    {
+        // Reuse the same logic as handleStandardUpdate
+        $this->handleStandardUpdate($templateId);
     }
 
     /**
