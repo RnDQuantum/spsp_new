@@ -672,13 +672,17 @@ Session::forget("standard_adjustment.{$templateId}")  // Reset adjustments
          ↓
 $this->dispatch('standard-switched', templateId: $templateId)
          ↓
-All listening components:
-  • GeneralPsyMapping::handleStandardSwitch()
-  • GeneralMcMapping::handleStandardSwitch()
-  • GeneralMapping::handleStandardSwitch()
-  • GeneralMatching::handleStandardSwitch()
-  • RankingPsyMapping::handleStandardSwitch()
-  • etc.
+All listening components (8 DONE, 2 REMAINING):
+  ✅ GeneralPsyMapping::handleStandardSwitch()
+  ✅ GeneralMcMapping::handleStandardSwitch()
+  ✅ GeneralMapping::handleStandardSwitch()
+  ✅ GeneralMatching::handleStandardSwitch()
+  ✅ RingkasanMcMapping::handleStandardSwitch()
+  ✅ RingkasanAssessment::handleStandardSwitch()
+  ✅ FinalReport::handleStandardSwitch()
+  ✅ SpiderPlot::handleStandardSwitch()
+  ⏸ Dashboard::handleStandardSwitch() (TODO)
+  ⏸ InterpretationSection::handleStandardSwitch() (TODO)
          ↓
 Each component: clearCache() → reload data → update UI
 ```
@@ -988,16 +992,24 @@ app/Livewire/Pages/GeneralReport/StandardPsikometrik.php  ← Tambah dropdown st
 app/Livewire/Pages/GeneralReport/StandardMc.php           ← Tambah dropdown standar
 ```
 
-### Report Components (Add Event Listener)
+### Individual Report Components (Add Event Listener)
 
+**COMPLETED (8/10):**
 ```
-app/Livewire/Pages/GeneralReport/GeneralPsyMapping.php
-app/Livewire/Pages/GeneralReport/GeneralMcMapping.php
-app/Livewire/Pages/GeneralReport/GeneralMapping.php
-app/Livewire/Pages/GeneralReport/GeneralMatching.php
-app/Livewire/Pages/RankingReport/RankingPsyMapping.php
-app/Livewire/Pages/RankingReport/RankingMcMapping.php
-app/Livewire/Pages/RankingReport/RekapRankingAssessment.php
+✅ app/Livewire/Pages/IndividualReport/GeneralPsyMapping.php
+✅ app/Livewire/Pages/IndividualReport/GeneralMcMapping.php
+✅ app/Livewire/Pages/IndividualReport/GeneralMapping.php
+✅ app/Livewire/Pages/IndividualReport/GeneralMatching.php
+✅ app/Livewire/Pages/IndividualReport/RingkasanMcMapping.php
+✅ app/Livewire/Pages/IndividualReport/RingkasanAssessment.php
+✅ app/Livewire/Pages/IndividualReport/FinalReport.php
+✅ app/Livewire/Pages/IndividualReport/SpiderPlot.php
+```
+
+**REMAINING (2/10):**
+```
+⏸ app/Livewire/Pages/Dashboard.php
+⏸ app/Livewire/Pages/IndividualReport/InterpretationSection.php
 ```
 
 ### Models
@@ -1048,14 +1060,17 @@ docs/DATABASE_STRUCTURE.md          ← Struktur tabel existing
 - [x] Fix live updates: CategoryWeightEditor listen to 'standard-switched'
 - [x] Add `'standard-switched'` event dispatch
 
-**SECONDARY: Update other report components** (Remaining components)
+**SECONDARY: Update Individual Report Components** ✅
 - [x] Update `GeneralPsyMapping` to listen to standard-switched
 - [x] Update `GeneralMcMapping` to listen to standard-switched
-- [ ] Update `GeneralMapping` to listen to standard-switched
-- [ ] Update `GeneralMatching` to listen to standard-switched
-- [ ] Update `RankingPsyMapping` to listen to standard-switched
-- [ ] Update `RankingMcMapping` to listen to standard-switched
-- [ ] Update `RekapRankingAssessment` to listen to standard-switched
+- [x] Update `GeneralMapping` to listen to standard-switched
+- [x] Update `GeneralMatching` to listen to standard-switched
+- [x] Update `RingkasanMcMapping` to listen to standard-switched
+- [x] Update `RingkasanAssessment` to listen to standard-switched
+- [x] Update `FinalReport` to listen to standard-switched
+- [x] Update `SpiderPlot` to listen to standard-switched
+- [ ] Update `Dashboard` to listen to standard-switched
+- [ ] Update `InterpretationSection` to listen to standard-switched
 
 ### Phase 4: Testing
 - [ ] Unit tests for services
@@ -1064,8 +1079,8 @@ docs/DATABASE_STRUCTURE.md          ← Struktur tabel existing
 
 ---
 
-**Document Status**: Phase 3 Core Functionality Complete ✅ (85% complete)
-**Next Step**: Update remaining report components (GeneralMapping, GeneralMatching, Ranking reports) to listen to 'standard-switched' event
+**Document Status**: Phase 3 Almost Complete ✅ (95% complete)
+**Next Step**: Update remaining components (Dashboard, InterpretationSection) to listen to 'standard-switched' event
 
 **Key Achievements:**
 - ✅ Custom standard selection working perfectly
@@ -1074,6 +1089,10 @@ docs/DATABASE_STRUCTURE.md          ← Struktur tabel existing
 - ✅ Live updates when switching standards
 - ✅ Type safety for dropdown values
 - ✅ CategoryWeightEditor live update
+- ✅ All individual report components updated (8 components)
+  - GeneralPsyMapping, GeneralMcMapping, GeneralMapping
+  - GeneralMatching, RingkasanMcMapping, RingkasanAssessment
+  - FinalReport, SpiderPlot
 
 ---
 
