@@ -181,6 +181,11 @@ class CategoryWeightEditor extends Component
         $original1 = $category1?->weight_percentage ?? 50;
         $original2 = $category2?->weight_percentage ?? 50;
 
+        // Check if weights are from session adjustment (not from custom standard)
+        $adjustments = $dynamicService->getAdjustments($this->templateId);
+        $isAdjusted = isset($adjustments['category_weights'][$this->categoryCode1])
+            || isset($adjustments['category_weights'][$this->categoryCode2]);
+
         return [
             'weight1' => $weight1,
             'weight2' => $weight2,
@@ -188,7 +193,7 @@ class CategoryWeightEditor extends Component
             'original2' => $original2,
             'name1' => $category1?->name ?? ucfirst($this->categoryCode1),
             'name2' => $category2?->name ?? ucfirst($this->categoryCode2),
-            'isAdjusted' => $weight1 !== $original1 || $weight2 !== $original2,
+            'isAdjusted' => $isAdjusted,
         ];
     }
 
