@@ -408,6 +408,9 @@ class StandardMc extends Component
         // Get DynamicStandardService instance (handles priority: Session → Custom Standard → Quantum Default)
         $dynamicService = app(DynamicStandardService::class);
 
+        // Check if there are session-based temporary adjustments (not custom standard selection)
+        $hasSessionAdjustments = $dynamicService->hasCategoryAdjustments($templateId, 'kompetensi');
+
         // Load ONLY Kompetensi category type with aspects from selected position's template
         // OPTIMIZED: Eager load all relationships in one query
         $categories = CategoryType::query()
@@ -436,6 +439,10 @@ class StandardMc extends Component
             $categoryWeight = $dynamicService->getCategoryWeight($templateId, $category->code);
             $categoryOriginalWeight = $category->weight_percentage;
 
+            // Check if category weight is from session adjustment (not from custom standard)
+            $adjustments = $dynamicService->getAdjustments($templateId);
+            $isCategoryWeightAdjusted = isset($adjustments['category_weights'][$category->code]);
+
             foreach ($category->aspects as $aspect) {
                 // Check if aspect is active (Priority: Session → Custom Standard → Default true)
                 if (! $dynamicService->isAspectActive($templateId, $aspect->code)) {
@@ -450,6 +457,10 @@ class StandardMc extends Component
                 $aspectRating = $dynamicService->getAspectRating($templateId, $aspect->code);
                 $aspectOriginalRating = (float) $aspect->standard_rating;
 
+                // Check if aspect weight/rating is from session adjustment
+                $isAspectWeightAdjusted = isset($adjustments['aspect_weights'][$aspect->code]);
+                $isAspectRatingAdjusted = isset($adjustments['aspect_ratings'][$aspect->code]);
+
                 // Calculate aspect score: rating × adjusted weight
                 $aspectScore = round($aspectRating * $aspectWeight, 2);
 
@@ -458,10 +469,10 @@ class StandardMc extends Component
                     'name' => $aspect->name,
                     'weight_percentage' => $aspectWeight,
                     'original_weight' => $aspectOriginalWeight,
-                    'is_weight_adjusted' => $aspectWeight !== $aspectOriginalWeight,
+                    'is_weight_adjusted' => $isAspectWeightAdjusted,
                     'standard_rating' => $aspectRating,
                     'original_rating' => $aspectOriginalRating,
-                    'is_rating_adjusted' => abs($aspectRating - $aspectOriginalRating) > 0.001,
+                    'is_rating_adjusted' => $isAspectRatingAdjusted,
                     'score' => $aspectScore,
                     'attribute_count' => 1,
                     'average_rating' => $aspectRating,
@@ -493,7 +504,7 @@ class StandardMc extends Component
                 'code' => $category->code,
                 'weight_percentage' => $categoryWeight,
                 'original_weight' => $categoryOriginalWeight,
-                'is_weight_adjusted' => $categoryWeight !== $categoryOriginalWeight,
+                'is_weight_adjusted' => $isCategoryWeightAdjusted,
                 'attribute_count' => $categoryAspectCount,
                 'standard_rating' => $categoryAvgRating,
                 'score' => round($categoryScoreSum, 2),

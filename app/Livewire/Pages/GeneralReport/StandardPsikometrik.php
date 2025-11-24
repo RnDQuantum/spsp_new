@@ -408,6 +408,9 @@ class StandardPsikometrik extends Component
         // Get DynamicStandardService instance (handles priority: Session → Custom Standard → Quantum Default)
         $dynamicService = app(DynamicStandardService::class);
 
+        // Check if there are session-based temporary adjustments (not custom standard selection)
+        $hasSessionAdjustments = $dynamicService->hasCategoryAdjustments($templateId, 'potensi');
+
         // Load ONLY Potensi category type with aspects and sub-aspects from selected position's template
         // OPTIMIZED: Eager load all relationships in one query
         $categories = CategoryType::query()
@@ -438,6 +441,10 @@ class StandardPsikometrik extends Component
             $categoryWeight = $dynamicService->getCategoryWeight($templateId, $category->code);
             $categoryOriginalWeight = $category->weight_percentage;
 
+            // Check if category weight is from session adjustment (not from custom standard)
+            $adjustments = $dynamicService->getAdjustments($templateId);
+            $isCategoryWeightAdjusted = isset($adjustments['category_weights'][$category->code]);
+
             foreach ($category->aspects as $aspect) {
                 // Check if aspect is active (Priority: Session → Custom Standard → Default true)
                 if (! $dynamicService->isAspectActive($templateId, $aspect->code)) {
@@ -447,6 +454,9 @@ class StandardPsikometrik extends Component
                 // Get aspect weight (Priority: Session → Custom Standard → Quantum Default)
                 $aspectWeight = $dynamicService->getAspectWeight($templateId, $aspect->code);
                 $aspectOriginalWeight = $aspect->weight_percentage;
+
+                // Check if aspect weight is from session adjustment
+                $isAspectWeightAdjusted = isset($adjustments['aspect_weights'][$aspect->code]);
 
                 $subAspectsData = [];
                 $activeSubAspectsCount = 0;
@@ -462,12 +472,15 @@ class StandardPsikometrik extends Component
                     $subAspectRating = $dynamicService->getSubAspectRating($templateId, $subAspect->code);
                     $subAspectOriginalRating = (int) $subAspect->standard_rating;
 
+                    // Check if sub-aspect rating is from session adjustment
+                    $isSubAspectRatingAdjusted = isset($adjustments['sub_aspect_ratings'][$subAspect->code]);
+
                     $subAspectsData[] = [
                         'code' => $subAspect->code,
                         'name' => $subAspect->name,
                         'standard_rating' => $subAspectRating,
                         'original_rating' => $subAspectOriginalRating,
-                        'is_adjusted' => $subAspectRating !== $subAspectOriginalRating,
+                        'is_adjusted' => $isSubAspectRatingAdjusted,
                         'description' => $subAspect->description,
                     ];
                     $activeSubAspectsCount++;
@@ -487,7 +500,7 @@ class StandardPsikometrik extends Component
                     'name' => $aspect->name,
                     'weight_percentage' => $aspectWeight,
                     'original_weight' => $aspectOriginalWeight,
-                    'is_weight_adjusted' => $aspectWeight !== $aspectOriginalWeight,
+                    'is_weight_adjusted' => $isAspectWeightAdjusted,
                     'standard_rating' => $aspectAvgRating,
                     'sub_aspects_count' => $activeSubAspectsCount,
                     'sub_aspects' => $subAspectsData,
@@ -522,7 +535,7 @@ class StandardPsikometrik extends Component
                 'code' => $category->code,
                 'weight_percentage' => $categoryWeight,
                 'original_weight' => $categoryOriginalWeight,
-                'is_weight_adjusted' => $categoryWeight !== $categoryOriginalWeight,
+                'is_weight_adjusted' => $isCategoryWeightAdjusted,
                 'aspects_count' => $categoryAspectsCount,
                 'standard_rating' => $categoryAvgRating,
                 'score' => $categoryScoreSum,
