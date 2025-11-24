@@ -3,7 +3,6 @@
 namespace App\Livewire\Pages\IndividualReport;
 
 use App\Models\Participant;
-use App\Models\Interpretation;
 use App\Services\InterpretationGeneratorService;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -33,6 +32,17 @@ class InterpretationSection extends Component
 
     // Standalone flag
     public $isStandalone = true;
+
+    // Cache for interpretations (cleared on standard changes)
+    private ?string $potensiInterpretationCache = null;
+
+    private ?string $kompetensiInterpretationCache = null;
+
+    // Event listeners
+    protected $listeners = [
+        'standard-switched' => 'handleStandardSwitch',
+        'standard-adjusted' => 'handleStandardAdjust',
+    ];
 
     public function mount(
         $eventCode,
@@ -74,61 +84,44 @@ class InterpretationSection extends Component
     }
 
     /**
-     * Load interpretations from database or generate if not exist
+     * Load interpretations - ALWAYS generate on-the-fly
+     * Respects custom standard selection and session adjustments
      */
     protected function loadInterpretations(): void
     {
-        // Get template & category IDs
-        $template = $this->participant->positionFormation->template;
+        // Check cache first
+        if ($this->potensiInterpretationCache !== null) {
+            $this->potensiInterpretation = $this->potensiInterpretationCache;
+            $this->kompetensiInterpretation = $this->kompetensiInterpretationCache;
 
-        // Get categories
-        $potensiCategory = $template->categoryTypes()
-            ->where('code', 'potensi')
-            ->first();
-
-        $kompetensiCategory = $template->categoryTypes()
-            ->where('code', 'kompetensi')
-            ->first();
-
-        // Check if interpretations exist in DB
-        $existingInterpretations = Interpretation::where('participant_id', $this->participant->id)
-            ->whereIn('category_type_id', [
-                $potensiCategory?->id,
-                $kompetensiCategory?->id,
-            ])
-            ->get()
-            ->keyBy('category_type_id');
-
-        // If any interpretation is missing, generate all
-        $potensiExists = $potensiCategory && $existingInterpretations->has($potensiCategory->id);
-        $kompetensiExists = $kompetensiCategory && $existingInterpretations->has($kompetensiCategory->id);
-
-        if (! $potensiExists || ! $kompetensiExists) {
-            // Generate all interpretations (both Potensi and Kompetensi)
-            $generator = app(InterpretationGeneratorService::class);
-            $generator->generateForParticipant($this->participant);
-
-            // Reload from database
-            $existingInterpretations = Interpretation::where('participant_id', $this->participant->id)
-                ->whereIn('category_type_id', [
-                    $potensiCategory?->id,
-                    $kompetensiCategory?->id,
-                ])
-                ->get()
-                ->keyBy('category_type_id');
+            return;
         }
 
-        // Load Potensi interpretation
-        if ($this->showPotensi && $potensiCategory) {
-            $potensiInterpretation = $existingInterpretations->get($potensiCategory->id);
-            $this->potensiInterpretation = $potensiInterpretation?->interpretation_text;
+        // Generate fresh interpretations on-the-fly
+        $generator = app(InterpretationGeneratorService::class);
+        $results = $generator->generateForDisplay($this->participant);
+
+        // Set to properties based on display flags
+        if ($this->showPotensi) {
+            $this->potensiInterpretation = $results['potensi'] ?? null;
         }
 
-        // Load Kompetensi interpretation
-        if ($this->showKompetensi && $kompetensiCategory) {
-            $kompetensiInterpretation = $existingInterpretations->get($kompetensiCategory->id);
-            $this->kompetensiInterpretation = $kompetensiInterpretation?->interpretation_text;
+        if ($this->showKompetensi) {
+            $this->kompetensiInterpretation = $results['kompetensi'] ?? null;
         }
+
+        // Cache for this request lifecycle
+        $this->potensiInterpretationCache = $this->potensiInterpretation;
+        $this->kompetensiInterpretationCache = $this->kompetensiInterpretation;
+    }
+
+    /**
+     * Clear cache (called when standard changes)
+     */
+    private function clearCache(): void
+    {
+        $this->potensiInterpretationCache = null;
+        $this->kompetensiInterpretationCache = null;
     }
 
     /**
@@ -136,13 +129,35 @@ class InterpretationSection extends Component
      */
     public function regenerate(): void
     {
-        $generator = app(InterpretationGeneratorService::class);
-        $results = $generator->regenerateInterpretations($this->participant);
-
-        $this->potensiInterpretation = $results['potensi'] ?? null;
-        $this->kompetensiInterpretation = $results['kompetensi'] ?? null;
+        // Clear cache and reload
+        $this->clearCache();
+        $this->loadInterpretations();
 
         $this->dispatch('interpretation-regenerated');
+    }
+
+    /**
+     * Handle custom standard switch event
+     */
+    public function handleStandardSwitch(int $templateId): void
+    {
+        // Validate same template
+        if ($this->participant->positionFormation->template_id !== $templateId) {
+            return;
+        }
+
+        // Clear cache and reload interpretations
+        $this->clearCache();
+        $this->loadInterpretations();
+    }
+
+    /**
+     * Handle standard adjustment event (session changes)
+     */
+    public function handleStandardAdjust(int $templateId): void
+    {
+        // Reuse same logic as handleStandardSwitch
+        $this->handleStandardSwitch($templateId);
     }
 
     public function render()

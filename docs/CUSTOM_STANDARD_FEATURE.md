@@ -994,7 +994,7 @@ app/Livewire/Pages/GeneralReport/StandardMc.php           ← Tambah dropdown st
 
 ### Individual Report Components (Add Event Listener)
 
-**COMPLETED (8/10):**
+**COMPLETED (10/10):** ✅ ALL DONE
 ```
 ✅ app/Livewire/Pages/IndividualReport/GeneralPsyMapping.php
 ✅ app/Livewire/Pages/IndividualReport/GeneralMcMapping.php
@@ -1004,13 +1004,19 @@ app/Livewire/Pages/GeneralReport/StandardMc.php           ← Tambah dropdown st
 ✅ app/Livewire/Pages/IndividualReport/RingkasanAssessment.php
 ✅ app/Livewire/Pages/IndividualReport/FinalReport.php
 ✅ app/Livewire/Pages/IndividualReport/SpiderPlot.php
+✅ app/Livewire/Pages/Dashboard.php
+✅ app/Livewire/Pages/IndividualReport/InterpretationSection.php (on-the-fly generation)
 ```
 
-**REMAINING (2/10):**
+### General Report Components (Add Event Listener)
+
+**STATUS (0/3):** ⏸ PENDING
 ```
-⏸ app/Livewire/Pages/Dashboard.php
-⏸ app/Livewire/Pages/IndividualReport/InterpretationSection.php
+⏸ app/Livewire/Pages/GeneralReport/Ranking/RankingPsyMapping.php
+⏸ app/Livewire/Pages/GeneralReport/Ranking/RankingMcMapping.php
+⏸ app/Livewire/Pages/GeneralReport/Ranking/RekapRankingAssessment.php
 ```
+**Note:** These components already have `'standard-adjusted'` listener but need `'standard-switched'` added.
 
 ### Models
 
@@ -1048,29 +1054,20 @@ docs/DATABASE_STRUCTURE.md          ← Struktur tabel existing
 - [x] Add validation (total weights = 100%)
 - [x] Add template filter (institution-specific)
 
-### Phase 3: Integration ✅
+### Phase 3: Integration 
 
-**PRIORITY: Core functionality (StandardPsikometrik & StandardMc)** ✅
-- [x] Add dropdown to `StandardPsikometrik`
-- [x] Add dropdown to `StandardMc`
-- [x] Fix TypeError: Handle type casting for selectCustomStandard()
-- [x] Fix data loading: Always use DynamicStandardService (priority chain)
-- [x] Fix badge logic: Session check instead of value comparison
-- [x] Fix CategoryWeightEditor: Session check for isAdjusted
-- [x] Fix live updates: CategoryWeightEditor listen to 'standard-switched'
-- [x] Add `'standard-switched'` event dispatch
+**Core functionality** ✅
+- [x] StandardPsikometrik & StandardMc with dropdown
+- [x] Event system with 'standard-switched'
+- [x] Data loading via DynamicStandardService
 
-**SECONDARY: Update Individual Report Components** ✅
-- [x] Update `GeneralPsyMapping` to listen to standard-switched
-- [x] Update `GeneralMcMapping` to listen to standard-switched
-- [x] Update `GeneralMapping` to listen to standard-switched
-- [x] Update `GeneralMatching` to listen to standard-switched
-- [x] Update `RingkasanMcMapping` to listen to standard-switched
-- [x] Update `RingkasanAssessment` to listen to standard-switched
-- [x] Update `FinalReport` to listen to standard-switched
-- [x] Update `SpiderPlot` to listen to standard-switched
-- [x] Update `Dashboard` to listen to standard-switched
-- [ ] Update `InterpretationSection` to listen to standard-switched
+**Individual Report Components** ✅ (10/10 Complete)
+- [x] GeneralPsyMapping, GeneralMcMapping, GeneralMapping
+- [x] GeneralMatching, RingkasanMcMapping, RingkasanAssessment
+- [x] FinalReport, SpiderPlot, Dashboard
+- [x] InterpretationSection (on-the-fly generation)
+
+**General Report Components** ???
 
 ### Phase 4: Testing
 - [ ] Unit tests for services
