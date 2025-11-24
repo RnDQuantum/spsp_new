@@ -236,13 +236,11 @@ class RankingService
     ): array {
         $standardService = app(DynamicStandardService::class);
 
-        // Check if there are any adjustments
-        if (! $standardService->hasCategoryAdjustments($templateId, $categoryCode)) {
-            // No adjustments, use database values
-            return $this->calculateOriginalStandards($aspectIds);
-        }
+        // ALWAYS recalculate from DynamicStandardService
+        // DynamicStandardService handles priority: Session → Custom Standard → Quantum Default
+        // We should NOT check hasCategoryAdjustments() because it only checks session,
+        // and misses custom standard selection!
 
-        // Recalculate based on adjusted standards from session
         $adjustedRating = 0;
         $adjustedScore = 0;
 
@@ -258,7 +256,7 @@ class RankingService
                 continue; // Skip inactive aspects
             }
 
-            // Get adjusted weight from session
+            // Get adjusted weight from DynamicStandardService (handles priority chain)
             $aspectWeight = $standardService->getAspectWeight($templateId, $aspect->code);
 
             // Get aspect rating based on category
@@ -270,7 +268,7 @@ class RankingService
                     $standardService
                 );
             } else {
-                // For Kompetensi: get direct rating from session
+                // For Kompetensi: get direct rating from DynamicStandardService
                 $aspectRating = $standardService->getAspectRating($templateId, $aspect->code);
             }
 
