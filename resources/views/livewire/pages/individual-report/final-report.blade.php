@@ -183,7 +183,10 @@
                                     <div class="flex">
                                         <span class="font-semibold w-32">2. Total Score</span>
                                         <span class="flex-1">:
-                                            {{ $finalAssessment ? number_format($finalAssessment->total_individual_score, 2) : '0.00' }}</span>
+                                            @php
+                                                $finalData = $this->loadFinalAssessmentData();
+                                            @endphp
+                                            {{ $finalData ? number_format($finalData['total_individual_score'], 2, ',', '.') : '0,00' }}</span>
                                     </div>
                                 </div>
                             </td>
