@@ -46,6 +46,15 @@
                     </td>
                 </tr>
             </table>
+
+            {{-- Adjustment Indicator --}}
+            <div class="mt-4">
+                <x-adjustment-indicator
+                    :template-id="$participant->positionFormation->template_id"
+                    category-code="kompetensi"
+                    size="sm"
+                />
+            </div>
         </div>
 
         <!-- Table Section - DARK MODE READY -->

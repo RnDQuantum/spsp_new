@@ -13,6 +13,14 @@
         @livewire('components.tolerance-selector', ['showSummary' => false])
     </div>
 
+    {{-- Adjustment Indicators --}}
+    <div class="mb-6 flex flex-wrap gap-2">
+        <x-adjustment-indicator :template-id="$participant->positionFormation->template_id" category-code="potensi"
+            size="sm" custom-label="Standar Potensi Disesuaikan" />
+        <x-adjustment-indicator :template-id="$participant->positionFormation->template_id" category-code="kompetensi"
+            size="sm" custom-label="Standar Kompetensi Disesuaikan" />
+    </div>
+
     {{-- Biodata Section --}}
     <div class="mb-8">
         <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4 pl-5">BIODATA PESERTA</h2>
@@ -70,10 +78,10 @@
                 <div
                     class="w-47 h-65 bg-gray-200 dark:bg-gray-700 rounded-md overflow-hidden flex items-center justify-center">
                     @if ($participant->photo)
-                        <img src="{{ asset('storage/' . $participant->photo) }}" alt="Foto Peserta"
-                            class="object-cover w-full h-full">
+                    <img src="{{ asset('storage/' . $participant->photo) }}" alt="Foto Peserta"
+                        class="object-cover w-full h-full">
                     @else
-                        <span class="text-gray-500 dark:text-gray-400 text-sm">Foto<br>Tidak Tersedia</span>
+                    <span class="text-gray-500 dark:text-gray-400 text-sm">Foto<br>Tidak Tersedia</span>
                     @endif
                 </div>
             </div>
@@ -82,52 +90,57 @@
 
     {{-- General Matching Section potensi --}}
     <div class="mb-8">
-        <livewire:pages.individual-report.general-matching :eventCode="$eventCode" :testNumber="$testNumber" :isStandalone="false"
-            :showHeader="false" :showInfoSection="false" :showPotensi="true" :showKompetensi="false" :key="'potensi-only-' . $eventCode . '-' . $testNumber" />
+        <livewire:pages.individual-report.general-matching :eventCode="$eventCode" :testNumber="$testNumber"
+            :isStandalone="false" :showHeader="false" :showInfoSection="false" :showPotensi="true"
+            :showKompetensi="false" :key="'potensi-only-' . $eventCode . '-' . $testNumber" />
     </div>
 
     {{-- Psychology Mapping Section --}}
     <div class="mb-8">
         <h2 class="text-2xl text-center font-bold text-gray-900 dark:text-white italic">Psychology Mapping</h2>
-        <livewire:pages.individual-report.general-psy-mapping :eventCode="$eventCode" :testNumber="$testNumber" :isStandalone="false"
-            :showHeader="false" :showInfoSection="false" :showTable="true" :showRatingChart="true" :showScoreChart="true"
-            :showRankingInfo="false" :key="'psy-mapping-' . $eventCode . '-' . $testNumber" />
+        <livewire:pages.individual-report.general-psy-mapping :eventCode="$eventCode" :testNumber="$testNumber"
+            :isStandalone="false" :showHeader="false" :showInfoSection="false" :showTable="true" :showRatingChart="true"
+            :showScoreChart="true" :showRankingInfo="false" :key="'psy-mapping-' . $eventCode . '-' . $testNumber" />
     </div>
 
     {{-- Interpretation Section potensi --}}
     <div class="mb-8">
         {{-- <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Interpretasi Hasil Assessment</h2> --}}
         <livewire:pages.individual-report.interpretation-section :eventCode="$eventCode" :testNumber="$testNumber"
-            :isStandalone="false" :showHeader="false" :showPotensi="true" :showKompetensi="false" :key="'interpretation-' . $eventCode . '-' . $testNumber" />
+            :isStandalone="false" :showHeader="false" :showPotensi="true" :showKompetensi="false"
+            :key="'interpretation-' . $eventCode . '-' . $testNumber" />
     </div>
 
     {{-- General Matching Section kompetensi --}}
     <div class="mb-8">
-        <livewire:pages.individual-report.general-matching :eventCode="$eventCode" :testNumber="$testNumber" :isStandalone="false"
-            :showHeader="false" :showInfoSection="false" :showPotensi="false" :showKompetensi="true" :key="'kompetensi-only-' . $eventCode . '-' . $testNumber" />
+        <livewire:pages.individual-report.general-matching :eventCode="$eventCode" :testNumber="$testNumber"
+            :isStandalone="false" :showHeader="false" :showInfoSection="false" :showPotensi="false"
+            :showKompetensi="true" :key="'kompetensi-only-' . $eventCode . '-' . $testNumber" />
     </div>
 
     {{-- Managerial Competency Mapping Section --}}
     <div class="mb-8">
         <h2 class="text-2xl text-center font-bold text-gray-900 dark:text-white italic">Managerial Competency
             Mapping</h2>
-        <livewire:pages.individual-report.general-mc-mapping :eventCode="$eventCode" :testNumber="$testNumber" :isStandalone="false"
-            :showHeader="false" :showInfoSection="false" :showTable="true" :showRatingChart="true" :showScoreChart="true"
-            :showRankingInfo="false" :key="'mc-mapping-' . $eventCode . '-' . $testNumber" />
+        <livewire:pages.individual-report.general-mc-mapping :eventCode="$eventCode" :testNumber="$testNumber"
+            :isStandalone="false" :showHeader="false" :showInfoSection="false" :showTable="true" :showRatingChart="true"
+            :showScoreChart="true" :showRankingInfo="false" :key="'mc-mapping-' . $eventCode . '-' . $testNumber" />
     </div>
 
     {{-- Interpretation Section kompetensi --}}
     <div class="mb-8">
         {{-- <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Interpretasi Kompetensi</h2> --}}
         <livewire:pages.individual-report.interpretation-section :eventCode="$eventCode" :testNumber="$testNumber"
-            :isStandalone="false" :showHeader="false" :showPotensi="false" :showKompetensi="true" :key="'interpretation-kompetensi-' . $eventCode . '-' . $testNumber" />
+            :isStandalone="false" :showHeader="false" :showPotensi="false" :showKompetensi="true"
+            :key="'interpretation-kompetensi-' . $eventCode . '-' . $testNumber" />
     </div>
 
     {{-- Ringkasan Asesmen Section - Table Only --}}
     <div class="mb-8">
         <h2 class="text-2xl text-center font-bold text-gray-900 dark:text-white mb-4">Ringkasan Hasil Asesmen</h2>
-        <livewire:pages.individual-report.ringkasan-assessment :eventCode="$eventCode" :testNumber="$testNumber" :isStandalone="false"
-            :showHeader="false" :showBiodata="false" :showInfoSection="false" :showTable="true" :key="'ringkasan-assessment-' . $eventCode . '-' . $testNumber" />
+        <livewire:pages.individual-report.ringkasan-assessment :eventCode="$eventCode" :testNumber="$testNumber"
+            :isStandalone="false" :showHeader="false" :showBiodata="false" :showInfoSection="false" :showTable="true"
+            :key="'ringkasan-assessment-' . $eventCode . '-' . $testNumber" />
     </div>
 
     {{-- Hasil Rekomendasi Section --}}
@@ -184,9 +197,10 @@
                                         <span class="font-semibold w-32">2. Total Score</span>
                                         <span class="flex-1">:
                                             @php
-                                                $finalData = $this->loadFinalAssessmentData();
+                                            $finalData = $this->loadFinalAssessmentData();
                                             @endphp
-                                            {{ $finalData ? number_format($finalData['total_individual_score'], 2, ',', '.') : '0,00' }}</span>
+                                            {{ $finalData ? number_format($finalData['total_individual_score'], 2, ',',
+                                            '.') : '0,00' }}</span>
                                     </div>
                                 </div>
                             </td>
@@ -212,107 +226,106 @@
 
                         <!-- Row 3: Tes Kejiwaan (Content) -->
                         @if ($psychologicalTest)
-                            <tr class="bg-white dark:bg-gray-800">
-                                <td
-                                    class="border-2 border-black px-4 py-3 text-center font-semibold text-gray-900 dark:text-white align-top">
-                                    2
-                                </td>
-                                <td
-                                    class="border-2 border-black px-4 py-3 font-semibold text-gray-900 dark:text-white align-top">
-                                    Tes Kejiwaan
-                                </td>
-                                <td class="border-2 border-black px-4 py-3 text-gray-900 dark:text-white align-top"
-                                    colspan="2">
-                                    <div class="space-y-3 text-sm">
-                                        <!-- 1. Validitas -->
-                                        <div class="border-b border-gray-300 pb-2">
-                                            <div class="font-semibold mb-1">1. Validitas</div>
-                                            <div class="pl-4 text-gray-700 dark:text-gray-300">
-                                                {{ $psychologicalTest->validitas ?? '-' }}
-                                            </div>
-                                        </div>
-
-                                        <!-- 2. Internal Pribadi -->
-                                        <div class="border-b border-gray-300 pb-2">
-                                            <div class="font-semibold mb-1">2. Internal Pribadi</div>
-                                            <div class="pl-4 text-gray-700 dark:text-gray-300 whitespace-pre-line">
-                                                {{ $psychologicalTest->internal ?? '-' }}
-                                            </div>
-                                        </div>
-
-                                        <!-- 3. Interpersonal -->
-                                        <div class="border-b border-gray-300 pb-2">
-                                            <div class="font-semibold mb-1">3. Interpersonal</div>
-                                            <div class="pl-4 text-gray-700 dark:text-gray-300 whitespace-pre-line">
-                                                {{ $psychologicalTest->interpersonal ?? '-' }}
-                                            </div>
-                                        </div>
-
-                                        <!-- 4. Kapasitas Kerja -->
-                                        <div class="border-b border-gray-300 pb-2">
-                                            <div class="font-semibold mb-1">4. Kapasitas Kerja</div>
-                                            <div class="pl-4 text-gray-700 dark:text-gray-300 whitespace-pre-line">
-                                                {{ $psychologicalTest->kap_kerja ?? '-' }}
-                                            </div>
-                                        </div>
-
-                                        <!-- 5. Klinis -->
-                                        <div class="border-b border-gray-300 pb-2">
-                                            <div class="font-semibold mb-1">5. Klinis</div>
-                                            <div class="pl-4 text-gray-700 dark:text-gray-300 whitespace-pre-line">
-                                                {{ $psychologicalTest->klinik ?? '-' }}
-                                            </div>
-                                        </div>
-
-                                        <!-- 6. Kesimpulan -->
-                                        <div class="border-b border-gray-300 pb-2">
-                                            <div class="font-semibold mb-1">6. Kesimpulan</div>
-                                            <div class="pl-4 text-gray-700 dark:text-gray-300 whitespace-pre-line">
-                                                {{ $psychologicalTest->kesimpulan ?? '-' }}
-                                            </div>
-                                        </div>
-
-                                        <!-- 7. Psikogram -->
-                                        <div class="border-b border-gray-300 pb-2">
-                                            <div class="font-semibold mb-1">7. Psikogram</div>
-                                            <div class="pl-4 text-gray-700 dark:text-gray-300 whitespace-pre-line">
-                                                {{ $psychologicalTest->psikogram ?? '-' }}
-                                            </div>
-                                        </div>
-
-                                        <!-- 8. Nilai PQ -->
-                                        <div class="border-b border-gray-300 pb-2">
-                                            <div class="font-semibold mb-1">8. Nilai PQ</div>
-                                            <div class="pl-4 text-gray-700 dark:text-gray-300">
-                                                {{ $psychologicalTest->nilai_pq ?? '-' }}
-                                            </div>
-                                        </div>
-
-                                        <!-- 9. Tingkat Stres -->
-                                        <div>
-                                            <div class="font-semibold mb-1">9. Tingkat Stres</div>
-                                            <div class="pl-4 text-gray-700 dark:text-gray-300">
-                                                {{ $psychologicalTest->tingkat_stres ?? '-' }}
-                                            </div>
+                        <tr class="bg-white dark:bg-gray-800">
+                            <td
+                                class="border-2 border-black px-4 py-3 text-center font-semibold text-gray-900 dark:text-white align-top">
+                                2
+                            </td>
+                            <td
+                                class="border-2 border-black px-4 py-3 font-semibold text-gray-900 dark:text-white align-top">
+                                Tes Kejiwaan
+                            </td>
+                            <td class="border-2 border-black px-4 py-3 text-gray-900 dark:text-white align-top"
+                                colspan="2">
+                                <div class="space-y-3 text-sm">
+                                    <!-- 1. Validitas -->
+                                    <div class="border-b border-gray-300 pb-2">
+                                        <div class="font-semibold mb-1">1. Validitas</div>
+                                        <div class="pl-4 text-gray-700 dark:text-gray-300">
+                                            {{ $psychologicalTest->validitas ?? '-' }}
                                         </div>
                                     </div>
-                                </td>
-                            </tr>
+
+                                    <!-- 2. Internal Pribadi -->
+                                    <div class="border-b border-gray-300 pb-2">
+                                        <div class="font-semibold mb-1">2. Internal Pribadi</div>
+                                        <div class="pl-4 text-gray-700 dark:text-gray-300 whitespace-pre-line">
+                                            {{ $psychologicalTest->internal ?? '-' }}
+                                        </div>
+                                    </div>
+
+                                    <!-- 3. Interpersonal -->
+                                    <div class="border-b border-gray-300 pb-2">
+                                        <div class="font-semibold mb-1">3. Interpersonal</div>
+                                        <div class="pl-4 text-gray-700 dark:text-gray-300 whitespace-pre-line">
+                                            {{ $psychologicalTest->interpersonal ?? '-' }}
+                                        </div>
+                                    </div>
+
+                                    <!-- 4. Kapasitas Kerja -->
+                                    <div class="border-b border-gray-300 pb-2">
+                                        <div class="font-semibold mb-1">4. Kapasitas Kerja</div>
+                                        <div class="pl-4 text-gray-700 dark:text-gray-300 whitespace-pre-line">
+                                            {{ $psychologicalTest->kap_kerja ?? '-' }}
+                                        </div>
+                                    </div>
+
+                                    <!-- 5. Klinis -->
+                                    <div class="border-b border-gray-300 pb-2">
+                                        <div class="font-semibold mb-1">5. Klinis</div>
+                                        <div class="pl-4 text-gray-700 dark:text-gray-300 whitespace-pre-line">
+                                            {{ $psychologicalTest->klinik ?? '-' }}
+                                        </div>
+                                    </div>
+
+                                    <!-- 6. Kesimpulan -->
+                                    <div class="border-b border-gray-300 pb-2">
+                                        <div class="font-semibold mb-1">6. Kesimpulan</div>
+                                        <div class="pl-4 text-gray-700 dark:text-gray-300 whitespace-pre-line">
+                                            {{ $psychologicalTest->kesimpulan ?? '-' }}
+                                        </div>
+                                    </div>
+
+                                    <!-- 7. Psikogram -->
+                                    <div class="border-b border-gray-300 pb-2">
+                                        <div class="font-semibold mb-1">7. Psikogram</div>
+                                        <div class="pl-4 text-gray-700 dark:text-gray-300 whitespace-pre-line">
+                                            {{ $psychologicalTest->psikogram ?? '-' }}
+                                        </div>
+                                    </div>
+
+                                    <!-- 8. Nilai PQ -->
+                                    <div class="border-b border-gray-300 pb-2">
+                                        <div class="font-semibold mb-1">8. Nilai PQ</div>
+                                        <div class="pl-4 text-gray-700 dark:text-gray-300">
+                                            {{ $psychologicalTest->nilai_pq ?? '-' }}
+                                        </div>
+                                    </div>
+
+                                    <!-- 9. Tingkat Stres -->
+                                    <div>
+                                        <div class="font-semibold mb-1">9. Tingkat Stres</div>
+                                        <div class="pl-4 text-gray-700 dark:text-gray-300">
+                                            {{ $psychologicalTest->tingkat_stres ?? '-' }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
                         @else
-                            <tr class="bg-white dark:bg-gray-800">
-                                <td
-                                    class="border-2 border-black px-4 py-3 text-center font-semibold text-gray-900 dark:text-white">
-                                    4
-                                </td>
-                                <td
-                                    class="border-2 border-black px-4 py-3 font-semibold text-gray-900 dark:text-white">
-                                    Tes Kejiwaan
-                                </td>
-                                <td class="border-2 border-black px-4 py-3 text-center text-gray-500 dark:text-gray-400"
-                                    colspan="2">
-                                    Data Tes Kejiwaan Tidak Tersedia
-                                </td>
-                            </tr>
+                        <tr class="bg-white dark:bg-gray-800">
+                            <td
+                                class="border-2 border-black px-4 py-3 text-center font-semibold text-gray-900 dark:text-white">
+                                4
+                            </td>
+                            <td class="border-2 border-black px-4 py-3 font-semibold text-gray-900 dark:text-white">
+                                Tes Kejiwaan
+                            </td>
+                            <td class="border-2 border-black px-4 py-3 text-center text-gray-500 dark:text-gray-400"
+                                colspan="2">
+                                Data Tes Kejiwaan Tidak Tersedia
+                            </td>
+                        </tr>
                         @endif
                     </tbody>
                 </table>
