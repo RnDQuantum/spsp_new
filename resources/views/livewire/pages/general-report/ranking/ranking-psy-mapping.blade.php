@@ -23,6 +23,21 @@
     'showSummary' => false,
     ])
 
+    {{-- Adjustment Indicator --}}
+    @php
+        $eventData = $this->getEventData();
+        $templateId = $eventData['position']->template_id ?? null;
+    @endphp
+    @if($templateId)
+    <div class="px-6 py-2 bg-gray-50 dark:bg-gray-700 border-b border-gray-300 dark:border-gray-600">
+        <x-adjustment-indicator
+            :template-id="$templateId"
+            category-code="potensi"
+            size="sm"
+        />
+    </div>
+    @endif
+
     <!-- Per Page Selector -->
     <div class="px-6 pt-4 bg-white dark:bg-gray-900">
         <div class="flex items-center justify-between">
