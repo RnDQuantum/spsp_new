@@ -399,10 +399,12 @@ class TrainingRecommendation extends Component
     {
         $participants = $this->getParticipantsPaginated();
         $aspectPriorities = $this->getAspectPriorityData();
+        $selectedTemplate = $this->selectedEvent?->positionFormations?->first()?->template;
 
         return view('livewire.pages.general-report.training.training-recommendation', [
             'participants' => $participants,
             'aspectPriorities' => $aspectPriorities,
+            'selectedTemplate' => $selectedTemplate,
         ]);
     }
 }

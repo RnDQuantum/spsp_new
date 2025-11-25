@@ -40,6 +40,17 @@
     'showSummary' => false,
     ])
 
+    {{-- Adjustment Indicators --}}
+    @if($this->selectedTemplate)
+    <div
+        class="px-6 py-2 bg-gray-50 dark:bg-gray-700 border-b border-gray-300 dark:border-gray-600 flex flex-wrap gap-2">
+        <x-adjustment-indicator :template-id="$this->selectedTemplate->id" category-code="potensi" size="sm"
+            custom-label="Standar Potensi Disesuaikan" />
+        <x-adjustment-indicator :template-id="$this->selectedTemplate->id" category-code="kompetensi" size="sm"
+            custom-label="Standar Kompetensi Disesuaikan" />
+    </div>
+    @endif
+
     <!-- Enhanced Table Section -->
     <div class="px-6 pb-6 bg-white dark:bg-gray-900 overflow-x-auto">
         <!-- Per Page Selector -->
@@ -210,14 +221,12 @@
                 </div>
 
                 <!-- Right Column: STANDAR ADJUSTED - Only show if tolerance > 0 -->
-                <div x-show="tolerance > 0"
-                    x-transition:enter="transition ease-out duration-300"
+                <div x-show="tolerance > 0" x-transition:enter="transition ease-out duration-300"
                     x-transition:enter-start="opacity-0 transform scale-95"
                     x-transition:enter-end="opacity-100 transform scale-100"
                     x-transition:leave="transition ease-in duration-200"
                     x-transition:leave-start="opacity-100 transform scale-100"
-                    x-transition:leave-end="opacity-0 transform scale-95"
-                    class="space-y-3">
+                    x-transition:leave-end="opacity-0 transform scale-95" class="space-y-3">
                     <h4 class="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wide mb-3">
                         Standar yang diberi toleransi
                         <span x-text="tolerance > 0 ? '(' + tolerance + '%)' : ''"

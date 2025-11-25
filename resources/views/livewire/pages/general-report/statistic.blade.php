@@ -18,6 +18,22 @@
         </div>
     </div>
 
+    {{-- Adjustment Indicators --}}
+    @if($selectedTemplate)
+    <div class="mb-4 flex flex-wrap gap-2">
+        <x-adjustment-indicator
+            :template-id="$selectedTemplate->id"
+            category-code="potensi"
+            size="sm"
+        />
+        <x-adjustment-indicator
+            :template-id="$selectedTemplate->id"
+            category-code="kompetensi"
+            size="sm"
+        />
+    </div>
+    @endif
+
     <!-- Judul Kurva -->
     <div class="mb-2 text-center font-bold text-2xl uppercase text-gray-900 dark:text-gray-100">KURVA DISTRIBUSI
         FREKUENSI</div>
