@@ -9,7 +9,7 @@ use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-#[Layout('components.layouts.app', ['title' => 'Shortlist Peserta'])]
+#[Layout('components.layouts.app', ['title' => 'Daftar Peserta'])]
 class ParticipantsList extends Component
 {
     use WithPagination;
@@ -141,9 +141,9 @@ class ParticipantsList extends Component
         // Filter berdasarkan search (nama, NIP jika ada)
         if ($this->search) {
             $query->where(function ($q) {
-                $q->where('name', 'like', '%'.$this->search.'%')
-                    ->orWhere('test_number', 'like', '%'.$this->search.'%')
-                    ->orWhere('skb_number', 'like', '%'.$this->search.'%');
+                $q->where('name', 'like', '%' . $this->search . '%')
+                    ->orWhere('test_number', 'like', '%' . $this->search . '%')
+                    ->orWhere('skb_number', 'like', '%' . $this->search . '%');
             });
         }
 

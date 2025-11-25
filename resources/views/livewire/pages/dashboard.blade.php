@@ -9,7 +9,7 @@
         <!-- Header - DARK MODE READY -->
         <div class="border-b-4 border-black dark:border-gray-300 py-3 bg-gray-300 dark:bg-gray-600">
             <h1 class="text-center text-lg font-bold uppercase tracking-wide text-gray-900 dark:text-gray-100">
-                SPIDER PLOT ANALYSIS - DASHBOARD
+                ANALISA <i>SPIDER PLOT</i>
             </h1>
             @if ($participant)
                 <p class="text-center text-sm font-semibold text-gray-700 dark:text-gray-300 mt-1">
@@ -56,8 +56,9 @@
         <!-- Charts Grid - DARK MODE READY -->
         @if (count($allAspectsData) > 0)
             <div class="p-6">
-                <h1 class="text-3xl text-center font-bold text-gray-800 dark:text-gray-100 mb-8">Static Pribadi Spider
-                    Plot (SPSP)</h1>
+                <h1 class="text-3xl text-center font-bold text-gray-800 dark:text-gray-100 mb-8"><i>Static Pribadi
+                        Spider
+                        Plot</i> (SPSP)</h1>
 
                 <!-- Charts - Vertical Layout -->
                 <div class="space-y-6 mt-8">
@@ -66,7 +67,7 @@
                         <div
                             class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg dark:shadow-gray-700/50 border border-gray-200 dark:border-gray-600">
                             <h3 class="text-lg text-center font-semibold text-gray-800 dark:text-gray-100 mb-4">
-                                Potential Mapping (Rating)
+                                <i>Potential Mapping (Rating)</i>
                             </h3>
                             <div class="relative" style="height: 600px;" wire:ignore>
                                 <canvas id="potensiChart-{{ $potensiChartId }}"></canvas>
@@ -79,8 +80,8 @@
                         <div
                             class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg dark:shadow-gray-700/50 border border-gray-200 dark:border-gray-600">
                             <h3 class="text-lg text-center font-semibold text-gray-800 dark:text-gray-100 mb-4">
-                                Managerial Potency Mapping
-                                (Rating)
+                                <i>Managerial Potency Mapping
+                                    (Rating)</i>
                             </h3>
                             <div class="relative" style="height: 600px;" wire:ignore>
                                 <canvas id="kompetensiChart-{{ $kompetensiChartId }}"></canvas>
@@ -92,8 +93,8 @@
                     @if (count($generalLabels) > 0)
                         <div
                             class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg dark:shadow-gray-700/50 border border-gray-200 dark:border-gray-600">
-                            <h3 class="text-lg text-center font-semibold text-gray-800 dark:text-gray-100 mb-4">General
-                                Mapping (Rating)
+                            <h3 class="text-lg text-center font-semibold text-gray-800 dark:text-gray-100 mb-4">
+                                <i>General Mapping (Rating)</i>
                             </h3>
                             <div class="relative" style="height: 600px;" wire:ignore>
                                 <canvas id="generalChart-{{ $generalChartId }}"></canvas>

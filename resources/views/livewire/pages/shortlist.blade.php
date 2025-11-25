@@ -3,7 +3,7 @@
     <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
         <div class="flex flex-col gap-4">
             <!-- Header Title -->
-            <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100">Data Peserta Assessment</h2>
+            <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100">Data Peserta Asesmen</h2>
 
             <!-- Filter Controls - Simple Grid -->
             <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
