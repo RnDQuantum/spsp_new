@@ -12,7 +12,7 @@ use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-#[Layout('components.layouts.app', ['title' => 'Ranking Skor General Competency Mapping'])]
+#[Layout('components.layouts.app', ['title' => 'Peringkat Skor General Competency Mapping'])]
 class RankingMcMapping extends Component
 {
     use WithPagination;

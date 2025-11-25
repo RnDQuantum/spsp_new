@@ -12,7 +12,7 @@ use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-#[Layout('components.layouts.app', ['title' => 'Ranking Skor Psychology Mapping'])]
+#[Layout('components.layouts.app', ['title' => 'Peringkat Skor Psychology Mapping'])]
 class RankingPsyMapping extends Component
 {
     use WithPagination;

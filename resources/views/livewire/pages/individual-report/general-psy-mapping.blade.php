@@ -7,7 +7,7 @@
                 <h1
                     class="text-center text-lg font-bold uppercase tracking-wide
                            text-gray-900 dark:text-white italic">
-                    PSYCHOLOGY MAPPING
+                    GENERAL PSYCHOLOGY MAPPING
                 </h1>
                 <p
                     class="text-center text-sm font-semibold
@@ -39,11 +39,7 @@
 
             {{-- Adjustment Indicator --}}
             <div class="px-4 py-2 bg-gray-50 dark:bg-gray-700 border-b border-gray-300 dark:border-gray-600">
-                <x-adjustment-indicator
-                    :template-id="$participant->positionFormation->template_id"
-                    category-code="potensi"
-                    size="sm"
-                />
+                <x-adjustment-indicator :template-id="$participant->positionFormation->template_id" category-code="potensi" size="sm" />
             </div>
         @endif
 
@@ -165,7 +161,8 @@
                                     @endphp
                                     {{ $percentage }}%
                                 </td>
-                                <td class="border border-black px-3 py-2 text-center font-bold {{ $conclusionConfig[$aspect['conclusion_text']]['tailwindClass'] ?? 'bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-white' }}">
+                                <td
+                                    class="border border-black px-3 py-2 text-center font-bold {{ $conclusionConfig[$aspect['conclusion_text']]['tailwindClass'] ?? 'bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-white' }}">
                                     {{ $aspect['conclusion_text'] }}
                                 </td>
                             </tr>
@@ -192,7 +189,8 @@
                                    text-gray-900 dark:text-white">
                                 {{ number_format($totalGapRating, 2) }}</td>
                             <td class="border border-black px-3 py-2 bg-black"></td>
-                            <td class="border border-black px-3 py-2 text-center font-bold {{ $conclusionConfig[$overallConclusion]['tailwindClass'] ?? 'bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-white' }}" colspan="2">
+                            <td class="border border-black px-3 py-2 text-center font-bold {{ $conclusionConfig[$overallConclusion]['tailwindClass'] ?? 'bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-white' }}"
+                                colspan="2">
                                 {{ $overallConclusion }}
                             </td>
                         </tr>
@@ -218,7 +216,8 @@
                                 class="border border-black px-3 py-2 text-center
                                    text-gray-900 dark:text-white">
                                 {{ number_format($totalGapScore, 2) }}</td>
-                            <td class="border border-black px-3 py-2 text-center font-bold {{ $conclusionConfig[$overallConclusion]['tailwindClass'] ?? 'bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-white' }}" colspan="2">
+                            <td class="border border-black px-3 py-2 text-center font-bold {{ $conclusionConfig[$overallConclusion]['tailwindClass'] ?? 'bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-white' }}"
+                                colspan="2">
                                 {{ $overallConclusion }}
                             </td>
                         </tr>
@@ -266,16 +265,18 @@
                             <!-- Conclusion Card -->
                             @php
                                 $conclusionText = $rankingInfo['conclusion'];
-                                $borderClass = match($conclusionText) {
+                                $borderClass = match ($conclusionText) {
                                     'Di Atas Standar' => 'border-green-300 dark:border-green-600',
                                     'Memenuhi Standar' => 'border-yellow-300 dark:border-yellow-600',
                                     'Di Bawah Standar' => 'border-red-300 dark:border-red-600',
-                                    default => 'border-gray-300 dark:border-gray-600'
+                                    default => 'border-gray-300 dark:border-gray-600',
                                 };
                             @endphp
-                            <div class="bg-white dark:bg-gray-800 border-2 rounded-lg p-4 text-center {{ $borderClass }}">
+                            <div
+                                class="bg-white dark:bg-gray-800 border-2 rounded-lg p-4 text-center {{ $borderClass }}">
                                 <div class="text-sm text-gray-500 dark:text-gray-400 mb-2">Status</div>
-                                <div class="text-lg font-bold px-4 py-2 rounded-lg {{ $conclusionConfig[$conclusionText]['tailwindClass'] ?? 'bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-white' }}">
+                                <div
+                                    class="text-lg font-bold px-4 py-2 rounded-lg {{ $conclusionConfig[$conclusionText]['tailwindClass'] ?? 'bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-white' }}">
                                     {{ $rankingInfo['conclusion'] }}
                                 </div>
                             </div>
@@ -302,7 +303,7 @@
                 id="chart-rating-{{ $chartId }}">
                 <div class="text-center text-base font-bold mb-6 
                        text-gray-900 dark:text-white">
-                    Profil Potensi Spider Plot Chart (Rating)</div>
+                    Profil Potensi <i>Spider Plot Chart (Rating)</i></div>
                 <div class="flex justify-center text-sm gap-8 mb-8" id="rating-legend-{{ $chartId }}">
                     <!-- Dataset 0: Peserta - HIJAU -->
                     <span
@@ -362,7 +363,7 @@
                 <div
                     class="text-center text-base font-bold mb-6 
                        text-gray-900 dark:text-white">
-                    Profil Potensi Spider Plot Chart (Score)</div>
+                    Profil Potensi <i>Spider Plot Chart (Score)</i></div>
 
 
                 <!-- Legend Score - DARK MODE READY -->

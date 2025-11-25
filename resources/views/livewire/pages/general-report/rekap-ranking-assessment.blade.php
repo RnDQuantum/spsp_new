@@ -21,34 +21,34 @@
 
         <!-- Category Weight Editor -->
         @if ($this->selectedTemplate)
-        <div class="flex justify-center items-center gap-4 mt-3 px-6">
-            <div class="w-full max-w-md">
-                @livewire('components.category-weight-editor', [
-                'templateId' => $this->selectedTemplate->id,
-                'categoryCode1' => 'potensi',
-                'categoryCode2' => 'kompetensi',
-                ])
+            <div class="flex justify-center items-center gap-4 mt-3 px-6">
+                <div class="w-full max-w-md">
+                    @livewire('components.category-weight-editor', [
+                        'templateId' => $this->selectedTemplate->id,
+                        'categoryCode1' => 'potensi',
+                        'categoryCode2' => 'kompetensi',
+                    ])
+                </div>
             </div>
-        </div>
         @endif
     </div>
     <!-- Toleransi Section -->
     @php $summary = $this->getPassingSummary(); @endphp
     @livewire('components.tolerance-selector', [
-    'passing' => $summary['passing'],
-    'total' => $summary['total'],
-    'showSummary' => false,
+        'passing' => $summary['passing'],
+        'total' => $summary['total'],
+        'showSummary' => false,
     ])
 
     {{-- Adjustment Indicators --}}
-    @if($this->selectedTemplate)
-    <div
-        class="px-6 py-2 bg-gray-50 dark:bg-gray-700 border-b border-gray-300 dark:border-gray-600 flex flex-wrap gap-2">
-        <x-adjustment-indicator :template-id="$this->selectedTemplate->id" category-code="potensi" size="sm"
-            custom-label="Standar Potensi Disesuaikan" />
-        <x-adjustment-indicator :template-id="$this->selectedTemplate->id" category-code="kompetensi" size="sm"
-            custom-label="Standar Kompetensi Disesuaikan" />
-    </div>
+    @if ($this->selectedTemplate)
+        <div
+            class="px-6 py-2 bg-gray-50 dark:bg-gray-700 border-b border-gray-300 dark:border-gray-600 flex flex-wrap gap-2">
+            <x-adjustment-indicator :template-id="$this->selectedTemplate->id" category-code="potensi" size="sm"
+                custom-label="Standar Potensi Disesuaikan" />
+            <x-adjustment-indicator :template-id="$this->selectedTemplate->id" category-code="kompetensi" size="sm"
+                custom-label="Standar Kompetensi Disesuaikan" />
+        </div>
     @endif
 
     <!-- Enhanced Table Section -->
@@ -71,21 +71,21 @@
             </div>
 
             @if (isset($rows) && $rows)
-            <div class="text-sm text-gray-600 dark:text-gray-400">
-                Menampilkan
-                <span class="font-semibold text-gray-900 dark:text-gray-100">
-                    {{ $rows->firstItem() ?? 0 }}
-                </span>
-                -
-                <span class="font-semibold text-gray-900 dark:text-gray-100">
-                    {{ $rows->lastItem() ?? 0 }}
-                </span>
-                dari
-                <span class="font-semibold text-gray-900 dark:text-gray-100">
-                    {{ $rows->total() }}
-                </span>
-                data
-            </div>
+                <div class="text-sm text-gray-600 dark:text-gray-400">
+                    Menampilkan
+                    <span class="font-semibold text-gray-900 dark:text-gray-100">
+                        {{ $rows->firstItem() ?? 0 }}
+                    </span>
+                    -
+                    <span class="font-semibold text-gray-900 dark:text-gray-100">
+                        {{ $rows->lastItem() ?? 0 }}
+                    </span>
+                    dari
+                    <span class="font-semibold text-gray-900 dark:text-gray-100">
+                        {{ $rows->total() }}
+                    </span>
+                    data
+                </div>
             @endif
         </div>
 
@@ -113,247 +113,251 @@
                     </th>
                 </tr>
                 <tr class="bg-gray-300 dark:bg-gray-600">
-                    <th class="border-2 border-black dark:border-gray-500 px-2 py-2 text-center">PSYCHOLOGY</th>
-                    <th class="border-2 border-black dark:border-gray-500 px-2 py-2 text-center">KOMPETENSI MANAGERIAL
+                    <th class="border-2 border-black dark:border-gray-500 px-2 py-2 text-center italic">PSYCHOLOGY</th>
+                    <th class="border-2 border-black dark:border-gray-500 px-2 py-2 text-center italic">COMPETENCY
+                        MANAGERIAL
                     </th>
-                    <th class="border-2 border-black dark:border-gray-500 px-2 py-2 text-center">PSYCHOLOGY
+                    <th class="border-2 border-black dark:border-gray-500 px-2 py-2 text-center italic">PSYCHOLOGY
                         {{ $potensiWeight }}%</th>
-                    <th class="border-2 border-black dark:border-gray-500 px-2 py-2 text-center">KOMPETENSI MANAGERIAL
+                    <th class="border-2 border-black dark:border-gray-500 px-2 py-2 text-center italic">COMPETENCY
+                        MANAGERIAL
                         {{ $kompetensiWeight }}%</th>
                 </tr>
             </thead>
             <tbody>
                 @if (isset($rows) && $rows)
-                @foreach ($rows as $row)
-                <tr class="bg-white dark:bg-gray-800">
-                    <td class="border-2 border-black dark:border-gray-600 px-2 py-2 text-center">
-                        {{ $row['rank'] }}</td>
-                    <td class="border-2 border-black dark:border-gray-600 px-2 py-2">{{ $row['name'] }}</td>
-                    <td class="border-2 border-black dark:border-gray-600 px-2 py-2 text-center">
-                        {{ number_format($row['psy_individual'], 2) }}</td>
-                    <td class="border-2 border-black dark:border-gray-600 px-2 py-2 text-center">
-                        {{ number_format($row['mc_individual'], 2) }}</td>
-                    <td class="border-2 border-black dark:border-gray-600 px-2 py-2 text-center">
-                        {{ number_format($row['total_individual'], 2) }}</td>
-                    <td class="border-2 border-black dark:border-gray-600 px-2 py-2 text-center">
-                        {{ number_format($row['psy_weighted'], 2) }}</td>
-                    <td class="border-2 border-black dark:border-gray-600 px-2 py-2 text-center">
-                        {{ number_format($row['mc_weighted'], 2) }}</td>
-                    <td class="border-2 border-black dark:border-gray-600 px-2 py-2 text-center">
-                        {{ number_format($row['total_weighted_individual'], 2) }}</td>
-                    <td class="border-2 border-black dark:border-gray-600 px-2 py-2 text-center">
-                        {{ number_format($row['gap'], 2) }}</td>
-                    <td
-                        class="border-2 border-black dark:border-gray-600 px-2 py-2 text-center font-bold {{ $conclusionConfig[$row['conclusion']]['tailwindClass'] ?? 'bg-gray-600 text-white' }}">
-                        {{ $row['conclusion'] }}
-                    </td>
-                </tr>
-                @endforeach
+                    @foreach ($rows as $row)
+                        <tr class="bg-white dark:bg-gray-800">
+                            <td class="border-2 border-black dark:border-gray-600 px-2 py-2 text-center">
+                                {{ $row['rank'] }}</td>
+                            <td class="border-2 border-black dark:border-gray-600 px-2 py-2">{{ $row['name'] }}</td>
+                            <td class="border-2 border-black dark:border-gray-600 px-2 py-2 text-center">
+                                {{ number_format($row['psy_individual'], 2) }}</td>
+                            <td class="border-2 border-black dark:border-gray-600 px-2 py-2 text-center">
+                                {{ number_format($row['mc_individual'], 2) }}</td>
+                            <td class="border-2 border-black dark:border-gray-600 px-2 py-2 text-center">
+                                {{ number_format($row['total_individual'], 2) }}</td>
+                            <td class="border-2 border-black dark:border-gray-600 px-2 py-2 text-center">
+                                {{ number_format($row['psy_weighted'], 2) }}</td>
+                            <td class="border-2 border-black dark:border-gray-600 px-2 py-2 text-center">
+                                {{ number_format($row['mc_weighted'], 2) }}</td>
+                            <td class="border-2 border-black dark:border-gray-600 px-2 py-2 text-center">
+                                {{ number_format($row['total_weighted_individual'], 2) }}</td>
+                            <td class="border-2 border-black dark:border-gray-600 px-2 py-2 text-center">
+                                {{ number_format($row['gap'], 2) }}</td>
+                            <td
+                                class="border-2 border-black dark:border-gray-600 px-2 py-2 text-center font-bold {{ $conclusionConfig[$row['conclusion']]['tailwindClass'] ?? 'bg-gray-600 text-white' }}">
+                                {{ $row['conclusion'] }}
+                            </td>
+                        </tr>
+                    @endforeach
                 @endif
             </tbody>
         </table>
         @if (isset($rows) && $rows && $rows->hasPages())
-        <div class="mt-4">
-            {{ $rows->links(data: ['scrollTo' => false]) }}
-        </div>
+            <div class="mt-4">
+                {{ $rows->links(data: ['scrollTo' => false]) }}
+            </div>
         @endif
     </div>
 
     <!-- Standard & Threshold Info Box -->
     @if ($standardInfo)
-    <div class="px-6 pb-6 bg-white dark:bg-gray-900">
-        <div class="bg-white dark:bg-gray-800 rounded-lg p-3">
-            <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2">
-                <svg class="w-5 h-5 text-gray-900 dark:text-gray-100" fill="none" stroke="currentColor"
-                    viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z">
-                    </path>
-                </svg>
-                Informasi Standar
-            </h3>
+        <div class="px-6 pb-6 bg-white dark:bg-gray-900">
+            <div class="bg-white dark:bg-gray-800 rounded-lg p-3">
+                <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-gray-900 dark:text-gray-100" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z">
+                        </path>
+                    </svg>
+                    Informasi Standar
+                </h3>
 
-            <div x-data="{ tolerance: $wire.entangle('tolerancePercentage') }"
-                class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div x-data="{ tolerance: $wire.entangle('tolerancePercentage') }" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-                <!-- Left Column: STANDAR -->
-                <div class="space-y-3">
-                    <h4 class="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wide mb-3">
-                        Standar
-                    </h4>
+                    <!-- Left Column: STANDAR -->
+                    <div class="space-y-3">
+                        <h4 class="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wide mb-3">
+                            Standar
+                        </h4>
 
-                    <!-- Psychology Standard -->
-                    <div class="bg-white dark:bg-gray-800 border-1 border-gray-400 dark:border-gray-300 rounded-lg p-3">
-                        <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Psychology</div>
-                        <div class="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                            {{ number_format($standardInfo['psy_original_standard'], 2) }}
+                        <!-- Psychology Standard -->
+                        <div
+                            class="bg-white dark:bg-gray-800 border-1 border-gray-400 dark:border-gray-300 rounded-lg p-3">
+                            <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Psychology</div>
+                            <div class="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                                {{ number_format($standardInfo['psy_original_standard'], 2) }}
+                            </div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                                Bobot {{ $potensiWeight }}% = <span
+                                    class="font-semibold text-gray-900 dark:text-gray-100">{{ number_format(($standardInfo['psy_original_standard'] * $potensiWeight) / 100, 2) }}</span>
+                            </div>
                         </div>
-                        <div class="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                            Bobot {{ $potensiWeight }}% = <span
-                                class="font-semibold text-gray-900 dark:text-gray-100">{{
-                                number_format(($standardInfo['psy_original_standard'] * $potensiWeight) / 100, 2)
-                                }}</span>
+
+                        <!-- Kompetensi Standard -->
+                        <div
+                            class="bg-white dark:bg-gray-800 border-1 border-gray-400 dark:border-gray-300 rounded-lg p-3">
+                            <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Kompetensi</div>
+                            <div class="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                                {{ number_format($standardInfo['mc_original_standard'], 2) }}
+                            </div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                                Bobot {{ $kompetensiWeight }}% = <span
+                                    class="font-semibold text-gray-900 dark:text-gray-100">{{ number_format(($standardInfo['mc_original_standard'] * $kompetensiWeight) / 100, 2) }}</span>
+                            </div>
+                        </div>
+
+                        <!-- Total Standard -->
+                        <div
+                            class="bg-white dark:bg-gray-800 border-1 border-gray-400 dark:border-gray-300 rounded-lg p-3">
+                            <div class="text-xs text-gray-600 dark:text-gray-300 mb-1 font-semibold">TOTAL STANDAR
+                            </div>
+                            <div class="text-3xl font-bold text-gray-900 dark:text-gray-100">
+                                {{ number_format($standardInfo['total_original_standard'], 2) }}
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Kompetensi Standard -->
-                    <div class="bg-white dark:bg-gray-800 border-1 border-gray-400 dark:border-gray-300 rounded-lg p-3">
-                        <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Kompetensi</div>
-                        <div class="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                            {{ number_format($standardInfo['mc_original_standard'], 2) }}
-                        </div>
-                        <div class="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                            Bobot {{ $kompetensiWeight }}% = <span
-                                class="font-semibold text-gray-900 dark:text-gray-100">{{
-                                number_format(($standardInfo['mc_original_standard'] * $kompetensiWeight) / 100, 2)
-                                }}</span>
-                        </div>
-                    </div>
+                    <!-- Right Column: STANDAR ADJUSTED - Only show if tolerance > 0 -->
+                    <div x-show="tolerance > 0" x-transition:enter="transition ease-out duration-300"
+                        x-transition:enter-start="opacity-0 transform scale-95"
+                        x-transition:enter-end="opacity-100 transform scale-100"
+                        x-transition:leave="transition ease-in duration-200"
+                        x-transition:leave-start="opacity-100 transform scale-100"
+                        x-transition:leave-end="opacity-0 transform scale-95" class="space-y-3">
+                        <h4 class="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wide mb-3">
+                            Standar yang diberi toleransi
+                            <span x-text="tolerance > 0 ? '(' + tolerance + '%)' : ''"
+                                class="text-gray-900 dark:text-gray-100"></span>
+                        </h4>
 
-                    <!-- Total Standard -->
-                    <div class="bg-white dark:bg-gray-800 border-1 border-gray-400 dark:border-gray-300 rounded-lg p-3">
-                        <div class="text-xs text-gray-600 dark:text-gray-300 mb-1 font-semibold">TOTAL STANDAR
+                        <!-- Psychology Adjusted -->
+                        <div
+                            class="bg-white dark:bg-gray-800 border-1 border-gray-400 dark:border-gray-300 rounded-lg p-3">
+                            <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Psychology</div>
+                            <div class="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                                {{ number_format($standardInfo['psy_adjusted_standard'], 2) }}
+                            </div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                                Bobot {{ $potensiWeight }}% = <span
+                                    class="font-semibold text-gray-900 dark:text-gray-100">{{ number_format($standardInfo['psy_standard'], 2) }}</span>
+                            </div>
                         </div>
-                        <div class="text-3xl font-bold text-gray-900 dark:text-gray-100">
-                            {{ number_format($standardInfo['total_original_standard'], 2) }}
-                        </div>
-                    </div>
-                </div>
 
-                <!-- Right Column: STANDAR ADJUSTED - Only show if tolerance > 0 -->
-                <div x-show="tolerance > 0" x-transition:enter="transition ease-out duration-300"
-                    x-transition:enter-start="opacity-0 transform scale-95"
-                    x-transition:enter-end="opacity-100 transform scale-100"
-                    x-transition:leave="transition ease-in duration-200"
-                    x-transition:leave-start="opacity-100 transform scale-100"
-                    x-transition:leave-end="opacity-0 transform scale-95" class="space-y-3">
-                    <h4 class="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wide mb-3">
-                        Standar yang diberi toleransi
-                        <span x-text="tolerance > 0 ? '(' + tolerance + '%)' : ''"
-                            class="text-gray-900 dark:text-gray-100"></span>
-                    </h4>
+                        <!-- Kompetensi Adjusted -->
+                        <div
+                            class="bg-white dark:bg-gray-800 border-1 border-gray-400 dark:border-gray-300 rounded-lg p-3">
+                            <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Kompetensi</div>
+                            <div class="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                                {{ number_format($standardInfo['mc_adjusted_standard'], 2) }}
+                            </div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                                Bobot {{ $kompetensiWeight }}% = <span
+                                    class="font-semibold text-gray-900 dark:text-gray-100">{{ number_format($standardInfo['mc_standard'], 2) }}</span>
+                            </div>
+                        </div>
 
-                    <!-- Psychology Adjusted -->
-                    <div class="bg-white dark:bg-gray-800 border-1 border-gray-400 dark:border-gray-300 rounded-lg p-3">
-                        <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Psychology</div>
-                        <div class="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                            {{ number_format($standardInfo['psy_adjusted_standard'], 2) }}
-                        </div>
-                        <div class="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                            Bobot {{ $potensiWeight }}% = <span
-                                class="font-semibold text-gray-900 dark:text-gray-100">{{
-                                number_format($standardInfo['psy_standard'], 2) }}</span>
-                        </div>
-                    </div>
-
-                    <!-- Kompetensi Adjusted -->
-                    <div class="bg-white dark:bg-gray-800 border-1 border-gray-400 dark:border-gray-300 rounded-lg p-3">
-                        <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Kompetensi</div>
-                        <div class="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                            {{ number_format($standardInfo['mc_adjusted_standard'], 2) }}
-                        </div>
-                        <div class="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                            Bobot {{ $kompetensiWeight }}% = <span
-                                class="font-semibold text-gray-900 dark:text-gray-100">{{
-                                number_format($standardInfo['mc_standard'], 2) }}</span>
-                        </div>
-                    </div>
-
-                    <!-- Total Adjusted -->
-                    <div class="bg-white dark:bg-gray-800 border-1 border-gray-400 dark:border-gray-300 rounded-lg p-3">
-                        <div class="text-xs text-gray-600 dark:text-gray-300 mb-1 font-semibold">TOTAL STANDAR
-                            YANG DIBERI TOLERANSI</div>
-                        <div class="text-3xl font-bold text-gray-900 dark:text-gray-100">
-                            {{ number_format($standardInfo['total_standard'], 2) }}
+                        <!-- Total Adjusted -->
+                        <div
+                            class="bg-white dark:bg-gray-800 border-1 border-gray-400 dark:border-gray-300 rounded-lg p-3">
+                            <div class="text-xs text-gray-600 dark:text-gray-300 mb-1 font-semibold">TOTAL STANDAR
+                                YANG DIBERI TOLERANSI</div>
+                            <div class="text-3xl font-bold text-gray-900 dark:text-gray-100">
+                                {{ number_format($standardInfo['total_standard'], 2) }}
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
     @endif
 
     <!-- Summary Statistics Section -->
     @if (!empty($conclusionSummary))
-    <div class="px-6 pb-6 bg-gray-50 dark:bg-gray-800 border-t-2 border-black dark:border-gray-600">
-        <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4 mt-4">Ringkasan Kesimpulan</h3>
+        <div class="px-6 pb-6 bg-gray-50 dark:bg-gray-800 border-t-2 border-black dark:border-gray-600">
+            <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4 mt-4">Ringkasan Kesimpulan</h3>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-            @foreach ($conclusionSummary as $conclusion => $count)
-            @php
-            $totalParticipants = array_sum($conclusionSummary);
-            $percentage = $totalParticipants > 0 ? round(($count / $totalParticipants) * 100, 1) : 0;
-            $tailwindClass = $conclusionConfig[$conclusion]['tailwindClass'] ?? 'bg-gray-100 border-gray-300
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                @foreach ($conclusionSummary as $conclusion => $count)
+                    @php
+                        $totalParticipants = array_sum($conclusionSummary);
+                        $percentage = $totalParticipants > 0 ? round(($count / $totalParticipants) * 100, 1) : 0;
+                        $tailwindClass =
+                            $conclusionConfig[$conclusion]['tailwindClass'] ??
+                            'bg-gray-100 border-gray-300
             text-gray-800';
+                    @endphp
+
+                    <div class="border-2 border-none rounded-lg p-4 text-center {{ $tailwindClass }}">
+                        <div class="text-3xl font-bold">{{ $count }}</div>
+                        <div class="text-sm mb-2">{{ $percentage }}%</div>
+                        <div class="text-sm font-semibold leading-tight mb-2">
+                            {{ $conclusion }}
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+
+            <!-- Overall Statistics -->
+            @php
+                $totalParticipants = array_sum($conclusionSummary);
+                $passingCount =
+                    ($conclusionSummary['Di Atas Standar'] ?? 0) + ($conclusionSummary['Memenuhi Standar'] ?? 0);
+                $passingPercentage = $totalParticipants > 0 ? round(($passingCount / $totalParticipants) * 100, 1) : 0;
             @endphp
 
-            <div class="border-2 border-none rounded-lg p-4 text-center {{ $tailwindClass }}">
-                <div class="text-3xl font-bold">{{ $count }}</div>
-                <div class="text-sm mb-2">{{ $percentage }}%</div>
-                <div class="text-sm font-semibold leading-tight mb-2">
-                    {{ $conclusion }}
-                </div>
-            </div>
-            @endforeach
-        </div>
-
-        <!-- Overall Statistics -->
-        @php
-        $totalParticipants = array_sum($conclusionSummary);
-        $passingCount =
-        ($conclusionSummary['Di Atas Standar'] ?? 0) + ($conclusionSummary['Memenuhi Standar'] ?? 0);
-        $passingPercentage = $totalParticipants > 0 ? round(($passingCount / $totalParticipants) * 100, 1) : 0;
-        @endphp
-
-        <div class="bg-white dark:bg-gray-800 border-2 border-black dark:border-gray-600 rounded-lg p-4">
-            <div class="grid grid-cols-3 gap-4 text-center">
-                <div>
-                    <div class="text-lg font-bold text-gray-900 dark:text-gray-100">{{ $totalParticipants }}</div>
-                    <div class="text-sm text-gray-600 dark:text-gray-400">Total Peserta</div>
-                </div>
-                <div>
-                    <div class="text-lg font-bold text-gray-900 dark:text-gray-100">{{ $passingCount }}</div>
-                    <div class="text-sm text-gray-600 dark:text-gray-400">Lulus</div>
-                </div>
-                <div>
-                    <div class="text-lg font-bold text-gray-900 dark:text-gray-100">{{ $passingPercentage }}%
+            <div class="bg-white dark:bg-gray-800 border-2 border-black dark:border-gray-600 rounded-lg p-4">
+                <div class="grid grid-cols-3 gap-4 text-center">
+                    <div>
+                        <div class="text-lg font-bold text-gray-900 dark:text-gray-100">{{ $totalParticipants }}</div>
+                        <div class="text-sm text-gray-600 dark:text-gray-400">Total Peserta</div>
                     </div>
-                    <div class="text-sm text-gray-600 dark:text-gray-400">Tingkat Kelulusan</div>
+                    <div>
+                        <div class="text-lg font-bold text-gray-900 dark:text-gray-100">{{ $passingCount }}</div>
+                        <div class="text-sm text-gray-600 dark:text-gray-400">Lulus</div>
+                    </div>
+                    <div>
+                        <div class="text-lg font-bold text-gray-900 dark:text-gray-100">{{ $passingPercentage }}%
+                        </div>
+                        <div class="text-sm text-gray-600 dark:text-gray-400">Tingkat Kelulusan</div>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Keterangan Rentang Nilai -->
-        <div class="mt-4 bg-gray-200 border dark:bg-gray-700 dark:border-gray-400 border-gray-600 rounded-lg p-3">
-            <div class="text-sm text-black dark:text-white ">
-                {{-- <strong>Keterangan:</strong> Kesimpulan berdasarkan Gap (Individual Score - Standard)
+            <!-- Keterangan Rentang Nilai -->
+            <div class="mt-4 bg-gray-200 border dark:bg-gray-700 dark:border-gray-400 border-gray-600 rounded-lg p-3">
+                <div class="text-sm text-black dark:text-white ">
+                    {{-- <strong>Keterangan:</strong> Kesimpulan berdasarkan Gap (Individual Score - Standard)
                 <span x-data
                     x-text="$wire.tolerancePercentage > 0 ? 'dengan toleransi ' + $wire.tolerancePercentage + '%' : 'tanpa toleransi'"></span>.
                 <br> --}}
-                <ul class="list-disc ml-6 mt-1 space-y-2">
-                    <li><strong class="bg-green-600 text-white px-2 py-0.5 rounded">Di Atas Standar</strong> : Skor
-                        Individu ≥ Skor Standar</li>
-                    <li><strong class="bg-yellow-400 text-gray-900 px-2 py-0.5 rounded">Memenuhi Standar</strong> : Skor
-                        Individu ≥ Skor Standar yang telah diberi toleransi</li>
-                    <li><strong class="bg-red-600 text-white px-2 py-0.5 rounded">Di Bawah Standar</strong> : Skor
-                        Individu < Skor Standar maupun Skor Standar yang telah diberi toleransi</li>
-                </ul>
+                    <ul class="list-disc ml-6 mt-1 space-y-2">
+                        <li><strong class="bg-green-600 text-white px-2 py-0.5 rounded">Di Atas Standar</strong> : Skor
+                            Individu ≥ Skor Standar</li>
+                        <li><strong class="bg-yellow-400 text-gray-900 px-2 py-0.5 rounded">Memenuhi Standar</strong> :
+                            Skor
+                            Individu ≥ Skor Standar yang telah diberi toleransi</li>
+                        <li><strong class="bg-red-600 text-white px-2 py-0.5 rounded">Di Bawah Standar</strong> : Skor
+                            Individu < Skor Standar maupun Skor Standar yang telah diberi toleransi</li>
+                    </ul>
+                </div>
             </div>
         </div>
-    </div>
     @endif
 
     <!-- Pie Chart Section -->
     @if (!empty($conclusionSummary))
-    <div class="mt-8 border-t-2 border-black dark:border-gray-600 pt-6 bg-white dark:bg-gray-900">
-        <div class="px-6 pb-6">
-            <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100 mb-6 text-center">Capacity Building Rekap
-                Assessment</h3>
+        <div class="mt-8 border-t-2 border-black dark:border-gray-600 pt-6 bg-white dark:bg-gray-900">
+            <div class="px-6 pb-6">
+                <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100 mb-6 text-center">Capacity Building Rekap
+                    Assessment</h3>
 
-            <!-- Content Grid -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-                <!-- Chart Section -->
-                <div x-data="{
+                <!-- Content Grid -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                    <!-- Chart Section -->
+                    <div x-data="{
                         refreshChart() {
                             const labels = @js($chartLabels);
                             const data = @js($chartData);
@@ -363,66 +367,71 @@
                             }
                         }
                     }" x-init="$nextTick(() => refreshChart())"
-                    class="border border-gray-300 dark:border-gray-600 p-2 rounded-lg bg-gray-50 dark:bg-gray-800 transition-shadow duration-300 hover:shadow-xl">
-                    <div wire:ignore>
-                        <canvas id="conclusionPieChart" class="w-full h-full"></canvas>
+                        class="border border-gray-300 dark:border-gray-600 p-2 rounded-lg bg-gray-50 dark:bg-gray-800 transition-shadow duration-300 hover:shadow-xl">
+                        <div wire:ignore>
+                            <canvas id="conclusionPieChart" class="w-full h-full"></canvas>
+                        </div>
                     </div>
-                </div>
 
-                <!-- Table Section -->
-                <div class="rounded-md overflow-hidden">
-                    <table class="w-full text-sm text-gray-900 dark:text-gray-100">
-                        <thead>
-                            <tr class="bg-gray-200 dark:bg-gray-700">
-                                <th
-                                    class="border-2 border-gray-400 dark:border-gray-500 px-4 py-3 text-center font-bold">
-                                    KETERANGAN
-                                </th>
-                                <th
-                                    class="border-2 border-gray-400 dark:border-gray-500 px-4 py-3 text-center font-bold">
-                                    JUMLAH
-                                </th>
-                                <th
-                                    class="border-2 border-gray-400 dark:border-gray-500 px-4 py-3 text-center font-bold">
-                                    PERSENTASE
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white dark:bg-gray-800">
-                            @foreach ($conclusionSummary as $conclusion => $count)
-                            @php
-                            $percentage = $totalParticipants > 0 ? round(($count / $totalParticipants) * 100, 2) : 0;
-                            $tailwindClass = $conclusionConfig[$conclusion]['tailwindClass'] ?? 'bg-gray-100
+                    <!-- Table Section -->
+                    <div class="rounded-md overflow-hidden">
+                        <table class="w-full text-sm text-gray-900 dark:text-gray-100">
+                            <thead>
+                                <tr class="bg-gray-200 dark:bg-gray-700">
+                                    <th
+                                        class="border-2 border-gray-400 dark:border-gray-500 px-4 py-3 text-center font-bold">
+                                        KETERANGAN
+                                    </th>
+                                    <th
+                                        class="border-2 border-gray-400 dark:border-gray-500 px-4 py-3 text-center font-bold">
+                                        JUMLAH
+                                    </th>
+                                    <th
+                                        class="border-2 border-gray-400 dark:border-gray-500 px-4 py-3 text-center font-bold">
+                                        PERSENTASE
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white dark:bg-gray-800">
+                                @foreach ($conclusionSummary as $conclusion => $count)
+                                    @php
+                                        $percentage =
+                                            $totalParticipants > 0 ? round(($count / $totalParticipants) * 100, 2) : 0;
+                                        $tailwindClass =
+                                            $conclusionConfig[$conclusion]['tailwindClass'] ??
+                                            'bg-gray-100
                             text-gray-800';
-                            @endphp
-                            <tr>
-                                <td
-                                    class="border-2 border-gray-400 dark:border-gray-500 px-4 py-3 font-bold {{ $tailwindClass }}">
-                                    {{ $conclusion }}
-                                </td>
-                                <td class="border-2 border-gray-400 dark:border-gray-500 px-4 py-3 text-center">
-                                    {{ $count }}
-                                    orang
-                                </td>
-                                <td class="border-2 border-gray-400 dark:border-gray-500 px-4 py-3 text-center">
-                                    {{ $percentage }}%
-                                </td>
-                            </tr>
-                            @endforeach
-                            <tr class="bg-gray-100 dark:bg-gray-700 font-semibold">
-                                <td class="border-2 border-gray-400 dark:border-gray-500 px-4 py-3">Jumlah
-                                    Responden</td>
-                                <td class="border-2 border-gray-400 dark:border-gray-500 px-4 py-3 text-center">
-                                    {{ $totalParticipants }} orang</td>
-                                <td class="border-2 border-gray-400 dark:border-gray-500 px-4 py-3 text-center">
-                                    100.00%</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                                    @endphp
+                                    <tr>
+                                        <td
+                                            class="border-2 border-gray-400 dark:border-gray-500 px-4 py-3 font-bold {{ $tailwindClass }}">
+                                            {{ $conclusion }}
+                                        </td>
+                                        <td
+                                            class="border-2 border-gray-400 dark:border-gray-500 px-4 py-3 text-center">
+                                            {{ $count }}
+                                            orang
+                                        </td>
+                                        <td
+                                            class="border-2 border-gray-400 dark:border-gray-500 px-4 py-3 text-center">
+                                            {{ $percentage }}%
+                                        </td>
+                                    </tr>
+                                @endforeach
+                                <tr class="bg-gray-100 dark:bg-gray-700 font-semibold">
+                                    <td class="border-2 border-gray-400 dark:border-gray-500 px-4 py-3">Jumlah
+                                        Responden</td>
+                                    <td class="border-2 border-gray-400 dark:border-gray-500 px-4 py-3 text-center">
+                                        {{ $totalParticipants }} orang</td>
+                                    <td class="border-2 border-gray-400 dark:border-gray-500 px-4 py-3 text-center">
+                                        100.00%</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
     @endif
 </div>
 
