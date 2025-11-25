@@ -733,7 +733,8 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                         const individualScores = @js($chartIndividualScores);
                         const participantName = @js($participant->name);
                         const tolerancePercentage = @js($tolerancePercentage);
-                        const maxScore = Math.max(...originalStandardScores, ...individualScores, ...standardScores) * 1.2;
+                        const rawMaxScore = Math.max(...originalStandardScores, ...individualScores, ...standardScores) * 1.2;
+                        const maxScore = Math.ceil(rawMaxScore / 20) * 20;
 
                         const canvas = document.getElementById('spiderScoreChart-{{ $chartId }}');
                         if (!canvas) return;
@@ -860,7 +861,10 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                                             },
                                             backdropColor: colors.tickBg,
                                             showLabelBackdrop: false,
-                                            z: 2 // Tambahkan z-index
+                                            z: 2,
+                                            callback: function(value) {
+                                                return Number.isInteger(value) ? value : null;
+                                            }
                                         },
                                         pointLabels: {
                                             font: {
