@@ -8,7 +8,7 @@ use Illuminate\Support\Collection;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
-#[Layout('components.layouts.app', ['title' => 'Custom Standards'])]
+#[Layout('components.layouts.app', ['title' => 'Standar Khusus'])]
 class Index extends Component
 {
     public Collection $customStandards;
