@@ -39,13 +39,44 @@ class DynamicStandardService
     // ========================================
 
     /**
-     * Get original value from database
+     * Get original value - prioritizes Custom Standard if selected, otherwise Quantum Default
+     * This ensures session adjustments are compared against the correct baseline
      *
      * @param  string  $type  'category_weight', 'aspect_weight', 'aspect_rating', 'sub_aspect_rating', 'aspect_active', 'sub_aspect_active'
      * @return mixed
      */
     private function getOriginalValue(string $type, int $templateId, string $code)
     {
+        // Check if custom standard is selected
+        $customStandardId = Session::get("selected_standard.{$templateId}");
+
+        if ($customStandardId) {
+            $customStandard = CustomStandard::find($customStandardId);
+
+            if ($customStandard) {
+                // Return value from Custom Standard if it exists
+                $value = match ($type) {
+                    'category_weight' => $customStandard->category_weights[$code] ?? null,
+                    'aspect_weight' => $customStandard->aspect_configs[$code]['weight'] ?? null,
+                    'aspect_rating' => isset($customStandard->aspect_configs[$code]['rating'])
+                        ? (float) $customStandard->aspect_configs[$code]['rating']
+                        : null,
+                    'sub_aspect_rating' => isset($customStandard->sub_aspect_configs[$code]['rating'])
+                        ? (int) $customStandard->sub_aspect_configs[$code]['rating']
+                        : null,
+                    'aspect_active' => $customStandard->aspect_configs[$code]['active'] ?? null,
+                    'sub_aspect_active' => $customStandard->sub_aspect_configs[$code]['active'] ?? null,
+                    default => null,
+                };
+
+                // If custom standard has this value, use it as baseline
+                if ($value !== null) {
+                    return $value;
+                }
+            }
+        }
+
+        // Fallback to Quantum default from database
         return match ($type) {
             'category_weight' => $this->getOriginalCategoryWeight($templateId, $code),
             'aspect_weight' => $this->getOriginalAspectWeight($templateId, $code),
