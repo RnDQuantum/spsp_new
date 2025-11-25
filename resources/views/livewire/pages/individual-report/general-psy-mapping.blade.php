@@ -36,6 +36,15 @@
                 'passing' => $summary['passing'],
                 'total' => $summary['total'],
             ])
+
+            {{-- Adjustment Indicator --}}
+            <div class="px-4 py-2 bg-gray-50 dark:bg-gray-700 border-b border-gray-300 dark:border-gray-600">
+                <x-adjustment-indicator
+                    :template-id="$participant->positionFormation->template_id"
+                    category-code="potensi"
+                    size="sm"
+                />
+            </div>
         @endif
 
         @if ($showTable)
