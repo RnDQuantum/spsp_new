@@ -20,17 +20,12 @@
 
     {{-- Adjustment Indicators --}}
     @if($selectedTemplate)
-    <div class="mb-4 flex flex-wrap gap-2">
-        <x-adjustment-indicator
-            :template-id="$selectedTemplate->id"
-            category-code="potensi"
-            size="sm"
-        />
-        <x-adjustment-indicator
-            :template-id="$selectedTemplate->id"
-            category-code="kompetensi"
-            size="sm"
-        />
+    <div
+        class="px-4 py-2 bg-gray-50 dark:bg-gray-700 border-b border-gray-300 dark:border-gray-600 flex flex-wrap gap-2">
+        <x-adjustment-indicator :template-id="$selectedTemplate->id" category-code="potensi" size="sm"
+            custom-label="Standar Potensi Disesuaikan" />
+        <x-adjustment-indicator :template-id="$selectedTemplate->id" category-code="kompetensi" size="sm"
+            custom-label="Standar Kompetensi Disesuaikan" />
     </div>
     @endif
 

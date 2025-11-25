@@ -20,6 +20,8 @@ class Statistic extends Component
 
     public float $averageRating = 0.0;
 
+    public ?object $selectedTemplate = null;
+
     public string $chartId = '';
 
     protected $listeners = [
@@ -32,7 +34,7 @@ class Statistic extends Component
 
     public function mount(): void
     {
-        $this->chartId = 'statistic'.uniqid();
+        $this->chartId = 'statistic' . uniqid();
 
         // Load aspect from session if available
         $this->aspectId = session('filter.aspect_id');
@@ -86,10 +88,13 @@ class Statistic extends Component
         }
 
         // Get position to access template_id
-        $position = $event->positionFormations()->find($positionFormationId);
+        $position = $event->positionFormations()->with('template')->find($positionFormationId);
         if (! $position || ! $position->template_id) {
+            $this->selectedTemplate = null;
             return;
         }
+
+        $this->selectedTemplate = $position->template;
 
         // Use StatisticService to get distribution data
         $service = app(StatisticService::class);
