@@ -27,6 +27,7 @@ class Statistic extends Component
         'position-selected' => 'handlePositionSelected',
         'aspect-selected' => 'handleAspectSelected',
         'standard-adjusted' => 'handleStandardUpdate',
+        'standard-switched' => 'handleStandardUpdate',
     ];
 
     public function mount(): void

@@ -57,6 +57,7 @@ class TrainingRecommendation extends Component
         'aspect-selected' => 'handleAspectSelected',
         'tolerance-updated' => 'handleToleranceUpdate',
         'standard-adjusted' => 'handleStandardUpdate',
+        'standard-switched' => 'handleStandardUpdate',
     ];
 
     public function mount(): void
