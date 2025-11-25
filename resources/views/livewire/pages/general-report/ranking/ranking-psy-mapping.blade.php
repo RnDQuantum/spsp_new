@@ -161,12 +161,11 @@
                     </path>
                 </svg>
                 Informasi Standar
-                <span x-data
-                    x-text="$wire.tolerancePercentage > 0 ? '(Toleransi -' + $wire.tolerancePercentage + '%)' : '(Tanpa Toleransi)'"
-                    class="text-sm font-normal text-black dark:text-gray-200"></span>
             </h3>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div x-data="{ tolerance: $wire.entangle('tolerancePercentage') }"
+                class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
                 <!-- Original Standard -->
                 <div class="bg-white dark:bg-gray-800 border-1 border-gray-400 dark:border-gray-300 rounded-lg p-3">
                     <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Standar</div>
@@ -174,11 +173,16 @@
                         {{ number_format($standardInfo['original_standard'], 2) }}</div>
                 </div>
 
-                <!-- Adjusted Standard -->
-                <div class="bg-white dark:bg-gray-800 border-1 border-gray-400 dark:border-gray-300 rounded-lg p-3">
+                <!-- Adjusted Standard - Only show if tolerance > 0 -->
+                <div x-show="tolerance > 0" x-transition:enter="transition ease-out duration-300"
+                    x-transition:enter-start="opacity-0 transform scale-95"
+                    x-transition:enter-end="opacity-100 transform scale-100"
+                    x-transition:leave="transition ease-in duration-200"
+                    x-transition:leave-start="opacity-100 transform scale-100"
+                    x-transition:leave-end="opacity-0 transform scale-95"
+                    class="bg-white dark:bg-gray-800 border-1 border-gray-400 dark:border-gray-300 rounded-lg p-3">
                     <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Standar yang diberi toleransi
-                        <span x-data
-                            x-text="$wire.tolerancePercentage > 0 ? '(-' + $wire.tolerancePercentage + '%)' : ''"></span>
+                        <span x-text="tolerance > 0 ? '(' + tolerance + '%)' : ''"></span>
                     </div>
                     <div class="text-2xl font-bold text-gray-900 dark:text-gray-100">
                         {{ number_format($standardInfo['adjusted_standard'], 2) }}</div>

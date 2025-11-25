@@ -160,16 +160,15 @@
                     </path>
                 </svg>
                 Informasi Standar
-                <span x-data
-                    x-text="$wire.tolerancePercentage > 0 ? '(Toleransi -' + $wire.tolerancePercentage + '%)' : '(Tanpa Toleransi)'"
-                    class="text-sm font-normal text-gray-900 dark:text-gray-100"></span>
             </h3>
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div x-data="{ tolerance: $wire.entangle('tolerancePercentage') }"
+                class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
                 <!-- Left Column: STANDAR -->
                 <div class="space-y-3">
                     <h4 class="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wide mb-3">
-                        Standar (Tanpa Toleransi)
+                        Standar
                     </h4>
 
                     <!-- Psychology Standard -->
@@ -210,12 +209,18 @@
                     </div>
                 </div>
 
-                <!-- Right Column: STANDAR ADJUSTED -->
-                <div class="space-y-3">
+                <!-- Right Column: STANDAR ADJUSTED - Only show if tolerance > 0 -->
+                <div x-show="tolerance > 0"
+                    x-transition:enter="transition ease-out duration-300"
+                    x-transition:enter-start="opacity-0 transform scale-95"
+                    x-transition:enter-end="opacity-100 transform scale-100"
+                    x-transition:leave="transition ease-in duration-200"
+                    x-transition:leave-start="opacity-100 transform scale-100"
+                    x-transition:leave-end="opacity-0 transform scale-95"
+                    class="space-y-3">
                     <h4 class="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wide mb-3">
-                        Standar Adjusted
-                        <span x-data
-                            x-text="$wire.tolerancePercentage > 0 ? '(Toleransi -' + $wire.tolerancePercentage + '%)' : ''"
+                        Standar yang diberi toleransi
+                        <span x-text="tolerance > 0 ? '(' + tolerance + '%)' : ''"
                             class="text-gray-900 dark:text-gray-100"></span>
                     </h4>
 
@@ -248,7 +253,7 @@
                     <!-- Total Adjusted -->
                     <div class="bg-white dark:bg-gray-800 border-1 border-gray-400 dark:border-gray-300 rounded-lg p-3">
                         <div class="text-xs text-gray-600 dark:text-gray-300 mb-1 font-semibold">TOTAL STANDAR
-                            ADJUSTED</div>
+                            YANG DIBERI TOLERANSI</div>
                         <div class="text-3xl font-bold text-gray-900 dark:text-gray-100">
                             {{ number_format($standardInfo['total_standard'], 2) }}
                         </div>
