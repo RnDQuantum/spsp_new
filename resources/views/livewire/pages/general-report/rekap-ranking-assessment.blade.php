@@ -162,7 +162,7 @@
     </div>
 
     <!-- Standard & Threshold Info Box -->
-    @if ($standardInfo)
+    {{-- @if ($standardInfo)
         <div class="px-6 pb-6 bg-white dark:bg-gray-900">
             <div class="bg-white dark:bg-gray-800 rounded-lg p-3">
                 <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2">
@@ -186,7 +186,7 @@
                         <!-- Psychology Standard -->
                         <div
                             class="bg-white dark:bg-gray-800 border-1 border-gray-400 dark:border-gray-300 rounded-lg p-3">
-                            <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Psychology</div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400 mb-1 italic">Psychology</div>
                             <div class="text-2xl font-bold text-gray-900 dark:text-gray-100">
                                 {{ number_format($standardInfo['psy_original_standard'], 2) }}
                             </div>
@@ -199,7 +199,7 @@
                         <!-- Kompetensi Standard -->
                         <div
                             class="bg-white dark:bg-gray-800 border-1 border-gray-400 dark:border-gray-300 rounded-lg p-3">
-                            <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Kompetensi</div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400 mb-1 italic">Competency</div>
                             <div class="text-2xl font-bold text-gray-900 dark:text-gray-100">
                                 {{ number_format($standardInfo['mc_original_standard'], 2) }}
                             </div>
@@ -236,7 +236,7 @@
                         <!-- Psychology Adjusted -->
                         <div
                             class="bg-white dark:bg-gray-800 border-1 border-gray-400 dark:border-gray-300 rounded-lg p-3">
-                            <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Psychology</div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400 mb-1 italic">Psychology</div>
                             <div class="text-2xl font-bold text-gray-900 dark:text-gray-100">
                                 {{ number_format($standardInfo['psy_adjusted_standard'], 2) }}
                             </div>
@@ -249,7 +249,7 @@
                         <!-- Kompetensi Adjusted -->
                         <div
                             class="bg-white dark:bg-gray-800 border-1 border-gray-400 dark:border-gray-300 rounded-lg p-3">
-                            <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Kompetensi</div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400 mb-1 italic">Competency</div>
                             <div class="text-2xl font-bold text-gray-900 dark:text-gray-100">
                                 {{ number_format($standardInfo['mc_adjusted_standard'], 2) }}
                             </div>
@@ -272,7 +272,111 @@
                 </div>
             </div>
         </div>
+    @endif --}}
+
+    @if ($standardInfo)
+        <div class="px-6 pb-6 bg-white dark:bg-gray-900">
+            <div class="bg-white dark:bg-gray-800 rounded-lg p-3">
+                <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-gray-900 dark:text-gray-100" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z">
+                        </path>
+                    </svg>
+                    Informasi Standar
+                </h3>
+
+                <div class="grid grid-cols-2 gap-6">
+
+                    <!-- Judul kolom kiri: Nilai Asli -->
+                    <div>
+                        <h4 class="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wide mb-3">
+                            Nilai Asli
+                        </h4>
+
+                        <!-- Kartu nilai asli -->
+                        <div class="space-y-3">
+                            <div
+                                class="bg-white dark:bg-gray-800 border border-gray-400 dark:border-gray-300 rounded-lg p-3">
+                                <div class="text-xs text-gray-500 dark:text-gray-400 mb-1 italic">Psychology</div>
+                                <div class="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                                    {{ number_format($standardInfo['psy_original_standard'], 2) }}
+                                </div>
+                                <div class="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                                    Bobot {{ $potensiWeight }}% = <span
+                                        class="font-semibold text-gray-900 dark:text-gray-100">{{ number_format(($standardInfo['psy_original_standard'] * $potensiWeight) / 100, 2) }}</span>
+                                </div>
+                            </div>
+
+                            <div
+                                class="bg-white dark:bg-gray-800 border border-gray-400 dark:border-gray-300 rounded-lg p-3">
+                                <div class="text-xs text-gray-500 dark:text-gray-400 mb-1 italic">Competency</div>
+                                <div class="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                                    {{ number_format($standardInfo['mc_original_standard'], 2) }}
+                                </div>
+                                <div class="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                                    Bobot {{ $kompetensiWeight }}% = <span
+                                        class="font-semibold text-gray-900 dark:text-gray-100">{{ number_format(($standardInfo['mc_original_standard'] * $kompetensiWeight) / 100, 2) }}</span>
+                                </div>
+                            </div>
+
+                            <div
+                                class="bg-white dark:bg-gray-800 border border-gray-400 dark:border-gray-300 rounded-lg p-3">
+                                <div class="text-xs text-gray-600 dark:text-gray-300 mb-1 font-semibold">TOTAL STANDAR
+                                </div>
+                                <div class="text-3xl font-bold text-gray-900 dark:text-gray-100">
+                                    {{ number_format($standardInfo['total_original_standard'], 2) }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Judul kolom kanan: Nilai Di Beri Toleransi -->
+                    <div x-data="{ tolerance: $wire.entangle('tolerancePercentage') }" x-show="tolerance > 0" x-transition class="space-y-3">
+                        <h4 class="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wide mb-3">
+                            Nilai Di Beri Toleransi
+                            <span x-text="tolerance > 0 ? '(' + tolerance + '%)' : ''"
+                                class="text-gray-900 dark:text-gray-100"></span>
+                        </h4>
+
+                        <!-- Kartu nilai dengan toleransi -->
+                        <div
+                            class="bg-white dark:bg-gray-800 border border-gray-400 dark:border-gray-300 rounded-lg p-3">
+                            <div class="text-xs text-gray-500 dark:text-gray-400 mb-1 italic">Psychology</div>
+                            <div class="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                                {{ number_format($standardInfo['psy_adjusted_standard'], 2) }}</div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                                Bobot {{ $potensiWeight }}% = <span
+                                    class="font-semibold text-gray-900 dark:text-gray-100">{{ number_format($standardInfo['psy_standard'], 2) }}</span>
+                            </div>
+                        </div>
+
+                        <div
+                            class="bg-white dark:bg-gray-800 border border-gray-400 dark:border-gray-300 rounded-lg p-3">
+                            <div class="text-xs text-gray-500 dark:text-gray-400 mb-1 italic">Competency</div>
+                            <div class="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                                {{ number_format($standardInfo['mc_adjusted_standard'], 2) }}</div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                                Bobot {{ $kompetensiWeight }}% = <span
+                                    class="font-semibold text-gray-900 dark:text-gray-100">{{ number_format($standardInfo['mc_standard'], 2) }}</span>
+                            </div>
+                        </div>
+
+                        <div
+                            class="bg-white dark:bg-gray-800 border border-gray-400 dark:border-gray-300 rounded-lg p-3">
+                            <div class="text-xs text-gray-600 dark:text-gray-300 mb-1 font-semibold">TOTAL STANDAR YANG
+                                DIBERI TOLERANSI</div>
+                            <div class="text-3xl font-bold text-gray-900 dark:text-gray-100">
+                                {{ number_format($standardInfo['total_standard'], 2) }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     @endif
+
+
 
     <!-- Summary Statistics Section -->
     @if (!empty($conclusionSummary))

@@ -19,14 +19,14 @@
     </div>
 
     {{-- Adjustment Indicators --}}
-    @if($selectedTemplate)
-    <div
-        class="px-4 py-2 bg-gray-50 dark:bg-gray-700 border-b border-gray-300 dark:border-gray-600 flex flex-wrap gap-2">
-        <x-adjustment-indicator :template-id="$selectedTemplate->id" category-code="potensi" size="sm"
-            custom-label="Standar Potensi Disesuaikan" />
-        <x-adjustment-indicator :template-id="$selectedTemplate->id" category-code="kompetensi" size="sm"
-            custom-label="Standar Kompetensi Disesuaikan" />
-    </div>
+    @if ($selectedTemplate)
+        <div
+            class="px-4 mb-4 bg-gray-50 dark:bg-gray-700 border-b border-gray-500 dark:border-gray-600 flex flex-wrap gap-2">
+            <x-adjustment-indicator :template-id="$selectedTemplate->id" category-code="potensi" size="sm"
+                custom-label="Standar Potensi Disesuaikan" />
+            <x-adjustment-indicator :template-id="$selectedTemplate->id" category-code="kompetensi" size="sm"
+                custom-label="Standar Kompetensi Disesuaikan" />
+        </div>
     @endif
 
     <!-- Judul Kurva -->
@@ -54,24 +54,24 @@
                 </thead>
                 <tbody>
                     <tr class="bg-white dark:bg-gray-800">
-                        <td class="border border-black dark:border-gray-600 px-3 py-2 text-center">I (Kurang Baik)</td>
-                        <td class="border border-black dark:border-gray-600 px-3 py-2">1.00 - 1.80</td>
+                        <td class="border border-black dark:border-gray-600 px-3 py-2">I (Kurang Baik)</td>
+                        <td class="border border-black dark:border-gray-600 px-3 py-2 text-center">1.00 - 1.80</td>
                     </tr>
                     <tr class="bg-white dark:bg-gray-800">
-                        <td class="border border-black dark:border-gray-600 px-3 py-2 text-center">II (Cukup Baik)</td>
-                        <td class="border border-black dark:border-gray-600 px-3 py-2">1.80 - 2.60</td>
+                        <td class="border border-black dark:border-gray-600 px-3 py-2">II (Cukup Baik)</td>
+                        <td class="border border-black dark:border-gray-600 px-3 py-2 text-center">1.80 - 2.60</td>
                     </tr>
                     <tr class="bg-white dark:bg-gray-800">
-                        <td class="border border-black dark:border-gray-600 px-3 py-2 text-center">III (Baik)</td>
-                        <td class="border border-black dark:border-gray-600 px-3 py-2">2.60 - 3.40</td>
+                        <td class="border border-black dark:border-gray-600 px-3 py-2">III (Baik)</td>
+                        <td class="border border-black dark:border-gray-600 px-3 py-2 text-center">2.60 - 3.40</td>
                     </tr>
                     <tr class="bg-white dark:bg-gray-800">
-                        <td class="border border-black dark:border-gray-600 px-3 py-2 text-center">IV (Baik Sekali)</td>
-                        <td class="border border-black dark:border-gray-600 px-3 py-2">3.40 - 4.20</td>
+                        <td class="border border-black dark:border-gray-600 px-3 py-2">IV (Baik Sekali)</td>
+                        <td class="border border-black dark:border-gray-600 px-3 py-2 text-center">3.40 - 4.20</td>
                     </tr>
                     <tr class="bg-white dark:bg-gray-800">
-                        <td class="border border-black dark:border-gray-600 px-3 py-2 text-center">V (Sangat Baik)</td>
-                        <td class="border border-black dark:border-gray-600 px-3 py-2">4.20 - 5.00</td>
+                        <td class="border border-black dark:border-gray-600 px-3 py-2">V (Sangat Baik)</td>
+                        <td class="border border-black dark:border-gray-600 px-3 py-2 text-center">4.20 - 5.00</td>
                     </tr>
                 </tbody>
             </table>
