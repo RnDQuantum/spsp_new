@@ -242,8 +242,9 @@
             <div class="flex flex-col">
                 <div class="grid grid-cols-2 border-b border-gray-300 dark:border-gray-600">
                     <div class="px-4 py-2 text-sm text-black dark:text-gray-200">Standar Penilaian</div>
-                    <div class="px-4 py-2 text-sm text-black dark:text-gray-200">:
-                        {{ $participant->positionFormation->template->name }}</div>
+                    <div class="px-4 py-2 text-sm text-black dark:text-gray-200">
+                        : {{ $participant->positionFormation->template->name }}
+                    </div>
                 </div>
                 <div class="grid grid-cols-2 border-b border-gray-300 dark:border-gray-600">
                     <div class="px-4 py-2 text-sm text-black dark:text-gray-200">Kegiatan</div>
@@ -251,6 +252,21 @@
                         {{ $participant->assessmentEvent->name }}
                     </div>
                 </div>
+
+                {{-- Adjustment Indicators --}}
+                <div class="px-4 py-2 border-b border-gray-300 dark:border-gray-600 flex flex-wrap gap-2">
+                    <x-adjustment-indicator
+                        :template-id="$participant->positionFormation->template_id"
+                        category-code="potensi"
+                        size="sm"
+                    />
+                    <x-adjustment-indicator
+                        :template-id="$participant->positionFormation->template_id"
+                        category-code="kompetensi"
+                        size="sm"
+                    />
+                </div>
+
                 <div
                     class="px-4 py-2 text-center font-bold text-sm border-b border-gray-300 dark:border-gray-600 text-black dark:text-white">
                     JOB PERSON MATCH
