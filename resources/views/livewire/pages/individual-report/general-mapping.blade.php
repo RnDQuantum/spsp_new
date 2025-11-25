@@ -26,6 +26,20 @@
             'total' => $summary['total'],
         ])
 
+        {{-- Adjustment Indicators --}}
+        <div class="px-4 py-2 bg-gray-50 dark:bg-gray-700 border-b border-gray-300 dark:border-gray-600 flex flex-wrap gap-2">
+            <x-adjustment-indicator
+                :template-id="$participant->positionFormation->template_id"
+                category-code="potensi"
+                size="sm"
+            />
+            <x-adjustment-indicator
+                :template-id="$participant->positionFormation->template_id"
+                category-code="kompetensi"
+                size="sm"
+            />
+        </div>
+
         <!-- Table Section -->
         <div class="p-4 overflow-x-auto">
             <table class="min-w-full border border-black dark:border-gray-300 text-xs text-gray-900 dark:text-gray-100">
