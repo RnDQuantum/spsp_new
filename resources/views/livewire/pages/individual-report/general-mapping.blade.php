@@ -19,25 +19,20 @@
 
         <!-- Tolerance Selector Component -->
         @php
-            $summary = $this->getPassingSummary();
+        $summary = $this->getPassingSummary();
         @endphp
         @livewire('components.tolerance-selector', [
-            'passing' => $summary['passing'],
-            'total' => $summary['total'],
+        'passing' => $summary['passing'],
+        'total' => $summary['total'],
         ])
 
         {{-- Adjustment Indicators --}}
-        <div class="px-4 py-2 bg-gray-50 dark:bg-gray-700 border-b border-gray-300 dark:border-gray-600 flex flex-wrap gap-2">
-            <x-adjustment-indicator
-                :template-id="$participant->positionFormation->template_id"
-                category-code="potensi"
-                size="sm"
-            />
-            <x-adjustment-indicator
-                :template-id="$participant->positionFormation->template_id"
-                category-code="kompetensi"
-                size="sm"
-            />
+        <div
+            class="px-4 py-2 bg-gray-50 dark:bg-gray-700 border-b border-gray-300 dark:border-gray-600 flex flex-wrap gap-2">
+            <x-adjustment-indicator :template-id="$participant->positionFormation->template_id" category-code="potensi"
+                size="sm" custom-label="Standar Potensi Disesuaikan" />
+            <x-adjustment-indicator :template-id="$participant->positionFormation->template_id"
+                category-code="kompetensi" size="sm" custom-label="Standar Kompetensi Disesuaikan" />
         </div>
 
         <!-- Table Section -->
@@ -79,37 +74,38 @@
                 </thead>
                 <tbody>
                     @foreach ($aspectsData as $aspect)
-                        <tr>
-                            <td class="border border-black dark:border-gray-300 px-3 py-2 text-center">
-                                {{ $loop->iteration }}</td>
-                            <td class="border border-black dark:border-gray-300 px-3 py-2">{{ $aspect['name'] }}</td>
-                            <td class="border border-black dark:border-gray-300 px-3 py-2 text-center">
-                                {{ $aspect['weight_percentage'] }}</td>
-                            <td class="border border-black dark:border-gray-300 px-3 py-2 text-center">
-                                {{ number_format($aspect['standard_rating'], 2) }}</td>
-                            <td class="border border-black dark:border-gray-300 px-3 py-2 text-center">
-                                {{ number_format($aspect['standard_score'], 2) }}</td>
-                            <td class="border border-black dark:border-gray-300 px-3 py-2 text-center">
-                                {{ number_format($aspect['individual_rating'], 2) }}</td>
-                            <td class="border border-black dark:border-gray-300 px-3 py-2 text-center">
-                                {{ number_format($aspect['individual_score'], 2) }}</td>
-                            <td class="border border-black dark:border-gray-300 px-3 py-2 text-center">
-                                {{ number_format($aspect['gap_rating'], 2) }}</td>
-                            <td class="border border-black dark:border-gray-300 px-3 py-2 text-center">
-                                {{ number_format($aspect['gap_score'], 2) }}</td>
-                            <td class="border border-black dark:border-gray-300 px-3 py-2 text-center">
-                                @php
-                                    $percentage =
-                                        $aspect['standard_score'] > 0
-                                            ? round(($aspect['individual_score'] / $aspect['standard_score']) * 100)
-                                            : 0;
-                                @endphp
-                                {{ $percentage }}%
-                            </td>
-                            <td class="border border-white px-3 py-2 text-center font-bold {{ $conclusionConfig[$aspect['conclusion_text']]['tailwindClass'] ?? 'bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-white' }}">
-                                {{ $aspect['conclusion_text'] }}
-                            </td>
-                        </tr>
+                    <tr>
+                        <td class="border border-black dark:border-gray-300 px-3 py-2 text-center">
+                            {{ $loop->iteration }}</td>
+                        <td class="border border-black dark:border-gray-300 px-3 py-2">{{ $aspect['name'] }}</td>
+                        <td class="border border-black dark:border-gray-300 px-3 py-2 text-center">
+                            {{ $aspect['weight_percentage'] }}</td>
+                        <td class="border border-black dark:border-gray-300 px-3 py-2 text-center">
+                            {{ number_format($aspect['standard_rating'], 2) }}</td>
+                        <td class="border border-black dark:border-gray-300 px-3 py-2 text-center">
+                            {{ number_format($aspect['standard_score'], 2) }}</td>
+                        <td class="border border-black dark:border-gray-300 px-3 py-2 text-center">
+                            {{ number_format($aspect['individual_rating'], 2) }}</td>
+                        <td class="border border-black dark:border-gray-300 px-3 py-2 text-center">
+                            {{ number_format($aspect['individual_score'], 2) }}</td>
+                        <td class="border border-black dark:border-gray-300 px-3 py-2 text-center">
+                            {{ number_format($aspect['gap_rating'], 2) }}</td>
+                        <td class="border border-black dark:border-gray-300 px-3 py-2 text-center">
+                            {{ number_format($aspect['gap_score'], 2) }}</td>
+                        <td class="border border-black dark:border-gray-300 px-3 py-2 text-center">
+                            @php
+                            $percentage =
+                            $aspect['standard_score'] > 0
+                            ? round(($aspect['individual_score'] / $aspect['standard_score']) * 100)
+                            : 0;
+                            @endphp
+                            {{ $percentage }}%
+                        </td>
+                        <td
+                            class="border border-white px-3 py-2 text-center font-bold {{ $conclusionConfig[$aspect['conclusion_text']]['tailwindClass'] ?? 'bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-white' }}">
+                            {{ $aspect['conclusion_text'] }}
+                        </td>
+                    </tr>
                     @endforeach
 
                     <!-- Total Rating Row -->
@@ -125,7 +121,8 @@
                         <td class="border border-black dark:border-gray-300 px-3 py-2 text-center">
                             {{ number_format($totalGapRating, 2) }}</td>
                         <td class="border border-black dark:border-gray-300 px-3 py-2 bg-black"></td>
-                        <td class="border border-white px-3 py-2 text-center font-bold {{ $conclusionConfig[$overallConclusion]['tailwindClass'] ?? 'bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-white' }}" colspan="2">
+                        <td class="border border-white px-3 py-2 text-center font-bold {{ $conclusionConfig[$overallConclusion]['tailwindClass'] ?? 'bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-white' }}"
+                            colspan="2">
                             {{ $overallConclusion }}
                         </td>
                     </tr>
@@ -143,7 +140,8 @@
                         <td class="border border-black dark:border-gray-300 px-3 py-2 bg-black"></td>
                         <td class="border border-black dark:border-gray-300 px-3 py-2 text-center">
                             {{ number_format($totalGapScore, 2) }}</td>
-                        <td class="border border-white px-3 py-2 text-center font-bold {{ $conclusionConfig[$overallConclusion]['tailwindClass'] ?? 'bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-white' }}" colspan="2">
+                        <td class="border border-white px-3 py-2 text-center font-bold {{ $conclusionConfig[$overallConclusion]['tailwindClass'] ?? 'bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-white' }}"
+                            colspan="2">
                             {{ $overallConclusion }}
                         </td>
                     </tr>
@@ -153,88 +151,89 @@
 
         <!-- Ranking Information Section -->
         @if ($showRankingInfo)
-            @php
-                $rankingInfo = $this->getParticipantRanking();
-            @endphp
+        @php
+        $rankingInfo = $this->getParticipantRanking();
+        @endphp
 
-            @if ($rankingInfo)
-                <div class="px-6 py-4 bg-gray-300 dark:bg-gray-600 border-t-2 border-black dark:border-gray-600">
-                    <div class="max-w-5xl mx-auto">
-                        <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
-                            <i class="fa-solid fa-circle-check"></i>
-                            Ranking Peserta - Skor Gabungan (Weighted)
-                        </h3>
+        @if ($rankingInfo)
+        <div class="px-6 py-4 bg-gray-300 dark:bg-gray-600 border-t-2 border-black dark:border-gray-600">
+            <div class="max-w-5xl mx-auto">
+                <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-circle-check"></i>
+                    Ranking Peserta - Skor Gabungan (Weighted)
+                </h3>
 
-                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                            <!-- Ranking Card -->
-                            <div
-                                class="bg-white dark:bg-gray-800 border-2 border-blue-300 dark:border-blue-600 rounded-lg p-4 text-center">
-                                <div class="text-sm text-gray-500 dark:text-gray-400 mb-2">Ranking</div>
-                                <div class="text-4xl font-bold text-blue-600 dark:text-blue-400">
-                                    #{{ $rankingInfo['rank'] }}
-                                </div>
-                            </div>
-
-                            <!-- Total Participants Card -->
-                            <div
-                                class="bg-white dark:bg-gray-800 border-2 border-blue-300 dark:border-blue-600 rounded-lg p-4 text-center">
-                                <div class="text-sm text-gray-500 dark:text-gray-400 mb-2">Total Peserta</div>
-                                <div class="text-4xl font-bold text-blue-600 dark:text-blue-400">
-                                    {{ $rankingInfo['total'] }}
-                                </div>
-                                <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                    {{ $participant->positionFormation->name }}
-                                </div>
-                            </div>
-
-                            <!-- Weights Info Card -->
-                            <div
-                                class="bg-white dark:bg-gray-800 border-2 border-blue-300 dark:border-blue-600 rounded-lg p-4 text-center">
-                                <div class="text-sm text-gray-500 dark:text-gray-400 mb-2">Bobot Penilaian</div>
-                                <div class="text-sm font-bold text-blue-600 dark:text-blue-400">
-                                    Potensi: {{ $rankingInfo['potensi_weight'] }}%
-                                </div>
-                                <div class="text-sm font-bold text-blue-600 dark:text-blue-400">
-                                    Kompetensi: {{ $rankingInfo['kompetensi_weight'] }}%
-                                </div>
-                            </div>
-
-                            <!-- Conclusion Card -->
-                            @php
-                                $conclusionText = $rankingInfo['conclusion'];
-                                $borderClass = match($conclusionText) {
-                                    'Di Atas Standar' => 'border-green-300 dark:border-green-600',
-                                    'Memenuhi Standar' => 'border-yellow-300 dark:border-yellow-600',
-                                    'Di Bawah Standar' => 'border-red-300 dark:border-red-600',
-                                    default => 'border-gray-300 dark:border-gray-600'
-                                };
-                            @endphp
-                            <div class="bg-white dark:bg-gray-800 border-2 rounded-lg p-4 text-center {{ $borderClass }}">
-                                <div class="text-sm text-gray-500 dark:text-gray-400 mb-2">Status</div>
-                                <div class="text-base font-bold px-3 py-2 rounded-lg {{ $conclusionConfig[$conclusionText]['tailwindClass'] ?? 'bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-white' }}">
-                                    {{ $rankingInfo['conclusion'] }}
-                                </div>
-                            </div>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <!-- Ranking Card -->
+                    <div
+                        class="bg-white dark:bg-gray-800 border-2 border-blue-300 dark:border-blue-600 rounded-lg p-4 text-center">
+                        <div class="text-sm text-gray-500 dark:text-gray-400 mb-2">Ranking</div>
+                        <div class="text-4xl font-bold text-blue-600 dark:text-blue-400">
+                            #{{ $rankingInfo['rank'] }}
                         </div>
+                    </div>
 
-                        <!-- Additional Info -->
-                        <div class="mt-4 bg-gray-300 dark:bg-gray-600 rounded-lg p-1">
-                            <div class="text-sm text-gray-800 dark:text-gray-200">
-                                <strong>Keterangan:</strong> Ranking berdasarkan <strong>Total Weighted Individual
-                                    Score</strong> dari kombinasi:
-                                <br>
-                                • <strong>Potensi ({{ $rankingInfo['potensi_weight'] }}%)</strong>: Psychology Mapping
-                                <br>
-                                • <strong>Kompetensi ({{ $rankingInfo['kompetensi_weight'] }}%)</strong>: Managerial
-                                Competency Mapping
-                                <br>
-                                Dibandingkan dengan peserta lain di event yang sama pada posisi
-                                <strong>{{ $participant->positionFormation->name }}</strong>.
-                            </div>
+                    <!-- Total Participants Card -->
+                    <div
+                        class="bg-white dark:bg-gray-800 border-2 border-blue-300 dark:border-blue-600 rounded-lg p-4 text-center">
+                        <div class="text-sm text-gray-500 dark:text-gray-400 mb-2">Total Peserta</div>
+                        <div class="text-4xl font-bold text-blue-600 dark:text-blue-400">
+                            {{ $rankingInfo['total'] }}
+                        </div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            {{ $participant->positionFormation->name }}
+                        </div>
+                    </div>
+
+                    <!-- Weights Info Card -->
+                    <div
+                        class="bg-white dark:bg-gray-800 border-2 border-blue-300 dark:border-blue-600 rounded-lg p-4 text-center">
+                        <div class="text-sm text-gray-500 dark:text-gray-400 mb-2">Bobot Penilaian</div>
+                        <div class="text-sm font-bold text-blue-600 dark:text-blue-400">
+                            Potensi: {{ $rankingInfo['potensi_weight'] }}%
+                        </div>
+                        <div class="text-sm font-bold text-blue-600 dark:text-blue-400">
+                            Kompetensi: {{ $rankingInfo['kompetensi_weight'] }}%
+                        </div>
+                    </div>
+
+                    <!-- Conclusion Card -->
+                    @php
+                    $conclusionText = $rankingInfo['conclusion'];
+                    $borderClass = match($conclusionText) {
+                    'Di Atas Standar' => 'border-green-300 dark:border-green-600',
+                    'Memenuhi Standar' => 'border-yellow-300 dark:border-yellow-600',
+                    'Di Bawah Standar' => 'border-red-300 dark:border-red-600',
+                    default => 'border-gray-300 dark:border-gray-600'
+                    };
+                    @endphp
+                    <div class="bg-white dark:bg-gray-800 border-2 rounded-lg p-4 text-center {{ $borderClass }}">
+                        <div class="text-sm text-gray-500 dark:text-gray-400 mb-2">Status</div>
+                        <div
+                            class="text-base font-bold px-3 py-2 rounded-lg {{ $conclusionConfig[$conclusionText]['tailwindClass'] ?? 'bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-white' }}">
+                            {{ $rankingInfo['conclusion'] }}
                         </div>
                     </div>
                 </div>
-            @endif
+
+                <!-- Additional Info -->
+                <div class="mt-4 bg-gray-300 dark:bg-gray-600 rounded-lg p-1">
+                    <div class="text-sm text-gray-800 dark:text-gray-200">
+                        <strong>Keterangan:</strong> Ranking berdasarkan <strong>Total Weighted Individual
+                            Score</strong> dari kombinasi:
+                        <br>
+                        • <strong>Potensi ({{ $rankingInfo['potensi_weight'] }}%)</strong>: Psychology Mapping
+                        <br>
+                        • <strong>Kompetensi ({{ $rankingInfo['kompetensi_weight'] }}%)</strong>: Managerial
+                        Competency Mapping
+                        <br>
+                        Dibandingkan dengan peserta lain di event yang sama pada posisi
+                        <strong>{{ $participant->positionFormation->name }}</strong>.
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endif
         @endif
 
         <!-- Chart Section Rating -->
