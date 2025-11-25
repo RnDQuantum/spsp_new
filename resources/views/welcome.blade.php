@@ -6,6 +6,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>STATIC PRIBADI SPIDER PLOT</title>
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+        <link rel="icon" type="image/x-icon" href="{{ asset('images/thumb-qhrmi.png') }}">
     </head>
 
     <body class="bg-gray-50 min-h-screen flex items-center justify-center p-4">
