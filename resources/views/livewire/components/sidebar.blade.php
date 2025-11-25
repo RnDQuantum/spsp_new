@@ -95,7 +95,7 @@
                         x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">Beranda</span>
                 </a>
 
-                <!-- Shortlist Peserta -->
+                <!-- Daftar Peserta -->
                 <a wire:navigate href="{{ route('shortlist') }}" x-tooltip.raw="minimized ? 'Shortlist Peserta' : null"
                     @class([
                         'group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200',
@@ -110,7 +110,7 @@
                         Peserta</span>
                 </a>
 
-                <!-- Standard -->
+                <!-- Standar -->
                 <a wire:navigate href="{{ route('custom-standards.index') }}"
                     x-tooltip.raw="minimized ? 'Shortlist Peserta' : null" @class([
                         'group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200',
@@ -122,7 +122,7 @@
                     :class="minimized ? 'justify-center px-2' : ''">
                     <i class="fa-solid fa-chart-line w-5 text-center" :class="!minimized && 'mr-3'"></i>
                     <span x-show="!minimized" x-transition:enter="transition ease-out duration-200"
-                        x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">Tambah Standard</span>
+                        x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">Tambah Standar</span>
                 </a>
 
                 <!-- Individual Report dengan Sub Menu -->
@@ -130,7 +130,7 @@
                     <button id="btn-individual"
                         @click="if (minimized) { minimized = false; $dispatch('sidebar-toggled', { minimized: minimized }); individualOpen = true } else { individualOpen = !individualOpen }"
                         x-tooltip.raw="minimized ? 'Individual Report' : null"
-                        class="w-full group flex items-center px-3 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 rounded-lg transition-all duration-200"
+                        class="w-full group flex items-center px-3 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 rounded-lg transition-all duration-200 italic"
                         :class="minimized ? 'justify-center px-2' : 'justify-between'" aria-haspopup="true"
                         :aria-expanded="individualOpen" aria-controls="submenu-individual">
                         <div class="flex items-center">
@@ -170,10 +170,11 @@
                                         <p class="text-xs text-yellow-700 dark:text-yellow-400/90 leading-relaxed">
                                             Pilih Proyek & Peserta di
                                             <a href="{{ route('dashboard') }}"
-                                                class="underline hover:text-yellow-600 dark:hover:text-yellow-300 font-medium">Dashboard</a>
+                                                class="underline hover:text-yellow-600 dark:hover:text-yellow-300 font-medium">Beranda</a>
                                             atau pilih salah satu peserta di
                                             <a href="{{ route('shortlist') }}" wire:navigate
-                                                class="underline hover:text-yellow-600 dark:hover:text-yellow-300 font-medium">Shortlist</a>
+                                                class="underline hover:text-yellow-600 dark:hover:text-yellow-300 font-medium">Daftar
+                                                Peserta</a>
                                         </p>
                                     </div>
                                 </div>
@@ -185,16 +186,16 @@
                                 href="{{ route('general_matching', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) }}"
                                 role="menuitem" @class([
                                     'block px-3 py-2 text-xs rounded-lg transition-all duration-200',
-                                    'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium' => $this->isActiveRoute(
+                                    'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium italic' => $this->isActiveRoute(
                                         'general_matching'),
-                                    'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' => !$this->isActiveRoute(
+                                    'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 italic' => !$this->isActiveRoute(
                                         'general_matching'),
                                 ])>
                                 <i class="fa-solid fa-circle-dot mr-2 text-xs"></i>General Matching
                             </a>
                         @else
                             <span role="menuitem" title="Pilih data terlebih dahulu"
-                                class="block px-3 py-2 text-xs rounded-lg transition-all duration-200 text-gray-400 dark:text-gray-600 cursor-not-allowed">
+                                class="block px-3 py-2 text-xs rounded-lg transition-all duration-200 text-gray-400 dark:text-gray-600 cursor-not-allowed italic">
                                 <i class="fa-solid fa-circle-dot mr-2 text-xs"></i>General Matching
                             </span>
                         @endif
@@ -204,16 +205,16 @@
                                 href="{{ route('general_mapping', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) }}"
                                 role="menuitem" @class([
                                     'block px-3 py-2 text-xs rounded-lg transition-all duration-200',
-                                    'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium' => $this->isActiveRoute(
+                                    'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium italic' => $this->isActiveRoute(
                                         'general_mapping'),
-                                    'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' => !$this->isActiveRoute(
+                                    'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 italic' => !$this->isActiveRoute(
                                         'general_mapping'),
                                 ])>
                                 <i class="fa-solid fa-circle-dot mr-2 text-xs"></i>General Mapping
                             </a>
                         @else
                             <span role="menuitem" title="Pilih data terlebih dahulu"
-                                class="block px-3 py-2 text-xs rounded-lg transition-all duration-200 text-gray-400 dark:text-gray-600 cursor-not-allowed">
+                                class="block px-3 py-2 text-xs rounded-lg transition-all duration-200 text-gray-400 dark:text-gray-600 cursor-not-allowed italic">
                                 <i class="fa-solid fa-circle-dot mr-2 text-xs"></i>General Mapping
                             </span>
                         @endif
@@ -223,9 +224,9 @@
                                 href="{{ route('general_psy_mapping', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) }}"
                                 role="menuitem" @class([
                                     'block px-3 py-2 text-xs rounded-lg transition-all duration-200',
-                                    'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium' => $this->isActiveRoute(
+                                    'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium italic' => $this->isActiveRoute(
                                         'general_psy_mapping'),
-                                    'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' => !$this->isActiveRoute(
+                                    'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 italic' => !$this->isActiveRoute(
                                         'general_psy_mapping'),
                                 ])>
                                 <div class="flex items-start gap-2">
@@ -235,7 +236,7 @@
                             </a>
                         @else
                             <span role="menuitem" title="Pilih data terlebih dahulu"
-                                class="block px-3 py-2 text-xs rounded-lg transition-all duration-200 text-gray-400 dark:text-gray-600 cursor-not-allowed">
+                                class="block px-3 py-2 text-xs rounded-lg transition-all duration-200 text-gray-400 dark:text-gray-600 cursor-not-allowed italic">
                                 <div class="flex items-start gap-2">
                                     <i class="fa-solid fa-circle-dot text-xs mt-0.5 flex-shrink-0"></i>
                                     <span class="flex-1 leading-tight">General Psychology Mapping</span>
@@ -248,9 +249,9 @@
                                 href="{{ route('general_mc_mapping', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) }}"
                                 role="menuitem" @class([
                                     'block px-3 py-2 text-xs rounded-lg transition-all duration-200',
-                                    'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium' => $this->isActiveRoute(
+                                    'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium italic' => $this->isActiveRoute(
                                         'general_mc_mapping'),
-                                    'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' => !$this->isActiveRoute(
+                                    'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 italic' => !$this->isActiveRoute(
                                         'general_mc_mapping'),
                                 ])>
                                 <div class="flex items-start gap-2">
@@ -260,7 +261,7 @@
                             </a>
                         @else
                             <span role="menuitem" title="Pilih data terlebih dahulu"
-                                class="block px-3 py-2 text-xs rounded-lg transition-all duration-200 text-gray-400 dark:text-gray-600 cursor-not-allowed">
+                                class="block px-3 py-2 text-xs rounded-lg transition-all duration-200 text-gray-400 dark:text-gray-600 cursor-not-allowed italic">
                                 <div class="flex items-start gap-2">
                                     <i class="fa-solid fa-circle-dot text-xs mt-0.5 flex-shrink-0"></i>
                                     <span class="flex-1 leading-tight">General Managerial Competency Mapping</span>
@@ -273,16 +274,16 @@
                                 href="{{ route('spider_plot', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) }}"
                                 role="menuitem" @class([
                                     'block px-3 py-2 text-xs rounded-lg transition-all duration-200',
-                                    'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium' => $this->isActiveRoute(
+                                    'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium italic' => $this->isActiveRoute(
                                         'spider_plot'),
-                                    'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' => !$this->isActiveRoute(
+                                    'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 italic' => !$this->isActiveRoute(
                                         'spider_plot'),
                                 ])>
                                 <i class="fa-solid fa-circle-dot mr-2 text-xs"></i>Spider Plot
                             </a>
                         @else
                             <span role="menuitem" title="Pilih data terlebih dahulu"
-                                class="block px-3 py-2 text-xs rounded-lg transition-all duration-200 text-gray-400 dark:text-gray-600 cursor-not-allowed">
+                                class="block px-3 py-2 text-xs rounded-lg transition-all duration-200 text-gray-400 dark:text-gray-600 cursor-not-allowed italic">
                                 <i class="fa-solid fa-circle-dot mr-2 text-xs"></i>Spider Plot
                             </span>
                         @endif
@@ -299,7 +300,8 @@
                                 ])>
                                 <div class="flex items-start gap-2">
                                     <i class="fa-solid fa-circle-dot text-xs mt-0.5 flex-shrink-0"></i>
-                                    <span class="flex-1 leading-tight">Ringkasan Pemetaan Kompetensi Manajerial</span>
+                                    <span class="flex-1 leading-tight">Ringkasan <i>Managerial Competency
+                                            Mapping</i></span>
                                 </div>
                             </a>
                         @else
@@ -307,7 +309,8 @@
                                 class="block px-3 py-2 text-xs rounded-lg transition-all duration-200 text-gray-400 dark:text-gray-600 cursor-not-allowed">
                                 <div class="flex items-start gap-2">
                                     <i class="fa-solid fa-circle-dot text-xs mt-0.5 flex-shrink-0"></i>
-                                    <span class="flex-1 leading-tight">Ringkasan Pemetaan Kompetensi Manajerial</span>
+                                    <span class="flex-1 leading-tight">Ringkasan <i>Managerial Competency
+                                            Mapping</i></span>
                                 </div>
                             </span>
                         @endif
@@ -363,7 +366,7 @@
                     <button id="btn-general"
                         @click="if (minimized) { minimized = false; $dispatch('sidebar-toggled', { minimized: minimized }); generalOpen = true } else { generalOpen = !generalOpen }"
                         x-tooltip.raw="minimized ? 'General Report' : null"
-                        class="w-full group flex items-center px-3 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 rounded-lg transition-all duration-200"
+                        class="w-full group flex items-center px-3 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 rounded-lg transition-all duration-200 italic"
                         :class="minimized ? 'justify-center px-2' : 'justify-between'" aria-haspopup="true"
                         :aria-expanded="generalOpen" aria-controls="submenu-general">
                         <div class="flex items-center">
@@ -393,27 +396,27 @@
                         <a wire:navigate href="{{ route('ranking-psy-mapping') }}" role="menuitem"
                             @class([
                                 'block px-3 py-2 text-xs rounded-lg transition-all duration-200',
-                                'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium' => $this->isActiveRoute(
+                                'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium italic' => $this->isActiveRoute(
                                     'ranking-psy-mapping'),
-                                'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' => !$this->isActiveRoute(
+                                'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 italic' => !$this->isActiveRoute(
                                     'ranking-psy-mapping'),
                             ])>
                             <div class="flex items-start gap-2">
                                 <i class="fa-solid fa-circle-dot text-xs mt-0.5 flex-shrink-0"></i>
-                                <span class="flex-1 leading-tight">Peringkat Pemetaan Psikologi</span>
+                                <span class="flex-1 leading-tight">Ranking Psychology Mapping</span>
                             </div>
                         </a>
                         <a wire:navigate href="{{ route('ranking-mc-mapping') }}" role="menuitem"
                             @class([
                                 'block px-3 py-2 text-xs rounded-lg transition-all duration-200',
-                                'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium' => $this->isActiveRoute(
+                                'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium italic' => $this->isActiveRoute(
                                     'ranking-mc-mapping'),
-                                'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' => !$this->isActiveRoute(
+                                'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 italic' => !$this->isActiveRoute(
                                     'ranking-mc-mapping'),
                             ])>
                             <div class="flex items-start gap-2">
                                 <i class="fa-solid fa-circle-dot text-xs mt-0.5 flex-shrink-0"></i>
-                                <span class="flex-1 leading-tight">Peringkat Pemetaan Kompetensi Manajerial</span>
+                                <span class="flex-1 leading-tight">Ranking Managerial Competency Mapping</span>
                             </div>
                         </a>
                         <a wire:navigate href="{{ route('rekap-ranking-assessment') }}" role="menuitem"
@@ -426,7 +429,7 @@
                             ])>
                             <div class="flex items-start gap-2">
                                 <i class="fa-solid fa-circle-dot text-xs mt-0.5 flex-shrink-0"></i>
-                                <span class="flex-1 leading-tight">Ranking Ringkasan Hasil Asesmen</span>
+                                <span class="flex-1 leading-tight"><i>Ranking</i> Ringkasan Hasil Asesmen</span>
                             </div>
                         </a>
                         <a wire:navigate href="{{ route('statistic') }}" role="menuitem"
@@ -449,7 +452,7 @@
                             ])>
                             <div class="flex items-start gap-2">
                                 <i class="fa-solid fa-circle-dot text-xs mt-0.5 flex-shrink-0"></i>
-                                <span class="flex-1 leading-tight">Training Recommendation</span>
+                                <span class="flex-1 leading-tight"><i>Training Recommendation</i></span>
                             </div>
                         </a>
                         <a wire:navigate href="{{ route('standard-mc') }}" role="menuitem"
@@ -462,7 +465,7 @@
                             ])>
                             <div class="flex items-start gap-2">
                                 <i class="fa-solid fa-circle-dot text-xs mt-0.5 flex-shrink-0"></i>
-                                <span class="flex-1 leading-tight">Standar Managerial Competency Mapping</span>
+                                <span class="flex-1 leading-tight">Standar <i>Managerial Competency Mapping</i></span>
                             </div>
                         </a>
                         <a wire:navigate href="{{ route('standard-psikometrik') }}" role="menuitem"
@@ -475,7 +478,7 @@
                             ])>
                             <div class="flex items-start gap-2">
                                 <i class="fa-solid fa-circle-dot text-xs mt-0.5 flex-shrink-0"></i>
-                                <span class="flex-1 leading-tight">Standar Potential Mapping</span>
+                                <span class="flex-1 leading-tight">Standar <i>Potential Mapping</i></span>
                             </div>
                         </a>
                         <a wire:navigate href="{{ route('general-report.mmpi') }}" role="menuitem"

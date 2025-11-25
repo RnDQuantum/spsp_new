@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
-#[Layout('components.layouts.app', ['title' => 'Dashboard'])]
+#[Layout('components.layouts.app', ['title' => 'Beranda'])]
 class Dashboard extends Component
 {
     public ?Participant $participant = null;
