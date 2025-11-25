@@ -92,7 +92,7 @@
                     ]) :class="minimized ? 'justify-center px-2' : ''">
                     <i class="fa-solid fa-house w-5 text-center" :class="!minimized && 'mr-3'"></i>
                     <span x-show="!minimized" x-transition:enter="transition ease-out duration-200"
-                        x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">Dashboard</span>
+                        x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">Beranda</span>
                 </a>
 
                 <!-- Shortlist Peserta -->
@@ -106,7 +106,7 @@
                     ]) :class="minimized ? 'justify-center px-2' : ''">
                     <i class="fa-solid fa-users w-5 text-center" :class="!minimized && 'mr-3'"></i>
                     <span x-show="!minimized" x-transition:enter="transition ease-out duration-200"
-                        x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">Shortlist
+                        x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">Daftar
                         Peserta</span>
                 </a>
 
