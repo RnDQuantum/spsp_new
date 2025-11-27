@@ -493,6 +493,34 @@
                         </a>
                     </div>
                 </div>
+                <a wire:navigate href="{{ route('shortlist') }}"
+                    x-tooltip.raw="minimized ? 'Shortlist Peserta' : null" @class([
+                        'group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200',
+                        'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border-l-4 border-blue-700 dark:border-blue-400' => $this->isActiveRoute(
+                            'shortlist'),
+                        'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' => !$this->isActiveRoute(
+                            'shortlist'),
+                    ])
+                    :class="minimized ? 'justify-center px-2' : ''">
+                    <i class="fa-solid fa-newspaper w-5 text-center" :class="!minimized && 'mr-3'"></i>
+                    <span x-show="!minimized" x-transition:enter="transition ease-out duration-200"
+                        x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"><i>Laporan Alat
+                            Tes</i></span>
+                </a>
+                <a wire:navigate href="{{ route('shortlist') }}"
+                    x-tooltip.raw="minimized ? 'Shortlist Peserta' : null" @class([
+                        'group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200',
+                        'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border-l-4 border-blue-700 dark:border-blue-400' => $this->isActiveRoute(
+                            'shortlist'),
+                        'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' => !$this->isActiveRoute(
+                            'shortlist'),
+                    ])
+                    :class="minimized ? 'justify-center px-2' : ''">
+                    <i class="fa-solid fa-briefcase w-5 text-center" :class="!minimized && 'mr-3'"></i>
+                    <span x-show="!minimized" x-transition:enter="transition ease-out duration-200"
+                        x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"><i>Talent Pool
+                            Management</i></span>
+                </a>
             </nav>
 
             <!-- Footer - User Info (Optional) -->
