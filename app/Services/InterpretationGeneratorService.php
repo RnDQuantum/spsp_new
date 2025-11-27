@@ -8,7 +8,6 @@ use App\Models\Interpretation;
 use App\Models\Participant;
 use App\Models\SubAspectAssessment;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 class InterpretationGeneratorService
 {
@@ -18,47 +17,47 @@ class InterpretationGeneratorService
     ) {}
 
     /**
-     * Generate interpretations for 1 participant (Potensi + Kompetensi)
+     * Generate interpretations for 1 participant (all categories)
      *
-     * @return array ['potensi' => string, 'kompetensi' => string]
+     * @return array Keyed by category code ['potensi' => string, 'kompetensi' => string, ...]
      */
     public function generateForParticipant(Participant $participant): array
     {
         $results = [];
 
         DB::transaction(function () use ($participant, &$results) {
-            // 1. Generate Potensi Interpretation
-            $results['potensi'] = $this->generatePotensiInterpretation($participant);
+            // Load participant with template
+            $participant->loadMissing('positionFormation.template');
+            $template = $participant->positionFormation->template;
 
-            // 2. Generate Kompetensi Interpretation
-            $results['kompetensi'] = $this->generateKompetensiInterpretation($participant);
+            // ✅ UNIFIED: Generate for all categories dynamically
+            foreach ($template->categoryTypes as $categoryType) {
+                $results[$categoryType->code] = $this->generateCategoryInterpretation(
+                    $participant,
+                    $categoryType
+                );
+            }
         });
 
         return $results;
     }
 
     /**
-     * Generate POTENSI interpretation (berbasis sub-aspects)
+     * Generate category interpretation (UNIFIED for all category types)
+     *
+     * Logic (DATA-DRIVEN):
+     * - For each aspect in category:
+     *   - If aspect has sub-aspect assessments: generate from sub-aspects
+     *   - If aspect has no sub-aspect assessments: generate from aspect directly
+     * - Combine into category interpretation
+     * - Save to database
      */
-    protected function generatePotensiInterpretation(Participant $participant): string
-    {
-        // Load participant with necessary relations
-        $participant->loadMissing('positionFormation.template');
-
-        // Get template & category
-        $template = $participant->positionFormation->template;
-        $potensiCategory = CategoryType::where('template_id', $template->id)
-            ->where('code', 'potensi')
-            ->first();
-
-        if (! $potensiCategory) {
-            Log::warning("Potensi category not found for template {$template->id}");
-
-            return '';
-        }
-
-        // Get all aspects for Potensi (sorted by order)
-        $aspects = $potensiCategory->aspects()->orderBy('order')->get();
+    protected function generateCategoryInterpretation(
+        Participant $participant,
+        CategoryType $categoryType
+    ): string {
+        // Get all aspects for this category (sorted by order)
+        $aspects = $categoryType->aspects()->orderBy('order')->get();
 
         $paragraphs = [];
 
@@ -76,7 +75,7 @@ class InterpretationGeneratorService
         Interpretation::updateOrCreate(
             [
                 'participant_id' => $participant->id,
-                'category_type_id' => $potensiCategory->id,
+                'category_type_id' => $categoryType->id,
             ],
             [
                 'event_id' => $participant->event_id,
@@ -88,11 +87,15 @@ class InterpretationGeneratorService
     }
 
     /**
-     * Build paragraph untuk 1 aspect (aggregate dari sub-aspects)
+     * Build paragraph for 1 aspect (DATA-DRIVEN)
+     *
+     * Logic:
+     * - If aspect has sub-aspect assessments: aggregate from sub-aspects
+     * - If aspect has no sub-aspect assessments: use aspect assessment directly
      */
     protected function buildAspectParagraph(Participant $participant, $aspect): string
     {
-        // Get all sub-aspect assessments for this aspect
+        // Check if this aspect has sub-aspect assessments
         $subAssessments = SubAspectAssessment::whereHas('aspectAssessment', function ($q) use ($aspect) {
             $q->where('aspect_id', $aspect->id);
         })
@@ -101,100 +104,58 @@ class InterpretationGeneratorService
             ->get()
             ->sortBy('subAspect.order');
 
-        if ($subAssessments->isEmpty()) {
-            return '';
-        }
+        // DATA-DRIVEN: Check if aspect has sub-aspect assessments
+        if ($subAssessments->isNotEmpty()) {
+            // Has sub-aspects: build from sub-aspects
+            $sentences = [];
 
-        $sentences = [];
-
-        foreach ($subAssessments as $subAssessment) {
-            // Get template by name (more flexible across different templates)
-            $template = $this->templateService->getTemplateByName(
-                'sub_aspect',
-                $subAssessment->subAspect->name,
-                $subAssessment->individual_rating
-            );
-
-            // Fallback ke default jika template tidak ada
-            if (! $template) {
-                $template = $this->templateService->getDefaultTemplate(
+            foreach ($subAssessments as $subAssessment) {
+                // Get template by name (more flexible across different templates)
+                $template = $this->templateService->getTemplateByName(
+                    'sub_aspect',
+                    $subAssessment->subAspect->name,
                     $subAssessment->individual_rating
                 );
+
+                // Fallback to default if template not found
+                if (! $template) {
+                    $template = $this->templateService->getDefaultTemplate(
+                        $subAssessment->individual_rating
+                    );
+                }
+
+                $sentences[] = $template;
             }
 
-            $sentences[] = $template;
+            // Combine sentences into flowing paragraph
+            return implode(' ', $sentences);
         }
 
-        // Combine sentences into flowing paragraph
-        return implode(' ', $sentences);
-    }
-
-    /**
-     * Generate KOMPETENSI interpretation (berbasis aspects, no sub-aspects)
-     */
-    protected function generateKompetensiInterpretation(Participant $participant): string
-    {
-        // Load participant with necessary relations
-        $participant->loadMissing('positionFormation.template');
-
-        // Get template & category
-        $template = $participant->positionFormation->template;
-        $kompetensiCategory = CategoryType::where('template_id', $template->id)
-            ->where('code', 'kompetensi')
+        // No sub-aspects: use aspect assessment directly
+        $aspectAssessment = AspectAssessment::where('participant_id', $participant->id)
+            ->where('aspect_id', $aspect->id)
             ->first();
 
-        if (! $kompetensiCategory) {
-            Log::warning("Kompetensi category not found for template {$template->id}");
-
+        if (! $aspectAssessment) {
             return '';
         }
 
-        // Get all aspect assessments for Kompetensi
-        $aspectAssessments = AspectAssessment::whereHas('aspect', function ($q) use ($kompetensiCategory) {
-            $q->where('category_type_id', $kompetensiCategory->id);
-        })
-            ->where('participant_id', $participant->id)
-            ->with('aspect')
-            ->get()
-            ->sortBy('aspect.order');
+        // Cast individual_rating to integer for template lookup
+        $ratingValue = (int) round($aspectAssessment->individual_rating);
 
-        $paragraphs = [];
-
-        foreach ($aspectAssessments as $assessment) {
-            // Cast individual_rating to integer for template lookup
-            $ratingValue = (int) round($assessment->individual_rating);
-
-            // Get template by name (more flexible across different templates)
-            $template = $this->templateService->getTemplateByName(
-                'aspect',
-                $assessment->aspect->name,
-                $ratingValue
-            );
-
-            // Fallback
-            if (! $template) {
-                $template = $this->templateService->getDefaultTemplate($ratingValue);
-            }
-
-            $paragraphs[] = $template;
-        }
-
-        // Combine all paragraphs (each aspect = 1 paragraph)
-        $finalText = implode("\n\n", $paragraphs);
-
-        // Save to interpretations table
-        Interpretation::updateOrCreate(
-            [
-                'participant_id' => $participant->id,
-                'category_type_id' => $kompetensiCategory->id,
-            ],
-            [
-                'event_id' => $participant->event_id,
-                'interpretation_text' => $finalText,
-            ]
+        // Get template by name
+        $template = $this->templateService->getTemplateByName(
+            'aspect',
+            $aspect->name,
+            $ratingValue
         );
 
-        return $finalText;
+        // Fallback to default if template not found
+        if (! $template) {
+            $template = $this->templateService->getDefaultTemplate($ratingValue);
+        }
+
+        return $template;
     }
 
     /**
@@ -253,39 +214,41 @@ class InterpretationGeneratorService
      * Generate interpretations for DISPLAY only (no database save)
      * Respects selected custom standard and session adjustments
      *
-     * @return array ['potensi' => string, 'kompetensi' => string]
+     * @return array Keyed by category code ['potensi' => string, 'kompetensi' => string, ...]
      */
     public function generateForDisplay(Participant $participant): array
     {
         $results = [];
 
-        // Generate without saving to database
-        $results['potensi'] = $this->generatePotensiInterpretationForDisplay($participant);
-        $results['kompetensi'] = $this->generateKompetensiInterpretationForDisplay($participant);
+        // Load participant with template
+        $participant->loadMissing('positionFormation.template');
+        $template = $participant->positionFormation->template;
+
+        // ✅ UNIFIED: Generate for all categories dynamically
+        foreach ($template->categoryTypes as $categoryType) {
+            $results[$categoryType->code] = $this->generateCategoryInterpretationForDisplay(
+                $participant,
+                $categoryType
+            );
+        }
 
         return $results;
     }
 
     /**
-     * Generate POTENSI interpretation for display (respects active aspects from session)
+     * Generate category interpretation for display (UNIFIED)
+     *
+     * Respects active aspects from DynamicStandardService (session adjustments)
+     * Does NOT save to database
      */
-    protected function generatePotensiInterpretationForDisplay(Participant $participant): string
-    {
-        $participant->loadMissing('positionFormation.template');
-
+    protected function generateCategoryInterpretationForDisplay(
+        Participant $participant,
+        CategoryType $categoryType
+    ): string {
         $template = $participant->positionFormation->template;
-        $potensiCategory = CategoryType::where('template_id', $template->id)
-            ->where('code', 'potensi')
-            ->first();
-
-        if (! $potensiCategory) {
-            Log::warning("Potensi category not found for template {$template->id}");
-
-            return '';
-        }
 
         // Get all aspects (sorted by order)
-        $aspects = $potensiCategory->aspects()->orderBy('order')->get();
+        $aspects = $categoryType->aspects()->orderBy('order')->get();
 
         // ✅ FILTER by active status (from DynamicStandardService)
         $aspects = $aspects->filter(function ($aspect) use ($template) {
@@ -306,13 +269,15 @@ class InterpretationGeneratorService
     }
 
     /**
-     * Build paragraph for 1 aspect (aggregate from sub-aspects) - Display version
+     * Build paragraph for 1 aspect - Display version (DATA-DRIVEN)
+     *
+     * Respects active sub-aspects from DynamicStandardService
      */
     protected function buildAspectParagraphForDisplay(Participant $participant, $aspect): string
     {
         $template = $participant->positionFormation->template;
 
-        // Get all sub-aspect assessments for this aspect
+        // Check if this aspect has sub-aspect assessments
         $subAssessments = SubAspectAssessment::whereHas('aspectAssessment', function ($q) use ($aspect) {
             $q->where('aspect_id', $aspect->id);
         })
@@ -321,93 +286,65 @@ class InterpretationGeneratorService
             ->get()
             ->sortBy('subAspect.order');
 
-        // ✅ FILTER by active status (from DynamicStandardService)
-        $subAssessments = $subAssessments->filter(function ($subAssessment) use ($template) {
-            return $this->dynamicService->isSubAspectActive($template->id, $subAssessment->subAspect->code);
-        });
+        // DATA-DRIVEN: Check if aspect has sub-aspect assessments
+        if ($subAssessments->isNotEmpty()) {
+            // Has sub-aspects: filter by active status and build from sub-aspects
+            $subAssessments = $subAssessments->filter(function ($subAssessment) use ($template) {
+                return $this->dynamicService->isSubAspectActive($template->id, $subAssessment->subAspect->code);
+            });
 
-        if ($subAssessments->isEmpty()) {
-            return '';
-        }
+            if ($subAssessments->isEmpty()) {
+                return '';
+            }
 
-        $sentences = [];
+            $sentences = [];
 
-        foreach ($subAssessments as $subAssessment) {
-            // Get template by name (more flexible across different templates)
-            $template = $this->templateService->getTemplateByName(
-                'sub_aspect',
-                $subAssessment->subAspect->name,
-                $subAssessment->individual_rating
-            );
-
-            // Fallback ke default jika template tidak ada
-            if (! $template) {
-                $template = $this->templateService->getDefaultTemplate(
+            foreach ($subAssessments as $subAssessment) {
+                // Get template by name
+                $interpretationTemplate = $this->templateService->getTemplateByName(
+                    'sub_aspect',
+                    $subAssessment->subAspect->name,
                     $subAssessment->individual_rating
                 );
+
+                // Fallback to default if template not found
+                if (! $interpretationTemplate) {
+                    $interpretationTemplate = $this->templateService->getDefaultTemplate(
+                        $subAssessment->individual_rating
+                    );
+                }
+
+                $sentences[] = $interpretationTemplate;
             }
 
-            $sentences[] = $template;
+            // Combine sentences into flowing paragraph
+            return implode(' ', $sentences);
         }
 
-        // Combine sentences into flowing paragraph
-        return implode(' ', $sentences);
-    }
-
-    /**
-     * Generate KOMPETENSI interpretation for display (respects active aspects)
-     */
-    protected function generateKompetensiInterpretationForDisplay(Participant $participant): string
-    {
-        $participant->loadMissing('positionFormation.template');
-
-        $template = $participant->positionFormation->template;
-        $kompetensiCategory = CategoryType::where('template_id', $template->id)
-            ->where('code', 'kompetensi')
+        // No sub-aspects: use aspect assessment directly
+        $aspectAssessment = AspectAssessment::where('participant_id', $participant->id)
+            ->where('aspect_id', $aspect->id)
             ->first();
 
-        if (! $kompetensiCategory) {
-            Log::warning("Kompetensi category not found for template {$template->id}");
-
+        if (! $aspectAssessment) {
             return '';
         }
 
-        // Get all aspect assessments for Kompetensi
-        $aspectAssessments = AspectAssessment::whereHas('aspect', function ($q) use ($kompetensiCategory) {
-            $q->where('category_type_id', $kompetensiCategory->id);
-        })
-            ->where('participant_id', $participant->id)
-            ->with('aspect')
-            ->get()
-            ->sortBy('aspect.order');
+        // Cast individual_rating to integer for template lookup
+        $ratingValue = (int) round($aspectAssessment->individual_rating);
 
-        // ✅ FILTER by active status (from DynamicStandardService)
-        $aspectAssessments = $aspectAssessments->filter(function ($assessment) use ($template) {
-            return $this->dynamicService->isAspectActive($template->id, $assessment->aspect->code);
-        });
+        // Get template by name
+        $interpretationTemplate = $this->templateService->getTemplateByName(
+            'aspect',
+            $aspect->name,
+            $ratingValue
+        );
 
-        $paragraphs = [];
-
-        foreach ($aspectAssessments as $assessment) {
-            // Cast individual_rating to integer for template lookup
-            $ratingValue = (int) round($assessment->individual_rating);
-
-            // Get template by name (more flexible across different templates)
-            $template = $this->templateService->getTemplateByName(
-                'aspect',
-                $assessment->aspect->name,
-                $ratingValue
-            );
-
-            // Fallback
-            if (! $template) {
-                $template = $this->templateService->getDefaultTemplate($ratingValue);
-            }
-
-            $paragraphs[] = $template;
+        // Fallback to default if template not found
+        if (! $interpretationTemplate) {
+            $interpretationTemplate = $this->templateService->getDefaultTemplate($ratingValue);
         }
 
-        // Combine all paragraphs (each aspect = 1 paragraph)
-        return implode("\n\n", $paragraphs);
+        return $interpretationTemplate;
     }
 }

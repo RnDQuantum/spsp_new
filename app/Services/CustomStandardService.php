@@ -85,6 +85,12 @@ class CustomStandardService
 
     /**
      * Get default values from template (for form initialization)
+     *
+     * Logic (DATA-DRIVEN):
+     * - All categories get weights
+     * - All aspects get weights + active status
+     * - Aspects WITHOUT sub-aspects get rating field
+     * - All sub-aspects get rating + active status
      */
     public function getTemplateDefaults(int $templateId): array
     {
@@ -97,27 +103,27 @@ class CustomStandardService
         $subAspectConfigs = [];
 
         foreach ($template->categoryTypes as $category) {
+            // Category weights (all categories)
             $categoryWeights[$category->code] = $category->weight_percentage;
 
             foreach ($category->aspects as $aspect) {
+                // Base aspect config (all aspects)
                 $aspectConfigs[$aspect->code] = [
                     'weight' => $aspect->weight_percentage,
                     'active' => true,
                 ];
 
-                // Add rating for Kompetensi aspects
-                if ($category->code === 'kompetensi') {
+                // ✅ DATA-DRIVEN: Add rating only if aspect has NO sub-aspects
+                if ($aspect->subAspects->isEmpty()) {
                     $aspectConfigs[$aspect->code]['rating'] = (float) $aspect->standard_rating;
                 }
 
-                // Add sub-aspects for Potensi aspects
-                if ($category->code === 'potensi') {
-                    foreach ($aspect->subAspects as $subAspect) {
-                        $subAspectConfigs[$subAspect->code] = [
-                            'rating' => $subAspect->standard_rating,
-                            'active' => true,
-                        ];
-                    }
+                // Sub-aspect configs (if aspect has sub-aspects)
+                foreach ($aspect->subAspects as $subAspect) {
+                    $subAspectConfigs[$subAspect->code] = [
+                        'rating' => $subAspect->standard_rating,
+                        'active' => true,
+                    ];
                 }
             }
         }

@@ -112,16 +112,16 @@ class IndividualAssessmentService
         $adjustedWeight = $standardService->getAspectWeight($templateId, $aspect->code);
         $originalWeight = $aspect->weight_percentage;
 
-        // Recalculate ratings based on category type
-        if ($categoryCode === 'potensi') {
-            // Potensi: Calculate from active sub-aspects
-            [$recalculatedStandardRating, $recalculatedIndividualRating] = $this->calculatePotensiRatings(
+        // ✅ DATA-DRIVEN: Recalculate ratings based on structure
+        if ($aspect->subAspects->isNotEmpty()) {
+            // Has sub-aspects: Calculate from active sub-aspects
+            [$recalculatedStandardRating, $recalculatedIndividualRating] = $this->calculateRatingsFromSubAspects(
                 $assessment,
                 $templateId,
                 $standardService
             );
         } else {
-            // Kompetensi: Use direct ratings
+            // No sub-aspects: Use direct ratings
             $recalculatedStandardRating = $standardService->getAspectRating($templateId, $aspect->code);
             $recalculatedIndividualRating = (float) $assessment->individual_rating;
         }
@@ -176,21 +176,21 @@ class IndividualAssessmentService
     }
 
     /**
-     * Calculate Potensi aspect ratings from active sub-aspects
+     * Calculate aspect ratings from active sub-aspects (DATA-DRIVEN)
      *
      * @param  AspectAssessment  $assessment  Aspect assessment
      * @param  int  $templateId  Template ID
      * @param  DynamicStandardService  $standardService  Standard service
      * @return array [standardRating, individualRating]
      */
-    private function calculatePotensiRatings(
+    private function calculateRatingsFromSubAspects(
         AspectAssessment $assessment,
         int $templateId,
         DynamicStandardService $standardService
     ): array {
         $aspect = $assessment->aspect;
 
-        if (! $aspect->subAspects || $aspect->subAspects->count() === 0) {
+        if ($aspect->subAspects->isEmpty()) {
             // No sub-aspects, return null to use database values
             return [null, null];
         }
@@ -493,24 +493,24 @@ class IndividualAssessmentService
     ): array {
         $aspect = $assessment->aspect;
 
-        // Calculate aspect-level matching percentage and ratings
-        if ($categoryCode === 'potensi') {
-            // Potensi: Calculate from active sub-aspects
-            [$standardRating, $individualRating, $matchingPercentage] = $this->calculatePotensiMatching(
+        // ✅ DATA-DRIVEN: Calculate aspect-level matching percentage and ratings
+        if ($aspect->subAspects->isNotEmpty()) {
+            // Has sub-aspects: Calculate from active sub-aspects
+            [$standardRating, $individualRating, $matchingPercentage] = $this->calculateMatchingFromSubAspects(
                 $assessment,
                 $templateId,
                 $standardService
             );
         } else {
-            // Kompetensi: Use direct ratings
+            // No sub-aspects: Use direct ratings
             $standardRating = $standardService->getAspectRating($templateId, $aspect->code);
             $individualRating = (float) $assessment->individual_rating;
             $matchingPercentage = $this->calculateMatchingPercentage($individualRating, $standardRating);
         }
 
-        // Load sub-aspects data (for Potensi)
+        // Load sub-aspects data (if aspect has sub-aspects)
         $subAspects = [];
-        if ($categoryCode === 'potensi' && $assessment->subAspectAssessments->isNotEmpty()) {
+        if ($aspect->subAspects->isNotEmpty() && $assessment->subAspectAssessments->isNotEmpty()) {
             $subAspects = $this->getSubAspectMatchingData(
                 $assessment,
                 $templateId,
@@ -531,21 +531,21 @@ class IndividualAssessmentService
     }
 
     /**
-     * Calculate Potensi aspect matching from active sub-aspects
+     * Calculate aspect matching from active sub-aspects (DATA-DRIVEN)
      *
      * @param  AspectAssessment  $assessment  Aspect assessment
      * @param  int  $templateId  Template ID
      * @param  DynamicStandardService  $standardService  Standard service
      * @return array [standardRating, individualRating, matchingPercentage]
      */
-    private function calculatePotensiMatching(
+    private function calculateMatchingFromSubAspects(
         AspectAssessment $assessment,
         int $templateId,
         DynamicStandardService $standardService
     ): array {
         $aspect = $assessment->aspect;
 
-        if (! $aspect->subAspects || $aspect->subAspects->count() === 0) {
+        if ($aspect->subAspects->isEmpty()) {
             // No sub-aspects, use aspect-level ratings
             $standardRating = $standardService->getAspectRating($templateId, $aspect->code);
             $individualRating = (float) $assessment->individual_rating;

@@ -58,9 +58,14 @@ class DynamicStandardService
                 $value = match ($type) {
                     'category_weight' => $customStandard->category_weights[$code] ?? null,
                     'aspect_weight' => $customStandard->aspect_configs[$code]['weight'] ?? null,
-                    'aspect_rating' => isset($customStandard->aspect_configs[$code]['rating'])
-                        ? (float) $customStandard->aspect_configs[$code]['rating']
-                        : null,
+
+                    // ✅ UPDATED: aspect_rating now data-driven for custom standard
+                    'aspect_rating' => $this->getAspectRatingFromCustomStandard(
+                        $customStandard,
+                        $code,
+                        $templateId
+                    ),
+
                     'sub_aspect_rating' => isset($customStandard->sub_aspect_configs[$code]['rating'])
                         ? (int) $customStandard->sub_aspect_configs[$code]['rating']
                         : null,
@@ -113,15 +118,56 @@ class DynamicStandardService
     }
 
     /**
-     * Get original aspect rating from database
+     * Get original aspect rating from database (data-driven)
+     *
+     * Logic:
+     * - If aspect has sub-aspects: calculate weighted average from them
+     * - If aspect has no sub-aspects: use aspect's own standard_rating
      */
     private function getOriginalAspectRating(int $templateId, string $aspectCode): float
     {
         $aspect = Aspect::where('template_id', $templateId)
             ->where('code', $aspectCode)
+            ->with('subAspects') // Eager load to check
             ->first();
 
-        return $aspect ? (float) $aspect->standard_rating : 0.0;
+        if (! $aspect) {
+            return 0.0;
+        }
+
+        // DATA-DRIVEN: Check if aspect has sub-aspects
+        if ($aspect->subAspects->isNotEmpty()) {
+            // Has sub-aspects: calculate weighted average
+            return $this->calculateRatingFromSubAspects($aspect->subAspects);
+        }
+
+        // No sub-aspects: use aspect's own rating
+        return (float) $aspect->standard_rating;
+    }
+
+    /**
+     * Calculate aspect rating from sub-aspects (weighted average)
+     *
+     * Formula: Average of all sub-aspect ratings
+     *
+     * @param  \Illuminate\Support\Collection  $subAspects  Collection of SubAspect models
+     * @return float Calculated rating (0.0 if no sub-aspects)
+     */
+    private function calculateRatingFromSubAspects(\Illuminate\Support\Collection $subAspects): float
+    {
+        if ($subAspects->isEmpty()) {
+            return 0.0;
+        }
+
+        $totalRating = 0;
+        $count = 0;
+
+        foreach ($subAspects as $subAspect) {
+            $totalRating += $subAspect->standard_rating;
+            $count++;
+        }
+
+        return $count > 0 ? round($totalRating / $count, 2) : 0.0;
     }
 
     /**
@@ -134,6 +180,64 @@ class DynamicStandardService
         })->where('code', $subAspectCode)->first();
 
         return $subAspect ? $subAspect->standard_rating : 0;
+    }
+
+    /**
+     * Get aspect rating from custom standard (data-driven)
+     *
+     * Logic:
+     * - If aspect has active sub-aspects in custom standard: calculate from them
+     * - If aspect has no sub-aspects: use aspect's own rating from custom standard
+     * - If not found in custom standard: return null (will fallback to Quantum)
+     */
+    private function getAspectRatingFromCustomStandard(
+        CustomStandard $customStandard,
+        string $aspectCode,
+        int $templateId
+    ): ?float {
+        // Get aspect from database to check structure
+        $aspect = Aspect::where('template_id', $templateId)
+            ->where('code', $aspectCode)
+            ->with('subAspects')
+            ->first();
+
+        if (! $aspect) {
+            return null;
+        }
+
+        // DATA-DRIVEN: Check if aspect has sub-aspects
+        if ($aspect->subAspects->isNotEmpty()) {
+            // Has sub-aspects: calculate from custom standard's sub-aspect configs
+            $activeSubAspects = $aspect->subAspects->filter(function ($subAspect) use ($customStandard) {
+                // Check if sub-aspect is active in custom standard
+                $isActive = $customStandard->sub_aspect_configs[$subAspect->code]['active'] ?? true;
+
+                return $isActive;
+            });
+
+            if ($activeSubAspects->isEmpty()) {
+                return null;
+            }
+
+            // Calculate weighted average from custom standard's sub-aspect ratings
+            $totalRating = 0;
+            $count = 0;
+
+            foreach ($activeSubAspects as $subAspect) {
+                $rating = $customStandard->sub_aspect_configs[$subAspect->code]['rating']
+                    ?? $subAspect->standard_rating; // Fallback to quantum if not in custom std
+
+                $totalRating += $rating;
+                $count++;
+            }
+
+            return $count > 0 ? round($totalRating / $count, 2) : null;
+        }
+
+        // No sub-aspects: use aspect's own rating from custom standard
+        return isset($customStandard->aspect_configs[$aspectCode]['rating'])
+            ? (float) $customStandard->aspect_configs[$aspectCode]['rating']
+            : null;
     }
 
     /**

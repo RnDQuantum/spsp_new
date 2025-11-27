@@ -20,22 +20,24 @@ class AssessmentCalculationService
     /**
      * Calculate all assessments for a single participant
      *
-     * @param  array  $assessmentsData  Data from API: ['potensi' => [...], 'kompetensi' => [...]]
+     * Data structure from API:
+     * [
+     *     'potensi' => [ ... aspects ... ],
+     *     'kompetensi' => [ ... aspects ... ],
+     *     // or any other category codes
+     * ]
+     *
+     * @param  array  $assessmentsData  Data from API grouped by category code
      */
     public function calculateParticipant(Participant $participant, array $assessmentsData): void
     {
         DB::transaction(function () use ($participant, $assessmentsData) {
-            // 1. Process Potensi (with sub-aspects)
-            if (isset($assessmentsData['potensi'])) {
-                $this->processPotensi($participant, $assessmentsData['potensi']);
+            // ✅ UNIFIED: Process all categories (works for any category code)
+            foreach ($assessmentsData as $categoryCode => $categoryData) {
+                $this->processCategory($participant, $categoryCode, $categoryData);
             }
 
-            // 2. Process Kompetensi (direct aspect ratings)
-            if (isset($assessmentsData['kompetensi'])) {
-                $this->processKompetensi($participant, $assessmentsData['kompetensi']);
-            }
-
-            // 3. Calculate Final Assessment
+            // Calculate Final Assessment (weighted combination of all categories)
             $this->finalAssessmentService->calculateFinal($participant);
         });
     }
@@ -56,85 +58,73 @@ class AssessmentCalculationService
 
     /**
      * Recalculate existing assessments (no new data from API)
+     *
+     * This recalculates all aspects and categories for a participant
+     * based on existing data (useful when standards change)
      */
     public function recalculateParticipant(Participant $participant): void
     {
         DB::transaction(function () use ($participant) {
-            // 1. Recalculate Potensi aspects from existing sub-aspects
-            $potensiCategory = $this->categoryService->createCategoryAssessment($participant, 'potensi');
-            $aspectAssessments = $potensiCategory->aspectAssessments;
+            // Get all category assessments for this participant
+            $categoryAssessments = $participant->categoryAssessments()
+                ->with('aspectAssessments')
+                ->get();
 
-            foreach ($aspectAssessments as $aspectAssessment) {
-                $this->aspectService->calculatePotensiAspect($aspectAssessment);
+            // ✅ UNIFIED: Recalculate all categories dynamically
+            foreach ($categoryAssessments as $categoryAssessment) {
+                // Recalculate each aspect in this category
+                foreach ($categoryAssessment->aspectAssessments as $aspectAssessment) {
+                    $this->aspectService->calculateAspect($aspectAssessment);
+                }
+
+                // Recalculate category totals
+                $this->categoryService->calculateCategory($categoryAssessment);
             }
 
-            // 2. Recalculate Potensi category
-            $this->categoryService->calculateCategory($potensiCategory);
-
-            // 3. Recalculate Kompetensi category
-            $kompetensiCategory = $this->categoryService->createCategoryAssessment($participant, 'kompetensi');
-            $this->categoryService->calculateCategory($kompetensiCategory);
-
-            // 4. Recalculate Final Assessment
+            // Recalculate Final Assessment
             $this->finalAssessmentService->calculateFinal($participant);
         });
     }
 
     /**
-     * Process Potensi assessments (with sub-aspects)
+     * Process category assessments (UNIFIED for all category types)
      *
-     * @param  array  $potensiData  Array of aspects with sub_aspects
+     * Logic (DATA-DRIVEN):
+     * - Create CategoryAssessment
+     * - For each aspect in category data:
+     *   - Create AspectAssessment
+     *   - If aspect has sub-aspects in data: process them
+     *   - Calculate aspect from service
+     * - Calculate category totals
+     *
+     * @param  string  $categoryCode  Category code (e.g., 'potensi', 'kompetensi', 'integritas')
+     * @param  array  $categoryData  Array of aspects with individual_rating (and optionally sub_aspects)
      */
-    private function processPotensi(Participant $participant, array $potensiData): void
+    private function processCategory(Participant $participant, string $categoryCode, array $categoryData): void
     {
         // 1. Create category assessment
-        $categoryAssessment = $this->categoryService->createCategoryAssessment($participant, 'potensi');
+        $categoryAssessment = $this->categoryService->createCategoryAssessment($participant, $categoryCode);
 
-        foreach ($potensiData as $aspectData) {
+        foreach ($categoryData as $aspectData) {
             // 2. Create aspect assessment
             $aspectAssessment = $this->aspectService->createAspectAssessment(
                 $categoryAssessment,
                 $aspectData['aspect_code']
             );
 
-            // 3. Store sub-aspect assessments (raw data from API)
+            // DATA-DRIVEN: Check if aspect has sub-aspects in the data
             if (isset($aspectData['sub_aspects']) && ! empty($aspectData['sub_aspects'])) {
+                // Process sub-aspects (store raw data from API)
                 $this->subAspectService->storeMultipleSubAspects(
                     $aspectAssessment,
                     $aspectData['sub_aspects']
                 );
             }
 
-            // 4. Calculate aspect rating (AVG from sub-aspects)
-            $this->aspectService->calculatePotensiAspect($aspectAssessment);
-        }
-
-        // 5. Calculate category total (SUM from aspects)
-        $this->categoryService->calculateCategory($categoryAssessment);
-    }
-
-    /**
-     * Process Kompetensi assessments (direct aspect ratings, no sub-aspects)
-     *
-     * @param  array  $kompetensiData  Array of aspects with individual_rating
-     */
-    private function processKompetensi(Participant $participant, array $kompetensiData): void
-    {
-        // 1. Create category assessment
-        $categoryAssessment = $this->categoryService->createCategoryAssessment($participant, 'kompetensi');
-
-        foreach ($kompetensiData as $aspectData) {
-            // 2. Create aspect assessment
-            $aspectAssessment = $this->aspectService->createAspectAssessment(
-                $categoryAssessment,
-                $aspectData['aspect_code']
-            );
-
-            // 3. Calculate aspect (direct rating from API, no sub-aspects)
-            $this->aspectService->calculateKompetensiAspect(
-                $aspectAssessment,
-                $aspectData['individual_rating']
-            );
+            // 3. Calculate aspect (service will determine if from sub-aspects or direct)
+            // Pass individual_rating if exists (for aspects without sub-aspects)
+            $individualRating = $aspectData['individual_rating'] ?? null;
+            $this->aspectService->calculateAspect($aspectAssessment, $individualRating);
         }
 
         // 4. Calculate category total (SUM from aspects)

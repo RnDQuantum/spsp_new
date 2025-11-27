@@ -17,59 +17,70 @@ class AspectService
     ) {}
 
     /**
-     * Calculate aspect assessment for Potensi (from sub-aspects)
-     * PHASE 2E: Now integrated with DynamicStandardService
+     * Calculate aspect assessment (UNIFIED for all types)
+     *
+     * Logic (DATA-DRIVEN):
+     * - Get aspect weight from DynamicStandardService (handles session/custom/default)
+     * - If aspect has sub-aspect assessments: calculate rating from them
+     * - If aspect has no sub-aspect assessments: use individual_rating parameter
+     * - Calculate scores (standard, individual, gap)
+     * - Determine conclusion
+     * - Save to database
+     *
+     * @param  float|int|null  $individualRating  From API for aspects without sub-aspects
      */
-    public function calculatePotensiAspect(AspectAssessment $aspectAssessment): void
+    public function calculateAspect(AspectAssessment $aspectAssessment, $individualRating = null): void
     {
         // 1. Get aspect from master
         $aspect = Aspect::with('subAspects')->findOrFail($aspectAssessment->aspect_id);
         $templateId = $aspect->template_id;
 
-        // 2. Get all sub-aspect assessments (filter only active sub-aspects)
+        // 2. Get adjusted weight from DynamicStandardService
+        $weight = $this->dynamicStandardService->getAspectWeight($templateId, $aspect->code);
+
+        // 3. DATA-DRIVEN: Determine rating source
         $subAssessments = SubAspectAssessment::where(
             'aspect_assessment_id',
             $aspectAssessment->id
         )->get();
 
-        if ($subAssessments->isEmpty()) {
-            return; // Skip if no sub-aspects
+        if ($subAssessments->isNotEmpty()) {
+            // Has sub-aspect assessments: calculate ratings from them
+            // Filter only ACTIVE sub-aspects based on session
+            $activeSubAssessments = $subAssessments->filter(function ($subAssessment) use ($templateId) {
+                $subAspect = $subAssessment->subAspect;
+
+                return $this->dynamicStandardService->isSubAspectActive($templateId, $subAspect->code);
+            });
+
+            if ($activeSubAssessments->isEmpty()) {
+                return; // Skip if no active sub-aspects
+            }
+
+            // Calculate individual_rating = AVERAGE of ACTIVE sub-aspects (DECIMAL)
+            $individualRating = $activeSubAssessments->avg('individual_rating');
+        } elseif ($individualRating === null) {
+            // No sub-aspects and no individual rating provided, skip
+            return;
         }
 
-        // PHASE 2E: Filter only ACTIVE sub-aspects based on session
-        $activeSubAssessments = $subAssessments->filter(function ($subAssessment) use ($templateId) {
-            $subAspect = $subAssessment->subAspect;
-
-            return $this->dynamicStandardService->isSubAspectActive($templateId, $subAspect->code);
-        });
-
-        if ($activeSubAssessments->isEmpty()) {
-            return; // Skip if no active sub-aspects
-        }
-
-        // 3. Calculate individual_rating = AVERAGE of ACTIVE sub-aspects (DECIMAL)
-        $individualRating = $activeSubAssessments->avg('individual_rating');
-
-        // 4. Get adjusted weight from DynamicStandardService
-        $weight = $this->dynamicStandardService->getAspectWeight($templateId, $aspect->code);
-
-        // 5. Calculate scores using adjusted weight
+        // 4. Calculate scores using adjusted weight
         // Score = rating × weight_percentage
         $standardScore = $aspectAssessment->standard_rating * $weight;
         $individualScore = $individualRating * $weight;
 
-        // 6. Calculate gaps
+        // 5. Calculate gaps
         $gapRating = $individualRating - $aspectAssessment->standard_rating;
         $gapScore = $individualScore - $standardScore;
 
-        // 7. Calculate percentage for spider chart (rating out of max scale 5)
+        // 6. Calculate percentage for spider chart (rating out of max scale 5)
         $percentageScore = (int) round(($individualRating / 5) * 100);
 
-        // 8. Determine conclusion
+        // 7. Determine conclusion
         $conclusionCode = $this->determineConclusion($gapRating);
         $conclusionText = $this->getConclusionText($conclusionCode);
 
-        // 9. Update aspect assessment
+        // 8. Update aspect assessment
         $aspectAssessment->update([
             'individual_rating' => round($individualRating, 2),
             'standard_score' => round($standardScore, 2),
@@ -83,53 +94,11 @@ class AspectService
     }
 
     /**
-     * Calculate aspect assessment for Kompetensi (direct from API)
-     * PHASE 2E: Now integrated with DynamicStandardService
-     *
-     * @param  int  $individualRating  From API (INTEGER 1-5)
-     */
-    public function calculateKompetensiAspect(
-        AspectAssessment $aspectAssessment,
-        int $individualRating
-    ): void {
-        // 1. Get aspect from master
-        $aspect = Aspect::findOrFail($aspectAssessment->aspect_id);
-        $templateId = $aspect->template_id;
-
-        // 2. Get adjusted weight from DynamicStandardService
-        $weight = $this->dynamicStandardService->getAspectWeight($templateId, $aspect->code);
-
-        // 3. Calculate scores using adjusted weight
-        // Score = rating × weight_percentage
-        $standardScore = $aspectAssessment->standard_rating * $weight;
-        $individualScore = $individualRating * $weight;
-
-        // 4. Calculate gaps
-        $gapRating = $individualRating - $aspectAssessment->standard_rating;
-        $gapScore = $individualScore - $standardScore;
-
-        // 5. Calculate percentage (rating out of max scale 5)
-        $percentageScore = (int) round(($individualRating / 5) * 100);
-
-        // 6. Determine conclusion
-        $conclusionCode = $this->determineConclusion($gapRating);
-        $conclusionText = $this->getConclusionText($conclusionCode);
-
-        // 7. Update aspect assessment
-        $aspectAssessment->update([
-            'individual_rating' => $individualRating, // Already INTEGER from API
-            'standard_score' => round($standardScore, 2),
-            'individual_score' => round($individualScore, 2),
-            'gap_rating' => round($gapRating, 2),
-            'gap_score' => round($gapScore, 2),
-            'percentage_score' => $percentageScore,
-            'conclusion_code' => $conclusionCode,
-            'conclusion_text' => $conclusionText,
-        ]);
-    }
-
-    /**
      * Create aspect assessment record (without calculation)
+     *
+     * Logic (DATA-DRIVEN):
+     * - If aspect has sub-aspects: calculate standard_rating from sub-aspects average
+     * - If aspect has no sub-aspects: use aspect's own standard_rating
      */
     public function createAspectAssessment(
         CategoryAssessment $categoryAssessment,
@@ -138,25 +107,15 @@ class AspectService
         // 1. Find aspect from master
         $aspect = Aspect::where('category_type_id', $categoryAssessment->category_type_id)
             ->where('code', $aspectCode)
+            ->with('subAspects') // Eager load to check structure
             ->firstOrFail();
 
-        // 2. Determine standard_rating based on category type
-        $categoryAssessment->loadMissing('categoryType');
-        $categoryCode = $categoryAssessment->categoryType->code;
-
-        if ($categoryCode === 'potensi') {
-            // POTENSI: Calculate standard_rating from sub-aspects average
-            // Load sub-aspects from master
-            $aspect->loadMissing('subAspects');
-
-            if ($aspect->subAspects->isNotEmpty()) {
-                $standardRating = (float) $aspect->subAspects->avg('standard_rating');
-            } else {
-                // Fallback: use aspect standard_rating if no sub-aspects
-                $standardRating = (float) $aspect->standard_rating;
-            }
+        // 2. ✅ DATA-DRIVEN: Determine standard_rating based on actual structure
+        if ($aspect->subAspects->isNotEmpty()) {
+            // Has sub-aspects: Calculate standard_rating from sub-aspects average
+            $standardRating = (float) $aspect->subAspects->avg('standard_rating');
         } else {
-            // KOMPETENSI: Use standard_rating from master (hardcoded)
+            // No sub-aspects: Use aspect's own standard_rating
             $standardRating = (float) $aspect->standard_rating;
         }
 

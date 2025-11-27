@@ -86,16 +86,16 @@ class RankingService
             // Get adjusted weight from session
             $adjustedWeight = $standardService->getAspectWeight($templateId, $aspect->code);
 
-            // Recalculate individual rating based on category
-            if ($categoryCode === 'potensi') {
-                // For Potensi: calculate from active sub-aspects
-                $individualRating = $this->calculatePotensiIndividualRating(
+            // ✅ DATA-DRIVEN: Recalculate individual rating based on structure
+            if ($aspect->subAspects->isNotEmpty()) {
+                // Has sub-aspects: calculate from active sub-aspects
+                $individualRating = $this->calculateIndividualRatingFromSubAspects(
                     $assessment,
                     $templateId,
                     $standardService
                 );
             } else {
-                // For Kompetensi: use direct rating
+                // No sub-aspects: use direct rating
                 $individualRating = (float) $assessment->individual_rating;
             }
 
@@ -259,16 +259,16 @@ class RankingService
             // Get adjusted weight from DynamicStandardService (handles priority chain)
             $aspectWeight = $standardService->getAspectWeight($templateId, $aspect->code);
 
-            // Get aspect rating based on category
-            if ($categoryCode === 'potensi') {
-                // For Potensi: calculate from sub-aspects
-                $aspectRating = $this->calculatePotensiAspectRating(
+            // ✅ DATA-DRIVEN: Get aspect rating based on structure
+            if ($aspect->subAspects->isNotEmpty()) {
+                // Has sub-aspects: calculate from sub-aspects
+                $aspectRating = $this->calculateAspectRatingFromSubAspects(
                     $aspect,
                     $templateId,
                     $standardService
                 );
             } else {
-                // For Kompetensi: get direct rating from DynamicStandardService
+                // No sub-aspects: get direct rating from DynamicStandardService
                 $aspectRating = $standardService->getAspectRating($templateId, $aspect->code);
             }
 
@@ -325,19 +325,19 @@ class RankingService
     }
 
     /**
-     * Calculate Potensi aspect rating from active sub-aspects
+     * Calculate aspect rating from active sub-aspects (DATA-DRIVEN)
      *
      * @param  \App\Models\Aspect  $aspect  Aspect model
      * @param  int  $templateId  Template ID
      * @param  DynamicStandardService  $standardService  Standard service instance
      * @return float Calculated aspect rating
      */
-    private function calculatePotensiAspectRating(
+    private function calculateAspectRatingFromSubAspects(
         $aspect,
         int $templateId,
         DynamicStandardService $standardService
     ): float {
-        if (! $aspect->subAspects || $aspect->subAspects->count() === 0) {
+        if ($aspect->subAspects->isEmpty()) {
             // No sub-aspects, use direct rating from session
             return $standardService->getAspectRating($templateId, $aspect->code);
         }
@@ -366,21 +366,21 @@ class RankingService
     }
 
     /**
-     * Calculate Potensi individual rating from active sub-aspects
+     * Calculate individual rating from active sub-aspects (DATA-DRIVEN)
      *
      * @param  \App\Models\AspectAssessment  $assessment  Aspect assessment
      * @param  int  $templateId  Template ID
      * @param  DynamicStandardService  $standardService  Standard service instance
      * @return float Calculated individual rating
      */
-    private function calculatePotensiIndividualRating(
+    private function calculateIndividualRatingFromSubAspects(
         $assessment,
         int $templateId,
         DynamicStandardService $standardService
     ): float {
         $aspect = $assessment->aspect;
 
-        if (! $aspect->subAspects || $aspect->subAspects->count() === 0) {
+        if ($aspect->subAspects->isEmpty()) {
             // No sub-aspects, use direct individual rating
             return (float) $assessment->individual_rating;
         }

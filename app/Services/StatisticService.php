@@ -83,10 +83,10 @@ class StatisticService
     }
 
     /**
-     * Calculate adjusted standard rating for an aspect
+     * Calculate adjusted standard rating for an aspect (DATA-DRIVEN)
      *
-     * For Potensi: Average of active sub-aspect ratings (from session)
-     * For Kompetensi: Direct aspect rating (from session)
+     * For aspects with sub-aspects: Average of active sub-aspect ratings (from session)
+     * For aspects without sub-aspects: Direct aspect rating (from session)
      *
      * @param  Aspect  $aspect  Aspect model
      * @param  int  $templateId  Template ID
@@ -98,13 +98,8 @@ class StatisticService
         int $templateId,
         DynamicStandardService $standardService
     ): float {
-        // For Potensi category with sub-aspects
-        if (
-            $aspect->categoryType &&
-            $aspect->categoryType->code === 'potensi' &&
-            $aspect->subAspects &&
-            $aspect->subAspects->count() > 0
-        ) {
+        // ✅ DATA-DRIVEN: Check if aspect has sub-aspects
+        if ($aspect->subAspects->isNotEmpty()) {
             $subAspectRatingSum = 0;
             $activeSubAspectsCount = 0;
 
@@ -128,12 +123,12 @@ class StatisticService
             return 0.0;
         }
 
-        // For Kompetensi or aspects without sub-aspects
+        // No sub-aspects: use direct aspect rating
         return $standardService->getAspectRating($templateId, $aspect->code);
     }
 
     /**
-     * Calculate frequency distribution (recalculated for Potensi from active sub-aspects)
+     * Calculate frequency distribution (DATA-DRIVEN)
      *
      * Distribution buckets based on classification table:
      * I:   1.00 - 1.80  (Sangat Kurang)
@@ -158,14 +153,11 @@ class StatisticService
     ): array {
         $distribution = [1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0];
 
-        // Check if we need to recalculate from sub-aspects (Potensi category)
-        $needsRecalculation = $aspect->categoryType &&
-            $aspect->categoryType->code === 'potensi' &&
-            $aspect->subAspects &&
-            $aspect->subAspects->count() > 0;
+        // ✅ DATA-DRIVEN: Check if we need to recalculate from sub-aspects
+        $needsRecalculation = $aspect->subAspects->isNotEmpty();
 
         if (! $needsRecalculation) {
-            // For Kompetensi: Use stored individual_rating directly
+            // No sub-aspects: Use stored individual_rating directly
             $rows = DB::table('aspect_assessments')
                 ->where('event_id', $eventId)
                 ->where('position_formation_id', $positionFormationId)
@@ -194,7 +186,7 @@ class StatisticService
             return $distribution;
         }
 
-        // For Potensi: Recalculate individual rating from active sub-aspects
+        // Has sub-aspects: Recalculate individual rating from active sub-aspects
         $assessments = AspectAssessment::with('subAspectAssessments.subAspect')
             ->where('event_id', $eventId)
             ->where('position_formation_id', $positionFormationId)
@@ -203,7 +195,7 @@ class StatisticService
 
         foreach ($assessments as $assessment) {
             // Recalculate individual rating from active sub-aspects
-            $recalculatedRating = $this->calculatePotensiIndividualRating(
+            $recalculatedRating = $this->calculateIndividualRatingFromSubAspects(
                 $assessment,
                 $templateId,
                 $standardService
@@ -221,7 +213,7 @@ class StatisticService
     }
 
     /**
-     * Calculate average individual rating (recalculated for Potensi from active sub-aspects)
+     * Calculate average individual rating (DATA-DRIVEN)
      *
      * @param  int  $eventId  Event ID
      * @param  int  $positionFormationId  Position formation ID
@@ -237,14 +229,11 @@ class StatisticService
         int $templateId,
         DynamicStandardService $standardService
     ): float {
-        // Check if we need to recalculate from sub-aspects (Potensi category)
-        $needsRecalculation = $aspect->categoryType &&
-            $aspect->categoryType->code === 'potensi' &&
-            $aspect->subAspects &&
-            $aspect->subAspects->count() > 0;
+        // ✅ DATA-DRIVEN: Check if we need to recalculate from sub-aspects
+        $needsRecalculation = $aspect->subAspects->isNotEmpty();
 
         if (! $needsRecalculation) {
-            // For Kompetensi: Use stored individual_rating directly
+            // No sub-aspects: Use stored individual_rating directly
             $avg = DB::table('aspect_assessments')
                 ->where('event_id', $eventId)
                 ->where('position_formation_id', $positionFormationId)
@@ -254,7 +243,7 @@ class StatisticService
             return (float) ($avg ?? 0);
         }
 
-        // For Potensi: Recalculate from active sub-aspects
+        // Has sub-aspects: Recalculate from active sub-aspects
         $assessments = AspectAssessment::with('subAspectAssessments.subAspect')
             ->where('event_id', $eventId)
             ->where('position_formation_id', $positionFormationId)
@@ -270,7 +259,7 @@ class StatisticService
 
         foreach ($assessments as $assessment) {
             // Recalculate individual rating from active sub-aspects
-            $recalculatedRating = $this->calculatePotensiIndividualRating(
+            $recalculatedRating = $this->calculateIndividualRatingFromSubAspects(
                 $assessment,
                 $templateId,
                 $standardService
@@ -284,14 +273,14 @@ class StatisticService
     }
 
     /**
-     * Calculate Potensi individual rating from active sub-aspects
+     * Calculate individual rating from active sub-aspects (DATA-DRIVEN)
      *
      * @param  AspectAssessment  $assessment  Aspect assessment
      * @param  int  $templateId  Template ID
      * @param  DynamicStandardService  $standardService  Standard service instance
      * @return float Individual rating
      */
-    private function calculatePotensiIndividualRating(
+    private function calculateIndividualRatingFromSubAspects(
         AspectAssessment $assessment,
         int $templateId,
         DynamicStandardService $standardService

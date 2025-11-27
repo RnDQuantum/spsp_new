@@ -246,8 +246,9 @@ class TrainingRecommendationService
     /**
      * Get original standard rating for an aspect (before tolerance adjustment)
      *
-     * For Potensi category: Calculate average from active sub-aspects
-     * For Kompetensi category: Use aspect rating directly
+     * Logic (DATA-DRIVEN):
+     * - If aspect has sub-aspects: calculate average from active sub-aspects
+     * - If aspect has no sub-aspects: use aspect rating directly
      *
      * @param  Aspect  $aspect  Aspect model
      * @param  int  $templateId  Template ID
@@ -257,9 +258,9 @@ class TrainingRecommendationService
     {
         $standardService = app(DynamicStandardService::class);
 
-        // Check if aspect belongs to Potensi category and has sub-aspects
-        if ($aspect->categoryType->code === 'potensi' && $aspect->subAspects->count() > 0) {
-            // Calculate average from active sub-aspects
+        // ✅ DATA-DRIVEN: Check if aspect has sub-aspects
+        if ($aspect->subAspects->isNotEmpty()) {
+            // Has sub-aspects: Calculate average from active sub-aspects
             $subAspectRatingSum = 0;
             $activeSubAspectsCount = 0;
 
@@ -280,7 +281,7 @@ class TrainingRecommendationService
             }
         }
 
-        // For Kompetensi or aspects without sub-aspects, use aspect rating
+        // No sub-aspects: use aspect rating directly
         return $standardService->getAspectRating($templateId, $aspect->code);
     }
 
