@@ -242,7 +242,7 @@
                                     },
                                     {
                                         // === LAYER 2: STANDARD (TENGAH) ===
-                                        label: 'Standard', // UBAH DARI: 'Tolerance {{ $tolerancePercentage }}%'
+                                        label: 'Standar', // UBAH DARI: 'Tolerance {{ $tolerancePercentage }}%'
                                         data: @js($potensiStandardRatings),
                                         borderColor: '#b50505', // MERAH SOLID
                                         backgroundColor: '#b50505',
@@ -275,7 +275,7 @@
                                     },
                                     {
                                         // === LAYER 3: TOLERANCE (PASTI ATAS) ===
-                                        label: 'Tolerance {{ $tolerancePercentage }}%', // UBAH DARI: 'Standard'
+                                        label: 'Toleransi {{ $tolerancePercentage }}%', // UBAH DARI: 'Standard'
                                         data: @js($potensiOriginalStandardRatings),
                                         fill: true,
                                         backgroundColor: '#fafa05', // KUNING SOLID
@@ -311,7 +311,7 @@
                                 ] : [
                                     // Standar (hijau) - tidak ada perubahan
                                     {
-                                        label: 'Standard',
+                                        label: 'Standar',
                                         data: @js($potensiStandardRatings),
                                         fill: true,
                                         backgroundColor: '#5db010', // HIJAU SOLID
@@ -344,7 +344,7 @@
                                     },
                                     // Toleransi (kuning) - tidak ada perubahan
                                     {
-                                        label: 'Tolerance {{ $tolerancePercentage }}%',
+                                        label: 'Toleransi {{ $tolerancePercentage }}%',
                                         data: @js($potensiOriginalStandardRatings),
                                         fill: true,
                                         backgroundColor: '#fafa05', // KUNING SOLID
@@ -522,7 +522,7 @@
                                     }
                                 }, {
                                     // Standard (merah) - PERUBAHAN LABEL
-                                    label: 'Standard', // UBAH DARI: 'Tolerance {{ $tolerancePercentage }}%'
+                                    label: 'Standar', // UBAH DARI: 'Tolerance {{ $tolerancePercentage }}%'
                                     data: @js($kompetensiStandardRatings),
                                     borderColor: '#b50505',
                                     backgroundColor: '#b50505',
@@ -554,7 +554,7 @@
                                     }
                                 }, {
                                     // Tolerance (kuning) - PERUBAHAN LABEL
-                                    label: 'Tolerance {{ $tolerancePercentage }}%', // UBAH DARI: 'Standard'
+                                    label: 'Toleransi {{ $tolerancePercentage }}%', // UBAH DARI: 'Standard'
                                     data: @js($kompetensiOriginalStandardRatings),
                                     fill: true,
                                     backgroundColor: '#fafa05',
@@ -589,7 +589,7 @@
                                 }] : [
                                     // Standar (hijau) - tidak ada perubahan
                                     {
-                                        label: 'Standard',
+                                        label: 'Standar',
                                         data: @js($kompetensiStandardRatings),
                                         fill: true,
                                         backgroundColor: '#5db010', // HIJAU SOLID
@@ -622,7 +622,7 @@
                                     },
                                     // Toleransi (kuning) - tidak ada perubahan
                                     {
-                                        label: 'Tolerance {{ $tolerancePercentage }}%',
+                                        label: 'Toleransi {{ $tolerancePercentage }}%',
                                         data: @js($kompetensiOriginalStandardRatings),
                                         fill: true,
                                         backgroundColor: '#fafa05', // KUNING SOLID
@@ -799,7 +799,7 @@
                                     }
                                 }, {
                                     // Standard (merah) - PERUBAHAN LABEL
-                                    label: 'Standard', // UBAH DARI: 'Tolerance {{ $tolerancePercentage }}%'
+                                    label: 'Standar', // UBAH DARI: 'Tolerance {{ $tolerancePercentage }}%'
                                     data: @js($generalStandardRatings),
                                     borderColor: '#b50505',
                                     backgroundColor: '#b50505',
@@ -831,7 +831,7 @@
                                     }
                                 }, {
                                     // Tolerance (kuning) - PERUBAHAN LABEL
-                                    label: 'Tolerance {{ $tolerancePercentage }}%', // UBAH DARI: 'Standard'
+                                    label: 'Toleransi {{ $tolerancePercentage }}%', // UBAH DARI: 'Standard'
                                     data: @js($generalOriginalStandardRatings),
                                     fill: true,
                                     backgroundColor: '#fafa05',
@@ -866,7 +866,7 @@
                                 }] : [
                                     // Standar (hijau) - tidak ada perubahan
                                     {
-                                        label: 'Standard',
+                                        label: 'Standar',
                                         data: @js($generalStandardRatings),
                                         fill: true,
                                         backgroundColor: '#5db010', // HIJAU SOLID
@@ -899,7 +899,7 @@
                                     },
                                     // Toleransi (kuning) - tidak ada perubahan
                                     {
-                                        label: 'Tolerance {{ $tolerancePercentage }}%',
+                                        label: 'Toleransi {{ $tolerancePercentage }}%',
                                         data: @js($generalOriginalStandardRatings),
                                         fill: true,
                                         backgroundColor: '#fafa05', // KUNING SOLID
@@ -1050,7 +1050,7 @@
                             },
                             // Standard (merah)
                             {
-                                label: 'Standard',
+                                label: 'Standar',
                                 data: data.standardRatings,
                                 borderColor: '#b50505',
                                 backgroundColor: '#b50505',
@@ -1066,7 +1066,7 @@
                             },
                             // Tolerance (kuning)
                             {
-                                label: `Tolerance ${tolerancePercentage}%`,
+                                label: `Toleransi ${tolerancePercentage}%`,
                                 data: data.originalStandardRatings,
                                 fill: true,
                                 backgroundColor: '#fafa05',
@@ -1083,7 +1083,7 @@
                         ] : [
                             // Standard (hijau)
                             {
-                                label: 'Standard',
+                                label: 'Standar',
                                 data: data.standardRatings,
                                 fill: true,
                                 backgroundColor: '#5db010',
@@ -1099,7 +1099,7 @@
                             },
                             // Tolerance (kuning)
                             {
-                                label: `Tolerance ${tolerancePercentage}%`,
+                                label: `Toleransi ${tolerancePercentage}%`,
                                 data: data.originalStandardRatings,
                                 fill: true,
                                 backgroundColor: '#fafa05',
@@ -1235,7 +1235,7 @@
                                 }
                             },
                             {
-                                label: 'Standard',
+                                label: 'Standar',
                                 data: data.standardRatings,
                                 borderColor: '#b50505',
                                 backgroundColor: '#b50505',
@@ -1250,7 +1250,7 @@
                                 }
                             },
                             {
-                                label: `Tolerance ${tolerancePercentage}%`,
+                                label: `Toleransi ${tolerancePercentage}%`,
                                 data: data.originalStandardRatings,
                                 fill: true,
                                 backgroundColor: '#fafa05',
@@ -1267,7 +1267,7 @@
                                 }
                             }
                         ] : [{
-                                label: 'Standard',
+                                label: 'Standar',
                                 data: data.standardRatings,
                                 fill: true,
                                 backgroundColor: '#5db010',
@@ -1282,7 +1282,7 @@
                                 }
                             },
                             {
-                                label: `Tolerance ${tolerancePercentage}%`,
+                                label: `Toleransi ${tolerancePercentage}%`,
                                 data: data.originalStandardRatings,
                                 fill: true,
                                 backgroundColor: '#fafa05',
@@ -1412,7 +1412,7 @@
                                 }
                             },
                             {
-                                label: 'Standard',
+                                label: 'Standar',
                                 data: data.standardRatings,
                                 borderColor: '#b50505',
                                 backgroundColor: '#b50505',
@@ -1427,7 +1427,7 @@
                                 }
                             },
                             {
-                                label: `Tolerance ${tolerancePercentage}%`,
+                                label: `Toleransi ${tolerancePercentage}%`,
                                 data: data.originalStandardRatings,
                                 fill: true,
                                 backgroundColor: '#fafa05',
@@ -1444,7 +1444,7 @@
                                 }
                             }
                         ] : [{
-                                label: 'Standard',
+                                label: 'Standar',
                                 data: data.standardRatings,
                                 fill: true,
                                 backgroundColor: '#5db010',
@@ -1459,7 +1459,7 @@
                                 }
                             },
                             {
-                                label: `Tolerance ${tolerancePercentage}%`,
+                                label: `Toleransi ${tolerancePercentage}%`,
                                 data: data.originalStandardRatings,
                                 fill: true,
                                 backgroundColor: '#fafa05',
@@ -1714,21 +1714,21 @@
                                     chart.data.datasets[0].data = data.individualRatings;
                                 }
                                 if (chart.data.datasets[1]) {
-                                    chart.data.datasets[1].label = 'Standard';
+                                    chart.data.datasets[1].label = 'Standar';
                                     chart.data.datasets[1].data = data.standardRatings;
                                 }
                                 if (chart.data.datasets[2]) {
-                                    chart.data.datasets[2].label = `Tolerance ${tolerancePercentage}%`;
+                                    chart.data.datasets[2].label = `Toleransi ${tolerancePercentage}%`;
                                     chart.data.datasets[2].data = data.originalStandardRatings;
                                 }
                             } else {
                                 // Update standar dan toleransi (tidak ada peserta)
                                 if (chart.data.datasets[0]) {
-                                    chart.data.datasets[0].label = 'Standard';
+                                    chart.data.datasets[0].label = 'Standar';
                                     chart.data.datasets[0].data = data.standardRatings;
                                 }
                                 if (chart.data.datasets[1]) {
-                                    chart.data.datasets[1].label = `Tolerance ${tolerancePercentage}%`;
+                                    chart.data.datasets[1].label = `Toleransi ${tolerancePercentage}%`;
                                     chart.data.datasets[1].data = data.originalStandardRatings;
                                 }
                             }

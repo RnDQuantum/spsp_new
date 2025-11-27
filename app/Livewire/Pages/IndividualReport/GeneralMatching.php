@@ -9,7 +9,7 @@ use App\Services\IndividualAssessmentService;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
-#[Layout('components.layouts.app', ['title' => 'General Matching'])]
+#[Layout('components.layouts.app', ['title' => '<i>General Matching</i>'])]
 class GeneralMatching extends Component
 {
     // Participant info

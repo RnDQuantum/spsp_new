@@ -11,7 +11,7 @@ use App\Services\IndividualAssessmentService;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
-#[Layout('components.layouts.app', ['title' => 'Spider Plot'])]
+#[Layout('components.layouts.app', ['title' => '<i>Spider Plot</i>'])]
 class SpiderPlot extends Component
 {
     public ?Participant $participant = null;
@@ -76,9 +76,9 @@ class SpiderPlot extends Component
     public function mount($eventCode, $testNumber): void
     {
         // Generate unique chart IDs
-        $this->potensiChartId = 'potensiSpider'.uniqid();
-        $this->kompetensiChartId = 'kompetensiSpider'.uniqid();
-        $this->generalChartId = 'generalSpider'.uniqid();
+        $this->potensiChartId = 'potensiSpider' . uniqid();
+        $this->kompetensiChartId = 'kompetensiSpider' . uniqid();
+        $this->generalChartId = 'generalSpider' . uniqid();
 
         // Load tolerance from session
         $this->tolerancePercentage = session('individual_report.tolerance', 10);

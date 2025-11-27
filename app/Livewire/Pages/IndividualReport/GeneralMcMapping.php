@@ -11,7 +11,7 @@ use App\Services\RankingService;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
-#[Layout('components.layouts.app', ['title' => 'Managerial Competency Mapping'])]
+#[Layout('components.layouts.app', ['title' => '<i>Managerial Competency Mapping</i>'])]
 class GeneralMcMapping extends Component
 {
     public ?Participant $participant = null;
@@ -110,7 +110,7 @@ class GeneralMcMapping extends Component
         }
 
         // Generate unique chart ID
-        $this->chartId = 'generalMcMapping'.uniqid();
+        $this->chartId = 'generalMcMapping' . uniqid();
 
         // Load tolerance from session
         $this->tolerancePercentage = session('individual_report.tolerance', 10);

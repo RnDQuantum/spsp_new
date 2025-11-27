@@ -11,7 +11,7 @@ use App\Services\RankingService;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
-#[Layout('components.layouts.app', ['title' => 'General Mapping'])]
+#[Layout('components.layouts.app', ['title' => '<i>General Mapping</i>'])]
 class GeneralMapping extends Component
 {
     public ?Participant $participant = null;
@@ -99,7 +99,7 @@ class GeneralMapping extends Component
         $this->showRankingInfo = $showRankingInfo;
 
         // Generate unique chart ID
-        $this->chartId = 'generalMapping'.uniqid();
+        $this->chartId = 'generalMapping' . uniqid();
 
         // Load tolerance from session
         $this->tolerancePercentage = session('individual_report.tolerance', 10);

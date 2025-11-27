@@ -4,7 +4,7 @@
         <!-- Header - DARK MODE READY -->
         <div class="border-b-4 border-black py-3 bg-gray-300 dark:bg-gray-600">
             <h1 class="text-center text-lg font-bold uppercase tracking-wide text-gray-900 dark:text-white">
-                SPIDER PLOT ANALYSIS
+                ANALISA <i>SPIDER PLOT</i>
             </h1>
             <p class="text-center text-sm font-semibold text-gray-700 dark:text-gray-300 mt-1">
                 {{ $participant->name }}
@@ -19,20 +19,20 @@
 
         <!-- Tolerance Selector Component -->
         @php
-        $summary = $this->getPassingSummary();
+            $summary = $this->getPassingSummary();
         @endphp
         @livewire('components.tolerance-selector', [
-        'passing' => $summary['passing'],
-        'total' => $summary['total'],
+            'passing' => $summary['passing'],
+            'total' => $summary['total'],
         ])
 
         {{-- Adjustment Indicators --}}
         <div
             class="px-4 py-2 bg-gray-50 dark:bg-gray-700 border-b border-gray-300 dark:border-gray-600 flex flex-wrap gap-2">
-            <x-adjustment-indicator :template-id="$participant->positionFormation->template_id" category-code="potensi"
-                size="sm" custom-label="Standar Potensi Disesuaikan" />
-            <x-adjustment-indicator :template-id="$participant->positionFormation->template_id"
-                category-code="kompetensi" size="sm" custom-label="Standar Kompetensi Disesuaikan" />
+            <x-adjustment-indicator :template-id="$participant->positionFormation->template_id" category-code="potensi" size="sm"
+                custom-label="Standar Potensi Disesuaikan" />
+            <x-adjustment-indicator :template-id="$participant->positionFormation->template_id" category-code="kompetensi" size="sm"
+                custom-label="Standar Kompetensi Disesuaikan" />
         </div>
 
         <!-- Charts Grid - DARK MODE READY -->

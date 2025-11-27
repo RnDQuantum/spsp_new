@@ -7,8 +7,8 @@
     <div class="px-4 sm:px-6 lg:px-8 py-3">
         <div class="flex items-center justify-between">
             <div class="flex items-center flex-1 min-w-0">
-                <h2 class="text-lg md:text-xl font-semibold text-gray-800 dark:text-gray-100 ml-12 md:ml-0 truncate">{{
-                    $title }}</h2>
+                <h2 class="text-lg md:text-xl font-semibold text-gray-800 dark:text-gray-100 ml-12 md:ml-0 truncate">
+                    {!! $title !!}</h2>
             </div>
 
             <div class="flex items-center gap-2 sm:gap-3">
