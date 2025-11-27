@@ -7,7 +7,7 @@ use App\Services\InterpretationGeneratorService;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
-#[Layout('components.layouts.app', ['title' => 'Interpretation'])]
+#[Layout('components.layouts.app', ['title' => '<i>Interpretation</i>'])]
 class InterpretationSection extends Component
 {
     // Participant info
