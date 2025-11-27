@@ -86,4 +86,7 @@ Route::middleware(['auth', 'institution.access'])->group(function () {
     Route::get('/custom-standards', App\Livewire\Pages\CustomStandards\Index::class)->name('custom-standards.index');
     Route::get('/custom-standards/create', App\Livewire\Pages\CustomStandards\Create::class)->name('custom-standards.create');
     Route::get('/custom-standards/{customStandard}/edit', App\Livewire\Pages\CustomStandards\Edit::class)->name('custom-standards.edit');
+
+    // Talent Pool Management\
+    Route::get('/talentpool', App\Livewire\Pages\TalentPool::class)->name('talentpool');
 });
