@@ -494,14 +494,15 @@
                     </div>
                 </div>
                 <!-- Laporan Alat Tes -->
-                <a wire:navigate href="#LaporanTes" x-tooltip.raw="minimized ? 'Laporan Tes' : null"
-                    @class([
+                <a wire:navigate href="{{ route('laporan-alat-tes') }}"
+                    x-tooltip.raw="minimized ? 'Laporan Tes' : null" @class([
                         'group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200',
                         'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border-l-4 border-blue-700 dark:border-blue-400' => $this->isActiveRoute(
-                            'laporantes'),
+                            'laporan-alat-tes'),
                         'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' => !$this->isActiveRoute(
-                            'laporantes'),
-                    ]) :class="minimized ? 'justify-center px-2' : ''">
+                            'laporan-alat-tes'),
+                    ])
+                    :class="minimized ? 'justify-center px-2' : ''">
                     <i class="fa-solid fa-newspaper w-5 text-center" :class="!minimized && 'mr-3'"></i>
                     <span x-show="!minimized" x-transition:enter="transition ease-out duration-200"
                         x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"><i>Laporan Alat
