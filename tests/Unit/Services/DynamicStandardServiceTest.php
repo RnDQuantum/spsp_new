@@ -29,9 +29,9 @@ use Tests\TestCase;
  * PHASE 4: ✅ Active/Inactive Tests (4/4 tests) - COMPLETE
  * PHASE 5: ✅ Validation Tests (5/5 tests) - COMPLETE
  * PHASE 6: ✅ Edge Cases & Additional Tests (14/14 tests) - COMPLETE
- * PHASE 7: ✅ Uncovered Methods Tests (10/10 tests) - COMPLETE
+ * PHASE 7: ✅ Uncovered Methods Tests (12/12 tests) - COMPLETE
  *
- * TOTAL: 50/50 tests (100% coverage) ✅
+ * TOTAL: 52/52 tests (100% coverage) ✅
  *
  * @see \App\Services\DynamicStandardService
  * @see docs/TESTING_GUIDE.md
@@ -2146,9 +2146,9 @@ class DynamicStandardServiceTest extends TestCase
     private function createInstitution(): Institution
     {
         return Institution::create([
-            'code' => 'INST_'.uniqid(),
+            'code' => 'INST_' . uniqid(),
             'name' => 'Test Institution',
-            'api_key' => 'test_api_key_'.uniqid(),
+            'api_key' => 'test_api_key_' . uniqid(),
         ]);
     }
 
@@ -2158,7 +2158,7 @@ class DynamicStandardServiceTest extends TestCase
     private function createTemplate(): AssessmentTemplate
     {
         return AssessmentTemplate::create([
-            'code' => 'TMPL_'.uniqid(),
+            'code' => 'TMPL_' . uniqid(),
             'name' => 'Test Template',
             'description' => 'Template for testing',
         ]);
