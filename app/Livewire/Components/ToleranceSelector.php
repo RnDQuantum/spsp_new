@@ -6,7 +6,7 @@ use Livewire\Component;
 
 class ToleranceSelector extends Component
 {
-    public int $tolerancePercentage = 10;
+    public int $tolerancePercentage = 0;
 
     public array $toleranceOptions = [
         0 => '0% (Standard)',
@@ -33,7 +33,7 @@ class ToleranceSelector extends Component
     public function mount(?int $passing = null, ?int $total = null, ?bool $showSummary = null): void
     {
         // Load tolerance from session or use default
-        $this->tolerancePercentage = session('individual_report.tolerance', 10);
+        $this->tolerancePercentage = session('individual_report.tolerance', 0);
 
         // Set summary data if provided
         if ($passing !== null && $total !== null) {
