@@ -21,7 +21,7 @@
                 </div>
 
                 <!-- Kolom Kanan - Konten Utama -->
-                <div class="text-center lg:pl-8">
+                <div class="text-center items-center">
                     <!-- Logo/Gambar -->
                     <div class="mb-4">
                         <img src="{{ asset('images/logo-qhrmi.png') }}" alt="Logo Static Pribadi Spider Plot"
@@ -33,8 +33,12 @@
                     </h1>
                     <!-- Subjudul -->
                     <h2 class="text-lg text-black mb-2 font-semibold">
-                        METODE PEMETAAN POTENSI DAN KOMPETENSI INDIVIDU KARYAWAN
+                        METODE PEMETAAN POTENSI DAN KOMPETENSI INDIVIDU
                     </h2>
+                    <!-- Slogan -->
+                    <h1 class="text-md font-bold text-black italic mb-2">
+                        "The Right Man, On The Right Place, With The Right Character"
+                    </h1>
                     <!-- Hak Cipta -->
                     <p class="text-sm text-black mb-4">
                         HAK CIPTA: DIRJEN HAKI No. 027762 TANGGAL 10 MARET 2004

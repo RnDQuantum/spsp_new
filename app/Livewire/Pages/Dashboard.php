@@ -26,7 +26,7 @@ class Dashboard extends Component
     public ?CategoryAssessment $kompetensiAssessment = null;
 
     // Tolerance percentage (loaded from session)
-    public int $tolerancePercentage = 10;
+    public int $tolerancePercentage = 0;
 
     // Chart IDs for unique identification
     public string $potensiChartId = '';
@@ -97,7 +97,7 @@ class Dashboard extends Component
         $this->generalChartId = 'generalSpider' . uniqid();
 
         // Load tolerance from session
-        $this->tolerancePercentage = session('individual_report.tolerance', 10);
+        $this->tolerancePercentage = session('individual_report.tolerance', 0);
 
         // Load data if session already has filters set (e.g., after refresh)
         $eventCode = session('filter.event_code');
