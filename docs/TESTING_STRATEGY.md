@@ -1,22 +1,75 @@
 # Testing Strategy - Assessment Calculation System
 
-> **Version**: 1.0
+> **Version**: 1.1
 > **Last Updated**: 2025-01-28
 > **Purpose**: Comprehensive testing documentation untuk validasi sistem assessment
 > **Important**: Dokumen ini adalah **Single Source of Truth** untuk semua testing efforts
 
 ---
 
+## 🎯 **PROGRESS UPDATE - IndividualAssessmentService**
+
+**Status**: ✅ **COMPLETED** (14/14 tests passing - 78 assertions)
+
+### Completed Phases
+
+| Phase | Tests | Status | Duration |
+|-------|-------|--------|----------|
+| **Phase 1**: Service Instantiation | 1/1 | ✅ DONE | ~2.3s |
+| **Phase 2**: Data Loading | 1/1 | ✅ DONE | ~0.07s |
+| **Phase 3**: Data-Driven Calculation | 2/2 | ✅ DONE | ~0.13s |
+| **Phase 4**: Tolerance Application | 3/3 | ✅ DONE | ~0.15s |
+| **Phase 5**: Column Validation | 3/3 | ✅ DONE | ~0.18s |
+| **Phase 6**: Matching Percentage | 4/4 | ✅ DONE | ~0.23s |
+| **TOTAL** | **14/14** | ✅ **COMPLETE** | **~3.14s** |
+
+### Key Achievements
+
+1. ✅ **Factory Pattern Implemented**
+   - CategoryAssessmentFactory.php (with state methods)
+   - AspectAssessmentFactory.php (with state methods)
+   - SubAspectAssessmentFactory.php (with rating states)
+
+2. ✅ **Model Updates**
+   - Added HasFactory trait to CategoryAssessment, AspectAssessment, SubAspectAssessment
+   - Added 'username' to Participant fillable array
+
+3. ✅ **Comprehensive Test Coverage**
+   - Data-driven calculations (with/without sub-aspects)
+   - Tolerance application (0%, 10%, 20%)
+   - Column validation (19 columns, data types, formulas)
+   - Percentage matching logic (<100%, =100%, >100%)
+
+### Critical Learning
+
+**⚠️ Important Discovery**: For aspects **without sub-aspects**, the service reads `standard_rating` from the **Aspect model** (template), NOT from the AspectAssessment record. This is because:
+```php
+// IndividualAssessmentService.php:125
+$recalculatedStandardRating = $standardService->getAspectRating($templateId, $aspect->code);
+```
+
+**Testing Implication**: When writing tests for aspects without sub-aspects, you must update `$aspect->standard_rating`, not `$aspectAssessment->standard_rating`.
+
+### Next Steps
+
+- [ ] RankingService tests (30-40 tests estimated)
+- [ ] DynamicStandardService tests (25-30 tests estimated)
+- [ ] Update test coverage metrics
+
+---
+
 ## 📋 Table of Contents
 
-1. [Overview](#overview)
-2. [Testing Philosophy](#testing-philosophy)
-3. [Service Testing (Unit Tests)](#service-testing-unit-tests)
-4. [Livewire Testing (Feature Tests)](#livewire-testing-feature-tests)
-5. [Test Data Setup](#test-data-setup)
-6. [Test Coverage Matrix](#test-coverage-matrix)
-7. [Running Tests](#running-tests)
-8. [Troubleshooting](#troubleshooting)
+1. [Progress Update](#progress-update---individualassessmentservice)
+2. [Overview](#overview)
+3. [Testing Philosophy](#testing-philosophy)
+4. [Service Testing (Unit Tests)](#service-testing-unit-tests)
+5. [Livewire Testing (Feature Tests)](#livewire-testing-feature-tests)
+6. [Test Data Setup](#test-data-setup)
+7. [Test Coverage Matrix](#test-coverage-matrix)
+8. [Running Tests](#running-tests)
+9. [Troubleshooting](#troubleshooting)
+10. [Lessons Learned](#lessons-learned)
 
 ---
 
@@ -107,23 +160,28 @@
 
 ### Priority Matrix
 
-| Service | Priority | Complexity | Impact | Est. Tests |
-|---------|----------|------------|--------|------------|
-| **IndividualAssessmentService** | ⭐⭐⭐ CRITICAL | High | Very High | 40-50 |
-| **RankingService** | ⭐⭐⭐ CRITICAL | High | Very High | 30-40 |
-| **DynamicStandardService** | ⭐⭐ HIGH | Medium | High | 25-30 |
-| **ConclusionService** | ⭐ MEDIUM | Low | Medium | 10-15 |
-| **StatisticService** | ⭐ MEDIUM | Medium | Medium | 15-20 |
-| **InterpretationGeneratorService** | ⭐ LOW | High | Low | 10-15 |
-| **TrainingRecommendationService** | ⭐ LOW | Medium | Low | 10-15 |
-
-**Start with**: IndividualAssessmentService (paling critical)
+| Service | Priority | Complexity | Impact | Est. Tests | Status |
+|---------|----------|------------|--------|------------|--------|
+| **IndividualAssessmentService** | ⭐⭐⭐ CRITICAL | High | Very High | 40-50 | ✅ **14/14** (3.14s) |
+| **RankingService** | ⭐⭐⭐ CRITICAL | High | Very High | 30-40 | ⏳ Pending |
+| **DynamicStandardService** | ⭐⭐ HIGH | Medium | High | 25-30 | ⏳ Pending |
+| **ConclusionService** | ⭐ MEDIUM | Low | Medium | 10-15 | ⏳ Pending |
+| **StatisticService** | ⭐ MEDIUM | Medium | Medium | 15-20 | ⏳ Pending |
+| **InterpretationGeneratorService** | ⭐ LOW | High | Low | 10-15 | ⏳ Pending |
+| **TrainingRecommendationService** | ⭐ LOW | Medium | Low | 10-15 | ⏳ Pending |
 
 ---
 
-### 1. IndividualAssessmentService Tests
+### 1. IndividualAssessmentService Tests ✅
 
 **File**: `tests/Unit/Services/IndividualAssessmentServiceTest.php`
+**Status**: ✅ COMPLETE (14 tests, 78 assertions, 3.14s)
+
+**Key Learnings**:
+- ⚠️ Service reads `standard_rating` from **Aspect model** (template), NOT AspectAssessment for aspects without sub-aspects
+- ✅ Use PHPUnit (not Pest) - project convention
+- ✅ Factory pattern with state methods for test data
+- ✅ Add `HasFactory` trait to models before creating factories
 
 #### Test Categories
 
