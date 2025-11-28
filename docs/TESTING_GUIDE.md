@@ -16,6 +16,8 @@
 | **IndividualAssessmentService** | 14/70 | 56 | ⭐⭐⭐ CRITICAL | `tests/Unit/Services/IndividualAssessmentServiceTest.php` |
 | **CustomStandardService** | 0/20 | 20 | ⭐⭐ HIGH | `tests/Unit/Services/CustomStandardServiceTest.php` |
 | **RankingService** | 0/40 | 40 | ⭐⭐ HIGH | `tests/Unit/Services/RankingServiceTest.php` |
+| TrainingRecommendationService | 0/25 | 25 | ⭐ OPTIONAL | Can be covered via Livewire tests |
+| StatisticService | 0/20 | 20 | ⭐ OPTIONAL | Can be covered via Livewire tests |
 
 ### Why This Order?
 
@@ -33,12 +35,13 @@
 tests/
 ├── Unit/                          # Pure logic testing (FAST, isolated)
 │   └── Services/
-│       ├── DynamicStandardServiceTest.php        # ⭐⭐⭐ Priority #1 (40-50 tests)
-│       ├── IndividualAssessmentServiceTest.php   # ⭐⭐⭐ (70 tests total)
-│       ├── CustomStandardServiceTest.php         # ⭐⭐ (15-20 tests)
-│       ├── RankingServiceTest.php                # ⭐⭐ (30-40 tests)
-│       ├── ConclusionServiceTest.php             # ⭐ (10-15 tests)
-│       └── StatisticServiceTest.php              # ⭐ (15-20 tests)
+│       ├── DynamicStandardServiceTest.php            # ⭐⭐⭐ Priority #1 (40-50 tests)
+│       ├── IndividualAssessmentServiceTest.php       # ⭐⭐⭐ (70 tests total)
+│       ├── CustomStandardServiceTest.php             # ⭐⭐ (15-20 tests)
+│       ├── RankingServiceTest.php                    # ⭐⭐ (30-40 tests)
+│       ├── ConclusionServiceTest.php                 # ⭐ (10-15 tests)
+│       ├── TrainingRecommendationServiceTest.php     # ⭐ Optional (20-25 tests)
+│       └── StatisticServiceTest.php                  # ⭐ Optional (15-20 tests)
 │
 └── Feature/                       # Integration testing (SLOWER, realistic)
     └── Livewire/
@@ -870,16 +873,21 @@ Before writing tests, understand the architecture:
 
 ### Service Tests (Unit)
 
-| Service | Current | Target | Priority | Est. Duration |
-|---------|---------|--------|----------|---------------|
-| DynamicStandardService | 0/50 | 80% | ⭐⭐⭐ | 2-3 days |
-| IndividualAssessmentService | 14/70 | 80% | ⭐⭐⭐ | 2-3 days |
-| CustomStandardService | 0/20 | 70% | ⭐⭐ | 1 day |
-| RankingService | 0/40 | 70% | ⭐⭐ | 1-2 days |
-| ConclusionService | 0/15 | 60% | ⭐ | 0.5 day |
-| StatisticService | 0/20 | 60% | ⭐ | 1 day |
+| Service | Current | Target | Priority | Est. Duration | Notes |
+|---------|---------|--------|----------|---------------|-------|
+| DynamicStandardService | 0/50 | 80% | ⭐⭐⭐ | 2-3 days | Core system |
+| IndividualAssessmentService | 14/70 | 80% | ⭐⭐⭐ | 2-3 days | Main calculation |
+| CustomStandardService | 0/20 | 70% | ⭐⭐ | 1 day | Persistent standard |
+| RankingService | 0/40 | 70% | ⭐⭐ | 1-2 days | Ranking logic |
+| ConclusionService | 0/15 | 60% | ⭐ | 0.5 day | Conclusion text |
+| TrainingRecommendationService | 0/25 | 60% | ⭐ | 1 day | Used in 1 Livewire only |
+| StatisticService | 0/20 | 60% | ⭐ | 1 day | Used in 1 Livewire only |
 
-**Total Service Tests**: ~215 tests (14 done, 201 remaining)
+**Total Service Tests**: ~240 tests (14 done, 226 remaining)
+
+**Note**:
+- `AssessmentService` tidak perlu test (auto-generate dari seeder)
+- `TrainingRecommendationService` & `StatisticService` bisa di-cover via Livewire tests (lower priority)
 
 ### Livewire Tests (Feature)
 
@@ -895,10 +903,12 @@ Before writing tests, understand the architecture:
 
 ### Overall Target
 
-- **Total Tests**: ~275 tests
+- **Total Tests**: ~300 tests (240 service + 60 Livewire)
 - **Current**: 14 tests (5%)
+- **Core Services**: 180 tests (focus here first)
+- **Optional Services**: 60 tests (lower priority)
 - **Target Coverage**: 70-80%
-- **Est. Completion**: 10-15 days (full-time)
+- **Est. Completion**: 8-12 days (core only), 12-16 days (full coverage)
 
 ---
 
