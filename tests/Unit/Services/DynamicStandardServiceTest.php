@@ -29,8 +29,9 @@ use Tests\TestCase;
  * PHASE 4: ✅ Active/Inactive Tests (4/4 tests) - COMPLETE
  * PHASE 5: ✅ Validation Tests (5/5 tests) - COMPLETE
  * PHASE 6: ✅ Edge Cases & Additional Tests (14/14 tests) - COMPLETE
+ * PHASE 7: ✅ Uncovered Methods Tests (10/10 tests) - COMPLETE
  *
- * TOTAL: 40/50 tests (80% coverage) ✅
+ * TOTAL: 50/50 tests (100% coverage) ✅
  *
  * @see \App\Services\DynamicStandardService
  * @see docs/TESTING_GUIDE.md
@@ -1448,6 +1449,691 @@ class DynamicStandardServiceTest extends TestCase
         // Assert: Should be integer
         $this->assertIsInt($result);
         $this->assertEquals(4, $result);
+    }
+
+    // ========================================
+    // PHASE 7: UNCOVERED METHODS TESTS (10 tests)
+    // ========================================
+
+    /**
+     * Test: validateSelection validates minimum 3 aspects per category
+     *
+     * HIGH PRIORITY - Tests complex validation logic
+     */
+    public function test_validates_minimum_3_aspects_per_category(): void
+    {
+        // Arrange
+        $template = $this->createTemplate();
+        $potensiCategory = $this->createCategory($template->id, 'potensi', 60);
+        $kompetensiCategory = $this->createCategory($template->id, 'kompetensi', 40);
+
+        // Create 5 Potensi aspects
+        for ($i = 1; $i <= 5; $i++) {
+            Aspect::create([
+                'template_id' => $template->id,
+                'category_type_id' => $potensiCategory->id,
+                'code' => "asp_pot_{$i}",
+                'name' => "Potensi Aspect {$i}",
+                'weight_percentage' => 20,
+                'standard_rating' => 3.0,
+                'order' => $i,
+            ]);
+        }
+
+        // Create 5 Kompetensi aspects
+        for ($i = 1; $i <= 5; $i++) {
+            Aspect::create([
+                'template_id' => $template->id,
+                'category_type_id' => $kompetensiCategory->id,
+                'code' => "asp_kom_{$i}",
+                'name' => "Kompetensi Aspect {$i}",
+                'weight_percentage' => 20,
+                'standard_rating' => 4.0,
+                'order' => $i,
+            ]);
+        }
+
+        // Act: Try to validate with only 2 active Potensi aspects (INVALID)
+        $data = [
+            'active_aspects' => [
+                'asp_pot_1' => true,
+                'asp_pot_2' => true,
+                'asp_pot_3' => false, // Inactive
+                'asp_pot_4' => false, // Inactive
+                'asp_pot_5' => false, // Inactive
+                'asp_kom_1' => true,
+                'asp_kom_2' => true,
+                'asp_kom_3' => true,
+                'asp_kom_4' => true,
+                'asp_kom_5' => true,
+            ],
+        ];
+
+        $result = $this->service->validateSelection($template->id, $data);
+
+        // Assert: Should fail validation (only 2 Potensi aspects active)
+        $this->assertFalse($result['valid']);
+        $this->assertNotEmpty($result['errors']);
+        $this->assertStringContainsString('Minimal 3 aspek Potensi', implode(' ', $result['errors']));
+    }
+
+    /**
+     * Test: validateSelection validates total weight per category must be 100%
+     */
+    public function test_validates_category_weights_total_100_percent(): void
+    {
+        // Arrange
+        $template = $this->createTemplate();
+        $potensiCategory = $this->createCategory($template->id, 'potensi', 60);
+
+        // Create 3 Potensi aspects
+        Aspect::create([
+            'template_id' => $template->id,
+            'category_type_id' => $potensiCategory->id,
+            'code' => 'asp_pot_1',
+            'name' => 'Potensi Aspect 1',
+            'weight_percentage' => 30,
+            'standard_rating' => 3.0,
+            'order' => 1,
+        ]);
+
+        Aspect::create([
+            'template_id' => $template->id,
+            'category_type_id' => $potensiCategory->id,
+            'code' => 'asp_pot_2',
+            'name' => 'Potensi Aspect 2',
+            'weight_percentage' => 30,
+            'standard_rating' => 3.0,
+            'order' => 2,
+        ]);
+
+        Aspect::create([
+            'template_id' => $template->id,
+            'category_type_id' => $potensiCategory->id,
+            'code' => 'asp_pot_3',
+            'name' => 'Potensi Aspect 3',
+            'weight_percentage' => 30,
+            'standard_rating' => 3.0,
+            'order' => 3,
+        ]);
+
+        // Act: Validate with weights that don't sum to 100
+        $data = [
+            'aspect_weights' => [
+                'asp_pot_1' => 30,
+                'asp_pot_2' => 30,
+                'asp_pot_3' => 30, // Total: 90% (INVALID)
+            ],
+        ];
+
+        $result = $this->service->validateSelection($template->id, $data);
+
+        // Assert: Should fail validation
+        $this->assertFalse($result['valid']);
+        $this->assertNotEmpty($result['errors']);
+        $this->assertStringContainsString('100%', implode(' ', $result['errors']));
+    }
+
+    /**
+     * Test: validateSelection validates each active Potensi aspect must have ≥1 active sub-aspect
+     */
+    public function test_validates_active_aspect_has_minimum_one_active_sub_aspect(): void
+    {
+        // Arrange
+        $template = $this->createTemplate();
+        $category = $this->createCategory($template->id, 'potensi', 60);
+
+        $aspect = Aspect::create([
+            'template_id' => $template->id,
+            'category_type_id' => $category->id,
+            'code' => 'asp_kecerdasan',
+            'name' => 'Kecerdasan',
+            'weight_percentage' => 100,
+            'standard_rating' => null,
+            'order' => 1,
+        ]);
+
+        // Create 3 sub-aspects
+        SubAspect::create([
+            'aspect_id' => $aspect->id,
+            'code' => 'sub_01',
+            'name' => 'Sub 1',
+            'standard_rating' => 3,
+            'order' => 1,
+        ]);
+
+        SubAspect::create([
+            'aspect_id' => $aspect->id,
+            'code' => 'sub_02',
+            'name' => 'Sub 2',
+            'standard_rating' => 4,
+            'order' => 2,
+        ]);
+
+        // Act: Validate with active aspect but ALL sub-aspects inactive (INVALID)
+        $data = [
+            'active_aspects' => [
+                'asp_kecerdasan' => true, // Active
+            ],
+            'active_sub_aspects' => [
+                'sub_01' => false, // Inactive
+                'sub_02' => false, // Inactive
+            ],
+        ];
+
+        $result = $this->service->validateSelection($template->id, $data);
+
+        // Assert: Should fail validation
+        $this->assertFalse($result['valid']);
+        $this->assertNotEmpty($result['errors']);
+        $this->assertStringContainsString('minimal 1 sub-aspek aktif', implode(' ', $result['errors']));
+    }
+
+    /**
+     * Test: resetCategoryAdjustments removes all adjustments for specific category
+     *
+     * HIGH PRIORITY - Tests category-specific reset
+     */
+    public function test_resets_category_adjustments(): void
+    {
+        // Arrange
+        $template = $this->createTemplate();
+        $potensiCategory = $this->createCategory($template->id, 'potensi', 60);
+        $kompetensiCategory = $this->createCategory($template->id, 'kompetensi', 40);
+
+        // Create Potensi aspect with sub-aspects
+        $potensiAspect = Aspect::create([
+            'template_id' => $template->id,
+            'category_type_id' => $potensiCategory->id,
+            'code' => 'asp_pot_01',
+            'name' => 'Potensi Aspect',
+            'weight_percentage' => 100,
+            'standard_rating' => null,
+            'order' => 1,
+        ]);
+
+        SubAspect::create([
+            'aspect_id' => $potensiAspect->id,
+            'code' => 'sub_01',
+            'name' => 'Sub 1',
+            'standard_rating' => 3,
+            'order' => 1,
+        ]);
+
+        // Create Kompetensi aspect
+        $kompetensiAspect = Aspect::create([
+            'template_id' => $template->id,
+            'category_type_id' => $kompetensiCategory->id,
+            'code' => 'asp_kom_01',
+            'name' => 'Kompetensi Aspect',
+            'weight_percentage' => 100,
+            'standard_rating' => 4.0,
+            'order' => 1,
+        ]);
+
+        // Act: Save adjustments for BOTH categories
+        $this->service->saveCategoryWeight($template->id, 'potensi', 70);
+        $this->service->saveAspectWeight($template->id, 'asp_pot_01', 90);
+        $this->service->saveSubAspectRating($template->id, 'sub_01', 5);
+
+        $this->service->saveCategoryWeight($template->id, 'kompetensi', 30);
+        $this->service->saveAspectWeight($template->id, 'asp_kom_01', 80);
+
+        // Verify adjustments exist
+        $this->assertEquals(70, $this->service->getCategoryWeight($template->id, 'potensi'));
+        $this->assertEquals(30, $this->service->getCategoryWeight($template->id, 'kompetensi'));
+
+        // Act: Reset ONLY Potensi adjustments
+        $this->service->resetCategoryAdjustments($template->id, 'potensi');
+
+        // Assert: Potensi should be reset to quantum defaults
+        $this->assertEquals(60, $this->service->getCategoryWeight($template->id, 'potensi')); // Back to quantum
+        $this->assertEquals(100, $this->service->getAspectWeight($template->id, 'asp_pot_01')); // Back to quantum
+        $this->assertEquals(3, $this->service->getSubAspectRating($template->id, 'sub_01')); // Back to quantum
+
+        // Assert: Kompetensi adjustments should REMAIN unchanged
+        $this->assertEquals(30, $this->service->getCategoryWeight($template->id, 'kompetensi'));
+        $this->assertEquals(80, $this->service->getAspectWeight($template->id, 'asp_kom_01'));
+    }
+
+    /**
+     * Test: saveBulkSelection filters out default values before saving
+     *
+     * HIGH PRIORITY - Tests bulk save with smart filtering
+     */
+    public function test_saves_bulk_selection_with_filtering(): void
+    {
+        // Arrange
+        $template = $this->createTemplate();
+        $category = $this->createCategory($template->id, 'potensi', 60);
+
+        $aspect1 = Aspect::create([
+            'template_id' => $template->id,
+            'category_type_id' => $category->id,
+            'code' => 'asp_01',
+            'name' => 'Aspect 1',
+            'weight_percentage' => 50, // Quantum default
+            'standard_rating' => 3.0,
+            'order' => 1,
+        ]);
+
+        $aspect2 = Aspect::create([
+            'template_id' => $template->id,
+            'category_type_id' => $category->id,
+            'code' => 'asp_02',
+            'name' => 'Aspect 2',
+            'weight_percentage' => 50, // Quantum default
+            'standard_rating' => 4.0,
+            'order' => 2,
+        ]);
+
+        // Act: Save bulk selection
+        // asp_01: weight = 50 (SAME as quantum) → should NOT be saved
+        // asp_02: weight = 60 (DIFFERENT from quantum) → should be saved
+        // asp_01: active = true (default) → should NOT be saved
+        // asp_02: active = false (non-default) → should be saved
+        $this->service->saveBulkSelection($template->id, [
+            'aspect_weights' => [
+                'asp_01' => 50, // Same as quantum (50) → skip
+                'asp_02' => 60, // Different from quantum (50) → save
+            ],
+            'active_aspects' => [
+                'asp_01' => true,  // Default active → skip
+                'asp_02' => false, // Non-default → save
+            ],
+        ]);
+
+        // Assert: Only different values should be saved
+        $adjustments = $this->service->getAdjustments($template->id);
+
+        // asp_01 weight should NOT be in adjustments (same as quantum)
+        $this->assertArrayNotHasKey('asp_01', $adjustments['aspect_weights'] ?? []);
+
+        // asp_02 weight should be in adjustments (different from quantum)
+        $this->assertArrayHasKey('aspect_weights', $adjustments);
+        $this->assertEquals(60, $adjustments['aspect_weights']['asp_02']);
+
+        // asp_01 active should NOT be in adjustments (default true)
+        $this->assertArrayNotHasKey('asp_01', $adjustments['active_aspects'] ?? []);
+
+        // asp_02 active should be in adjustments (non-default false)
+        $this->assertArrayHasKey('active_aspects', $adjustments);
+        $this->assertFalse($adjustments['active_aspects']['asp_02']);
+    }
+
+    /**
+     * Test: saveBulkAdjustments saves all adjustments directly
+     *
+     * MEDIUM PRIORITY
+     */
+    public function test_saves_bulk_adjustments(): void
+    {
+        // Arrange
+        $template = $this->createTemplate();
+
+        $adjustments = [
+            'category_weights' => [
+                'potensi' => 70,
+                'kompetensi' => 30,
+            ],
+            'aspect_weights' => [
+                'asp_01' => 15,
+                'asp_02' => 20,
+            ],
+            'aspect_ratings' => [
+                'asp_01' => 4.5,
+            ],
+        ];
+
+        // Act: Save bulk adjustments
+        $this->service->saveBulkAdjustments($template->id, $adjustments);
+
+        // Assert: All adjustments should be saved
+        $result = $this->service->getAdjustments($template->id);
+
+        $this->assertEquals(70, $result['category_weights']['potensi']);
+        $this->assertEquals(30, $result['category_weights']['kompetensi']);
+        $this->assertEquals(15, $result['aspect_weights']['asp_01']);
+        $this->assertEquals(20, $result['aspect_weights']['asp_02']);
+        $this->assertEquals(4.5, $result['aspect_ratings']['asp_01']);
+        $this->assertArrayHasKey('adjusted_at', $result);
+    }
+
+    /**
+     * Test: hasCategoryAdjustments detects if category has any adjustments
+     *
+     * MEDIUM PRIORITY
+     */
+    public function test_checks_category_has_adjustments(): void
+    {
+        // Arrange
+        $template = $this->createTemplate();
+        $potensiCategory = $this->createCategory($template->id, 'potensi', 60);
+        $kompetensiCategory = $this->createCategory($template->id, 'kompetensi', 40);
+
+        $potensiAspect = Aspect::create([
+            'template_id' => $template->id,
+            'category_type_id' => $potensiCategory->id,
+            'code' => 'asp_pot_01',
+            'name' => 'Potensi Aspect',
+            'weight_percentage' => 100,
+            'standard_rating' => 3.0,
+            'order' => 1,
+        ]);
+
+        // Act 1: Check before any adjustments
+        $hasAdjustments1 = $this->service->hasCategoryAdjustments($template->id, 'potensi');
+        $this->assertFalse($hasAdjustments1);
+
+        // Act 2: Save Potensi adjustment
+        $this->service->saveAspectWeight($template->id, 'asp_pot_01', 80);
+
+        // Assert: Should detect Potensi has adjustments
+        $hasAdjustments2 = $this->service->hasCategoryAdjustments($template->id, 'potensi');
+        $this->assertTrue($hasAdjustments2);
+
+        // Assert: Kompetensi should still have no adjustments
+        $hasAdjustments3 = $this->service->hasCategoryAdjustments($template->id, 'kompetensi');
+        $this->assertFalse($hasAdjustments3);
+    }
+
+    /**
+     * Test: resetCategoryWeights resets only category weights (Potensi + Kompetensi)
+     *
+     * MEDIUM PRIORITY
+     */
+    public function test_resets_category_weights_only(): void
+    {
+        // Arrange
+        $template = $this->createTemplate();
+        $potensiCategory = $this->createCategory($template->id, 'potensi', 60); // Quantum default
+        $this->createCategory($template->id, 'kompetensi', 40); // Quantum default
+
+        Aspect::create([
+            'template_id' => $template->id,
+            'category_type_id' => $potensiCategory->id,
+            'code' => 'asp_01',
+            'name' => 'Test Aspect',
+            'weight_percentage' => 100,
+            'standard_rating' => 3.0,
+            'order' => 1,
+        ]);
+
+        // Act: Save multiple adjustments
+        $this->service->saveBothCategoryWeights($template->id, 'potensi', 70, 'kompetensi', 30);
+        $this->service->saveAspectWeight($template->id, 'asp_01', 80);
+
+        // Verify adjustments exist
+        $this->assertEquals(70, $this->service->getCategoryWeight($template->id, 'potensi'));
+        $this->assertEquals(80, $this->service->getAspectWeight($template->id, 'asp_01'));
+
+        // Act: Reset ONLY category weights
+        $this->service->resetCategoryWeights($template->id);
+
+        // Assert: Category weights should be reset
+        $this->assertEquals(60, $this->service->getCategoryWeight($template->id, 'potensi'));
+        $this->assertEquals(40, $this->service->getCategoryWeight($template->id, 'kompetensi'));
+
+        // Assert: Aspect weight should REMAIN unchanged
+        $this->assertEquals(80, $this->service->getAspectWeight($template->id, 'asp_01'));
+    }
+
+    /**
+     * Test: getOriginalTemplateData returns unadjusted template data
+     *
+     * MEDIUM PRIORITY
+     */
+    public function test_gets_original_template_data(): void
+    {
+        // Arrange
+        $template = $this->createTemplate();
+        $potensiCategory = $this->createCategory($template->id, 'potensi', 60);
+        $kompetensiCategory = $this->createCategory($template->id, 'kompetensi', 40);
+
+        $potensiAspect = Aspect::create([
+            'template_id' => $template->id,
+            'category_type_id' => $potensiCategory->id,
+            'code' => 'asp_pot_01',
+            'name' => 'Potensi Aspect',
+            'weight_percentage' => 100,
+            'standard_rating' => null,
+            'order' => 1,
+        ]);
+
+        $subAspect = SubAspect::create([
+            'aspect_id' => $potensiAspect->id,
+            'code' => 'sub_01',
+            'name' => 'Sub 1',
+            'standard_rating' => 3,
+            'order' => 1,
+        ]);
+
+        $kompetensiAspect = Aspect::create([
+            'template_id' => $template->id,
+            'category_type_id' => $kompetensiCategory->id,
+            'code' => 'asp_kom_01',
+            'name' => 'Kompetensi Aspect',
+            'weight_percentage' => 100,
+            'standard_rating' => 4.0,
+            'order' => 1,
+        ]);
+
+        // Save some adjustments (should NOT affect original data)
+        $this->service->saveAspectWeight($template->id, 'asp_pot_01', 80);
+
+        // Act: Get original template data
+        $result = $this->service->getOriginalTemplateData($template->id);
+
+        // Assert: Should return quantum defaults, NOT adjusted values
+        $this->assertArrayHasKey('template', $result);
+        $this->assertArrayHasKey('category_weights', $result);
+        $this->assertArrayHasKey('potensi_aspects', $result);
+        $this->assertArrayHasKey('kompetensi_aspects', $result);
+
+        // Category weights
+        $this->assertEquals(60, $result['category_weights']['potensi']);
+        $this->assertEquals(40, $result['category_weights']['kompetensi']);
+
+        // Potensi aspects
+        $this->assertCount(1, $result['potensi_aspects']);
+        $this->assertEquals('asp_pot_01', $result['potensi_aspects'][0]['code']);
+        $this->assertEquals(100, $result['potensi_aspects'][0]['weight_percentage']); // Original, not 80
+        $this->assertCount(1, $result['potensi_aspects'][0]['sub_aspects']);
+
+        // Kompetensi aspects
+        $this->assertCount(1, $result['kompetensi_aspects']);
+        $this->assertEquals('asp_kom_01', $result['kompetensi_aspects'][0]['code']);
+        $this->assertEquals(4.0, $result['kompetensi_aspects'][0]['standard_rating']);
+    }
+
+    /**
+     * Test: getActiveAspects returns array of active aspect codes
+     *
+     * LOW PRIORITY - Different from getActiveAspectIds()
+     * Note: Returns codes where active_aspects[code] === true in session
+     * If no active_aspects in session, returns ALL aspect codes
+     */
+    public function test_gets_active_aspect_codes(): void
+    {
+        // Arrange
+        $template = $this->createTemplate();
+        $category = $this->createCategory($template->id, 'potensi');
+
+        Aspect::create([
+            'template_id' => $template->id,
+            'category_type_id' => $category->id,
+            'code' => 'asp_01',
+            'name' => 'Aspect 1',
+            'weight_percentage' => 50,
+            'standard_rating' => 3.0,
+            'order' => 1,
+        ]);
+
+        Aspect::create([
+            'template_id' => $template->id,
+            'category_type_id' => $category->id,
+            'code' => 'asp_02',
+            'name' => 'Aspect 2',
+            'weight_percentage' => 50,
+            'standard_rating' => 4.0,
+            'order' => 2,
+        ]);
+
+        // Act 1: No adjustments - should return ALL aspects
+        $result1 = $this->service->getActiveAspects($template->id);
+        $this->assertCount(2, $result1);
+        $this->assertContains('asp_01', $result1);
+        $this->assertContains('asp_02', $result1);
+
+        // Act 2: Set asp_02 inactive - asp_02 becomes false in session
+        $this->service->setAspectActive($template->id, 'asp_02', false);
+
+        // Method returns array_keys where value === true
+        // asp_01 is not in session (no adjustment), so NOT in result
+        // asp_02 is false in session, so NOT in result
+        $result2 = $this->service->getActiveAspects($template->id);
+
+        // Assert: Should return empty array (no aspects with active_aspects[code] === true)
+        $this->assertIsArray($result2);
+        $this->assertEmpty($result2);
+    }
+
+    /**
+     * Test: getActiveSubAspects returns array of active sub-aspect codes
+     *
+     * LOW PRIORITY
+     * Note: Returns codes where active_sub_aspects[code] === true in session
+     * If no active_sub_aspects in session, returns ALL sub-aspect codes
+     */
+    public function test_gets_active_sub_aspect_codes(): void
+    {
+        // Arrange
+        $template = $this->createTemplate();
+        $category = $this->createCategory($template->id, 'potensi');
+
+        $aspect = Aspect::create([
+            'template_id' => $template->id,
+            'category_type_id' => $category->id,
+            'code' => 'asp_kecerdasan',
+            'name' => 'Kecerdasan',
+            'weight_percentage' => 100,
+            'standard_rating' => null,
+            'order' => 1,
+        ]);
+
+        SubAspect::create([
+            'aspect_id' => $aspect->id,
+            'code' => 'sub_01',
+            'name' => 'Sub 1',
+            'standard_rating' => 3,
+            'order' => 1,
+        ]);
+
+        SubAspect::create([
+            'aspect_id' => $aspect->id,
+            'code' => 'sub_02',
+            'name' => 'Sub 2',
+            'standard_rating' => 4,
+            'order' => 2,
+        ]);
+
+        // Act 1: No adjustments - should return ALL sub-aspects
+        $result1 = $this->service->getActiveSubAspects($template->id);
+        $this->assertCount(2, $result1);
+        $this->assertContains('sub_01', $result1);
+        $this->assertContains('sub_02', $result1);
+
+        // Act 2: Set sub_02 inactive - sub_02 becomes false in session
+        $this->service->setSubAspectActive($template->id, 'sub_02', false);
+
+        // Method returns array_keys where value === true
+        // sub_01 is not in session (no adjustment), so NOT in result
+        // sub_02 is false in session, so NOT in result
+        $result2 = $this->service->getActiveSubAspects($template->id);
+
+        // Assert: Should return empty array (no sub-aspects with active_sub_aspects[code] === true)
+        $this->assertIsArray($result2);
+        $this->assertEmpty($result2);
+    }
+
+    /**
+     * Test: getActiveAspectsCount and getTotalAspectsCount
+     *
+     * LOW PRIORITY
+     */
+    public function test_counts_active_and_total_aspects(): void
+    {
+        // Arrange
+        $template = $this->createTemplate();
+        $potensiCategory = $this->createCategory($template->id, 'potensi');
+        $kompetensiCategory = $this->createCategory($template->id, 'kompetensi');
+
+        // Create 3 Potensi aspects
+        Aspect::create([
+            'template_id' => $template->id,
+            'category_type_id' => $potensiCategory->id,
+            'code' => 'asp_pot_1',
+            'name' => 'Potensi 1',
+            'weight_percentage' => 33,
+            'standard_rating' => 3.0,
+            'order' => 1,
+        ]);
+
+        Aspect::create([
+            'template_id' => $template->id,
+            'category_type_id' => $potensiCategory->id,
+            'code' => 'asp_pot_2',
+            'name' => 'Potensi 2',
+            'weight_percentage' => 33,
+            'standard_rating' => 3.0,
+            'order' => 2,
+        ]);
+
+        Aspect::create([
+            'template_id' => $template->id,
+            'category_type_id' => $potensiCategory->id,
+            'code' => 'asp_pot_3',
+            'name' => 'Potensi 3',
+            'weight_percentage' => 34,
+            'standard_rating' => 3.0,
+            'order' => 3,
+        ]);
+
+        // Create 2 Kompetensi aspects
+        Aspect::create([
+            'template_id' => $template->id,
+            'category_type_id' => $kompetensiCategory->id,
+            'code' => 'asp_kom_1',
+            'name' => 'Kompetensi 1',
+            'weight_percentage' => 50,
+            'standard_rating' => 4.0,
+            'order' => 1,
+        ]);
+
+        Aspect::create([
+            'template_id' => $template->id,
+            'category_type_id' => $kompetensiCategory->id,
+            'code' => 'asp_kom_2',
+            'name' => 'Kompetensi 2',
+            'weight_percentage' => 50,
+            'standard_rating' => 4.0,
+            'order' => 2,
+        ]);
+
+        // Set 1 Potensi aspect inactive
+        $this->service->setAspectActive($template->id, 'asp_pot_3', false);
+
+        // Act: Get counts
+        $activeCounts = $this->service->getActiveAspectsCount($template->id);
+        $totalCounts = $this->service->getTotalAspectsCount($template->id);
+
+        // Assert: Active counts
+        $this->assertEquals(2, $activeCounts['potensi']); // 2 active (asp_pot_3 inactive)
+        $this->assertEquals(2, $activeCounts['kompetensi']); // All active
+
+        // Assert: Total counts
+        $this->assertEquals(3, $totalCounts['potensi']); // Total 3
+        $this->assertEquals(2, $totalCounts['kompetensi']); // Total 2
     }
 
     // ========================================
