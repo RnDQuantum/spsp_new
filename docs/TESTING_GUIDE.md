@@ -25,13 +25,13 @@
 | Service | Tests Done | Remaining | Priority | Status | Test File |
 |---------|------------|-----------|----------|--------|-----------|
 | **DynamicStandardService** | ✅ **52/52** | 0 | ⭐⭐⭐ | **✅ COMPLETE (100%)** | `tests/Unit/Services/DynamicStandardServiceTest.php` |
-| **IndividualAssessmentService** | ✅ 14/70 | 56 | ⭐⭐⭐ | PARTIAL | `tests/Unit/Services/IndividualAssessmentServiceTest.php` |
+| **IndividualAssessmentService** | ✅ **29/70** | 41 | ⭐⭐⭐ | **IN PROGRESS (41%)** | `tests/Unit/Services/IndividualAssessmentServiceTest.php` |
 | **CustomStandardService** | 0/20 | 20 | ⭐⭐ | PENDING | `tests/Unit/Services/CustomStandardServiceTest.php` |
 | **RankingService** | 0/40 | 40 | ⭐⭐ | PENDING | `tests/Unit/Services/RankingServiceTest.php` |
 | TrainingRecommendationService | 0/25 | 25 | ⭐ | OPTIONAL | Can be covered via Livewire tests |
 | StatisticService | 0/20 | 20 | ⭐ | OPTIONAL | Can be covered via Livewire tests |
 
-**Progress**: 66/227 tests (29%)
+**Progress**: 81/227 tests (36%) 🔥 +15 tests today!
 
 ### Why This Order?
 
@@ -545,8 +545,64 @@ public function test_validates_rating_between_1_and_5(): void
 
 ## 📝 IndividualAssessmentService Tests (Priority #2)
 
-**Status**: ✅ 14/70 done
-**Next**: Test remaining public methods
+**File**: `tests/Unit/Services/IndividualAssessmentServiceTest.php`
+**Framework**: PHPUnit (NOT Pest)
+**Total Tests**: ✅ **29/70** (41% done)
+**Status**: 🔥 **IN PROGRESS** - getCategoryAssessment() complete
+
+### Test Structure (29/70 Tests Done)
+
+#### ✅ PHASE 1-6: Basic Tests (14 tests) - COMPLETE
+- ✅ Service instantiation (1)
+- ✅ Data loading with factories (1)
+- ✅ Data-driven calculation (2)
+- ✅ Tolerance application (3)
+- ✅ Column validation (3)
+- ✅ Matching percentage (4)
+
+#### ✅ PHASE 7: getCategoryAssessment() (15 tests) - COMPLETE
+1. ✅ Aggregates aspect scores correctly
+2. ✅ Applies category weight to totals
+3. ✅ Excludes inactive aspects from category totals
+4. ✅ Calculates category gaps correctly
+5. ✅ Applies tolerance to category totals
+6. ✅ Returns correct overall conclusion
+7. ✅ Category assessment has all required keys
+8. ✅ Category assessment data types
+9. ✅ Category assessment with single aspect
+10. ✅ Category assessment with potensi sub aspects
+11. ✅ Category assessment rounds correctly
+12. ✅ Calculates weighted gap correctly
+13. ✅ Throws exception for nonexistent category
+14. ✅ Category assessment with different tolerances
+15. ✅ Helper: `createCategoryWithMultipleAspects()`
+
+**Bugs Found**: 2
+1. 🐛 Test logic error in decimal rounding check (fixed)
+2. 🐛 Assertion parameter order reversed in tolerance test (fixed)
+
+#### ⏳ PHASE 8: getFinalAssessment() (15 tests) - PENDING
+- Combines Potensi + Kompetensi
+- Calculates final weighted scores
+- Overall passing determination
+- Final conclusion generation
+
+#### ⏳ PHASE 9: getPassingSummary() (5 tests) - PENDING
+- Count passing aspects
+- Category-level passing
+- Overall passing status
+
+#### ⏳ PHASE 10: getAspectMatchingData() (12 tests) - PENDING
+- Aspect-level matching percentage
+- Job requirement matching
+- Tolerance effects on matching
+
+#### ⏳ PHASE 11: getJobMatchingPercentage() (9 tests) - PENDING
+- Overall job matching calculation
+- Weighted matching percentage
+- Final job suitability
+
+**Next**: Continue with `getFinalAssessment()` tests
 
 ### Remaining Public Methods
 
