@@ -20,17 +20,18 @@ Level 1: Sub-Aspect Individual Ratings (Raw data dari CI3)
     ↓ AGGREGATE (Average)
 Level 2: Aspect Individual Ratings (Calculated atau Direct)
     ↓ AGGREGATE (Sum with weights)
-Level 3: Category Ratings (Potensi + Kompetensi)
+Level 3: Category Ratings (Dynamic categories)
     ↓ WEIGHTED CALCULATION
 Level 4: Final Assessment (Achievement percentage + Conclusion)
 ```
 
 **Key Principles:**
-1. Sub-Aspects → Aspects: Aggregation (average) - **hanya untuk Potensi**
+1. Sub-Aspects → Aspects: Aggregation (average) - **untuk aspect yang memiliki sub-aspects**
 2. Aspects → Categories: Aggregation (sum with weights)
 3. Categories → Final: Weighted calculation (dynamic weights per template)
 4. Gap Calculation: Individual vs Standard di setiap level
 5. Snapshot Pattern: Standard ratings dicopy untuk integritas historis
+6. **Data-Driven Structure**: Logic berdasarkan data structure, bukan category names (see [FLEXIBLE_HIERARCHY_REFACTORING.md](./FLEXIBLE_HIERARCHY_REFACTORING.md))
 
 ---
 
@@ -49,10 +50,15 @@ rating_label           varchar               -- 'Kurang', 'Cukup', 'Baik', 'Baik
 
 ### Karakteristik
 
-| Category | Sub-Aspects | Source |
-|----------|-------------|--------|
-| **Potensi** | ✅ Ada (20-25 total) | Wajib dari API |
-| **Kompetensi** | ❌ Tidak ada | N/A |
+**Data-Driven Approach** (sejak refactoring 2025-01-27):
+- Aspect **dapat memiliki atau tidak memiliki** sub-aspects (0..N relationship)
+- Logic mendeteksi secara otomatis berdasarkan struktur data
+- Tidak tergantung pada category name (potensi/kompetensi)
+
+**Current Common Pattern**:
+- Potensi aspects: biasanya memiliki sub-aspects (20-25 total)
+- Kompetensi aspects: biasanya tidak memiliki sub-aspects
+- Template masa depan dapat memiliki kombinasi apapun
 
 ### Purpose
 
@@ -101,43 +107,47 @@ conclusion_text        varchar               -- 'Memenuhi Standard'
 
 ### Calculation Logic
 
-#### POTENSI (dengan sub-aspects)
+**Unified Data-Driven Approach** (sejak refactoring 2025-01-27):
 
-**Service:** `AspectService::calculatePotensiAspect()`
+**Service:** `AspectService::calculateAspect()` - works for ANY category
 
 ```php
-// 1. Get all sub-aspect assessments
-$subAssessments = SubAspectAssessment::where('aspect_assessment_id', $id)->get();
+// 1. Check if aspect has sub-aspects (DATA-DRIVEN)
+if ($aspect->subAspects->isNotEmpty()) {
+    // HAS sub-aspects: Calculate individual_rating from AVERAGE
+    $subAssessments = SubAspectAssessment::where('aspect_assessment_id', $id)->get();
+    $individualRating = $subAssessments->avg('individual_rating'); // Decimal
+} else {
+    // NO sub-aspects: Use direct individual_rating from API
+    $individualRating = $providedRating; // Integer 1-5
+}
 
-// 2. Calculate individual_rating = AVERAGE of sub-aspects (returns decimal)
-$individualRating = $subAssessments->avg('individual_rating');
-
-// 3. Get aspect weight from master
+// 2. Get aspect weight from master (or adjusted from session)
 $aspect = Aspect::find($aspectId);
 
-// 4. Calculate scores
+// 3. Calculate scores
 // Formula: score = rating × weight_percentage
 $standardScore = $standardRating × $aspect->weight_percentage;
 $individualScore = $individualRating × $aspect->weight_percentage;
 
-// 5. Calculate gaps
+// 4. Calculate gaps
 $gapRating = $individualRating - $standardRating;
 $gapScore = $individualScore - $standardScore;
 
-// 6. Calculate percentage for spider chart
+// 5. Calculate percentage for spider chart
 $percentageScore = ($individualRating / 5) × 100;
 
-// 7. Determine conclusion
+// 6. Determine conclusion
 if ($gapRating < -0.5) → 'below_standard'
 if ($gapRating < 0.5) → 'meets_standard'
 else → 'exceeds_standard'
 ```
 
-**Example:**
+**Example 1: Aspect WITH Sub-Aspects**
 ```
-Aspect: Kecerdasan (weight 25%)
+Aspect: Kecerdasan (weight 25%, has 6 sub-aspects)
 ├─ Sub-aspects average: (3+4+3+4+3+3)/6 = 3.33
-├─ Standard Rating: 3.00 (dari master)
+├─ Standard Rating: 3.00 (calculated from sub-aspects)
 ├─ Standard Score: 3.00 × 25 = 75.00
 ├─ Individual Rating: 3.33 (average dari sub-aspects)
 ├─ Individual Score: 3.33 × 25 = 83.25
@@ -147,35 +157,10 @@ Aspect: Kecerdasan (weight 25%)
 └─ Conclusion: 'meets_standard' (gap < 0.5)
 ```
 
-#### KOMPETENSI (tanpa sub-aspects)
-
-**Service:** `AspectService::calculateKompetensiAspect()`
-
-```php
-// IMPORTANT: individualRating dari API harus INTEGER 1-5
-
-// 1. Get aspect weight from master
-$aspect = Aspect::find($aspectId);
-
-// 2. Calculate scores
-// Formula: score = rating × weight_percentage
-$standardScore = $standardRating × $aspect->weight_percentage;
-$individualScore = $individualRating × $aspect->weight_percentage;
-
-// 3. Calculate gaps
-$gapRating = $individualRating - $standardRating;
-$gapScore = $individualScore - $standardScore;
-
-// 4. Calculate percentage
-$percentageScore = ($individualRating / 5) × 100;
-
-// 5. Determine conclusion (same logic as Potensi)
+**Example 2: Aspect WITHOUT Sub-Aspects**
 ```
-
-**Example:**
-```
-Aspect: Integritas (weight 15%)
-├─ Standard Rating: 3.00 (dari master)
+Aspect: Integritas (weight 15%, no sub-aspects)
+├─ Standard Rating: 3.00 (from master data)
 ├─ Standard Score: 3.00 × 15 = 45.00
 ├─ Individual Rating: 4 (INTEGER dari API)
 ├─ Individual Score: 4 × 15 = 60.00
@@ -187,20 +172,19 @@ Aspect: Integritas (weight 15%)
 
 ### Standard Rating Calculation
 
-**Potensi:** Standard rating di-calculate dari average sub-aspects saat create
+**Data-Driven Approach:**
 ```php
 // AspectService::createAspectAssessment()
-if ($categoryCode === 'potensi') {
+if ($aspect->subAspects->isNotEmpty()) {
+    // Has sub-aspects: Calculate from average
     $standardRating = $aspect->subAspects->avg('standard_rating');
-}
-```
-
-**Kompetensi:** Standard rating langsung dari master
-```php
-if ($categoryCode === 'kompetensi') {
+} else {
+    // No sub-aspects: Use aspect's own rating
     $standardRating = $aspect->standard_rating;
 }
 ```
+
+**Note:** Sejak refactoring 2025-01-27, logic tidak lagi bergantung pada category code (`potensi`/`kompetensi`), tetapi pada struktur data aktual. Lihat [FLEXIBLE_HIERARCHY_REFACTORING.md](./FLEXIBLE_HIERARCHY_REFACTORING.md) untuk detail.
 
 ---
 
@@ -579,13 +563,12 @@ standard_rating = INTEGER 1-5 (snapshot dari master)
 
 ### Level 2: Aspect
 
-**Potensi (dengan sub-aspects):**
+**Data-Driven Calculation:**
 ```
+// If aspect has sub-aspects
 individual_rating = AVG(sub_aspect_ratings)  // Hasil: decimal
-```
 
-**Kompetensi (tanpa sub-aspects):**
-```
+// If aspect has no sub-aspects
 individual_rating = INTEGER 1-5 (langsung dari API)
 ```
 

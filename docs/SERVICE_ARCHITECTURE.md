@@ -1,8 +1,9 @@
 # Service Architecture: Assessment Calculation System
 
-> **Version**: 1.3
-> **Last Updated**: 2025-01-17
+> **Version**: 1.4
+> **Last Updated**: 2025-01-28
 > **Purpose**: Single Source of Truth untuk kalkulasi assessment (Individual, Ranking, Matching & Statistics)
+> **Important**: Sejak 2025-01-27, sistem menggunakan **data-driven approach** (bukan hardcoded category logic). Lihat [FLEXIBLE_HIERARCHY_REFACTORING.md](./FLEXIBLE_HIERARCHY_REFACTORING.md) untuk detail refactoring.
 
 ---
 
@@ -20,6 +21,8 @@
 ---
 
 ## Overview
+
+> **Note on Data-Driven Structure**: Dokumen ini telah diupdate untuk reflect refactoring yang dilakukan pada 2025-01-27. Sistem tidak lagi menggunakan hardcoded checks terhadap category names (`potensi`/`kompetensi`), melainkan menggunakan data-driven approach berdasarkan struktur data aktual (`$aspect->subAspects->isNotEmpty()`). Lihat [FLEXIBLE_HIERARCHY_REFACTORING.md](./FLEXIBLE_HIERARCHY_REFACTORING.md).
 
 ### Architecture Diagram
 
@@ -345,7 +348,7 @@ getConclusionSummary(Collection $rankings): array
 
 ## Calculation Levels
 
-### Level 1: Sub-Aspect Rating (Potensi Only)
+### Level 1: Sub-Aspect Rating (For Aspects with Sub-Aspects)
 
 **Formula**:
 ```
@@ -362,9 +365,9 @@ Sub-Aspects (3 total, 2 active):
 Aspect Rating = (4 + 5) / 2 = 4.5
 ```
 
-**Code** ([IndividualAssessmentService.php:185-227](app/Services/IndividualAssessmentService.php#L185-L227)):
+**Code** ([IndividualAssessmentService.php](app/Services/IndividualAssessmentService.php)):
 ```php
-private function calculatePotensiRatings(
+private function calculateRatingsFromSubAspects(
     AspectAssessment $assessment,
     int $templateId,
     DynamicStandardService $standardService
@@ -404,7 +407,8 @@ private function calculatePotensiRatings(
 **🔑 Key Points**:
 - Only **active** sub-aspects counted
 - Ratings adjusted via `DynamicStandardService`
-- Applies to **Potensi** category only (Kompetensi has direct aspect rating)
+- Applies to **any aspect that has sub-aspects** (data-driven, not category-specific)
+- Since refactoring 2025-01-27, logic checks `$aspect->subAspects->isNotEmpty()` instead of category code
 
 ---
 
@@ -435,7 +439,8 @@ $individualScore = round($individualRating * $adjustedWeight, 2);
 
 **🔑 Key Points**:
 - Weight always dari `DynamicStandardService` (adjusted or original)
-- Applies to both Potensi & Kompetensi
+- Applies to **all aspects** regardless of category type
+- Rating source determined by `$aspect->subAspects->isNotEmpty()` check
 
 ---
 
@@ -449,11 +454,11 @@ Total Category Score = Sum(Active Aspect Scores)
 
 **Example**:
 ```
-Potensi (5 aspects, 1 inactive):
-- Aspect 01: Rating 4.5, Score 67.5  (active)
-- Aspect 02: Rating 4.0, Score 60.0  (active)
-- Aspect 03: Rating 3.5, Score 52.5  (active)
-- Aspect 04: Rating 5.0, Score 75.0  (active)
+Category (5 aspects, 1 inactive):
+- Aspect 01: Rating 4.5, Score 67.5  (active, has sub-aspects)
+- Aspect 02: Rating 4.0, Score 60.0  (active, no sub-aspects)
+- Aspect 03: Rating 3.5, Score 52.5  (active, has sub-aspects)
+- Aspect 04: Rating 5.0, Score 75.0  (active, no sub-aspects)
 - Aspect 05: Rating 3.0, Score 45.0  (inactive) ← Skip
 
 Total Rating = 4.5 + 4.0 + 3.5 + 5.0 = 17.0
@@ -503,12 +508,12 @@ Weighted Category Score = Total Category Score × (Category Weight / 100)
 
 **Example**:
 ```
-Potensi:
+Category A (e.g., Potensi):
 - Total Score: 255.0
 - Category Weight: 60% (adjusted from 50% original)
 - Weighted Score: 255.0 × 0.6 = 153.0
 
-Kompetensi:
+Category B (e.g., Kompetensi):
 - Total Score: 300.0
 - Category Weight: 40% (adjusted from 50% original)
 - Weighted Score: 300.0 × 0.4 = 120.0
@@ -550,8 +555,8 @@ Final Score = Weighted Potensi Score + Weighted Kompetensi Score
 
 **Example**:
 ```
-Weighted Potensi Score: 153.0
-Weighted Kompetensi Score: 120.0
+Weighted Category A Score: 153.0
+Weighted Category B Score: 120.0
 
 Final Individual Score = 153.0 + 120.0 = 273.0
 ```
