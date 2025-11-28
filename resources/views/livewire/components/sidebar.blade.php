@@ -52,8 +52,7 @@
     <aside x-transition:enter="transition ease-in-out duration-300 transform"
         x-transition:enter-start="-translate-x-full" x-transition:enter-end="translate-x-0"
         x-transition:leave="transition ease-in-out duration-300 transform" x-transition:leave-start="translate-x-0"
-        x-transition:leave-end="-translate-x-full"
-        :class="[
+        x-transition:leave-end="-translate-x-full" :class="[
             mobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0',
             minimized ? 'w-20' : 'w-64'
         ]"
@@ -82,14 +81,15 @@
             <nav x-ref="sidebarNav" @scroll.debounce.500ms="saveScrollPosition()"
                 class="flex-1 px-3 py-4 overflow-y-auto space-y-1">
                 <!-- Dashboard -->
-                <a wire:navigate href="/dashboard" x-tooltip.raw="minimized ? 'Dashboard' : null"
-                    @class([
-                        'group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200',
-                        'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border-l-4 border-blue-700 dark:border-blue-400' => $this->isActiveRoute(
-                            'dashboard'),
-                        'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' => !$this->isActiveRoute(
-                            'dashboard'),
-                    ]) :class="minimized ? 'justify-center px-2' : ''">
+                <a wire:navigate href="/dashboard" x-tooltip.raw="minimized ? 'Dashboard' : null" @class([
+                    'group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200',
+                    'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border-l-4 border-blue-700 dark:border-blue-400' => $this->isActiveRoute(
+                        'dashboard'
+                    ),
+                    'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' => !$this->isActiveRoute(
+                        'dashboard'
+                    ),
+                ]) :class="minimized ? 'justify-center px-2' : ''">
                     <i class="fa-solid fa-house w-5 text-center" :class="!minimized && 'mr-3'"></i>
                     <span x-show="!minimized" x-transition:enter="transition ease-out duration-200"
                         x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">Beranda</span>
@@ -100,9 +100,11 @@
                     @class([
                         'group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200',
                         'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border-l-4 border-blue-700 dark:border-blue-400' => $this->isActiveRoute(
-                            'shortlist'),
+                            'shortlist'
+                        ),
                         'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' => !$this->isActiveRoute(
-                            'shortlist'),
+                            'shortlist'
+                        ),
                     ]) :class="minimized ? 'justify-center px-2' : ''">
                     <i class="fa-solid fa-users w-5 text-center" :class="!minimized && 'mr-3'"></i>
                     <span x-show="!minimized" x-transition:enter="transition ease-out duration-200"
@@ -115,9 +117,11 @@
                     x-tooltip.raw="minimized ? 'Shortlist Peserta' : null" @class([
                         'group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200',
                         'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border-l-4 border-blue-700 dark:border-blue-400' => $this->isActiveRoute(
-                            'custom-standards.index'),
+                            'custom-standards.index'
+                        ),
                         'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' => !$this->isActiveRoute(
-                            'custom-standards.index'),
+                            'custom-standards.index'
+                        ),
                     ])
                     :class="minimized ? 'justify-center px-2' : ''">
                     <i class="fa-solid fa-chart-line w-5 text-center" :class="!minimized && 'mr-3'"></i>
@@ -155,8 +159,7 @@
                         x-transition:leave="transition ease-in duration-150"
                         x-transition:leave-start="opacity-100 translate-y-0"
                         x-transition:leave-end="opacity-0 -translate-y-1" id="submenu-individual"
-                        class="ml-4 mt-1 space-y-1" role="menu" aria-labelledby="btn-individual"
-                        style="display: none;">
+                        class="ml-4 mt-1 space-y-1" role="menu" aria-labelledby="btn-individual" style="display: none;">
                         @if (!$this->canShowIndividualReports())
                             <div
                                 class="mx-2 my-2 p-2.5 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-600/50 rounded-lg">
@@ -187,9 +190,11 @@
                                 role="menuitem" @class([
                                     'block px-3 py-2 text-xs rounded-lg transition-all duration-200',
                                     'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium italic' => $this->isActiveRoute(
-                                        'general_matching'),
+                                        'general_matching'
+                                    ),
                                     'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 italic' => !$this->isActiveRoute(
-                                        'general_matching'),
+                                        'general_matching'
+                                    ),
                                 ])>
                                 <i class="fa-solid fa-circle-dot mr-2 text-xs"></i>General Matching
                             </a>
@@ -206,9 +211,11 @@
                                 role="menuitem" @class([
                                     'block px-3 py-2 text-xs rounded-lg transition-all duration-200',
                                     'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium italic' => $this->isActiveRoute(
-                                        'general_mapping'),
+                                        'general_mapping'
+                                    ),
                                     'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 italic' => !$this->isActiveRoute(
-                                        'general_mapping'),
+                                        'general_mapping'
+                                    ),
                                 ])>
                                 <i class="fa-solid fa-circle-dot mr-2 text-xs"></i>General Mapping
                             </a>
@@ -225,9 +232,11 @@
                                 role="menuitem" @class([
                                     'block px-3 py-2 text-xs rounded-lg transition-all duration-200',
                                     'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium italic' => $this->isActiveRoute(
-                                        'general_psy_mapping'),
+                                        'general_psy_mapping'
+                                    ),
                                     'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 italic' => !$this->isActiveRoute(
-                                        'general_psy_mapping'),
+                                        'general_psy_mapping'
+                                    ),
                                 ])>
                                 <div class="flex items-start gap-2">
                                     <i class="fa-solid fa-circle-dot text-xs mt-0.5 flex-shrink-0"></i>
@@ -250,9 +259,11 @@
                                 role="menuitem" @class([
                                     'block px-3 py-2 text-xs rounded-lg transition-all duration-200',
                                     'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium italic' => $this->isActiveRoute(
-                                        'general_mc_mapping'),
+                                        'general_mc_mapping'
+                                    ),
                                     'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 italic' => !$this->isActiveRoute(
-                                        'general_mc_mapping'),
+                                        'general_mc_mapping'
+                                    ),
                                 ])>
                                 <div class="flex items-start gap-2">
                                     <i class="fa-solid fa-circle-dot text-xs mt-0.5 flex-shrink-0"></i>
@@ -275,9 +286,11 @@
                                 role="menuitem" @class([
                                     'block px-3 py-2 text-xs rounded-lg transition-all duration-200',
                                     'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium italic' => $this->isActiveRoute(
-                                        'spider_plot'),
+                                        'spider_plot'
+                                    ),
                                     'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 italic' => !$this->isActiveRoute(
-                                        'spider_plot'),
+                                        'spider_plot'
+                                    ),
                                 ])>
                                 <i class="fa-solid fa-circle-dot mr-2 text-xs"></i>Spider Plot
                             </a>
@@ -294,9 +307,11 @@
                                 role="menuitem" @class([
                                     'block px-3 py-2 text-xs rounded-lg transition-all duration-200',
                                     'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium' => $this->isActiveRoute(
-                                        'ringkasan_mc_mapping'),
+                                        'ringkasan_mc_mapping'
+                                    ),
                                     'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' => !$this->isActiveRoute(
-                                        'ringkasan_mc_mapping'),
+                                        'ringkasan_mc_mapping'
+                                    ),
                                 ])>
                                 <div class="flex items-start gap-2">
                                     <i class="fa-solid fa-circle-dot text-xs mt-0.5 flex-shrink-0"></i>
@@ -321,9 +336,11 @@
                                 role="menuitem" @class([
                                     'block px-3 py-2 text-xs rounded-lg transition-all duration-200',
                                     'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium' => $this->isActiveRoute(
-                                        'ringkasan_assessment'),
+                                        'ringkasan_assessment'
+                                    ),
                                     'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' => !$this->isActiveRoute(
-                                        'ringkasan_assessment'),
+                                        'ringkasan_assessment'
+                                    ),
                                 ])>
                                 <div class="flex items-start gap-2">
                                     <i class="fa-solid fa-circle-dot text-xs mt-0.5 flex-shrink-0"></i>
@@ -346,9 +363,11 @@
                                 role="menuitem" @class([
                                     'block px-3 py-2 text-xs rounded-lg transition-all duration-200',
                                     'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium' => $this->isActiveRoute(
-                                        'final_report'),
+                                        'final_report'
+                                    ),
                                     'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' => !$this->isActiveRoute(
-                                        'final_report'),
+                                        'final_report'
+                                    ),
                                 ])>
                                 <i class="fa-solid fa-circle-dot mr-2 text-xs"></i>Laporan Individu
                             </a>
@@ -391,202 +410,142 @@
                         x-transition:leave="transition ease-in duration-150"
                         x-transition:leave-start="opacity-100 translate-y-0"
                         x-transition:leave-end="opacity-0 -translate-y-1" id="submenu-general"
-                        class="ml-4 mt-1 space-y-1" role="menu" aria-labelledby="btn-general"
-                        style="display: none;">
-                        <a wire:navigate href="{{ route('ranking-psy-mapping') }}" role="menuitem"
-                            @class([
-                                'block px-3 py-2 text-xs rounded-lg transition-all duration-200',
-                                'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium italic' => $this->isActiveRoute(
-                                    'ranking-psy-mapping'),
-                                'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 italic' => !$this->isActiveRoute(
-                                    'ranking-psy-mapping'),
-                            ])>
+                        class="ml-4 mt-1 space-y-1" role="menu" aria-labelledby="btn-general" style="display: none;">
+                        <a wire:navigate href="{{ route('ranking-psy-mapping') }}" role="menuitem" @class([
+                            'block px-3 py-2 text-xs rounded-lg transition-all duration-200',
+                            'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium italic' => $this->isActiveRoute(
+                                'ranking-psy-mapping'
+                            ),
+                            'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 italic' => !$this->isActiveRoute(
+                                'ranking-psy-mapping'
+                            ),
+                        ])>
                             <div class="flex items-start gap-2">
                                 <i class="fa-solid fa-circle-dot text-xs mt-0.5 flex-shrink-0"></i>
                                 <span class="flex-1 leading-tight">Ranking Psychology Mapping</span>
                             </div>
                         </a>
-                        <a wire:navigate href="{{ route('ranking-mc-mapping') }}" role="menuitem"
-                            @class([
-                                'block px-3 py-2 text-xs rounded-lg transition-all duration-200',
-                                'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium italic' => $this->isActiveRoute(
-                                    'ranking-mc-mapping'),
-                                'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 italic' => !$this->isActiveRoute(
-                                    'ranking-mc-mapping'),
-                            ])>
+                        <a wire:navigate href="{{ route('ranking-mc-mapping') }}" role="menuitem" @class([
+                            'block px-3 py-2 text-xs rounded-lg transition-all duration-200',
+                            'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium italic' => $this->isActiveRoute(
+                                'ranking-mc-mapping'
+                            ),
+                            'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 italic' => !$this->isActiveRoute(
+                                'ranking-mc-mapping'
+                            ),
+                        ])>
                             <div class="flex items-start gap-2">
                                 <i class="fa-solid fa-circle-dot text-xs mt-0.5 flex-shrink-0"></i>
                                 <span class="flex-1 leading-tight">Ranking Managerial Competency Mapping</span>
                             </div>
                         </a>
-                        <a wire:navigate href="{{ route('rekap-ranking-assessment') }}" role="menuitem"
-                            @class([
-                                'block px-3 py-2 text-xs rounded-lg transition-all duration-200',
-                                'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium' => $this->isActiveRoute(
-                                    'rekap-ranking-assessment'),
-                                'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' => !$this->isActiveRoute(
-                                    'rekap-ranking-assessment'),
-                            ])>
+                        <a wire:navigate href="{{ route('rekap-ranking-assessment') }}" role="menuitem" @class([
+                            'block px-3 py-2 text-xs rounded-lg transition-all duration-200',
+                            'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium' => $this->isActiveRoute(
+                                'rekap-ranking-assessment'
+                            ),
+                            'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' => !$this->isActiveRoute(
+                                'rekap-ranking-assessment'
+                            ),
+                        ])>
                             <div class="flex items-start gap-2">
                                 <i class="fa-solid fa-circle-dot text-xs mt-0.5 flex-shrink-0"></i>
                                 <span class="flex-1 leading-tight"><i>Ranking</i> Ringkasan Hasil Asesmen</span>
                             </div>
                         </a>
-                        <a wire:navigate href="{{ route('statistic') }}" role="menuitem"
-                            @class([
-                                'block px-3 py-2 text-xs rounded-lg transition-all duration-200',
-                                'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium' => $this->isActiveRoute(
-                                    'statistic'),
-                                'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' => !$this->isActiveRoute(
-                                    'statistic'),
-                            ])>
+                        <a wire:navigate href="{{ route('statistic') }}" role="menuitem" @class([
+                            'block px-3 py-2 text-xs rounded-lg transition-all duration-200',
+                            'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium' => $this->isActiveRoute(
+                                'statistic'
+                            ),
+                            'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' => !$this->isActiveRoute(
+                                'statistic'
+                            ),
+                        ])>
                             <i class="fa-solid fa-circle-dot mr-2 text-xs"></i>Statistik
                         </a>
-                        <a wire:navigate href="{{ route('training-recommendation') }}" role="menuitem"
-                            @class([
-                                'block px-3 py-2 text-xs rounded-lg transition-all duration-200',
-                                'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium' => $this->isActiveRoute(
-                                    'training-recommendation'),
-                                'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' => !$this->isActiveRoute(
-                                    'training-recommendation'),
-                            ])>
+                        <a wire:navigate href="{{ route('training-recommendation') }}" role="menuitem" @class([
+                            'block px-3 py-2 text-xs rounded-lg transition-all duration-200',
+                            'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium' => $this->isActiveRoute(
+                                'training-recommendation'
+                            ),
+                            'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' => !$this->isActiveRoute(
+                                'training-recommendation'
+                            ),
+                        ])>
                             <div class="flex items-start gap-2">
                                 <i class="fa-solid fa-circle-dot text-xs mt-0.5 flex-shrink-0"></i>
                                 <span class="flex-1 leading-tight"><i>Training Recommendation</i></span>
                             </div>
                         </a>
-                        <a wire:navigate href="{{ route('standard-mc') }}" role="menuitem"
-                            @class([
-                                'block px-3 py-2 text-xs rounded-lg transition-all duration-200',
-                                'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium' => $this->isActiveRoute(
-                                    'standard-mc'),
-                                'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' => !$this->isActiveRoute(
-                                    'standard-mc'),
-                            ])>
+                        <a wire:navigate href="{{ route('standard-mc') }}" role="menuitem" @class([
+                            'block px-3 py-2 text-xs rounded-lg transition-all duration-200',
+                            'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium' => $this->isActiveRoute(
+                                'standard-mc'
+                            ),
+                            'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' => !$this->isActiveRoute(
+                                'standard-mc'
+                            ),
+                        ])>
                             <div class="flex items-start gap-2">
                                 <i class="fa-solid fa-circle-dot text-xs mt-0.5 flex-shrink-0"></i>
                                 <span class="flex-1 leading-tight">Standar <i>Managerial Competency Mapping</i></span>
                             </div>
                         </a>
-                        <a wire:navigate href="{{ route('standard-psikometrik') }}" role="menuitem"
-                            @class([
-                                'block px-3 py-2 text-xs rounded-lg transition-all duration-200',
-                                'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium' => $this->isActiveRoute(
-                                    'standard-psikometrik'),
-                                'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' => !$this->isActiveRoute(
-                                    'standard-psikometrik'),
-                            ])>
+                        <a wire:navigate href="{{ route('standard-psikometrik') }}" role="menuitem" @class([
+                            'block px-3 py-2 text-xs rounded-lg transition-all duration-200',
+                            'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium' => $this->isActiveRoute(
+                                'standard-psikometrik'
+                            ),
+                            'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' => !$this->isActiveRoute(
+                                'standard-psikometrik'
+                            ),
+                        ])>
                             <div class="flex items-start gap-2">
                                 <i class="fa-solid fa-circle-dot text-xs mt-0.5 flex-shrink-0"></i>
                                 <span class="flex-1 leading-tight">Standar <i>Potential Mapping</i></span>
                             </div>
                         </a>
-                        <a wire:navigate href="{{ route('general-report.mmpi') }}" role="menuitem"
-                            @class([
-                                'block px-3 py-2 text-xs rounded-lg transition-all duration-200',
-                                'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium' => $this->isActiveRoute(
-                                    'general-report.mmpi'),
-                                'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' => !$this->isActiveRoute(
-                                    'general-report.mmpi'),
-                            ])>
+                        <a wire:navigate href="{{ route('general-report.mmpi') }}" role="menuitem" @class([
+                            'block px-3 py-2 text-xs rounded-lg transition-all duration-200',
+                            'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium' => $this->isActiveRoute(
+                                'general-report.mmpi'
+                            ),
+                            'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' => !$this->isActiveRoute(
+                                'general-report.mmpi'
+                            ),
+                        ])>
                             <i class="fa-solid fa-circle-dot mr-2 text-xs"></i>MMPI
                         </a>
                     </div>
                 </div>
 
-                {{-- Laporan Alat Tes (judul + submenu) --}}
-                <div x-data="{ laporanAlatTesOpen: {{ $this->isActiveRoute('laporan-potensi') || $this->isActiveRoute('laporan-kompetensi') || $this->isActiveRoute('laporan-potensi-kompetensi') ? 'true' : 'false' }} }">
-
-                    {{-- Tombol Judul --}}
-                    <button id="btn-laporan-alat-tes"
-                        @click="if (minimized) { minimized = false; $dispatch('sidebar-toggled', { minimized }); laporanAlatTesOpen = true } else { laporanAlatTesOpen = !laporanAlatTesOpen }"
-                        x-tooltip.raw="minimized ? 'Laporan Tes' : null"
-                        class="w-full group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 justify-between"
-                        :class="laporanAlatTesOpen
-                            ?
-                            'bg-gray-100 dark:bg-gray-800 text-gray-300' :
-                            'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50'"
-                        aria-haspopup="true" :aria-expanded="laporanAlatTesOpen"
-                        aria-controls="submenu-laporan-alat-tes">
-
-                        <div class="flex items-center">
-                            <i class="fa-solid fa-newspaper w-5 text-center mr-3"></i>
-                            <span><i>Laporan Alat Tes</i></span>
-                        </div>
-
-                        <svg class="w-4 h-4 transition-transform duration-200"
-                            :class="laporanAlatTesOpen ? 'rotate-180' : ''" fill="currentColor" viewBox="0 0 20 20"
-                            aria-hidden="true">
-                            <path fill-rule="evenodd"
-                                d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                                clip-rule="evenodd"></path>
-                        </svg>
-                    </button>
-
-
-                    {{-- Submenu --}}
-                    <div x-show="laporanAlatTesOpen" x-transition:enter="transition ease-out duration-200"
-                        x-transition:enter-start="opacity-0 -translate-y-1"
-                        x-transition:enter-end="opacity-100 translate-y-0"
-                        x-transition:leave="transition ease-in duration-150"
-                        x-transition:leave-start="opacity-100 translate-y-0"
-                        x-transition:leave-end="opacity-0 -translate-y-1" id="submenu-laporan-alat-tes"
-                        class="ml-4 mt-1 space-y-1" role="menu" aria-labelledby="btn-laporan-alat-tes"
-                        style="display: none;">
-
-                        {{-- 1. Laporan Potensi --}}
-                        <a wire:navigate href="#" role="menuitem" @class([
-                            'block px-3 py-2 text-xs rounded-lg transition-all duration-200',
-                            'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium' => $this->isActiveRoute(
-                                'laporan-potensi'),
-                            'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' => !$this->isActiveRoute(
-                                'laporan-potensi'),
-                        ])>
-                            <div class="flex items-start gap-2">
-                                <i class="fa-solid fa-circle-dot text-xs mt-0.5 flex-shrink-0"></i>
-                                <span class="flex-1 leading-tight">Laporan Potensi</span>
-                            </div>
-                        </a>
-
-                        {{-- 2. Laporan Kompetensi --}}
-                        <a wire:navigate href="#" role="menuitem" @class([
-                            'block px-3 py-2 text-xs rounded-lg transition-all duration-200',
-                            'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium' => $this->isActiveRoute(
-                                'laporan-kompetensi'),
-                            'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' => !$this->isActiveRoute(
-                                'laporan-kompetensi'),
-                        ])>
-                            <div class="flex items-start gap-2">
-                                <i class="fa-solid fa-circle-dot text-xs mt-0.5 flex-shrink-0"></i>
-                                <span class="flex-1 leading-tight">Laporan Kompetensi</span>
-                            </div>
-                        </a>
-
-                        {{-- 3. Potensi & Kompetensi --}}
-                        <a wire:navigate href="#" role="menuitem" @class([
-                            'block px-3 py-2 text-xs rounded-lg transition-all duration-200',
-                            'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium' => $this->isActiveRoute(
-                                'laporan-potensi-kompetensi'),
-                            'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' => !$this->isActiveRoute(
-                                'laporan-potensi-kompetensi'),
-                        ])>
-                            <div class="flex items-start gap-2">
-                                <i class="fa-solid fa-circle-dot text-xs mt-0.5 flex-shrink-0"></i>
-                                <span class="flex-1 leading-tight">Potensi &amp; Kompetensi</span>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-
+                <a wire:navigate href="{{ route('laporan-alat-tes') }}" x-tooltip.raw="minimized ? 'Laporan Tes' : null"
+                    @class([
+                        'group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200',
+                        'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border-l-4 border-blue-700 dark:border-blue-400' => $this->isActiveRoute(
+                            'laporan-alat-tes'
+                        ),
+                        'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' => !$this->isActiveRoute(
+                            'laporan-alat-tes'
+                        ),
+                    ]) :class="minimized ? 'justify-center px-2' : ''">
+                    <i class="fa-solid fa-newspaper w-5 text-center" :class="!minimized && 'mr-3'"></i>
+                    <span x-show="!minimized" x-transition:enter="transition ease-out duration-200"
+                        x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"><i>Laporan Alat
+                            Tes</i></span>
+                </a>
 
                 <!-- Talent Pool Management -->
                 <a wire:navigate href="{{ route('talentpool') }}" x-tooltip.raw="minimized ? 'Talent Pool' : null"
                     @class([
                         'group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200',
                         'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border-l-4 border-blue-700 dark:border-blue-400' => $this->isActiveRoute(
-                            'talentpool'),
+                            'talentpool'
+                        ),
                         'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' => !$this->isActiveRoute(
-                            'talentpool'),
+                            'talentpool'
+                        ),
                     ]) :class="minimized ? 'justify-center px-2' : ''">
                     <i class="fa-solid fa-briefcase w-5 text-center" :class="!minimized && 'mr-3'"></i>
                     <span x-show="!minimized" x-transition:enter="transition ease-out duration-200"
@@ -606,7 +565,8 @@
                     </div>
                     <div class="flex-1 min-w-0">
                         <p class="text-xs font-medium text-gray-900 dark:text-gray-100 truncate">
-                            {{ auth()->user()?->name ?? 'User' }}</p>
+                            {{ auth()->user()?->name ?? 'User' }}
+                        </p>
                         <p class="text-xs text-gray-500 dark:text-gray-400">Online</p>
                     </div>
                 </div>
