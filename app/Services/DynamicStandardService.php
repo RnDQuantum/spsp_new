@@ -704,12 +704,21 @@ class DynamicStandardService
             return (float) $adjustments['aspect_ratings'][$aspectCode];
         }
 
-        // Priority 2: Custom standard
+        // Priority 2: Custom standard (DATA-DRIVEN)
         $customStandardId = Session::get("selected_standard.{$templateId}");
         if ($customStandardId) {
             $customStandard = CustomStandard::find($customStandardId);
-            if ($customStandard && isset($customStandard->aspect_configs[$aspectCode]['rating'])) {
-                return (float) $customStandard->aspect_configs[$aspectCode]['rating'];
+            if ($customStandard) {
+                // Use data-driven calculation (handles both with/without sub-aspects)
+                $rating = $this->getAspectRatingFromCustomStandard(
+                    $customStandard,
+                    $aspectCode,
+                    $templateId
+                );
+
+                if ($rating !== null) {
+                    return $rating;
+                }
             }
         }
 

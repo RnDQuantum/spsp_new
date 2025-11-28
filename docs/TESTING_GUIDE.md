@@ -1,8 +1,20 @@
 # Testing Guide - SPSP Assessment System
 
-> **Version**: 1.0
+> **Version**: 1.1
 > **Last Updated**: 2025-01-28
+> **Status**: 🚧 **IN DEVELOPMENT** - Tests may uncover bugs in production code
 > **Purpose**: Quick reference untuk testing strategy dengan PHPUnit
+
+---
+
+## ⚠️ Development Notice
+
+**Project ini masih dalam tahap development**. Testing dilakukan untuk:
+- ✅ **Validate business logic** - Memastikan logic sesuai requirements
+- 🐛 **Discover bugs early** - Menemukan bug sebelum production
+- 📚 **Document behavior** - Test sebagai dokumentasi hidup
+
+**Expected Outcome**: Tests bisa mengungkap bugs di production code yang perlu diperbaiki!
 
 ---
 
@@ -10,14 +22,16 @@
 
 ### Current Status
 
-| Service | Tests Done | Remaining | Priority | Test File |
-|---------|------------|-----------|----------|-----------|
-| **DynamicStandardService** | 0/50 | 50 | ⭐⭐⭐ **START HERE** | `tests/Unit/Services/DynamicStandardServiceTest.php` |
-| **IndividualAssessmentService** | 14/70 | 56 | ⭐⭐⭐ CRITICAL | `tests/Unit/Services/IndividualAssessmentServiceTest.php` |
-| **CustomStandardService** | 0/20 | 20 | ⭐⭐ HIGH | `tests/Unit/Services/CustomStandardServiceTest.php` |
-| **RankingService** | 0/40 | 40 | ⭐⭐ HIGH | `tests/Unit/Services/RankingServiceTest.php` |
-| TrainingRecommendationService | 0/25 | 25 | ⭐ OPTIONAL | Can be covered via Livewire tests |
-| StatisticService | 0/20 | 20 | ⭐ OPTIONAL | Can be covered via Livewire tests |
+| Service | Tests Done | Remaining | Priority | Status | Test File |
+|---------|------------|-----------|----------|--------|-----------|
+| **DynamicStandardService** | ✅ **26/50** | 24 | ⭐⭐⭐ | **IN PROGRESS** | `tests/Unit/Services/DynamicStandardServiceTest.php` |
+| **IndividualAssessmentService** | ✅ 14/70 | 56 | ⭐⭐⭐ | PARTIAL | `tests/Unit/Services/IndividualAssessmentServiceTest.php` |
+| **CustomStandardService** | 0/20 | 20 | ⭐⭐ | PENDING | `tests/Unit/Services/CustomStandardServiceTest.php` |
+| **RankingService** | 0/40 | 40 | ⭐⭐ | PENDING | `tests/Unit/Services/RankingServiceTest.php` |
+| TrainingRecommendationService | 0/25 | 25 | ⭐ | OPTIONAL | Can be covered via Livewire tests |
+| StatisticService | 0/20 | 20 | ⭐ | OPTIONAL | Can be covered via Livewire tests |
+
+**Progress**: 40/225 tests (17.8%)
 
 ### Why This Order?
 
@@ -976,27 +990,37 @@ ray($result);
 
 ---
 
+## 🐛 Bugs Discovered During Testing
+
+| # | File | Method | Issue | Status |
+|---|------|--------|-------|--------|
+| 1 | `DynamicStandardService.php` | `getAspectRating()` | Custom standard tidak calculate dari sub-aspects (fallback ke quantum) | ✅ FIXED |
+
+**Note**: Testing = best way to find bugs early! Update table saat menemukan bugs baru.
+
+---
+
 ## 🎯 Next Steps
 
 **Immediate Actions:**
 
 1. ✅ Read [CUSTOM_STANDARD_FEATURE.md](./CUSTOM_STANDARD_FEATURE.md)
 2. ✅ Understand 3-layer priority system
-3. ✅ Start with `DynamicStandardServiceTest.php`
+3. ✅ Start with `DynamicStandardServiceTest.php` (26/50 done)
 4. ✅ Follow phased approach (Priority Chain → Data-Driven → etc.)
 5. ✅ Run `vendor/bin/pint --dirty` after writing tests
 6. ✅ Update this document with progress
 
-**After DynamicStandardService Complete:**
+**Next Tasks:**
 
-1. Complete remaining IndividualAssessmentService methods
-2. Test CustomStandardService
-3. Test RankingService
-4. Start Livewire integration tests
+1. ⏳ Complete DynamicStandardService (24/50 remaining)
+2. ⏳ Complete IndividualAssessmentService (56/70 remaining)
+3. ⏳ Test CustomStandardService (0/20)
+4. ⏳ Test RankingService (0/40)
 
 ---
 
-**Version**: 1.0
+**Version**: 1.1
 **Last Updated**: 2025-01-28
 **Next Review**: After DynamicStandardService tests complete
 **Maintainer**: Development Team
