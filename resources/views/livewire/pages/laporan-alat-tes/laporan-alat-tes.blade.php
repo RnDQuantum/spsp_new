@@ -29,7 +29,7 @@
             <ul class="text-sm text-gray-700 dark:text-gray-200 space-y-1">
                 <li class="flex items-center">
                     <span class="w-1.5 h-1.5 rounded-full bg-blue-500 mr-2"></span>
-                    Tes Potensi Akademik (TPA)
+                    Tes Psikologi
                 </li>
                 <li class="flex items-center">
                     <span class="w-1.5 h-1.5 rounded-full bg-blue-500 mr-2"></span>

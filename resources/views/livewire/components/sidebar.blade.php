@@ -493,21 +493,91 @@
                         </a>
                     </div>
                 </div>
-                <!-- Laporan Alat Tes -->
-                <a wire:navigate href="{{ route('laporan-alat-tes') }}"
-                    x-tooltip.raw="minimized ? 'Laporan Tes' : null" @class([
-                        'group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200',
-                        'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border-l-4 border-blue-700 dark:border-blue-400' => $this->isActiveRoute(
-                            'laporan-alat-tes'),
-                        'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' => !$this->isActiveRoute(
-                            'laporan-alat-tes'),
-                    ])
-                    :class="minimized ? 'justify-center px-2' : ''">
-                    <i class="fa-solid fa-newspaper w-5 text-center" :class="!minimized && 'mr-3'"></i>
-                    <span x-show="!minimized" x-transition:enter="transition ease-out duration-200"
-                        x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"><i>Laporan Alat
-                            Tes</i></span>
-                </a>
+
+                {{-- Laporan Alat Tes (judul + submenu) --}}
+                <div x-data="{ laporanAlatTesOpen: {{ $this->isActiveRoute('laporan-potensi') || $this->isActiveRoute('laporan-kompetensi') || $this->isActiveRoute('laporan-potensi-kompetensi') ? 'true' : 'false' }} }">
+
+                    {{-- Tombol Judul --}}
+                    <button id="btn-laporan-alat-tes"
+                        @click="if (minimized) { minimized = false; $dispatch('sidebar-toggled', { minimized }); laporanAlatTesOpen = true } else { laporanAlatTesOpen = !laporanAlatTesOpen }"
+                        x-tooltip.raw="minimized ? 'Laporan Tes' : null"
+                        class="w-full group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 justify-between"
+                        :class="laporanAlatTesOpen
+                            ?
+                            'bg-gray-100 dark:bg-gray-800 text-gray-300' :
+                            'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50'"
+                        aria-haspopup="true" :aria-expanded="laporanAlatTesOpen"
+                        aria-controls="submenu-laporan-alat-tes">
+
+                        <div class="flex items-center">
+                            <i class="fa-solid fa-newspaper w-5 text-center mr-3"></i>
+                            <span><i>Laporan Alat Tes</i></span>
+                        </div>
+
+                        <svg class="w-4 h-4 transition-transform duration-200"
+                            :class="laporanAlatTesOpen ? 'rotate-180' : ''" fill="currentColor" viewBox="0 0 20 20"
+                            aria-hidden="true">
+                            <path fill-rule="evenodd"
+                                d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                                clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+
+
+                    {{-- Submenu --}}
+                    <div x-show="laporanAlatTesOpen" x-transition:enter="transition ease-out duration-200"
+                        x-transition:enter-start="opacity-0 -translate-y-1"
+                        x-transition:enter-end="opacity-100 translate-y-0"
+                        x-transition:leave="transition ease-in duration-150"
+                        x-transition:leave-start="opacity-100 translate-y-0"
+                        x-transition:leave-end="opacity-0 -translate-y-1" id="submenu-laporan-alat-tes"
+                        class="ml-4 mt-1 space-y-1" role="menu" aria-labelledby="btn-laporan-alat-tes"
+                        style="display: none;">
+
+                        {{-- 1. Laporan Potensi --}}
+                        <a wire:navigate href="#" role="menuitem" @class([
+                            'block px-3 py-2 text-xs rounded-lg transition-all duration-200',
+                            'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium' => $this->isActiveRoute(
+                                'laporan-potensi'),
+                            'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' => !$this->isActiveRoute(
+                                'laporan-potensi'),
+                        ])>
+                            <div class="flex items-start gap-2">
+                                <i class="fa-solid fa-circle-dot text-xs mt-0.5 flex-shrink-0"></i>
+                                <span class="flex-1 leading-tight">Laporan Potensi</span>
+                            </div>
+                        </a>
+
+                        {{-- 2. Laporan Kompetensi --}}
+                        <a wire:navigate href="#" role="menuitem" @class([
+                            'block px-3 py-2 text-xs rounded-lg transition-all duration-200',
+                            'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium' => $this->isActiveRoute(
+                                'laporan-kompetensi'),
+                            'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' => !$this->isActiveRoute(
+                                'laporan-kompetensi'),
+                        ])>
+                            <div class="flex items-start gap-2">
+                                <i class="fa-solid fa-circle-dot text-xs mt-0.5 flex-shrink-0"></i>
+                                <span class="flex-1 leading-tight">Laporan Kompetensi</span>
+                            </div>
+                        </a>
+
+                        {{-- 3. Potensi & Kompetensi --}}
+                        <a wire:navigate href="#" role="menuitem" @class([
+                            'block px-3 py-2 text-xs rounded-lg transition-all duration-200',
+                            'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium' => $this->isActiveRoute(
+                                'laporan-potensi-kompetensi'),
+                            'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' => !$this->isActiveRoute(
+                                'laporan-potensi-kompetensi'),
+                        ])>
+                            <div class="flex items-start gap-2">
+                                <i class="fa-solid fa-circle-dot text-xs mt-0.5 flex-shrink-0"></i>
+                                <span class="flex-1 leading-tight">Potensi &amp; Kompetensi</span>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
 
                 <!-- Talent Pool Management -->
                 <a wire:navigate href="{{ route('talentpool') }}" x-tooltip.raw="minimized ? 'Talent Pool' : null"
