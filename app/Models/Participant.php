@@ -16,6 +16,7 @@ class Participant extends Model
         'event_id',
         'batch_id',
         'position_formation_id',
+        'username',
         'test_number',
         'skb_number',
         'name',
