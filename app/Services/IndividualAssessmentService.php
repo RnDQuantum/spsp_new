@@ -37,9 +37,21 @@ class IndividualAssessmentService
 
     /**
      * Get participant with template (with caching)
+     * If participant object is passed, use it directly to avoid duplicate queries
      */
-    private function getParticipant(int $participantId): Participant
+    private function getParticipant(int|Participant $participant): Participant
     {
+        if ($participant instanceof Participant) {
+            // Participant object passed, cache it and return
+            $participantId = $participant->id;
+            if (! isset(self::$participantCache[$participantId])) {
+                self::$participantCache[$participantId] = $participant;
+            }
+            return $participant;
+        }
+
+        // Participant ID passed, load from cache or database
+        $participantId = $participant;
         if (! isset(self::$participantCache[$participantId])) {
             self::$participantCache[$participantId] = Participant::with('positionFormation.template')
                 ->findOrFail($participantId);
@@ -378,19 +390,19 @@ class IndividualAssessmentService
         // Calculate weighted scores
         $totalStandardScore = round(
             ($potensiAssessment['total_standard_score'] * ($potensiWeight / 100)) +
-            ($kompetensiAssessment['total_standard_score'] * ($kompetensiWeight / 100)),
+                ($kompetensiAssessment['total_standard_score'] * ($kompetensiWeight / 100)),
             2
         );
 
         $totalIndividualScore = round(
             ($potensiAssessment['total_individual_score'] * ($potensiWeight / 100)) +
-            ($kompetensiAssessment['total_individual_score'] * ($kompetensiWeight / 100)),
+                ($kompetensiAssessment['total_individual_score'] * ($kompetensiWeight / 100)),
             2
         );
 
         $totalOriginalStandardScore = round(
             ($potensiAssessment['total_original_standard_score'] * ($potensiWeight / 100)) +
-            ($kompetensiAssessment['total_original_standard_score'] * ($kompetensiWeight / 100)),
+                ($kompetensiAssessment['total_original_standard_score'] * ($kompetensiWeight / 100)),
             2
         );
 
@@ -445,6 +457,88 @@ class IndividualAssessmentService
             'passing' => $passingAspects,
             'percentage' => $totalAspects > 0 ? round(($passingAspects / $totalAspects) * 100) : 0,
         ];
+    }
+
+    /**
+     * Get all aspect matching data for GeneralMatching component (BATCH LOADING)
+     *
+     * Returns both Potensi and Kompetensi data in single query to eliminate duplicates
+     *
+     * @param  int  $participantId  Participant ID
+     * @return array Array with 'potensi' and 'kompetensi' keys containing matching data
+     */
+    public function getAllAspectMatchingData(int|Participant $participant): array
+    {
+        $participant = $this->getParticipant($participant);
+        $participantId = $participant->id;
+        $template = $participant->positionFormation->template;
+        $standardService = app(DynamicStandardService::class);
+
+        // Preload aspect cache for this template (once)
+        AspectCacheService::preloadByTemplate($template->id);
+
+        // Get category types using cache
+        $potensiCategory = AspectCacheService::getCategoryByCode($template->id, 'potensi');
+        $kompetensiCategory = AspectCacheService::getCategoryByCode($template->id, 'kompetensi');
+
+        // Get active aspect IDs for both categories
+        $allActiveAspectIds = [];
+
+        if ($potensiCategory) {
+            $potensiAspectIds = $standardService->getActiveAspectIds($template->id, 'potensi');
+            if (empty($potensiAspectIds)) {
+                $potensiAspectIds = \App\Models\Aspect::where('category_type_id', $potensiCategory->id)
+                    ->orderBy('order')
+                    ->pluck('id')
+                    ->toArray();
+            }
+            $allActiveAspectIds = array_merge($allActiveAspectIds, $potensiAspectIds);
+        }
+
+        if ($kompetensiCategory) {
+            $kompetensiAspectIds = $standardService->getActiveAspectIds($template->id, 'kompetensi');
+            if (empty($kompetensiAspectIds)) {
+                $kompetensiAspectIds = \App\Models\Aspect::where('category_type_id', $kompetensiCategory->id)
+                    ->orderBy('order')
+                    ->pluck('id')
+                    ->toArray();
+            }
+            $allActiveAspectIds = array_merge($allActiveAspectIds, $kompetensiAspectIds);
+        }
+
+        // Single query to get ALL aspect assessments with relationships
+        $allAspectAssessments = AspectAssessment::with([
+            'aspect.subAspects',
+            'subAspectAssessments.subAspect',
+        ])
+            ->where('participant_id', $participantId)
+            ->whereIn('aspect_id', array_unique($allActiveAspectIds))
+            ->orderBy('aspect_id')
+            ->get();
+
+        // Group by category
+        $groupedAssessments = $allAspectAssessments->groupBy(function ($assessment) {
+            return $assessment->aspect->category_type_id;
+        });
+
+        // Process each category
+        $result = [];
+
+        if ($potensiCategory) {
+            $potensiAssessments = $groupedAssessments->get($potensiCategory->id, collect());
+            $result['potensi'] = $potensiAssessments->map(function ($assessment) use ($template, $standardService) {
+                return $this->calculateAspectMatching($assessment, $template->id, $standardService);
+            })->values();
+        }
+
+        if ($kompetensiCategory) {
+            $kompetensiAssessments = $groupedAssessments->get($kompetensiCategory->id, collect());
+            $result['kompetensi'] = $kompetensiAssessments->map(function ($assessment) use ($template, $standardService) {
+                return $this->calculateAspectMatching($assessment, $template->id, $standardService);
+            })->values();
+        }
+
+        return $result;
     }
 
     /**
@@ -697,35 +791,31 @@ class IndividualAssessmentService
      * @param  int  $participantId  Participant ID
      * @return array Array with keys: job_match_percentage, potensi_percentage, kompetensi_percentage
      */
-    public function getJobMatchingPercentage(int $participantId): array
+    public function getJobMatchingPercentage(int|Participant $participant): array
     {
-        $participant = $this->getParticipant($participantId);
+        $participant = $this->getParticipant($participant);
         $template = $participant->positionFormation->template;
 
         // Preload aspect cache for this template
         AspectCacheService::preloadByTemplate($template->id);
 
-        // Get category types using cache
-        $potensiCategory = AspectCacheService::getCategoryByCode($template->id, 'potensi');
-        $kompetensiCategory = AspectCacheService::getCategoryByCode($template->id, 'kompetensi');
+        // Use batch loading to get all data in single query
+        $allData = $this->getAllAspectMatchingData($participant);
 
         $allPercentages = [];
         $potensiPercentages = [];
         $kompetensiPercentages = [];
 
-        // Get Potensi matching data
-        if ($potensiCategory) {
-            $potensiAspects = $this->getAspectMatchingData($participantId, $potensiCategory->id);
-            foreach ($potensiAspects as $aspect) {
+        // Extract percentages from batch data
+        if (isset($allData['potensi'])) {
+            foreach ($allData['potensi'] as $aspect) {
                 $allPercentages[] = $aspect['percentage'];
                 $potensiPercentages[] = $aspect['percentage'];
             }
         }
 
-        // Get Kompetensi matching data
-        if ($kompetensiCategory) {
-            $kompetensiAspects = $this->getAspectMatchingData($participantId, $kompetensiCategory->id);
-            foreach ($kompetensiAspects as $aspect) {
+        if (isset($allData['kompetensi'])) {
+            foreach ($allData['kompetensi'] as $aspect) {
                 $allPercentages[] = $aspect['percentage'];
                 $kompetensiPercentages[] = $aspect['percentage'];
             }
