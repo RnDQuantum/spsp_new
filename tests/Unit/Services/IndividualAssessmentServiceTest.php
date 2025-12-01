@@ -28,8 +28,10 @@ use Tests\TestCase;
  * PHASE 4: ✅ Tolerance application (DONE - 3/3 tests)
  * PHASE 5: ✅ Column validation (DONE - 3/3 tests)
  * PHASE 6: ✅ Matching percentage (DONE - 4/4 tests)
+ * PHASE 7: ✅ getCategoryAssessment() (DONE - 15/15 tests)
  *
- * TOTAL: 14 tests covering all core functionality
+ * TOTAL: 29/70 tests (41% progress)
+ * TODO: getFinalAssessment(), getPassingSummary(), getAspectMatchingData(), getJobMatchingPercentage()
  *
  * @see \App\Services\IndividualAssessmentService
  * @see docs/TESTING_STRATEGY.md
@@ -654,7 +656,622 @@ class IndividualAssessmentServiceTest extends TestCase
     }
 
     // ========================================
+    // PHASE 7: getCategoryAssessment() TESTS (15 tests)
+    // ========================================
+
+    /**
+     * Test: getCategoryAssessment aggregates aspect scores correctly
+     *
+     * Category total = sum of all active aspect scores
+     */
+    public function test_aggregates_aspect_scores_correctly(): void
+    {
+        // Arrange: Create category with 3 aspects
+        $testData = $this->createCategoryWithMultipleAspects();
+
+        // Act: Get category assessment
+        $service = app(IndividualAssessmentService::class);
+        $result = $service->getCategoryAssessment(
+            participantId: $testData['participant']->id,
+            categoryCode: 'kompetensi',
+            tolerancePercentage: 0
+        );
+
+        // Assert: Total scores should be sum of all aspects
+        // Aspect 1: standard_score = 3.0 * 30 = 90
+        // Aspect 2: standard_score = 4.0 * 30 = 120
+        // Aspect 3: standard_score = 3.5 * 40 = 140
+        // Total: 90 + 120 + 140 = 350
+        $this->assertEquals(350.0, $result['total_standard_score']);
+
+        // Individual totals
+        // Aspect 1: 4.0 * 30 = 120
+        // Aspect 2: 4.5 * 30 = 135
+        // Aspect 3: 4.0 * 40 = 160
+        // Total: 120 + 135 + 160 = 415
+        $this->assertEquals(415.0, $result['total_individual_score']);
+    }
+
+    /**
+     * Test: getCategoryAssessment applies category weight correctly
+     *
+     * Weighted score = total_score × (category_weight / 100)
+     */
+    public function test_applies_category_weight_to_totals(): void
+    {
+        // Arrange
+        $testData = $this->createCategoryWithMultipleAspects();
+
+        // Set category weight to 60% (default is 50%)
+        $standardService = app(\App\Services\DynamicStandardService::class);
+        $standardService->saveCategoryWeight($testData['template']->id, 'kompetensi', 60);
+
+        // Act: Get category assessment
+        $service = app(IndividualAssessmentService::class);
+        $result = $service->getCategoryAssessment(
+            participantId: $testData['participant']->id,
+            categoryCode: 'kompetensi',
+            tolerancePercentage: 0
+        );
+
+        // Assert: Category weight should be applied
+        $this->assertEquals(60, $result['category_weight']);
+
+        // Weighted scores = total × (60 / 100)
+        // total_standard_score = 350, weighted = 350 * 0.6 = 210
+        $this->assertEquals(210.0, $result['weighted_standard_score']);
+
+        // total_individual_score = 415, weighted = 415 * 0.6 = 249
+        $this->assertEquals(249.0, $result['weighted_individual_score']);
+    }
+
+    /**
+     * Test: getCategoryAssessment excludes inactive aspects from totals
+     *
+     * CRITICAL: Inactive aspects should NOT be counted in totals
+     */
+    public function test_excludes_inactive_aspects_from_category_totals(): void
+    {
+        // Arrange
+        $testData = $this->createCategoryWithMultipleAspects();
+
+        // Set aspect 2 as inactive
+        $standardService = app(\App\Services\DynamicStandardService::class);
+        $standardService->setAspectActive(
+            $testData['template']->id,
+            $testData['aspects'][1]->code,
+            false
+        );
+
+        // Act: Get category assessment
+        $service = app(IndividualAssessmentService::class);
+        $result = $service->getCategoryAssessment(
+            participantId: $testData['participant']->id,
+            categoryCode: 'kompetensi',
+            tolerancePercentage: 0
+        );
+
+        // Assert: Should only count aspect 1 and 3 (aspect 2 is inactive)
+        // Aspect 1: 90, Aspect 3: 140, Total: 230 (NOT 350)
+        $this->assertEquals(230.0, $result['total_standard_score']);
+
+        // Individual: 120 + 160 = 280 (NOT 415)
+        $this->assertEquals(280.0, $result['total_individual_score']);
+
+        // Aspect count should be 2 (not 3)
+        $this->assertEquals(2, $result['aspect_count']);
+    }
+
+    /**
+     * Test: getCategoryAssessment calculates gaps correctly
+     *
+     * Gap = individual - standard
+     */
+    public function test_calculates_category_gaps_correctly(): void
+    {
+        // Arrange
+        $testData = $this->createCategoryWithMultipleAspects();
+
+        // Act
+        $service = app(IndividualAssessmentService::class);
+        $result = $service->getCategoryAssessment(
+            participantId: $testData['participant']->id,
+            categoryCode: 'kompetensi',
+            tolerancePercentage: 0
+        );
+
+        // Assert: Gap = Individual - Standard
+        // Individual: 415, Standard: 350, Gap: 65
+        $this->assertEquals(65.0, $result['total_gap_score']);
+
+        // Rating gaps
+        // Individual rating: 4.0 + 4.5 + 4.0 = 12.5
+        // Standard rating: 3.0 + 4.0 + 3.5 = 10.5
+        // Gap: 2.0
+        $this->assertEquals(2.0, $result['total_gap_rating']);
+    }
+
+    /**
+     * Test: getCategoryAssessment applies tolerance to category totals
+     *
+     * With tolerance, standard scores should be reduced
+     */
+    public function test_applies_tolerance_to_category_totals(): void
+    {
+        // Arrange
+        $testData = $this->createCategoryWithMultipleAspects();
+
+        $service = app(IndividualAssessmentService::class);
+
+        // Act: Compare 0% vs 10% tolerance
+        $resultNoTolerance = $service->getCategoryAssessment(
+            participantId: $testData['participant']->id,
+            categoryCode: 'kompetensi',
+            tolerancePercentage: 0
+        );
+
+        $resultWithTolerance = $service->getCategoryAssessment(
+            participantId: $testData['participant']->id,
+            categoryCode: 'kompetensi',
+            tolerancePercentage: 10
+        );
+
+        // Assert: Standard score should be reduced with tolerance
+        // Original: 350
+        // With 10% tolerance: 350 * 0.9 = 315
+        $this->assertEquals(350.0, $resultNoTolerance['total_standard_score']);
+        $this->assertEquals(315.0, $resultWithTolerance['total_standard_score']);
+
+        // Individual score should remain the same
+        $this->assertEquals(
+            $resultNoTolerance['total_individual_score'],
+            $resultWithTolerance['total_individual_score']
+        );
+
+        // Gap should be larger with tolerance
+        $this->assertGreaterThan(
+            $resultNoTolerance['total_gap_score'],
+            $resultWithTolerance['total_gap_score']
+        );
+    }
+
+    /**
+     * Test: getCategoryAssessment returns correct conclusion
+     *
+     * Conclusion should be based on gap-based logic (from ConclusionService)
+     */
+    public function test_returns_correct_overall_conclusion(): void
+    {
+        // Arrange
+        $testData = $this->createCategoryWithMultipleAspects();
+
+        // Act
+        $service = app(IndividualAssessmentService::class);
+        $result = $service->getCategoryAssessment(
+            participantId: $testData['participant']->id,
+            categoryCode: 'kompetensi',
+            tolerancePercentage: 0
+        );
+
+        // Assert: Should have conclusion
+        $this->assertArrayHasKey('overall_conclusion', $result);
+        $this->assertIsString($result['overall_conclusion']);
+
+        // Gap is positive (415 > 350), so should be "Di Atas Standar" or "Memenuhi Standar"
+        $this->assertContains($result['overall_conclusion'], [
+            'Di Atas Standar',
+            'Memenuhi Standar',
+            'Mendekati Standar',
+        ]);
+    }
+
+    /**
+     * Test: getCategoryAssessment includes all required keys
+     */
+    public function test_category_assessment_has_all_required_keys(): void
+    {
+        // Arrange
+        $testData = $this->createCategoryWithMultipleAspects();
+
+        // Act
+        $service = app(IndividualAssessmentService::class);
+        $result = $service->getCategoryAssessment(
+            participantId: $testData['participant']->id,
+            categoryCode: 'kompetensi',
+            tolerancePercentage: 0
+        );
+
+        // Assert: Check all required keys
+        $requiredKeys = [
+            'category_code',
+            'category_name',
+            'category_weight',
+            'aspect_count',
+            'total_standard_rating',
+            'total_standard_score',
+            'total_individual_rating',
+            'total_individual_score',
+            'total_gap_rating',
+            'total_gap_score',
+            'total_original_standard_score',
+            'total_original_gap_score',
+            'overall_conclusion',
+            'weighted_standard_score',
+            'weighted_individual_score',
+            'weighted_gap_score',
+            'aspects',
+        ];
+
+        foreach ($requiredKeys as $key) {
+            $this->assertArrayHasKey($key, $result, "Missing key: {$key}");
+        }
+    }
+
+    /**
+     * Test: getCategoryAssessment validates data types
+     */
+    public function test_category_assessment_data_types(): void
+    {
+        // Arrange
+        $testData = $this->createCategoryWithMultipleAspects();
+
+        // Act
+        $service = app(IndividualAssessmentService::class);
+        $result = $service->getCategoryAssessment(
+            participantId: $testData['participant']->id,
+            categoryCode: 'kompetensi',
+            tolerancePercentage: 0
+        );
+
+        // Assert: Data types
+        $this->assertIsString($result['category_code']);
+        $this->assertIsString($result['category_name']);
+        $this->assertIsNumeric($result['category_weight']);
+        $this->assertIsInt($result['aspect_count']);
+        $this->assertIsNumeric($result['total_standard_rating']);
+        $this->assertIsNumeric($result['total_standard_score']);
+        $this->assertIsNumeric($result['total_individual_score']);
+        $this->assertIsString($result['overall_conclusion']);
+        $this->assertInstanceOf(\Illuminate\Support\Collection::class, $result['aspects']);
+    }
+
+    /**
+     * Test: getCategoryAssessment with single aspect
+     *
+     * Edge case: Category with only 1 aspect
+     */
+    public function test_category_assessment_with_single_aspect(): void
+    {
+        // Arrange: Use existing test data (has 1 aspect)
+        $testData = $this->createCompleteAssessmentData();
+
+        // Act
+        $service = app(IndividualAssessmentService::class);
+        $result = $service->getCategoryAssessment(
+            participantId: $testData['participant']->id,
+            categoryCode: 'kompetensi',
+            tolerancePercentage: 0
+        );
+
+        // Assert
+        $this->assertEquals(1, $result['aspect_count']);
+        $this->assertCount(1, $result['aspects']);
+    }
+
+    /**
+     * Test: getCategoryAssessment with Potensi category (has sub-aspects)
+     *
+     * CRITICAL: Test data-driven calculation for Potensi
+     */
+    public function test_category_assessment_with_potensi_sub_aspects(): void
+    {
+        // Arrange: Create Potensi category with sub-aspects
+        $testData = $this->createAssessmentWithSubAspects();
+
+        // Act
+        $service = app(IndividualAssessmentService::class);
+        $result = $service->getCategoryAssessment(
+            participantId: $testData['participant']->id,
+            categoryCode: 'potensi',
+            tolerancePercentage: 0
+        );
+
+        // Assert: Should calculate from sub-aspects
+        $this->assertGreaterThan(0, $result['total_standard_score']);
+        $this->assertGreaterThan(0, $result['total_individual_score']);
+
+        // Category should be 'potensi'
+        $this->assertEquals('potensi', $result['category_code']);
+        $this->assertEquals('Potensi', $result['category_name']);
+    }
+
+    /**
+     * Test: getCategoryAssessment rounds decimals correctly
+     *
+     * All monetary/score values should be rounded to 2 decimals
+     */
+    public function test_category_assessment_rounds_correctly(): void
+    {
+        // Arrange
+        $testData = $this->createCategoryWithMultipleAspects();
+
+        // Act
+        $service = app(IndividualAssessmentService::class);
+        $result = $service->getCategoryAssessment(
+            participantId: $testData['participant']->id,
+            categoryCode: 'kompetensi',
+            tolerancePercentage: 10
+        );
+
+        // Assert: All numeric values should be rounded to 2 decimal places
+        // Check that when rounded to 2 decimals, value doesn't change
+        $this->assertEquals(
+            round($result['total_standard_rating'], 2),
+            $result['total_standard_rating'],
+            'total_standard_rating should be rounded to 2 decimals'
+        );
+
+        $this->assertEquals(
+            round($result['total_standard_score'], 2),
+            $result['total_standard_score'],
+            'total_standard_score should be rounded to 2 decimals'
+        );
+    }
+
+    /**
+     * Test: getCategoryAssessment calculates weighted gap correctly
+     *
+     * weighted_gap = weighted_individual - weighted_standard
+     */
+    public function test_calculates_weighted_gap_correctly(): void
+    {
+        // Arrange
+        $testData = $this->createCategoryWithMultipleAspects();
+
+        // Set category weight to 60%
+        $standardService = app(\App\Services\DynamicStandardService::class);
+        $standardService->saveCategoryWeight($testData['template']->id, 'kompetensi', 60);
+
+        // Act
+        $service = app(IndividualAssessmentService::class);
+        $result = $service->getCategoryAssessment(
+            participantId: $testData['participant']->id,
+            categoryCode: 'kompetensi',
+            tolerancePercentage: 0
+        );
+
+        // Assert: weighted_gap = weighted_individual - weighted_standard
+        // weighted_standard = 210, weighted_individual = 249
+        // weighted_gap = 249 - 210 = 39
+        $expectedGap = $result['weighted_individual_score'] - $result['weighted_standard_score'];
+        $this->assertEquals($expectedGap, $result['weighted_gap_score']);
+        $this->assertEquals(39.0, $result['weighted_gap_score']);
+    }
+
+    /**
+     * Test: getCategoryAssessment throws exception for non-existent category
+     *
+     * Should fail gracefully when category doesn't exist
+     */
+    public function test_throws_exception_for_nonexistent_category(): void
+    {
+        // Arrange
+        $testData = $this->createCompleteAssessmentData();
+
+        // Act & Assert: Should throw ModelNotFoundException
+        $this->expectException(\Illuminate\Database\Eloquent\ModelNotFoundException::class);
+
+        $service = app(IndividualAssessmentService::class);
+        $service->getCategoryAssessment(
+            participantId: $testData['participant']->id,
+            categoryCode: 'nonexistent_category', // Invalid category
+            tolerancePercentage: 0
+        );
+    }
+
+    /**
+     * Test: getCategoryAssessment with different tolerance values
+     *
+     * Higher tolerance = larger gap
+     */
+    public function test_category_assessment_with_different_tolerances(): void
+    {
+        // Arrange
+        $testData = $this->createCategoryWithMultipleAspects();
+        $service = app(IndividualAssessmentService::class);
+
+        // Act: Test with 0%, 10%, 20% tolerance
+        $result0 = $service->getCategoryAssessment(
+            participantId: $testData['participant']->id,
+            categoryCode: 'kompetensi',
+            tolerancePercentage: 0
+        );
+
+        $result10 = $service->getCategoryAssessment(
+            participantId: $testData['participant']->id,
+            categoryCode: 'kompetensi',
+            tolerancePercentage: 10
+        );
+
+        $result20 = $service->getCategoryAssessment(
+            participantId: $testData['participant']->id,
+            categoryCode: 'kompetensi',
+            tolerancePercentage: 20
+        );
+
+        // Assert: Standard score decreases as tolerance increases
+        // 0%: 350
+        $this->assertEquals(350.0, $result0['total_standard_score']);
+
+        // 10%: 350 * 0.9 = 315
+        $this->assertEquals(315.0, $result10['total_standard_score']);
+
+        // 20%: 350 * 0.8 = 280
+        $this->assertEquals(280.0, $result20['total_standard_score']);
+
+        // Gap increases as tolerance increases
+        // Gap = Individual - Standard
+        // 0%: 415 - 350 = 65
+        // 10%: 415 - 315 = 100
+        // 20%: 415 - 280 = 135
+        $this->assertEquals(65.0, $result0['total_gap_score']);
+        $this->assertEquals(100.0, $result10['total_gap_score']);
+        $this->assertEquals(135.0, $result20['total_gap_score']);
+
+        // Verify gap progression
+        $this->assertGreaterThan($result0['total_gap_score'], $result10['total_gap_score'], 'Gap@10% should be larger than Gap@0%');
+        $this->assertGreaterThan($result10['total_gap_score'], $result20['total_gap_score'], 'Gap@20% should be larger than Gap@10%');
+    }
+
+    // ========================================
     // HELPER METHODS
+    // ========================================
+
+    /**
+     * Create category with multiple aspects for testing aggregation
+     *
+     * Creates 3 Kompetensi aspects with different weights
+     */
+    private function createCategoryWithMultipleAspects(): array
+    {
+        // 1-3: Basic setup
+        $institution = Institution::create([
+            'code' => 'INST_MULTI',
+            'name' => 'Test Institution',
+            'api_key' => 'test_api_key',
+        ]);
+
+        $event = AssessmentEvent::create([
+            'institution_id' => $institution->id,
+            'code' => 'EVT_MULTI',
+            'name' => 'Test Event 2025',
+            'year' => 2025,
+            'start_date' => '2025-01-01',
+            'end_date' => '2025-12-31',
+            'status' => 'ongoing',
+        ]);
+
+        $template = AssessmentTemplate::create([
+            'name' => 'Staff Standard v1',
+            'code' => 'staff_standard_multi',
+            'description' => 'Standard assessment for testing',
+        ]);
+
+        // 4: Create Kompetensi category
+        $category = CategoryType::create([
+            'template_id' => $template->id,
+            'code' => 'kompetensi',
+            'name' => 'Kompetensi',
+            'weight_percentage' => 50,
+            'order' => 2,
+        ]);
+
+        // 5: Create 3 aspects with different weights (totaling 100%)
+        $aspect1 = Aspect::create([
+            'template_id' => $template->id,
+            'category_type_id' => $category->id,
+            'code' => 'asp_kom_01',
+            'name' => 'Integritas',
+            'description' => 'Kemampuan bekerja dengan integritas',
+            'standard_rating' => 3.0,
+            'weight_percentage' => 30, // 30%
+            'order' => 1,
+        ]);
+
+        $aspect2 = Aspect::create([
+            'template_id' => $template->id,
+            'category_type_id' => $category->id,
+            'code' => 'asp_kom_02',
+            'name' => 'Kerjasama',
+            'description' => 'Kemampuan bekerjasama',
+            'standard_rating' => 4.0,
+            'weight_percentage' => 30, // 30%
+            'order' => 2,
+        ]);
+
+        $aspect3 = Aspect::create([
+            'template_id' => $template->id,
+            'category_type_id' => $category->id,
+            'code' => 'asp_kom_03',
+            'name' => 'Orientasi Pelayanan',
+            'description' => 'Fokus pada pelayanan',
+            'standard_rating' => 3.5,
+            'weight_percentage' => 40, // 40%
+            'order' => 3,
+        ]);
+
+        // 6-7: Position & Participant
+        $position = PositionFormation::create([
+            'event_id' => $event->id,
+            'template_id' => $template->id,
+            'name' => 'Staff IT',
+            'code' => 'POS_IT_MULTI',
+            'quota' => 10,
+        ]);
+
+        $participant = Participant::factory()->create([
+            'event_id' => $event->id,
+            'position_formation_id' => $position->id,
+            'assessment_date' => '2025-01-15',
+        ]);
+
+        // 8: CategoryAssessment
+        $categoryAssessment = CategoryAssessment::factory()
+            ->forParticipant($participant)
+            ->forCategoryType($category)
+            ->create();
+
+        // 9: Create AspectAssessments for all 3 aspects
+        AspectAssessment::factory()
+            ->forCategoryAssessment($categoryAssessment)
+            ->forAspect($aspect1)
+            ->create([
+                'standard_rating' => 3.0,
+                'individual_rating' => 4.0,
+                'standard_score' => 90.0,   // 3.0 * 30
+                'individual_score' => 120.0, // 4.0 * 30
+                'gap_rating' => 1.0,
+                'gap_score' => 30.0,
+            ]);
+
+        AspectAssessment::factory()
+            ->forCategoryAssessment($categoryAssessment)
+            ->forAspect($aspect2)
+            ->create([
+                'standard_rating' => 4.0,
+                'individual_rating' => 4.5,
+                'standard_score' => 120.0,  // 4.0 * 30
+                'individual_score' => 135.0, // 4.5 * 30
+                'gap_rating' => 0.5,
+                'gap_score' => 15.0,
+            ]);
+
+        AspectAssessment::factory()
+            ->forCategoryAssessment($categoryAssessment)
+            ->forAspect($aspect3)
+            ->create([
+                'standard_rating' => 3.5,
+                'individual_rating' => 4.0,
+                'standard_score' => 140.0,  // 3.5 * 40
+                'individual_score' => 160.0, // 4.0 * 40
+                'gap_rating' => 0.5,
+                'gap_score' => 20.0,
+            ]);
+
+        return [
+            'institution' => $institution,
+            'event' => $event,
+            'template' => $template,
+            'category' => $category,
+            'aspects' => [$aspect1, $aspect2, $aspect3],
+            'position' => $position,
+            'participant' => $participant,
+            'categoryAssessment' => $categoryAssessment,
+        ];
+    }
+
+    // ========================================
+    // HELPER METHODS (EXISTING)
     // ========================================
 
     /**
