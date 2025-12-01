@@ -7,6 +7,7 @@ namespace App\Services;
 use App\Models\AspectAssessment;
 use App\Models\CategoryType;
 use App\Models\Participant;
+use App\Services\Cache\AspectCacheService;
 use Illuminate\Support\Collection;
 
 /**
@@ -30,6 +31,32 @@ use Illuminate\Support\Collection;
 class IndividualAssessmentService
 {
     /**
+     * Participant cache to avoid duplicate queries
+     */
+    private static array $participantCache = [];
+
+    /**
+     * Get participant with template (with caching)
+     */
+    private function getParticipant(int $participantId): Participant
+    {
+        if (! isset(self::$participantCache[$participantId])) {
+            self::$participantCache[$participantId] = Participant::with('positionFormation.template')
+                ->findOrFail($participantId);
+        }
+
+        return self::$participantCache[$participantId];
+    }
+
+    /**
+     * Clear participant cache
+     */
+    public static function clearParticipantCache(): void
+    {
+        self::$participantCache = [];
+    }
+
+    /**
      * Get aspect assessments for a participant in a specific category
      *
      * Returns detailed breakdown of each aspect with:
@@ -48,12 +75,18 @@ class IndividualAssessmentService
         int $categoryTypeId,
         int $tolerancePercentage = 10
     ): Collection {
-        $participant = Participant::with('positionFormation.template')->findOrFail($participantId);
+        $participant = $this->getParticipant($participantId);
         $template = $participant->positionFormation->template;
         $standardService = app(DynamicStandardService::class);
 
-        // Get category code
-        $category = CategoryType::findOrFail($categoryTypeId);
+        // Preload aspect cache for this template
+        AspectCacheService::preloadByTemplate($template->id);
+
+        // Get category using cache
+        $category = AspectCacheService::getCategoryById($categoryTypeId);
+        if (! $category) {
+            throw new \Illuminate\Database\Eloquent\ModelNotFoundException("CategoryType not found: {$categoryTypeId}");
+        }
         $categoryCode = $category->code;
 
         // Get active aspect IDs
@@ -78,11 +111,10 @@ class IndividualAssessmentService
             ->get();
 
         // Process each assessment
-        return $aspectAssessments->map(function ($assessment) use ($template, $standardService, $categoryCode, $tolerancePercentage) {
+        return $aspectAssessments->map(function ($assessment) use ($template, $standardService, $tolerancePercentage) {
             return $this->calculateAspectAssessment(
                 $assessment,
                 $template->id,
-                $categoryCode,
                 $standardService,
                 $tolerancePercentage
             );
@@ -94,7 +126,6 @@ class IndividualAssessmentService
      *
      * @param  AspectAssessment  $assessment  Aspect assessment model
      * @param  int  $templateId  Template ID
-     * @param  string  $categoryCode  Category code ('potensi' or 'kompetensi')
      * @param  DynamicStandardService  $standardService  Standard service instance
      * @param  int  $tolerancePercentage  Tolerance percentage
      * @return array Calculated assessment data
@@ -102,7 +133,6 @@ class IndividualAssessmentService
     private function calculateAspectAssessment(
         AspectAssessment $assessment,
         int $templateId,
-        string $categoryCode,
         DynamicStandardService $standardService,
         int $tolerancePercentage
     ): array {
@@ -246,7 +276,7 @@ class IndividualAssessmentService
         string $categoryCode,
         int $tolerancePercentage = 10
     ): array {
-        $participant = Participant::with('positionFormation.template')->findOrFail($participantId);
+        $participant = $this->getParticipant($participantId);
         $template = $participant->positionFormation->template;
 
         // Get category type
@@ -333,7 +363,7 @@ class IndividualAssessmentService
         int $participantId,
         int $tolerancePercentage = 10
     ): array {
-        $participant = Participant::with('positionFormation.template')->findOrFail($participantId);
+        $participant = $this->getParticipant($participantId);
         $template = $participant->positionFormation->template;
 
         // Get category assessments
@@ -436,12 +466,18 @@ class IndividualAssessmentService
         int $participantId,
         int $categoryTypeId
     ): Collection {
-        $participant = Participant::with('positionFormation.template')->findOrFail($participantId);
+        $participant = $this->getParticipant($participantId);
         $template = $participant->positionFormation->template;
         $standardService = app(DynamicStandardService::class);
 
-        // Get category code
-        $category = CategoryType::findOrFail($categoryTypeId);
+        // Preload aspect cache for this template
+        AspectCacheService::preloadByTemplate($template->id);
+
+        // Get category using cache
+        $category = AspectCacheService::getCategoryById($categoryTypeId);
+        if (! $category) {
+            throw new \Illuminate\Database\Eloquent\ModelNotFoundException("CategoryType not found: {$categoryTypeId}");
+        }
         $categoryCode = $category->code;
 
         // Get active aspect IDs
@@ -466,11 +502,10 @@ class IndividualAssessmentService
             ->get();
 
         // Process each assessment
-        return $aspectAssessments->map(function ($assessment) use ($template, $standardService, $categoryCode) {
+        return $aspectAssessments->map(function ($assessment) use ($template, $standardService) {
             return $this->calculateAspectMatching(
                 $assessment,
                 $template->id,
-                $categoryCode,
                 $standardService
             );
         });
@@ -481,14 +516,12 @@ class IndividualAssessmentService
      *
      * @param  AspectAssessment  $assessment  Aspect assessment model
      * @param  int  $templateId  Template ID
-     * @param  string  $categoryCode  Category code ('potensi' or 'kompetensi')
      * @param  DynamicStandardService  $standardService  Standard service instance
      * @return array Matching data
      */
     private function calculateAspectMatching(
         AspectAssessment $assessment,
         int $templateId,
-        string $categoryCode,
         DynamicStandardService $standardService
     ): array {
         $aspect = $assessment->aspect;
@@ -666,17 +699,15 @@ class IndividualAssessmentService
      */
     public function getJobMatchingPercentage(int $participantId): array
     {
-        $participant = Participant::with('positionFormation.template')->findOrFail($participantId);
+        $participant = $this->getParticipant($participantId);
         $template = $participant->positionFormation->template;
 
-        // Get category types
-        $potensiCategory = CategoryType::where('template_id', $template->id)
-            ->where('code', 'potensi')
-            ->first();
+        // Preload aspect cache for this template
+        AspectCacheService::preloadByTemplate($template->id);
 
-        $kompetensiCategory = CategoryType::where('template_id', $template->id)
-            ->where('code', 'kompetensi')
-            ->first();
+        // Get category types using cache
+        $potensiCategory = AspectCacheService::getCategoryByCode($template->id, 'potensi');
+        $kompetensiCategory = AspectCacheService::getCategoryByCode($template->id, 'kompetensi');
 
         $allPercentages = [];
         $potensiPercentages = [];

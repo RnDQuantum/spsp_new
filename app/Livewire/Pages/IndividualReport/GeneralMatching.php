@@ -5,6 +5,7 @@ namespace App\Livewire\Pages\IndividualReport;
 use App\Models\CategoryType;
 use App\Models\FinalAssessment;
 use App\Models\Participant;
+use App\Services\Cache\AspectCacheService;
 use App\Services\IndividualAssessmentService;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -140,6 +141,7 @@ class GeneralMatching extends Component
     {
         $this->potensiAspectsCache = null;
         $this->kompetensiAspectsCache = null;
+        AspectCacheService::clearCache();
     }
 
     /**
@@ -154,6 +156,10 @@ class GeneralMatching extends Component
 
             return;
         }
+
+        // Preload aspect cache once for this participant's template
+        $template = $this->participant->positionFormation->template;
+        AspectCacheService::preloadByTemplate($template->id);
 
         $service = app(IndividualAssessmentService::class);
 

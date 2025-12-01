@@ -8,7 +8,7 @@ use App\Models\Aspect;
 use App\Models\AssessmentTemplate;
 use App\Models\CategoryType;
 use App\Models\CustomStandard;
-use App\Models\SubAspect;
+use App\Services\Cache\AspectCacheService;
 use Illuminate\Support\Facades\Session;
 
 class DynamicStandardService
@@ -110,9 +110,7 @@ class DynamicStandardService
      */
     private function getOriginalAspectWeight(int $templateId, string $aspectCode): int
     {
-        $aspect = Aspect::where('template_id', $templateId)
-            ->where('code', $aspectCode)
-            ->first();
+        $aspect = AspectCacheService::getByCode($templateId, $aspectCode);
 
         return $aspect ? $aspect->weight_percentage : 0;
     }
@@ -126,10 +124,7 @@ class DynamicStandardService
      */
     private function getOriginalAspectRating(int $templateId, string $aspectCode): float
     {
-        $aspect = Aspect::where('template_id', $templateId)
-            ->where('code', $aspectCode)
-            ->with('subAspects') // Eager load to check
-            ->first();
+        $aspect = AspectCacheService::getByCode($templateId, $aspectCode);
 
         if (! $aspect) {
             return 0.0;
@@ -175,9 +170,7 @@ class DynamicStandardService
      */
     private function getOriginalSubAspectRating(int $templateId, string $subAspectCode): int
     {
-        $subAspect = SubAspect::whereHas('aspect', function ($query) use ($templateId) {
-            $query->where('template_id', $templateId);
-        })->where('code', $subAspectCode)->first();
+        $subAspect = AspectCacheService::getSubAspectByCode($templateId, $subAspectCode);
 
         return $subAspect ? $subAspect->standard_rating : 0;
     }
@@ -195,11 +188,8 @@ class DynamicStandardService
         string $aspectCode,
         int $templateId
     ): ?float {
-        // Get aspect from database to check structure
-        $aspect = Aspect::where('template_id', $templateId)
-            ->where('code', $aspectCode)
-            ->with('subAspects')
-            ->first();
+        // Get aspect from cache to check structure
+        $aspect = AspectCacheService::getByCode($templateId, $aspectCode);
 
         if (! $aspect) {
             return null;
@@ -1178,9 +1168,8 @@ class DynamicStandardService
      */
     public function getActiveAspectIds(int $templateId, string $categoryCode): array
     {
-        $aspects = Aspect::where('template_id', $templateId)
-            ->whereHas('categoryType', fn ($q) => $q->where('code', $categoryCode))
-            ->get();
+        // Use cached aspects instead of querying database
+        $aspects = AspectCacheService::getAspectsByCategory($templateId, $categoryCode);
 
         $activeIds = [];
         foreach ($aspects as $aspect) {
