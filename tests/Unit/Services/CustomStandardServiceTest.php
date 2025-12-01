@@ -247,7 +247,9 @@ class CustomStandardServiceTest extends TestCase
 
     public function test_create_uses_auth_id_when_created_by_not_provided(): void
     {
-        $this->actingAs(User::factory()->create());
+        /** @var User $user */
+        $user = User::factory()->create();
+        $this->actingAs($user);
 
         $institution = Institution::factory()->create();
         $template = AssessmentTemplate::factory()->create();
