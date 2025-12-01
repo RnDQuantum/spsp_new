@@ -41,6 +41,14 @@ class IndividualAssessmentServiceTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // Clear cache between tests to prevent interference
+        \App\Services\Cache\AspectCacheService::clearCache();
+    }
+
     // ========================================
     // PHASE 1: BASIC SERVICE TESTS ✅
     // ========================================

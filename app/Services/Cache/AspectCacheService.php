@@ -221,8 +221,8 @@ class AspectCacheService
      */
     public static function getAspectsByCategory(int $templateId, string $categoryCode): Collection
     {
-        // Ensure data is preloaded
-        if (empty(self::$aspectCache)) {
+        // Ensure data is preloaded for this specific template
+        if (! isset(self::$preloadedTemplates[$templateId])) {
             self::preloadByTemplate($templateId);
         }
 
