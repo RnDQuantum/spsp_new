@@ -29,7 +29,7 @@ Route::middleware(['auth', 'institution.access'])->group(function () {
     Route::get('/dashboard', \App\Livewire\Pages\DashboardAdmin::class)->name('dashboard');
 
     // List Klien Route
-    Route::get('/list-klient', \App\Livewire\Pages\ClientList::class)->name('daftar-klien');
+    Route::get('/list-klien', \App\Livewire\Pages\ClientList::class)->name('daftar-klien');
 
     Route::get('/shortlist-peserta', \App\Livewire\Pages\ParticipantsList::class)->name('shortlist');
 
