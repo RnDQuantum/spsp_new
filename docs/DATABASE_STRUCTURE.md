@@ -1,656 +1,531 @@
-# DATABASE STRUCTURE - SPSP Analytics Dashboard
+# Database Structure - SPSP Assessment System
 
-**Database Engine:** MySQL 8.0
-**Total Tables:** 18 (Master: 6, Operational: 4, Assessment: 4, Results: 2, System: 2)
-
----
-
-## TABLE OVERVIEW
-
-### Master Data Tables (6)
-1. **institutions** - Institusi/Organisasi
-2. **assessment_templates** - Blueprint standar asesmen
-3. **category_types** - Kategori Potensi/Kompetensi per template
-4. **aspects** - Aspek penilaian dengan bobot
-5. **sub_aspects** - Sub-aspek detail (untuk Potensi)
-6. **interpretation_templates** - Template interpretasi narasi
-
-### Operational Tables (4)
-7. **assessment_events** - Event/kegiatan asesmen
-8. **batches** - Gelombang/batch peserta
-9. **position_formations** - Formasi jabatan
-10. **participants** - Data peserta
-
-### Assessment Data Tables (4)
-11. **category_assessments** - Nilai per kategori (Potensi/Kompetensi)
-12. **aspect_assessments** - Nilai per aspek
-13. **sub_aspect_assessments** - Nilai per sub-aspek
-14. **interpretations** - Interpretasi narasi hasil
-
-### Result Tables (2)
-15. **final_assessments** - Hasil akhir gabungan
-16. **psychological_tests** - Data tes psikologi
-
-### System Tables (2)
-17. **users** - Autentikasi user (dengan multi-tenancy)
-18. **Spatie Permission tables** - roles, permissions, model_has_roles, model_has_permissions, role_has_permissions
+> **Version**: 1.0
+> **Last Updated**: 2025-12-01
+> **Purpose**: Complete reference for database schema, relationships, and data flow
 
 ---
 
-## MASTER DATA TABLES
+## Table of Contents
 
-### 1. institutions
+1. [Overview](#overview)
+2. [Core Assessment Tables](#core-assessment-tables)
+3. [Entity Relationships](#entity-relationships)
+4. [Data Hierarchy](#data-hierarchy)
+5. [Sample Data Examples](#sample-data-examples)
+6. [Key Insights for Testing](#key-insights-for-testing)
 
-Menyimpan data institusi/organisasi yang menggunakan sistem.
+---
 
+## Overview
+
+The SPSP system uses a **hierarchical assessment structure** with the following key concepts:
+
+- **Template-Based**: Each position uses an assessment template (e.g., Staff, Supervisor, Manager)
+- **Dual Category**: All assessments have **Potensi** (Potential) and **Kompetensi** (Competency)
+- **Aspect-Based**: Categories contain multiple aspects (e.g., Kecerdasan, Integritas)
+- **Sub-Aspect Structure**: Some aspects have sub-aspects (Potensi), some don't (Kompetensi)
+- **Weighted Scores**: Category weights + Aspect weights → Final score
+
+---
+
+## Core Assessment Tables
+
+### 1. Master Data Tables (Template & Structure)
+
+#### `assessment_templates`
+Defines assessment structures (e.g., Staff, Supervisor, Manager).
+
+| Column | Type | Description |
+|--------|------|-------------|
+| id | bigint | Primary key |
+| code | varchar | Unique code (e.g., `staff_standard_v1`) |
+| name | varchar | Display name |
+| description | text | Template purpose |
+
+**Sample Data**:
+```
+id=1, code='staff_standard_v1', name='Standar Asesmen Staff'
+id=2, code='supervisor_standard_v1', name='Standar Asesmen Supervisor'
+id=3, code='manager_standard_v1', name='Standar Asesmen Manager'
+```
+
+---
+
+#### `category_types`
+Two categories per template: **Potensi** and **Kompetensi**.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| id | bigint | Primary key |
+| template_id | bigint | FK to assessment_templates |
+| code | varchar | `potensi` or `kompetensi` |
+| name | varchar | Display name |
+| weight_percentage | int | Category weight (sum = 100%) |
+| order | int | Display order |
+
+**Sample Data** (template_id=1, Staff Standard):
+```
+id=1, template_id=1, code='potensi', weight_percentage=50
+id=2, template_id=1, code='kompetensi', weight_percentage=50
+```
+
+**Key Point**: Category weights vary by template!
+- Staff: 50/50
+- Supervisor: 30/70 (more Kompetensi)
+- Manager: 40/60
+
+---
+
+#### `aspects`
+Individual assessment dimensions within a category.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| id | bigint | Primary key |
+| template_id | bigint | FK to assessment_templates |
+| category_type_id | bigint | FK to category_types |
+| code | varchar | Unique code (e.g., `kecerdasan`) |
+| name | varchar | Display name |
+| weight_percentage | int | Aspect weight within category |
+| standard_rating | decimal | Default standard rating (1-5) |
+| order | int | Display order |
+
+**Sample Data** (Potensi category):
+```
+id=1, code='kecerdasan', name='Kecerdasan', weight_percentage=25, standard_rating=3.00
+id=2, code='cara_kerja', name='Cara Kerja', weight_percentage=20, standard_rating=3.60
+id=3, code='potensi_kerja', name='Potensi Kerja', weight_percentage=20, standard_rating=3.00
+```
+
+**Sample Data** (Kompetensi category):
+```
+id=6, code='integritas', name='Integritas', weight_percentage=15, standard_rating=3.00
+id=7, code='kerjasama', name='Kerjasama', weight_percentage=14, standard_rating=3.00
+```
+
+**CRITICAL DIFFERENCE**:
+- **Potensi aspects** have sub-aspects → rating calculated from sub-aspects
+- **Kompetensi aspects** NO sub-aspects → use direct `standard_rating`
+
+---
+
+#### `sub_aspects`
+Sub-dimensions for Potensi aspects ONLY.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| id | bigint | Primary key |
+| aspect_id | bigint | FK to aspects |
+| code | varchar | Unique code |
+| name | varchar | Display name |
+| standard_rating | int | Default rating (1-5) |
+| order | int | Display order |
+
+**Sample Data** (aspect_id=1, Kecerdasan):
+```
+id=1, aspect_id=1, code='kecerdasan_umum', name='Kecerdasan Umum', standard_rating=3
+id=2, aspect_id=1, code='daya_tangkap', name='Daya Tangkap', standard_rating=3
+id=3, aspect_id=1, code='daya_analisa', name='Daya Analisa', standard_rating=3
+id=4, aspect_id=1, code='kemampuan_logika', name='Kemampuan Logika', standard_rating=3
+```
+
+**Aspect Rating Calculation** (DATA-DRIVEN):
+```
+Kecerdasan rating = AVG(3, 3, 3, 3) = 3.00
+```
+
+---
+
+### 2. Event & Participant Tables
+
+#### `institutions`
+Organizations running assessments.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| id | bigint | Primary key |
+| code | varchar | Unique code (e.g., `kemenkes`) |
+| name | varchar | Institution name |
+
+---
+
+#### `assessment_events`
+Assessment events for institutions.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| id | bigint | Primary key |
+| institution_id | bigint | FK to institutions |
+| code | varchar | Unique code |
+| name | varchar | Event name |
+| year | int | Assessment year |
+| status | enum | `draft`, `ongoing`, `completed`, `cancelled` |
+
+**Sample Data**:
+```
+id=1, code='P3K-KEMENKES-2025', name='Seleksi P3K Kementerian Kesehatan 2025', status='ongoing'
+```
+
+---
+
+#### `batches`
+Assessment batches within an event.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| id | bigint | Primary key |
+| event_id | bigint | FK to assessment_events |
+| code | varchar | Batch code |
+| name | varchar | Batch name |
+| batch_number | int | Sequence number |
+
+**Sample Data**:
+```
+id=1, event_id=1, code='BATCH-1-BANDUNG', batch_number=1
+id=2, event_id=1, code='BATCH-2-YOGYAKARTA', batch_number=2
+```
+
+---
+
+#### `position_formations`
+Positions available in an event (each position has a template).
+
+| Column | Type | Description |
+|--------|------|-------------|
+| id | bigint | Primary key |
+| event_id | bigint | FK to assessment_events |
+| template_id | bigint | FK to assessment_templates |
+| code | varchar | Position code |
+| name | varchar | Position name |
+| quota | int | Available slots |
+
+**Sample Data**:
+```
+id=1, code='dokter_umum', name='Dokter Umum', template_id=4 (professional_standard_v1), quota=50
+id=2, code='perawat', name='Perawat', template_id=1 (staff_standard_v1), quota=100
+id=3, code='apoteker', name='Apoteker', template_id=2 (supervisor_standard_v1), quota=50
+```
+
+**CRITICAL**: Different positions in the same event can use **different templates**!
+
+---
+
+#### `participants`
+Individuals being assessed.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| id | bigint | Primary key |
+| event_id | bigint | FK to assessment_events |
+| batch_id | bigint | FK to batches (nullable) |
+| position_formation_id | bigint | FK to position_formations |
+| username | varchar | Unique username |
+| test_number | varchar | Unique test number |
+| name | varchar | Participant name |
+| email | varchar | Email address |
+| gender | varchar | L/P |
+
+**Sample Data**:
+```
+id=1, event_id=1, batch_id=2, position_formation_id=3, name='BRENNAN SMITHAM, S.Pd'
+id=2, event_id=1, batch_id=1, position_formation_id=2, name='CHRIS ROGAHN, S.Kom'
+```
+
+---
+
+### 3. Assessment Result Tables
+
+#### `category_assessments`
+Aggregated scores at the category level (Potensi/Kompetensi).
+
+| Column | Type | Description |
+|--------|------|-------------|
+| id | bigint | Primary key |
+| participant_id | bigint | FK to participants |
+| category_type_id | bigint | FK to category_types |
+| total_standard_rating | decimal | Sum of standard ratings |
+| total_standard_score | decimal | Weighted standard score |
+| total_individual_rating | decimal | Sum of individual ratings |
+| total_individual_score | decimal | Weighted individual score |
+| gap_rating | decimal | Individual - Standard (rating) |
+| gap_score | decimal | Individual - Standard (score) |
+| conclusion_code | varchar | `above_standard`, `meets_standard`, `below_standard` |
+
+**Calculation Example**:
 ```sql
-id                  bigint unsigned (PK)
-code                varchar (UNIQUE)          -- 'kejaksaan', 'bnn'
-name                varchar                   -- 'Kejaksaan Agung RI'
-logo_path           varchar (nullable)
-api_key             varchar (UNIQUE)          -- untuk autentikasi API sync
-created_at          timestamp
-updated_at          timestamp
-
-INDEX: code
-```
-
-**Relasi:**
-- hasMany: assessment_events, users
-
----
-
-### 2. assessment_templates
-
-Blueprint/template standar asesmen yang reusable.
-
-```sql
-id                  bigint unsigned (PK)
-code                varchar (UNIQUE)          -- 'staff_standard_v1'
-name                varchar                   -- 'Standar Asesmen Staff'
-description         text (nullable)
-created_at          timestamp
-updated_at          timestamp
-
-INDEX: code
-```
-
-**Relasi:**
-- hasMany: category_types, aspects, position_formations
-
----
-
-### 3. category_types
-
-Kategori utama dalam template (Potensi & Kompetensi).
-
-```sql
-id                  bigint unsigned (PK)
-template_id         bigint unsigned (FK → assessment_templates)
-code                varchar                   -- 'potensi', 'kompetensi'
-name                varchar                   -- 'Potensi', 'Kompetensi'
-weight_percentage   integer                   -- 40, 60 (total harus 100%)
-order               integer                   -- urutan tampilan
-created_at          timestamp
-updated_at          timestamp
-
-INDEX: template_id
-UNIQUE: [template_id, code]
-CASCADE DELETE: template deleted → categories deleted
-```
-
-**Relasi:**
-- belongsTo: assessment_templates
-- hasMany: aspects, category_assessments, interpretations
-
----
-
-### 4. aspects
-
-Aspek penilaian dengan bobot dan standar rating.
-
-```sql
-id                  bigint unsigned (PK)
-template_id         bigint unsigned (FK → assessment_templates)
-category_type_id    bigint unsigned (FK → category_types)
-code                varchar                   -- 'kecerdasan', 'integritas'
-name                varchar                   -- 'Kecerdasan', 'Integritas'
-description         text (nullable)
-weight_percentage   integer (nullable)        -- 25, 20, 15 (total 100% per kategori)
-standard_rating     decimal(5,2) (nullable)   -- 3.00, 3.60, 3.75
-order               integer                   -- urutan tampilan
-created_at          timestamp
-updated_at          timestamp
-
-INDEX: template_id, category_type_id, code
-UNIQUE: [template_id, category_type_id, code]
-CASCADE DELETE: template/category deleted → aspects deleted
-```
-
-**Relasi:**
-- belongsTo: assessment_templates, category_types
-- hasMany: sub_aspects, aspect_assessments
-
----
-
-### 5. sub_aspects
-
-Sub-aspek detail untuk breakdown aspek Potensi.
-
-```sql
-id                  bigint unsigned (PK)
-aspect_id           bigint unsigned (FK → aspects)
-code                varchar                   -- 'kecerdasan_umum'
-name                varchar                   -- 'Kecerdasan Umum'
-description         text (nullable)
-standard_rating     integer (nullable)        -- 3, 4, 5 (skala 1-5)
-order               integer                   -- urutan tampilan
-created_at          timestamp
-updated_at          timestamp
-
-INDEX: aspect_id
-CASCADE DELETE: aspect deleted → sub_aspects deleted
-```
-
-**Note:** Hanya untuk aspek Potensi. Aspek Kompetensi tidak memiliki sub-aspek.
-
-**Relasi:**
-- belongsTo: aspects
-- hasMany: sub_aspect_assessments
-
----
-
-### 6. interpretation_templates
-
-Template interpretasi narasi berdasarkan rating.
-
-```sql
-id                  bigint unsigned (PK)
-interpretable_type  enum                      -- 'aspect', 'sub_aspect'
-interpretable_id    bigint unsigned (nullable)
-interpretable_name  varchar (nullable)        -- Nama untuk reference
-rating_value        tinyint unsigned          -- 1, 2, 3, 4, 5
-template_text       text                      -- Template interpretasi
-tone                enum                      -- 'positive', 'neutral', 'negative'
-category            enum                      -- 'strength', 'development_area', 'neutral'
-version             varchar(10)               -- '1.0'
-is_active           boolean (default: true)
-created_at          timestamp
-updated_at          timestamp
-
-INDEX: [interpretable_type, interpretable_id]
-INDEX: [interpretable_type, interpretable_name, rating_value]
-INDEX: rating_value, is_active
-```
-
-**Relasi:**
-- morphTo: interpretable (Aspect atau SubAspect)
-
----
-
-## OPERATIONAL TABLES
-
-### 7. assessment_events
-
-Event/kegiatan asesmen.
-
-```sql
-id                  bigint unsigned (PK)
-institution_id      bigint unsigned (FK → institutions)
-code                varchar (UNIQUE)          -- 'P3K-KEJAKSAAN-2025'
-name                varchar                   -- 'Asesmen P3K Kejaksaan 2025'
-description         text (nullable)
-year                integer                   -- 2025
-start_date          date
-end_date            date
-status              enum                      -- 'draft', 'ongoing', 'completed'
-last_synced_at      timestamp (nullable)
-created_at          timestamp
-updated_at          timestamp
-
-INDEX: institution_id, code, status
-CASCADE DELETE: institution deleted → events deleted
-```
-
-**Relasi:**
-- belongsTo: institutions
-- hasMany: batches, position_formations, participants
-
----
-
-### 8. batches
-
-Gelombang/batch/lokasi pelaksanaan asesmen.
-
-```sql
-id                  bigint unsigned (PK)
-event_id            bigint unsigned (FK → assessment_events)
-code                varchar                   -- 'BATCH-1-MOJOKERTO'
-name                varchar                   -- 'Batch 1 Mojokerto'
-location            varchar                   -- 'Hotel X, Mojokerto'
-batch_number        integer                   -- 1, 2, 3
-start_date          date
-end_date            date
-created_at          timestamp
-updated_at          timestamp
-
-INDEX: event_id
-UNIQUE: [event_id, code]
-CASCADE DELETE: event deleted → batches deleted
-```
-
-**Relasi:**
-- belongsTo: assessment_events
-- hasMany: participants
-
----
-
-### 9. position_formations
-
-Formasi jabatan yang diasesmen.
-
-```sql
-id                  bigint unsigned (PK)
-event_id            bigint unsigned (FK → assessment_events)
-template_id         bigint unsigned (FK → assessment_templates)
-code                varchar                   -- 'fisikawan_medis'
-name                varchar                   -- 'Fisikawan Medis'
-quota               integer (nullable)        -- Kuota formasi
-created_at          timestamp
-updated_at          timestamp
-
-INDEX: event_id, template_id
-UNIQUE: [event_id, code]
-CASCADE DELETE: event/template deleted → positions deleted
-```
-
-**Relasi:**
-- belongsTo: assessment_events, assessment_templates
-- hasMany: participants
-
----
-
-### 10. participants
-
-Data peserta asesmen.
-
-```sql
-id                  bigint unsigned (PK)
-event_id            bigint unsigned (FK → assessment_events)
-batch_id            bigint unsigned (FK → batches, nullable)
-position_formation_id bigint unsigned (FK → position_formations)
-username            varchar (UNIQUE)
-test_number         varchar (UNIQUE)          -- '03-5-2-18-001'
-skb_number          varchar
-name                varchar                   -- Nama lengkap
-email               varchar (nullable)
-phone               varchar (nullable)
-gender              varchar (nullable)        -- 'L', 'P'
-photo_path          varchar (nullable)
-assessment_date     date
-created_at          timestamp
-updated_at          timestamp
-
-INDEX: event_id, batch_id, position_formation_id, name
-CASCADE DELETE: event/position deleted → participants deleted
-SET NULL: batch deleted → batch_id = NULL
-```
-
-**Relasi:**
-- belongsTo: assessment_events, batches, position_formations
-- hasMany: category_assessments, interpretations
-- hasOne: final_assessment, psychological_test
-
----
-
-## ASSESSMENT DATA TABLES
-
-### 11. category_assessments
-
-Nilai agregat per kategori (Potensi/Kompetensi) per peserta.
-
-```sql
-id                      bigint unsigned (PK)
-participant_id          bigint unsigned (FK → participants)
-event_id                bigint unsigned (FK → assessment_events)
-batch_id                bigint unsigned (FK → batches, nullable)
-position_formation_id   bigint unsigned (FK → position_formations, nullable)
-category_type_id        bigint unsigned (FK → category_types)
-total_standard_rating   decimal(8,2)
-total_standard_score    decimal(8,2)
-total_individual_rating decimal(8,2)
-total_individual_score  decimal(8,2)
-gap_rating              decimal(8,2)
-gap_score               decimal(8,2)
-conclusion_code         varchar               -- 'DBS', 'MS', 'K', 'SK'
-conclusion_text         varchar               -- 'Memenuhi Syarat'
-created_at              timestamp
-updated_at              timestamp
-
-UNIQUE: [participant_id, category_type_id]
-INDEX: category_type_id, conclusion_code
-INDEX: [event_id, category_type_id]
-INDEX: [batch_id, category_type_id]
-INDEX: [position_formation_id, category_type_id]
-```
-
-**Relasi:**
-- belongsTo: participants, assessment_events, batches, position_formations, category_types
-- hasMany: aspect_assessments
-
----
-
-### 12. aspect_assessments
-
-Nilai per aspek per peserta dengan gap comparison.
-
-```sql
-id                      bigint unsigned (PK)
-category_assessment_id  bigint unsigned (FK → category_assessments)
-participant_id          bigint unsigned (FK → participants)
-event_id                bigint unsigned (FK → assessment_events)
-batch_id                bigint unsigned (FK → batches, nullable)
-position_formation_id   bigint unsigned (FK → position_formations, nullable)
-aspect_id               bigint unsigned (FK → aspects)
-standard_rating         decimal(5,2)          -- SNAPSHOT dari master
-standard_score          decimal(8,2)          -- rating × weight_percentage
-individual_rating       decimal(5,2)          -- Hasil asesmen
-individual_score        decimal(8,2)          -- rating × weight_percentage
-gap_rating              decimal(8,2)          -- individual - standard
-gap_score               decimal(8,2)          -- individual - standard
-percentage_score        integer (nullable)    -- untuk spider chart
-conclusion_code         varchar (nullable)
-conclusion_text         varchar (nullable)
-created_at              timestamp
-updated_at              timestamp
-
-INDEX: category_assessment_id, aspect_id
-INDEX: [event_id, aspect_id]
-INDEX: [batch_id, aspect_id]
-INDEX: [position_formation_id, aspect_id]
-INDEX: [participant_id, aspect_id]
-```
-
-**Relasi:**
-- belongsTo: category_assessments, participants, assessment_events, batches, position_formations, aspects
-- hasMany: sub_aspect_assessments
-
----
-
-### 13. sub_aspect_assessments
-
-Nilai detail per sub-aspek (hanya untuk Potensi).
-
-```sql
-id                      bigint unsigned (PK)
-aspect_assessment_id    bigint unsigned (FK → aspect_assessments)
-participant_id          bigint unsigned (FK → participants)
-event_id                bigint unsigned (FK → assessment_events)
-sub_aspect_id           bigint unsigned (FK → sub_aspects)
-standard_rating         integer               -- SNAPSHOT dari master (1-5)
-individual_rating       integer               -- Nilai aktual (1-5)
-rating_label            varchar               -- 'Kurang', 'Cukup', 'Baik', etc.
-created_at              timestamp
-updated_at              timestamp
-
-INDEX: aspect_assessment_id, sub_aspect_id
-INDEX: [event_id, sub_aspect_id]
-INDEX: [participant_id, sub_aspect_id]
-```
-
-**Relasi:**
-- belongsTo: aspect_assessments, participants, assessment_events, sub_aspects
-
----
-
-### 14. interpretations
-
-Interpretasi narasi hasil asesmen per kategori.
-
-```sql
-id                  bigint unsigned (PK)
-participant_id      bigint unsigned (FK → participants)
-event_id            bigint unsigned (FK → assessment_events)
-category_type_id    bigint unsigned (FK → category_types, nullable)
-interpretation_text text
-created_at          timestamp
-updated_at          timestamp
-
-INDEX: participant_id, category_type_id
-INDEX: [event_id, category_type_id]
-```
-
-**Relasi:**
-- belongsTo: participants, assessment_events, category_types
-
----
-
-## RESULT TABLES
-
-### 15. final_assessments
-
-Hasil akhir gabungan Potensi + Kompetensi dengan bobot.
-
-```sql
-id                          bigint unsigned (PK)
-participant_id              bigint unsigned (FK → participants, UNIQUE)
-event_id                    bigint unsigned (FK → assessment_events)
-batch_id                    bigint unsigned (FK → batches, nullable)
-position_formation_id       bigint unsigned (FK → position_formations, nullable)
-potensi_weight              integer               -- 40, 50 (%)
-potensi_standard_score      decimal(8,2)
-potensi_individual_score    decimal(8,2)
-kompetensi_weight           integer               -- 60, 50 (%)
-kompetensi_standard_score   decimal(8,2)
-kompetensi_individual_score decimal(8,2)
-total_standard_score        decimal(8,2)          -- Weighted total
-total_individual_score      decimal(8,2)          -- Weighted total
-achievement_percentage      decimal(5,2)          -- (individual/standard) × 100
-conclusion_code             varchar               -- 'TMS', 'MMS', 'MS'
-conclusion_text             varchar               -- 'Memenuhi Syarat'
-created_at                  timestamp
-updated_at                  timestamp
-
-INDEX: conclusion_code, achievement_percentage
-INDEX: [event_id, achievement_percentage]
-INDEX: [batch_id, achievement_percentage]
-INDEX: [position_formation_id, achievement_percentage]
-```
-
-**Relasi:**
-- belongsTo: participants, assessment_events, batches, position_formations
-
----
-
-### 16. psychological_tests
-
-Data hasil tes psikologi (terpisah dari asesmen).
-
-```sql
-id                      bigint unsigned (PK)
-event_id                bigint unsigned
-participant_id          bigint unsigned
-no_test                 varchar(30) (nullable)
-username                varchar(100) (nullable)
-validitas               text (nullable)
-internal                text (nullable)
-interpersonal           text (nullable)
-kap_kerja               text (nullable)       -- Kapasitas kerja
-klinik                  text (nullable)
-kesimpulan              text (nullable)
-psikogram               text (nullable)
-nilai_pq                decimal(10,2) (nullable)
-tingkat_stres           varchar(20) (nullable)
-created_at              timestamp
-updated_at              timestamp
-
-INDEX: [event_id, participant_id]
-```
-
-**Relasi:**
-- belongsTo: participants, assessment_events
-
----
-
-## SYSTEM TABLES
-
-### 17. users
-
-Autentikasi user dengan multi-tenancy support.
-
-```sql
-id                  bigint unsigned (PK)
-institution_id      bigint unsigned (FK → institutions, nullable)  -- Multi-tenancy
-name                varchar
-email               varchar (UNIQUE)
-email_verified_at   timestamp (nullable)
-password            varchar
-is_active           boolean (default: true)
-last_login_at       timestamp (nullable)
-remember_token      varchar (nullable)
-created_at          timestamp
-updated_at          timestamp
-
-INDEX: email, institution_id, is_active
-```
-
-**Multi-tenancy Logic:**
-- `institution_id = NULL` → Admin/Quantum (akses semua data)
-- `institution_id = X` → Client (akses data institution X saja)
-
-**Relasi:**
-- belongsTo: institutions
-- morphToMany: roles, permissions (Spatie)
-
----
-
-### 18. Spatie Permission Tables
-
-```sql
--- roles
-id, name, guard_name, created_at, updated_at
-
--- permissions
-id, name, guard_name, created_at, updated_at
-
--- model_has_roles
-role_id, model_type, model_id
-
--- model_has_permissions
-permission_id, model_type, model_id
-
--- role_has_permissions
-permission_id, role_id
+-- Potensi category with 3 aspects (weights: 25, 20, 20)
+total_standard_rating = 3.0 + 3.6 + 3.0 = 9.6
+total_standard_score = (3.0*25) + (3.6*20) + (3.0*20) = 167.0
 ```
 
 ---
 
-## DATABASE RELATIONSHIPS
+#### `aspect_assessments`
+Individual aspect scores for each participant.
 
-### Master Layer
-```
-Institution (1) ──< (N) AssessmentEvent
-Institution (1) ──< (N) User
-AssessmentTemplate (1) ──< (N) CategoryType
-AssessmentTemplate (1) ──< (N) Aspect
-AssessmentTemplate (1) ──< (N) PositionFormation
-CategoryType (1) ──< (N) Aspect
-Aspect (1) ──< (0-N) SubAspect
-```
+| Column | Type | Description |
+|--------|------|-------------|
+| id | bigint | Primary key |
+| participant_id | bigint | FK to participants |
+| aspect_id | bigint | FK to aspects |
+| standard_rating | decimal | Standard rating (1-5) |
+| standard_score | decimal | standard_rating * weight |
+| individual_rating | decimal | Participant's rating (1-5) |
+| individual_score | decimal | individual_rating * weight |
+| gap_rating | decimal | Individual - Standard |
+| gap_score | decimal | Individual - Standard |
+| percentage_score | int | (individual/standard) * 100 |
+| conclusion_code | varchar | Conclusion code |
 
-### Operational Layer
+**Sample Data**:
 ```
-AssessmentEvent (1) ──< (N) Batch
-AssessmentEvent (1) ──< (N) PositionFormation
-AssessmentEvent (1) ──< (N) Participant
-Batch (1) ──< (N) Participant
-PositionFormation (1) ──< (N) Participant
-```
-
-### Assessment Layer
-```
-Participant (1) ──< (2) CategoryAssessment
-Participant (1) ──── (1) FinalAssessment
-Participant (1) ──── (0-1) PsychologicalTest
-Participant (1) ──< (0-2) Interpretation
-
-CategoryAssessment (1) ──< (N) AspectAssessment
-AspectAssessment (1) ──< (0-N) SubAspectAssessment
+id=1062, participant_id=85, aspect_id=13,
+standard_rating=4.00, standard_score=120.00,
+individual_rating=2.50, individual_score=75.00,
+gap_rating=-1.50, gap_score=-45.00, percentage_score=50
 ```
 
 ---
 
-## DATA HIERARCHY
+#### `sub_aspect_assessments`
+Sub-aspect ratings (for Potensi aspects only).
+
+| Column | Type | Description |
+|--------|------|-------------|
+| id | bigint | Primary key |
+| aspect_assessment_id | bigint | FK to aspect_assessments |
+| participant_id | bigint | FK to participants |
+| sub_aspect_id | bigint | FK to sub_aspects |
+| standard_rating | int | Standard rating (1-5) |
+| individual_rating | int | Participant's rating (1-5) |
+
+**Aspect Rating Calculation**:
+```
+Kecerdasan individual_rating = AVG(sub_aspect_1, sub_aspect_2, ..., sub_aspect_n)
+```
+
+---
+
+#### `final_assessments`
+Combined Potensi + Kompetensi final scores.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| id | bigint | Primary key |
+| participant_id | bigint | FK to participants (UNIQUE) |
+| potensi_weight | int | Potensi category weight % |
+| kompetensi_weight | int | Kompetensi category weight % |
+| potensi_standard_score | decimal | Potensi weighted score |
+| kompetensi_standard_score | decimal | Kompetensi weighted score |
+| total_standard_score | decimal | Sum of both |
+| total_individual_score | decimal | Sum of both |
+| achievement_percentage | decimal | (individual/standard) * 100 |
+| conclusion_code | varchar | Final conclusion |
+
+---
+
+## Entity Relationships
+
+### Visual Hierarchy
 
 ```
-AssessmentTemplate
-├── CategoryType (Potensi & Kompetensi)
-│   └── Aspect (5-9 aspek per kategori)
-│       └── SubAspect (0-5 sub per aspek, hanya Potensi)
-└── PositionFormation
-
 Institution
-├── User (multi-tenancy)
-└── AssessmentEvent
-    ├── Batch
-    ├── PositionFormation
-    └── Participant
-        ├── CategoryAssessment (2: Potensi + Kompetensi)
-        │   └── AspectAssessment (5-9 per kategori)
-        │       └── SubAspectAssessment (0-5 per aspek)
-        ├── FinalAssessment (1)
-        ├── PsychologicalTest (0-1)
-        └── Interpretation (0-2)
+  └─> AssessmentEvent (1 event per institution)
+       ├─> Batch (multiple batches per event)
+       ├─> PositionFormation (multiple positions per event)
+       │    └─> AssessmentTemplate (1 template per position)
+       │         └─> CategoryType (2 categories: Potensi + Kompetensi)
+       │              └─> Aspect (multiple aspects per category)
+       │                   └─> SubAspect (ONLY for Potensi aspects)
+       └─> Participant (multiple participants per event)
+            ├─> belongs to: Batch
+            ├─> belongs to: PositionFormation
+            ├─> has: CategoryAssessment (2 per participant: Potensi + Kompetensi)
+            │    └─> has: AspectAssessment (multiple per category)
+            │         └─> has: SubAspectAssessment (ONLY for Potensi aspects)
+            └─> has: FinalAssessment (1 per participant)
 ```
 
 ---
 
-## KEY DESIGN PATTERNS
+## Data Hierarchy
 
-### 1. Template Pattern
-Template mendefinisikan "BAGAIMANA menilai" (struktur, bobot, standar). Setiap position formation menggunakan template tertentu. Template bersifat reusable.
+### Template → Category → Aspect → Sub-Aspect
 
-### 2. Snapshot Pattern
-`standard_rating` dari master (aspects, sub_aspects) di-copy ke tabel assessment pada saat asesmen. Ini menjaga integritas historis jika standar berubah di masa depan.
+**Example: Staff Standard V1**
 
-### 3. Denormalization for Performance
-Field `event_id`, `batch_id`, `position_formation_id` ditambahkan ke tabel assessment untuk query analytics cepat tanpa JOIN.
-
-### 4. Dual Foreign Key (Aspects)
-Aspect memiliki 2 FK:
-- `template_id` - Definisi per template (bobot berbeda)
-- `category_type_id` - Grouping Potensi/Kompetensi
-
-### 5. Multi-tenancy via Institution
-User memiliki `institution_id` untuk pembatasan akses data berdasarkan institusi.
-
----
-
-## INDEXING STRATEGY
-
-### Standard Indexes
-- Primary Keys: Auto-increment di semua tabel
-- Foreign Keys: Auto-indexed oleh Laravel
-- Business Keys: UNIQUE index pada `code` fields
-- Search Fields: Index pada `participants.name`
-
-### Performance Indexes (Composite)
-Composite indexes untuk analytics cepat:
-- `[event_id, category_type_id]`
-- `[event_id, aspect_id]`
-- `[batch_id, aspect_id]`
-- `[position_formation_id, aspect_id]`
-- `[participant_id, aspect_id]`
+```
+Template: staff_standard_v1
+  ├── Category: Potensi (50%)
+  │   ├── Aspect: Kecerdasan (25%) - standard_rating: 3.0
+  │   │   ├── SubAspect: Kecerdasan Umum (rating: 3)
+  │   │   ├── SubAspect: Daya Tangkap (rating: 3)
+  │   │   ├── SubAspect: Daya Analisa (rating: 3)
+  │   │   └── SubAspect: Kemampuan Logika (rating: 3)
+  │   ├── Aspect: Cara Kerja (20%) - calculated from sub-aspects
+  │   └── Aspect: Potensi Kerja (20%) - calculated from sub-aspects
+  │
+  └── Category: Kompetensi (50%)
+      ├── Aspect: Integritas (15%) - standard_rating: 3.0 (DIRECT)
+      ├── Aspect: Kerjasama (14%) - standard_rating: 3.0 (DIRECT)
+      ├── Aspect: Komunikasi (14%) - standard_rating: 3.0 (DIRECT)
+      └── ... (7 total kompetensi aspects)
+```
 
 ---
 
-## SCALE & PERFORMANCE
+## Sample Data Examples
 
-**Target Scale:**
-- 2000+ participants per event
-- 5-10 events per year
-- ~840,000 records per year
+### Complete Assessment Flow for 1 Participant
 
-**Performance:**
-- Analytics query: < 3ms (dengan composite indexes)
-- Query optimization: 1000x faster vs normalized design
+**Participant**: BRENNAN SMITHAM, S.Pd (id=1)
+- Event: P3K-KEMENKES-2025
+- Position: Apoteker (Supervisor template, Potensi 30%, Kompetensi 70%)
+- Batch: BATCH-2-YOGYAKARTA
+
+**Step 1: Sub-Aspect Assessments** (Potensi aspects ONLY)
+```
+Kecerdasan sub-aspects:
+  - Kecerdasan Umum: standard=3, individual=4
+  - Daya Tangkap: standard=3, individual=3
+  - Daya Analisa: standard=3, individual=4
+  - Kemampuan Logika: standard=3, individual=3
+```
+
+**Step 2: Aspect Assessment** (Calculated)
+```
+Kecerdasan aspect:
+  - standard_rating = AVG(3,3,3,3) = 3.0
+  - individual_rating = AVG(4,3,4,3) = 3.5
+  - weight = 25%
+  - standard_score = 3.0 * 25 = 75.0
+  - individual_score = 3.5 * 25 = 87.5
+```
+
+**Step 3: Category Assessment** (Aggregated)
+```
+Potensi category:
+  - total_standard_score = SUM(all aspect scores in Potensi)
+  - total_individual_score = SUM(all aspect scores in Potensi)
+  - gap_score = individual - standard
+```
+
+**Step 4: Final Assessment** (Weighted)
+```
+Final:
+  - potensi_score * 30% + kompetensi_score * 70% = total
+  - achievement_percentage = (total_individual / total_standard) * 100
+```
+
+---
+
+## Key Insights for Testing
+
+### 1. Data-Driven Aspect Rating
+
+**Potensi aspects** (WITH sub-aspects):
+```php
+// ✅ CORRECT: Calculate from sub-aspects
+$rating = $subAspects->avg('individual_rating');
+```
+
+**Kompetensi aspects** (NO sub-aspects):
+```php
+// ✅ CORRECT: Use direct rating from aspects table
+$rating = $aspect->standard_rating;
+```
+
+### 2. Template Variability
+
+Different positions in same event can have:
+- Different category weights (e.g., 50/50 vs 30/70)
+- Different aspect weights
+- Different standard ratings
+
+**Test Implication**: Always filter by `position_formation_id` to get correct template!
+
+### 3. Active/Inactive Filtering
+
+- DynamicStandardService can mark aspects/sub-aspects as inactive
+- Inactive aspects: `weight = 0`
+- Inactive sub-aspects: excluded from average calculation
+
+### 4. 3-Layer Priority System
+
+When getting standards:
+1. **Session Adjustment** (temporary, highest priority)
+2. **Custom Standard** (persistent, saved in DB)
+3. **Quantum Default** (from aspects/sub_aspects table, fallback)
+
+### 5. Tolerance Application
+
+RankingService applies tolerance to standards:
+```php
+$adjustedStandard = $originalStandard * (1 - $tolerancePercentage/100);
+// Example: 10% tolerance on 100.0 → 90.0
+```
+
+### 6. Ranking Sort Order
+
+**ALWAYS**:
+1. Sort by `individual_score` DESC (highest first)
+2. Tiebreaker: `participant_name` ASC (alphabetical)
+
+### 7. Database Indexes
+
+**Performance-critical queries**:
+- `aspect_assessments`: indexed on `(event_id, aspect_id)`, `(participant_id, aspect_id)`
+- `category_assessments`: indexed on `(event_id, category_type_id)`, `(participant_id, category_type_id)`
+- `final_assessments`: indexed on `(event_id, achievement_percentage)`
+
+---
+
+## Factory Usage for Testing
+
+### Required Factories
+
+When creating test data, you'll need:
+
+1. **Institution** → `Institution::factory()`
+2. **AssessmentTemplate** → `AssessmentTemplate::factory()` (OR use existing seeded data)
+3. **CategoryType** → `CategoryType::factory()`
+4. **Aspect** → `Aspect::factory()`
+5. **SubAspect** → `SubAspect::factory()` (ONLY for Potensi)
+6. **AssessmentEvent** → `AssessmentEvent::factory()`
+7. **Batch** → `Batch::factory()`
+8. **PositionFormation** → `PositionFormation::factory()`
+9. **Participant** → `Participant::factory()`
+10. **AspectAssessment** → `AspectAssessment::factory()`
+11. **SubAspectAssessment** → `SubAspectAssessment::factory()`
+12. **CategoryAssessment** → `CategoryAssessment::factory()`
+13. **FinalAssessment** → `FinalAssessment::factory()`
+
+### Recommended Approach for RankingService Tests
+
+**Option A: Use Seeded Data** (FASTEST)
+```php
+// Run seeder first: php artisan db:seed
+$event = AssessmentEvent::first();
+$position = PositionFormation::first();
+// Test with real seeded participants
+```
+
+**Option B: Minimal Factory Setup** (FLEXIBLE)
+```php
+// Create minimal template structure
+$template = $this->createTemplateWithCategories();
+$event = AssessmentEvent::factory()->create();
+$position = PositionFormation::factory()->create([
+    'event_id' => $event->id,
+    'template_id' => $template->id,
+]);
+// Create 3-5 participants with assessments
+```
+
+---
+
+**Version**: 1.0
+**Last Updated**: 2025-12-01
+**Next Review**: After RankingService tests complete
+**Maintainer**: Development Team
