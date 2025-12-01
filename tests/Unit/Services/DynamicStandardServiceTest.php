@@ -48,6 +48,9 @@ class DynamicStandardServiceTest extends TestCase
         parent::setUp();
 
         $this->service = app(DynamicStandardService::class);
+
+        // Clear cache between tests to prevent interference
+        \App\Services\Cache\AspectCacheService::clearCache();
     }
 
     // ========================================
