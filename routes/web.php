@@ -25,7 +25,11 @@ Route::middleware(['guest'])->group(function () {
 // Route::middleware(['auth', 'institution.access'])->group(function () {
 Route::middleware(['auth', 'institution.access'])->group(function () {
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
-    Route::get('/dashboard', \App\Livewire\Pages\Dashboard::class)->name('dashboard');
+    // Route::get('/dashboard', \App\Livewire\Pages\Dashboard::class)->name('dashboard');
+    Route::get('/dashboard', \App\Livewire\Pages\DashboardAdmin::class)->name('dashboard');
+
+    // List Klien Route
+    Route::get('/list-klient', \App\Livewire\Pages\ClientList::class)->name('daftar-klien');
 
     Route::get('/shortlist-peserta', \App\Livewire\Pages\ParticipantsList::class)->name('shortlist');
 
