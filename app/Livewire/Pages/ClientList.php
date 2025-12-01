@@ -4,7 +4,9 @@ namespace App\Livewire\Pages;
 
 use Livewire\Component;
 use Livewire\WithPagination;
+use Livewire\Attributes\Layout;
 
+#[Layout('components.layouts.app', ['title' => 'Daftar Klien'])]
 class ClientList extends Component
 {
     use WithPagination;
