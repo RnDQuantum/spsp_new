@@ -42,7 +42,7 @@ class FinalReport extends Component
     public $kompetensiCategory = null;
 
     // Tolerance percentage (default 10%)
-    public int $tolerancePercentage = 10;
+    public int $tolerancePercentage = 0;
 
     // Cache for final assessment data from service
     private ?array $finalAssessmentDataCache = null;
@@ -53,7 +53,7 @@ class FinalReport extends Component
         $this->testNumber = $testNumber;
 
         // Load tolerance from session
-        $this->tolerancePercentage = session('individual_report.tolerance', 10);
+        $this->tolerancePercentage = session('individual_report.tolerance', 0);
 
         // Ambil AssessmentEvent dengan relasi institution berdasarkan eventCode
         $assessmentEvent = AssessmentEvent::with('institution')
