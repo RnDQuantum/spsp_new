@@ -89,6 +89,7 @@ Route::middleware(['auth', 'institution.access'])->group(function () {
 
     // Laporan Alat Tes
     Route::get('/laporan-alat-tes', App\Livewire\Pages\LaporanAlatTes\LaporanAlatTes::class)->name('laporan-alat-tes');
+    Route::get('/laporan-alat-tes-detail', App\Livewire\Pages\LaporanAlatTes\DetailLaporanTes::class)->name('laporan-alat-tes-detail');
 
     // Talent Pool Management
     Route::get('/talentpool', App\Livewire\Pages\TalentPool::class)->name('talentpool');

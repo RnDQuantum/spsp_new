@@ -5,11 +5,11 @@ namespace App\Livewire\Pages\LaporanAlatTes;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 
-#[Layout('components.layouts.app')]
+#[Layout('components.layouts.app', ['title' => 'Laporan Alat Tes'])]
 class LaporanAlatTes extends Component
 {
     public function render()
     {
-        return view('livewire.pages.laporan-alat-tes.laporan-alat-tes');
+        return view('livewire.pages.laporan-alat-tes.index');
     }
 }
