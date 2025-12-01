@@ -34,6 +34,13 @@ class LoginController extends Controller
             $request->session()->regenerate();
             session()->flash('force_reload', true);
 
+            // Redirect berdasarkan role
+            $user = Auth::user();
+
+            if ($user->hasRole('admin')) {
+                return redirect()->intended(route('dashboard-admin'));
+            }
+
             return redirect()->intended(route('dashboard'));
         }
 
