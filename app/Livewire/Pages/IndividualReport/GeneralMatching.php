@@ -36,6 +36,8 @@ class GeneralMatching extends Component
 
     private ?array $kompetensiAspectsCache = null;
 
+    private ?array $allMatchingDataCache = null; // Cache for batch loaded data
+
     // ADD: Public properties untuk support child component
     public $eventCode;
 
@@ -79,14 +81,16 @@ class GeneralMatching extends Component
             abort(404, 'Event code and test number are required');
         }
 
-        // Load participant with relations based on event code and test number
+        // Load participant with comprehensive relations to eliminate N+1 queries
         $this->participant = Participant::with([
             'assessmentEvent',
             'batch',
             'positionFormation.template',
+            'positionFormation', // Include position formation itself
         ])
             ->whereHas('assessmentEvent', function ($query) {
-                $query->where('code', $this->eventCode);
+                $query->where('code', $this->eventCode)
+                    ->where('institution_id', auth()->user()->institution_id ?? 4); // Add institution filter
             })
             ->where('test_number', $this->testNumber)
             ->firstOrFail();
@@ -145,7 +149,7 @@ class GeneralMatching extends Component
     }
 
     /**
-     * Load matching data using IndividualAssessmentService
+     * Load matching data using IndividualAssessmentService (BATCH LOADING)
      */
     private function loadMatchingData(): void
     {
@@ -157,37 +161,69 @@ class GeneralMatching extends Component
             return;
         }
 
-        // Preload aspect cache once for this participant's template
-        $template = $this->participant->positionFormation->template;
-        AspectCacheService::preloadByTemplate($template->id);
-
         $service = app(IndividualAssessmentService::class);
 
-        // Load Potensi aspects
-        if ($this->potensiCategory) {
-            $data = $service->getAspectMatchingData(
-                $this->participant->id,
-                $this->potensiCategory->id
-            )->toArray();
+        // Single batch call to get both Potensi and Kompetensi data
+        $allData = $service->getAllAspectMatchingData($this->participant);
 
-            $this->potensiAspects = $data;
-            $this->potensiAspectsCache = $data;
-        }
+        // Cache the batch data to avoid duplicate calls
+        $this->allMatchingDataCache = $allData;
 
-        // Load Kompetensi aspects
-        if ($this->kompetensiCategory) {
-            $data = $service->getAspectMatchingData(
-                $this->participant->id,
-                $this->kompetensiCategory->id
-            )->toArray();
+        // Set Potensi data (convert Collection to array for cache compatibility)
+        $this->potensiAspects = $allData['potensi'] ?? [];
+        $this->potensiAspectsCache = is_array($this->potensiAspects) ? $this->potensiAspects : $this->potensiAspects->toArray();
 
-            $this->kompetensiAspects = $data;
-            $this->kompetensiAspectsCache = $data;
-        }
+        // Set Kompetensi data (convert Collection to array for cache compatibility)
+        $this->kompetensiAspects = $allData['kompetensi'] ?? [];
+        $this->kompetensiAspectsCache = is_array($this->kompetensiAspects) ? $this->kompetensiAspects : $this->kompetensiAspects->toArray();
 
-        // Calculate job match percentage using service
-        $jobMatching = $service->getJobMatchingPercentage($this->participant->id);
+        // Calculate job match percentage using cached batch data
+        $jobMatching = $this->calculateJobMatchPercentage($allData);
         $this->jobMatchPercentage = $jobMatching['job_match_percentage'];
+    }
+
+    /**
+     * Calculate job match percentage from cached batch data (no additional queries)
+     */
+    private function calculateJobMatchPercentage(array $allData): array
+    {
+        $allPercentages = [];
+        $potensiPercentages = [];
+        $kompetensiPercentages = [];
+
+        // Extract percentages from batch data
+        if (isset($allData['potensi'])) {
+            foreach ($allData['potensi'] as $aspect) {
+                $allPercentages[] = $aspect['percentage'];
+                $potensiPercentages[] = $aspect['percentage'];
+            }
+        }
+
+        if (isset($allData['kompetensi'])) {
+            foreach ($allData['kompetensi'] as $aspect) {
+                $allPercentages[] = $aspect['percentage'];
+                $kompetensiPercentages[] = $aspect['percentage'];
+            }
+        }
+
+        // Calculate averages
+        $jobMatchPercentage = count($allPercentages) > 0
+            ? round(array_sum($allPercentages) / count($allPercentages))
+            : 0;
+
+        $potensiAverage = count($potensiPercentages) > 0
+            ? round(array_sum($potensiPercentages) / count($potensiPercentages))
+            : 0;
+
+        $kompetensiAverage = count($kompetensiPercentages) > 0
+            ? round(array_sum($kompetensiPercentages) / count($kompetensiPercentages))
+            : 0;
+
+        return [
+            'job_match_percentage' => $jobMatchPercentage,
+            'potensi_percentage' => $potensiAverage,
+            'kompetensi_percentage' => $kompetensiAverage,
+        ];
     }
 
     public function getAspectPercentage(string $aspectCode): int
