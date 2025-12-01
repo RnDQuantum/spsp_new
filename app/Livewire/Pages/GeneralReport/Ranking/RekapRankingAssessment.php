@@ -25,7 +25,7 @@ class RekapRankingAssessment extends Component
 
     public $perPage = 10; // Changed from int to allow 'all'
 
-    public int $tolerancePercentage = 10;
+    public int $tolerancePercentage = 0;
 
     // Pie chart data
     public array $chartLabels = [];
@@ -56,7 +56,7 @@ class RekapRankingAssessment extends Component
 
     public function mount(): void
     {
-        $this->tolerancePercentage = session('individual_report.tolerance', 10);
+        $this->tolerancePercentage = session('individual_report.tolerance', 0);
 
         // Load conclusion configuration from ConclusionService
         $this->conclusionConfig = ConclusionService::getGapConclusionConfig();

@@ -17,7 +17,7 @@ class RankingMcMapping extends Component
 {
     use WithPagination;
 
-    public int $tolerancePercentage = 10;
+    public int $tolerancePercentage = 0;
 
     public int $perPage = 10;
 
@@ -44,7 +44,7 @@ class RankingMcMapping extends Component
 
     public function mount(): void
     {
-        $this->tolerancePercentage = session('individual_report.tolerance', 10);
+        $this->tolerancePercentage = session('individual_report.tolerance', 0);
 
         // Load conclusion configuration from ConclusionService
         $this->conclusionConfig = ConclusionService::getGapConclusionConfig();

@@ -22,7 +22,7 @@ class RingkasanAssessment extends Component
     public ?array $kompetensiData = null;
 
     // Tolerance percentage (default 10%)
-    public int $tolerancePercentage = 10;
+    public int $tolerancePercentage = 0;
 
     // CACHE: Store service results
     private ?array $finalAssessmentCache = null;
@@ -74,7 +74,7 @@ class RingkasanAssessment extends Component
         }
 
         // Load tolerance from session (same as GeneralPsyMapping)
-        $this->tolerancePercentage = session('individual_report.tolerance', 10);
+        $this->tolerancePercentage = session('individual_report.tolerance', 0);
 
         // Load participant with relations based on event code and test number
         $this->participant = Participant::with([
