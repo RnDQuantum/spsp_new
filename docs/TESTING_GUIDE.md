@@ -26,12 +26,12 @@
 |---------|------------|-----------|----------|--------|-----------|
 | **DynamicStandardService** | ✅ **52/52** | 0 | ⭐⭐⭐ | **✅ COMPLETE (100%)** | `tests/Unit/Services/DynamicStandardServiceTest.php` |
 | **IndividualAssessmentService** | ✅ **69/69** | 0 | ⭐⭐⭐ | **✅ COMPLETE (100%)** | `tests/Unit/Services/IndividualAssessmentServiceTest.php` |
-| **CustomStandardService** | 0/20 | 20 | ⭐⭐ | PENDING | `tests/Unit/Services/CustomStandardServiceTest.php` |
+| **CustomStandardService** | ✅ **69/69** | 0 | ⭐⭐ | **✅ COMPLETE (100%)** | `tests/Unit/Services/CustomStandardServiceTest.php` |
 | **RankingService** | 0/40 | 40 | ⭐⭐ | PENDING | `tests/Unit/Services/RankingServiceTest.php` |
 | TrainingRecommendationService | 0/25 | 25 | ⭐ | OPTIONAL | Can be covered via Livewire tests |
 | StatisticService | 0/20 | 20 | ⭐ | OPTIONAL | Can be covered via Livewire tests |
 
-**Progress**: 121/227 tests (53%) 🎉 +40 tests today!
+**Progress**: 190/227 tests (84%) 🎉 **+69 tests today!**
 
 ### Why This Order?
 
@@ -50,8 +50,8 @@ tests/
 ├── Unit/                          # Pure logic testing (FAST, isolated)
 │   └── Services/
 │       ├── DynamicStandardServiceTest.php            # ✅ COMPLETE (52/52)
-│       ├── IndividualAssessmentServiceTest.php       # 🔥 IN PROGRESS (29/70)
-│       ├── CustomStandardServiceTest.php             # ⏳ PENDING (0/20)
+│       ├── IndividualAssessmentServiceTest.php       # ✅ COMPLETE (69/69)
+│       ├── CustomStandardServiceTest.php             # ✅ COMPLETE (69/69)
 │       └── RankingServiceTest.php                    # ⏳ PENDING (0/40)
 │
 └── Feature/                       # Integration testing (SLOWER, realistic)
@@ -265,28 +265,86 @@ $aspect->update(['standard_rating' => 4.0]);
 ## 📝 CustomStandardService Tests (Priority #3)
 
 **File**: `tests/Unit/Services/CustomStandardServiceTest.php`
-**Estimated**: 15-20 tests
+**Status**: ✅ **COMPLETE** (100% done)
+**Total Tests**: 69/69 tests
+**Coverage**: All 20 public methods fully tested
 
-### Test Categories
+### Test Coverage Summary
 
-**CRUD Tests** (5-8 tests):
-- Create, update, delete custom standard
-- List standards for institution
-- Apply custom standard to assessment
+#### ✅ PHASE 1: Service Initialization (1 test) - COMPLETE
+- Service instantiation
 
-**Session Selection Tests** (4-6 tests):
-- Select custom standard → stored in session
-- Clear selection
-- Selection resets adjustments
+#### ✅ PHASE 2: Query Methods (10 tests) - COMPLETE
+1. getForInstitution() - filters by institution & template, active only, ordered by name
+2. getAllForInstitution() - all templates for institution, eager loads relationships
+3. getAvailableTemplatesForInstitution() - only templates used in events, distinct, ordered
 
-**Validation Tests** (4-6 tests):
-- Category weights sum to 100
-- Rating range 1-5
-- Unique code per institution
+#### ✅ PHASE 3: CRUD Operations (12 tests) - COMPLETE
+1. create() - stores all data, uses auth()->id() fallback, handles null description
+2. update() - modifies data, keeps original values when not provided, returns fresh instance
+3. delete() - removes standard, returns false when fails (🐛 **BUG FIXED**: null → false coercion)
+4. JSON field casting validation
 
-**Template Defaults** (2-3 tests):
-- Generate correct defaults from template
-- Data-driven defaults for aspects with sub-aspects
+#### ✅ PHASE 4: Template Defaults (8 tests) - COMPLETE
+1. getTemplateDefaults() - returns all required keys
+2. **DATA-DRIVEN logic**: adds rating ONLY for aspects WITHOUT sub-aspects
+3. Includes category weights, aspect weights & active status
+4. Includes sub-aspect ratings & active status
+5. Eager loads relationships
+6. Handles empty templates, throws exception for nonexistent template
+
+#### ✅ PHASE 5: Session Management (12 tests) - COMPLETE
+1. select() - stores in session, can store null, clears adjustments, allows switching
+2. getSelected() - retrieves from session, returns null when no selection
+3. getSelectedStandard() - returns model, handles null/nonexistent
+4. clearSelection() - removes from session, also clears adjustments
+5. Session keys are template-specific
+
+#### ✅ PHASE 6: Getter Methods (15 tests) - COMPLETE
+1. getAspectWeight() - returns weight, null for nonexistent
+2. getAspectRating() - returns as float, null when no rating field
+3. getSubAspectRating() - returns rating, null for nonexistent
+4. getCategoryWeight() - returns weight, null for nonexistent
+5. isAspectActive() - returns status, defaults to true
+6. isSubAspectActive() - returns status, defaults to true
+
+#### ✅ PHASE 7: Validation Methods (8 tests) - COMPLETE
+1. validate() - category weights sum to 100%
+2. Rating range validation (1-5) for aspects & sub-aspects
+3. Accepts valid boundaries, passes when no rating field
+4. Returns empty array for empty data
+
+#### ✅ PHASE 8: Code Uniqueness (5 tests) - COMPLETE
+1. isCodeUnique() - returns true/false correctly
+2. Scoped to institution (same code allowed in different institutions)
+3. Excludes current standard when updating
+4. Detects duplicates correctly
+
+### Bugs Discovered & Fixed
+
+🐛 **Bug #1**: `is_active` default value was NULL instead of TRUE
+- **Fix**: Added `protected $attributes = ['is_active' => true]` in CustomStandard model
+
+🐛 **Bug #2**: `delete()` method returned NULL when deleting already-deleted model
+- **Fix**: Changed `return $customStandard->delete();` to `return $customStandard->delete() ?: false;`
+
+🐛 **Bug #3**: AssessmentEvent factory used invalid enum value ('active' instead of 'ongoing')
+- **Fix**: Updated factory to use correct enum values
+
+### Helper Methods Created
+- `makeStandardData()` - Creates test data array for CustomStandard
+- `createTemplateWithCategories()` - Creates complete template with categories, aspects, sub-aspects
+
+### Factories Created
+- InstitutionFactory ✅
+- AssessmentTemplateFactory ✅
+- CategoryTypeFactory ✅
+- AspectFactory ✅
+- SubAspectFactory ✅
+- AssessmentEventFactory ✅
+- PositionFormationFactory ✅
+
+**Result**: ✅ **All public methods fully tested with comprehensive coverage including edge cases, data-driven logic, and bug discovery**
 
 ---
 
@@ -486,19 +544,14 @@ php artisan test --display-errors
 
 ### Current Priority
 
-1. ⭐⭐⭐ **Complete IndividualAssessmentService** (41 tests remaining)
-   - getFinalAssessment() - 15 tests
-   - getPassingSummary() - 5 tests
-   - getAspectMatchingData() - 12 tests
-   - getJobMatchingPercentage() - 9 tests
-
-2. ⭐⭐ **Test CustomStandardService** (0/20 remaining)
-3. ⭐⭐ **Test RankingService** (0/40 remaining)
-4. ⭐ **Test ConclusionService** (0/15 remaining)
+1. ⭐⭐ **Test RankingService** (0/40 remaining) - **NEXT**
+2. ⭐ **Test ConclusionService** (0/15 remaining)
+3. ⭐ **Test TrainingRecommendationService** (0/25 remaining) - OPTIONAL
+4. ⭐ **Test StatisticService** (0/20 remaining) - OPTIONAL
 
 ---
 
-**Version**: 1.3
-**Last Updated**: 2025-01-28
-**Next Review**: After IndividualAssessmentService tests complete
+**Version**: 1.4
+**Last Updated**: 2025-12-01
+**Next Review**: After RankingService tests complete
 **Maintainer**: Development Team

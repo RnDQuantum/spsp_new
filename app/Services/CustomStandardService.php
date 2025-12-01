@@ -80,7 +80,7 @@ class CustomStandardService
      */
     public function delete(CustomStandard $customStandard): bool
     {
-        return $customStandard->delete();
+        return $customStandard->delete() ?: false;
     }
 
     /**

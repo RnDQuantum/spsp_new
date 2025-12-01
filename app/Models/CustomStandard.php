@@ -20,6 +20,10 @@ class CustomStandard extends Model
         'created_by',
     ];
 
+    protected $attributes = [
+        'is_active' => true,
+    ];
+
     protected function casts(): array
     {
         return [

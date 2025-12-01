@@ -48,7 +48,7 @@ class PsychologicalTestFactory extends Factory
      */
     public function forParticipant(Participant $participant): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'participant_id' => $participant->id,
             'event_id' => $participant->event_id,
             'username' => $participant->username,
@@ -167,12 +167,12 @@ class PsychologicalTestFactory extends Factory
     {
         $qualities = $this->getQualityLevel($nilaiPq);
 
-        return "1. Kejujuran: {$qualities['high']}\n" .
-            "2. Tanggung jawab: {$qualities['high']}\n" .
-            "3. Ketaatan pada peraturan: {$qualities['medium']}\n" .
-            "4. Percaya diri: {$qualities['medium']}\n" .
-            "5. Kemampuan beradaptasi: {$qualities['medium']}\n" .
-            "6. Kemampuan Mengendalikan emosi: {$qualities['medium']}\n" .
+        return "1. Kejujuran: {$qualities['high']}\n".
+            "2. Tanggung jawab: {$qualities['high']}\n".
+            "3. Ketaatan pada peraturan: {$qualities['medium']}\n".
+            "4. Percaya diri: {$qualities['medium']}\n".
+            "5. Kemampuan beradaptasi: {$qualities['medium']}\n".
+            "6. Kemampuan Mengendalikan emosi: {$qualities['medium']}\n".
             "7. Kemandirian: {$qualities['low']}";
     }
 
@@ -181,9 +181,9 @@ class PsychologicalTestFactory extends Factory
         $qualities = $this->getQualityLevel($nilaiPq);
         $socialization = ucfirst($qualities['high']);
 
-        return "1. Sosialisasi: {$socialization}\n" .
-            "2. Hubungan dalam keluarga: {$qualities['medium']}\n" .
-            "3. Kemampuan membina hubungan akrab: {$qualities['high']}\n" .
+        return "1. Sosialisasi: {$socialization}\n".
+            "2. Hubungan dalam keluarga: {$qualities['medium']}\n".
+            "3. Kemampuan membina hubungan akrab: {$qualities['high']}\n".
             "4. Kemampuan mempercayai orang lain: {$qualities['medium']}";
     }
 
@@ -191,9 +191,9 @@ class PsychologicalTestFactory extends Factory
     {
         $qualities = $this->getQualityLevel($nilaiPq);
 
-        return "1. Kemampuan mengatasi kendala sikap (bekerja): {$qualities['high']}\n" .
-            "2. Kemampuan mengatasi permasalahan: {$qualities['low']}\n" .
-            "3. Kemampuan mengambil keputusan: {$qualities['medium']}\n" .
+        return "1. Kemampuan mengatasi kendala sikap (bekerja): {$qualities['high']}\n".
+            "2. Kemampuan mengatasi permasalahan: {$qualities['low']}\n".
+            "3. Kemampuan mengambil keputusan: {$qualities['medium']}\n".
             "4. Motivasi: {$qualities['medium']}";
     }
 
@@ -225,10 +225,10 @@ class PsychologicalTestFactory extends Factory
             default => 'tingkat stres normal',
         };
 
-        return "1. Klien memiliki Fungsi Psikologik Menyeluruh (Overall Psychological Function) yang {$overallFunction}.(PQ={$nilaiPq})\n" .
-            "2. Saat ini klien mengalami {$stresText}.\n" .
-            "3. Klien memiliki kapasitas kerja yang {$kapasitasKerja}.\n" .
-            "4. Hubungan interpersonal klien: {$hubInterpersonal}.\n" .
+        return "1. Klien memiliki Fungsi Psikologik Menyeluruh (Overall Psychological Function) yang {$overallFunction}.(PQ={$nilaiPq})\n".
+            "2. Saat ini klien mengalami {$stresText}.\n".
+            "3. Klien memiliki kapasitas kerja yang {$kapasitasKerja}.\n".
+            "4. Hubungan interpersonal klien: {$hubInterpersonal}.\n".
             "5. Kemampuan klien mengembangkan/merubah potensi diri: {$kemampuanMengembangkan}.";
     }
 
@@ -279,37 +279,73 @@ class PsychologicalTestFactory extends Factory
 
     private function getOverallFunction(float $nilaiPq): string
     {
-        if ($nilaiPq >= 80) return 'sangat bagus';
-        if ($nilaiPq >= 65) return 'bagus';
-        if ($nilaiPq >= 50) return 'sedang';
-        if ($nilaiPq >= 40) return 'sedang';
+        if ($nilaiPq >= 80) {
+            return 'sangat bagus';
+        }
+        if ($nilaiPq >= 65) {
+            return 'bagus';
+        }
+        if ($nilaiPq >= 50) {
+            return 'sedang';
+        }
+        if ($nilaiPq >= 40) {
+            return 'sedang';
+        }
+
         return 'sangat kurang';
     }
 
     private function getKapasitasKerja(float $nilaiPq): string
     {
-        if ($nilaiPq >= 80) return 'sangat baik';
-        if ($nilaiPq >= 65) return 'baik';
-        if ($nilaiPq >= 50) return 'sedang';
-        if ($nilaiPq >= 40) return 'sedang';
+        if ($nilaiPq >= 80) {
+            return 'sangat baik';
+        }
+        if ($nilaiPq >= 65) {
+            return 'baik';
+        }
+        if ($nilaiPq >= 50) {
+            return 'sedang';
+        }
+        if ($nilaiPq >= 40) {
+            return 'sedang';
+        }
+
         return 'kurang';
     }
 
     private function getHubInterpersonal(float $nilaiPq): string
     {
-        if ($nilaiPq >= 80) return 'sangat bagus';
-        if ($nilaiPq >= 65) return 'bagus';
-        if ($nilaiPq >= 50) return 'cukup';
-        if ($nilaiPq >= 40) return 'cukup';
+        if ($nilaiPq >= 80) {
+            return 'sangat bagus';
+        }
+        if ($nilaiPq >= 65) {
+            return 'bagus';
+        }
+        if ($nilaiPq >= 50) {
+            return 'cukup';
+        }
+        if ($nilaiPq >= 40) {
+            return 'cukup';
+        }
+
         return 'sangat kurang';
     }
 
     private function getKemampuanMengembangkan(float $nilaiPq): string
     {
-        if ($nilaiPq >= 80) return 'bagus';
-        if ($nilaiPq >= 65) return 'cukup';
-        if ($nilaiPq >= 50) return 'kurang';
-        if ($nilaiPq >= 40) return 'kurang';
+        if ($nilaiPq >= 80) {
+            return 'bagus';
+        }
+        if ($nilaiPq >= 65) {
+            return 'cukup';
+        }
+        if ($nilaiPq >= 50) {
+            return 'kurang';
+        }
+        if ($nilaiPq >= 40) {
+            return 'kurang';
+        }
+
         return 'sangat kurang';
     }
 }
