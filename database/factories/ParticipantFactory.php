@@ -17,6 +17,8 @@ class ParticipantFactory extends Factory
 {
     protected $model = Participant::class;
 
+    private static int $counter = 0;
+
     public function definition(): array
     {
         $gender = fake()->randomElement(['L', 'P']);
@@ -26,12 +28,14 @@ class ParticipantFactory extends Factory
         $degrees = ['S.Si', 'S.T', 'S.Kom', 'S.E', 'S.H', 'S.Ak', 'S.Psi', 'S.Pd', 'S.Sos'];
         $degree = fake()->randomElement($degrees);
 
+        self::$counter++;
+
         return [
-            'username' => fake()->unique()->bothify('???##-###'),
+            'username' => $this->generateUsername(),
             'test_number' => $this->generateTestNumber(),
-            'skb_number' => fake()->unique()->numerify('244002401200#####'),
+            'skb_number' => $this->generateSkbNumber(),
             'name' => strtoupper($firstName.' '.$lastName).', '.$degree,
-            'email' => fake()->unique()->safeEmail(),
+            'email' => $this->generateEmail(),
             'phone' => fake()->numerify('08##########'),
             'gender' => $gender,
             'photo_path' => null,
@@ -40,14 +44,55 @@ class ParticipantFactory extends Factory
     }
 
     /**
-     * Generate unique test number
+     * Generate unique username using counter
+     */
+    private function generateUsername(): string
+    {
+        $letters = fake()->bothify('???');
+        $numbers = str_pad((string) (self::$counter % 100), 2, '0', STR_PAD_LEFT);
+        $suffix = str_pad((string) ((int) (self::$counter / 100)), 3, '0', STR_PAD_LEFT);
+
+        return strtoupper($letters.$numbers.'-'.$suffix);
+    }
+
+    /**
+     * Generate unique test number using counter
      */
     private function generateTestNumber(): string
     {
         $prefix = fake()->numerify('##-#-#-##');
-        $sequence = fake()->unique()->numerify('###');
+        $sequence = str_pad((string) self::$counter, 5, '0', STR_PAD_LEFT);
 
         return $prefix.'-'.$sequence;
+    }
+
+    /**
+     * Generate unique SKB number using counter
+     */
+    private function generateSkbNumber(): string
+    {
+        $baseNumber = str_pad((string) self::$counter, 5, '0', STR_PAD_LEFT);
+
+        return '244002401200'.$baseNumber;
+    }
+
+    /**
+     * Generate unique email using counter
+     */
+    private function generateEmail(): string
+    {
+        $providers = ['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com'];
+        $provider = fake()->randomElement($providers);
+
+        return 'participant'.self::$counter.'@'.$provider;
+    }
+
+    /**
+     * Reset the counter (useful for seeding fresh data)
+     */
+    public static function resetCounter(): void
+    {
+        self::$counter = 0;
     }
 
     /**

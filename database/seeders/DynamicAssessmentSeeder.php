@@ -44,7 +44,7 @@ class DynamicAssessmentSeeder extends Seeder
                 ],
                 'batches' => [['code' => 'BATCH-1-MOJOKERTO', 'name' => 'Gelombang 1 - Mojokerto', 'location' => 'Mojokerto', 'batch_number' => 1, 'start_date' => '2025-09-27', 'end_date' => '2025-09-28'], ['code' => 'BATCH-2-SURABAYA', 'name' => 'Gelombang 2 - Surabaya', 'location' => 'Surabaya', 'batch_number' => 2, 'start_date' => '2025-10-15', 'end_date' => '2025-10-16'], ['code' => 'BATCH-3-JAKARTA', 'name' => 'Gelombang 3 - Jakarta', 'location' => 'Jakarta', 'batch_number' => 3, 'start_date' => '2025-11-05', 'end_date' => '2025-11-06']],
                 'positions' => [['code' => 'fisikawan_medis', 'name' => 'Fisikawan Medis', 'quota' => 20, 'template_code' => 'professional_standard_v1'], ['code' => 'analis_kebijakan', 'name' => 'Analis Kebijakan', 'quota' => 30, 'template_code' => 'staff_standard_v1'], ['code' => 'auditor', 'name' => 'Auditor', 'quota' => 25, 'template_code' => 'supervisor_standard_v1'], ['code' => 'pranata_komputer', 'name' => 'Pranata Komputer', 'quota' => 25, 'template_code' => 'staff_standard_v1']],
-                'participants_count' => 100, // JUMLAH PESERTA
+                'participants_count' => 20000, // JUMLAH PESERTA
                 'performance_distribution' => [
                     'high' => 25, // 25% high performers (exceed standard)
                     'medium' => 60, // 60% medium performers (around standard)
@@ -66,7 +66,7 @@ class DynamicAssessmentSeeder extends Seeder
                 ],
                 'batches' => [['code' => 'BATCH-1-BANDUNG', 'name' => 'Gelombang 1 - Bandung', 'location' => 'Bandung', 'batch_number' => 1, 'start_date' => '2025-10-10', 'end_date' => '2025-10-11'], ['code' => 'BATCH-2-YOGYAKARTA', 'name' => 'Gelombang 2 - Yogyakarta', 'location' => 'Yogyakarta', 'batch_number' => 2, 'start_date' => '2025-11-10', 'end_date' => '2025-11-11']],
                 'positions' => [['code' => 'dokter_umum', 'name' => 'Dokter Umum', 'quota' => 50, 'template_code' => 'professional_standard_v1'], ['code' => 'perawat', 'name' => 'Perawat', 'quota' => 100, 'template_code' => 'staff_standard_v1'], ['code' => 'apoteker', 'name' => 'Apoteker', 'quota' => 50, 'template_code' => 'supervisor_standard_v1']],
-                'participants_count' => 200, // JUMLAH PESERTA
+                'participants_count' => 15000, // JUMLAH PESERTA
                 'performance_distribution' => [
                     'high' => 20, // 25% high performers (exceed standard)
                     'medium' => 10, // 60% medium performers (around standard)
@@ -81,6 +81,9 @@ class DynamicAssessmentSeeder extends Seeder
      */
     public function run(): void
     {
+        // Reset the participant factory counter at the start
+        Participant::factory()::resetCounter();
+
         $configurations = $this->getSeederConfigurations();
 
         foreach ($configurations as $config) {
@@ -145,46 +148,57 @@ class DynamicAssessmentSeeder extends Seeder
             $progressBar = $this->command->getOutput()->createProgressBar($config['participants_count']);
             $progressBar->start();
 
-            for ($i = 0; $i < $config['participants_count']; $i++) {
-                // Determine performance level based on distribution
-                $performanceLevel = $this->determinePerformanceLevel($config['performance_distribution']);
+            // Process in smaller chunks for better memory management
+            $chunkSize = 100;
+            $totalChunks = (int) ceil($config['participants_count'] / $chunkSize);
 
-                // Random batch & position
-                $batch = fake()->randomElement($batches);
-                $position = fake()->randomElement($positions);
+            for ($chunk = 0; $chunk < $totalChunks; $chunk++) {
+                $currentChunkSize = min($chunkSize, $config['participants_count'] - ($chunk * $chunkSize));
 
-                // Create participant
-                $participant = Participant::factory()->forEvent($event)->forBatch($batch)->forPosition($position)->create();
+                // Create participants in nested transaction for better performance
+                DB::transaction(function () use ($currentChunkSize, $batches, $positions, $event, $config, $progressBar) {
+                    for ($i = 0; $i < $currentChunkSize; $i++) {
+                        // Determine performance level based on distribution
+                        $performanceLevel = $this->determinePerformanceLevel($config['performance_distribution']);
 
-                // Get template from position (not from event!)
-                $template = $position->template;
+                        // Random batch & position
+                        $batch = fake()->randomElement($batches);
+                        $position = fake()->randomElement($positions);
 
-                // Get category types from position's template
-                $potensiCategory = CategoryType::where('template_id', $template->id)->where('code', 'potensi')->firstOrFail();
+                        // Create participant
+                        $participant = Participant::factory()->forEvent($event)->forBatch($batch)->forPosition($position)->create();
 
-                $kompetensiCategory = CategoryType::where('template_id', $template->id)->where('code', 'kompetensi')->firstOrFail();
+                        // Get template from position (not from event!)
+                        $template = $position->template;
 
-                // Generate assessment data (RAW DATA like API)
-                $assessmentsData = $this->generateAssessmentsData($template, $potensiCategory, $kompetensiCategory, $performanceLevel);
+                        // Get category types from position's template (cache these if possible)
+                        $potensiCategory = CategoryType::where('template_id', $template->id)->where('code', 'potensi')->firstOrFail();
 
-                // Calculate assessments using SERVICE
-                $this->assessmentService->calculateParticipant($participant, $assessmentsData);
+                        $kompetensiCategory = CategoryType::where('template_id', $template->id)->where('code', 'kompetensi')->firstOrFail();
 
-                // Create psychological test
-                $psychTestFactory = PsychologicalTest::factory()->forParticipant($participant);
+                        // Generate assessment data (RAW DATA like API)
+                        $assessmentsData = $this->generateAssessmentsData($template, $potensiCategory, $kompetensiCategory, $performanceLevel);
 
-                match ($performanceLevel) {
-                    'high' => $psychTestFactory->highPerformance()->create(),
-                    'medium' => $psychTestFactory->mediumPerformance()->create(),
-                    'low' => $psychTestFactory->lowPerformance()->create(),
-                };
+                        // Calculate assessments using SERVICE
+                        $this->assessmentService->calculateParticipant($participant, $assessmentsData);
 
-                // Create interpretations
-                Interpretation::factory()->forParticipant($participant)->forCategoryType($potensiCategory)->potensi($performanceLevel)->create();
+                        // Create psychological test
+                        $psychTestFactory = PsychologicalTest::factory()->forParticipant($participant);
 
-                Interpretation::factory()->forParticipant($participant)->forCategoryType($kompetensiCategory)->kompetensi($performanceLevel)->create();
+                        match ($performanceLevel) {
+                            'high' => $psychTestFactory->highPerformance()->create(),
+                            'medium' => $psychTestFactory->mediumPerformance()->create(),
+                            'low' => $psychTestFactory->lowPerformance()->create(),
+                        };
 
-                $progressBar->advance();
+                        // Create interpretations
+                        Interpretation::factory()->forParticipant($participant)->forCategoryType($potensiCategory)->potensi($performanceLevel)->create();
+
+                        Interpretation::factory()->forParticipant($participant)->forCategoryType($kompetensiCategory)->kompetensi($performanceLevel)->create();
+
+                        $progressBar->advance();
+                    }
+                });
             }
 
             $progressBar->finish();
