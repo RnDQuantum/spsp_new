@@ -23,6 +23,7 @@ class AspectAssessmentFactory extends Factory
     public function definition(): array
     {
         return [
+            'category_assessment_id' => null, // Optional, can be set in state
             'standard_rating' => fake()->randomFloat(2, 1, 5),
             'standard_score' => fake()->randomFloat(2, 10, 100),
             'individual_rating' => fake()->randomFloat(2, 1, 5),
