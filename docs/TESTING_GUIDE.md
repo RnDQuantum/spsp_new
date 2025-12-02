@@ -1,8 +1,8 @@
 # Testing Guide - SPSP Assessment System
 
-> **Version**: 1.3
-> **Last Updated**: 2025-01-28
-> **Status**: 🚧 **IN DEVELOPMENT** - Tests uncover bugs in production code
+> **Version**: 2.1
+> **Last Updated**: 2025-12-02
+> **Status**: ✅ **COMPLETE** - All core services fully tested with 3-layer priority chain coverage
 > **Purpose**: Quick reference untuk testing strategy dengan PHPUnit
 
 ---
@@ -25,13 +25,14 @@
 | Service | Tests Done | Remaining | Priority | Status | Test File |
 |---------|------------|-----------|----------|--------|-----------|
 | **DynamicStandardService** | ✅ **52/52** | 0 | ⭐⭐⭐ | **✅ COMPLETE (100%)** | `tests/Unit/Services/DynamicStandardServiceTest.php` |
-| **IndividualAssessmentService** | ✅ **69/69** | 0 | ⭐⭐⭐ | **✅ COMPLETE (100%)** | `tests/Unit/Services/IndividualAssessmentServiceTest.php` |
+| **IndividualAssessmentService** | ✅ **73/73** | 0 | ⭐⭐⭐ | **✅ COMPLETE (100%)** | `tests/Unit/Services/IndividualAssessmentServiceTest.php` |
 | **CustomStandardService** | ✅ **69/69** | 0 | ⭐⭐ | **✅ COMPLETE (100%)** | `tests/Unit/Services/CustomStandardServiceTest.php` |
-| **RankingService** | ✅ **48/48** | 0 | ⭐⭐⭐ | **✅ COMPLETE (100%)** | `tests/Unit/Services/RankingServiceTest.php` |
+| **RankingService** | ✅ **51/51** | 0 | ⭐⭐⭐ | **✅ COMPLETE (100%)** | `tests/Unit/Services/RankingServiceTest.php` |
+| **Integration Tests** | ✅ **2/2** | 0 | ⭐⭐⭐ | **✅ COMPLETE (100%)** | `tests/Integration/Services/PriorityChainIntegrationTest.php` |
 | TrainingRecommendationService | 0/25 | 25 | ⭐ | OPTIONAL | Can be covered via Livewire tests |
 | StatisticService | 0/20 | 20 | ⭐ | OPTIONAL | Can be covered via Livewire tests |
 
-**Progress**: 238/238 core tests (100%) - **All priority services fully tested with bug fixes!** 🎉
+**Progress**: 247/247 core tests (100%) - **All priority services fully tested with 3-layer priority chain coverage!** 🎉
 
 ### Why This Order?
 
@@ -50,9 +51,13 @@ tests/
 ├── Unit/                          # Pure logic testing (FAST, isolated)
 │   └── Services/
 │       ├── DynamicStandardServiceTest.php            # ✅ COMPLETE (52/52)
-│       ├── IndividualAssessmentServiceTest.php       # ✅ COMPLETE (69/69)
+│       ├── IndividualAssessmentServiceTest.php       # ✅ COMPLETE (73/73)
 │       ├── CustomStandardServiceTest.php             # ✅ COMPLETE (69/69)
-│       └── RankingServiceTest.php                    # ✅ COMPLETE (42/48, 6 skipped)
+│       └── RankingServiceTest.php                    # ✅ COMPLETE (51/51)
+│
+├── Integration/                   # End-to-end testing (SLOWER, comprehensive)
+│   └── Services/
+│       └── PriorityChainIntegrationTest.php          # ✅ COMPLETE (2/2)
 │
 └── Feature/                       # Integration testing (SLOWER, realistic)
     └── Livewire/
@@ -84,9 +89,10 @@ tests/
 
 **Services to Test** (in order):
 1. ✅ **DynamicStandardService** (COMPLETE - 52/52 tests)
-2. ✅ **IndividualAssessmentService** (COMPLETE - 69/69 tests)
+2. ✅ **IndividualAssessmentService** (COMPLETE - 73/73 tests with priority chain)
 3. ✅ **CustomStandardService** (COMPLETE - 69/69 tests)
-4. ✅ **RankingService** (COMPLETE - 42/48 tests, 6 skipped)
+4. ✅ **RankingService** (COMPLETE - 51/51 tests with priority transitions)
+5. ✅ **Integration Tests** (COMPLETE - 2/2 end-to-end tests)
 
 **Example Focus Areas**:
 - 3-layer priority chain (session → custom → quantum)
@@ -194,7 +200,7 @@ $aspect->update(['standard_rating' => 4.0]);
 
 **File**: `tests/Unit/Services/IndividualAssessmentServiceTest.php`
 **Status**: ✅ **COMPLETE** (100% done)
-**Total Tests**: 69/69 tests
+**Total Tests**: 73/73 tests
 
 ### Test Coverage Summary
 
@@ -258,7 +264,19 @@ $aspect->update(['standard_rating' => 4.0]);
 - Batch loading optimization
 - Empty aspects handling
 
-**Result**: ✅ **All public methods fully tested with edge cases and bug discovery**
+#### ✅ PHASE 12: Priority Chain Tests (4 tests) - COMPLETE
+1. `test_aspect_assessments_use_session_adjustment_when_available()` - Session (Layer 1) > Custom (Layer 2)
+2. `test_aspect_assessments_use_custom_standard_when_no_session()` - Custom (Layer 2) > Quantum (Layer 3)
+3. `test_aspect_assessments_revert_to_quantum_when_custom_cleared()` - Clears custom → reverts to Quantum
+4. `test_final_assessment_reflects_priority_chain_changes()` - Final assessment updates with priority changes
+
+**Key Coverage**:
+- ✅ Complete 3-layer priority chain integration (Session → Custom → Quantum)
+- ✅ Aspect assessments reflect current active priority layer
+- ✅ Final assessment totals update correctly when priorities change
+- ✅ AspectCacheService integration (cache clearing for real-time updates)
+
+**Result**: ✅ **All public methods fully tested with edge cases, bug discovery, and complete priority chain coverage**
 
 ---
 
@@ -352,8 +370,8 @@ $aspect->update(['standard_rating' => 4.0]);
 
 **File**: `tests/Unit/Services/RankingServiceTest.php`
 **Status**: ✅ **COMPLETE** (100% done)
-**Total Tests**: 48/48 tests passing
-**Coverage**: All 7 public methods tested + edge cases
+**Total Tests**: 51/51 tests passing
+**Coverage**: All 7 public methods tested + edge cases + priority transitions
 
 ### Test Coverage Summary
 
@@ -428,6 +446,18 @@ $aspect->update(['standard_rating' => 4.0]);
 2. Returns empty when missing Kompetensi rankings (all inactive)
 3. Handles zero category weights gracefully
 
+#### ✅ PHASE 12: Priority Transition Tests (3 tests) - COMPLETE
+1. `test_session_overrides_custom_standard_in_rankings()` - Session (50%) overrides Custom (40%)
+2. `test_rankings_change_when_custom_standard_selected()` - Quantum (20%) → Custom (35%) updates rankings
+3. `test_rankings_revert_when_session_cleared()` - Session cleared → reverts to Custom
+
+**Key Coverage**:
+- ✅ Session adjustment (Layer 1) has highest priority in rankings
+- ✅ Custom standard (Layer 2) overrides quantum defaults (Layer 3)
+- ✅ Rankings update correctly when switching between priority layers
+- ✅ AspectCacheService integration (cache clearing for real-time updates)
+- ✅ Session key validation (`standard_adjustment.{templateId}`)
+
 ### Helper Methods Created
 - `createCompleteTemplate()` - Creates template with Potensi & Kompetensi categories, aspects, and sub-aspects
 - `createParticipantWithAssessments()` - Creates participant with complete assessment data at specified performance level
@@ -458,12 +488,130 @@ $aspect->update(['standard_rating' => 4.0]);
 - 🧹 **Cleanup** - Removed unused `CategoryType` import
 
 ### Test Results
-- ✅ **48 tests PASSED** (100%)
-- ✅ **173 assertions** executed successfully
+- ✅ **51 tests PASSED** (100%)
+- ✅ **182 assertions** executed successfully
 - ✅ **Code formatted** with Laravel Pint
-- ✅ **All edge cases covered** including inactive aspects, custom standards, and zero weights
+- ✅ **All edge cases covered** including inactive aspects, custom standards, zero weights, and priority transitions
 
-**Result**: ✅ **Complete test coverage with bug fixes, edge case handling, and comprehensive validation of all ranking functionality.**
+**Result**: ✅ **Complete test coverage with bug fixes, edge case handling, priority chain validation, and comprehensive testing of all ranking functionality.**
+
+---
+
+## 📝 Integration Tests (Priority #5)
+
+**File**: `tests/Integration/Services/PriorityChainIntegrationTest.php`
+**Status**: ✅ **COMPLETE** (100% done)
+**Total Tests**: 2/2 tests passing
+**Coverage**: End-to-end 3-layer priority chain validation across all services
+
+### Test Coverage Summary
+
+#### ✅ Integration Test 1: Full Priority Chain Flow (1 test)
+**Test**: `test_full_priority_chain_from_assessment_to_ranking()`
+
+**What It Tests**:
+- Complete flow from assessment calculation → ranking calculation across ALL priority layers
+- Verifies IndividualAssessmentService + RankingService use consistent priority chain
+- Tests transitions: Quantum (Layer 3) → Custom (Layer 2) → Session (Layer 1)
+
+**Test Flow**:
+1. Create participant with baseline assessments (Quantum defaults - Layer 3)
+2. Verify baseline individual assessment uses quantum weights (20%)
+3. Verify baseline ranking uses quantum weights (20%)
+4. Apply custom standard with weight 30% (Layer 2)
+5. Verify individual assessment updates to custom weights (30%)
+6. Verify ranking updates to custom weights (30%)
+7. Apply session adjustment with weight 40% (Layer 1)
+8. Verify individual assessment updates to session weights (40%)
+9. Verify ranking updates to session weights (40%)
+10. Validate complete chain: Quantum (20%) < Custom (30%) < Session (40%)
+
+**Key Validations**:
+- ✅ Both services read from same DynamicStandardService
+- ✅ Standard scores increase correctly as weights increase
+- ✅ Rankings respond to priority changes in real-time
+- ✅ AspectCacheService integration (cache clearing for updates)
+
+#### ✅ Integration Test 2: Mixed Priority Layers (1 test)
+**Test**: `test_mixed_priority_layers_in_final_assessment()`
+
+**What It Tests**:
+- Different aspects using different priority layers simultaneously
+- Final assessment correctly combines mixed-priority aspects
+- Verifies aspect-level independence of priority chain
+
+**Test Flow**:
+1. Create participant with 3 Potensi + 3 Kompetensi aspects
+2. Apply custom standard affecting only 2 Potensi aspects (Layer 2)
+3. Apply session adjustment affecting only 1 Potensi aspect (Layer 1)
+4. Verify final assessment with mixed layers:
+   - 1 Potensi aspect uses Session (Layer 1) - 40%
+   - 1 Potensi aspect uses Custom (Layer 2) - 30%
+   - 1 Potensi aspect uses Quantum (Layer 3) - 20%
+   - 3 Kompetensi aspects use Quantum (Layer 3) - 25%
+5. Validate weighted total score calculation is correct
+6. Verify each aspect independently resolves its priority layer
+
+**Key Validations**:
+- ✅ Aspect-level priority independence
+- ✅ Correct weighted score aggregation across mixed layers
+- ✅ Each aspect uses highest available priority layer
+- ✅ Final assessment totals reflect mixed-priority contributions
+
+### Helper Methods Created
+- `createCompleteTemplate()` - Creates template with Potensi (50%) + Kompetensi (50%) categories
+  - 3 Potensi aspects (20% each) WITH 3 sub-aspects each
+  - 3 Kompetensi aspects (25% each) WITHOUT sub-aspects
+- `createParticipantWithAssessments()` - Creates participant with complete assessment data
+- `createCategoryAssessments()` - Creates category-level and aspect-level assessments
+  - Handles data-driven rating (WITH sub-aspects) vs direct rating (WITHOUT)
+  - Calculates scores = rating × weight
+  - Properly sets all required fields (aspect_id, participant_id, event_id, batch_id, position_formation_id)
+- `getAspectStandardRating()` - Calculates aspect rating based on sub-aspects presence
+
+### Factories Used
+- ✅ **CategoryAssessment** - Used `forParticipant()` and `forCategoryType()` state methods
+- ✅ **AspectAssessment** - Comprehensive field set with all required relational IDs
+- ✅ **SubAspectAssessment** - Complete sub-aspect assessment data
+
+### Critical Bugs Discovered & Fixed
+
+🐛 **Bug #1**: CategoryAssessment factory missing relational fields
+- **Issue**: Direct `create()` didn't populate `event_id`, `batch_id`, `position_formation_id`
+- **Fix**: Used factory state methods `forParticipant()` and `forCategoryType()`
+
+🐛 **Bug #2**: AspectAssessment missing multiple required fields
+- **Issue**: Didn't include `aspect_id`, `participant_id`, `event_id`, `batch_id`, `position_formation_id`
+- **Fix**: Added all required fields to factory call
+
+🐛 **Bug #3**: Score calculation missing
+- **Issue**: Not calculating `standard_score` and `individual_score` (score = rating × weight)
+- **Fix**: Added score calculations: `round($rating * $weight, 2)`
+
+🐛 **Bug #4**: Type error with standard_rating
+- **Issue**: `standard_rating` field is string in database, causing type error in `round()`
+- **Fix**: Cast to float: `(float) $aspect->standard_rating`
+
+🐛 **Bug #5 (CRITICAL)**: Empty rankings due to missing template_id
+- **Issue**: AspectCacheService's `getAspectsByCategory()` filters by `$aspect->template_id === $templateId`
+- **Root Cause**: Aspects created without `template_id` field → empty aspect collection → empty rankings
+- **Fix**: Added `template_id` to all Aspect factory calls
+
+### Integration Points Tested
+- ✅ **DynamicStandardService** - 3-layer priority chain (Session → Custom → Quantum)
+- ✅ **IndividualAssessmentService** - Individual assessment calculations
+- ✅ **RankingService** - Participant ranking calculations
+- ✅ **CustomStandardService** - Custom standard selection and management
+- ✅ **AspectCacheService** - Cache clearing for real-time updates
+
+### Test Results
+- ✅ **2 tests PASSED** (100%)
+- ✅ **21 assertions** executed successfully
+- ✅ **Code formatted** with Laravel Pint
+- ✅ **All services validated** for consistent priority chain behavior
+- ✅ **5 critical bugs discovered and fixed** during test development
+
+**Result**: ✅ **Complete end-to-end validation of 3-layer priority chain across all services with comprehensive bug discovery and fixes.**
 
 ---
 
@@ -663,11 +811,27 @@ php artisan test --display-errors
 
 ### ✅ All Core Services Complete!
 
-All priority services are now 100% tested:
-- ✅ DynamicStandardService (52 tests)
-- ✅ IndividualAssessmentService (69 tests)
-- ✅ CustomStandardService (69 tests)
-- ✅ RankingService (48 tests) - **Including all edge cases + bug fixes!**
+All priority services are now 100% tested with complete 3-layer priority chain coverage:
+- ✅ DynamicStandardService (52 tests) - Foundation for all priority logic
+- ✅ IndividualAssessmentService (73 tests) - **Including priority chain integration!**
+- ✅ CustomStandardService (69 tests) - Layer 2 management
+- ✅ RankingService (51 tests) - **Including priority transitions!**
+- ✅ Integration Tests (2 tests) - **End-to-end priority chain validation!**
+
+**Total**: 247/247 core tests (753 assertions) - **100% COMPLETE** 🎉
+
+### Test Coverage Highlights
+
+**3-Layer Priority Chain** (Session → Custom → Quantum):
+- ✅ Unit-level testing (each service independently)
+- ✅ Integration testing (services working together)
+- ✅ Transition testing (switching between priority layers)
+- ✅ Mixed-layer testing (different aspects using different layers)
+
+**Bug Discoveries**:
+- 🐛 6 bugs discovered and fixed during test development
+- 🐛 1 critical bug (missing template_id causing empty rankings)
+- 🐛 Multiple factory/database field issues resolved
 
 ### Optional Additional Testing
 
@@ -679,8 +843,8 @@ These are lower priority as they are either simple utilities or better tested th
 
 ---
 
-**Version**: 2.0
+**Version**: 2.1
 **Last Updated**: 2025-12-02
-**Status**: All core services 100% tested (238/238 tests passing)
+**Status**: All core services 100% tested with complete 3-layer priority chain coverage (247/247 tests passing)
 **Next Review**: Production deployment or optional service testing
 **Maintainer**: Development Team

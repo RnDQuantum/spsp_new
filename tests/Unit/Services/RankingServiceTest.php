@@ -31,8 +31,9 @@ use Tests\TestCase;
  * PHASE 6: ⏳ getParticipantCombinedRank() - Single Participant Combined Rank (3 tests)
  * PHASE 7: ⏳ getPassingSummary() - Statistics (3 tests)
  * PHASE 8: ⏳ getConclusionSummary() - Conclusion Breakdown (3 tests)
+ * PHASE 12: ⏳ Three-Layer Priority System Integration (3 tests)
  *
- * TOTAL: 0/48 tests (0% complete)
+ * TOTAL: 0/51 tests (0% complete)
  *
  * @see \App\Services\RankingService
  * @see docs/TESTING_GUIDE.md
@@ -1576,5 +1577,290 @@ class RankingServiceTest extends TestCase
         // Assert: All should have same conclusion
         $total = $summary['Di Atas Standar'] + $summary['Memenuhi Standar'] + $summary['Di Bawah Standar'];
         $this->assertEquals(3, $total);
+    }
+
+    // ========================================
+    // PHASE 12: Three-Layer Priority System Integration (3 tests)
+    // ========================================
+
+    /**
+     * Test that session adjustment (Layer 1) overrides custom standard (Layer 2) in ranking calculations
+     *
+     * Priority Chain:
+     * LAYER 1 (Session) > LAYER 2 (Custom) > LAYER 3 (Quantum)
+     */
+    public function test_session_overrides_custom_standard_in_rankings(): void
+    {
+        // Arrange: Create participant with assessments
+        $participant = $this->createParticipantWithAssessments('Test Session Override', 1.0);
+
+        // Get baseline rankings (quantum defaults)
+        $baselineRankings = $this->service->getRankings(
+            $this->event->id,
+            $this->position->id,
+            $this->template->id,
+            'potensi',
+            0
+        );
+        $baselineRank = $baselineRankings->first();
+
+        // LAYER 2: Create and select custom standard with different weight (40%)
+        $customStandardService = app(\App\Services\CustomStandardService::class);
+        $firstAspect = Aspect::where('category_type_id', $this->potensiCategory->id)
+            ->orderBy('order')
+            ->first();
+
+        $customStandardData = [
+            'institution_id' => $this->event->institution_id,
+            'template_id' => $this->template->id,
+            'code' => 'PRIORITY-TEST-SESSION',
+            'name' => 'Priority Test - Session Override',
+            'description' => 'Test custom standard for priority chain',
+            'category_weights' => [
+                'potensi' => 50,
+                'kompetensi' => 50,
+            ],
+            'aspect_configs' => [
+                $firstAspect->code => [
+                    'weight' => 40,
+                    'active' => true,
+                ],
+            ],
+            'sub_aspect_configs' => [],
+        ];
+
+        $customStandard = $customStandardService->create($customStandardData);
+        $customStandardService->select($this->template->id, $customStandard->id);
+
+        // Get rankings with custom standard
+        $customRankings = $this->service->getRankings(
+            $this->event->id,
+            $this->position->id,
+            $this->template->id,
+            'potensi',
+            0
+        );
+        $customRank = $customRankings->first();
+
+        // LAYER 1: Apply session adjustment with different weight (50%)
+        $dynamicService = app(\App\Services\DynamicStandardService::class);
+        $dynamicService->saveAspectWeight($this->template->id, $firstAspect->code, 50);
+
+        // Get rankings with session adjustment (should override custom)
+        $sessionRankings = $this->service->getRankings(
+            $this->event->id,
+            $this->position->id,
+            $this->template->id,
+            'potensi',
+            0
+        );
+        $sessionRank = $sessionRankings->first();
+
+        // Assert: Rankings should be different between all 3 layers
+        $this->assertNotEquals(
+            $baselineRank['adjusted_standard_score'],
+            $customRank['adjusted_standard_score'],
+            'Custom standard should change standard score from quantum defaults'
+        );
+
+        $this->assertNotEquals(
+            $customRank['adjusted_standard_score'],
+            $sessionRank['adjusted_standard_score'],
+            'Session adjustment should override custom standard'
+        );
+
+        // Assert: Session adjustment should be used (50%), not custom (40%) or quantum (20%)
+        $this->assertGreaterThan(
+            $customRank['adjusted_standard_score'],
+            $sessionRank['adjusted_standard_score'],
+            'Session weight (50%) should produce higher score than custom weight (40%)'
+        );
+
+        // Cleanup
+        \Illuminate\Support\Facades\Session::forget("standard_adjustment.{$this->template->id}");
+        $customStandardService->clearSelection($this->template->id);
+    }
+
+    /**
+     * Test that rankings change when switching from quantum to custom standard
+     *
+     * Priority Chain:
+     * LAYER 3 (Quantum) → LAYER 2 (Custom)
+     */
+    public function test_rankings_change_when_custom_standard_selected(): void
+    {
+        // Arrange: Create multiple participants
+        $participant1 = $this->createParticipantWithAssessments('Participant A', 1.2);
+        $participant2 = $this->createParticipantWithAssessments('Participant B', 1.0);
+        $participant3 = $this->createParticipantWithAssessments('Participant C', 0.8);
+
+        // LAYER 3: Get quantum baseline rankings
+        $quantumRankings = $this->service->getRankings(
+            $this->event->id,
+            $this->position->id,
+            $this->template->id,
+            'potensi',
+            0
+        );
+
+        // LAYER 2: Create custom standard with modified weights
+        $customStandardService = app(\App\Services\CustomStandardService::class);
+        $aspects = Aspect::where('category_type_id', $this->potensiCategory->id)
+            ->orderBy('order')
+            ->get();
+
+        $aspectConfigs = [];
+        foreach ($aspects as $index => $aspect) {
+            // Reverse the weights to potentially change rankings
+            $aspectConfigs[$aspect->code] = [
+                'weight' => $index === 0 ? 60 : 20,  // Give first aspect higher weight
+                'active' => true,
+            ];
+        }
+
+        $customStandardData = [
+            'institution_id' => $this->event->institution_id,
+            'template_id' => $this->template->id,
+            'code' => 'PRIORITY-TEST-CUSTOM',
+            'name' => 'Priority Test - Custom Change',
+            'description' => 'Test custom standard impact on rankings',
+            'category_weights' => [
+                'potensi' => 50,
+                'kompetensi' => 50,
+            ],
+            'aspect_configs' => $aspectConfigs,
+            'sub_aspect_configs' => [],
+        ];
+
+        $customStandard = $customStandardService->create($customStandardData);
+        $customStandardService->select($this->template->id, $customStandard->id);
+
+        // Get custom standard rankings
+        $customRankings = $this->service->getRankings(
+            $this->event->id,
+            $this->position->id,
+            $this->template->id,
+            'potensi',
+            0
+        );
+
+        // Assert: Rankings should be different
+        $this->assertCount(3, $quantumRankings);
+        $this->assertCount(3, $customRankings);
+
+        // Check that at least some scores changed
+        $quantumScores = $quantumRankings->pluck('adjusted_standard_score')->toArray();
+        $customScores = $customRankings->pluck('adjusted_standard_score')->toArray();
+
+        $this->assertNotEquals(
+            $quantumScores,
+            $customScores,
+            'Custom standard should change ranking scores'
+        );
+
+        // Cleanup
+        $customStandardService->clearSelection($this->template->id);
+    }
+
+    /**
+     * Test that rankings revert to custom/quantum when session is cleared
+     *
+     * Priority Chain:
+     * LAYER 1 (Session) → LAYER 2 (Custom) → LAYER 1 cleared → LAYER 2 (Custom)
+     */
+    public function test_rankings_revert_when_session_cleared(): void
+    {
+        // Arrange: Create participant
+        $participant = $this->createParticipantWithAssessments('Test Revert', 1.0);
+
+        // LAYER 2: Create and select custom standard
+        $customStandardService = app(\App\Services\CustomStandardService::class);
+        $firstAspect = Aspect::where('category_type_id', $this->potensiCategory->id)
+            ->orderBy('order')
+            ->first();
+
+        $customStandardData = [
+            'institution_id' => $this->event->institution_id,
+            'template_id' => $this->template->id,
+            'code' => 'PRIORITY-TEST-REVERT',
+            'name' => 'Priority Test - Session Revert',
+            'description' => 'Test session clearing behavior',
+            'category_weights' => [
+                'potensi' => 50,
+                'kompetensi' => 50,
+            ],
+            'aspect_configs' => [
+                $firstAspect->code => [
+                    'weight' => 35,
+                    'active' => true,
+                ],
+            ],
+            'sub_aspect_configs' => [],
+        ];
+
+        $customStandard = $customStandardService->create($customStandardData);
+        $customStandardService->select($this->template->id, $customStandard->id);
+
+        // Get custom standard baseline
+        $customRankings = $this->service->getRankings(
+            $this->event->id,
+            $this->position->id,
+            $this->template->id,
+            'potensi',
+            0
+        );
+        $customRank = $customRankings->first();
+
+        // LAYER 1: Apply session adjustment
+        $dynamicService = app(\App\Services\DynamicStandardService::class);
+        $dynamicService->saveAspectWeight($this->template->id, $firstAspect->code, 55);
+
+        // Get session rankings
+        $sessionRankings = $this->service->getRankings(
+            $this->event->id,
+            $this->position->id,
+            $this->template->id,
+            'potensi',
+            0
+        );
+        $sessionRank = $sessionRankings->first();
+
+        // Clear session (revert to Layer 2)
+        \Illuminate\Support\Facades\Session::forget("standard_adjustment.{$this->template->id}");
+
+        // IMPORTANT: Clear aspect cache to force DynamicStandardService to re-read session
+        \App\Services\Cache\AspectCacheService::clearCache();
+
+        // Get reverted rankings
+        $revertedRankings = $this->service->getRankings(
+            $this->event->id,
+            $this->position->id,
+            $this->template->id,
+            'potensi',
+            0
+        );
+        $revertedRank = $revertedRankings->first();
+
+        // Assert: Reverted rankings should match custom (Layer 2), not session (Layer 1)
+        $this->assertNotEquals(
+            $customRank['adjusted_standard_score'],
+            $sessionRank['adjusted_standard_score'],
+            'Session adjustment should change score from custom standard'
+        );
+
+        $this->assertEquals(
+            $customRank['adjusted_standard_score'],
+            $revertedRank['adjusted_standard_score'],
+            'After clearing session, rankings should revert to custom standard'
+        );
+
+        $this->assertNotEquals(
+            $sessionRank['adjusted_standard_score'],
+            $revertedRank['adjusted_standard_score'],
+            'Reverted rankings should not match session rankings'
+        );
+
+        // Cleanup
+        $customStandardService->clearSelection($this->template->id);
     }
 }

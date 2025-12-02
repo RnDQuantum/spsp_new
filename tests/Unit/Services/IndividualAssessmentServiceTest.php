@@ -33,12 +33,14 @@ use Tests\TestCase;
  * PHASE 9: ✅ getPassingSummary() (DONE - 5/5 tests)
  * PHASE 10: ✅ Matching methods (DONE - 12/12 tests)
  * PHASE 11: ✅ getJobMatchingPercentage() (DONE - 9/9 tests)
+ * PHASE 12: ✅ 3-Layer Priority Integration (DONE - 4/4 tests)
  *
- * TOTAL: 69/69 tests (100% COMPLETE ✅)
+ * TOTAL: 73/73 tests (100% COMPLETE ✅)
  *
  * @see \App\Services\IndividualAssessmentService
  * @see docs/TESTING_STRATEGY.md
  * @see docs/ASSESSMENT_CALCULATION_FLOW.md
+ * @see docs/FLEXIBLE_HIERARCHY_REFACTORING.md
  */
 class IndividualAssessmentServiceTest extends TestCase
 {
@@ -2921,5 +2923,226 @@ class IndividualAssessmentServiceTest extends TestCase
             'aspectAssessment' => $aspectAssessment,
             'subAspects' => [$subAspect1, $subAspect2, $subAspect3],
         ];
+    }
+
+    // ========================================
+    // PHASE 12: 3-LAYER PRIORITY INTEGRATION 🔄
+    // ========================================
+
+    /**
+     * Test: Individual assessment uses session adjustment (Priority Layer 1)
+     *
+     * Validates that when session adjustment is active, IndividualAssessmentService
+     * correctly uses adjusted weights/ratings from DynamicStandardService
+     */
+    public function test_individual_assessment_uses_session_adjustment(): void
+    {
+        // Arrange: Create complete assessment data
+        $testData = $this->createCompleteAssessmentData();
+        $aspect = $testData['aspect'];
+
+        // Get baseline assessment (quantum defaults)
+        $service = app(\App\Services\IndividualAssessmentService::class);
+        $baselineAssessment = $service->getAspectAssessments(
+            $testData['participant']->id,
+            $testData['category']->id,
+            0
+        )->first();
+
+        // Apply session adjustment (increase aspect weight from 20% to 40%)
+        $dynamicService = app(\App\Services\DynamicStandardService::class);
+        $dynamicService->saveAspectWeight($testData['template']->id, $aspect->code, 40);
+
+        // Act: Get assessment with session adjustment active
+        $adjustedAssessment = $service->getAspectAssessments(
+            $testData['participant']->id,
+            $testData['category']->id,
+            0
+        )->first();
+
+        // Assert: Standard score should change (rating × new weight)
+        $this->assertNotEquals(
+            $baselineAssessment['standard_score'],
+            $adjustedAssessment['standard_score'],
+            'Session adjustment should change standard score'
+        );
+
+        // Verify new score uses adjusted weight (40%)
+        $expectedScore = round($adjustedAssessment['standard_rating'] * 40, 2);
+        $this->assertEquals($expectedScore, $adjustedAssessment['standard_score']);
+    }
+
+    /**
+     * Test: Individual assessment uses custom standard (Priority Layer 2)
+     *
+     * Validates that when custom standard is selected, IndividualAssessmentService
+     * correctly uses custom weights/ratings instead of quantum defaults
+     */
+    public function test_individual_assessment_uses_custom_standard(): void
+    {
+        // Arrange: Create complete assessment data
+        $testData = $this->createCompleteAssessmentData();
+        $aspect = $testData['aspect'];
+
+        // Get baseline assessment (quantum defaults)
+        $service = app(\App\Services\IndividualAssessmentService::class);
+        $baselineAssessment = $service->getAspectAssessments(
+            $testData['participant']->id,
+            $testData['category']->id,
+            0
+        )->first();
+
+        // Create and select custom standard with different weight (35%)
+        $customStandardService = app(\App\Services\CustomStandardService::class);
+        $customStandardData = [
+            'institution_id' => $testData['institution']->id,
+            'template_id' => $testData['template']->id,
+            'code' => 'CUSTOM-PRIORITY-TEST',
+            'name' => 'Custom Standard Priority Test',
+            'description' => 'Testing Layer 2 priority',
+            'category_weights' => [
+                'potensi' => 50,
+                'kompetensi' => 50,
+            ],
+            'aspect_configs' => [
+                $aspect->code => [
+                    'weight' => 35, // Different from quantum (20%)
+                    'active' => true,
+                ],
+            ],
+            'sub_aspect_configs' => [],
+        ];
+
+        $customStandard = $customStandardService->create($customStandardData);
+        $customStandardService->select($testData['template']->id, $customStandard->id);
+
+        // Act: Get assessment with custom standard selected
+        $customAssessment = $service->getAspectAssessments(
+            $testData['participant']->id,
+            $testData['category']->id,
+            0
+        )->first();
+
+        // Assert: Standard score should change (rating × custom weight)
+        $this->assertNotEquals(
+            $baselineAssessment['standard_score'],
+            $customAssessment['standard_score'],
+            'Custom standard should change standard score'
+        );
+
+        // Verify new score uses custom weight (35%)
+        $expectedScore = round($customAssessment['standard_rating'] * 35, 2);
+        $this->assertEquals($expectedScore, $customAssessment['standard_score']);
+
+        // Cleanup
+        $customStandardService->clearSelection($testData['template']->id);
+    }
+
+    /**
+     * Test: Session overrides custom in individual assessment (Priority Layer 1 > 2)
+     *
+     * Validates that session adjustment (Layer 1) takes priority over custom standard (Layer 2)
+     * when both are active
+     */
+    public function test_session_overrides_custom_in_individual_assessment(): void
+    {
+        // Arrange: Create complete assessment data
+        $testData = $this->createCompleteAssessmentData();
+        $aspect = $testData['aspect'];
+
+        // Create and select custom standard with weight 35%
+        $customStandardService = app(\App\Services\CustomStandardService::class);
+        $customStandardData = [
+            'institution_id' => $testData['institution']->id,
+            'template_id' => $testData['template']->id,
+            'code' => 'CUSTOM-OVERRIDE-TEST',
+            'name' => 'Custom Standard Override Test',
+            'description' => 'Testing Layer 1 > Layer 2 priority',
+            'category_weights' => [
+                'potensi' => 50,
+                'kompetensi' => 50,
+            ],
+            'aspect_configs' => [
+                $aspect->code => [
+                    'weight' => 35,
+                    'active' => true,
+                ],
+            ],
+            'sub_aspect_configs' => [],
+        ];
+
+        $customStandard = $customStandardService->create($customStandardData);
+        $customStandardService->select($testData['template']->id, $customStandard->id);
+
+        // Get assessment with custom standard (weight = 35%)
+        $service = app(\App\Services\IndividualAssessmentService::class);
+        $customAssessment = $service->getAspectAssessments(
+            $testData['participant']->id,
+            $testData['category']->id,
+            0
+        )->first();
+
+        // Apply session adjustment (weight = 45%)
+        $dynamicService = app(\App\Services\DynamicStandardService::class);
+        $dynamicService->saveAspectWeight($testData['template']->id, $aspect->code, 45);
+
+        // Act: Get assessment with both custom (35%) and session (45%) active
+        $sessionAssessment = $service->getAspectAssessments(
+            $testData['participant']->id,
+            $testData['category']->id,
+            0
+        )->first();
+
+        // Assert: Should use session weight (45%), NOT custom weight (35%)
+        $this->assertNotEquals(
+            $customAssessment['standard_score'],
+            $sessionAssessment['standard_score'],
+            'Session should override custom standard'
+        );
+
+        // Verify uses session weight (45%), not custom weight (35%)
+        $expectedSessionScore = round($sessionAssessment['standard_rating'] * 45, 2);
+        $this->assertEquals($expectedSessionScore, $sessionAssessment['standard_score']);
+
+        // Cleanup
+        $customStandardService->clearSelection($testData['template']->id);
+    }
+
+    /**
+     * Test: Assessment falls back to quantum defaults (Priority Layer 3)
+     *
+     * Validates that when no session adjustment and no custom standard,
+     * IndividualAssessmentService uses quantum defaults from database
+     */
+    public function test_assessment_falls_back_to_quantum_defaults(): void
+    {
+        // Arrange: Create complete assessment data
+        $testData = $this->createCompleteAssessmentData();
+        $aspect = $testData['aspect'];
+
+        // Ensure no session adjustments (clear session key)
+        \Illuminate\Support\Facades\Session::forget("dynamic_standard.{$testData['template']->id}");
+
+        // Ensure no custom standard selected (clear custom standard session)
+        \Illuminate\Support\Facades\Session::forget("selected_standard.{$testData['template']->id}");
+
+        // Act: Get assessment (should use quantum defaults)
+        $service = app(\App\Services\IndividualAssessmentService::class);
+        $quantumAssessment = $service->getAspectAssessments(
+            $testData['participant']->id,
+            $testData['category']->id,
+            0
+        )->first();
+
+        // Assert: Should use quantum weight from database (aspect->weight_percentage)
+        $expectedScore = round($quantumAssessment['standard_rating'] * $aspect->weight_percentage, 2);
+        $this->assertEquals(
+            $expectedScore,
+            $quantumAssessment['standard_score'],
+            'Should use quantum weight when no adjustments'
+        );
+
+        // Verify aspect weight is quantum default (20%)
+        $this->assertEquals(20, $aspect->weight_percentage);
     }
 }
