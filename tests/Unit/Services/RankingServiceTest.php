@@ -379,8 +379,6 @@ class RankingServiceTest extends TestCase
 
     public function test_returns_empty_collection_when_no_active_aspects(): void
     {
-        $this->markTestSkipped('TODO: Bug in RankingService/DynamicStandardService - need to investigate why inactive aspects still return results');
-
         // Arrange: Create participant
         $this->createParticipantWithAssessments('Test Participant');
 
@@ -1097,12 +1095,75 @@ class RankingServiceTest extends TestCase
 
     public function test_uses_custom_standard_when_selected(): void
     {
-        $this->markTestSkipped('Custom standard selection not implemented in test setup');
+        // Arrange: Create custom standard with different weights
+        $customStandardService = app(\App\Services\CustomStandardService::class);
+
+        // Create custom standard data with different aspect weight
+        $firstAspect = Aspect::where('category_type_id', $this->potensiCategory->id)
+            ->orderBy('order')
+            ->first();
+
+        $customStandardData = [
+            'institution_id' => $this->event->institution_id,
+            'template_id' => $this->template->id,
+            'code' => 'CUSTOM-TEST-001',
+            'name' => 'Test Custom Standard',
+            'description' => 'Test custom standard for unit testing',
+            'category_weights' => [
+                'potensi' => 50,
+                'kompetensi' => 50,
+            ],
+            'aspect_configs' => [
+                $firstAspect->code => [
+                    'weight' => $firstAspect->weight_percentage + 10, // Different weight
+                    'active' => true,
+                ],
+            ],
+            'sub_aspect_configs' => [],
+        ];
+
+        // Create and select custom standard
+        $customStandard = $customStandardService->create($customStandardData);
+        $customStandardService->select($this->template->id, $customStandard->id);
+
+        $aspectIds = $this->getActiveAspectIds('potensi');
+
+        // Act
+        $standards = $this->service->calculateAdjustedStandards(
+            $this->template->id,
+            'potensi',
+            $aspectIds
+        );
+
+        // Assert: Should use custom standard values
+        $this->assertGreaterThan(0, $standards['standard_score']);
+
+        // Cleanup: Clear custom standard selection
+        $customStandardService->clearSelection($this->template->id);
     }
 
     public function test_returns_zero_when_all_aspects_inactive(): void
     {
-        $this->markTestSkipped('Related to skipped test_returns_empty_collection_when_no_active_aspects');
+        // Arrange: Mark all Potensi aspects as inactive
+        $potensiAspects = Aspect::where('category_type_id', $this->potensiCategory->id)->get();
+        $adjustments = [];
+        foreach ($potensiAspects as $aspect) {
+            $adjustments[$aspect->code] = ['active' => false];
+        }
+        $this->setSessionAdjustments($adjustments);
+
+        $aspectIds = $this->getActiveAspectIds('potensi');
+
+        // Act: Calculate standards with all inactive aspects
+        $standards = $this->service->calculateAdjustedStandards(
+            $this->template->id,
+            'potensi',
+            $aspectIds // Should be empty array
+        );
+
+        // Assert: Should return zero values
+        $this->assertEquals(0.0, $standards['standard_rating']);
+        $this->assertEquals(0.0, $standards['standard_score']);
     }
 
     // ========================================
@@ -1172,12 +1233,52 @@ class RankingServiceTest extends TestCase
 
     public function test_returns_empty_when_missing_potensi_rankings(): void
     {
-        $this->markTestSkipped('Complex scenario - would need to delete all Potensi aspects');
+        // Arrange: Create participant and mark all Potensi aspects as inactive
+        $this->createParticipantWithAssessments('Test Participant');
+
+        $potensiAspects = Aspect::where('category_type_id', $this->potensiCategory->id)->get();
+        $adjustments = [];
+        foreach ($potensiAspects as $aspect) {
+            $adjustments[$aspect->code] = ['active' => false];
+        }
+        $this->setSessionAdjustments($adjustments);
+
+        // Act: Try to get combined rankings without Potensi data
+        $rankings = $this->service->getCombinedRankings(
+            $this->event->id,
+            $this->position->id,
+            $this->template->id,
+            10
+        );
+
+        // Assert: Should return empty collection
+        $this->assertInstanceOf(\Illuminate\Support\Collection::class, $rankings);
+        $this->assertCount(0, $rankings);
     }
 
     public function test_returns_empty_when_missing_kompetensi_rankings(): void
     {
-        $this->markTestSkipped('Complex scenario - would need to delete all Kompetensi aspects');
+        // Arrange: Create participant and mark all Kompetensi aspects as inactive
+        $this->createParticipantWithAssessments('Test Participant');
+
+        $kompetensiAspects = Aspect::where('category_type_id', $this->kompetensiCategory->id)->get();
+        $adjustments = [];
+        foreach ($kompetensiAspects as $aspect) {
+            $adjustments[$aspect->code] = ['active' => false];
+        }
+        $this->setSessionAdjustments($adjustments);
+
+        // Act: Try to get combined rankings without Kompetensi data
+        $rankings = $this->service->getCombinedRankings(
+            $this->event->id,
+            $this->position->id,
+            $this->template->id,
+            10
+        );
+
+        // Assert: Should return empty collection
+        $this->assertInstanceOf(\Illuminate\Support\Collection::class, $rankings);
+        $this->assertCount(0, $rankings);
     }
 
     public function test_combined_rankings_include_all_required_keys(): void
@@ -1241,7 +1342,35 @@ class RankingServiceTest extends TestCase
 
     public function test_handles_zero_category_weights(): void
     {
-        $this->markTestSkipped('Would need to modify category weights to 0 - edge case');
+        // Arrange: Create participant and set Potensi category weight to 0
+        $this->createParticipantWithAssessments('Test Participant');
+
+        // Set category weights via session (Potensi = 0, Kompetensi = 100)
+        $standardService = app(\App\Services\DynamicStandardService::class);
+        $standardService->saveBothCategoryWeights(
+            $this->template->id,
+            'potensi',
+            0,
+            'kompetensi',
+            100
+        );
+
+        // Act: Get combined rankings with zero Potensi weight
+        $rankings = $this->service->getCombinedRankings(
+            $this->event->id,
+            $this->position->id,
+            $this->template->id,
+            10
+        );
+
+        // Assert: Should handle gracefully
+        $this->assertInstanceOf(\Illuminate\Support\Collection::class, $rankings);
+        $this->assertGreaterThan(0, $rankings->count());
+
+        // Check that weights are reflected correctly
+        $ranking = $rankings->first();
+        $this->assertEquals(0, $ranking['potensi_weight']);
+        $this->assertEquals(100, $ranking['kompetensi_weight']);
     }
 
     // ========================================

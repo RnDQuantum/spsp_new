@@ -6,7 +6,6 @@ namespace App\Services;
 
 use App\Models\Aspect;
 use App\Models\AspectAssessment;
-use App\Models\CategoryType;
 use Illuminate\Support\Collection;
 
 /**
@@ -285,46 +284,6 @@ class RankingService
     }
 
     /**
-     * Calculate original standard values from database (no adjustments)
-     *
-     * @param  array  $aspectIds  Array of aspect IDs
-     * @return array Array with keys: standard_rating, standard_score
-     */
-    private function calculateOriginalStandards(array $aspectIds): array
-    {
-        $aspects = Aspect::whereIn('id', $aspectIds)
-            ->with('subAspects')
-            ->orderBy('order')
-            ->get();
-
-        $totalRating = 0;
-        $totalScore = 0;
-
-        foreach ($aspects as $aspect) {
-            // For Potensi, calculate rating from sub-aspects
-            if ($aspect->subAspects && $aspect->subAspects->count() > 0) {
-                $subAspectRatingSum = 0;
-                foreach ($aspect->subAspects as $subAspect) {
-                    $subAspectRatingSum += $subAspect->standard_rating;
-                }
-                $aspectRating = round($subAspectRatingSum / $aspect->subAspects->count(), 2);
-            } else {
-                // For Kompetensi, use direct rating
-                $aspectRating = (float) $aspect->standard_rating;
-            }
-
-            $totalRating += $aspectRating;
-            $aspectScore = round($aspectRating * $aspect->weight_percentage, 2);
-            $totalScore += $aspectScore;
-        }
-
-        return [
-            'standard_rating' => round($totalRating, 2),
-            'standard_score' => round($totalScore, 2),
-        ];
-    }
-
-    /**
      * Calculate aspect rating from active sub-aspects (DATA-DRIVEN)
      *
      * @param  \App\Models\Aspect  $aspect  Aspect model
@@ -417,26 +376,9 @@ class RankingService
     {
         $standardService = app(DynamicStandardService::class);
 
-        // Get active aspect IDs from DynamicStandardService
-        $activeAspectIds = $standardService->getActiveAspectIds($templateId, $categoryCode);
-
-        // Fallback to all IDs if no adjustments (performance optimization)
-        if (empty($activeAspectIds)) {
-            $category = CategoryType::where('template_id', $templateId)
-                ->where('code', $categoryCode)
-                ->first();
-
-            if (! $category) {
-                return [];
-            }
-
-            $activeAspectIds = Aspect::where('category_type_id', $category->id)
-                ->orderBy('order')
-                ->pluck('id')
-                ->toArray();
-        }
-
-        return $activeAspectIds;
+        // Get active aspect IDs from DynamicStandardService (3-layer priority)
+        // Will return empty array if all aspects are inactive
+        return $standardService->getActiveAspectIds($templateId, $categoryCode);
     }
 
     /**
