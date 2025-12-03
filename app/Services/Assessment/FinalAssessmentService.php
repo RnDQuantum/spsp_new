@@ -8,6 +8,7 @@ use App\Models\CategoryAssessment;
 use App\Models\CategoryType;
 use App\Models\FinalAssessment;
 use App\Models\Participant;
+use App\Services\Cache\AspectCacheService;
 use App\Services\DynamicStandardService;
 
 class FinalAssessmentService
@@ -25,14 +26,22 @@ class FinalAssessmentService
         $participant->loadMissing('positionFormation.template');
         $templateId = $participant->positionFormation->template_id;
 
-        // 1. Get category types from template (DYNAMIC - template from position, not event!)
-        $potensiCategory = CategoryType::where('template_id', $templateId)
-            ->where('code', 'potensi')
-            ->firstOrFail();
+        // 1. ⚡ Get category types from cache first, then database
+        $potensiCategory = AspectCacheService::getCategoryByCode($templateId, 'potensi');
+        $kompetensiCategory = AspectCacheService::getCategoryByCode($templateId, 'kompetensi');
 
-        $kompetensiCategory = CategoryType::where('template_id', $templateId)
-            ->where('code', 'kompetensi')
-            ->firstOrFail();
+        // Fallback to database if not in cache
+        if (! $potensiCategory) {
+            $potensiCategory = CategoryType::where('template_id', $templateId)
+                ->where('code', 'potensi')
+                ->firstOrFail();
+        }
+
+        if (! $kompetensiCategory) {
+            $kompetensiCategory = CategoryType::where('template_id', $templateId)
+                ->where('code', 'kompetensi')
+                ->firstOrFail();
+        }
 
         // 2. Get category assessments
         $potensiAssessment = CategoryAssessment::where('participant_id', $participant->id)

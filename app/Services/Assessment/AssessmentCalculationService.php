@@ -32,14 +32,25 @@ class AssessmentCalculationService
     public function calculateParticipant(Participant $participant, array $assessmentsData): void
     {
         DB::transaction(function () use ($participant, $assessmentsData) {
-            // ✅ UNIFIED: Process all categories (works for any category code)
-            foreach ($assessmentsData as $categoryCode => $categoryData) {
-                $this->processCategory($participant, $categoryCode, $categoryData);
-            }
-
-            // Calculate Final Assessment (weighted combination of all categories)
-            $this->finalAssessmentService->calculateFinal($participant);
+            $this->calculateParticipantWithoutTransaction($participant, $assessmentsData);
         });
+    }
+
+    /**
+     * Calculate participant without wrapping in transaction
+     * Use this when already inside a transaction (e.g., seeding)
+     *
+     * @param  array  $assessmentsData  Data from API grouped by category code
+     */
+    public function calculateParticipantWithoutTransaction(Participant $participant, array $assessmentsData): void
+    {
+        // ✅ UNIFIED: Process all categories (works for any category code)
+        foreach ($assessmentsData as $categoryCode => $categoryData) {
+            $this->processCategory($participant, $categoryCode, $categoryData);
+        }
+
+        // Calculate Final Assessment (weighted combination of all categories)
+        $this->finalAssessmentService->calculateFinal($participant);
     }
 
     /**
@@ -113,18 +124,19 @@ class AssessmentCalculationService
             );
 
             // DATA-DRIVEN: Check if aspect has sub-aspects in the data
+            $subAssessments = null;
             if (isset($aspectData['sub_aspects']) && ! empty($aspectData['sub_aspects'])) {
-                // Process sub-aspects (store raw data from API)
-                $this->subAspectService->storeMultipleSubAspects(
+                // ⚡ Process sub-aspects and get created assessments (avoid re-query)
+                $subAssessments = $this->subAspectService->storeMultipleSubAspects(
                     $aspectAssessment,
                     $aspectData['sub_aspects']
                 );
             }
 
-            // 3. Calculate aspect (service will determine if from sub-aspects or direct)
+            // 3. ⚡ Calculate aspect (pass sub-assessments to avoid query)
             // Pass individual_rating if exists (for aspects without sub-aspects)
             $individualRating = $aspectData['individual_rating'] ?? null;
-            $this->aspectService->calculateAspect($aspectAssessment, $individualRating);
+            $this->aspectService->calculateAspect($aspectAssessment, $individualRating, $subAssessments);
         }
 
         // 4. Calculate category total (SUM from aspects)

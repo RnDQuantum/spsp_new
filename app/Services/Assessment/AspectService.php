@@ -8,6 +8,7 @@ use App\Models\Aspect;
 use App\Models\AspectAssessment;
 use App\Models\CategoryAssessment;
 use App\Models\SubAspectAssessment;
+use App\Services\Cache\AspectCacheService;
 use App\Services\DynamicStandardService;
 
 class AspectService
@@ -28,26 +29,37 @@ class AspectService
      * - Save to database
      *
      * @param  float|int|null  $individualRating  From API for aspects without sub-aspects
+     * @param  \Illuminate\Support\Collection|null  $subAssessments  Pre-loaded sub-assessments (for performance)
      */
-    public function calculateAspect(AspectAssessment $aspectAssessment, $individualRating = null): void
+    public function calculateAspect(AspectAssessment $aspectAssessment, $individualRating = null, $subAssessments = null): void
     {
-        // 1. Get aspect from master
-        $aspect = Aspect::with('subAspects')->findOrFail($aspectAssessment->aspect_id);
+        // 1. ⚡ Get aspect from cache first, then database
+        $aspect = AspectCacheService::getById($aspectAssessment->aspect_id);
+
+        if (! $aspect) {
+            $aspect = Aspect::with('subAspects')->findOrFail($aspectAssessment->aspect_id);
+        }
+
         $templateId = $aspect->template_id;
 
         // 2. Get adjusted weight from DynamicStandardService
         $weight = $this->dynamicStandardService->getAspectWeight($templateId, $aspect->code);
 
-        // 3. DATA-DRIVEN: Determine rating source
-        $subAssessments = SubAspectAssessment::where(
-            'aspect_assessment_id',
-            $aspectAssessment->id
-        )->get();
+        // 3. ⚡ DATA-DRIVEN: Determine rating source (use passed sub-assessments if available)
+        if ($subAssessments === null) {
+            $subAssessments = SubAspectAssessment::where(
+                'aspect_assessment_id',
+                $aspectAssessment->id
+            )->get();
+        }
 
         if ($subAssessments->isNotEmpty()) {
             // Has sub-aspect assessments: calculate ratings from them
+            // ⚡ Note: subAspect relationship should be already loaded from storeSubAspectAssessment
+
             // Filter only ACTIVE sub-aspects based on session
             $activeSubAssessments = $subAssessments->filter(function ($subAssessment) use ($templateId) {
+                // Access subAspect relationship (already loaded, no query)
                 $subAspect = $subAssessment->subAspect;
 
                 return $this->dynamicStandardService->isSubAspectActive($templateId, $subAspect->code);
@@ -104,11 +116,22 @@ class AspectService
         CategoryAssessment $categoryAssessment,
         string $aspectCode
     ): AspectAssessment {
-        // 1. Find aspect from master
-        $aspect = Aspect::where('category_type_id', $categoryAssessment->category_type_id)
-            ->where('code', $aspectCode)
-            ->with('subAspects') // Eager load to check structure
-            ->firstOrFail();
+        // 1. ⚡ Find aspect from cache first, then database
+        $categoryType = AspectCacheService::getCategoryById($categoryAssessment->category_type_id);
+        $templateId = $categoryType?->template_id;
+
+        $aspect = null;
+        if ($templateId) {
+            $aspect = AspectCacheService::getByCode($templateId, $aspectCode);
+        }
+
+        // Fallback to database if not in cache
+        if (! $aspect) {
+            $aspect = Aspect::where('category_type_id', $categoryAssessment->category_type_id)
+                ->where('code', $aspectCode)
+                ->with('subAspects')
+                ->firstOrFail();
+        }
 
         // 2. ✅ DATA-DRIVEN: Determine standard_rating based on actual structure
         if ($aspect->subAspects->isNotEmpty()) {

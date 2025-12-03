@@ -9,6 +9,7 @@ use App\Models\AspectAssessment;
 use App\Models\CategoryAssessment;
 use App\Models\CategoryType;
 use App\Models\Participant;
+use App\Services\Cache\AspectCacheService;
 use App\Services\DynamicStandardService;
 
 class CategoryService
@@ -80,11 +81,18 @@ class CategoryService
         Participant $participant,
         string $categoryCode
     ): CategoryAssessment {
-        // 1. Find category type from master (template is from position, not event!)
+        // 1. ⚡ Find category type from cache first, then database
         $participant->loadMissing('positionFormation.template');
-        $categoryType = CategoryType::where('template_id', $participant->positionFormation->template_id)
-            ->where('code', $categoryCode)
-            ->firstOrFail();
+        $templateId = $participant->positionFormation->template_id;
+
+        $categoryType = AspectCacheService::getCategoryByCode($templateId, $categoryCode);
+
+        // Fallback to database if not in cache
+        if (! $categoryType) {
+            $categoryType = CategoryType::where('template_id', $templateId)
+                ->where('code', $categoryCode)
+                ->firstOrFail();
+        }
 
         // 2. Create category assessment (values will be calculated later)
         return CategoryAssessment::updateOrCreate(

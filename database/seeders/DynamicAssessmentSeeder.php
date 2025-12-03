@@ -15,6 +15,7 @@ use App\Models\Participant;
 use App\Models\PositionFormation;
 use App\Models\PsychologicalTest;
 use App\Services\Assessment\AssessmentCalculationService;
+use App\Services\Cache\AspectCacheService;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -44,7 +45,7 @@ class DynamicAssessmentSeeder extends Seeder
                 ],
                 'batches' => [['code' => 'BATCH-1-MOJOKERTO', 'name' => 'Gelombang 1 - Mojokerto', 'location' => 'Mojokerto', 'batch_number' => 1, 'start_date' => '2025-09-27', 'end_date' => '2025-09-28'], ['code' => 'BATCH-2-SURABAYA', 'name' => 'Gelombang 2 - Surabaya', 'location' => 'Surabaya', 'batch_number' => 2, 'start_date' => '2025-10-15', 'end_date' => '2025-10-16'], ['code' => 'BATCH-3-JAKARTA', 'name' => 'Gelombang 3 - Jakarta', 'location' => 'Jakarta', 'batch_number' => 3, 'start_date' => '2025-11-05', 'end_date' => '2025-11-06']],
                 'positions' => [['code' => 'fisikawan_medis', 'name' => 'Fisikawan Medis', 'quota' => 20, 'template_code' => 'professional_standard_v1'], ['code' => 'analis_kebijakan', 'name' => 'Analis Kebijakan', 'quota' => 30, 'template_code' => 'staff_standard_v1'], ['code' => 'auditor', 'name' => 'Auditor', 'quota' => 25, 'template_code' => 'supervisor_standard_v1'], ['code' => 'pranata_komputer', 'name' => 'Pranata Komputer', 'quota' => 25, 'template_code' => 'staff_standard_v1']],
-                'participants_count' => 200, // JUMLAH PESERTA
+                'participants_count' => 20000, // JUMLAH PESERTA
                 'performance_distribution' => [
                     'high' => 25, // 25% high performers (exceed standard)
                     'medium' => 60, // 60% medium performers (around standard)
@@ -66,7 +67,7 @@ class DynamicAssessmentSeeder extends Seeder
                 ],
                 'batches' => [['code' => 'BATCH-1-BANDUNG', 'name' => 'Gelombang 1 - Bandung', 'location' => 'Bandung', 'batch_number' => 1, 'start_date' => '2025-10-10', 'end_date' => '2025-10-11'], ['code' => 'BATCH-2-YOGYAKARTA', 'name' => 'Gelombang 2 - Yogyakarta', 'location' => 'Yogyakarta', 'batch_number' => 2, 'start_date' => '2025-11-10', 'end_date' => '2025-11-11']],
                 'positions' => [['code' => 'dokter_umum', 'name' => 'Dokter Umum', 'quota' => 50, 'template_code' => 'professional_standard_v1'], ['code' => 'perawat', 'name' => 'Perawat', 'quota' => 100, 'template_code' => 'staff_standard_v1'], ['code' => 'apoteker', 'name' => 'Apoteker', 'quota' => 50, 'template_code' => 'supervisor_standard_v1']],
-                'participants_count' => 150, // JUMLAH PESERTA
+                'participants_count' => 15000, // JUMLAH PESERTA
                 'performance_distribution' => [
                     'high' => 20, // 25% high performers (exceed standard)
                     'medium' => 10, // 60% medium performers (around standard)
@@ -121,7 +122,7 @@ class DynamicAssessmentSeeder extends Seeder
                     ...$batchData,
                 ]);
             }
-            $this->info('  📦 Batches created: ' . count($batches));
+            $this->info('  📦 Batches created: '.count($batches));
 
             // 4. Create positions with their templates
             $positions = [];
@@ -140,7 +141,28 @@ class DynamicAssessmentSeeder extends Seeder
                 $position->load('template');
                 $positions[] = $position;
             }
-            $this->info('  💼 Positions created: ' . count($positions));
+            $this->info('  💼 Positions created: '.count($positions));
+
+            // ⚡ CACHE: Pre-load all templates' categories & aspects once
+            $templateIds = collect($positions)->pluck('template_id')->unique()->values();
+
+            // Preload AspectCacheService for all templates
+            foreach ($templateIds as $templateId) {
+                AspectCacheService::preloadByTemplate($templateId);
+            }
+
+            $categoriesCache = CategoryType::whereIn('template_id', $templateIds)
+                ->get()
+                ->groupBy('template_id');
+
+            $aspectsCache = Aspect::whereHas('categoryType', function ($query) use ($templateIds) {
+                $query->whereIn('template_id', $templateIds);
+            })
+                ->with('subAspects')
+                ->get()
+                ->groupBy('category_type_id');
+
+            $this->info('  🚀 Cached categories & aspects for performance');
 
             // 5. Generate participants with calculated assessments
             $this->info("  👥 Creating {$config['participants_count']} participants...");
@@ -148,15 +170,15 @@ class DynamicAssessmentSeeder extends Seeder
             $progressBar = $this->command->getOutput()->createProgressBar($config['participants_count']);
             $progressBar->start();
 
-            // Process in smaller chunks for better memory management
-            $chunkSize = 100;
+            // ⚡ OPTIMIZATION: Process in larger chunks with periodic transaction commits
+            $chunkSize = 50; // Reduced chunk size for faster commits
             $totalChunks = (int) ceil($config['participants_count'] / $chunkSize);
 
             for ($chunk = 0; $chunk < $totalChunks; $chunk++) {
                 $currentChunkSize = min($chunkSize, $config['participants_count'] - ($chunk * $chunkSize));
 
-                // Create participants in nested transaction for better performance
-                DB::transaction(function () use ($currentChunkSize, $batches, $positions, $event, $config, $progressBar) {
+                // ⚡ Use separate transaction per chunk to avoid memory buildup
+                DB::transaction(function () use ($currentChunkSize, $batches, $positions, $event, $config, $progressBar, $categoriesCache, $aspectsCache) {
                     for ($i = 0; $i < $currentChunkSize; $i++) {
                         // Determine performance level based on distribution
                         $performanceLevel = $this->determinePerformanceLevel($config['performance_distribution']);
@@ -171,16 +193,16 @@ class DynamicAssessmentSeeder extends Seeder
                         // Get template from position (not from event!)
                         $template = $position->template;
 
-                        // Get category types from position's template (cache these if possible)
-                        $potensiCategory = CategoryType::where('template_id', $template->id)->where('code', 'potensi')->firstOrFail();
-
-                        $kompetensiCategory = CategoryType::where('template_id', $template->id)->where('code', 'kompetensi')->firstOrFail();
+                        // ⚡ Get categories from cache instead of query
+                        $categories = $categoriesCache->get($template->id);
+                        $potensiCategory = $categories->firstWhere('code', 'potensi');
+                        $kompetensiCategory = $categories->firstWhere('code', 'kompetensi');
 
                         // Generate assessment data (RAW DATA like API)
-                        $assessmentsData = $this->generateAssessmentsData($template, $potensiCategory, $kompetensiCategory, $performanceLevel);
+                        $assessmentsData = $this->generateAssessmentsData($template, $potensiCategory, $kompetensiCategory, $performanceLevel, $aspectsCache);
 
-                        // Calculate assessments using SERVICE
-                        $this->assessmentService->calculateParticipant($participant, $assessmentsData);
+                        // ⚡ Calculate assessments using SERVICE (without nested transaction)
+                        $this->assessmentService->calculateParticipantWithoutTransaction($participant, $assessmentsData);
 
                         // Create psychological test
                         $psychTestFactory = PsychologicalTest::factory()->forParticipant($participant);
@@ -199,6 +221,11 @@ class DynamicAssessmentSeeder extends Seeder
                         $progressBar->advance();
                     }
                 });
+
+                // ⚡ CRITICAL: Clear entity manager cache every chunk to prevent memory leak
+                if ($chunk % 10 === 0) {
+                    gc_collect_cycles(); // Force garbage collection
+                }
             }
 
             $progressBar->finish();
@@ -209,7 +236,7 @@ class DynamicAssessmentSeeder extends Seeder
     /**
      * Generate assessments data (RAW DATA like from API)
      */
-    private function generateAssessmentsData(AssessmentTemplate $template, CategoryType $potensiCategory, CategoryType $kompetensiCategory, string $performanceLevel): array
+    private function generateAssessmentsData(AssessmentTemplate $template, CategoryType $potensiCategory, CategoryType $kompetensiCategory, string $performanceLevel, $aspectsCache): array
     {
         // Base performance multiplier range by level
         [$minMultiplier, $maxMultiplier] = match ($performanceLevel) {
@@ -223,8 +250,8 @@ class DynamicAssessmentSeeder extends Seeder
             'kompetensi' => [],
         ];
 
-        // POTENSI: Generate sub-aspect ratings (API sends INTEGER 1-5)
-        $potensiAspects = Aspect::where('category_type_id', $potensiCategory->id)->with('subAspects')->orderBy('order')->get();
+        // ⚡ POTENSI: Get aspects from cache
+        $potensiAspects = $aspectsCache->get($potensiCategory->id)?->sortBy('order') ?? collect();
 
         foreach ($potensiAspects as $aspect) {
             $subAspectsData = [];
@@ -249,8 +276,8 @@ class DynamicAssessmentSeeder extends Seeder
             ];
         }
 
-        // KOMPETENSI: Generate aspect ratings (API sends INTEGER 1-5)
-        $kompetensiAspects = Aspect::where('category_type_id', $kompetensiCategory->id)->orderBy('order')->get();
+        // ⚡ KOMPETENSI: Get aspects from cache
+        $kompetensiAspects = $aspectsCache->get($kompetensiCategory->id)?->sortBy('order') ?? collect();
 
         foreach ($kompetensiAspects as $aspect) {
             // Add random variation per aspect (±0.3 variance)
