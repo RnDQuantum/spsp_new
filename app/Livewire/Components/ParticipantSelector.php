@@ -10,10 +10,21 @@ class ParticipantSelector extends Component
 {
     public ?int $participantId = null;
 
+    public string $search = '';
+
     /** @var array<int, array{id: int, test_number: string, name: string}> */
     public array $availableParticipants = [];
 
     public bool $showLabel = true;
+
+    public int $page = 1;
+
+    public bool $hasMorePages = false;
+
+    /**
+     * Number of results per page for infinite scroll
+     */
+    private const PER_PAGE = 50;
 
     /**
      * Listen to event and position selection changes
@@ -33,8 +44,50 @@ class ParticipantSelector extends Component
             $this->showLabel = $showLabel;
         }
 
-        // Load participants based on session event code and position
+        // Don't auto-load participants on mount - wait for user search
+        $this->availableParticipants = [];
+
+        // Load participant from session if exists
+        $sessionParticipantId = session('filter.participant_id');
+
+        if ($sessionParticipantId) {
+            $this->participantId = $sessionParticipantId;
+            $this->loadParticipantById($sessionParticipantId);
+        }
+    }
+
+    /**
+     * Watch for search input changes
+     */
+    public function updatedSearch(): void
+    {
+        // Reset pagination when search changes
+        $this->page = 1;
+        $this->availableParticipants = [];
         $this->loadAvailableParticipants();
+    }
+
+    /**
+     * Load initial participants when dropdown opens
+     */
+    public function loadInitial(): void
+    {
+        // Only load if not already loaded and filters are set
+        if (empty($this->availableParticipants)) {
+            $this->page = 1;
+            $this->loadAvailableParticipants();
+        }
+    }
+
+    /**
+     * Load more participants (for infinite scroll)
+     */
+    public function loadMore(): void
+    {
+        if ($this->hasMorePages) {
+            $this->page++;
+            $this->loadAvailableParticipants(append: true);
+        }
     }
 
     /**
@@ -69,10 +122,12 @@ class ParticipantSelector extends Component
     {
         // Reset participant when event changes
         $this->participantId = null;
+        $this->search = '';
+        $this->page = 1;
         session()->forget('filter.participant_id');
 
-        // Reload available participants (will be empty until position is selected)
-        $this->loadAvailableParticipants();
+        // Clear available participants
+        $this->availableParticipants = [];
 
         // Dispatch to parent that participant was reset
         $this->dispatch('participant-selected', participantId: $this->participantId);
@@ -85,21 +140,26 @@ class ParticipantSelector extends Component
     {
         // Reset participant when position changes (don't preserve)
         $this->participantId = null;
+        $this->search = '';
+        $this->page = 1;
         session()->forget('filter.participant_id');
 
-        // Reload participants for new position
-        $this->loadAvailableParticipants();
+        // Clear available participants
+        $this->availableParticipants = [];
 
         // Dispatch event to parent that participant was reset
         $this->dispatch('participant-selected', participantId: $this->participantId);
     }
 
     /**
-     * Load available participants based on current event and position from session
+     * Load available participants based on search query
+     * OPTIMIZED: Supports pagination for infinite scroll
      */
-    private function loadAvailableParticipants(): void
+    private function loadAvailableParticipants(bool $append = false): void
     {
-        $this->availableParticipants = [];
+        if (! $append) {
+            $this->availableParticipants = [];
+        }
 
         $eventCode = session('filter.event_code');
         $positionFormationId = session('filter.position_formation_id');
@@ -114,25 +174,71 @@ class ParticipantSelector extends Component
             return;
         }
 
-        $participants = Participant::query()
+        // OPTIMIZED: Paginated query with LIMIT and OFFSET
+        $query = Participant::query()
             ->where('event_id', $event->id)
-            ->where('position_formation_id', $positionFormationId)
-            ->orderBy('name')
+            ->where('position_formation_id', $positionFormationId);
+
+        // Add search filter if search is not empty
+        if (! empty($this->search)) {
+            $query->where(function ($q) {
+                $q->where('name', 'like', "%{$this->search}%")
+                    ->orWhere('test_number', 'like', "%{$this->search}%");
+            });
+        }
+
+        $query->orderBy('name');
+
+        // Get one extra to check if there are more pages
+        $participants = $query
+            ->skip(($this->page - 1) * self::PER_PAGE)
+            ->take(self::PER_PAGE + 1)
             ->get(['id', 'test_number', 'name']);
 
-        $this->availableParticipants = $participants->map(fn ($p) => [
+        // Check if there are more pages
+        $this->hasMorePages = $participants->count() > self::PER_PAGE;
+
+        // Remove the extra record
+        if ($this->hasMorePages) {
+            $participants = $participants->take(self::PER_PAGE);
+        }
+
+        $newParticipants = $participants->map(fn ($p) => [
             'id' => $p->id,
             'test_number' => $p->test_number,
             'name' => $p->name,
         ])->all();
 
-        // Load participant from session (do NOT auto-select first participant)
-        $sessionParticipantId = session('filter.participant_id');
-
-        if ($sessionParticipantId && $this->isValidParticipantId($sessionParticipantId)) {
-            $this->participantId = $sessionParticipantId;
+        if ($append) {
+            $this->availableParticipants = array_merge($this->availableParticipants, $newParticipants);
         } else {
+            $this->availableParticipants = $newParticipants;
+        }
+
+        // Validate current selection is in results
+        if ($this->participantId && ! $this->isValidParticipantId($this->participantId)) {
             $this->participantId = null;
+        }
+    }
+
+    /**
+     * Load a specific participant by ID (used when restoring from session)
+     */
+    private function loadParticipantById(int $participantId): void
+    {
+        $participant = Participant::find($participantId);
+
+        if (! $participant) {
+            return;
+        }
+
+        // Add to available participants if not already present
+        if (! $this->isValidParticipantId($participantId)) {
+            $this->availableParticipants[] = [
+                'id' => $participant->id,
+                'test_number' => $participant->test_number,
+                'name' => $participant->name,
+            ];
         }
     }
 
@@ -150,6 +256,9 @@ class ParticipantSelector extends Component
     public function resetParticipant(): void
     {
         $this->participantId = null;
+        $this->search = '';
+        $this->page = 1;
+        $this->availableParticipants = [];
         session()->forget('filter.participant_id');
 
         // Dispatch event to parent component
