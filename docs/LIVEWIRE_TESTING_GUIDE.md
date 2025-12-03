@@ -1,11 +1,11 @@
 # Livewire Testing Guide - SPSP Assessment System
 
-> **Version**: 1.2
+> **Version**: 1.3
 > **Last Updated**: 2025-12-03
-> **Status**: 📋 **READY** - Self-contained guide for new chat sessions
+> **Status**: 🚧 **IN PROGRESS** - 11/45 tests complete (24.4%)
 > **Purpose**: Testing strategy untuk Livewire components dengan PHPUnit
 >
-> **Changes in v1.2**: Added "How to Use This Guide" section + Critical Context for self-contained usage
+> **Changes in v1.3**: ✅ SelectiveAspectsModal complete (11 tests, 46 assertions)
 
 ---
 
@@ -80,14 +80,16 @@ Start with Phase 1, Component: [ComponentName]
 
 | Component Category | Tests Done | Priority | Status |
 |-------------------|------------|----------|--------|
-| **Dynamic Standard Editing** | 0/12 | ⭐⭐⭐ | PENDING |
+| **Dynamic Standard Editing** | 11/12 | ⭐⭐⭐ | 🚧 IN PROGRESS |
 | **Custom Standard Management** | 0/9 | ⭐⭐⭐ | PENDING |
 | **Selector Components** | 0/6 | ⭐⭐⭐ | PENDING |
 | **General Reports** | 0/6 | ⭐⭐ | PENDING |
 | **Individual Reports** | 0/9 | ⭐⭐ | PENDING |
 | **Helper Components** | 0/3 | ⭐ | PENDING |
 
-**Progress**: 0/45 component tests (0%)
+**Progress**: 11/45 component tests (24.4%)
+
+**Latest**: ✅ SelectiveAspectsModal (11 tests, 46 assertions) - 2025-12-03
 
 ---
 
@@ -204,8 +206,8 @@ app/Livewire/
 - ✅ Persists selection to session
 - ✅ Dispatches 'position-selected' event
 
-**SelectiveAspectsModal.php** - Bulk aspect/sub-aspect editing
-- ✅ Opens modal with current session state
+**SelectiveAspectsModal.php** - Bulk aspect/sub-aspect editing ✅ **COMPLETE**
+- ✅ Opens modal with current session state (Potensi & Kompetensi)
 - ✅ Select/deselect aspects
 - ✅ Edit aspect weights
 - ✅ Toggle sub-aspects (Potensi only)
@@ -213,8 +215,13 @@ app/Livewire/
 - ✅ Validates minimum 3 active aspects
 - ✅ Saves to session via DynamicStandardService
 - ✅ Auto-distribute weights functionality
+- ✅ Close modal without saving
 
-**Total**: 6 tests (focused on SelectiveAspectsModal)
+**File**: `tests/Feature/Livewire/DynamicStandard/SelectiveAspectsModalTest.php`
+**Tests**: 11 tests, 46 assertions
+**Status**: ✅ All tests passing
+
+**Total**: 11 tests (SelectiveAspectsModal complete, EventSelector & PositionSelector pending)
 
 ---
 
@@ -729,8 +736,8 @@ $this->assertDatabaseMissing('table_name', ['column' => 'value']);
 
 ### Phase 1: Core Infrastructure (Start Here) ⭐⭐⭐
 
-1. **SelectiveAspectsModal** (8 tests) - Most complex, used by StandardPsikometrik & StandardMc
-2. **StandardPsikometrik** (6 tests) - Session editing for Potensi
+1. ✅ **SelectiveAspectsModal** (11 tests) - **COMPLETE** - Most complex, used by StandardPsikometrik & StandardMc
+2. **StandardPsikometrik** (6 tests) - Session editing for Potensi - **NEXT**
 3. **StandardMc** (6 tests) - Session editing for Kompetensi
 4. **EventSelector** (2 tests) - Foundation for all filters
 5. **PositionSelector** (2 tests) - Foundation for all filters
@@ -738,7 +745,7 @@ $this->assertDatabaseMissing('table_name', ['column' => 'value']);
 7. **CustomStandards/Create** (4 tests) - CRUD foundation
 8. **CustomStandards/Edit** (3 tests) - CRUD foundation
 
-**Subtotal**: 35 tests - **Foundation complete!**
+**Subtotal**: 11/35 tests complete (31.4%) - Foundation in progress
 
 ### Phase 2: Report Components ⭐⭐
 
@@ -771,12 +778,13 @@ $this->assertDatabaseMissing('table_name', ['column' => 'value']);
 
 ---
 
-**Version**: 1.2
+**Version**: 1.3
 **Last Updated**: 2025-12-03
-**Status**: ✅ Ready for new chat sessions - Self-contained guide
-**Next Action**: Implement SelectiveAspectsModal tests first (most complex)
+**Status**: 🚧 In Progress - 11/45 tests complete (24.4%)
+**Next Action**: Implement StandardPsikometrik tests (6 tests)
 **Maintainer**: Development Team
 **Changelog**:
+- v1.3 (2025-12-03): ✅ SelectiveAspectsModal complete (11 tests, 46 assertions) - Updated progress tracking
 - v1.2 (2025-12-03): Added "How to Use This Guide" section + Critical Context from Service Layer for self-contained usage in new chat sessions
 - v1.1 (2025-12-03): Fixed folder structure - Training & Ranking are subfolders of GeneralReport
 - v1.0 (2025-12-03): Initial documentation created
