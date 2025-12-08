@@ -19,6 +19,29 @@
 
 ---
 
+## Why This Solution? (The "User Flow" Logic)
+
+To understand why **SQL Aggregation** + **Alpine.js** is the best practice, let's look at the two main user scenarios:
+
+### Case 1: Initial Load (The "Heavy Lift")
+**Scenario**: User opens the "Rekap Ranking" page.
+*   ❌ **Old Way**: PHP loads 340,000 rows, hydrates models, loops 250,000 times. **Result: 30s load.**
+*   ✅ **V3 Way (SQL Aggregation)**: We send a smart query to MySQL: "Calculate (Rating * Weight) for everyone, sum it up, and just give me the top 10 results." Database engines (C++) are 100x faster at math than PHP loops. **Result: 2-3s load.**
+
+### Case 2: Interactive Analysis (The "Exploration")
+**Scenario**: User slides Tolerance from 0% to 5% to see who passes.
+*   ❌ **Old Way**: Browser refreshes, server repeats the heavy calculation above. **Result: Another 30s wait.**
+*   ✅ **V3 Way (Alpine.js)**: 
+    1. Server sends lightweight JSON payload to browser on load.
+    2. When User slides to 5%, **Alpine.js** recalculates the "MS/TMS" status locally in the browser's memory.
+    3. No server request at all. **Result: 0.1s (Instant).**
+
+**The Best Practice Philosophy**:
+1.  **"Move computation to the data"** (SQL) for the heavy initial crunching.
+2.  **"Reactive UI for Parameter Tuning"** (JS) for the instant feedback loop.
+
+---
+
 ## Application Context & Business Logic (Crucial)
 
 ### What is SPSP?
