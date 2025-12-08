@@ -19,6 +19,50 @@
 
 ---
 
+## Application Context & Business Logic (Crucial)
+
+### What is SPSP?
+**SPSP (Sistem Pemetaan & Statistik Psikologi)** is a SaaS analytics dashboard for psychological assessment results. Unlike a read-heavy CRUD application (like a news site), SPSP is an **analytics tool** where users actively experiment with data parameters to find insights.
+
+### 100% Dynamic Nature
+Users frequently change parameters, and each change requires a fresh calculation of rankings.
+- **Tolerance**: 0% vs 5% vs 10%
+- **Weights**: Potensi (60%) vs Kompetensi (40%)
+- **Standards**: "Quantum Default" vs "Custom Standard A" vs "Custom Standard B"
+
+### The 3-Layer Priority System
+This is the core business logic that complicates caching and SQL optimization. Every time the system needs a value (e.g., "Weight for Aspect A"), it must check 3 layers in order:
+
+```
+Layer 1: Session Adjustment (Temporary)
+    Examples: User adjusts weight via slider, changes tolerance
+    Storage: PHP Session
+    Scope: Unique per user, lost on logout
+    ↓ if not found
+
+Layer 2: Custom Standard (Persistent)
+    Examples: "Standar Kejaksaan v1", "Standar BNN Strict"
+    Storage: Database (custom_standards table)
+    Scope: Per institution
+    ↓ if not found
+
+Layer 3: Quantum Default (Master)
+    Examples: Original template values
+    Storage: Database (aspects table)
+    Scope: Global
+```
+
+**Implication for V3**:
+We cannot *just* use a static SQL query. We must first resolve these 3 layers in PHP to get the final "Effective Weights" for the current user, and *then* inject those weights into the SQL query or Alpine.js logic.
+
+### Data Scale (The Challenge)
+- ** Participants**: 5,000 - 35,000 per event
+- ** Aspects**: 5+ categories
+- ** Sub-Aspects**: 15-20 discrete items
+- ** Assessments**: ~340,000 individual data points per page load
+
+---
+
 ## Why Previous Approaches Failed
 
 ### V1: Redis Caching (FAILED - Wrong Approach)
