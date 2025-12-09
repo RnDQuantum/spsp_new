@@ -193,6 +193,7 @@ class RankingService
             return [
                 'rank' => $index + 1,
                 'participant_id' => $row['participant_id'],
+                'participant_name' => $row['participant_name'],
                 'individual_rating' => $individualRating,
                 'individual_score' => $individualScore,
                 'original_standard_rating' => round($adjustedStandards['standard_rating'], 2),
@@ -668,11 +669,9 @@ class RankingService
             return collect();
         }
 
-        // Get participant names in one query
-        $participantIds = $potensiRankings->pluck('participant_id')->unique()->toArray();
-        $participantNames = \App\Models\Participant::whereIn('id', $participantIds)
-            ->pluck('name', 'id')
-            ->toArray();
+        // OPTIMIZED: Name is already in getRankings result
+        // No need to query participants table again
+
 
         // OPTIMIZED: Key by participant_id for O(1) lookup instead of O(n)
         $kompetensiRankingsKeyed = $kompetensiRankings->keyBy('participant_id');
@@ -717,7 +716,7 @@ class RankingService
 
             $participantScores[] = [
                 'participant_id' => $participantId,
-                'participant_name' => $participantNames[$participantId] ?? '',
+                'participant_name' => $potensiRank['participant_name'] ?? '',
                 'total_individual_score' => $totalIndividualScore,
                 'total_standard_score' => $totalStandardScore,
                 'total_original_standard_score' => $totalOriginalStandardScore,

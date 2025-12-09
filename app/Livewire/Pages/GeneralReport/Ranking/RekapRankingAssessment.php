@@ -511,7 +511,7 @@ class RekapRankingAssessment extends Component
 
     /**
      * Build rankings with pagination using RankingService
-     * OPTIMIZED: Use cached rankings
+     * OPTIMIZED: Use cached rankings and Slice -> Process strategy
      */
     private function buildRankings(): ?LengthAwarePaginator
     {
@@ -530,14 +530,28 @@ class RekapRankingAssessment extends Component
         }
 
         // Key by participant_id for fast lookup
-        $potensiRankings = $potensiRankings->keyBy('participant_id');
-        $kompetensiRankings = $kompetensiRankings->keyBy('participant_id');
+        $potensiRankingsKeyed = $potensiRankings->keyBy('participant_id');
+        $kompetensiRankingsKeyed = $kompetensiRankings->keyBy('participant_id');
 
-        // Map combined rankings to view format
-        $items = $rankings->map(function ($ranking) use ($potensiRankings, $kompetensiRankings) {
+        $totalItems = $rankings->count();
+        $slicedRankings = $rankings;
+        $currentPage = 1;
+
+        // 🚀 OPTIMIZATION: Slice the collection FIRST
+        // This ensures we only process (map/format) the 10 items we show, not all 5000+.
+        if ($this->perPage !== 'all' && $this->perPage > 0) {
+            $currentPage = $this->getPage();
+            $offset = ($currentPage - 1) * $this->perPage;
+            
+            // Slice the RAW data first
+            $slicedRankings = $rankings->slice($offset, $this->perPage);
+        }
+
+        // Map ONLY the sliced items to view format
+        $items = $slicedRankings->map(function ($ranking) use ($potensiRankingsKeyed, $kompetensiRankingsKeyed) {
             $participantId = $ranking['participant_id'];
-            $potensiRank = $potensiRankings->get($participantId);
-            $kompetensiRank = $kompetensiRankings->get($participantId);
+            $potensiRank = $potensiRankingsKeyed->get($participantId);
+            $kompetensiRank = $kompetensiRankingsKeyed->get($participantId);
 
             // Calculate per-category scores
             $psyIndividual = $potensiRank ? $potensiRank['individual_score'] : 0;
@@ -550,7 +564,7 @@ class RekapRankingAssessment extends Component
 
             return [
                 'rank' => $ranking['rank'],
-                'name' => $ranking['participant_name'],
+                'name' => $ranking['participant_name'], // Should be populated from optimized Service
                 'psy_individual' => round($psyIndividual, 2),
                 'mc_individual' => round($mcIndividual, 2),
                 'total_individual' => round($totalIndividual, 2),
@@ -562,32 +576,11 @@ class RekapRankingAssessment extends Component
             ];
         });
 
-        // Handle "Show All" option
-        if ($this->perPage === 'all' || $this->perPage === 0) {
-            $totalItems = $items->count();
-
-            return new LengthAwarePaginator(
-                $items->all(),
-                $totalItems,
-                $totalItems > 0 ? $totalItems : 1,
-                1,
-                [
-                    'path' => LengthAwarePaginator::resolveCurrentPath(),
-                    'pageName' => 'page',
-                ]
-            );
-        }
-
-        // Normal pagination
-        $currentPage = $this->getPage();
-        $offset = ($currentPage - 1) * $this->perPage;
-
-        $paginatedItems = $items->slice($offset, $this->perPage)->values();
-
+        // Use appropriate items for paginator (sliced or all)
         return new LengthAwarePaginator(
-            $paginatedItems->all(),
-            $items->count(),
-            $this->perPage,
+            $items->values()->all(),
+            $totalItems,
+            $this->perPage === 'all' || $this->perPage === 0 ? ($totalItems > 0 ? $totalItems : 1) : $this->perPage,
             $currentPage,
             [
                 'path' => LengthAwarePaginator::resolveCurrentPath(),
