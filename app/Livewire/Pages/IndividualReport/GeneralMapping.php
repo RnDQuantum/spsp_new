@@ -99,7 +99,7 @@ class GeneralMapping extends Component
         $this->showRankingInfo = $showRankingInfo;
 
         // Generate unique chart ID
-        $this->chartId = 'generalMapping' . uniqid();
+        $this->chartId = 'generalMapping'.uniqid();
 
         // Load tolerance from session
         $this->tolerancePercentage = session('individual_report.tolerance', 0);
@@ -172,40 +172,30 @@ class GeneralMapping extends Component
             return;
         }
 
+        // 🚀 OPTIMIZATION: Single-pass data loading
+        // Load ALL data (aspects + final assessment) in ONE call
+        // This prevents duplicate queries to AspectAssessment table
         $service = app(IndividualAssessmentService::class);
-        $allAspects = [];
+        $fullData = $service->getParticipantFullAssessment(
+            $this->participant->id,
+            $this->potensiCategory?->id,
+            $this->kompetensiCategory?->id,
+            $this->tolerancePercentage
+        );
 
-        // Load Potensi aspects
-        if ($this->potensiCategory) {
-            $potensiAspects = $service->getAspectAssessments(
-                $this->participant->id,
-                $this->potensiCategory->id,
-                $this->tolerancePercentage
-            )->toArray();
-            $allAspects = array_merge($allAspects, $potensiAspects);
-        }
-
-        // Load Kompetensi aspects
-        if ($this->kompetensiCategory) {
-            $kompetensiAspects = $service->getAspectAssessments(
-                $this->participant->id,
-                $this->kompetensiCategory->id,
-                $this->tolerancePercentage
-            )->toArray();
-            $allAspects = array_merge($allAspects, $kompetensiAspects);
-        }
-
-        $this->aspectsData = $allAspects;
-        $this->aspectsDataCache = $allAspects;
+        // Cache both aspects and final assessment
+        $this->aspectsData = $fullData['aspects'];
+        $this->aspectsDataCache = $fullData['aspects'];
+        $this->finalAssessmentCache = $fullData['final_assessment'];
     }
 
     private function calculateTotals(): void
     {
-        // Check cache first
-        if ($this->finalAssessmentCache !== null) {
-            $finalAssessment = $this->finalAssessmentCache;
-        } else {
-            // Use IndividualAssessmentService to get weighted totals
+        // 🚀 OPTIMIZATION: Reuse cached data from loadAspectsData()
+        // finalAssessmentCache is already populated in loadAspectsData()
+        // No additional queries needed!
+        if ($this->finalAssessmentCache === null) {
+            // Fallback: This should NOT happen if loadAspectsData() was called first
             $service = app(IndividualAssessmentService::class);
             $finalAssessment = $service->getFinalAssessment(
                 $this->participant->id,
@@ -213,6 +203,8 @@ class GeneralMapping extends Component
             );
             $this->finalAssessmentCache = $finalAssessment;
         }
+
+        $finalAssessment = $this->finalAssessmentCache;
 
         // Use weighted totals from service
         $this->totalStandardScore = $finalAssessment['total_standard_score'];

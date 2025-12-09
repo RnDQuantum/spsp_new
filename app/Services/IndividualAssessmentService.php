@@ -47,6 +47,7 @@ class IndividualAssessmentService
             if (! isset(self::$participantCache[$participantId])) {
                 self::$participantCache[$participantId] = $participant;
             }
+
             return $participant;
         }
 
@@ -112,11 +113,26 @@ class IndividualAssessmentService
                 ->toArray();
         }
 
-        // Get aspect assessments with relationships
-        $aspectAssessments = AspectAssessment::with([
-            'aspect.subAspects',
-            'subAspectAssessments.subAspect',
-        ])
+        // 🚀 OPTIMIZATION: Conditional eager loading
+        // Only load sub-aspects relationships if custom standard has adjustments
+        // Similar to RankingService optimization
+        $hasSubAspectAdjustments = $standardService->hasActiveSubAspectAdjustments($template->id);
+
+        $query = AspectAssessment::query();
+
+        if ($hasSubAspectAdjustments) {
+            // Custom Standard: Load full relationships (need sub-aspects for calculation)
+            $query->with([
+                'aspect.subAspects',
+                'subAspectAssessments.subAspect',
+            ]);
+        } else {
+            // Default/Quantum Standard: Light load (only aspect, no sub-aspects)
+            $query->with(['aspect']);
+        }
+
+        // Get aspect assessments
+        $aspectAssessments = $query
             ->where('participant_id', $participantId)
             ->whereIn('aspect_id', $activeAspectIds)
             ->orderBy('aspect_id')
@@ -438,6 +454,167 @@ class IndividualAssessmentService
     }
 
     /**
+     * OPTIMIZATION: Get participant full assessment in single pass
+     *
+     * This method loads all aspect data once and reuses it for:
+     * - Aspects array (for table display)
+     * - Final assessment calculations (weighted totals)
+     *
+     * Prevents duplicate queries to AspectAssessment table
+     *
+     * @param  int  $participantId  Participant ID
+     * @param  int|null  $potensiCategoryId  Potensi category ID (optional)
+     * @param  int|null  $kompetensiCategoryId  Kompetensi category ID (optional)
+     * @param  int  $tolerancePercentage  Tolerance percentage
+     * @return array Full assessment data
+     */
+    public function getParticipantFullAssessment(
+        int $participantId,
+        ?int $potensiCategoryId,
+        ?int $kompetensiCategoryId,
+        int $tolerancePercentage = 10
+    ): array {
+        $participant = $this->getParticipant($participantId);
+        $template = $participant->positionFormation->template;
+        $standardService = app(DynamicStandardService::class);
+
+        // Load aspect assessments ONCE for each category
+        $potensiAspects = collect();
+        $kompetensiAspects = collect();
+
+        if ($potensiCategoryId) {
+            $potensiAspects = $this->getAspectAssessments(
+                $participantId,
+                $potensiCategoryId,
+                $tolerancePercentage
+            );
+        }
+
+        if ($kompetensiCategoryId) {
+            $kompetensiAspects = $this->getAspectAssessments(
+                $participantId,
+                $kompetensiCategoryId,
+                $tolerancePercentage
+            );
+        }
+
+        // Merge all aspects for table display
+        $allAspects = $potensiAspects->merge($kompetensiAspects);
+
+        // Calculate final assessment FROM already loaded data (no additional queries)
+        $finalAssessment = $this->calculateFinalFromAspects(
+            $potensiAspects,
+            $kompetensiAspects,
+            $template->id,
+            $standardService,
+            $tolerancePercentage
+        );
+
+        return [
+            'aspects' => $allAspects->toArray(),
+            'final_assessment' => $finalAssessment,
+        ];
+    }
+
+    /**
+     * Calculate final assessment from already-loaded aspect collections
+     *
+     * @param  Collection  $potensiAspects  Potensi aspects (already computed)
+     * @param  Collection  $kompetensiAspects  Kompetensi aspects (already computed)
+     * @param  int  $templateId  Template ID
+     * @param  DynamicStandardService  $standardService  Standard service
+     * @param  int  $tolerancePercentage  Tolerance percentage
+     * @return array Final assessment
+     */
+    private function calculateFinalFromAspects(
+        Collection $potensiAspects,
+        Collection $kompetensiAspects,
+        int $templateId,
+        DynamicStandardService $standardService,
+        int $tolerancePercentage
+    ): array {
+        // Calculate category totals from aspects
+        $potensiTotals = $this->calculateCategoryTotalsFromAspects($potensiAspects);
+        $kompetensiTotals = $this->calculateCategoryTotalsFromAspects($kompetensiAspects);
+
+        // Get category weights
+        $potensiWeight = $standardService->getCategoryWeight($templateId, 'potensi');
+        $kompetensiWeight = $standardService->getCategoryWeight($templateId, 'kompetensi');
+
+        // Calculate weighted scores
+        $totalStandardScore = round(
+            ($potensiTotals['total_standard_score'] * ($potensiWeight / 100)) +
+            ($kompetensiTotals['total_standard_score'] * ($kompetensiWeight / 100)),
+            2
+        );
+
+        $totalIndividualScore = round(
+            ($potensiTotals['total_individual_score'] * ($potensiWeight / 100)) +
+            ($kompetensiTotals['total_individual_score'] * ($kompetensiWeight / 100)),
+            2
+        );
+
+        $totalOriginalStandardScore = round(
+            ($potensiTotals['total_original_standard_score'] * ($potensiWeight / 100)) +
+            ($kompetensiTotals['total_original_standard_score'] * ($kompetensiWeight / 100)),
+            2
+        );
+
+        // Calculate gaps
+        $totalGapScore = round($totalIndividualScore - $totalStandardScore, 2);
+        $totalOriginalGapScore = round($totalIndividualScore - $totalOriginalStandardScore, 2);
+
+        // Achievement percentage
+        $achievementPercentage = $totalStandardScore > 0
+            ? ($totalIndividualScore / $totalStandardScore) * 100
+            : 0;
+
+        // Final conclusion
+        $finalConclusion = ConclusionService::getGapBasedConclusion($totalOriginalGapScore, $totalGapScore);
+
+        return [
+            'tolerance_percentage' => $tolerancePercentage,
+            'potensi_weight' => $potensiWeight,
+            'kompetensi_weight' => $kompetensiWeight,
+            'total_standard_score' => $totalStandardScore,
+            'total_individual_score' => $totalIndividualScore,
+            'total_original_standard_score' => $totalOriginalStandardScore,
+            'total_gap_score' => $totalGapScore,
+            'total_original_gap_score' => $totalOriginalGapScore,
+            'achievement_percentage' => round($achievementPercentage, 2),
+            'final_conclusion' => $finalConclusion,
+        ];
+    }
+
+    /**
+     * Calculate category totals from aspect collection
+     *
+     * @param  Collection  $aspects  Aspect assessments
+     * @return array Category totals
+     */
+    private function calculateCategoryTotalsFromAspects(Collection $aspects): array
+    {
+        $totalStandardScore = 0;
+        $totalIndividualScore = 0;
+        $totalOriginalStandardScore = 0;
+        $totalOriginalGapScore = 0;
+
+        foreach ($aspects as $aspect) {
+            $totalStandardScore += $aspect['standard_score'];
+            $totalIndividualScore += $aspect['individual_score'];
+            $totalOriginalStandardScore += $aspect['original_standard_score'];
+            $totalOriginalGapScore += $aspect['original_gap_score'];
+        }
+
+        return [
+            'total_standard_score' => $totalStandardScore,
+            'total_individual_score' => $totalIndividualScore,
+            'total_original_standard_score' => $totalOriginalStandardScore,
+            'total_original_gap_score' => $totalOriginalGapScore,
+        ];
+    }
+
+    /**
      * Get passing summary for aspects
      *
      * @param  Collection  $aspectAssessments  Aspect assessments collection
@@ -585,11 +762,24 @@ class IndividualAssessmentService
                 ->toArray();
         }
 
-        // Get aspect assessments with relationships
-        $aspectAssessments = AspectAssessment::with([
-            'aspect.subAspects',
-            'subAspectAssessments.subAspect',
-        ])
+        // 🚀 OPTIMIZATION: Conditional eager loading (matching)
+        $hasSubAspectAdjustments = $standardService->hasActiveSubAspectAdjustments($template->id);
+
+        $query = AspectAssessment::query();
+
+        if ($hasSubAspectAdjustments) {
+            // Custom Standard: Load full relationships
+            $query->with([
+                'aspect.subAspects',
+                'subAspectAssessments.subAspect',
+            ]);
+        } else {
+            // Default Standard: Light load
+            $query->with(['aspect']);
+        }
+
+        // Get aspect assessments
+        $aspectAssessments = $query
             ->where('participant_id', $participantId)
             ->whereIn('aspect_id', $activeAspectIds)
             ->orderBy('aspect_id')
