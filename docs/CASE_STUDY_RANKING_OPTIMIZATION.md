@@ -1,8 +1,9 @@
 # Case Study: Ranking Performance Optimization
 
 **Date**: December 2024
-**Target**: `RankingPsyMapping` Livewire Component & `RankingService`
+**Components**: `RankingPsyMapping`, `RankingMcMapping`, `RekapRankingAssessment` Livewire Components & `RankingService`
 **Goal**: Reduce load time from ~30s to <2s.
+**Status**: ✅ Phase 1 & Phase 2 Completed
 
 ## 📊 Performance Metrics (Before vs After)
 
@@ -79,6 +80,92 @@ $participants = Participant::whereIn('id', $participantIds)->get();
 
 ---
 
+## 🔄 Phase 2: Database & Query Optimization (December 2024)
+
+**Target**: `RekapRankingAssessment` component bottleneck (2.32s → target <1s)
+**Status**: ✅ Completed - Achieved 1.87s (51% total improvement from baseline)
+
+### Problem Identified
+
+After Phase 1 optimizations, profiling revealed:
+- **97.6% of query time** (923ms/946ms) spent in 2 slow queries
+- Both queries fetching `aspect_assessments` with different aspect_ids (potensi vs kompetensi)
+- Queries using filesort due to `ORDER BY participants.name`
+- Fetching all columns (`SELECT *`) when only 5 needed
+
+### Strategies Applied
+
+#### Strategy A: Composite Database Index ⚡
+**Impact**: Highest
+**File**: `database/migrations/2025_12_09_064003_add_composite_index_to_aspect_assessments.php`
+
+Created composite index optimized for the WHERE clause pattern:
+```sql
+CREATE INDEX idx_asp_event_pos_aspect_participant
+ON aspect_assessments(event_id, position_formation_id, aspect_id, participant_id);
+```
+
+**Result**: Improved index selectivity for filtering operations
+
+#### Strategy B: Remove Redundant ORDER BY 🚀
+**Impact**: High (Eliminated filesort)
+**File**: `app/Services/RankingService.php:74`
+
+Removed `->orderBy('participants.name')` from query since sorting already handled in PHP (lines 153-158):
+```php
+// Removed from query builder (line 74)
+// Sorting done in PHP for better control:
+$rankings = collect($participantScores)
+    ->sortBy([
+        ['individual_score', 'desc'],
+        ['participant_name', 'asc'],
+    ])
+    ->values();
+```
+
+**Result**: Eliminated "Using filesort" and "Using temporary" from query execution plan
+
+#### Strategy C: Selective Column Selection 📊
+**Impact**: Medium
+**File**: `app/Services/RankingService.php:74-80`
+
+Changed from `SELECT aspect_assessments.*` to only needed columns:
+```php
+->select(
+    'aspect_assessments.id',
+    'aspect_assessments.participant_id',
+    'aspect_assessments.aspect_id',
+    'aspect_assessments.individual_rating',
+    'participants.name as participant_name'
+)
+```
+
+**Result**: Reduced data transfer from 15+ columns to 5 columns
+
+### Phase 2 Performance Results
+
+| Metric | Phase 1 (Before) | Phase 2 (After) | Improvement |
+|--------|------------------|-----------------|-------------|
+| **Request Time** | 2.32s | **1.87s** | **19.4% faster** |
+| **Total Query Time** | 946ms | **491ms** | **48.1% faster** |
+| **Potensi Query** | ~460ms | **193ms** | **58% faster** |
+| **Kompetensi Query** | ~463ms | **277ms** | **40% faster** |
+| **Duplicate Queries** | 19 | **13** | 31.6% reduction |
+
+### Overall Progress: Phase 1 + Phase 2
+
+| Component | Original | Phase 1 | Phase 2 | **Total Improvement** |
+|-----------|----------|---------|---------|----------------------|
+| RekapRankingAssessment | 3.84s | 2.32s | **1.87s** | **51.3% faster** |
+
+### Strategy D (Optional - Not Implemented)
+
+**Concept**: Combine potensi + kompetensi queries into single query
+**Estimated Additional Gain**: 10-15% (target ~1.65s)
+**Status**: Skipped - Current performance (1.87s) deemed sufficient
+
+---
+
 ## 📝 Checklist for Optimizing Other Livewire Components
 
 If you see high memory usage or slow speeds in other 'Rekap' or 'Ranking' pages, check for:
@@ -87,3 +174,6 @@ If you see high memory usage or slow speeds in other 'Rekap' or 'Ranking' pages,
 2.  **Eager Loading**: Are you loading relationships that are conditional?
 3.  **Hydration**: Are you hydrating 1000+ Eloquent models just to count them or sort them? Use `toBase()` or `pluck()`.
 4.  **Pagination**: Are you hydrating the full list specific details (Pivot tables, User relationships) *before* the pagination slice?
+5.  **ORDER BY**: Are you sorting in SQL when sorting is already done in PHP? Remove redundant ORDER BY.
+6.  **Database Indexes**: Run EXPLAIN on slow queries - add composite indexes for common WHERE clauses.
+7.  **Column Selection**: Use specific columns in SELECT instead of `*`.
