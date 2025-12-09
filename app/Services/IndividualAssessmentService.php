@@ -120,16 +120,17 @@ class IndividualAssessmentService
 
         $query = AspectAssessment::query();
 
-        if ($hasSubAspectAdjustments) {
-            // Custom Standard: Load full relationships (need sub-aspects for calculation)
-            $query->with([
-                'aspect.subAspects',
-                'subAspectAssessments.subAspect',
-            ]);
-        } else {
-            // Default/Quantum Standard: Light load (only aspect, no sub-aspects)
-            $query->with(['aspect']);
-        }
+        // CRITICAL FIX: Always check if aspect has sub-aspects structure
+        // Even without custom adjustments, code ACCESSES sub-aspects for calculation
+        // So we MUST eager load to prevent N+1
+        $query->with([
+            'aspect.subAspects',
+            'subAspectAssessments.subAspect',
+        ]);
+
+        // TODO: Future optimization - only load if aspect structure has sub-aspects
+        // Current issue: calculateAspectAssessment() ALWAYS accesses $aspect->subAspects (line 174)
+        // This causes N+1 even when hasSubAspectAdjustments = false
 
         // Get aspect assessments
         $aspectAssessments = $query
@@ -762,21 +763,13 @@ class IndividualAssessmentService
                 ->toArray();
         }
 
-        // 🚀 OPTIMIZATION: Conditional eager loading (matching)
-        $hasSubAspectAdjustments = $standardService->hasActiveSubAspectAdjustments($template->id);
-
+        // 🚀 OPTIMIZATION: Eager load to prevent N+1
+        // Always load sub-aspects because matching logic accesses them
         $query = AspectAssessment::query();
-
-        if ($hasSubAspectAdjustments) {
-            // Custom Standard: Load full relationships
-            $query->with([
-                'aspect.subAspects',
-                'subAspectAssessments.subAspect',
-            ]);
-        } else {
-            // Default Standard: Light load
-            $query->with(['aspect']);
-        }
+        $query->with([
+            'aspect.subAspects',
+            'subAspectAssessments.subAspect',
+        ]);
 
         // Get aspect assessments
         $aspectAssessments = $query
