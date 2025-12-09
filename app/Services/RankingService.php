@@ -53,16 +53,30 @@ class RankingService
         // This reduces 100,000+ calls to DynamicStandardService to just 5-10 calls
         $standardsCache = $this->precomputeStandards($templateId, $activeAspectIds);
 
-        // Get aspect assessments with aspect data for recalculation
-        $assessments = AspectAssessment::query()
-            ->with(['aspect.subAspects', 'subAspectAssessments.subAspect'])
+        // 🚀 OPTIMIZATION: Check if we need to load sub-aspects
+        // If NO adjustments to active sub-aspects, we can use the pre-calculated individual_rating
+        // stored in aspect_assessments, avoiding the massive N+1 / hydration overhead.
+        $standardService = app(DynamicStandardService::class);
+        $hasSubAspectAdjustments = $standardService->hasActiveSubAspectAdjustments($templateId);
+
+        // Build query
+        $query = AspectAssessment::query()
             ->join('participants', 'participants.id', '=', 'aspect_assessments.participant_id')
             ->where('aspect_assessments.event_id', $eventId)
             ->where('aspect_assessments.position_formation_id', $positionFormationId)
             ->whereIn('aspect_assessments.aspect_id', $activeAspectIds)
             ->select('aspect_assessments.*', 'participants.name as participant_name')
-            ->orderBy('participants.name')
-            ->get();
+            ->orderBy('participants.name');
+
+        // Only eager load if necessary
+        if ($hasSubAspectAdjustments) {
+            $query->with(['aspect.subAspects', 'subAspectAssessments.subAspect']);
+        } else {
+            // Minimal eager load when using standard calculation
+            $query->with(['aspect']);
+        }
+
+        $assessments = $query->get();
 
         if ($assessments->isEmpty()) {
             return collect();
@@ -88,14 +102,15 @@ class RankingService
             $adjustedWeight = $standardsCache[$aspect->code]['weight'];
 
             // ✅ DATA-DRIVEN: Recalculate individual rating based on structure
-            if ($aspect->subAspects->isNotEmpty()) {
+            if ($aspect->subAspects->isNotEmpty() && $hasSubAspectAdjustments) {
                 // 🚀 USE CACHE: Pass pre-computed sub-aspects cache (OPTIMIZED!)
+                // Only do this expensive calculation if we actually need to handle inactive sub-aspects
                 $individualRating = $this->calculateIndividualRatingFromSubAspectsWithCache(
                     $assessment,
                     $standardsCache[$aspect->code]['sub_aspects']
                 );
             } else {
-                // No sub-aspects: use direct rating
+                // No sub-aspects OR no adjustments: use direct rating from DB (FASTEST)
                 $individualRating = (float) $assessment->individual_rating;
             }
 

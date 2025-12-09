@@ -564,6 +564,39 @@ class DynamicStandardService
     // ========================================
 
     /**
+     * Check if ANY sub-aspects have been deactivated (in session or custom standard)
+     * Used for optimization: if false, we can skip eager loading subAspectAssessments
+     */
+    public function hasActiveSubAspectAdjustments(int $templateId): bool
+    {
+        // 1. Check session adjustments
+        $adjustments = $this->getAdjustments($templateId);
+        if (! empty($adjustments['active_sub_aspects'])) {
+            // If any sub-aspect is explicitly set to false in session, return true (adjustments exist)
+            foreach ($adjustments['active_sub_aspects'] as $isActive) {
+                if ($isActive === false) {
+                    return true;
+                }
+            }
+        }
+
+        // 2. Check custom standard
+        $customStandardId = Session::get("selected_standard.{$templateId}");
+        if ($customStandardId) {
+            $customStandard = CustomStandard::find($customStandardId);
+            if ($customStandard && ! empty($customStandard->sub_aspect_configs)) {
+                foreach ($customStandard->sub_aspect_configs as $config) {
+                    if (isset($config['active']) && $config['active'] === false) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Check if specific category has any adjustments
      */
     public function hasCategoryAdjustments(int $templateId, string $categoryCode): bool
