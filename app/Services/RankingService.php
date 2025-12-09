@@ -71,8 +71,13 @@ class RankingService
             ->where('aspect_assessments.event_id', $eventId)
             ->where('aspect_assessments.position_formation_id', $positionFormationId)
             ->whereIn('aspect_assessments.aspect_id', $activeAspectIds)
-            ->select('aspect_assessments.*', 'participants.name as participant_name')
-            ->orderBy('participants.name');
+            ->select(
+                'aspect_assessments.id',
+                'aspect_assessments.participant_id',
+                'aspect_assessments.aspect_id',
+                'aspect_assessments.individual_rating',
+                'participants.name as participant_name'
+            );
 
         // Only eager load if necessary
         if ($hasSubAspectAdjustments) {
@@ -113,9 +118,9 @@ class RankingService
             // Resolve Aspect Code Helper
             $aspectCode = null;
             if ($hasSubAspectAdjustments && $assessment instanceof AspectAssessment) {
-                 $aspectCode = $assessment->aspect->code;
+                $aspectCode = $assessment->aspect->code;
             } else {
-                 $aspectCode = $aspectIdToCode[$assessment->aspect_id] ?? null;
+                $aspectCode = $aspectIdToCode[$assessment->aspect_id] ?? null;
             }
 
             if (! $aspectCode || ! isset($standardsCache[$aspectCode])) {
@@ -127,7 +132,7 @@ class RankingService
 
             // ✅ DATA-DRIVEN: Recalculate individual rating based on structure
             // Note: $assessment can be Model or stdClass here.
-            
+
             if ($hasSubAspectAdjustments && $assessment instanceof AspectAssessment && $assessment->aspect->subAspects->isNotEmpty()) {
                 // 🚀 USE CACHE: Pass pre-computed sub-aspects cache (OPTIMIZED!)
                 // Only do this expensive calculation if we actually need to handle inactive sub-aspects
@@ -671,7 +676,6 @@ class RankingService
 
         // OPTIMIZED: Name is already in getRankings result
         // No need to query participants table again
-
 
         // OPTIMIZED: Key by participant_id for O(1) lookup instead of O(n)
         $kompetensiRankingsKeyed = $kompetensiRankings->keyBy('participant_id');
