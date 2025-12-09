@@ -219,15 +219,27 @@ class RankingPsyMapping extends Component
             return null;
         }
 
-        // Get participant details for display
-        $participantIds = $rankings->pluck('participant_id')->unique()->all();
+        $totalItems = $rankings->count();
+        $slicedRankings = $rankings;
+        $currentPage = 1;
+
+        // Handle Pagination Logic
+        if ($this->perPage > 0) {
+            $currentPage = $this->getPage();
+            $offset = ($currentPage - 1) * $this->perPage;
+            // 🚀 OPTIMIZATION: Slice FIRST, then hydrate details only for visible items
+            $slicedRankings = $rankings->slice($offset, $this->perPage);
+        }
+
+        // Get participant details ONLY for the sliced items (e.g. 10 items instead of 5000!)
+        $participantIds = $slicedRankings->pluck('participant_id')->unique()->all();
         $participants = Participant::with('positionFormation')
             ->whereIn('id', $participantIds)
             ->get()
             ->keyBy('id');
 
-        // Map rankings to display format
-        $items = $rankings->map(function ($ranking) use ($participants) {
+        // Map only the sliced items
+        $items = $slicedRankings->map(function ($ranking) use ($participants) {
             $participant = $participants->get($ranking['participant_id']);
 
             return [
@@ -249,32 +261,11 @@ class RankingPsyMapping extends Component
             ];
         });
 
-        // Check if "Show All" is selected
-        if ($this->perPage === 0) {
-            $totalItems = $items->count();
-
-            return new LengthAwarePaginator(
-                $items->all(),
-                $totalItems,
-                $totalItems > 0 ? $totalItems : 1,
-                1,
-                [
-                    'path' => LengthAwarePaginator::resolveCurrentPath(),
-                    'pageName' => 'page',
-                ]
-            );
-        }
-
-        // Normal pagination
-        $currentPage = $this->getPage();
-        $offset = ($currentPage - 1) * $this->perPage;
-
-        $paginatedItems = $items->slice($offset, $this->perPage)->values();
-
+        // Return Paginator with correct total count but only sliced items
         return new LengthAwarePaginator(
-            $paginatedItems->all(),
-            $items->count(),
-            $this->perPage,
+            $items->values()->all(),
+            $totalItems,
+            $this->perPage > 0 ? $this->perPage : ($totalItems > 0 ? $totalItems : 1),
             $currentPage,
             [
                 'path' => LengthAwarePaginator::resolveCurrentPath(),
