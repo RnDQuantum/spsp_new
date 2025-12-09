@@ -177,7 +177,9 @@ class RekapRankingAssessment extends Component
     }
 
     /**
-     * Get combined rankings from RankingService (with cache)
+     * Get combined rankings (with cache)
+     * 🚀 CRITICAL OPTIMIZATION: Build combined rankings from cached potensi & kompetensi
+     * to avoid duplicate database queries
      */
     private function getRankings(): ?\Illuminate\Support\Collection
     {
@@ -190,57 +192,108 @@ class RekapRankingAssessment extends Component
             return null;
         }
 
-        // OPTIMIZED: Use cached event data
-        $eventData = $this->getEventData();
+        // Get potensi and kompetensi rankings (will be cached after first call)
+        $potensiRankings = $this->getPotensiRankings();
+        $kompetensiRankings = $this->getKompetensiRankings();
 
-        if (! $eventData) {
+        if (! $potensiRankings || $potensiRankings->isEmpty() || ! $kompetensiRankings || $kompetensiRankings->isEmpty()) {
             return null;
         }
 
-        $event = $eventData['event'];
-        $position = $eventData['position'];
+        // 🚀 OPTIMIZATION: Build combined rankings locally instead of calling getCombinedRankings()
+        // This avoids duplicate queries since getCombinedRankings() would call getRankings() again
+        // Logic replicated from RankingService::getCombinedRankings() (lines 676-743)
 
-        // Call RankingService to get combined rankings
-        $rankingService = app(RankingService::class);
-        $rankings = $rankingService->getCombinedRankings(
-            $event->id,
-            $position->id,
-            $position->template_id,
-            $this->tolerancePercentage
-        );
+        $kompetensiRankingsKeyed = $kompetensiRankings->keyBy('participant_id');
 
-        // Cache the result
-        $this->rankingsCache = $rankings;
+        $participantScores = [];
+        foreach ($potensiRankings as $potensiRank) {
+            $participantId = $potensiRank['participant_id'];
 
-        return $rankings;
+            $kompetensiRank = $kompetensiRankingsKeyed->get($participantId);
+            if (! $kompetensiRank) {
+                continue;
+            }
+
+            // Calculate weighted total score
+            $weightedPotensiScore = $potensiRank['individual_score'] * ($this->potensiWeight / 100);
+            $weightedKompetensiScore = $kompetensiRank['individual_score'] * ($this->kompetensiWeight / 100);
+            $totalIndividualScore = round($weightedPotensiScore + $weightedKompetensiScore, 2);
+
+            // Calculate weighted standard score (with tolerance)
+            $weightedPotensiStd = $potensiRank['adjusted_standard_score'] * ($this->potensiWeight / 100);
+            $weightedKompetensiStd = $kompetensiRank['adjusted_standard_score'] * ($this->kompetensiWeight / 100);
+            $totalStandardScore = round($weightedPotensiStd + $weightedKompetensiStd, 2);
+
+            // Calculate weighted original standard score
+            $weightedOrigPotensiStd = $potensiRank['original_standard_score'] * ($this->potensiWeight / 100);
+            $weightedOrigKompetensiStd = $kompetensiRank['original_standard_score'] * ($this->kompetensiWeight / 100);
+            $totalOriginalStandardScore = round($weightedOrigPotensiStd + $weightedOrigKompetensiStd, 2);
+
+            // Calculate gaps
+            $totalGapScore = round($totalIndividualScore - $totalStandardScore, 2);
+            $totalOriginalGapScore = round($totalIndividualScore - $totalOriginalStandardScore, 2);
+
+            // Calculate percentage
+            $percentage = $totalStandardScore > 0
+                ? ($totalIndividualScore / $totalStandardScore) * 100
+                : 0;
+
+            // Determine conclusion
+            $conclusion = ConclusionService::getGapBasedConclusion($totalOriginalGapScore, $totalGapScore);
+
+            $participantScores[] = [
+                'participant_id' => $participantId,
+                'participant_name' => $potensiRank['participant_name'] ?? '',
+                'total_individual_score' => $totalIndividualScore,
+                'total_standard_score' => $totalStandardScore,
+                'total_original_standard_score' => $totalOriginalStandardScore,
+                'total_gap_score' => $totalGapScore,
+                'total_original_gap_score' => $totalOriginalGapScore,
+                'percentage' => round($percentage, 2),
+                'conclusion' => $conclusion,
+                'potensi_weight' => $this->potensiWeight,
+                'kompetensi_weight' => $this->kompetensiWeight,
+            ];
+        }
+
+        // Sort by total_individual_score DESC, then participant_name ASC (tiebreaker)
+        $rankings = collect($participantScores)
+            ->sortBy([
+                ['total_individual_score', 'desc'],
+                ['participant_name', 'asc'],
+            ])
+            ->values();
+
+        // Add rank number
+        $this->rankingsCache = $rankings->map(fn ($row, $index) => [...$row, 'rank' => $index + 1]);
+
+        return $this->rankingsCache;
     }
 
     /**
      * Get Potensi rankings (with cache)
-     * OPTIMIZED: Cache to avoid duplicate queries
+     * 🚀 OPTIMIZED: Fetch once and cache, reused by getRankings()
      */
     private function getPotensiRankings(): ?\Illuminate\Support\Collection
     {
-        // Check cache first
+        // Return cached if available
         if ($this->potensiRankingsCache !== null) {
             return $this->potensiRankingsCache;
         }
 
-        // OPTIMIZED: Use cached event data
+        // Fetch from service and cache
         $eventData = $this->getEventData();
 
         if (! $eventData) {
             return null;
         }
 
-        $event = $eventData['event'];
-        $position = $eventData['position'];
-
         $rankingService = app(RankingService::class);
         $this->potensiRankingsCache = $rankingService->getRankings(
-            $event->id,
-            $position->id,
-            $position->template_id,
+            $eventData['event']->id,
+            $eventData['position']->id,
+            $eventData['position']->template_id,
             'potensi',
             $this->tolerancePercentage
         );
@@ -250,30 +303,27 @@ class RekapRankingAssessment extends Component
 
     /**
      * Get Kompetensi rankings (with cache)
-     * OPTIMIZED: Cache to avoid duplicate queries
+     * 🚀 OPTIMIZED: Fetch once and cache, reused by getRankings()
      */
     private function getKompetensiRankings(): ?\Illuminate\Support\Collection
     {
-        // Check cache first
+        // Return cached if available
         if ($this->kompetensiRankingsCache !== null) {
             return $this->kompetensiRankingsCache;
         }
 
-        // OPTIMIZED: Use cached event data
+        // Fetch from service and cache
         $eventData = $this->getEventData();
 
         if (! $eventData) {
             return null;
         }
 
-        $event = $eventData['event'];
-        $position = $eventData['position'];
-
         $rankingService = app(RankingService::class);
         $this->kompetensiRankingsCache = $rankingService->getRankings(
-            $event->id,
-            $position->id,
-            $position->template_id,
+            $eventData['event']->id,
+            $eventData['position']->id,
+            $eventData['position']->template_id,
             'kompetensi',
             $this->tolerancePercentage
         );
@@ -542,7 +592,7 @@ class RekapRankingAssessment extends Component
         if ($this->perPage !== 'all' && $this->perPage > 0) {
             $currentPage = $this->getPage();
             $offset = ($currentPage - 1) * $this->perPage;
-            
+
             // Slice the RAW data first
             $slicedRankings = $rankings->slice($offset, $this->perPage);
         }
