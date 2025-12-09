@@ -19,6 +19,12 @@ class DynamicStandardService
     private const SESSION_PREFIX = 'standard_adjustment';
 
     /**
+     * 🚀 OPTIMIZATION: Request-scoped cache for CustomStandard
+     * Prevents N+1 queries (50+ calls to CustomStandard::find per request)
+     */
+    private array $customStandardCache = [];
+
+    /**
      * Get session key for template
      */
     private function getSessionKey(int $templateId): string
@@ -32,6 +38,19 @@ class DynamicStandardService
     public function getAdjustments(int $templateId): array
     {
         return Session::get($this->getSessionKey($templateId), []);
+    }
+
+    /**
+     * 🚀 OPTIMIZATION: Get CustomStandard with request-scoped caching
+     * Single query per customStandardId per request lifecycle
+     */
+    private function getCustomStandard(int $customStandardId): ?CustomStandard
+    {
+        if (! isset($this->customStandardCache[$customStandardId])) {
+            $this->customStandardCache[$customStandardId] = CustomStandard::find($customStandardId);
+        }
+
+        return $this->customStandardCache[$customStandardId];
     }
 
     // ========================================
@@ -51,7 +70,8 @@ class DynamicStandardService
         $customStandardId = Session::get("selected_standard.{$templateId}");
 
         if ($customStandardId) {
-            $customStandard = CustomStandard::find($customStandardId);
+            // 🚀 Use cached getter (prevents N+1)
+            $customStandard = $this->getCustomStandard($customStandardId);
 
             if ($customStandard) {
                 // Return value from Custom Standard if it exists
@@ -583,7 +603,7 @@ class DynamicStandardService
         // 2. Check custom standard
         $customStandardId = Session::get("selected_standard.{$templateId}");
         if ($customStandardId) {
-            $customStandard = CustomStandard::find($customStandardId);
+            $customStandard = $this->getCustomStandard($customStandardId);
             if ($customStandard && ! empty($customStandard->sub_aspect_configs)) {
                 foreach ($customStandard->sub_aspect_configs as $config) {
                     if (isset($config['active']) && $config['active'] === false) {
@@ -678,7 +698,7 @@ class DynamicStandardService
         // Priority 2: Custom standard
         $customStandardId = Session::get("selected_standard.{$templateId}");
         if ($customStandardId) {
-            $customStandard = CustomStandard::find($customStandardId);
+            $customStandard = $this->getCustomStandard($customStandardId);
             if ($customStandard && isset($customStandard->category_weights[$categoryCode])) {
                 return (int) $customStandard->category_weights[$categoryCode];
             }
@@ -704,7 +724,7 @@ class DynamicStandardService
         // Priority 2: Custom standard
         $customStandardId = Session::get("selected_standard.{$templateId}");
         if ($customStandardId) {
-            $customStandard = CustomStandard::find($customStandardId);
+            $customStandard = $this->getCustomStandard($customStandardId);
             if ($customStandard && isset($customStandard->aspect_configs[$aspectCode]['weight'])) {
                 return (int) $customStandard->aspect_configs[$aspectCode]['weight'];
             }
@@ -730,7 +750,7 @@ class DynamicStandardService
         // Priority 2: Custom standard (DATA-DRIVEN)
         $customStandardId = Session::get("selected_standard.{$templateId}");
         if ($customStandardId) {
-            $customStandard = CustomStandard::find($customStandardId);
+            $customStandard = $this->getCustomStandard($customStandardId);
             if ($customStandard) {
                 // Use data-driven calculation (handles both with/without sub-aspects)
                 $rating = $this->getAspectRatingFromCustomStandard(
@@ -765,7 +785,7 @@ class DynamicStandardService
         // Priority 2: Custom standard
         $customStandardId = Session::get("selected_standard.{$templateId}");
         if ($customStandardId) {
-            $customStandard = CustomStandard::find($customStandardId);
+            $customStandard = $this->getCustomStandard($customStandardId);
             if ($customStandard && isset($customStandard->sub_aspect_configs[$subAspectCode]['rating'])) {
                 return (int) $customStandard->sub_aspect_configs[$subAspectCode]['rating'];
             }
@@ -972,7 +992,7 @@ class DynamicStandardService
         // Priority 2: Custom standard
         $customStandardId = Session::get("selected_standard.{$templateId}");
         if ($customStandardId) {
-            $customStandard = CustomStandard::find($customStandardId);
+            $customStandard = $this->getCustomStandard($customStandardId);
             if ($customStandard && isset($customStandard->aspect_configs[$aspectCode]['active'])) {
                 return (bool) $customStandard->aspect_configs[$aspectCode]['active'];
             }
@@ -998,7 +1018,7 @@ class DynamicStandardService
         // Priority 2: Custom standard
         $customStandardId = Session::get("selected_standard.{$templateId}");
         if ($customStandardId) {
-            $customStandard = CustomStandard::find($customStandardId);
+            $customStandard = $this->getCustomStandard($customStandardId);
             if ($customStandard && isset($customStandard->sub_aspect_configs[$subAspectCode]['active'])) {
                 return (bool) $customStandard->sub_aspect_configs[$subAspectCode]['active'];
             }
