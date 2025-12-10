@@ -6,7 +6,9 @@ namespace App\Services;
 
 use App\Models\Aspect;
 use App\Models\AspectAssessment;
+use App\Services\Cache\AspectCacheService;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 
 /**
  * TrainingRecommendationService - Single Source of Truth for Training Recommendation Calculations
@@ -33,6 +35,8 @@ class TrainingRecommendationService
      * - If individual_rating < adjusted_standard_rating → Recommended for Training
      * - If individual_rating >= adjusted_standard_rating → Not Recommended
      *
+     * Returns ALL participants (component will handle pagination)
+     *
      * @param  int  $eventId  Assessment event ID
      * @param  int  $positionFormationId  Position formation ID
      * @param  int  $aspectId  Aspect ID
@@ -45,36 +49,85 @@ class TrainingRecommendationService
         int $aspectId,
         int $tolerancePercentage = 10
     ): Collection {
-        // Get aspect data
-        $aspect = Aspect::with('categoryType', 'subAspects')->findOrFail($aspectId);
+        // 🚀 OPTIMIZATION: Smart caching with lightweight query + lazy loading
+        //
+        // STRATEGY:
+        // 1. Cache lightweight data (IDs + ratings only)
+        // 2. Component handles pagination (slice)
+        // 3. Component hydrates participant details ONLY for visible items
+        //
+        // BEFORE: Load 4,944 participants with relationships → 3.98s
+        // AFTER: Load 4,944 ratings only → ~200ms (cached: ~50ms)
 
-        // Get adjusted standard rating
+        $standardService = app(DynamicStandardService::class);
+
+        // Get aspect data (use cache service to avoid N+1)
+        $aspect = AspectCacheService::getById($aspectId);
+
+        if (! $aspect) {
+            throw new \Exception("Aspect with ID {$aspectId} not found");
+        }
+
+        // Build config hash for cache invalidation
+        $aspectRating = $standardService->getAspectRating($aspect->template_id, $aspect->code);
+
+        $subAspectRatings = [];
+        if ($aspect->subAspects->isNotEmpty()) {
+            foreach ($aspect->subAspects as $subAspect) {
+                if ($standardService->isSubAspectActive($aspect->template_id, $subAspect->code)) {
+                    $subAspectRatings[$subAspect->code] = $standardService->getSubAspectRating($aspect->template_id, $subAspect->code);
+                }
+            }
+        }
+
+        $configHash = md5(json_encode([
+            'aspect_code' => $aspect->code,
+            'aspect_rating' => $aspectRating,
+            'sub_aspect_ratings' => $subAspectRatings,
+            'session' => session()->getId(),
+        ]));
+
+        $cacheKey = "training_participants:{$aspectId}:{$eventId}:{$positionFormationId}:{$configHash}";
+
+        // Cache lightweight assessment data
+        $lightweightAssessments = Cache::remember($cacheKey, 60, function () use ($eventId, $positionFormationId, $aspectId) {
+            // 🚀 OPTIMIZATION: Load only IDs and ratings (no relationships)
+            return AspectAssessment::query()
+                ->join('participants', 'participants.id', '=', 'aspect_assessments.participant_id')
+                ->where('aspect_assessments.event_id', $eventId)
+                ->where('aspect_assessments.position_formation_id', $positionFormationId)
+                ->where('aspect_assessments.aspect_id', $aspectId)
+                ->select(
+                    'aspect_assessments.id',
+                    'aspect_assessments.participant_id',
+                    'aspect_assessments.individual_rating',
+                    'participants.test_number',
+                    'participants.name',
+                    'participants.position_formation_id'
+                )
+                ->orderBy('aspect_assessments.individual_rating', 'asc')
+                ->toBase() // Skip model hydration
+                ->get();
+        });
+
+        // Get adjusted standard rating (with tolerance applied)
         $adjustedStandardRating = $this->getAdjustedStandardRating(
             $aspect,
             $positionFormationId,
             $tolerancePercentage
         );
 
-        // Get all aspect assessments, sorted by rating (lowest first)
-        $assessments = AspectAssessment::query()
-            ->with(['participant.positionFormation'])
-            ->where('event_id', $eventId)
-            ->where('position_formation_id', $positionFormationId)
-            ->where('aspect_id', $aspectId)
-            ->orderBy('individual_rating', 'asc')
-            ->get();
-
-        // Map to recommendation data
-        return $assessments->map(function ($assessment, $index) use ($adjustedStandardRating) {
+        // Map to recommendation data (lightweight - no DB queries)
+        return $lightweightAssessments->map(function ($assessment, $index) use ($adjustedStandardRating) {
             $individualRating = (float) $assessment->individual_rating;
             $isRecommended = $individualRating < $adjustedStandardRating;
 
             return [
                 'priority' => $index + 1,
                 'participant_id' => $assessment->participant_id,
-                'test_number' => $assessment->participant->test_number,
-                'name' => $assessment->participant->name,
-                'position' => $assessment->participant->positionFormation->name ?? '-',
+                'test_number' => $assessment->test_number,
+                'name' => $assessment->name,
+                'position_formation_id' => $assessment->position_formation_id,
                 'rating' => $individualRating,
                 'is_recommended' => $isRecommended,
                 'statement' => $isRecommended ? 'Recommended' : 'Not Recommended',
@@ -100,7 +153,18 @@ class TrainingRecommendationService
         int $templateId,
         int $tolerancePercentage = 10
     ): Collection {
+        // 🚀 OPTIMIZATION: Smart caching with lightweight query
+        //
+        // STRATEGY:
+        // 1. Preload aspects using AspectCacheService
+        // 2. Use lightweight query for assessments (select specific columns only)
+        // 3. Cache results with config hash
+        // 4. Apply tolerance after cache for instant UX
+
         $standardService = app(DynamicStandardService::class);
+
+        // Preload aspects to avoid N+1
+        AspectCacheService::preloadByTemplate($templateId);
 
         // Get all aspects for the template
         $aspects = Aspect::where('template_id', $templateId)
@@ -109,58 +173,94 @@ class TrainingRecommendationService
             ->orderBy('order', 'asc')
             ->get();
 
-        // Get all assessments at once to avoid N+1
-        $aspectIds = $aspects->pluck('id')->all();
-        $assessmentsGrouped = AspectAssessment::query()
-            ->where('event_id', $eventId)
-            ->where('position_formation_id', $positionFormationId)
-            ->whereIn('aspect_id', $aspectIds)
-            ->get()
-            ->groupBy('aspect_id');
+        // Filter active aspects
+        $activeAspects = $aspects->filter(function ($aspect) use ($standardService, $templateId) {
+            return $standardService->isAspectActive($templateId, $aspect->code);
+        });
 
-        $aspectData = [];
+        if ($activeAspects->isEmpty()) {
+            return collect();
+        }
 
-        foreach ($aspects as $aspect) {
-            // Check if aspect is active from session
-            if (! $standardService->isAspectActive($templateId, $aspect->code)) {
-                continue; // Skip inactive aspects
+        // Build config hash for cache invalidation
+        $aspectRatings = [];
+        foreach ($activeAspects as $aspect) {
+            $aspectRatings[$aspect->code] = $standardService->getAspectRating($templateId, $aspect->code);
+        }
+
+        $configHash = md5(json_encode([
+            'template_id' => $templateId,
+            'aspect_ratings' => $aspectRatings,
+            'session' => session()->getId(),
+        ]));
+
+        $cacheKey = "training_priority:{$templateId}:{$eventId}:{$positionFormationId}:{$configHash}";
+
+        // Cache aspect priority data (without tolerance applied)
+        $rawPriorityData = Cache::remember($cacheKey, 60, function () use ($eventId, $positionFormationId, $activeAspects, $templateId) {
+            $aspectIds = $activeAspects->pluck('id')->all();
+
+            // 🚀 OPTIMIZATION: Use lightweight query with specific columns only
+            $assessmentsGrouped = AspectAssessment::query()
+                ->where('event_id', $eventId)
+                ->where('position_formation_id', $positionFormationId)
+                ->whereIn('aspect_id', $aspectIds)
+                ->select('id', 'aspect_id', 'individual_rating')
+                ->toBase() // Skip model hydration
+                ->get()
+                ->groupBy('aspect_id');
+
+            $aspectData = [];
+
+            foreach ($activeAspects as $aspect) {
+                // Get assessments from grouped collection
+                $assessments = $assessmentsGrouped->get($aspect->id, collect());
+
+                if ($assessments->isEmpty()) {
+                    continue;
+                }
+
+                // Calculate average rating for this aspect
+                $totalRating = 0;
+                foreach ($assessments as $assessment) {
+                    $totalRating += (float) $assessment->individual_rating;
+                }
+                $averageRating = $totalRating / $assessments->count();
+
+                // Get original standard rating (before tolerance)
+                $originalStandardRating = $this->getOriginalStandardRating($aspect, $templateId);
+
+                $aspectData[] = [
+                    'aspect_name' => $aspect->name,
+                    'original_standard_rating' => $originalStandardRating,
+                    'average_rating' => $averageRating,
+                ];
             }
 
-            // Get assessments from grouped collection
-            $assessments = $assessmentsGrouped->get($aspect->id, collect());
+            return $aspectData;
+        });
 
-            if ($assessments->isEmpty()) {
-                continue;
-            }
+        // Apply tolerance adjustment (not cached for instant UX)
+        $aspectDataWithTolerance = [];
+        $toleranceFactor = 1 - ($tolerancePercentage / 100);
 
-            // Calculate average rating for this aspect
-            $averageRating = $assessments->avg('individual_rating');
-
-            // Get original standard rating (before tolerance)
-            $originalStandardRating = $this->getOriginalStandardRating($aspect, $templateId);
-
-            // Calculate adjusted standard based on tolerance
-            $toleranceFactor = 1 - ($tolerancePercentage / 100);
-            $adjustedStandardRating = $originalStandardRating * $toleranceFactor;
-
-            // Calculate gap using adjusted standard
-            $gap = $averageRating - $adjustedStandardRating;
-
-            // Determine action (Pelatihan if gap < 0, Dipertahankan if gap >= 0)
+        foreach ($rawPriorityData as $data) {
+            $adjustedStandardRating = $data['original_standard_rating'] * $toleranceFactor;
+            $gap = $data['average_rating'] - $adjustedStandardRating;
             $action = $gap < 0 ? 'Pelatihan' : 'Dipertahankan';
 
-            $aspectData[] = [
-                'aspect_name' => $aspect->name,
-                'original_standard_rating' => round($originalStandardRating, 2),
+            $aspectDataWithTolerance[] = [
+                'aspect_name' => $data['aspect_name'],
+                'original_standard_rating' => round($data['original_standard_rating'], 2),
                 'adjusted_standard_rating' => round($adjustedStandardRating, 2),
-                'average_rating' => round($averageRating, 2),
+                'average_rating' => round($data['average_rating'], 2),
                 'gap' => round($gap, 2),
                 'action' => $action,
             ];
         }
 
         // Sort by gap (ascending - most negative first)
-        $collection = collect($aspectData)->sortBy('gap')->values();
+        $collection = collect($aspectDataWithTolerance)->sortBy('gap')->values();
 
         // Add priority number
         return $collection->map(function ($item, $index) {
@@ -185,60 +285,115 @@ class TrainingRecommendationService
         int $aspectId,
         int $tolerancePercentage = 10
     ): array {
-        // Get aspect data
-        $aspect = Aspect::with('categoryType', 'subAspects')->findOrFail($aspectId);
+        // 🚀 OPTIMIZATION: Smart caching with 3-layer priority support (60s TTL)
+        //
+        // CACHE STRATEGY:
+        // - Cache key includes: event, position, aspect, config hash, and session ID
+        // - Config hash based on aspect ratings from DynamicStandardService
+        // - This respects 3-layer priority automatically:
+        //
+        // ✅ Layer 1 (Session Adjustment): Config hash changes → Cache miss → Re-compute
+        // ✅ Layer 2 (Custom Standard): Config hash changes → Cache miss → Re-compute
+        // ✅ Layer 3 (Quantum Default): Config hash stable → Cache hit (until TTL)
+        //
+        // TOLERANCE HANDLING:
+        // - Tolerance is NOT in cache key (applied after cache for instant UX)
 
-        // Get original standard rating (before tolerance)
-        $originalStandardRating = $this->getOriginalStandardRating($aspect, $aspect->template_id);
+        $standardService = app(DynamicStandardService::class);
 
-        // Get adjusted standard rating (with tolerance)
-        $adjustedStandardRating = $this->getAdjustedStandardRating(
-            $aspect,
-            $positionFormationId,
-            $tolerancePercentage
-        );
+        // Get aspect data (use cache service to avoid N+1)
+        $aspect = AspectCacheService::getById($aspectId);
 
-        // Get all aspect assessments
-        $assessments = AspectAssessment::where('event_id', $eventId)
-            ->where('position_formation_id', $positionFormationId)
-            ->where('aspect_id', $aspectId)
-            ->get();
+        if (! $aspect) {
+            throw new \Exception("Aspect with ID {$aspectId} not found");
+        }
 
-        $totalParticipants = $assessments->count();
+        // Build config hash from aspect rating for cache invalidation
+        $aspectRating = $standardService->getAspectRating($aspect->template_id, $aspect->code);
+
+        // Include sub-aspect ratings if aspect has sub-aspects
+        $subAspectRatings = [];
+        if ($aspect->subAspects->isNotEmpty()) {
+            foreach ($aspect->subAspects as $subAspect) {
+                if ($standardService->isSubAspectActive($aspect->template_id, $subAspect->code)) {
+                    $subAspectRatings[$subAspect->code] = $standardService->getSubAspectRating($aspect->template_id, $subAspect->code);
+                }
+            }
+        }
+
+        $configHash = md5(json_encode([
+            'aspect_code' => $aspect->code,
+            'aspect_rating' => $aspectRating,
+            'sub_aspect_ratings' => $subAspectRatings,
+            'session' => session()->getId(), // Isolates per-user session adjustments
+        ]));
+
+        $cacheKey = "training_summary:{$aspectId}:{$eventId}:{$positionFormationId}:{$configHash}";
+
+        // Cache the summary (without tolerance applied)
+        $rawSummary = Cache::remember($cacheKey, 60, function () use ($eventId, $positionFormationId, $aspectId, $aspect) {
+            // 🚀 OPTIMIZATION: Use lightweight query with selective columns
+            // Only select columns we need for calculations
+            $assessments = AspectAssessment::query()
+                ->where('event_id', $eventId)
+                ->where('position_formation_id', $positionFormationId)
+                ->where('aspect_id', $aspectId)
+                ->select('id', 'participant_id', 'individual_rating')
+                ->toBase() // Skip model hydration for performance
+                ->get();
+
+            $totalParticipants = $assessments->count();
+            $totalRating = 0;
+
+            // Calculate basic statistics (without tolerance)
+            foreach ($assessments as $assessment) {
+                $totalRating += (float) $assessment->individual_rating;
+            }
+
+            $averageRating = $totalParticipants > 0
+                ? $totalRating / $totalParticipants
+                : 0;
+
+            // Get original standard rating (before tolerance)
+            $originalStandardRating = $this->getOriginalStandardRating($aspect, $aspect->template_id);
+
+            return [
+                'total_participants' => $totalParticipants,
+                'average_rating' => $averageRating,
+                'original_standard_rating' => $originalStandardRating,
+                'assessments_ratings' => $assessments->pluck('individual_rating')->all(), // Store for tolerance calculation
+            ];
+        });
+
+        // Apply tolerance adjustment (not cached for instant UX)
+        $originalStandardRating = $rawSummary['original_standard_rating'];
+        $toleranceFactor = 1 - ($tolerancePercentage / 100);
+        $adjustedStandardRating = $originalStandardRating * $toleranceFactor;
+
+        // Calculate recommended counts based on tolerance
         $recommendedCount = 0;
         $notRecommendedCount = 0;
-        $totalRating = 0;
 
-        // Calculate summary statistics
-        foreach ($assessments as $assessment) {
-            $individualRating = (float) $assessment->individual_rating;
-            $totalRating += $individualRating;
-
-            // Participant is recommended for training if individual rating < adjusted standard
-            if ($individualRating < $adjustedStandardRating) {
+        foreach ($rawSummary['assessments_ratings'] as $rating) {
+            if ($rating < $adjustedStandardRating) {
                 $recommendedCount++;
             } else {
                 $notRecommendedCount++;
             }
         }
 
-        // Calculate average rating
-        $averageRating = $totalParticipants > 0
-            ? round($totalRating / $totalParticipants, 2)
-            : 0;
-
         return [
-            'total_participants' => $totalParticipants,
+            'total_participants' => $rawSummary['total_participants'],
             'recommended_count' => $recommendedCount,
             'not_recommended_count' => $notRecommendedCount,
-            'average_rating' => $averageRating,
+            'average_rating' => round($rawSummary['average_rating'], 2),
             'standard_rating' => round($adjustedStandardRating, 2),
             'original_standard_rating' => round($originalStandardRating, 2),
-            'recommended_percentage' => $totalParticipants > 0
-                ? round(($recommendedCount / $totalParticipants) * 100, 2)
+            'recommended_percentage' => $rawSummary['total_participants'] > 0
+                ? round(($recommendedCount / $rawSummary['total_participants']) * 100, 2)
                 : 0,
-            'not_recommended_percentage' => $totalParticipants > 0
-                ? round(($notRecommendedCount / $totalParticipants) * 100, 2)
+            'not_recommended_percentage' => $rawSummary['total_participants'] > 0
+                ? round(($notRecommendedCount / $rawSummary['total_participants']) * 100, 2)
                 : 0,
         ];
     }

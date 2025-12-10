@@ -283,7 +283,7 @@ class TrainingRecommendation extends Component
             return $this->paginateCollection($this->participantsCacheData);
         }
 
-        // Call service
+        // Call service (returns lightweight data from cache)
         $service = app(TrainingRecommendationService::class);
         $participants = $service->getParticipantsRecommendation(
             $this->selectedEvent->id,
@@ -291,6 +291,24 @@ class TrainingRecommendation extends Component
             $this->selectedAspect->id,
             $this->tolerancePercentage
         );
+
+        // 🚀 OPTIMIZATION: Load position names for ALL participants at once (not lazy)
+        // This is acceptable because it's just one query with minimal data
+        $positionIds = $participants->pluck('position_formation_id')->unique()->filter()->all();
+
+        if (! empty($positionIds)) {
+            $positions = \App\Models\PositionFormation::whereIn('id', $positionIds)
+                ->select('id', 'name')
+                ->get()
+                ->keyBy('id');
+
+            // Attach position names
+            $participants = $participants->map(function ($participant) use ($positions) {
+                $participant['position'] = $positions->get($participant['position_formation_id'])->name ?? '-';
+
+                return $participant;
+            });
+        }
 
         // Cache result
         $this->participantsCacheData = $participants;
