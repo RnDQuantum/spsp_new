@@ -86,24 +86,45 @@ Test suite telah dibuat untuk memverifikasi cache optimization pada 6 Livewire c
 ## ⏸️ Test Scenarios - PENDING (Out of Scope)
 
 ### **3. Advanced Cache Invalidation**
-**Status**: ⏸️ **PAUSED - Custom Standard Baseline**
+**Status**: ⚠️ **NEEDS FIX - Wrong Method Names**
 
-| Test Case | Blocker | Required |
-|-----------|---------|----------|
-| `it_invalidates_cache_on_standard_adjustment()` | Missing `DynamicStandardService::setAspectWeight()` | For session adjustment testing |
-| `it_invalidates_cache_on_custom_standard_switch()` | Missing `DynamicStandardService::setActiveBaselineStandard()` | For Custom Standard testing |
-| `it_invalidates_cache_on_category_weight_change()` | Missing `DynamicStandardService::setCategoryWeight()` | For session adjustment testing |
+| Test Case | Issue | Fix Required |
+|-----------|-------|--------------|
+| `it_invalidates_cache_on_standard_adjustment()` | ❌ Test uses `setAspectWeight()` | ✅ Change to `saveAspectWeight()` (method exists) |
+| `it_invalidates_cache_on_custom_standard_switch()` | ❌ Test uses `setActiveBaselineStandard()` | ⏸️ Method **belum ada**, skip test untuk saat ini |
+| `it_invalidates_cache_on_category_weight_change()` | ❌ Test uses `setCategoryWeight()` | ✅ Change to `saveCategoryWeight()` (method exists) |
 
-**Why Paused**:
+**Actual Status**:
+1. ✅ DynamicStandardService **SUDAH PUNYA** methods untuk adjustment:
+   - `saveCategoryWeight(int $templateId, string $categoryCode, int $weight): void`
+   - `saveAspectWeight(int $templateId, string $aspectCode, int $weight): void`
+   - `saveAspectRating(int $templateId, string $aspectCode, float $rating): void`
+
+2. ❌ Test **menggunakan nama method yang SALAH**:
+   - Test: `setAspectWeight()` → Correct: `saveAspectWeight()`
+   - Test: `setCategoryWeight()` → Correct: `saveCategoryWeight()`
+
+3. ⏸️ Method untuk **switch baseline standard memang BELUM ADA**:
+   - Test uses: `setActiveBaselineStandard()` → **Method not exist**
+   - Workaround: Skip Custom Standard switch test untuk saat ini
+
+**Why Not Fully Implemented**:
 1. ✅ Fokus saat ini adalah **Quantum Default baseline**
-2. ✅ Cache optimization **sudah berfungsi** untuk Quantum Default
-3. ⏸️ Custom Standard & Session Adjustment testing requires additional DynamicStandardService methods
-4. ⏸️ Methods tersebut **belum diimplementasikan** (out of current optimization scope)
+2. ⚠️ Test code needs fix (wrong method names)
+3. ⏸️ Custom Standard switch test requires new method (out of current scope)
 
 **Future Work**:
-- Implementasi missing methods di `DynamicStandardService`
-- Enable & run advanced invalidation tests
-- Full coverage untuk semua baseline scenarios
+1. **Fix test method names** (Quick win):
+   - Replace `setAspectWeight()` → `saveAspectWeight()`
+   - Replace `setCategoryWeight()` → `saveCategoryWeight()`
+
+2. **Implement Custom Standard switch method** (If needed):
+   - Add `setActiveBaselineStandard(int $templateId, string $standard): void` to DynamicStandardService
+   - Or skip Custom Standard switch tests (out of current scope)
+
+3. **Run advanced invalidation tests**:
+   - After fixing method names
+   - Verify cache invalidation on session adjustments
 
 ---
 
@@ -190,17 +211,23 @@ Advanced tests (`standard_adjustment`, `custom_standard_switch`) akan **skip/fai
    - Measure actual performance improvement
    - Monitor cache hit rate
 
-### **Future (When Custom Standard Baseline Required)**
+### **Future (Optional - For Full Test Coverage)**
 
-4. **Implement missing DynamicStandardService methods**
-   - `setAspectWeight(int $templateId, string $aspectCode, float $weight): void`
-   - `setCategoryWeight(int $templateId, string $categoryCode, int $weight): void`
-   - `setActiveBaselineStandard(int $templateId, string $standard): void`
+4. **Fix test method names** (Quick win - ~5 minutes)
+   - Find & replace in all 6 test files:
+     - `setAspectWeight` → `saveAspectWeight`
+     - `setCategoryWeight` → `saveCategoryWeight`
+   - Re-run tests to verify session adjustment cache invalidation
 
-5. **Enable advanced tests**
-   - Uncomment standard adjustment tests
-   - Run full test suite
-   - Verify cache invalidation on config changes
+5. **Implement Custom Standard switch method** (If needed)
+   - Add `setActiveBaselineStandard()` to DynamicStandardService
+   - Enable Custom Standard switch tests
+   - Verify cache invalidation on baseline change
+
+6. **Run full test suite**
+   - After fixing method names
+   - Verify all 59 tests passing
+   - Document final coverage
 
 ---
 
