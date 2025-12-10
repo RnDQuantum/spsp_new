@@ -97,38 +97,23 @@ class RankingService
         $cacheKey = "rankings:{$categoryCode}:{$eventId}:{$positionFormationId}:{$templateId}:{$configHash}";
 
         // Cache the raw rankings (without tolerance applied)
-        $rawRankings = \Illuminate\Support\Facades\Cache::remember($cacheKey, 60, function () use ($eventId, $positionFormationId, $templateId, $categoryCode, $activeAspectIds) {
+        $rawRankings = \Illuminate\Support\Facades\Cache::remember($cacheKey, 60, function () use ($eventId, $positionFormationId, $templateId, $categoryCode, $activeAspectIds, $standardService) {
             // 🚀 OPTIMIZATION: PRE-COMPUTE STANDARDS ONCE (instead of 100K+ times!)
             // This reduces 100,000+ calls to DynamicStandardService to just 5-10 calls
             $standardsCache = $this->precomputeStandards($templateId, $activeAspectIds);
 
-            // 🚀 CRITICAL OPTIMIZATION: Always use lightweight query
-            //
-            // WHY: For ranking, we ONLY need aspect-level individual_rating
-            // which is ALREADY in aspect_assessments table (pre-calculated)
-            //
-            // Sub-aspects are ONLY needed for:
-            // - Individual participant reports (GeneralMapping, etc.)
-            // - NOT for ranking 4,905 participants
-            //
-            // BEFORE FIX:
-            // - Quantum Default: toBase() → 1s ✅
-            // - Custom Standard: eager load → 11s ❌ (133K models!)
-            //
-            // AFTER FIX:
-            // - Quantum Default: toBase() → 1s ✅
-            // - Custom Standard: toBase() → 1s ✅
-            //
-            // Custom Standard only changes weights & standard ratings (both cached)
-            // It does NOT change individual_rating (historical data from assessment)
+            // 🚀 OPTIMIZATION: Check if we need to load sub-aspects
+            // If NO adjustments to active sub-aspects, we can use the pre-calculated individual_rating
+            // stored in aspect_assessments, avoiding the massive N+1 / hydration overhead.
+            $hasSubAspectAdjustments = $standardService->hasActiveSubAspectAdjustments($templateId);
 
-            // Map aspect ID to Code for fast lookup
+            // Map aspect ID to Code for fast lookup (needed for raw query optimization)
             $aspectIdToCode = [];
             foreach ($standardsCache as $code => $data) {
                 $aspectIdToCode[$data['id']] = $code;
             }
 
-            // Build query - ALWAYS use toBase() for maximum performance
+            // Build query
             $query = AspectAssessment::query()
                 ->join('participants', 'participants.id', '=', 'aspect_assessments.participant_id')
                 ->where('aspect_assessments.event_id', $eventId)
@@ -142,8 +127,16 @@ class RankingService
                     'participants.name as participant_name'
                 );
 
-            // 🚀 Always use toBase() - no eager loading, no model hydration
-            $assessments = $query->toBase()->get();
+            // Only eager load if necessary
+            if ($hasSubAspectAdjustments) {
+                $query->with(['aspect.subAspects', 'subAspectAssessments.subAspect']);
+                $assessments = $query->get(); // Hydrate models if we need complex sub-aspect logic
+            } else {
+                // 🚀 MAX OPTIMIZATION: Use toBase() to skip Model Hydration completely
+                // We get stdClass objects instead of AspectAssessment models.
+                // This saves creating ~25,000 model instances when we only need simple values.
+                $assessments = $query->toBase()->get();
+            }
 
             if ($assessments->isEmpty()) {
                 return collect();
@@ -155,6 +148,12 @@ class RankingService
             foreach ($assessments as $assessment) {
                 $participantId = $assessment->participant_id;
 
+                // Handle object vs model property access
+                // In raw object (stdClass), properties are accessed directly.
+                // In Eloquent model, they are properly cast types.
+                // However, AspectAssessment casts are 'decimal:2', so raw values might be strings.
+                // We should cast them to float manually to be safe.
+
                 if (! isset($participantScores[$participantId])) {
                     $participantScores[$participantId] = [
                         'participant_id' => $participantId,
@@ -164,20 +163,38 @@ class RankingService
                     ];
                 }
 
-                // Simple array lookup (assessment is stdClass from toBase())
-                $aspectCode = $aspectIdToCode[$assessment->aspect_id] ?? null;
+                // Resolve Aspect Code Helper
+                $aspectCode = null;
+                if ($hasSubAspectAdjustments && $assessment instanceof AspectAssessment) {
+                    $aspectCode = $assessment->aspect->code;
+                } else {
+                    $aspectCode = $aspectIdToCode[$assessment->aspect_id] ?? null;
+                }
 
                 if (! $aspectCode || ! isset($standardsCache[$aspectCode])) {
                     continue;
                 }
 
-                // Get adjusted weight from cache (works for both Default & Custom Standard)
+                // 🚀 USE CACHE instead of calling service (OPTIMIZED!)
                 $adjustedWeight = $standardsCache[$aspectCode]['weight'];
 
-                // Use pre-calculated individual_rating from DB (ALWAYS correct)
-                $individualRating = (float) $assessment->individual_rating;
+                // ✅ DATA-DRIVEN: Recalculate individual rating based on structure
+                // Note: $assessment can be Model or stdClass here.
 
-                // Calculate weighted score
+                if ($hasSubAspectAdjustments && $assessment instanceof AspectAssessment && $assessment->aspect->subAspects->isNotEmpty()) {
+                    // 🚀 USE CACHE: Pass pre-computed sub-aspects cache (OPTIMIZED!)
+                    // Only do this expensive calculation if we actually need to handle inactive sub-aspects
+                    $individualRating = $this->calculateIndividualRatingFromSubAspectsWithCache(
+                        $assessment,
+                        $standardsCache[$aspectCode]['sub_aspects']
+                    );
+                } else {
+                    // No sub-aspects OR no adjustments: use direct rating from DB (FASTEST)
+                    // Cast to float because raw DB value might be string "3.50"
+                    $individualRating = (float) $assessment->individual_rating;
+                }
+
+                // Recalculate individual score with adjusted weight
                 $individualScore = round($individualRating * $adjustedWeight, 2);
 
                 // Accumulate
@@ -524,6 +541,50 @@ class RankingService
 
         // Fallback to direct rating if no active sub-aspects
         return (float) $assessment->individual_rating;
+    }
+
+    /**
+     * Calculate individual rating from sub-aspects using pre-computed cache
+     *
+     * This is the OPTIMIZED version that uses pre-computed standards cache
+     * instead of calling DynamicStandardService for each sub-aspect.
+     *
+     * @param  \App\Models\AspectAssessment  $assessment  Aspect assessment
+     * @param  array  $subAspectsCache  Pre-computed sub-aspect standards from precomputeStandards()
+     * @return float Calculated individual rating
+     */
+    private function calculateIndividualRatingFromSubAspectsWithCache(
+        $assessment,
+        array $subAspectsCache
+    ): float {
+        $subAssessments = $assessment->subAspectAssessments;
+
+        if ($subAssessments->isEmpty()) {
+            return (float) $assessment->individual_rating;
+        }
+
+        $totalRating = 0;
+        $activeCount = 0;
+
+        foreach ($subAssessments as $subAssessment) {
+            $subAspect = $subAssessment->subAspect;
+
+            if (! $subAspect) {
+                continue;
+            }
+
+            // USE CACHE instead of calling service (50-100x faster!)
+            $isActive = $subAspectsCache[$subAspect->code]['active'] ?? true;
+
+            if (! $isActive) {
+                continue;
+            }
+
+            $totalRating += (float) $subAssessment->individual_rating;
+            $activeCount++;
+        }
+
+        return $activeCount > 0 ? round($totalRating / $activeCount, 2) : 0.0;
     }
 
     /**
