@@ -25,6 +25,12 @@ class DynamicStandardService
     private array $customStandardCache = [];
 
     /**
+     * 🚀 OPTIMIZATION: Request-scoped cache for hasCategoryAdjustments
+     * Prevents duplicate queries to AssessmentTemplate per request
+     */
+    private array $categoryAdjustmentsCache = [];
+
+    /**
      * Get session key for template
      */
     private function getSessionKey(int $templateId): string
@@ -618,48 +624,64 @@ class DynamicStandardService
 
     /**
      * Check if specific category has any adjustments
+     * 🚀 OPTIMIZATION: Uses request-scoped cache to prevent duplicate queries
      */
     public function hasCategoryAdjustments(int $templateId, string $categoryCode): bool
     {
+        // Check cache first
+        $cacheKey = "{$templateId}:{$categoryCode}";
+        if (isset($this->categoryAdjustmentsCache[$cacheKey])) {
+            return $this->categoryAdjustmentsCache[$cacheKey];
+        }
+
         $adjustments = $this->getAdjustments($templateId);
 
         if (empty($adjustments)) {
+            $this->categoryAdjustmentsCache[$cacheKey] = false;
+
             return false;
         }
 
-        // Load template to get aspect codes for this category
-        $template = AssessmentTemplate::with([
-            'categoryTypes' => fn ($q) => $q->where('code', $categoryCode)->with('aspects.subAspects'),
-        ])->find($templateId);
+        // 🚀 OPTIMIZATION: Use AspectCacheService instead of loading from database
+        // This leverages the preloaded data and prevents duplicate queries
+        $category = AspectCacheService::getCategoryByCode($templateId, $categoryCode);
 
-        if (! $template) {
-            return false;
-        }
-
-        $category = $template->categoryTypes->firstWhere('code', $categoryCode);
         if (! $category) {
+            $this->categoryAdjustmentsCache[$cacheKey] = false;
+
             return false;
         }
 
         // Check category weight adjustment
         if (isset($adjustments['category_weights'][$categoryCode])) {
+            $this->categoryAdjustmentsCache[$cacheKey] = true;
+
             return true;
         }
 
+        // Get aspects for this category from cache
+        $aspects = AspectCacheService::getAspectsByCategory($templateId, $categoryCode);
+
         // Check aspect-level adjustments for this category
-        foreach ($category->aspects as $aspect) {
+        foreach ($aspects as $aspect) {
             // Check aspect weight
             if (isset($adjustments['aspect_weights'][$aspect->code])) {
+                $this->categoryAdjustmentsCache[$cacheKey] = true;
+
                 return true;
             }
 
             // Check aspect rating
             if (isset($adjustments['aspect_ratings'][$aspect->code])) {
+                $this->categoryAdjustmentsCache[$cacheKey] = true;
+
                 return true;
             }
 
             // Check aspect active status
             if (isset($adjustments['active_aspects'][$aspect->code])) {
+                $this->categoryAdjustmentsCache[$cacheKey] = true;
+
                 return true;
             }
 
@@ -668,16 +690,22 @@ class DynamicStandardService
                 foreach ($aspect->subAspects as $subAspect) {
                     // Check sub-aspect rating
                     if (isset($adjustments['sub_aspect_ratings'][$subAspect->code])) {
+                        $this->categoryAdjustmentsCache[$cacheKey] = true;
+
                         return true;
                     }
 
                     // Check sub-aspect active status
                     if (isset($adjustments['active_sub_aspects'][$subAspect->code])) {
+                        $this->categoryAdjustmentsCache[$cacheKey] = true;
+
                         return true;
                     }
                 }
             }
         }
+
+        $this->categoryAdjustmentsCache[$cacheKey] = false;
 
         return false;
     }
