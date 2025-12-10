@@ -13,6 +13,11 @@ export default defineConfig({
         tailwindcss(),
     ],
     server: {
+        host: '0.0.0.0', // Listen on all interfaces
+        port: 5173,      // Explicitly set port
+        hmr: {
+            host: 'localhost', // Browser should connect to localhost
+        },
         cors: true,
     },
 });
