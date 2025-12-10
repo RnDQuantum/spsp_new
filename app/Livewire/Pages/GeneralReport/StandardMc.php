@@ -342,7 +342,7 @@ class StandardMc extends Component
 
     /**
      * PHASE 2C: Load standard data with DynamicStandardService integration
-     * OPTIMIZED: Use caching to avoid recalculating data
+     * OPTIMIZED: Use caching to avoid recalculating data + AspectCacheService to eliminate N+1
      */
     private function loadStandardData(): void
     {
@@ -378,8 +378,14 @@ class StandardMc extends Component
             return;
         }
 
+        // 🚀 OPTIMIZATION: Use select() to minimize data transfer
         $this->selectedEvent = AssessmentEvent::query()
-            ->with('institution', 'positionFormations.template')
+            ->select('id', 'code', 'name', 'institution_id')
+            ->with([
+                'institution:id,name,code',
+                'positionFormations' => fn ($q) => $q->select('id', 'name', 'event_id', 'template_id'),
+                'positionFormations.template:id,name,code',
+            ])
             ->where('code', $eventCode)
             ->first();
 
@@ -405,6 +411,10 @@ class StandardMc extends Component
 
         $templateId = $this->selectedTemplate->id;
 
+        // 🚀 OPTIMIZATION: Preload all aspects and sub-aspects into AspectCacheService
+        // This eliminates 30+ N+1 queries from DynamicStandardService
+        \App\Services\Cache\AspectCacheService::preloadByTemplate($templateId);
+
         // Get DynamicStandardService instance (handles priority: Session → Custom Standard → Quantum Default)
         $dynamicService = app(DynamicStandardService::class);
 
@@ -412,12 +422,14 @@ class StandardMc extends Component
         $hasSessionAdjustments = $dynamicService->hasCategoryAdjustments($templateId, 'kompetensi');
 
         // Load ONLY Kompetensi category type with aspects from selected position's template
-        // OPTIMIZED: Eager load all relationships in one query
+        // 🚀 OPTIMIZATION: Eager load all relationships in one query with specific columns
         $categories = CategoryType::query()
+            ->select('id', 'template_id', 'code', 'name', 'weight_percentage', 'order')
             ->where('template_id', $templateId)
             ->where('code', 'kompetensi')
             ->with([
-                'aspects' => fn ($q) => $q->orderBy('order'),
+                'aspects' => fn ($q) => $q->select('id', 'category_type_id', 'template_id', 'code', 'name', 'weight_percentage', 'standard_rating', 'order')
+                    ->orderBy('order'),
             ])
             ->orderBy('order')
             ->get();
