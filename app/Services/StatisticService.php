@@ -6,6 +6,8 @@ namespace App\Services;
 
 use App\Models\Aspect;
 use App\Models\AspectAssessment;
+use App\Services\Cache\AspectCacheService;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -21,9 +23,19 @@ use Illuminate\Support\Facades\DB;
  *
  * Used by:
  * - Statistic component (frequency distribution chart)
+ *
+ * 🚀 OPTIMIZATION:
+ * - Smart caching with 60s TTL (respects 3-layer priority system)
+ * - Selective column loading (reduces data transfer)
+ * - Conditional eager loading (only when needed)
  */
 class StatisticService
 {
+    /**
+     * Cache TTL in seconds
+     */
+    private const CACHE_TTL = 60;
+
     /**
      * Get distribution data for an aspect in an event/position
      *
@@ -31,6 +43,8 @@ class StatisticService
      * - distribution: Array [1=>count, 2=>count, 3=>count, 4=>count, 5=>count]
      * - standard_rating: Adjusted standard rating from session
      * - average_rating: Average individual rating (recalculated from active sub-aspects)
+     *
+     * 🚀 OPTIMIZATION: Results cached for 60s with smart invalidation
      *
      * @param  int  $eventId  Assessment event ID
      * @param  int  $positionFormationId  Position formation ID
@@ -44,9 +58,86 @@ class StatisticService
         int $aspectId,
         int $templateId
     ): array {
-        // Get aspect data with category type and sub-aspects
-        $aspect = Aspect::with(['categoryType', 'subAspects'])
-            ->findOrFail($aspectId);
+        // 🚀 Generate cache key based on all parameters + session state
+        $cacheKey = $this->generateCacheKey(
+            $eventId,
+            $positionFormationId,
+            $aspectId,
+            $templateId
+        );
+
+        // Try cache first
+        return Cache::remember($cacheKey, self::CACHE_TTL, function () use (
+            $eventId,
+            $positionFormationId,
+            $aspectId,
+            $templateId
+        ) {
+            return $this->calculateDistributionData(
+                $eventId,
+                $positionFormationId,
+                $aspectId,
+                $templateId
+            );
+        });
+    }
+
+    /**
+     * Generate cache key for distribution data
+     *
+     * Includes session state to auto-invalidate when standards change
+     */
+    private function generateCacheKey(
+        int $eventId,
+        int $positionFormationId,
+        int $aspectId,
+        int $templateId
+    ): string {
+        $standardService = app(DynamicStandardService::class);
+        $adjustments = $standardService->getAdjustments($templateId);
+
+        // Include adjustment timestamp in cache key for auto-invalidation
+        $adjustmentHash = md5(json_encode($adjustments));
+
+        // Check selected standard
+        $selectedStandard = session("selected_standard.{$templateId}");
+
+        return sprintf(
+            'statistic:distribution:%d:%d:%d:%d:%s:%s',
+            $eventId,
+            $positionFormationId,
+            $aspectId,
+            $templateId,
+            $adjustmentHash,
+            $selectedStandard ?? 'quantum'
+        );
+    }
+
+    /**
+     * Calculate distribution data (cached method)
+     *
+     * @param  int  $eventId  Assessment event ID
+     * @param  int  $positionFormationId  Position formation ID
+     * @param  int  $aspectId  Aspect ID
+     * @param  int  $templateId  Template ID (for session adjustments)
+     * @return array Distribution data
+     */
+    private function calculateDistributionData(
+        int $eventId,
+        int $positionFormationId,
+        int $aspectId,
+        int $templateId
+    ): array {
+        // 🚀 Use AspectCacheService to get aspect (prevents duplicate queries)
+        $aspect = AspectCacheService::getById($aspectId);
+
+        if (! $aspect) {
+            return [
+                'distribution' => [1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0],
+                'standard_rating' => 0.0,
+                'average_rating' => 0.0,
+            ];
+        }
 
         $standardService = app(DynamicStandardService::class);
 
@@ -137,6 +228,10 @@ class StatisticService
      * IV:  3.40 - 4.20  (Baik)
      * V:   4.20 - 5.00  (Sangat Baik)
      *
+     * 🚀 OPTIMIZATION:
+     * - Conditional eager loading (only when needed)
+     * - Selective column selection (reduces data transfer)
+     *
      * @param  int  $eventId  Event ID
      * @param  int  $positionFormationId  Position formation ID
      * @param  Aspect  $aspect  Aspect model
@@ -153,11 +248,13 @@ class StatisticService
     ): array {
         $distribution = [1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0];
 
-        // ✅ DATA-DRIVEN: Check if we need to recalculate from sub-aspects
-        $needsRecalculation = $aspect->subAspects->isNotEmpty();
+        // 🚀 DATA-DRIVEN: Check if we need to recalculate from sub-aspects
+        $needsRecalculation = $aspect->subAspects->isNotEmpty()
+            && $standardService->hasActiveSubAspectAdjustments($templateId);
 
         if (! $needsRecalculation) {
-            // No sub-aspects: Use stored individual_rating directly
+            // No sub-aspects OR no sub-aspect adjustments: Use stored individual_rating directly
+            // 🚀 FAST PATH: Single SQL query with aggregation
             $rows = DB::table('aspect_assessments')
                 ->where('event_id', $eventId)
                 ->where('position_formation_id', $positionFormationId)
@@ -186,8 +283,24 @@ class StatisticService
             return $distribution;
         }
 
-        // Has sub-aspects: Recalculate individual rating from active sub-aspects
-        $assessments = AspectAssessment::with('subAspectAssessments.subAspect')
+        // Has sub-aspects AND sub-aspect adjustments: Recalculate from active sub-aspects
+        // 🚀 OPTIMIZATION: Select only needed columns
+        $assessments = AspectAssessment::select([
+            'id',
+            'aspect_id',
+            'participant_id',
+            'individual_rating',
+        ])
+            ->with(['subAspectAssessments' => function ($query) {
+                $query->select([
+                    'id',
+                    'aspect_assessment_id',
+                    'sub_aspect_id',
+                    'individual_rating',
+                ]);
+            }, 'subAspectAssessments.subAspect' => function ($query) {
+                $query->select(['id', 'code', 'aspect_id']);
+            }])
             ->where('event_id', $eventId)
             ->where('position_formation_id', $positionFormationId)
             ->where('aspect_id', $aspect->id)
@@ -215,6 +328,11 @@ class StatisticService
     /**
      * Calculate average individual rating (DATA-DRIVEN)
      *
+     * 🚀 OPTIMIZATION:
+     * - Conditional eager loading (only when needed)
+     * - Selective column selection (reduces data transfer)
+     * - Fast path for no adjustments (single SQL query)
+     *
      * @param  int  $eventId  Event ID
      * @param  int  $positionFormationId  Position formation ID
      * @param  Aspect  $aspect  Aspect model
@@ -229,11 +347,13 @@ class StatisticService
         int $templateId,
         DynamicStandardService $standardService
     ): float {
-        // ✅ DATA-DRIVEN: Check if we need to recalculate from sub-aspects
-        $needsRecalculation = $aspect->subAspects->isNotEmpty();
+        // 🚀 DATA-DRIVEN: Check if we need to recalculate from sub-aspects
+        $needsRecalculation = $aspect->subAspects->isNotEmpty()
+            && $standardService->hasActiveSubAspectAdjustments($templateId);
 
         if (! $needsRecalculation) {
-            // No sub-aspects: Use stored individual_rating directly
+            // No sub-aspects OR no sub-aspect adjustments: Use stored individual_rating directly
+            // 🚀 FAST PATH: Single SQL query
             $avg = DB::table('aspect_assessments')
                 ->where('event_id', $eventId)
                 ->where('position_formation_id', $positionFormationId)
@@ -243,8 +363,24 @@ class StatisticService
             return (float) ($avg ?? 0);
         }
 
-        // Has sub-aspects: Recalculate from active sub-aspects
-        $assessments = AspectAssessment::with('subAspectAssessments.subAspect')
+        // Has sub-aspects AND sub-aspect adjustments: Recalculate from active sub-aspects
+        // 🚀 OPTIMIZATION: Select only needed columns
+        $assessments = AspectAssessment::select([
+            'id',
+            'aspect_id',
+            'participant_id',
+            'individual_rating',
+        ])
+            ->with(['subAspectAssessments' => function ($query) {
+                $query->select([
+                    'id',
+                    'aspect_assessment_id',
+                    'sub_aspect_id',
+                    'individual_rating',
+                ]);
+            }, 'subAspectAssessments.subAspect' => function ($query) {
+                $query->select(['id', 'code', 'aspect_id']);
+            }])
             ->where('event_id', $eventId)
             ->where('position_formation_id', $positionFormationId)
             ->where('aspect_id', $aspect->id)

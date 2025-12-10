@@ -2,8 +2,8 @@
 
 namespace App\Livewire\Pages\GeneralReport;
 
-use App\Models\Aspect;
 use App\Models\AssessmentEvent;
+use App\Services\Cache\AspectCacheService;
 use App\Services\StatisticService;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -34,10 +34,25 @@ class Statistic extends Component
 
     public function mount(): void
     {
-        $this->chartId = 'statistic' . uniqid();
+        $this->chartId = 'statistic'.uniqid();
 
         // Load aspect from session if available
         $this->aspectId = session('filter.aspect_id');
+
+        // 🚀 Preload aspect cache if we have a position with template
+        $eventCode = session('filter.event_code');
+        $positionFormationId = session('filter.position_formation_id');
+
+        if ($eventCode && $positionFormationId) {
+            $event = AssessmentEvent::where('code', $eventCode)->first();
+            if ($event) {
+                $position = $event->positionFormations()->find($positionFormationId);
+                if ($position && $position->template_id) {
+                    // Preload all aspects for this template to avoid N+1 queries
+                    AspectCacheService::preloadByTemplate($position->template_id);
+                }
+            }
+        }
 
         $this->refreshStatistics();
     }
@@ -91,6 +106,7 @@ class Statistic extends Component
         $position = $event->positionFormations()->with('template')->find($positionFormationId);
         if (! $position || ! $position->template_id) {
             $this->selectedTemplate = null;
+
             return;
         }
 
@@ -130,7 +146,8 @@ class Statistic extends Component
             return '';
         }
 
-        $aspect = Aspect::find((int) $this->aspectId);
+        // 🚀 Use AspectCacheService to prevent duplicate queries
+        $aspect = AspectCacheService::getById((int) $this->aspectId);
 
         return $aspect?->name ?? '';
     }
