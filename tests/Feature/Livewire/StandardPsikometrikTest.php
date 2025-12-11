@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Livewire;
 
+use PHPUnit\Framework\Attributes\Test;
 use App\Livewire\Pages\GeneralReport\StandardPsikometrik;
 use App\Models\Aspect;
 use App\Models\AssessmentEvent;
@@ -136,6 +137,9 @@ class StandardPsikometrikTest extends TestCase
         // Clear all sessions after each test
         session()->flush();
 
+        // Clear AspectCacheService static cache to prevent stale data between tests
+        \App\Services\Cache\AspectCacheService::clearCache();
+
         parent::tearDown();
     }
 
@@ -154,7 +158,7 @@ class StandardPsikometrikTest extends TestCase
     // GROUP 1: LIFECYCLE & INITIALIZATION (3 TESTS)
     // ============================================================================
 
-    /** @test */
+    #[Test]
     public function component_mounts_with_default_state(): void
     {
         Livewire::test(StandardPsikometrik::class)
@@ -166,7 +170,7 @@ class StandardPsikometrikTest extends TestCase
             ->assertSet('chartData.scores', []);
     }
 
-    /** @test */
+    #[Test]
     public function component_loads_standard_data_when_event_and_position_selected(): void
     {
         $this->setSessionFilters();
@@ -181,7 +185,7 @@ class StandardPsikometrikTest extends TestCase
             ->assertSet('totals.total_aspects', 1);
     }
 
-    /** @test */
+    #[Test]
     public function component_loads_available_custom_standards_for_institution(): void
     {
         $this->setSessionFilters();
@@ -203,7 +207,7 @@ class StandardPsikometrikTest extends TestCase
     // GROUP 2: BASELINE SELECTION & SWITCHING (5 TESTS)
     // ============================================================================
 
-    /** @test */
+    #[Test]
     public function selecting_custom_standard_updates_component_state(): void
     {
         $this->setSessionFilters();
@@ -220,7 +224,7 @@ class StandardPsikometrikTest extends TestCase
         $this->assertEquals($this->customStandard->id, $selected);
     }
 
-    /** @test */
+    #[Test]
     public function switching_to_quantum_default_clears_custom_standard_selection(): void
     {
         $this->setSessionFilters();
@@ -240,7 +244,7 @@ class StandardPsikometrikTest extends TestCase
         $this->assertNull($selected);
     }
 
-    /** @test */
+    #[Test]
     public function handles_string_null_empty_string_or_actual_null_correctly(): void
     {
         $this->setSessionFilters();
@@ -261,10 +265,13 @@ class StandardPsikometrikTest extends TestCase
             ->assertSet('selectedCustomStandardId', null);
     }
 
-    /** @test */
+    #[Test]
     public function switching_custom_standard_clears_previous_session_adjustments(): void
     {
         $this->setSessionFilters();
+
+        // Preload cache for hasCategoryAdjustments() to work
+        \App\Services\Cache\AspectCacheService::preloadByTemplate($this->template->id);
 
         // Set session adjustments
         $dynamicService = app(DynamicStandardService::class);
@@ -288,10 +295,12 @@ class StandardPsikometrikTest extends TestCase
             ->assertSet('selectedCustomStandardId', $customStandard2->id);
 
         // Verify adjustments cleared
-        $this->assertFalse($dynamicService->hasCategoryAdjustments($this->template->id, 'potensi'));
+        // IMPORTANT: Create NEW instance to avoid stale request-scoped cache
+        $freshDynamicService = app(DynamicStandardService::class);
+        $this->assertFalse($freshDynamicService->hasCategoryAdjustments($this->template->id, 'potensi'));
     }
 
-    /** @test */
+    #[Test]
     public function handles_standard_switched_event_from_other_components(): void
     {
         $this->setSessionFilters();
@@ -305,7 +314,7 @@ class StandardPsikometrikTest extends TestCase
     // GROUP 3: CATEGORY WEIGHT ADJUSTMENTS (4 TESTS)
     // ============================================================================
 
-    /** @test */
+    #[Test]
     public function opening_category_weight_modal_sets_state_correctly(): void
     {
         $this->setSessionFilters();
@@ -318,7 +327,7 @@ class StandardPsikometrikTest extends TestCase
             ->assertSet('editingOriginalValue', 25);
     }
 
-    /** @test */
+    #[Test]
     public function saving_category_weight_creates_session_adjustment(): void
     {
         $this->setSessionFilters();
@@ -336,7 +345,7 @@ class StandardPsikometrikTest extends TestCase
         $this->assertEquals(30, $weight);
     }
 
-    /** @test */
+    #[Test]
     public function closing_modal_without_saving_discards_changes(): void
     {
         $this->setSessionFilters();
@@ -356,7 +365,7 @@ class StandardPsikometrikTest extends TestCase
         $this->assertEquals(25, $weight); // Original value
     }
 
-    /** @test */
+    #[Test]
     public function category_weight_modal_handles_invalid_template_gracefully(): void
     {
         // Don't set session filters - no template selected
@@ -370,7 +379,7 @@ class StandardPsikometrikTest extends TestCase
     // GROUP 4: SUB-ASPECT RATING ADJUSTMENTS (5 TESTS)
     // ============================================================================
 
-    /** @test */
+    #[Test]
     public function opening_sub_aspect_rating_modal_sets_state_correctly(): void
     {
         $this->setSessionFilters();
@@ -383,7 +392,7 @@ class StandardPsikometrikTest extends TestCase
             ->assertSet('editingOriginalValue', 3);
     }
 
-    /** @test */
+    #[Test]
     public function saving_sub_aspect_rating_creates_session_adjustment(): void
     {
         $this->setSessionFilters();
@@ -401,7 +410,7 @@ class StandardPsikometrikTest extends TestCase
         $this->assertEquals(4, $rating);
     }
 
-    /** @test */
+    #[Test]
     public function sub_aspect_rating_validation_rejects_values_below_1(): void
     {
         $this->setSessionFilters();
@@ -419,7 +428,7 @@ class StandardPsikometrikTest extends TestCase
         $this->assertEquals(3, $rating); // Original value
     }
 
-    /** @test */
+    #[Test]
     public function sub_aspect_rating_validation_rejects_values_above_5(): void
     {
         $this->setSessionFilters();
@@ -437,7 +446,7 @@ class StandardPsikometrikTest extends TestCase
         $this->assertEquals(3, $rating); // Original value
     }
 
-    /** @test */
+    #[Test]
     public function sub_aspect_rating_modal_handles_null_template_gracefully(): void
     {
         // Don't set session filters - no template selected
@@ -451,19 +460,25 @@ class StandardPsikometrikTest extends TestCase
     // GROUP 5: RESET ADJUSTMENTS (2 TESTS)
     // ============================================================================
 
-    /** @test */
+    #[Test]
     public function reset_adjustments_clears_all_session_adjustments(): void
     {
         $this->setSessionFilters();
+
+        // Preload cache for hasCategoryAdjustments() to work
+        \App\Services\Cache\AspectCacheService::preloadByTemplate($this->template->id);
 
         // Select custom standard
         $customStandardService = app(CustomStandardService::class);
         $customStandardService->select($this->template->id, $this->customStandard->id);
 
-        // Set session adjustments
+        // Set session adjustments (use values DIFFERENT from custom standard)
         $dynamicService = app(DynamicStandardService::class);
-        $dynamicService->saveCategoryWeight($this->template->id, 'potensi', 30);
-        $dynamicService->saveSubAspectRating($this->template->id, 'daya-analisa', 4);
+        $dynamicService->saveCategoryWeight($this->template->id, 'potensi', 35); // Custom std has 30
+        $dynamicService->saveSubAspectRating($this->template->id, 'daya-analisa', 5); // Custom std has 4
+
+        // Preload cache again after setting adjustments (fresh instance needs cache)
+        \App\Services\Cache\AspectCacheService::preloadByTemplate($this->template->id);
 
         // Verify adjustments exist
         $this->assertTrue($dynamicService->hasCategoryAdjustments($this->template->id, 'potensi'));
@@ -474,14 +489,16 @@ class StandardPsikometrikTest extends TestCase
             ->assertDispatched('standard-adjusted');
 
         // Verify adjustments cleared
-        $this->assertFalse($dynamicService->hasCategoryAdjustments($this->template->id, 'potensi'));
+        // IMPORTANT: Create NEW instance to avoid stale request-scoped cache
+        $freshDynamicService = app(DynamicStandardService::class);
+        $this->assertFalse($freshDynamicService->hasCategoryAdjustments($this->template->id, 'potensi'));
 
         // Verify custom standard selection persists
         $selected = $customStandardService->getSelected($this->template->id);
         $this->assertEquals($this->customStandard->id, $selected);
     }
 
-    /** @test */
+    #[Test]
     public function reset_adjustments_handles_null_template_gracefully(): void
     {
         // Don't set session filters - no template selected
@@ -494,7 +511,7 @@ class StandardPsikometrikTest extends TestCase
     // GROUP 6: EVENT HANDLING (3 TESTS)
     // ============================================================================
 
-    /** @test */
+    #[Test]
     public function handles_event_selected_clears_cache_and_waits_for_position(): void
     {
         $this->setSessionFilters();
@@ -509,7 +526,7 @@ class StandardPsikometrikTest extends TestCase
         // We can't directly test cache, but we can verify the handler was called
     }
 
-    /** @test */
+    #[Test]
     public function handles_position_selected_loads_data_and_dispatches_chart_update(): void
     {
         // Set only event filter initially
@@ -520,7 +537,7 @@ class StandardPsikometrikTest extends TestCase
             ->assertDispatched('chartDataUpdated');
     }
 
-    /** @test */
+    #[Test]
     public function handles_standard_adjusted_event_from_other_components(): void
     {
         $this->setSessionFilters();
@@ -534,7 +551,7 @@ class StandardPsikometrikTest extends TestCase
     // GROUP 7: CACHE MANAGEMENT (2 TESTS)
     // ============================================================================
 
-    /** @test */
+    #[Test]
     public function cache_prevents_redundant_data_processing(): void
     {
         $this->setSessionFilters();
@@ -552,7 +569,7 @@ class StandardPsikometrikTest extends TestCase
         $this->assertEquals($firstCategoryData, $secondCategoryData);
     }
 
-    /** @test */
+    #[Test]
     public function cache_cleared_on_baseline_changes(): void
     {
         $this->setSessionFilters();
@@ -571,7 +588,7 @@ class StandardPsikometrikTest extends TestCase
     // GROUP 8: 3-LAYER PRIORITY INTEGRATION (1 TEST)
     // ============================================================================
 
-    /** @test */
+    #[Test]
     public function loaded_data_respects_3_layer_priority_system(): void
     {
         $this->setSessionFilters();
