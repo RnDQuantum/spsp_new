@@ -41,6 +41,10 @@ class AdjustmentIndicator extends Component
 
         // Check if adjustments exist
         if ($templateId && $categoryCode) {
+            // 🛡️ SAFETY: Preload cache to ensure hasCategoryAdjustments() works correctly
+            // This prevents silent failures if cache hasn't been preloaded by parent component
+            \App\Services\Cache\AspectCacheService::preloadByTemplate($templateId);
+            
             $dynamicService = app(DynamicStandardService::class);
             $this->hasAdjustments = $dynamicService->hasCategoryAdjustments($templateId, $categoryCode);
         }
