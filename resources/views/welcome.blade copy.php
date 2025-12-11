@@ -12,7 +12,7 @@
     <div class="text-center max-w-3xl mx-auto">
         <!-- Logo/Gambar -->
         <div class="mb-8">
-            <img src="{{ asset('images/logo-qhrmi.webp') }}" alt="Logo Static Pribadi Spider Plot"
+            <img src="{{ asset('images/logo-qhrmi.webp') }}" as="image" fetchpriority="high" alt="Logo Static Pribadi Spider Plot" 
                 class="mx-auto max-w-md md:max-w-lg rounded-lg shadow-md">
         </div>
 

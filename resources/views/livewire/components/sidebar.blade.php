@@ -75,7 +75,7 @@
                 <img :src="minimized ? '{{ asset('images/thumb-qhrmi.webp') }}' : '{{ asset('images/thumb-qhrmi-hd.webp') }}'"
                     :alt="minimized ? 'MD' : 'My Dashboard'"
                     :class="minimized ? 'h-12 mx-auto p-1 bg-gray-100 rounded-md' : 'ml-6 h-12 p-1 bg-gray-100 rounded-md'"
-                    class="object-contain transition-all duration-300">
+                    class="object-contain transition-all duration-300" fetchpriority="high">
             </div>
 
             <!-- Menu dengan Scroll -->
