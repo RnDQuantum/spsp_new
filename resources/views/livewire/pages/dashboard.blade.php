@@ -1751,7 +1751,7 @@
                             mutations.forEach(function(mutation) {
                                 if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
                                     const theme = getCurrentTheme();
-                                    console.log('Theme changed to:', theme);
+                                    // console.log('Theme changed to:', theme);
 
                                     // Reinitialize all charts with new theme
                                     initializePotensiChart();
