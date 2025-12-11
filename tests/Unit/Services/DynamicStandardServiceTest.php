@@ -1824,6 +1824,9 @@ class DynamicStandardServiceTest extends TestCase
             'order' => 1,
         ]);
 
+        // CRITICAL: Preload AspectCacheService before calling hasCategoryAdjustments()
+        \App\Services\Cache\AspectCacheService::preloadByTemplate($template->id);
+
         // Act 1: Check before any adjustments
         $hasAdjustments1 = $this->service->hasCategoryAdjustments($template->id, 'potensi');
         $this->assertFalse($hasAdjustments1);
@@ -1831,12 +1834,19 @@ class DynamicStandardServiceTest extends TestCase
         // Act 2: Save Potensi adjustment
         $this->service->saveAspectWeight($template->id, 'asp_pot_01', 80);
 
+        // CRITICAL: Create fresh instance to avoid stale request-scoped cache
+        // (Same pattern as StandardPsikometrikTest)
+        $freshService = app(DynamicStandardService::class);
+
+        // Preload again for fresh instance
+        \App\Services\Cache\AspectCacheService::preloadByTemplate($template->id);
+
         // Assert: Should detect Potensi has adjustments
-        $hasAdjustments2 = $this->service->hasCategoryAdjustments($template->id, 'potensi');
+        $hasAdjustments2 = $freshService->hasCategoryAdjustments($template->id, 'potensi');
         $this->assertTrue($hasAdjustments2);
 
         // Assert: Kompetensi should still have no adjustments
-        $hasAdjustments3 = $this->service->hasCategoryAdjustments($template->id, 'kompetensi');
+        $hasAdjustments3 = $freshService->hasCategoryAdjustments($template->id, 'kompetensi');
         $this->assertFalse($hasAdjustments3);
     }
 
