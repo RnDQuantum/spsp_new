@@ -152,12 +152,14 @@ class RankingServiceTest extends TestCase
             ]);
 
             // Create 3 sub-aspects for each Potensi aspect
+            // Use VARIED ratings to ensure recalculation produces different results
+            $subAspectRatings = [2, 3, 4]; // Different ratings for testing
             for ($i = 1; $i <= 3; $i++) {
                 SubAspect::factory()->create([
                     'aspect_id' => $aspect->id,
                     'code' => $aspectData['code'].'_sub_'.$i,
                     'name' => $aspectData['name'].' Sub '.$i,
-                    'standard_rating' => 3, // Standard rating = 3
+                    'standard_rating' => $subAspectRatings[$i - 1], // Varied: 2, 3, 4
                     'order' => $i,
                 ]);
             }
@@ -2073,8 +2075,8 @@ class RankingServiceTest extends TestCase
         // Assert 4: Gap should reflect FAIR comparison (both using same active sub-aspects)
         // Since multiplier was 1.0, gap should be close to 0 after recalculation
         $this->assertLessThan(
-            abs($baselineRank['adjusted_gap_rating']),
-            abs($adjustedRank['adjusted_gap_rating']) + 0.5, // Small tolerance for rounding
+            0.5, // Small tolerance for rounding
+            abs($adjustedRank['adjusted_gap_rating']),
             'Gap should be FAIR (both standard and individual use same active sub-aspects)'
         );
 
