@@ -10,7 +10,6 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         @livewireStyles
         <link rel="icon" type="image/x-icon" href="{{ asset('images/thumb-qhrmi.webp') }}">
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
     </head>
 
     <body class="bg-gray-100 min-h-screen" x-data="{
