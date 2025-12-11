@@ -1352,7 +1352,7 @@ class RankingServiceTest extends TestCase
         $this->createParticipantWithAssessments('Test Participant');
 
         // Set category weights via session (Potensi = 0, Kompetensi = 100)
-        $standardService = app(\App\Services\DynamicStandardService::class);
+        $standardService = app(DynamicStandardService::class);
         $standardService->saveBothCategoryWeights(
             $this->template->id,
             'potensi',
@@ -1648,7 +1648,7 @@ class RankingServiceTest extends TestCase
         $customRank = $customRankings->first();
 
         // LAYER 1: Apply session adjustment with different weight (50%)
-        $dynamicService = app(\App\Services\DynamicStandardService::class);
+        $dynamicService = app(DynamicStandardService::class);
         $dynamicService->saveAspectWeight($this->template->id, $firstAspect->code, 50);
 
         // Get rankings with session adjustment (should override custom)
@@ -1817,7 +1817,7 @@ class RankingServiceTest extends TestCase
         $customRank = $customRankings->first();
 
         // LAYER 1: Apply session adjustment
-        $dynamicService = app(\App\Services\DynamicStandardService::class);
+        $dynamicService = app(DynamicStandardService::class);
         $dynamicService->saveAspectWeight($this->template->id, $firstAspect->code, 55);
 
         // Get session rankings
@@ -1910,7 +1910,7 @@ class RankingServiceTest extends TestCase
 
         // Act 1: Disable a sub-aspect (should trigger recalculation in calculation logic)
         $firstSubAspect = $firstAspect->subAspects->first();
-        $dynamicService = app(\App\Services\DynamicStandardService::class);
+        $dynamicService = app(DynamicStandardService::class);
         $dynamicService->setSubAspectActive($this->template->id, $firstSubAspect->code, false);
 
         // Get rankings (triggers calculation logic)
@@ -2034,7 +2034,7 @@ class RankingServiceTest extends TestCase
 
         // Act: Disable one sub-aspect
         $firstSubAspect = $firstAspect->subAspects->first();
-        $dynamicService = app(\App\Services\DynamicStandardService::class);
+        $dynamicService = app(DynamicStandardService::class);
         $dynamicService->setSubAspectActive($this->template->id, $firstSubAspect->code, false);
 
         // Clear cache to force recalculation
@@ -2122,7 +2122,7 @@ class RankingServiceTest extends TestCase
 
         // Act: Disable one sub-aspect
         $firstSubAspect = $firstAspect->subAspects->first();
-        $dynamicService = app(\App\Services\DynamicStandardService::class);
+        $dynamicService = app(DynamicStandardService::class);
         $dynamicService->setSubAspectActive($this->template->id, $firstSubAspect->code, false);
 
         // Clear cache

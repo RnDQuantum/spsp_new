@@ -2942,7 +2942,7 @@ class IndividualAssessmentServiceTest extends TestCase
         $aspect = $testData['aspect'];
 
         // Get baseline assessment (quantum defaults)
-        $service = app(\App\Services\IndividualAssessmentService::class);
+        $service = app(IndividualAssessmentService::class);
         $baselineAssessment = $service->getAspectAssessments(
             $testData['participant']->id,
             $testData['category']->id,
@@ -2985,7 +2985,7 @@ class IndividualAssessmentServiceTest extends TestCase
         $aspect = $testData['aspect'];
 
         // Get baseline assessment (quantum defaults)
-        $service = app(\App\Services\IndividualAssessmentService::class);
+        $service = app(IndividualAssessmentService::class);
         $baselineAssessment = $service->getAspectAssessments(
             $testData['participant']->id,
             $testData['category']->id,
@@ -3075,7 +3075,7 @@ class IndividualAssessmentServiceTest extends TestCase
         $customStandardService->select($testData['template']->id, $customStandard->id);
 
         // Get assessment with custom standard (weight = 35%)
-        $service = app(\App\Services\IndividualAssessmentService::class);
+        $service = app(IndividualAssessmentService::class);
         $customAssessment = $service->getAspectAssessments(
             $testData['participant']->id,
             $testData['category']->id,
@@ -3127,7 +3127,7 @@ class IndividualAssessmentServiceTest extends TestCase
         \Illuminate\Support\Facades\Session::forget("selected_standard.{$testData['template']->id}");
 
         // Act: Get assessment (should use quantum defaults)
-        $service = app(\App\Services\IndividualAssessmentService::class);
+        $service = app(IndividualAssessmentService::class);
         $quantumAssessment = $service->getAspectAssessments(
             $testData['participant']->id,
             $testData['category']->id,
