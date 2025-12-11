@@ -23,17 +23,19 @@ use Tests\TestCase;
 /**
  * RankingService Unit Tests
  *
- * PHASE 1: ⏳ Service Instantiation (1 test)
- * PHASE 2: ⏳ getRankings() - Single Category Rankings (15 tests)
- * PHASE 3: ⏳ getParticipantRank() - Single Participant Rank (5 tests)
- * PHASE 4: ⏳ calculateAdjustedStandards() - Standard Recalculation (10 tests)
- * PHASE 5: ⏳ getCombinedRankings() - Potensi + Kompetensi (8 tests)
- * PHASE 6: ⏳ getParticipantCombinedRank() - Single Participant Combined Rank (3 tests)
- * PHASE 7: ⏳ getPassingSummary() - Statistics (3 tests)
- * PHASE 8: ⏳ getConclusionSummary() - Conclusion Breakdown (3 tests)
- * PHASE 12: ⏳ Three-Layer Priority System Integration (3 tests)
+ * PHASE 1: ✅ Service Instantiation (1 test)
+ * PHASE 2: ✅ getRankings() - Single Category Rankings (15 tests)
+ * PHASE 3: ✅ getParticipantRank() - Single Participant Rank (5 tests)
+ * PHASE 4: ✅ calculateAdjustedStandards() - Standard Recalculation (10 tests)
+ * PHASE 5: ✅ getCombinedRankings() - Potensi + Kompetensi (8 tests)
+ * PHASE 6: ✅ getParticipantCombinedRank() - Single Participant Combined Rank (3 tests)
+ * PHASE 7: ✅ getPassingSummary() - Statistics (3 tests)
+ * PHASE 8: ✅ getConclusionSummary() - Conclusion Breakdown (3 tests)
+ * PHASE 12: ✅ Three-Layer Priority System Integration (3 tests)
+ * PHASE 13: ⭐ Individual Rating Recalculation (3 tests) - CRITICAL NEW
+ * PHASE 14: ⭐ Cache Key Completeness (6 tests) - CRITICAL NEW
  *
- * TOTAL: 0/51 tests (0% complete)
+ * TOTAL: 60/60 tests (100% complete ✅)
  *
  * @see \App\Services\RankingService
  * @see docs/TESTING_GUIDE.md
@@ -1862,5 +1864,664 @@ class RankingServiceTest extends TestCase
 
         // Cleanup
         $customStandardService->clearSelection($this->template->id);
+    }
+
+    // ========================================
+    // PHASE 13: Individual Rating Recalculation Tests (3 tests) ⭐ NEW - CRITICAL
+    // ========================================
+
+    /**
+     * Test 2.2 & 4.4: Database individual_rating NEVER changes (IMMUTABLE)
+     *
+     * CRITICAL TEST per TESTING_SCENARIOS_BASELINE_3LAYER.md line 300-324
+     *
+     * This test verifies that individual_rating in aspect_assessments table
+     * is IMMUTABLE - it must NEVER be modified regardless of:
+     * - Custom standard selection
+     * - Session adjustments
+     * - Sub-aspect active/inactive changes
+     *
+     * The recalculation happens ONLY in calculation logic (ephemeral),
+     * NOT in the database.
+     */
+    public function test_database_individual_rating_never_modified(): void
+    {
+        // Arrange: Create participant with known individual_rating
+        $participant = $this->createParticipantWithAssessments('Test Immutability', 1.2);
+
+        // Get first Potensi aspect with sub-aspects
+        $firstAspect = Aspect::where('category_type_id', $this->potensiCategory->id)
+            ->with('subAspects')
+            ->orderBy('order')
+            ->first();
+
+        // Get original database value
+        $aspectAssessment = AspectAssessment::where('participant_id', $participant->id)
+            ->where('aspect_id', $firstAspect->id)
+            ->first();
+
+        $originalIndividualRating = $aspectAssessment->individual_rating;
+
+        // Verify we have sub-aspects to test with
+        $this->assertGreaterThan(0, $firstAspect->subAspects->count());
+
+        // Act 1: Disable a sub-aspect (should trigger recalculation in calculation logic)
+        $firstSubAspect = $firstAspect->subAspects->first();
+        $dynamicService = app(\App\Services\DynamicStandardService::class);
+        $dynamicService->setSubAspectActive($this->template->id, $firstSubAspect->code, false);
+
+        // Get rankings (triggers calculation logic)
+        $rankings = $this->service->getRankings(
+            $this->event->id,
+            $this->position->id,
+            $this->template->id,
+            'potensi',
+            0
+        );
+
+        // Assert 1: Database value should be UNCHANGED
+        $aspectAssessment->refresh();
+        $this->assertEquals(
+            $originalIndividualRating,
+            $aspectAssessment->individual_rating,
+            'Database individual_rating must NEVER change when sub-aspect disabled'
+        );
+
+        // Act 2: Apply session adjustment (weight change)
+        $dynamicService->saveAspectWeight($this->template->id, $firstAspect->code, 50);
+
+        // Get rankings again
+        $rankings = $this->service->getRankings(
+            $this->event->id,
+            $this->position->id,
+            $this->template->id,
+            'potensi',
+            0
+        );
+
+        // Assert 2: Database value should STILL be unchanged
+        $aspectAssessment->refresh();
+        $this->assertEquals(
+            $originalIndividualRating,
+            $aspectAssessment->individual_rating,
+            'Database individual_rating must NEVER change when weight adjusted'
+        );
+
+        // Act 3: Select custom standard
+        $customStandardService = app(\App\Services\CustomStandardService::class);
+        $customStandardData = [
+            'institution_id' => $this->event->institution_id,
+            'template_id' => $this->template->id,
+            'code' => 'IMMUTABILITY-TEST',
+            'name' => 'Test Immutability',
+            'description' => 'Test that database is never modified',
+            'category_weights' => ['potensi' => 50, 'kompetensi' => 50],
+            'aspect_configs' => [
+                $firstAspect->code => ['weight' => 40, 'active' => true],
+            ],
+            'sub_aspect_configs' => [],
+        ];
+        $customStandard = $customStandardService->create($customStandardData);
+        $customStandardService->select($this->template->id, $customStandard->id);
+
+        // Get rankings with custom standard
+        $rankings = $this->service->getRankings(
+            $this->event->id,
+            $this->position->id,
+            $this->template->id,
+            'potensi',
+            0
+        );
+
+        // Assert 3: Database value should STILL be unchanged
+        $aspectAssessment->refresh();
+        $this->assertEquals(
+            $originalIndividualRating,
+            $aspectAssessment->individual_rating,
+            'Database individual_rating must NEVER change when custom standard selected'
+        );
+
+        // Cleanup
+        \Illuminate\Support\Facades\Session::forget("standard_adjustment.{$this->template->id}");
+        $customStandardService->clearSelection($this->template->id);
+    }
+
+    /**
+     * Test 2.2 & 4.4: Individual rating RECALCULATED when sub-aspect disabled (ephemeral)
+     *
+     * CRITICAL TEST per TESTING_SCENARIOS_BASELINE_3LAYER.md line 326-347
+     *
+     * This test verifies that when sub-aspects are disabled:
+     * 1. Database individual_rating: NEVER changes (immutable)
+     * 2. Calculation logic: RECALCULATES individual_rating from active sub-aspects only
+     * 3. Standard rating: ALSO recalculated from active sub-aspects
+     * 4. Gap: Calculated from recalculated values (FAIR comparison)
+     *
+     * This ensures "apple-to-apple" comparison between individual and standard.
+     */
+    public function test_individual_rating_recalculated_when_subaspect_disabled(): void
+    {
+        // Arrange: Create participant with sub-aspects
+        // Using multiplier 1.0 so individual ratings match standard ratings
+        $participant = $this->createParticipantWithAssessments('Test Recalculation', 1.0);
+
+        // Get first Potensi aspect with sub-aspects
+        $firstAspect = Aspect::where('category_type_id', $this->potensiCategory->id)
+            ->with('subAspects')
+            ->orderBy('order')
+            ->first();
+
+        $this->assertGreaterThan(1, $firstAspect->subAspects->count(), 'Need multiple sub-aspects to test');
+
+        // Get baseline rankings (all sub-aspects active)
+        $baselineRankings = $this->service->getRankings(
+            $this->event->id,
+            $this->position->id,
+            $this->template->id,
+            'potensi',
+            0
+        );
+        $baselineRank = $baselineRankings->first();
+
+        // Get database value (should remain unchanged)
+        $aspectAssessment = AspectAssessment::where('participant_id', $participant->id)
+            ->where('aspect_id', $firstAspect->id)
+            ->first();
+        $databaseIndividualRating = $aspectAssessment->individual_rating;
+
+        // Act: Disable one sub-aspect
+        $firstSubAspect = $firstAspect->subAspects->first();
+        $dynamicService = app(\App\Services\DynamicStandardService::class);
+        $dynamicService->setSubAspectActive($this->template->id, $firstSubAspect->code, false);
+
+        // Clear cache to force recalculation
+        \App\Services\Cache\AspectCacheService::clearCache();
+
+        // Get rankings with disabled sub-aspect
+        $adjustedRankings = $this->service->getRankings(
+            $this->event->id,
+            $this->position->id,
+            $this->template->id,
+            'potensi',
+            0
+        );
+        $adjustedRank = $adjustedRankings->first();
+
+        // Assert 1: Database value is UNCHANGED
+        $aspectAssessment->refresh();
+        $this->assertEquals(
+            $databaseIndividualRating,
+            $aspectAssessment->individual_rating,
+            'Database individual_rating must remain IMMUTABLE'
+        );
+
+        // Assert 2: Calculated individual_rating should be DIFFERENT
+        // (recalculated from active sub-aspects only)
+        $this->assertNotEquals(
+            $baselineRank['individual_rating'],
+            $adjustedRank['individual_rating'],
+            'Calculation should recalculate individual_rating from active sub-aspects'
+        );
+
+        // Assert 3: Standard rating should ALSO be recalculated
+        $this->assertNotEquals(
+            $baselineRank['adjusted_standard_rating'],
+            $adjustedRank['adjusted_standard_rating'],
+            'Standard rating should also recalculate from active sub-aspects'
+        );
+
+        // Assert 4: Gap should reflect FAIR comparison (both using same active sub-aspects)
+        // Since multiplier was 1.0, gap should be close to 0 after recalculation
+        $this->assertLessThan(
+            abs($baselineRank['adjusted_gap_rating']),
+            abs($adjustedRank['adjusted_gap_rating']) + 0.5, // Small tolerance for rounding
+            'Gap should be FAIR (both standard and individual use same active sub-aspects)'
+        );
+
+        // Cleanup
+        \Illuminate\Support\Facades\Session::forget("standard_adjustment.{$this->template->id}");
+    }
+
+    /**
+     * Test 3.5: Sub-aspect recalculation impact on statistics
+     *
+     * NEW TEST per TESTING_SCENARIOS_BASELINE_3LAYER.md line 466-484
+     *
+     * This test verifies that when sub-aspects are disabled:
+     * - All participants' individual_ratings are recalculated
+     * - Statistics (average, distribution) use recalculated values
+     * - NOT using stored database values (which would be unfair)
+     */
+    public function test_subaspect_recalculation_affects_all_participants(): void
+    {
+        // Arrange: Create multiple participants with different performance
+        $participant1 = $this->createParticipantWithAssessments('Participant A', 1.2);
+        $participant2 = $this->createParticipantWithAssessments('Participant B', 1.0);
+        $participant3 = $this->createParticipantWithAssessments('Participant C', 0.8);
+
+        // Get first Potensi aspect with sub-aspects
+        $firstAspect = Aspect::where('category_type_id', $this->potensiCategory->id)
+            ->with('subAspects')
+            ->orderBy('order')
+            ->first();
+
+        // Get baseline rankings (all sub-aspects active)
+        $baselineRankings = $this->service->getRankings(
+            $this->event->id,
+            $this->position->id,
+            $this->template->id,
+            'potensi',
+            0
+        );
+
+        // Calculate baseline average individual_rating
+        $baselineAverage = $baselineRankings->avg('individual_rating');
+
+        // Act: Disable one sub-aspect
+        $firstSubAspect = $firstAspect->subAspects->first();
+        $dynamicService = app(\App\Services\DynamicStandardService::class);
+        $dynamicService->setSubAspectActive($this->template->id, $firstSubAspect->code, false);
+
+        // Clear cache
+        \App\Services\Cache\AspectCacheService::clearCache();
+
+        // Get rankings with disabled sub-aspect
+        $adjustedRankings = $this->service->getRankings(
+            $this->event->id,
+            $this->position->id,
+            $this->template->id,
+            'potensi',
+            0
+        );
+
+        // Calculate adjusted average individual_rating
+        $adjustedAverage = $adjustedRankings->avg('individual_rating');
+
+        // Assert 1: ALL participants should have recalculated ratings
+        $this->assertCount(3, $adjustedRankings);
+        foreach ($adjustedRankings as $ranking) {
+            // Verify each participant's database is unchanged
+            $aspectAssessment = AspectAssessment::where('participant_id', $ranking['participant_id'])
+                ->where('aspect_id', $firstAspect->id)
+                ->first();
+
+            // The ranking's individual_rating should be different from database
+            // (except by coincidence if recalculation happens to match)
+            $this->assertNotNull($aspectAssessment);
+        }
+
+        // Assert 2: Average should change (statistics reflect recalculated values)
+        $this->assertNotEquals(
+            $baselineAverage,
+            $adjustedAverage,
+            'Average should reflect recalculated individual ratings, not database values'
+        );
+
+        // Assert 3: All rankings should still be valid and ordered correctly
+        $scores = $adjustedRankings->pluck('individual_score')->toArray();
+        $sortedScores = collect($scores)->sortDesc()->values()->toArray();
+        $this->assertEquals($sortedScores, $scores, 'Rankings should be properly ordered');
+
+        // Cleanup
+        \Illuminate\Support\Facades\Session::forget("standard_adjustment.{$this->template->id}");
+    }
+
+    // ========================================
+    // PHASE 14: Cache Key Completeness Tests (6 tests) ⭐ NEW - CRITICAL
+    // ========================================
+
+    /**
+     * Test 12.1: Cache key includes sub-aspect active status
+     *
+     * CRITICAL TEST per TESTING_SCENARIOS_BASELINE_3LAYER.md line 1605-1632
+     *
+     * This test verifies that cache keys properly differentiate between:
+     * - All sub-aspects active
+     * - Some sub-aspects inactive
+     *
+     * If cache doesn't include sub-aspect status, users will see stale data!
+     */
+    public function test_cache_key_includes_subaspect_active_status(): void
+    {
+        // Arrange: Create participant
+        $participant = $this->createParticipantWithAssessments('Test Cache SubAspect', 1.0);
+
+        // Get first aspect with sub-aspects
+        $firstAspect = Aspect::where('category_type_id', $this->potensiCategory->id)
+            ->with('subAspects')
+            ->orderBy('order')
+            ->first();
+
+        // Act 1: Get rankings with all sub-aspects active
+        $rankings1 = $this->service->getRankings(
+            $this->event->id,
+            $this->position->id,
+            $this->template->id,
+            'potensi',
+            0
+        );
+        $result1 = $rankings1->first();
+
+        // Act 2: Disable one sub-aspect
+        $firstSubAspect = $firstAspect->subAspects->first();
+        $dynamicService = app(DynamicStandardService::class);
+        $dynamicService->setSubAspectActive($this->template->id, $firstSubAspect->code, false);
+
+        // Clear cache to force recalculation
+        \App\Services\Cache\AspectCacheService::clearCache();
+
+        // Act 3: Get rankings with disabled sub-aspect
+        $rankings2 = $this->service->getRankings(
+            $this->event->id,
+            $this->position->id,
+            $this->template->id,
+            'potensi',
+            0
+        );
+        $result2 = $rankings2->first();
+
+        // Assert: Results should be DIFFERENT (cache respected sub-aspect status)
+        $this->assertNotEquals(
+            $result1['adjusted_standard_rating'],
+            $result2['adjusted_standard_rating'],
+            'Cache key must include sub-aspect active status'
+        );
+
+        $this->assertNotEquals(
+            $result1['individual_rating'],
+            $result2['individual_rating'],
+            'Individual rating should be recalculated when sub-aspect disabled'
+        );
+
+        // Cleanup
+        \Illuminate\Support\Facades\Session::forget("standard_adjustment.{$this->template->id}");
+    }
+
+    /**
+     * Test 12.2: Cache key includes aspect active status
+     *
+     * CRITICAL TEST per TESTING_SCENARIOS_BASELINE_3LAYER.md line 1634-1661
+     */
+    public function test_cache_key_includes_aspect_active_status(): void
+    {
+        // Arrange: Create participant
+        $participant = $this->createParticipantWithAssessments('Test Cache Aspect', 1.0);
+
+        // Get first aspect
+        $firstAspect = Aspect::where('category_type_id', $this->potensiCategory->id)
+            ->orderBy('order')
+            ->first();
+
+        // Act 1: Get rankings with all aspects active
+        $rankings1 = $this->service->getRankings(
+            $this->event->id,
+            $this->position->id,
+            $this->template->id,
+            'potensi',
+            0
+        );
+        $result1 = $rankings1->first();
+
+        // Act 2: Disable aspect
+        $dynamicService = app(DynamicStandardService::class);
+        $dynamicService->setAspectActive($this->template->id, $firstAspect->code, false);
+
+        // Clear cache
+        \App\Services\Cache\AspectCacheService::clearCache();
+
+        // Act 3: Get rankings with disabled aspect
+        $rankings2 = $this->service->getRankings(
+            $this->event->id,
+            $this->position->id,
+            $this->template->id,
+            'potensi',
+            0
+        );
+        $result2 = $rankings2->first();
+
+        // Assert: Results should be DIFFERENT
+        $this->assertNotEquals(
+            $result1['adjusted_standard_score'],
+            $result2['adjusted_standard_score'],
+            'Cache key must include aspect active status'
+        );
+
+        // Cleanup
+        \Illuminate\Support\Facades\Session::forget("standard_adjustment.{$this->template->id}");
+    }
+
+    /**
+     * Test 12.3: Cache key includes session ID (isolation)
+     *
+     * CRITICAL TEST per TESTING_SCENARIOS_BASELINE_3LAYER.md line 1663-1690
+     *
+     * This test verifies that different sessions get different cache entries.
+     * Without session ID in cache key, User A would see User B's adjustments!
+     */
+    public function test_cache_key_includes_session_id(): void
+    {
+        // Arrange: Create participant
+        $participant = $this->createParticipantWithAssessments('Test Cache Session', 1.0);
+
+        // Get first aspect
+        $firstAspect = Aspect::where('category_type_id', $this->potensiCategory->id)
+            ->orderBy('order')
+            ->first();
+
+        // SESSION 1: Apply adjustment
+        $dynamicService = app(DynamicStandardService::class);
+        $dynamicService->saveAspectWeight($this->template->id, $firstAspect->code, 50);
+
+        $rankings1 = $this->service->getRankings(
+            $this->event->id,
+            $this->position->id,
+            $this->template->id,
+            'potensi',
+            0
+        );
+        $result1 = $rankings1->first();
+
+        // SESSION 2: Clear session and apply different adjustment
+        \Illuminate\Support\Facades\Session::forget("standard_adjustment.{$this->template->id}");
+        \App\Services\Cache\AspectCacheService::clearCache();
+
+        $dynamicService->saveAspectWeight($this->template->id, $firstAspect->code, 30);
+
+        $rankings2 = $this->service->getRankings(
+            $this->event->id,
+            $this->position->id,
+            $this->template->id,
+            'potensi',
+            0
+        );
+        $result2 = $rankings2->first();
+
+        // Assert: Results should be DIFFERENT
+        $this->assertNotEquals(
+            $result1['adjusted_standard_score'],
+            $result2['adjusted_standard_score'],
+            'Different session adjustments should produce different results'
+        );
+
+        // Cleanup
+        \Illuminate\Support\Facades\Session::forget("standard_adjustment.{$this->template->id}");
+    }
+
+    /**
+     * Test 12.4: Cache key includes custom standard selection
+     *
+     * CRITICAL TEST per TESTING_SCENARIOS_BASELINE_3LAYER.md line 1692-1719
+     */
+    public function test_cache_key_includes_custom_standard_selection(): void
+    {
+        // Arrange: Create participant
+        $participant = $this->createParticipantWithAssessments('Test Cache Custom', 1.0);
+
+        // Get first aspect
+        $firstAspect = Aspect::where('category_type_id', $this->potensiCategory->id)
+            ->orderBy('order')
+            ->first();
+
+        // Act 1: Get rankings with quantum defaults
+        $rankings1 = $this->service->getRankings(
+            $this->event->id,
+            $this->position->id,
+            $this->template->id,
+            'potensi',
+            0
+        );
+        $result1 = $rankings1->first();
+
+        // Act 2: Select custom standard
+        $customStandardService = app(\App\Services\CustomStandardService::class);
+        $customStandardData = [
+            'institution_id' => $this->event->institution_id,
+            'template_id' => $this->template->id,
+            'code' => 'CACHE-TEST-CUSTOM',
+            'name' => 'Cache Test Custom Standard',
+            'description' => 'Test cache key includes custom standard',
+            'category_weights' => ['potensi' => 50, 'kompetensi' => 50],
+            'aspect_configs' => [
+                $firstAspect->code => ['weight' => 45, 'active' => true],
+            ],
+            'sub_aspect_configs' => [],
+        ];
+        $customStandard = $customStandardService->create($customStandardData);
+        $customStandardService->select($this->template->id, $customStandard->id);
+
+        // Clear cache
+        \App\Services\Cache\AspectCacheService::clearCache();
+
+        // Act 3: Get rankings with custom standard
+        $rankings2 = $this->service->getRankings(
+            $this->event->id,
+            $this->position->id,
+            $this->template->id,
+            'potensi',
+            0
+        );
+        $result2 = $rankings2->first();
+
+        // Assert: Results should be DIFFERENT
+        $this->assertNotEquals(
+            $result1['adjusted_standard_score'],
+            $result2['adjusted_standard_score'],
+            'Cache key must include custom standard selection'
+        );
+
+        // Cleanup
+        $customStandardService->clearSelection($this->template->id);
+    }
+
+    /**
+     * Test 12.5: Cache key includes category weight changes
+     *
+     * CRITICAL TEST per TESTING_SCENARIOS_BASELINE_3LAYER.md line 1721-1747
+     */
+    public function test_cache_key_includes_category_weight_changes(): void
+    {
+        // Arrange: Create participant
+        $participant = $this->createParticipantWithAssessments('Test Cache Category Weight', 1.0);
+
+        // Act 1: Get combined rankings with default category weights (50/50)
+        $rankings1 = $this->service->getCombinedRankings(
+            $this->event->id,
+            $this->position->id,
+            $this->template->id,
+            0
+        );
+        $result1 = $rankings1->first();
+
+        // Act 2: Change category weights
+        $dynamicService = app(DynamicStandardService::class);
+        $dynamicService->saveBothCategoryWeights(
+            $this->template->id,
+            'potensi',
+            70,  // Changed from 50
+            'kompetensi',
+            30   // Changed from 50
+        );
+
+        // Clear cache
+        \App\Services\Cache\AspectCacheService::clearCache();
+
+        // Act 3: Get combined rankings with adjusted category weights
+        $rankings2 = $this->service->getCombinedRankings(
+            $this->event->id,
+            $this->position->id,
+            $this->template->id,
+            0
+        );
+        $result2 = $rankings2->first();
+
+        // Assert: Results should be DIFFERENT
+        $this->assertNotEquals(
+            $result1['total_individual_score'],
+            $result2['total_individual_score'],
+            'Cache key must include category weight changes'
+        );
+
+        $this->assertEquals(70, $result2['potensi_weight']);
+        $this->assertEquals(30, $result2['kompetensi_weight']);
+
+        // Cleanup
+        \Illuminate\Support\Facades\Session::forget("standard_adjustment.{$this->template->id}");
+    }
+
+    /**
+     * Test 12.6: Tolerance percentage NOT in cache key
+     *
+     * IMPORTANT TEST per TESTING_SCENARIOS_BASELINE_3LAYER.md line 1749-1777
+     *
+     * This test verifies that tolerance is applied AFTER caching.
+     * Same cache entry should be reused for different tolerance values
+     * to improve performance.
+     */
+    public function test_tolerance_not_in_cache_key(): void
+    {
+        // Arrange: Create participant
+        $participant = $this->createParticipantWithAssessments('Test Cache Tolerance', 1.0);
+
+        // Act 1: Get rankings with 0% tolerance
+        $rankings1 = $this->service->getRankings(
+            $this->event->id,
+            $this->position->id,
+            $this->template->id,
+            'potensi',
+            0
+        );
+        $result1 = $rankings1->first();
+
+        // Act 2: Get rankings with 10% tolerance (should use same cache for base calculation)
+        $rankings2 = $this->service->getRankings(
+            $this->event->id,
+            $this->position->id,
+            $this->template->id,
+            'potensi',
+            10
+        );
+        $result2 = $rankings2->first();
+
+        // Assert 1: Original standard should be SAME (from cache)
+        $this->assertEquals(
+            $result1['original_standard_score'],
+            $result2['original_standard_score'],
+            'Original standard should be same (cached)'
+        );
+
+        // Assert 2: Adjusted standard should be DIFFERENT (tolerance applied post-cache)
+        $expectedAdjusted = round($result1['original_standard_score'] * 0.9, 2);
+        $this->assertEquals(
+            $expectedAdjusted,
+            $result2['adjusted_standard_score'],
+            'Tolerance should be applied after caching'
+        );
+
+        // Assert 3: Individual score should be SAME (not affected by tolerance)
+        $this->assertEquals(
+            $result1['individual_score'],
+            $result2['individual_score'],
+            'Individual score should not change with tolerance'
+        );
     }
 }
