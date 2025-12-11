@@ -8,9 +8,9 @@
 
 ## 📊 Overall Progress
 
-- **Total Scenarios:** 77 tests
-- **Completed:** 64 tests (83%)
-- **Remaining:** 13 tests (17%)
+- **Total Scenarios:** ~110+ tests (⚠️ ESTIMATED - Final count determined after component analysis)
+- **Completed:** 64 tests (Service Layer - 83% of original scope)
+- **Remaining:** ~46+ tests (Livewire Layer - to be finalized after analysis)
 
 ---
 
@@ -143,15 +143,32 @@
 
 ---
 
-## 📡 Scenario Group 11: Event Communication (0/5)
+## 📡 Scenario Group 11: Event Communication (0/~15) ⚠️ EXPANDED
 
+### A. Event Producers (StandardPsikometrik / StandardMc)
 - [ ] Test 11.1: 'standard-switched' Event Propagation
 - [ ] Test 11.2: 'standard-adjusted' Event Propagation
 - [ ] Test 11.3: 'event-selected' Listener
 - [ ] Test 11.4: 'position-selected' Listener
 - [ ] Test 11.5: Multiple Events in Sequence
 
-**Status:** 🔴 **NOT STARTED**
+### B. Event Consumers - General Report Components ⭐ NEW
+- [ ] Test 11.6: RekapRankingAssessment receives 'standard-switched' and clears cache
+- [ ] Test 11.7: RekapRankingAssessment receives 'standard-adjusted' and updates summary
+- [ ] Test 11.8: Statistic receives events and refreshes distribution data
+- [ ] Test 11.9: TrainingRecommendation receives events and updates training summary
+- [ ] Test 11.10: RankingPsyMapping/RankingMcMapping handle baseline events
+
+### C. Event Consumers - Individual Report Components ⭐ NEW
+- [ ] Test 11.11: GeneralMapping responds to baseline changes
+- [ ] Test 11.12: SpiderPlot updates chart on standard adjustment
+- [ ] Test 11.13: RingkasanAssessment refreshes data on event
+- [ ] Test 11.14: GeneralPsyMapping/GeneralMcMapping handle events
+- [ ] Test 11.15: Multiple consumers receive same event simultaneously (integration)
+
+**Status:** 🔴 **NOT STARTED** - **PRIORITY 2** (after Group 9)
+
+**Note:** ⚠️ Test count (~15) is ESTIMATED. Actual test count will be determined after analyzing each component's methods and event listeners. All methods handling baseline events MUST be covered.
 
 ---
 
@@ -168,6 +185,24 @@
 
 ---
 
+## 🔄 Scenario Group 13: Cross-Component Integration (0/~8) ⭐ NEW SECTION
+
+### End-to-End Baseline Change Propagation
+- [ ] Test 13.1: Baseline change from StandardPsikometrik propagates to all listening components
+- [ ] Test 13.2: Session adjustment triggers cache clear + data reload across all consumers
+- [ ] Test 13.3: Switching Custom Standard updates all components simultaneously
+- [ ] Test 13.4: Event isolation - different templates don't interfere with each other
+- [ ] Test 13.5: Multiple users with different baselines see correct isolated data
+- [ ] Test 13.6: Cache invalidation cascades correctly to all dependent components
+- [ ] Test 13.7: Chart updates propagate correctly (chartDataUpdated events)
+- [ ] Test 13.8: Summary updates propagate correctly (summary-updated events)
+
+**Status:** 🔴 **NOT STARTED** - **PRIORITY 3** (Integration tests after unit tests complete)
+
+**Note:** ⚠️ Test count (~8) is ESTIMATED. These are integration tests that verify end-to-end behavior across multiple components. Additional tests may be added based on discovered edge cases.
+
+---
+
 ## 📋 Test File Locations
 
 ### ✅ Completed Tests
@@ -180,63 +215,143 @@
 | CustomStandardServiceTest | `tests/Unit/Services/CustomStandardServiceTest.php` | 70/70 | ✅ PASS |
 | DynamicStandardServiceTest | `tests/Unit/Services/DynamicStandardServiceTest.php` | 49/50 | ⚠️ 1 FAIL |
 
-### 🔴 Pending Tests
+### 🔴 Pending Tests - Livewire Layer
 
-| Test File | Location | Tests | Status |
-|-----------|----------|-------|--------|
-| StandardPsikometrikTest | `tests/Feature/Livewire/StandardPsikometrikTest.php` | 0/12 | 🔴 NOT STARTED |
-| StandardMcTest | `tests/Feature/Livewire/StandardMcTest.php` | 0/8 | 🔴 NOT STARTED |
-| BaselineSwitchingTest | `tests/Feature/Livewire/BaselineSwitchingTest.php` | 0/4 | 🔴 NOT STARTED |
-| EventCommunicationTest | `tests/Feature/Livewire/EventCommunicationTest.php` | 0/5 | 🔴 NOT STARTED |
-| EdgeCasesTest | `tests/Unit/EdgeCasesTest.php` | 0/10 | 🔴 NOT STARTED |
-| PerformanceTest | `tests/Performance/PerformanceTest.php` | 0/4 | 🔴 NOT STARTED |
+**⚠️ IMPORTANT:** Test counts below are ESTIMATED. Actual count will be determined after analyzing each component's:
+- Public methods that interact with baseline system
+- Event listeners (`$listeners` array)
+- Methods that call DynamicStandardService
+- Cache management methods
+- Modal interactions and validations
+
+**Coverage Goal:** 100% of all methods related to baseline/standard management
+
+| Test File | Location | Tests (Est.) | Status | Priority |
+|-----------|----------|--------------|--------|----------|
+| **Producer Components** | | | | |
+| StandardPsikometrikTest | `tests/Feature/Livewire/StandardPsikometrikTest.php` | ~12-15 | 🔴 NOT STARTED | **P1** |
+| StandardMcTest | `tests/Feature/Livewire/StandardMcTest.php` | ~8-10 | 🔴 NOT STARTED | **P1** |
+| BaselineSwitchingTest | `tests/Feature/Livewire/BaselineSwitchingTest.php` | ~4-6 | 🔴 NOT STARTED | **P1** |
+| **Consumer Components** | | | | |
+| RekapRankingAssessmentTest | `tests/Feature/Livewire/RekapRankingAssessmentTest.php` | ~6-8 | 🔴 NOT STARTED | **P2** |
+| StatisticTest | `tests/Feature/Livewire/StatisticTest.php` | ~4-6 | 🔴 NOT STARTED | **P2** |
+| TrainingRecommendationTest | `tests/Feature/Livewire/TrainingRecommendationTest.php` | ~6-8 | 🔴 NOT STARTED | **P2** |
+| RankingComponentsTest | `tests/Feature/Livewire/RankingComponentsTest.php` | ~4-6 | 🔴 NOT STARTED | **P2** |
+| IndividualReportComponentsTest | `tests/Feature/Livewire/IndividualReportComponentsTest.php` | ~6-8 | 🔴 NOT STARTED | **P2** |
+| **Integration Tests** | | | | |
+| CrossComponentIntegrationTest | `tests/Feature/Livewire/CrossComponentIntegrationTest.php` | ~8-10 | 🔴 NOT STARTED | **P3** |
+| **Other Tests** | | | | |
+| EdgeCasesTest | `tests/Unit/EdgeCasesTest.php` | ~10 | 🔴 NOT STARTED | **P3** |
+| PerformanceTest | `tests/Performance/PerformanceTest.php` | ~4 | 🔴 NOT STARTED | **P4** |
+
+**Total Estimated:** ~72-91 additional tests (to be finalized during implementation)
 
 ---
 
-## 🎯 Next Steps
+## 🎯 Next Steps & Implementation Strategy
 
-### Immediate Priority (Livewire Testing)
+### **CRITICAL WORKFLOW** ⚠️
 
-1. **Create StandardPsikometrikTest.php** (12 tests)
-   - Baseline dropdown selection
-   - Session adjustment labels
-   - Modal interactions
-   - Component cache
+Before implementing ANY test file, Claude Code MUST:
 
-2. **Create StandardMcTest.php** (8 tests)
-   - Similar to StandardPsikometrik
-   - Kompetensi-specific tests
+1. **📖 Read & Analyze Component File**
+   - Read full component source code
+   - Identify ALL public methods
+   - Map ALL event listeners in `$listeners` array
+   - Find ALL DynamicStandardService calls
+   - Identify ALL cache management logic
+   - List ALL modal interactions
 
-3. **Create BaselineSwitchingTest.php** (4 tests)
-   - Edge cases for baseline switching
+2. **📋 List Required Tests**
+   - Create comprehensive test list based on actual code
+   - Ensure 100% coverage of baseline-related methods
+   - Document expected behavior for each test
+   - Get user approval on test list
 
-4. **Create EventCommunicationTest.php** (5 tests)
-   - Livewire event dispatching/listening
+3. **✅ Implement Tests**
+   - Write tests based on approved list
+   - Follow Livewire testing best practices
+   - Use TESTING_SCENARIOS as reference for patterns
 
-### Future Priority
+### Immediate Priority (P1 - Producer Components)
 
-5. **Complete DynamicStandardServiceTest** (1 failing test)
-   - Fix `hasCategoryAdjustments()` test
+**Step 1: Analyze & Test StandardPsikometrik**
+```bash
+# Claude will:
+1. Read app/Livewire/Pages/GeneralReport/StandardPsikometrik.php
+2. List all methods requiring tests
+3. Create comprehensive test plan (~12-15 tests)
+4. Implement tests
+5. Run tests and verify 100% coverage
+```
 
-6. **Create EdgeCasesTest.php** (10 tests)
-   - Zero participants, ties, boundaries, etc.
+**Step 2: Analyze & Test StandardMc**
+```bash
+# Similar process for StandardMc component (~8-10 tests)
+```
 
-7. **Create PerformanceTest.php** (4 tests)
-   - Performance regression testing
+**Step 3: Analyze & Test Baseline Switching Edge Cases**
+```bash
+# Integration tests for switching behavior (~4-6 tests)
+```
+
+### Priority 2 (P2 - Consumer Components)
+
+**Step 4-8: Analyze & Test Each Consumer Component**
+- RekapRankingAssessment
+- Statistic
+- TrainingRecommendation
+- Ranking Components (Psy/Mc)
+- Individual Report Components
+
+Each follows same workflow: Analyze → List → Approve → Implement
+
+### Priority 3 (P3 - Integration & Edge Cases)
+
+**Step 9: Cross-Component Integration Tests**
+- End-to-end baseline propagation
+- Multi-component event handling
+
+**Step 10: Edge Cases**
+- Zero participants, ties, boundaries, etc.
+
+### Priority 4 (P4 - Performance)
+
+**Step 11: Performance Regression Tests**
+- Baseline performance benchmarks
 
 ---
 
 ## 📝 Notes
 
 - **Service Layer**: 83% complete (64/77 tests passing)
-- **Livewire Layer**: 0% complete (0/29 tests)
+- **Livewire Layer**: 0% complete (0/~72-91 estimated tests)
+- **Total Progress**: ~47% complete (64/~136-154 total estimated tests)
 - **Critical Bugs Fixed**:
   - ✅ Individual rating recalculation
   - ✅ Cache key completeness
 - **Known Issues**:
   - ⚠️ 1 test failing in DynamicStandardServiceTest (non-critical)
 
+### Important Reminders
+
+⚠️ **Test Count Flexibility:**
+- All test counts marked with `~` are ESTIMATES
+- Actual count determined after component analysis
+- Goal: 100% coverage of baseline-related functionality
+- Better to have MORE thorough tests than hit exact estimate
+
+⚠️ **Before Writing Tests:**
+- ALWAYS read component source code first
+- ALWAYS list all methods requiring tests
+- ALWAYS get user approval on test plan
+- NEVER assume test count from estimate
+
 ---
 
 **For detailed test scenarios and expected behavior, see:**
 [TESTING_SCENARIOS_BASELINE_3LAYER.md](./TESTING_SCENARIOS_BASELINE_3LAYER.md)
+
+---
+
+**Last Updated:** December 2025 (Updated with consumer components and flexible test counts)
