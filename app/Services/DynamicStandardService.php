@@ -624,7 +624,31 @@ class DynamicStandardService
 
     /**
      * Check if specific category has any adjustments
+     * 
      * 🚀 OPTIMIZATION: Uses request-scoped cache to prevent duplicate queries
+     * 
+     * ⚠️ IMPORTANT: This method depends on AspectCacheService being preloaded.
+     * You MUST call AspectCacheService::preloadByTemplate($templateId) before using this method.
+     * 
+     * Why? This method uses AspectCacheService to avoid N+1 queries when checking
+     * aspect and sub-aspect adjustments. Without preloading, the cache will be empty
+     * and this method may return incorrect results.
+     * 
+     * Example usage:
+     * ```php
+     * // ✅ CORRECT
+     * AspectCacheService::preloadByTemplate($templateId);
+     * $hasAdjustments = $dynamicService->hasCategoryAdjustments($templateId, 'potensi');
+     * 
+     * // ❌ WRONG (may return false even if adjustments exist)
+     * $hasAdjustments = $dynamicService->hasCategoryAdjustments($templateId, 'potensi');
+     * ```
+     * 
+     * @param int $templateId Template ID
+     * @param string $categoryCode Category code (e.g., 'potensi', 'kompetensi')
+     * @return bool True if category has any adjustments (weights, ratings, active status)
+     * 
+     * @throws \RuntimeException If AspectCacheService is not preloaded (in non-production environments)
      */
     public function hasCategoryAdjustments(int $templateId, string $categoryCode): bool
     {
@@ -647,6 +671,16 @@ class DynamicStandardService
         $category = AspectCacheService::getCategoryByCode($templateId, $categoryCode);
 
         if (! $category) {
+            // 🛡️ GUARD: Fail fast if cache not preloaded (helps catch bugs early)
+            // Only throw in non-production to avoid breaking production if cache fails
+            if (app()->environment(['local', 'testing'])) {
+                throw new \RuntimeException(
+                    "AspectCacheService not preloaded for template {$templateId}. ".
+                    "Call AspectCacheService::preloadByTemplate({$templateId}) before using hasCategoryAdjustments(). ".
+                    "Category '{$categoryCode}' not found in cache."
+                );
+            }
+
             $this->categoryAdjustmentsCache[$cacheKey] = false;
 
             return false;

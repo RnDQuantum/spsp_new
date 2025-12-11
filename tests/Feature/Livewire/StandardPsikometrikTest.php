@@ -504,7 +504,8 @@ class StandardPsikometrikTest extends TestCase
         // Don't set session filters - no template selected
 
         Livewire::test(StandardPsikometrik::class)
-            ->call('resetAdjustments'); // Should not throw exception
+            ->call('resetAdjustments')
+            ->assertNotDispatched('standard-adjusted'); // Should not dispatch event when no template
     }
 
     // ============================================================================
