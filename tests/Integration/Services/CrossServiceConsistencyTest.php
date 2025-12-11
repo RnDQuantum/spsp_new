@@ -146,12 +146,14 @@ class CrossServiceConsistencyTest extends TestCase
             ]);
 
             // Create 3 sub-aspects for each Potensi aspect
+            // Use VARIED ratings to ensure recalculation produces different results
+            $subAspectRatings = [2, 3, 4]; // Different ratings for testing
             for ($i = 1; $i <= 3; $i++) {
                 SubAspect::factory()->create([
                     'aspect_id' => $aspect->id,
                     'code' => $aspectData['code'].'_sub_'.$i,
                     'name' => $aspectData['name'].' Sub '.$i,
-                    'standard_rating' => 3,
+                    'standard_rating' => $subAspectRatings[$i - 1], // Varied: 2, 3, 4
                     'order' => $i,
                 ]);
             }
@@ -231,6 +233,8 @@ class CrossServiceConsistencyTest extends TestCase
             $standardRating = $this->getAspectStandardRating($aspect);
 
             // Calculate individual rating
+            // IMPORTANT: For aspects with sub-aspects, we'll recalculate this later
+            // to match the average of sub-aspect individual_ratings
             $individualRating = min(5.0, round($standardRating * $performanceMultiplier, 2));
 
             // Calculate scores
@@ -255,19 +259,33 @@ class CrossServiceConsistencyTest extends TestCase
 
             // Create sub-aspect assessments if aspect has sub-aspects
             if ($aspect->subAspects->isNotEmpty()) {
-                $this->createSubAspectAssessments($aspectAssessment, $aspect, $performanceMultiplier);
+                $subAspectIndividualRatings = $this->createSubAspectAssessments($aspectAssessment, $aspect, $performanceMultiplier);
+
+                // CRITICAL: Update aspect individual_rating to match average of sub-aspects
+                // This ensures test data consistency with recalculation logic
+                $avgIndividualRating = round(collect($subAspectIndividualRatings)->avg(), 2);
+                $aspectAssessment->update([
+                    'individual_rating' => $avgIndividualRating,
+                    'individual_score' => round($avgIndividualRating * $aspect->weight_percentage, 2),
+                    'gap_rating' => round($avgIndividualRating - $standardRating, 2),
+                    'gap_score' => round(($avgIndividualRating * $aspect->weight_percentage) - $standardScore, 2),
+                ]);
             }
         }
     }
 
     /**
      * Create sub-aspect assessments for an aspect assessment
+     *
+     * @return array Array of individual ratings for each sub-aspect
      */
     private function createSubAspectAssessments(
         AspectAssessment $aspectAssessment,
         Aspect $aspect,
         float $performanceMultiplier
-    ): void {
+    ): array {
+        $individualRatings = [];
+
         foreach ($aspect->subAspects as $subAspect) {
             $standardRating = (int) $subAspect->standard_rating;
             $individualRating = (int) min(5, round($standardRating * $performanceMultiplier));
@@ -280,7 +298,11 @@ class CrossServiceConsistencyTest extends TestCase
                 'standard_rating' => $standardRating,
                 'individual_rating' => $individualRating,
             ]);
+
+            $individualRatings[] = $individualRating;
         }
+
+        return $individualRatings;
     }
 
     /**
@@ -342,43 +364,43 @@ class CrossServiceConsistencyTest extends TestCase
         // Assert: Both services should return IDENTICAL values
         $this->assertEquals(
             $rankingResult['individual_rating'],
-            $individualResult['individual_rating'],
+            $individualResult['total_individual_rating'],
             'RankingService and IndividualAssessmentService must return same individual_rating'
         );
 
         $this->assertEquals(
             $rankingResult['individual_score'],
-            $individualResult['individual_score'],
+            $individualResult['total_individual_score'],
             'RankingService and IndividualAssessmentService must return same individual_score'
         );
 
         $this->assertEquals(
             $rankingResult['adjusted_standard_rating'],
-            $individualResult['standard_rating'],
+            $individualResult['total_standard_rating'],
             'RankingService and IndividualAssessmentService must return same standard_rating'
         );
 
         $this->assertEquals(
             $rankingResult['adjusted_standard_score'],
-            $individualResult['standard_score'],
+            $individualResult['total_standard_score'],
             'RankingService and IndividualAssessmentService must return same standard_score'
         );
 
         $this->assertEquals(
             $rankingResult['adjusted_gap_rating'],
-            $individualResult['gap_rating'],
+            $individualResult['total_gap_rating'],
             'RankingService and IndividualAssessmentService must return same gap_rating'
         );
 
         $this->assertEquals(
             $rankingResult['adjusted_gap_score'],
-            $individualResult['gap_score'],
+            $individualResult['total_gap_score'],
             'RankingService and IndividualAssessmentService must return same gap_score'
         );
 
         $this->assertEquals(
             $rankingResult['conclusion'],
-            $individualResult['conclusion'],
+            $individualResult['overall_conclusion'],
             'RankingService and IndividualAssessmentService must return same conclusion'
         );
     }
@@ -431,13 +453,13 @@ class CrossServiceConsistencyTest extends TestCase
         // Assert: Both services must return IDENTICAL RECALCULATED values
         $this->assertEquals(
             $rankingResult['individual_rating'],
-            $individualResult['individual_rating'],
+            $individualResult['total_individual_rating'],
             'Both services must recalculate individual_rating identically'
         );
 
         $this->assertEquals(
             $rankingResult['adjusted_standard_rating'],
-            $individualResult['standard_rating'],
+            $individualResult['total_standard_rating'],
             'Both services must recalculate standard_rating identically'
         );
 
@@ -497,13 +519,13 @@ class CrossServiceConsistencyTest extends TestCase
         // Assert: Both services must apply session adjustments identically
         $this->assertEquals(
             $rankingResult['individual_score'],
-            $individualResult['individual_score'],
+            $individualResult['total_individual_score'],
             'Both services must apply session weight adjustments identically'
         );
 
         $this->assertEquals(
             $rankingResult['adjusted_standard_score'],
-            $individualResult['standard_score'],
+            $individualResult['total_standard_score'],
             'Both services must calculate standard_score with adjusted weight identically'
         );
 
@@ -566,13 +588,13 @@ class CrossServiceConsistencyTest extends TestCase
         // Assert: Both services must use custom standard identically
         $this->assertEquals(
             $rankingResult['adjusted_standard_score'],
-            $individualResult['standard_score'],
+            $individualResult['total_standard_score'],
             'Both services must use custom standard identically'
         );
 
         $this->assertEquals(
             $rankingResult['individual_score'],
-            $individualResult['individual_score'],
+            $individualResult['total_individual_score'],
             'Both services must calculate scores with custom standard identically'
         );
 
