@@ -166,10 +166,11 @@ class RankingServiceTest extends TestCase
         }
 
         // Create Kompetensi aspects WITHOUT sub-aspects (3 aspects)
+        // Use different rating (4.0) to create different total score than Potensi (for cache tests)
         $kompetensiAspects = [
-            ['code' => 'integritas', 'name' => 'Integritas', 'weight' => 20, 'rating' => 3.0, 'order' => 1],
-            ['code' => 'kerjasama', 'name' => 'Kerjasama', 'weight' => 15, 'rating' => 3.0, 'order' => 2],
-            ['code' => 'komunikasi', 'name' => 'Komunikasi', 'weight' => 15, 'rating' => 3.0, 'order' => 3],
+            ['code' => 'integritas', 'name' => 'Integritas', 'weight' => 20, 'rating' => 4.0, 'order' => 1],
+            ['code' => 'kerjasama', 'name' => 'Kerjasama', 'weight' => 15, 'rating' => 4.0, 'order' => 2],
+            ['code' => 'komunikasi', 'name' => 'Komunikasi', 'weight' => 15, 'rating' => 4.0, 'order' => 3],
         ];
 
         foreach ($kompetensiAspects as $aspectData) {
@@ -2444,8 +2445,9 @@ class RankingServiceTest extends TestCase
             30   // Changed from 50
         );
 
-        // Clear cache
+        // Clear ALL caches (AspectCacheService + Laravel Cache)
         \App\Services\Cache\AspectCacheService::clearCache();
+        \Illuminate\Support\Facades\Cache::flush();  // CRITICAL: Clear Laravel cache too!
 
         // Act 3: Get combined rankings with adjusted category weights
         $rankings2 = $this->service->getCombinedRankings(
@@ -2456,7 +2458,7 @@ class RankingServiceTest extends TestCase
         );
         $result2 = $rankings2->first();
 
-        // Assert: Results should be DIFFERENT
+        // Assert: Results should be DIFFERENT (due to different category weights)
         $this->assertNotEquals(
             $result1['total_individual_score'],
             $result2['total_individual_score'],
