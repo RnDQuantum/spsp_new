@@ -10,6 +10,9 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         @livewireStyles
         <link rel="icon" type="image/x-icon" href="{{ asset('images/thumb-qhrmi.webp') }}">
+        {{-- Preload Sidebar Images (Dynamic/Alpine) --}}
+        <link rel="preload" as="image" href="{{ asset('images/thumb-qhrmi.webp') }}" fetchpriority="high">
+        <link rel="preload" as="image" href="{{ asset('images/thumb-qhrmi-hd.webp') }}" fetchpriority="high">
     </head>
 
     <body class="bg-gray-100 min-h-screen" x-data="{

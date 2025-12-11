@@ -6,7 +6,10 @@
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title>STATIC PRIBADI SPIDER PLOT</title>
         @vite(['resources/css/app.css', 'resources/js/app.js'])
-        <link rel="icon" type="image/x-icon" href="{{ asset('images/thumb-qhrmi.webp') }}" />
+        <link rel="icon" type="image/x-icon" href="{{ asset('images/thumb-qhrmi.webp') }}">
+        {{-- Preload LCP Images --}}
+        <link rel="preload" as="image" href="{{ asset('images/spsp.webp') }}" fetchpriority="high">
+        <link rel="preload" as="image" href="{{ asset('images/logo-qhrmi.webp') }}" fetchpriority="high">
         <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     </head>
 
@@ -17,14 +20,14 @@
 
                 <!-- Kolom Kiri - Gambar SPSP -->
                 <div class="flex items-center justify-center lg:pr-8">
-                    <img src="{{ asset('images/spsp.webp') }}" alt="SPSP Diagram" class="w-full max-w-lg" />
+                    <img src="{{ asset('images/spsp.webp') }}" fetchpriority="high" alt="SPSP Diagram" class="w-full max-w-lg" />
                 </div>
 
                 <!-- Kolom Kanan - Konten Utama -->
                 <div class="text-center items-center">
                     <!-- Logo/Gambar -->
                     <div class="mb-4">
-                        <img src="{{ asset('images/logo-qhrmi.webp') }}" alt="Logo Static Pribadi Spider Plot"
+                        <img src="{{ asset('images/logo-qhrmi.webp') }}" fetchpriority="high" alt="Logo Static Pribadi Spider Plot"
                             class="mx-auto max-w-md" />
                     </div>
                     <!-- Judul Utama -->
