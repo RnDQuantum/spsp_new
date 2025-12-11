@@ -9,8 +9,9 @@
 ## 📊 Overall Progress
 
 - **Total Scenarios:** ~110+ tests (⚠️ ESTIMATED - Final count determined after component analysis)
-- **Completed:** 64 tests (Service Layer - 83% of original scope)
-- **Remaining:** ~46+ tests (Livewire Layer - to be finalized after analysis)
+- **Completed:** 86 tests (Service Layer: 64, Livewire Layer: 22)
+- **In Progress:** 3 tests (2 failed + 1 risky in StandardPsikometrik)
+- **Remaining:** ~21+ tests (Livewire Layer - consumer components)
 
 ---
 
@@ -111,24 +112,56 @@
 
 ---
 
-## 🎯 Scenario Group 9: Livewire Component Integration (0/12)
+## 🎯 Scenario Group 9: Livewire Component Integration (22/25) ⭐ **IN PROGRESS**
 
-### StandardPsikometrik / StandardMc Components
+### StandardPsikometrik Component (22/25 tests - 88% PASS)
 
-- [ ] Test 9.1: Baseline Dropdown Selection (Quantum Default)
-- [ ] Test 9.2: Baseline Dropdown Selection (Custom Standard)
-- [ ] Test 9.3: Switch from Custom Standard to Quantum Default
-- [ ] Test 9.4: "Standar Disesuaikan" Label Appears After Session Adjustment
-- [ ] Test 9.5: "Standar Disesuaikan" Label Disappears After Baseline Switch
-- [ ] Test 9.6: Category Weight Edit Modal Flow
-- [ ] Test 9.7: Sub-Aspect Rating Edit Modal Flow (Potensi)
-- [ ] Test 9.8: Aspect Rating Edit Modal Flow (Kompetensi)
-- [ ] Test 9.9: Rating Validation (Must be 1-5)
-- [ ] Test 9.10: Reset Adjustments Button
-- [ ] Test 9.11: Modal Close Without Save
-- [ ] Test 9.12: Component Cache Management
+**✅ Group 1: Lifecycle & Initialization (3/3)**
+- [x] Test 9.1a: Component mounts with default state
+- [x] Test 9.1b: Component loads standard data when event and position selected
+- [x] Test 9.1c: Component loads available custom standards for institution
 
-**Status:** 🔴 **NOT STARTED** - **NEXT PRIORITY**
+**✅ Group 2: Baseline Selection & Switching (4/5)**
+- [x] Test 9.2a: Selecting custom standard updates component state
+- [x] Test 9.2b: Switch from custom standard to Quantum Default
+- [x] Test 9.2c: Handle string null/empty string/actual null correctly
+- [⚠️] Test 9.2d: Switching custom standard clears previous session adjustments ❌ FAILED
+- [x] Test 9.2e: Handles standard-switched event from other components
+
+**✅ Group 3: Category Weight Adjustments (4/4)**
+- [x] Test 9.3a: Opening category weight modal sets state correctly
+- [x] Test 9.3b: Saving category weight creates session adjustment
+- [x] Test 9.3c: Closing modal without saving discards changes
+- [x] Test 9.3d: Category weight modal handles invalid template gracefully
+
+**✅ Group 4: Sub-Aspect Rating Adjustments (5/5)**
+- [x] Test 9.4a: Opening sub-aspect rating modal sets state correctly
+- [x] Test 9.4b: Saving sub-aspect rating creates session adjustment
+- [x] Test 9.4c: Sub-aspect rating validation rejects values below 1
+- [x] Test 9.4d: Sub-aspect rating validation rejects values above 5
+- [x] Test 9.4e: Sub-aspect rating modal handles null template gracefully
+
+**⚠️ Group 5: Reset Adjustments (1/2)**
+- [⚠️] Test 9.5a: Reset adjustments clears all session adjustments ❌ FAILED
+- [x] Test 9.5b: Reset adjustments handles null template gracefully
+
+**✅ Group 6: Event Handling (3/3)**
+- [x] Test 9.6a: Handles event-selected clears cache and waits for position
+- [x] Test 9.6b: Handles position-selected loads data and dispatches chart update
+- [x] Test 9.6c: Handles standard-adjusted event from other components
+
+**✅ Group 7: Cache Management (2/2)**
+- [x] Test 9.7a: Cache prevents redundant data processing
+- [x] Test 9.7b: Cache cleared on baseline changes
+
+**✅ Group 8: 3-Layer Priority Integration (1/1)**
+- [x] Test 9.8a: Loaded data respects 3-layer priority system
+
+**Status:** ⚠️ **88% COMPLETE** - 2 tests failing (session adjustment detection)
+
+**Test File:** `tests/Feature/Livewire/StandardPsikometrikTest.php`
+
+### StandardMc Component (0/8 tests - NOT STARTED)
 
 ---
 
@@ -273,6 +306,24 @@ Before implementing ANY test file, Claude Code MUST:
    - Follow Livewire testing best practices
    - Use TESTING_SCENARIOS as reference for patterns
 
+---
+
+## ✅ **COMPLETED IMPLEMENTATIONS**
+
+### **StandardPsikometrik Component** ✅
+- **File:** `tests/Feature/Livewire/StandardPsikometrikTest.php`
+- **Tests:** 25 total (22 passing, 2 failing, 1 risky)
+- **Coverage:** 88% baseline-related methods
+- **Status:** ⚠️ Needs fix for 2 tests related to `hasCategoryAdjustments()`
+- **Issues:**
+  - Test 9.2d: Session adjustment detection after switching custom standard
+  - Test 9.5a: Session adjustment detection after reset
+- **Created Files:**
+  - `tests/Feature/Livewire/StandardPsikometrikTest.php`
+  - `database/factories/CustomStandardFactory.php`
+  - `docs/TEST_PLAN_STANDARD_PSIKOMETRIK.md`
+  - Updated `app/Models/CustomStandard.php` (added HasFactory)
+
 ### Immediate Priority (P1 - Producer Components)
 
 **Step 1: Analyze & Test StandardPsikometrik**
@@ -325,13 +376,15 @@ Each follows same workflow: Analyze → List → Approve → Implement
 ## 📝 Notes
 
 - **Service Layer**: 83% complete (64/77 tests passing)
-- **Livewire Layer**: 0% complete (0/~72-91 estimated tests)
-- **Total Progress**: ~47% complete (64/~136-154 total estimated tests)
+- **Livewire Layer**: 88% complete for StandardPsikometrik (22/25 tests passing)
+- **Total Progress**: ~63% complete (86/~136-154 total estimated tests)
 - **Critical Bugs Fixed**:
   - ✅ Individual rating recalculation
   - ✅ Cache key completeness
 - **Known Issues**:
   - ⚠️ 1 test failing in DynamicStandardServiceTest (non-critical)
+  - ⚠️ 2 tests failing in StandardPsikometrikTest (session adjustment detection)
+  - ⚠️ 1 test risky in StandardPsikometrikTest
 
 ### Important Reminders
 
