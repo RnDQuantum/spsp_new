@@ -21,6 +21,7 @@ use App\Models\User;
 use App\Services\ConclusionService;
 use App\Services\CustomStandardService;
 use App\Services\DynamicStandardService;
+use App\Services\Cache\AspectCacheService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use PHPUnit\Framework\Attributes\Test;
@@ -152,6 +153,9 @@ class RankingPsyMappingTest extends TestCase
             'institution_id' => $this->institution->id,
             'name' => 'Custom Standard Test',
         ]);
+
+        // Preload aspect cache to avoid AspectCacheService errors
+        AspectCacheService::preloadByTemplate($this->template->id);
 
         // Set session filters
         session([

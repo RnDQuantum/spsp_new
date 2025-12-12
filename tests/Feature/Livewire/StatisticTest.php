@@ -43,6 +43,7 @@ class StatisticTest extends TestCase
     private AssessmentTemplate $template;
     private CategoryType $categoryType;
     private CategoryType $potensiCategoryType;
+    private CategoryType $potensiCategory;
     private Aspect $aspect;
     private Participant $participant;
     private CategoryAssessment $categoryAssessment;
@@ -83,6 +84,13 @@ class StatisticTest extends TestCase
             'weight_percentage' => 50,
         ]);
 
+        // Create potensi category to satisfy AdjustmentIndicator in view (needs 'potensi' code)
+        $this->potensiCategory = CategoryType::factory()->create([
+            'template_id' => $this->template->id,
+            'code' => 'potensi',
+            'weight_percentage' => 50,
+        ]);
+
         $this->aspect = Aspect::factory()->create([
             'category_type_id' => $this->categoryType->id,
             'template_id' => $this->template->id,
@@ -108,6 +116,9 @@ class StatisticTest extends TestCase
             'filter.position_formation_id' => $this->position->id,
             'filter.aspect_id' => $this->aspect->id,
         ]);
+
+        // Preload aspect cache to avoid AspectCacheService errors
+        AspectCacheService::preloadByTemplate($this->template->id);
 
         // Create specific assessment data with known values
         AspectAssessment::factory()->create([
@@ -463,12 +474,8 @@ class StatisticTest extends TestCase
         // Apply session adjustment (Layer 1) - overrides custom standard
         $dynamicStandard->saveAspectRating($this->template->id, $this->aspect->code, 5.0);
 
-        // Create potensi category to satisfy AdjustmentIndicator in view
-        $potensiCategory = CategoryType::factory()->create([
-            'template_id' => $this->template->id,
-            'code' => 'potensi',
-            'weight_percentage' => 50,
-        ]);
+        // Use existing potensi-psikometrik category to satisfy AdjustmentIndicator in view
+        $potensiCategory = $this->potensiCategoryType;
 
         // Preload cache again before component test to ensure AdjustmentIndicator has access
         AspectCacheService::preloadByTemplate($this->template->id);
@@ -497,12 +504,8 @@ class StatisticTest extends TestCase
         // Apply session adjustment
         $dynamicStandard->saveAspectRating($this->template->id, $this->aspect->code, 5.0);
 
-        // Create potensi category to satisfy AdjustmentIndicator in view
-        $potensiCategory = CategoryType::factory()->create([
-            'template_id' => $this->template->id,
-            'code' => 'potensi',
-            'weight_percentage' => 50,
-        ]);
+        // Use existing potensi-psikometrik category to satisfy AdjustmentIndicator in view
+        $potensiCategory = $this->potensiCategoryType;
 
         // Preload cache again before component test to ensure AdjustmentIndicator has access
         AspectCacheService::preloadByTemplate($this->template->id);
