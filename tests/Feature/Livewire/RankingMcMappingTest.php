@@ -51,6 +51,9 @@ class RankingMcMappingTest extends TestCase
     {
         parent::setUp();
 
+        // Clear aspect cache to ensure test isolation
+        AspectCacheService::clearCache();
+
         // Create institution
         $this->institution = Institution::factory()->create([
             'name' => 'Test Institution',
@@ -133,6 +136,9 @@ class RankingMcMappingTest extends TestCase
             'institution_id' => $this->institution->id,
             'name' => 'Custom Standard Test',
         ]);
+
+        // Clear any existing session data first
+        session()->flush();
 
         // Preload aspect cache to avoid AspectCacheService errors
         AspectCacheService::preloadByTemplate($this->template->id);

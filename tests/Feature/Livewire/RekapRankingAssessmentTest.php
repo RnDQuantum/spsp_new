@@ -21,6 +21,7 @@ use App\Models\User;
 use App\Services\ConclusionService;
 use App\Services\CustomStandardService;
 use App\Services\DynamicStandardService;
+use App\Services\Cache\AspectCacheService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use PHPUnit\Framework\Attributes\Test;
@@ -57,6 +58,12 @@ class RekapRankingAssessmentTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+
+        // Clear aspect cache to ensure test isolation
+        AspectCacheService::clearCache();
+
+        // Clear any existing session data first
+        session()->flush();
 
         // Create institution
         $this->institution = Institution::factory()->create([
@@ -191,6 +198,9 @@ class RekapRankingAssessmentTest extends TestCase
             'institution_id' => $this->institution->id,
             'name' => 'Custom Standard Test',
         ]);
+
+        // Preload aspect cache to avoid AspectCacheService errors
+        AspectCacheService::preloadByTemplate($this->template->id);
 
         // Set session filters
         session([
