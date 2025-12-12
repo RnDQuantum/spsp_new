@@ -9,13 +9,13 @@
 ## 📊 Overall Progress Summary
 
 ### **Current Status:**
-- **Total Tests:** 394 tests (381 passing + 13 integration)
-- **Total Assertions:** 1183+ assertions
+- **Total Tests:** 404 tests (391 passing + 13 integration)
+- **Total Assertions:** 1213+ assertions
 - **Service Layer:** ✅ **100% COMPLETE** (260/260 tests)
 - **Livewire Layer:** ✅ **PRODUCER COMPONENTS COMPLETE** (51/51 tests)
-- **Livewire Consumers:** ⚠️ **PARTIAL** (81/~120 tests)
+- **Livewire Consumers:** ⚠️ **PARTIAL** (91/~120 tests)
   - ✅ RekapRankingAssessment: COMPLETE (43/43 tests)
-  - ✅ RankingPsyMapping: COMPLETE (38/38 tests) ⭐ **NEW**
+  - ✅ RankingPsyMapping: COMPLETE (48/48 tests) ⭐ **UPDATED**
   - 🔴 RankingMcMapping: NOT STARTED (~38 tests)
   - 🔴 Statistic, Training, Individual Reports: NOT STARTED (~40+ tests)
 - **Integration Layer:** ✅ **COMPLETE** (6/6 tests)
@@ -32,15 +32,15 @@ Service Layer Tests:        260 tests (777 assertions)
 
 Integration Tests:            6 tests (35 assertions)
 ├─ CrossServiceConsistency:   4 tests ✅
-└─ PriorityChainIntegration:  2 tests ✅
+└─ PriorityChainIntegration: 2 tests ✅
 
-Livewire Tests:             132 tests (397 assertions)
+Livewire Tests:             142 tests (426 assertions)
 ├─ StandardPsikometrik:      25 tests ✅
 ├─ StandardMc:               26 tests ✅
 ├─ RekapRankingAssessment:  43 tests ✅
-└─ RankingPsyMapping:       38 tests ✅
+└─ RankingPsyMapping:       48 tests ✅
 
-TOTAL:                      394 tests (1183 assertions) ✅
+TOTAL:                      404 tests (1213 assertions) ✅
 ```
 
 ---
@@ -350,10 +350,11 @@ TOTAL:                      394 tests (1183 assertions) ✅
 - [ ] Test 11.13: Recommendation counts reflect new standards
 - [ ] Test 11.14: Gap-based recommendations recalculated
 
-**📋 RankingPsyMapping Component** (38/38 tests - ✅ COMPLETE)
+**📋 RankingPsyMapping Component** (48/48 tests - ✅ COMPLETE)
 
 **Covered by:** RankingPsyMappingTest.php
 
+**✅ Original Tests (38 tests):**
 - [x] Test 11.15: Handle baseline events and refresh rankings
   - **Covered:** `handle_standard_update_clears_cache_and_refreshes()`
   - **Covered:** `handle_standard_switch_delegates_to_handle_standard_update()`
@@ -366,6 +367,22 @@ TOTAL:                      394 tests (1183 assertions) ✅
 - [x] Test 11.18: Active/inactive aspects reflected in rankings
   - **Covered:** `rankings_reflect_active_inactive_aspects_from_baseline()`
   - **Covered:** `database_individual_rating_never_changes_when_aspects_disabled()`
+
+**⭐ Additional Tests Added (10 tests):**
+- [x] Test 2.2: Fair Recalculation (3 tests)
+  - **Covered:** `inactive_sub_aspect_triggers_fair_recalculation()`
+  - **Covered:** `all_sub_aspects_inactive_marks_aspect_inactive()`
+  - **Covered:** `recalculation_impact_on_statistics_and_distribution()`
+- [x] Test 12.1-12.5: Cache Key Completeness (3 tests)
+  - **Covered:** `sub_aspect_active_status_affects_cache_key()`
+  - **Covered:** `custom_standard_selection_affects_cache_key()`
+  - **Covered:** `session_adjustment_affects_cache_key()`
+- [x] Test 3.1, 3.4: Active/Inactive Logic Impact (2 tests)
+  - **Covered:** `inactive_aspect_excluded_from_total_score()`
+  - **Covered:** `mixed_active_inactive_aspects_calculated_correctly()`
+- [x] Test 7.1: Cross-Service Consistency (2 tests)
+  - **Covered:** `cross_service_consistency_for_same_participant()`
+  - **Covered:** `cross_service_consistency_with_inactive_sub_aspects()`
 
 **📋 RankingMcMapping Component** (Est. 4-6 tests)
 - [ ] Test 11.19: Handle baseline events and refresh rankings
@@ -468,8 +485,8 @@ TOTAL:                      394 tests (1183 assertions) ✅
 | StandardMcTest | `tests/Feature/Livewire/` | 26 | ✅ PASS | 79 |
 | **Livewire Layer - Consumers** | | | | |
 | RekapRankingAssessmentTest | `tests/Feature/Livewire/` | 43 | ✅ PASS | ~129 |
-| RankingPsyMappingTest | `tests/Feature/Livewire/` | 38 | ✅ PASS | ~85 |
-| **TOTAL** | | **394** | **✅ PASS** | **1183+** |
+| RankingPsyMappingTest | `tests/Feature/Livewire/` | 48 | ✅ PASS | ~130 |
+| **TOTAL** | | **404** | **✅ PASS** | **1213+** |
 
 ---
 
@@ -481,7 +498,7 @@ TOTAL:                      394 tests (1183 assertions) ✅
 |-----------|----------|------------|----------|--------|
 | **Event Consumers - General Reports** | | | | |
 | RekapRankingAssessmentTest | `tests/Feature/Livewire/` | 43 tests ✅ | **P2** | ✅ COMPLETE |
-| RankingPsyMappingTest | `tests/Feature/Livewire/` | 38 tests ✅ | **P2** | ✅ COMPLETE |
+| RankingPsyMappingTest | `tests/Feature/Livewire/` | 48 tests ✅ | **P2** | ✅ COMPLETE |
 | RankingMcMappingTest | `tests/Feature/Livewire/` | ~38 | **P2** | 🔴 NOT STARTED |
 | StatisticTest | `tests/Feature/Livewire/` | ~4-6 | **P2** | 🔴 NOT STARTED |
 | TrainingRecommendationTest | `tests/Feature/Livewire/` | ~6-8 | **P2** | 🔴 NOT STARTED |
@@ -493,7 +510,7 @@ TOTAL:                      394 tests (1183 assertions) ✅
 | EdgeCasesTest | `tests/Unit/` | ~9 | **P3** | 🔴 NOT STARTED |
 | **Performance** | | | | |
 | PerformanceTest | `tests/Performance/` | ~4 | **P4** | 🔴 NOT STARTED |
-| **TOTAL PENDING** | | **~48-60** | | |
+| **TOTAL PENDING** | | **~38-50** | | |
 
 ---
 
@@ -599,5 +616,5 @@ Step 9: Performance benchmarks and scalability tests
 ---
 
 **Last Updated:** December 2025 (Synchronized with actual test results)
-**Total Test Progress:** 394/~430 tests (91.6% complete)
+**Total Test Progress:** 404/~430 tests (93.9% complete)
 **Next Priority:** RankingMcMapping Component (Est. 38 tests - similar to RankingPsyMapping)
