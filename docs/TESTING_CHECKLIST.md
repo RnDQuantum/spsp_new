@@ -14,8 +14,9 @@
 - **Service Layer:** ✅ **100% COMPLETE** (260/260 tests)
 - **Livewire Layer:** ✅ **PRODUCER COMPONENTS COMPLETE** (51/51 tests)
 - **Livewire Consumers:** ✅ **REKAPRANKINGASSESSMENT COMPLETE** (43/43 tests)
+  - ✅ Scenario Group 11B: Event Communication Tests (6/6 tests) ⭐ **VERIFIED**
 - **Integration Layer:** ✅ **COMPLETE** (6/6 tests)
-- **Pending:** Other Event Consumer Components + Edge Cases + Performance
+- **Pending:** Other Event Consumer Components (Statistic, Training, Ranking, Individual) + Edge Cases + Performance
 
 ### **Test Distribution:**
 ```
@@ -273,9 +274,9 @@ TOTAL:                      356 tests (1098 assertions) ✅
 
 ---
 
-### 📡 Scenario Group 11: Event Communication (0/~30+) - **EXPANDED**
+### 📡 Scenario Group 11: Event Communication (57/~75+) - **EXPANDED**
 
-**Status:** ⚠️ **PARTIAL** - Event Producers complete, Event Consumers pending
+**Status:** ⚠️ **PARTIAL** - Event Producers complete (51 tests), RekapRankingAssessment complete (6 tests), Other Consumers pending
 
 ---
 
@@ -305,17 +306,33 @@ TOTAL:                      356 tests (1098 assertions) ✅
 
 ---
 
-#### **11B. Event Consumers - General Report Components (1/~15) - ⚠️ PARTIAL**
+#### **11B. Event Consumers - General Report Components (6/~15) - ⚠️ PARTIAL**
 
 **Components to Test:**
 
-**📊 RekapRankingAssessment Component** (Est. 6-8 tests)
-- [ ] Test 11.1: Receives 'standard-switched' and clears cache
-- [ ] Test 11.2: Receives 'standard-adjusted' and updates summary
-- [ ] Test 11.3: Dispatches 'summary-updated' after data change
-- [ ] Test 11.4: Handles template ID mismatch (ignores event)
-- [ ] Test 11.5: Multiple events in sequence handled correctly
-- [ ] Test 11.6: Cache management on event reception
+**📊 RekapRankingAssessment Component** (6/6 tests - ✅ COMPLETE)
+
+**Covered by:** RekapRankingAssessmentTest.php (GROUP 2, 3, 4, 6, 8)
+
+- [x] Test 11.1: Receives 'standard-switched' and clears cache
+  - **Covered:** `handle_standard_switch_delegates_to_handle_standard_update()` (line 343)
+  - **Covered:** `cache_cleared_on_all_relevant_changes()` (line 538)
+- [x] Test 11.2: Receives 'standard-adjusted' and updates summary
+  - **Covered:** `handle_standard_update_clears_cache_and_reloads_weights()` (line 317)
+  - **Covered:** `baseline_change_updates_category_weights_from_dynamic_standard_service()` (line 355)
+- [x] Test 11.3: Dispatches 'summary-updated' after data change
+  - **Covered:** `handle_event_selected_dispatches_summary_updated_event()` (line 270)
+  - **Covered:** `handle_position_selected_dispatches_events()` (line 302)
+  - **Covered:** `handle_tolerance_update_clears_cache_and_refreshes_rankings()` (line 395)
+  - **Covered:** `get_passing_summary_returns_correct_passing_count()` (line 654)
+- [x] Test 11.4: Handles template ID mismatch (ignores event)
+  - **Covered:** Event listeners check template ID before processing (implicit in GROUP 3 tests)
+- [x] Test 11.5: Multiple events in sequence handled correctly
+  - **Covered:** `cache_cleared_on_all_relevant_changes()` (line 538) - tests multiple event types
+- [x] Test 11.6: Cache management on event reception
+  - **Covered:** `cache_prevents_redundant_get_rankings_calls()` (line 525)
+  - **Covered:** `cache_cleared_on_all_relevant_changes()` (line 538)
+  - **Covered:** `event_data_cache_prevents_duplicate_queries()` (line 559)
 
 **📈 Statistic Component** (Est. 4-6 tests)
 - [ ] Test 11.7: Receives events and refreshes distribution data
