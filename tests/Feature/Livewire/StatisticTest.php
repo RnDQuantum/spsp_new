@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Livewire;
 
+use PHPUnit\Framework\Attributes\Test;
 use App\Models\Aspect;
 use App\Models\AspectAssessment;
 use App\Models\AssessmentEvent;
@@ -137,7 +138,7 @@ class StatisticTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function component_mounts_with_default_state()
     {
         // Act
@@ -155,7 +156,7 @@ class StatisticTest extends TestCase
         $this->assertNotNull($component->get('selectedTemplate'));
     }
 
-    /** @test */
+    #[Test]
     public function component_loads_statistics_when_mounted_with_complete_filters()
     {
         // Act
@@ -169,7 +170,7 @@ class StatisticTest extends TestCase
             ->assertSet('standardRating', 3.0); // Standard rating from aspect
     }
 
-    /** @test */
+    #[Test]
     public function handle_event_selected_clears_cache_and_waits_for_position()
     {
         // Arrange
@@ -184,7 +185,7 @@ class StatisticTest extends TestCase
         $component->assertNoRedirect();
     }
 
-    /** @test */
+    #[Test]
     public function handle_position_selected_clears_cache_and_waits_for_aspect()
     {
         // Arrange
@@ -199,7 +200,7 @@ class StatisticTest extends TestCase
         $component->assertNoRedirect();
     }
 
-    /** @test */
+    #[Test]
     public function handle_aspect_selected_refreshes_statistics_and_dispatches_chart_update()
     {
         // Arrange
@@ -231,7 +232,7 @@ class StatisticTest extends TestCase
             ->assertDispatched('chartDataUpdated');
     }
 
-    /** @test */
+    #[Test]
     public function handle_standard_update_refreshes_statistics_and_dispatches_chart_update()
     {
         // Arrange
@@ -246,7 +247,7 @@ class StatisticTest extends TestCase
             ->assertSet('selectedTemplate.id', $this->template->id);
     }
 
-    /** @test */
+    #[Test]
     public function handle_standard_switched_refreshes_statistics_and_dispatches_chart_update()
     {
         // Arrange
@@ -261,7 +262,7 @@ class StatisticTest extends TestCase
             ->assertSet('selectedTemplate.id', $this->template->id);
     }
 
-    /** @test */
+    #[Test]
     public function refresh_statistics_with_no_filters_returns_early()
     {
         // Arrange
@@ -278,7 +279,7 @@ class StatisticTest extends TestCase
             ->assertSet('selectedTemplate', null);
     }
 
-    /** @test */
+    #[Test]
     public function refresh_statistics_with_invalid_event_returns_early()
     {
         // Arrange
@@ -295,7 +296,7 @@ class StatisticTest extends TestCase
             ->assertSet('selectedTemplate', null);
     }
 
-    /** @test */
+    #[Test]
     public function refresh_statistics_with_invalid_position_returns_early()
     {
         // Arrange
@@ -312,7 +313,7 @@ class StatisticTest extends TestCase
             ->assertSet('selectedTemplate', null);
     }
 
-    /** @test */
+    #[Test]
     public function dispatch_chart_update_sends_correct_data_structure()
     {
         // Arrange
@@ -333,7 +334,7 @@ class StatisticTest extends TestCase
         $this->assertTrue(true, 'Component has correct data structure for chart update');
     }
 
-    /** @test */
+    #[Test]
     public function get_current_aspect_name_returns_empty_when_no_aspect()
     {
         // Arrange
@@ -347,7 +348,7 @@ class StatisticTest extends TestCase
         $this->assertEquals('', $aspectName);
     }
 
-    /** @test */
+    #[Test]
     public function get_current_aspect_name_returns_aspect_name_when_aspect_exists()
     {
         // Arrange
@@ -362,7 +363,7 @@ class StatisticTest extends TestCase
         $this->assertNotEmpty($aspectName);
     }
 
-    /** @test */
+    #[Test]
     public function distribution_calculation_respects_bucket_boundaries()
     {
         // Create specific ratings for boundary testing
@@ -417,7 +418,7 @@ class StatisticTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function standard_rating_calculation_respects_3_layer_priority()
     {
         // Arrange
@@ -440,7 +441,7 @@ class StatisticTest extends TestCase
         $component->assertSet('standardRating', 5.0);
     }
 
-    /** @test */
+    #[Test]
     public function session_adjustments_override_custom_standard()
     {
         // Arrange
@@ -480,7 +481,7 @@ class StatisticTest extends TestCase
         $component->assertSet('standardRating', 5.0);
     }
 
-    /** @test */
+    #[Test]
     public function cache_key_includes_session_adjustments()
     {
         // Arrange
@@ -515,7 +516,7 @@ class StatisticTest extends TestCase
         $this->assertNotEquals($initialStandard, 5.0);
     }
 
-    /** @test */
+    #[Test]
     public function component_preloads_aspect_cache_when_mounted()
     {
         // Test that component initializes without error
@@ -527,7 +528,7 @@ class StatisticTest extends TestCase
         $this->assertNotNull($component->get('chartId'));
     }
 
-    /** @test */
+    #[Test]
     public function render_passes_correct_data_to_view()
     {
         // Arrange
@@ -555,7 +556,7 @@ class StatisticTest extends TestCase
         $this->assertEquals($actualAspectName, $viewData['aspectName']);
     }
 
-    /** @test */
+    #[Test]
     public function chart_id_is_unique_across_instances()
     {
         // Arrange
