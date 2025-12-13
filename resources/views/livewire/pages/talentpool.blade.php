@@ -2,9 +2,31 @@
     <h1 class="text-center text-2xl font-bold text-gray-800 mb-2">9-Box Performance Matrix</h1>
     <div class="text-center text-gray-600 mb-8 text-sm">Matriks Kinerja dan Potensi Karyawan</div>
 
-    <div style="height:600px; margin-bottom:30px;">
-        <canvas id="nineBoxChart"></canvas>
+    <!-- Event and Position Selectors -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+        <div>
+            <livewire:components.event-selector />
+        </div>
+        <div>
+            <livewire:components.position-selector />
+        </div>
     </div>
+
+    <!-- Show message if no data -->
+    @if (!$selectedEvent || !$selectedPositionId)
+        <div class="text-center py-12 bg-gray-50 rounded-lg">
+            <div class="text-gray-500 text-lg">Silakan pilih Event dan Position untuk melihat 9-Box Performance Matrix
+            </div>
+        </div>
+    @elseif($totalParticipants === 0)
+        <div class="text-center py-12 bg-gray-50 rounded-lg">
+            <div class="text-gray-500 text-lg">Tidak ada data peserta untuk Event dan Position yang dipilih</div>
+        </div>
+    @else
+        <div style="height:600px; margin-bottom:30px;">
+            <canvas id="nineBoxChart"></canvas>
+        </div>
+    @endif
 
     <div>
         <h2 class="text-sm font-semibold mb-1">Keterangan</h2>
@@ -104,162 +126,28 @@
                 return;
             }
 
-            const pesertaData = [{
-                    nama: "Ahmad Rizki",
-                    kinerja: 8.5,
-                    potensi: 8.0
-                },
-                {
-                    nama: "Dewi Lestari",
-                    kinerja: 9.0,
-                    potensi: 9.5
-                },
-                {
-                    nama: "Tini Kartini",
-                    kinerja: 3.8,
-                    potensi: 4.0
-                },
-                {
-                    nama: "Budi Santoso",
-                    kinerja: 7.8,
-                    potensi: 6.5
-                },
-                {
-                    nama: "Siti Nurhaliza",
-                    kinerja: 6.5,
-                    potensi: 8.2
-                },
-                {
-                    nama: "Andi Wijaya",
-                    kinerja: 5.0,
-                    potensi: 5.0
-                },
-                {
-                    nama: "Rina Kusuma",
-                    kinerja: 8.8,
-                    potensi: 7.2
-                },
-                {
-                    nama: "Doni Prasetyo",
-                    kinerja: 4.5,
-                    potensi: 6.8
-                },
-                {
-                    nama: "Maya Sari",
-                    kinerja: 6.8,
-                    potensi: 5.8
-                },
-                {
-                    nama: "Eko Saputra",
-                    kinerja: 9.2,
-                    potensi: 8.8
-                }
-            ];
+            // Get data from Livewire component
+            const pesertaData = @json($chartData);
+            const boxBoundaries = @json($boxBoundaries);
+            const boxStatistics = @json($boxStatistics);
 
-            function getBoxInfo(kinerja, potensi) {
-                const kinerjaLevel = kinerja >= 7.5 ? 'atas' : kinerja >= 5.5 ? 'sesuai' : 'bawah';
-                const potensiLevel = potensi >= 7.5 ? 'tinggi' : potensi >= 5.5 ? 'menengah' : 'rendah';
-
-                if (kinerjaLevel === 'atas' && potensiLevel === 'tinggi') return {
-                    box: 9,
-                    color: '#00C853'
-                };
-                if (kinerjaLevel === 'atas' && potensiLevel === 'menengah') return {
-                    box: 7,
-                    color: '#2196F3'
-                };
-                if (kinerjaLevel === 'atas' && potensiLevel === 'rendah') return {
-                    box: 4,
-                    color: '#9C27B0'
-                };
-                if (kinerjaLevel === 'sesuai' && potensiLevel === 'tinggi') return {
-                    box: 8,
-                    color: '#00BCD4'
-                };
-                if (kinerjaLevel === 'sesuai' && potensiLevel === 'menengah') return {
-                    box: 5,
-                    color: '#FFC107'
-                };
-                if (kinerjaLevel === 'sesuai' && potensiLevel === 'rendah') return {
-                    box: 2,
-                    color: '#FF9800'
-                };
-                if (kinerjaLevel === 'bawah' && potensiLevel === 'tinggi') return {
-                    box: 6,
-                    color: '#FF5722'
-                };
-                if (kinerjaLevel === 'bawah' && potensiLevel === 'menengah') return {
-                    box: 3,
-                    color: '#E91E63'
-                };
-                return {
-                    box: 1,
-                    color: '#D32F2F'
-                };
+            if (pesertaData.length === 0) {
+                console.log('No participant data available');
+                return;
             }
 
+            // Transform data for Chart.js (swap x/y for correct axes)
             const chartData = pesertaData.map(p => {
-                const info = getBoxInfo(p.kinerja, p.potensi);
                 return {
-                    x: p.potensi,
-                    y: p.kinerja,
+                    x: p.potensi, // Horizontal axis = POTENSI
+                    y: p.kinerja, // Vertical axis = KINERJA
                     nama: p.nama,
-                    box: info.box,
-                    color: info.color
+                    box: p.box,
+                    color: p.color
                 };
-            });
-
-            // Hitung jumlah peserta per box
-            const boxMeta = {
-                9: {
-                    label: 'Star Performer',
-                    color: '#00C853'
-                },
-                8: {
-                    label: 'High Potential',
-                    color: '#00BCD4'
-                },
-                7: {
-                    label: 'Potential Star',
-                    color: '#2196F3'
-                },
-                6: {
-                    label: 'Enigma',
-                    color: '#FF5722'
-                },
-                5: {
-                    label: 'Core Performer',
-                    color: '#FFC107'
-                },
-                4: {
-                    label: 'Solid Performer',
-                    color: '#9C27B0'
-                },
-                3: {
-                    label: 'Inconsistent',
-                    color: '#E91E63'
-                },
-                2: {
-                    label: 'Steady Performer',
-                    color: '#FF9800'
-                },
-                1: {
-                    label: 'Need Attention',
-                    color: '#D32F2F'
-                },
-            };
-
-            const boxCounts = {};
-            chartData.forEach(d => {
-                boxCounts[d.box] = (boxCounts[d.box] || 0) + 1;
             });
 
             const totalPeserta = chartData.length;
-
-            const boxPercent = {};
-            Object.keys(boxCounts).forEach(box => {
-                boxPercent[box] = (boxCounts[box] / totalPeserta) * 100;
-            });
 
 
             const ctx = canvas.getContext('2d');
@@ -350,68 +238,74 @@
                         ctx.save();
 
                         // Draw box backgrounds first
+                        // Draw box backgrounds first - use dynamic boundaries
+                        const potensiLower = boxBoundaries?.potensi?.lower_bound ?? 5.5;
+                        const potensiUpper = boxBoundaries?.potensi?.upper_bound ?? 7.5;
+                        const kinerjaLower = boxBoundaries?.kinerja?.lower_bound ?? 5.5;
+                        const kinerjaUpper = boxBoundaries?.kinerja?.upper_bound ?? 7.5;
+
                         const boxColors = [{
                                 x1: 0,
-                                x2: 5.5,
+                                x2: potensiLower,
                                 y1: 0,
-                                y2: 5.5,
-                                color: 'rgba(211,47,47,0.08)'
+                                y2: kinerjaLower,
+                                color: 'rgba(211,47,47,0.08)' // Box 1
                             },
                             {
                                 x1: 0,
-                                x2: 5.5,
-                                y1: 5.5,
-                                y2: 7.5,
-                                color: 'rgba(255,152,0,0.08)'
+                                x2: potensiLower,
+                                y1: kinerjaLower,
+                                y2: kinerjaUpper,
+                                color: 'rgba(255,152,0,0.08)' // Box 2
                             },
                             {
-                                x1: 5.5,
-                                x2: 7.5,
+                                x1: potensiLower,
+                                x2: potensiUpper,
                                 y1: 0,
-                                y2: 5.5,
-                                color: 'rgba(233,30,99,0.08)'
+                                y2: kinerjaLower,
+                                color: 'rgba(233,30,99,0.08)' // Box 3
                             },
                             {
                                 x1: 0,
-                                x2: 5.5,
-                                y1: 7.5,
+                                x2: potensiLower,
+                                y1: kinerjaUpper,
                                 y2: 10,
-                                color: 'rgba(156,39,176,0.08)'
+                                color: 'rgba(156,39,176,0.08)' // Box 4
                             },
                             {
-                                x1: 5.5,
-                                x2: 7.5,
-                                y1: 5.5,
-                                y2: 7.5,
-                                color: 'rgba(255,193,7,0.08)'
+                                x1: potensiLower,
+                                x2: potensiUpper,
+                                y1: kinerjaLower,
+                                y2: kinerjaUpper,
+                                color: 'rgba(255,193,7,0.08)' // Box 5
                             },
                             {
-                                x1: 7.5,
+                                x1: potensiUpper,
                                 x2: 10,
                                 y1: 0,
-                                y2: 5.5,
-                                color: 'rgba(255,87,34,0.08)'
+                                y2: kinerjaLower,
+                                color: 'rgba(255,87,34,0.08)' // Box 6
                             },
                             {
-                                x1: 5.5,
-                                x2: 7.5,
-                                y1: 7.5,
+                                x1: potensiLower,
+                                x2: potensiUpper,
+                                y1: kinerjaUpper,
                                 y2: 10,
-                                color: 'rgba(33,150,243,0.08)'
+                                color: 'rgba(33,150,243,0.08)' // Box 7
                             },
                             {
-                                x1: 7.5,
+                                x1: potensiUpper,
                                 x2: 10,
-                                y1: 5.5,
-                                y2: 7.5,
-                                color: 'rgba(0,188,212,0.08)'
+                                y1: kinerjaLower,
+                                y2: kinerjaUpper,
+                                color: 'rgba(0,188,212,0.08)' // Box 8
                             },
                             {
-                                x1: 7.5,
+                                x1: potensiUpper,
                                 x2: 10,
-                                y1: 7.5,
+                                y1: kinerjaUpper,
                                 y2: 10,
-                                color: 'rgba(0,200,83,0.08)'
+                                color: 'rgba(0,200,83,0.08)' // Box 9
                             }
                         ];
 
@@ -427,8 +321,13 @@
                             );
                         });
 
-                        // Draw grid lines
-                        [5.5, 7.5].forEach(function(v) {
+                        // Draw grid lines - use dynamic boundaries
+                        const potensiLower = boxBoundaries?.potensi?.lower_bound ?? 5.5;
+                        const potensiUpper = boxBoundaries?.potensi?.upper_bound ?? 7.5;
+                        const kinerjaLower = boxBoundaries?.kinerja?.lower_bound ?? 5.5;
+                        const kinerjaUpper = boxBoundaries?.kinerja?.upper_bound ?? 7.5;
+
+                        [potensiLower, potensiUpper].forEach(function(v) {
                             const x = xScale.getPixelForValue(v);
                             ctx.beginPath();
                             ctx.moveTo(x, yScale.getPixelForValue(10));
@@ -436,7 +335,9 @@
                             ctx.lineWidth = 3;
                             ctx.strokeStyle = '#333';
                             ctx.stroke();
+                        });
 
+                        [kinerjaLower, kinerjaUpper].forEach(function(v) {
                             const y = yScale.getPixelForValue(v);
                             ctx.beginPath();
                             ctx.moveTo(xScale.getPixelForValue(0), y);
@@ -444,7 +345,7 @@
                             ctx.stroke();
                         });
 
-                        // Draw box numbers
+                        // Draw box numbers - use dynamic boundaries
                         ctx.font = 'bold 48px Arial';
                         ctx.fillStyle = 'rgba(0,0,0,0.15)';
                         ctx.textAlign = 'center';
@@ -452,48 +353,48 @@
 
                         const boxes = [{
                                 num: '1',
-                                x: 2.75,
-                                y: 2.75
+                                x: potensiLower / 2,
+                                y: kinerjaLower / 2
                             },
                             {
                                 num: '2',
-                                x: 2.75,
-                                y: 6.5
+                                x: potensiLower / 2,
+                                y: (kinerjaLower + kinerjaUpper) / 2
                             },
                             {
                                 num: '3',
-                                x: 6.5,
-                                y: 2.75
+                                x: (potensiLower + potensiUpper) / 2,
+                                y: kinerjaLower / 2
                             },
                             {
                                 num: '4',
-                                x: 2.75,
-                                y: 8.75
+                                x: potensiLower / 2,
+                                y: (kinerjaUpper + 10) / 2
                             },
                             {
                                 num: '5',
-                                x: 6.5,
-                                y: 6.5
+                                x: (potensiLower + potensiUpper) / 2,
+                                y: (kinerjaLower + kinerjaUpper) / 2
                             },
                             {
                                 num: '6',
-                                x: 8.75,
-                                y: 2.75
+                                x: (potensiUpper + 10) / 2,
+                                y: kinerjaLower / 2
                             },
                             {
                                 num: '7',
-                                x: 6.5,
-                                y: 8.75
+                                x: (potensiLower + potensiUpper) / 2,
+                                y: (kinerjaUpper + 10) / 2
                             },
                             {
                                 num: '8',
-                                x: 8.75,
-                                y: 6.5
+                                x: (potensiUpper + 10) / 2,
+                                y: (kinerjaLower + kinerjaUpper) / 2
                             },
                             {
                                 num: '9',
-                                x: 8.75,
-                                y: 8.75
+                                x: (potensiUpper + 10) / 2,
+                                y: (kinerjaUpper + 10) / 2
                             }
                         ];
 
@@ -514,15 +415,29 @@
             if (pieCanvas) {
                 const pieCtx = pieCanvas.getContext('2d');
 
-                const pieLabels = Object.keys(boxCounts)
+                // Use boxStatistics from service instead of calculating from chartData
+                const boxLabels = Object.keys(boxStatistics)
                     .sort((a, b) => b - a) // urut 9 ke 1
                     .map(box => 'Box ' + box);
-                const pieData = Object.keys(boxCounts)
+                const pieData = Object.keys(boxStatistics)
                     .sort((a, b) => b - a)
-                    .map(box => boxCounts[box]);
-                const pieColors = Object.keys(boxCounts)
+                    .map(box => boxStatistics[box].count);
+                const pieColors = Object.keys(boxStatistics)
                     .sort((a, b) => b - a)
-                    .map(box => boxMeta[box].color);
+                    .map(box => {
+                        const colorMap = {
+                            1: '#D32F2F',
+                            2: '#FF9800',
+                            3: '#E91E63',
+                            4: '#9C27B0',
+                            5: '#FFC107',
+                            6: '#FF5722',
+                            7: '#2196F3',
+                            8: '#00BCD4',
+                            9: '#00C853'
+                        };
+                        return colorMap[box] || '#9E9E9E';
+                    });
 
                 new Chart(pieCtx, {
                     type: 'pie',
@@ -547,7 +462,8 @@
                                     label: function(ctx) {
                                         const label = ctx.label || '';
                                         const value = ctx.raw || 0;
-                                        const percent = (value / totalPeserta * 100).toFixed(1);
+                                        const percent = boxStatistics[ctx.label.replace('Box ', '')]
+                                            ?.percentage || 0;
                                         return label + ': ' + value + ' orang (' + percent + '%)';
                                     }
                                 }
@@ -561,7 +477,20 @@
             if (summaryBody) {
                 summaryBody.innerHTML = '';
 
-                Object.keys(boxCounts)
+                // Use boxStatistics from service
+                const boxLabelsMap = {
+                    1: 'Need Attention',
+                    2: 'Steady Performer',
+                    3: 'Inconsistent',
+                    4: 'Solid Performer',
+                    5: 'Core Performer',
+                    6: 'Enigma',
+                    7: 'Potential Star',
+                    8: 'High Potential',
+                    9: 'Star Performer'
+                };
+
+                Object.keys(boxStatistics)
                     .sort((a, b) => b - a) // 9 ke 1
                     .forEach(box => {
                         const tr = document.createElement('tr');
@@ -572,15 +501,15 @@
 
                         const tdLabel = document.createElement('td');
                         tdLabel.className = 'px-5 py-1 border-2 border-gray-300';
-                        tdLabel.textContent = boxMeta[box].label;
+                        tdLabel.textContent = boxLabelsMap[box] || 'Unknown';
 
                         const tdCount = document.createElement('td');
                         tdCount.className = 'text-center px-5 py-1 border-2 border-gray-300';
-                        tdCount.textContent = boxCounts[box];
+                        tdCount.textContent = boxStatistics[box].count;
 
                         const tdPercent = document.createElement('td');
                         tdPercent.className = 'text-center px-5 py-1 border-2 border-gray-300';
-                        tdPercent.textContent = boxPercent[box].toFixed(1) + '%';
+                        tdPercent.textContent = boxStatistics[box].percentage + '%';
 
                         tr.appendChild(tdBox);
                         tr.appendChild(tdLabel);
