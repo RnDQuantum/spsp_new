@@ -209,7 +209,7 @@
                                 }
                             },
                             min: 0,
-                            max: 10,
+                            max: 5,
                             ticks: {
                                 stepSize: 1
                             }
@@ -224,7 +224,7 @@
                                 }
                             },
                             min: 0,
-                            max: 10,
+                            max: 5,
                             ticks: {
                                 stepSize: 1
                             }
@@ -270,7 +270,7 @@
                                 x1: 0,
                                 x2: potensiLower,
                                 y1: kinerjaUpper,
-                                y2: 10,
+                                y2: 5,
                                 color: 'rgba(156,39,176,0.08)' // Box 4
                             },
                             {
@@ -282,7 +282,7 @@
                             },
                             {
                                 x1: potensiUpper,
-                                x2: 10,
+                                x2: 5,
                                 y1: 0,
                                 y2: kinerjaLower,
                                 color: 'rgba(255,87,34,0.08)' // Box 6
@@ -291,21 +291,21 @@
                                 x1: potensiLower,
                                 x2: potensiUpper,
                                 y1: kinerjaUpper,
-                                y2: 10,
+                                y2: 5,
                                 color: 'rgba(33,150,243,0.08)' // Box 7
                             },
                             {
                                 x1: potensiUpper,
-                                x2: 10,
+                                x2: 5,
                                 y1: kinerjaLower,
                                 y2: kinerjaUpper,
                                 color: 'rgba(0,188,212,0.08)' // Box 8
                             },
                             {
                                 x1: potensiUpper,
-                                x2: 10,
+                                x2: 5,
                                 y1: kinerjaUpper,
-                                y2: 10,
+                                y2: 5,
                                 color: 'rgba(0,200,83,0.08)' // Box 9
                             }
                         ];
@@ -326,7 +326,7 @@
                         [potensiLower, potensiUpper].forEach(function(v) {
                             const x = xScale.getPixelForValue(v);
                             ctx.beginPath();
-                            ctx.moveTo(x, yScale.getPixelForValue(10));
+                            ctx.moveTo(x, yScale.getPixelForValue(5));
                             ctx.lineTo(x, yScale.getPixelForValue(0));
                             ctx.lineWidth = 3;
                             ctx.strokeStyle = '#333';
@@ -337,7 +337,7 @@
                             const y = yScale.getPixelForValue(v);
                             ctx.beginPath();
                             ctx.moveTo(xScale.getPixelForValue(0), y);
-                            ctx.lineTo(xScale.getPixelForValue(10), y);
+                            ctx.lineTo(xScale.getPixelForValue(5), y);
                             ctx.stroke();
                         });
 
@@ -365,7 +365,7 @@
                             {
                                 num: '4',
                                 x: potensiLower / 2,
-                                y: (kinerjaUpper + 10) / 2
+                                y: (kinerjaUpper + 5) / 2
                             },
                             {
                                 num: '5',
@@ -374,23 +374,23 @@
                             },
                             {
                                 num: '6',
-                                x: (potensiUpper + 10) / 2,
+                                x: (potensiUpper + 5) / 2,
                                 y: kinerjaLower / 2
                             },
                             {
                                 num: '7',
                                 x: (potensiLower + potensiUpper) / 2,
-                                y: (kinerjaUpper + 10) / 2
+                                y: (kinerjaUpper + 5) / 2
                             },
                             {
                                 num: '8',
-                                x: (potensiUpper + 10) / 2,
+                                x: (potensiUpper + 5) / 2,
                                 y: (kinerjaLower + kinerjaUpper) / 2
                             },
                             {
                                 num: '9',
-                                x: (potensiUpper + 10) / 2,
-                                y: (kinerjaUpper + 10) / 2
+                                x: (potensiUpper + 5) / 2,
+                                y: (kinerjaUpper + 5) / 2
                             }
                         ];
 
