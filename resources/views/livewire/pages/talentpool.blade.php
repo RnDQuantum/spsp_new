@@ -163,7 +163,7 @@
                         backgroundColor: chartData.map(d => d.color),
                         borderColor: chartData.map(d => d.color),
                         borderWidth: 2,
-                        pointRadius: 10,
+                        pointRadius: 3,
                         pointHoverRadius: 15,
                         showLine: false
                     }]
