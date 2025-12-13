@@ -187,6 +187,14 @@ class TalentPool extends Component
     }
 
     /**
+     * Get chart data alias for backward compatibility
+     */
+    public function getChartProperty(): array
+    {
+        return $this->getChartDataProperty();
+    }
+
+    /**
      * Get box boundaries for chart
      */
     public function getBoxBoundariesProperty(): ?array
@@ -242,6 +250,15 @@ class TalentPool extends Component
 
     public function render()
     {
+        // Dispatch chart data to JavaScript
+        $this->dispatch('chartDataUpdated', [
+            'chartId' => 'talentPoolChart',
+            'labels' => ['Box 1', 'Box 2', 'Box 3', 'Box 4', 'Box 5', 'Box 6', 'Box 7', 'Box 8', 'Box 9'],
+            'data' => $this->matrixData['box_statistics'] ?? [],
+            'boxBoundaries' => $this->matrixData['box_boundaries'] ?? [],
+            'aspectName' => 'Talent Pool Distribution',
+        ]);
+
         return view('livewire.pages.talentpool', [
             'selectedTemplate' => $this->selectedEvent?->positionFormations?->first()?->template,
         ]);

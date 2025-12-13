@@ -12,13 +12,24 @@
         </div>
     </div>
 
+    <!-- Adjustment Indicators -->
+    @if ($selectedTemplate)
+        <div
+            class="px-4 mb-4 bg-gray-50 dark:bg-gray-700 border-b border-gray-500 dark:border-gray-600 flex flex-wrap gap-2">
+            <x-adjustment-indicator :template-id="$selectedTemplate->id" category-code="potensi" size="sm"
+                custom-label="Standar Potensi Disesuaikan" />
+            <x-adjustment-indicator :template-id="$selectedTemplate->id" category-code="kompetensi" size="sm"
+                custom-label="Standar Kompetensi Disesuaikan" />
+        </div>
+    @endif
+
     <!-- Show message if no data -->
-    @if (!$selectedEvent || !$selectedPositionId)
+    @if (!$this->selectedEvent || !$this->selectedPositionId)
         <div class="text-center py-12 bg-gray-50 rounded-lg">
             <div class="text-gray-500 text-lg">Silakan pilih Event dan Position untuk melihat 9-Box Performance Matrix
             </div>
         </div>
-    @elseif($totalParticipants === 0)
+    @elseif($this->totalParticipants === 0)
         <div class="text-center py-12 bg-gray-50 rounded-lg">
             <div class="text-gray-500 text-lg">Tidak ada data peserta untuk Event dan Position yang dipilih</div>
         </div>
@@ -127,9 +138,9 @@
             }
 
             // Get data from Livewire component
-            const pesertaData = @json($chartData);
-            const boxBoundaries = @json($boxBoundaries);
-            const boxStatistics = @json($boxStatistics);
+            const pesertaData = @json($this->chart);
+            const boxBoundaries = @json($this->boxBoundaries);
+            const boxStatistics = @json($this->boxStatistics);
 
             if (pesertaData.length === 0) {
                 console.log('No participant data available');
@@ -520,12 +531,475 @@
             }
         }
 
-        // Coba jalankan setelah DOM ready
+        // Handle Livewire events and navigation
+        Livewire.on('chartDataUpdated', function(eventData) {
+            try {
+                const payload = Array.isArray(eventData) && eventData.length > 0 ? eventData[0] : eventData;
+
+                const chartId = payload.chartId;
+                if (!chartId || chartId !== 'talentPoolChart') {
+                    return; // ignore events for other instances
+                }
+
+                const labels = payload.labels || ['Box 1', 'Box 2', 'Box 3', 'Box 4', 'Box 5', 'Box 6',
+                    'Box 7', 'Box 8', 'Box 9'
+                ];
+                const data = Array.isArray(payload.data) ? payload.data : [];
+                const label = payload.aspectName || 'Talent Pool Distribution';
+
+                // Update pie chart
+                updatePieChart(labels, data, label);
+
+                // Update summary table
+                updateSummaryTable(payload.boxStatistics || {});
+
+            } catch (e) {
+                console.error('chartDataUpdated render error:', e, eventData);
+            }
+        });
+
+        function updatePieChart(labels, data, label) {
+            const pieCanvas = document.getElementById('boxPieChart');
+            if (!pieCanvas) return;
+
+            const pieCtx = pieCanvas.getContext('2d');
+
+            const colorMap = {
+                1: '#D32F2F',
+                2: '#FF9800',
+                3: '#E91E63',
+                4: '#9C27B0',
+                5: '#FFC107',
+                6: '#FF5722',
+                7: '#2196F3',
+                8: '#00BCD4',
+                9: '#00C853'
+            };
+
+            const pieColors = labels.map((label, index) => {
+                const boxNumber = parseInt(label.replace('Box ', ''));
+                return colorMap[boxNumber] || '#9E9E9E';
+            });
+
+            // Destroy existing chart if it exists
+            const existingChart = Chart.getChart(pieCanvas);
+            if (existingChart) {
+                existingChart.destroy();
+            }
+
+            new Chart(pieCtx, {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: pieColors,
+                        borderWidth: 1,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(ctx) {
+                                    const label = ctx.label || '';
+                                    const value = ctx.raw || 0;
+                                    const total = data.reduce((sum, val) => sum + val, 0);
+                                    const percent = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                    return label + ': ' + value + ' orang (' + percent + '%)';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateSummaryTable(boxStatistics) {
+            const summaryBody = document.getElementById('boxSummaryBody');
+            if (!summaryBody) return;
+
+            summaryBody.innerHTML = '';
+
+            const boxLabelsMap = {
+                1: 'Need Attention',
+                2: 'Steady Performer',
+                3: 'Inconsistent',
+                4: 'Solid Performer',
+                5: 'Core Performer',
+                6: 'Enigma',
+                7: 'Potential Star',
+                8: 'High Potential',
+                9: 'Star Performer'
+            };
+
+            Object.keys(boxStatistics)
+                .sort((a, b) => b - a) // 9 ke 1
+                .forEach(box => {
+                    const tr = document.createElement('tr');
+
+                    const tdBox = document.createElement('td');
+                    tdBox.className = 'px-5 py-1 border-2 border-gray-300';
+                    tdBox.textContent = 'Box ' + box;
+
+                    const tdLabel = document.createElement('td');
+                    tdLabel.className = 'px-5 py-1 border-2 border-gray-300';
+                    tdLabel.textContent = boxLabelsMap[box] || 'Unknown';
+
+                    const tdCount = document.createElement('td');
+                    tdCount.className = 'text-center px-5 py-1 border-2 border-gray-300';
+                    tdCount.textContent = boxStatistics[box].count;
+
+                    const tdPercent = document.createElement('td');
+                    tdPercent.className = 'text-center px-5 py-1 border-2 border-gray-300';
+                    tdPercent.textContent = boxStatistics[box].percentage + '%';
+
+                    tr.appendChild(tdBox);
+                    tr.appendChild(tdLabel);
+                    tr.appendChild(tdCount);
+                    tr.appendChild(tdPercent);
+                    summaryBody.appendChild(tr);
+                });
+        }
+
+        // Initialize chart on page load
+        function initializeChart() {
+            if (typeof Chart === 'undefined') {
+                console.error('Chart.js belum dimuat!');
+                return;
+            }
+
+            const canvas = document.getElementById('nineBoxChart');
+            if (!canvas) {
+                console.error('Canvas tidak ditemukan!');
+                return;
+            }
+
+            // Get data from Livewire component
+            const pesertaData = @json($this->chart);
+            const boxBoundaries = @json($this->boxBoundaries);
+            const boxStatistics = @json($this->boxStatistics);
+
+            if (pesertaData.length === 0) {
+                console.log('No participant data available');
+                return;
+            }
+
+            // Transform data for Chart.js (swap x/y for correct axes)
+            const chartData = pesertaData.map(p => {
+                return {
+                    x: p.potensi, // Horizontal axis = POTENSI
+                    y: p.kinerja, // Vertical axis = KINERJA
+                    nama: p.nama,
+                    box: p.box,
+                    color: p.color
+                };
+            });
+
+            const totalPeserta = chartData.length;
+
+            const ctx = canvas.getContext('2d');
+
+            new Chart(ctx, {
+                type: 'scatter',
+                data: {
+                    datasets: [{
+                        label: '',
+                        data: chartData,
+                        backgroundColor: chartData.map(d => d.color),
+                        borderColor: chartData.map(d => d.color),
+                        borderWidth: 2,
+                        pointRadius: 10,
+                        pointHoverRadius: 15,
+                        showLine: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            enabled: true,
+                            backgroundColor: 'rgba(0,0,0,0.8)',
+                            padding: 12,
+                            displayColors: false,
+                            callbacks: {
+                                title: function(ctx) {
+                                    return ctx[0].raw.nama;
+                                },
+                                label: function(ctx) {
+                                    const d = ctx.raw;
+                                    return [
+                                        'Kinerja: ' + d.y.toFixed(1),
+                                        'Potensi: ' + d.x.toFixed(1),
+                                        'Box: ' + d.box
+                                    ];
+                                }
+                            }
+                        },
+                        datalabels: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'POTENSI',
+                                font: {
+                                    size: 16,
+                                    weight: 'bold'
+                                }
+                            },
+                            min: 0,
+                            max: 10,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'KINERJA',
+                                font: {
+                                    size: 16,
+                                    weight: 'bold'
+                                }
+                            },
+                            min: 0,
+                            max: 10,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                },
+                plugins: [{
+                    id: 'nineBoxGrid',
+                    beforeDraw: function(chart) {
+                        const ctx = chart.ctx;
+                        const xScale = chart.scales.x;
+                        const yScale = chart.scales.y;
+                        ctx.save();
+
+                        // Draw box backgrounds first - use dynamic boundaries
+                        const potensiLower = boxBoundaries?.potensi?.lower_bound ?? 5.5;
+                        const potensiUpper = boxBoundaries?.potensi?.upper_bound ?? 7.5;
+                        const kinerjaLower = boxBoundaries?.kinerja?.lower_bound ?? 5.5;
+                        const kinerjaUpper = boxBoundaries?.kinerja?.upper_bound ?? 7.5;
+
+                        const boxColors = [{
+                                x1: 0,
+                                x2: potensiLower,
+                                y1: 0,
+                                y2: kinerjaLower,
+                                color: 'rgba(211,47,47,0.08)' // Box 1
+                            },
+                            {
+                                x1: 0,
+                                x2: potensiLower,
+                                y1: kinerjaLower,
+                                y2: kinerjaUpper,
+                                color: 'rgba(255,152,0,0.08)' // Box 2
+                            },
+                            {
+                                x1: potensiLower,
+                                x2: potensiUpper,
+                                y1: 0,
+                                y2: kinerjaLower,
+                                color: 'rgba(233,30,99,0.08)' // Box 3
+                            },
+                            {
+                                x1: 0,
+                                x2: potensiLower,
+                                y1: kinerjaUpper,
+                                y2: 10,
+                                color: 'rgba(156,39,176,0.08)' // Box 4
+                            },
+                            {
+                                x1: potensiLower,
+                                x2: potensiUpper,
+                                y1: kinerjaLower,
+                                y2: kinerjaUpper,
+                                color: 'rgba(255,193,7,0.08)' // Box 5
+                            },
+                            {
+                                x1: potensiUpper,
+                                x2: 10,
+                                y1: 0,
+                                y2: kinerjaLower,
+                                color: 'rgba(255,87,34,0.08)' // Box 6
+                            },
+                            {
+                                x1: potensiLower,
+                                x2: potensiUpper,
+                                y1: kinerjaUpper,
+                                y2: 10,
+                                color: 'rgba(33,150,243,0.08)' // Box 7
+                            },
+                            {
+                                x1: potensiUpper,
+                                x2: 10,
+                                y1: kinerjaLower,
+                                y2: kinerjaUpper,
+                                color: 'rgba(0,188,212,0.08)' // Box 8
+                            },
+                            {
+                                x1: potensiUpper,
+                                x2: 10,
+                                y1: kinerjaUpper,
+                                y2: 10,
+                                color: 'rgba(0,200,83,0.08)' // Box 9
+                            }
+                        ];
+
+                        boxColors.forEach(function(box) {
+                            ctx.fillStyle = box.color;
+                            ctx.fillRect(
+                                xScale.getPixelForValue(box.x1),
+                                yScale.getPixelForValue(box.y2),
+                                xScale.getPixelForValue(box.x2) - xScale
+                                .getPixelForValue(box.x1),
+                                yScale.getPixelForValue(box.y1) - yScale
+                                .getPixelForValue(box.y2)
+                            );
+                        });
+
+                        // Draw grid lines - use dynamic boundaries
+                        [potensiLower, potensiUpper].forEach(function(v) {
+                            const x = xScale.getPixelForValue(v);
+                            ctx.beginPath();
+                            ctx.moveTo(x, yScale.getPixelForValue(10));
+                            ctx.lineTo(x, yScale.getPixelForValue(0));
+                            ctx.lineWidth = 3;
+                            ctx.strokeStyle = '#333';
+                            ctx.stroke();
+                        });
+
+                        [kinerjaLower, kinerjaUpper].forEach(function(v) {
+                            const y = yScale.getPixelForValue(v);
+                            ctx.beginPath();
+                            ctx.moveTo(xScale.getPixelForValue(0), y);
+                            ctx.lineTo(xScale.getPixelForValue(10), y);
+                            ctx.stroke();
+                        });
+
+                        // Draw box numbers - use dynamic boundaries
+                        ctx.font = 'bold 48px Arial';
+                        ctx.fillStyle = 'rgba(0,0,0,0.15)';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+
+                        const boxes = [{
+                                num: '1',
+                                x: potensiLower / 2,
+                                y: kinerjaLower / 2
+                            },
+                            {
+                                num: '2',
+                                x: potensiLower / 2,
+                                y: (kinerjaLower + kinerjaUpper) / 2
+                            },
+                            {
+                                num: '3',
+                                x: (potensiLower + potensiUpper) / 2,
+                                y: kinerjaLower / 2
+                            },
+                            {
+                                num: '4',
+                                x: potensiLower / 2,
+                                y: (kinerjaUpper + 10) / 2
+                            },
+                            {
+                                num: '5',
+                                x: (potensiLower + potensiUpper) / 2,
+                                y: (kinerjaLower + kinerjaUpper) / 2
+                            },
+                            {
+                                num: '6',
+                                x: (potensiUpper + 10) / 2,
+                                y: kinerjaLower / 2
+                            },
+                            {
+                                num: '7',
+                                x: (potensiLower + potensiUpper) / 2,
+                                y: (kinerjaUpper + 10) / 2
+                            },
+                            {
+                                num: '8',
+                                x: (potensiUpper + 10) / 2,
+                                y: (kinerjaLower + kinerjaUpper) / 2
+                            },
+                            {
+                                num: '9',
+                                x: (potensiUpper + 10) / 2,
+                                y: (kinerjaUpper + 10) / 2
+                            }
+                        ];
+
+                        boxes.forEach(function(box) {
+                            ctx.fillText(box.num, xScale.getPixelForValue(box.x), yScale
+                                .getPixelForValue(box.y));
+                        });
+
+                        ctx.restore();
+                    }
+                }]
+            });
+
+            console.log('9-Box Chart berhasil dimuat!');
+
+            // Initialize pie chart and summary table
+            updatePieChart(
+                Object.keys(boxStatistics).sort((a, b) => b - a).map(box => 'Box ' + box),
+                Object.keys(boxStatistics).sort((a, b) => b - a).map(box => boxStatistics[box].count),
+                'Talent Pool Distribution'
+            );
+
+            updateSummaryTable(boxStatistics);
+        }
+
+        // Handle Livewire navigation events
+        document.addEventListener('livewire:navigated', function() {
+            // Re-initialize chart after navigation
+            setTimeout(initializeChart, 100);
+        });
+
+        // Handle Livewire navigate away events
+        document.addEventListener('livewire:navigating', function() {
+            // Cleanup chart on navigate away
+            const canvas = document.getElementById('nineBoxChart');
+            if (canvas) {
+                const chart = Chart.getChart(canvas);
+                if (chart) {
+                    chart.destroy();
+                }
+            }
+
+            const pieCanvas = document.getElementById('boxPieChart');
+            if (pieCanvas) {
+                const pieChart = Chart.getChart(pieCanvas);
+                if (pieChart) {
+                    pieChart.destroy();
+                }
+            }
+        });
+
+        // Initialize chart when DOM is ready
         if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initChart);
+            document.addEventListener('DOMContentLoaded', initializeChart);
         } else {
-            // DOM sudah ready, coba delay sedikit untuk Chart.js
-            setTimeout(initChart, 100);
+            // DOM already ready, try with slight delay for Chart.js
+            setTimeout(initializeChart, 100);
         }
     })();
 </script>
