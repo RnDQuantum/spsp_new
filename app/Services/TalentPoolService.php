@@ -10,6 +10,7 @@ use App\Models\CategoryType;
 use App\Services\Cache\AspectCacheService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 /**
  * TalentPoolService - Single Source of Truth for 9-Box Performance Matrix Calculations
@@ -45,36 +46,41 @@ class TalentPoolService
         int $eventId,
         int $positionFormationId
     ): array {
-        // Get participants position data
-        $participantsData = $this->getParticipantsPositionData($eventId, $positionFormationId);
+        // 🚀 PERFORMANCE: Additional cache layer untuk complete matrix data
+        $matrixCacheKey = "talent_pool_matrix:{$eventId}:{$positionFormationId}:{$this->buildConfigHash($eventId,$positionFormationId)}";
 
-        if ($participantsData['participants']->isEmpty()) {
+        return Cache::remember($matrixCacheKey, 60, function () use ($eventId, $positionFormationId) {
+            // Get participants position data
+            $participantsData = $this->getParticipantsPositionData($eventId, $positionFormationId);
+
+            if ($participantsData['participants']->isEmpty()) {
+                return [
+                    'participants' => collect([]),
+                    'box_boundaries' => null,
+                    'box_statistics' => [],
+                    'total_participants' => 0,
+                ];
+            }
+
+            // Calculate box boundaries from participants data
+            $boxBoundaries = $this->calculateBoxBoundaries($participantsData['participants']);
+
+            // Classify participants into boxes
+            $participantsWithBoxes = $this->classifyParticipantsToBoxes(
+                $participantsData['participants'],
+                $boxBoundaries
+            );
+
+            // Calculate box statistics
+            $boxStatistics = $this->calculateBoxStatistics($participantsWithBoxes);
+
             return [
-                'participants' => collect([]),
-                'box_boundaries' => null,
-                'box_statistics' => [],
-                'total_participants' => 0,
+                'participants' => $participantsWithBoxes,
+                'box_boundaries' => $boxBoundaries,
+                'box_statistics' => $boxStatistics,
+                'total_participants' => $participantsWithBoxes->count(),
             ];
-        }
-
-        // Calculate box boundaries from participants data
-        $boxBoundaries = $this->calculateBoxBoundaries($participantsData['participants']);
-
-        // Classify participants into boxes
-        $participantsWithBoxes = $this->classifyParticipantsToBoxes(
-            $participantsData['participants'],
-            $boxBoundaries
-        );
-
-        // Calculate box statistics
-        $boxStatistics = $this->calculateBoxStatistics($participantsWithBoxes);
-
-        return [
-            'participants' => $participantsWithBoxes,
-            'box_boundaries' => $boxBoundaries,
-            'box_statistics' => $boxStatistics,
-            'total_participants' => $participantsWithBoxes->count(),
-        ];
+        });
     }
 
     /**
@@ -93,8 +99,9 @@ class TalentPoolService
 
         $cacheKey = "talent_pool_participants:{$eventId}:{$positionFormationId}:{$configHash}";
 
-        // 🚀 PERFORMANCE: Cache dengan TTL lebih pendek untuk data dinamis
-        return Cache::remember($cacheKey, 30, function () use ($eventId, $positionFormationId) {
+        // 🚀 PERFORMANCE: Multi-layer caching dengan TTL yang lebih optimal
+        // Layer 1: Medium-term cache (2 jam) untuk calculated matrix data
+        return Cache::remember($cacheKey, 120, function () use ($eventId, $positionFormationId) {
             // Get category types for the template
             $categoryTypes = $this->getCategoryTypes($eventId, $positionFormationId);
 
@@ -267,19 +274,29 @@ class TalentPoolService
      */
     private function getAspectAssessments(int $eventId, int $positionFormationId): Collection
     {
+        // 🚀 PERFORMANCE: Optimized query with database-level aggregation
+        // Instead of fetching all raw records, calculate averages at SQL level
         return AspectAssessment::query()
             ->join('participants', 'participants.id', '=', 'aspect_assessments.participant_id')
             ->join('aspects', 'aspects.id', '=', 'aspect_assessments.aspect_id')
+            ->join('category_types', 'category_types.id', '=', 'aspects.category_type_id')
             ->where('aspect_assessments.event_id', $eventId)
             ->where('aspect_assessments.position_formation_id', $positionFormationId)
+            ->whereIn('category_types.code', ['potensi', 'kompetensi']) // Only fetch needed categories
             ->select(
                 'aspect_assessments.participant_id',
-                'aspect_assessments.aspect_id',
-                'aspect_assessments.individual_rating',
                 'participants.name',
                 'participants.test_number',
-                'aspects.category_type_id'
+                'category_types.code as category_code',
+                DB::raw('AVG(aspect_assessments.individual_rating) as rating')
             )
+            ->groupBy(
+                'aspect_assessments.participant_id',
+                'participants.name',
+                'participants.test_number',
+                'category_types.code'
+            )
+            ->orderBy('aspect_assessments.participant_id')
             ->toBase()
             ->get();
     }
@@ -297,33 +314,31 @@ class TalentPoolService
         int $potensiCategoryId,
         int $kompetensiCategoryId
     ): Collection {
-        // Group assessments by participant
+        // 🚀 PERFORMANCE: Optimized processing for pre-aggregated data
+        // Data is now already grouped by participant and category at SQL level
         $assessmentsByParticipant = $assessments->groupBy('participant_id');
 
-        return $assessmentsByParticipant->map(function ($participantAssessments, $participantId) use ($potensiCategoryId, $kompetensiCategoryId) {
-            // Group by category type
-            $assessmentsByCategory = $participantAssessments->groupBy('category_type_id');
-
-            // Calculate potensi average
-            $potensiAssessments = $assessmentsByCategory->get($potensiCategoryId, collect());
-            $potensiRating = $potensiAssessments->isNotEmpty()
-                ? $potensiAssessments->avg('individual_rating')
-                : 0;
-
-            // Calculate kinerja average
-            $kinerjaAssessments = $assessmentsByCategory->get($kompetensiCategoryId, collect());
-            $kinerjaRating = $kinerjaAssessments->isNotEmpty()
-                ? $kinerjaAssessments->avg('individual_rating')
-                : 0;
-
+        return $assessmentsByParticipant->map(function ($participantAssessments) {
             $firstAssessment = $participantAssessments->first();
 
+            // Extract potensi and kinerja ratings from pre-calculated data
+            $potensiRating = 0;
+            $kinerjaRating = 0;
+
+            foreach ($participantAssessments as $assessment) {
+                if ($assessment->category_code === 'potensi') {
+                    $potensiRating = round((float) $assessment->rating, 2);
+                } elseif ($assessment->category_code === 'kompetensi') {
+                    $kinerjaRating = round((float) $assessment->rating, 2);
+                }
+            }
+
             return [
-                'participant_id' => $participantId,
+                'participant_id' => $firstAssessment->participant_id,
                 'name' => $firstAssessment->name,
                 'test_number' => $firstAssessment->test_number,
-                'potensi_rating' => round($potensiRating, 2),
-                'kinerja_rating' => round($kinerjaRating, 2),
+                'potensi_rating' => $potensiRating,
+                'kinerja_rating' => $kinerjaRating,
             ];
         })->values();
     }

@@ -29,6 +29,15 @@
             <div class="text-gray-500 text-lg">Silakan pilih Event dan Position untuk melihat 9-Box Performance Matrix
             </div>
         </div>
+    @elseif($this->isLoading)
+        <!-- 🚀 PERFORMANCE: Loading state untuk UX yang lebih baik -->
+        <div class="text-center py-12 bg-gray-50 rounded-lg">
+            <div class="flex flex-col items-center">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
+                <div class="text-gray-600 text-lg">Memuat data Talent Pool...</div>
+                <div class="text-gray-500 text-sm mt-2">Memproses {{ $this->totalParticipants }} peserta</div>
+            </div>
+        </div>
     @elseif($this->totalParticipants === 0)
         <div class="text-center py-12 bg-gray-50 rounded-lg">
             <div class="text-gray-500 text-lg">Tidak ada data peserta untuk Event dan Position yang dipilih</div>
@@ -125,8 +134,33 @@
 <script>
     (function() {
         let chartInstances = {};
+        let isProcessing = false;
+
+        // 🚀 PERFORMANCE: Debounce function untuk rapid updates
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        // 🚀 PERFORMANCE: Smart data sampling untuk large datasets
+        function sampleData(data, maxPoints = 500) {
+            if (data.length <= maxPoints) return data;
+
+            const step = Math.ceil(data.length / maxPoints);
+            return data.filter((_, index) => index % step === 0);
+        }
 
         function updateScatterChart(pesertaData, boxBoundaries) {
+            // 🚀 PERFORMANCE: Prevent concurrent processing
+            if (isProcessing) return;
+            isProcessing = true;
             const canvas = document.getElementById('nineBoxChart');
             if (!canvas) return;
 
@@ -134,17 +168,23 @@
 
             if (pesertaData.length === 0) {
                 console.log('No participant data available');
+                isProcessing = false;
                 return;
             }
 
+            // 🚀 PERFORMANCE: Sample data for better performance with large datasets
+            const sampledData = sampleData(pesertaData, 500);
+            console.log(`Processing ${pesertaData.length} participants, showing ${sampledData.length} points`);
+
             // Transform data for Chart.js (swap x/y for correct axes)
-            const chartData = pesertaData.map(p => {
+            const chartData = sampledData.map(p => {
                 return {
                     x: p.potensi, // Horizontal axis = POTENSI
                     y: p.kinerja, // Vertical axis = KINERJA
                     nama: p.nama,
                     box: p.box,
-                    color: p.color
+                    color: p.color,
+                    originalData: p // Keep reference for detailed view
                 };
             });
 
@@ -404,7 +444,8 @@
                 }]
             });
 
-            console.log('9-Box Chart berhasil dimuat!');
+            console.log('9-Box Chart berhasil dimuat dengan ' + chartData.length + ' points!');
+            isProcessing = false;
         }
 
         function updatePieChart(labels, data, label) {
@@ -575,8 +616,8 @@
 
         // Initialize chart when DOM is ready
         waitForLivewire(function() {
-            // Handle Livewire events and navigation
-            Livewire.on('chartDataUpdated', function(eventData) {
+            // 🚀 PERFORMANCE: Debounced chart updates untuk prevent excessive re-renders
+            const debouncedChartUpdate = debounce(function(eventData) {
                 try {
                     const payload = Array.isArray(eventData) && eventData.length > 0 ? eventData[
                         0] : eventData;
@@ -587,11 +628,15 @@
                     }
 
                     const labels = payload.labels || ['Box 1', 'Box 2', 'Box 3', 'Box 4', 'Box 5',
-                        'Box 6',
-                        'Box 7', 'Box 8', 'Box 9'
+                        'Box 6', 'Box 7', 'Box 8', 'Box 9'
                     ];
                     const data = Array.isArray(payload.data) ? payload.data : [];
                     const label = payload.aspectName || 'Talent Pool Distribution';
+
+                    console.log('Updating charts with data:', {
+                        participants: payload.pesertaData?.length || 0,
+                        statistics: payload.boxStatistics
+                    });
 
                     // Update scatter chart
                     updateScatterChart(payload.pesertaData || [], payload.boxBoundaries || {});
@@ -605,9 +650,21 @@
                 } catch (e) {
                     console.error('chartDataUpdated render error:', e, eventData);
                 }
+            }, 300); // 300ms debounce
+
+            // Handle Livewire events and navigation
+            Livewire.on('chartDataUpdated', debouncedChartUpdate);
+
+            // Handle loading state
+            Livewire.on('loadMatrixDataDebounced', function(data) {
+                console.log('Loading matrix data...', data);
             });
 
-            initializeChart();
+            // Initialize charts after a short delay to ensure DOM is ready
+            setTimeout(function() {
+                console.log('Initializing charts...');
+                initializeChart();
+            }, 500);
         });
     })();
 </script>
