@@ -22,12 +22,6 @@ class TalentPool extends Component
     // Cache properties
     private ?array $matrixCacheData = null;
 
-    // 🚀 PERFORMANCE: Loading state untuk UX yang lebih baik
-    public bool $isLoading = false;
-
-    // 🚀 PERFORMANCE: Debounce timer untuk rapid position changes
-    public ?int $debounceTimer = null;
-
     /**
      * Listen to filter component events
      */
@@ -55,57 +49,31 @@ class TalentPool extends Component
      */
     public function handleEventSelected(?string $eventCode): void
     {
-        $this->clearCache();
+        if ($eventCode) {
+            session(['filter.event_code' => $eventCode]);
+        } else {
+            session()->forget('filter.event_code');
+        }
 
-        // Reset data
-        $this->reset(['selectedEvent', 'selectedPositionId', 'matrixData', 'totalParticipants']);
+        $this->redirect(request()->header('Referer'), navigate: false);
     }
 
     /**
-     * Handle position selection with debouncing for performance
+     * Handle position selection
      */
     public function handlePositionSelected(?int $positionFormationId): void
     {
-        // Clear existing debounce timer
-        if ($this->debounceTimer) {
-            $this->debounceTimer = null;
-        }
-
-        $this->selectedPositionId = $positionFormationId;
-        $this->clearCache();
-
-        if ($this->selectedEvent && $positionFormationId) {
-            // 🚀 PERFORMANCE: Debounce rapid position changes
-            $this->debounceTimer = time();
-            $this->isLoading = true;
-
-            // Use dispatch untuk non-blocking execution
-            $this->dispatch('loadMatrixDataDebounced', [
-                'timestamp' => $this->debounceTimer
-            ]);
+        if ($positionFormationId) {
+            session(['filter.position_formation_id' => $positionFormationId]);
         } else {
-            $this->reset(['matrixData', 'totalParticipants']);
-            $this->isLoading = false;
+            session()->forget('filter.position_formation_id');
         }
+
+        $this->redirect(request()->header('Referer'), navigate: false);
     }
 
     /**
-     * Debounced matrix data loading
-     */
-    public function loadMatrixDataDebounced(int $timestamp): void
-    {
-        // Only proceed if this is the latest call
-        if ($this->debounceTimer !== $timestamp) {
-            return;
-        }
-
-        if ($this->selectedEvent && $this->selectedPositionId) {
-            $this->loadMatrixData();
-        }
-    }
-
-    /**
-     * Handle standard adjustment with loading state
+     * Handle standard adjustment
      */
     public function handleStandardUpdate(int $templateId): void
     {
@@ -121,16 +89,11 @@ class TalentPool extends Component
             return;
         }
 
-        // 🚀 PERFORMANCE: Show loading state during standard update
-        $this->isLoading = true;
-
         // Clear cache before reload
         $this->clearCache();
 
         // Reload data (will call service fresh with new session values)
         $this->loadMatrixData();
-
-        $this->isLoading = false;
 
         // Dispatch chart update to frontend
         $this->dispatchChartUpdate();
@@ -183,7 +146,6 @@ class TalentPool extends Component
             // Check cache first
             if ($this->matrixCacheData !== null) {
                 $this->applyMatrixData($this->matrixCacheData);
-                $this->isLoading = false;
                 return;
             }
 
@@ -201,14 +163,10 @@ class TalentPool extends Component
             // Apply to component properties
             $this->applyMatrixData($matrix);
 
-            // Stop loading state
-            $this->isLoading = false;
-
             // Dispatch chart update to frontend
             $this->dispatchChartUpdate();
         } catch (\Exception $e) {
             // Handle error gracefully
-            $this->isLoading = false;
             $this->dispatch('error', 'Failed to load talent pool data: ' . $e->getMessage());
         }
     }
@@ -324,7 +282,6 @@ class TalentPool extends Component
             'total_participants' => $this->totalParticipants,
             'matrix_data_count' => count($this->matrixData),
             'chart_data_count' => count($this->chart),
-            'is_loading' => $this->isLoading
         ]);
 
         $this->dispatch('chartDataUpdated', $data);
@@ -332,8 +289,8 @@ class TalentPool extends Component
 
     public function render()
     {
-        // 🚀 PERFORMANCE: Only dispatch chart update if not loading and data has changed
-        if (!$this->isLoading && !empty($this->matrixData)) {
+        // 🚀 PERFORMANCE: Only dispatch chart update if data has changed
+        if (!empty($this->matrixData)) {
             $this->dispatchChartUpdate();
         }
 

@@ -29,15 +29,6 @@
             <div class="text-gray-500 text-lg">Silakan pilih Event dan Position untuk melihat 9-Box Performance Matrix
             </div>
         </div>
-    @elseif($this->isLoading)
-        <!-- 🚀 PERFORMANCE: Loading state untuk UX yang lebih baik -->
-        <div class="text-center py-12 bg-gray-50 rounded-lg">
-            <div class="flex flex-col items-center">
-                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
-                <div class="text-gray-600 text-lg">Memuat data Talent Pool...</div>
-                <div class="text-gray-500 text-sm mt-2">Memproses {{ $this->totalParticipants }} peserta</div>
-            </div>
-        </div>
     @elseif($this->totalParticipants === 0)
         <div class="text-center py-12 bg-gray-50 rounded-lg">
             <div class="text-gray-500 text-lg">Tidak ada data peserta untuk Event dan Position yang dipilih</div>
@@ -135,19 +126,6 @@
     (function() {
         let chartInstances = {};
         let isProcessing = false;
-
-        // 🚀 PERFORMANCE: Debounce function untuk rapid updates
-        function debounce(func, wait) {
-            let timeout;
-            return function executedFunction(...args) {
-                const later = () => {
-                    clearTimeout(timeout);
-                    func(...args);
-                };
-                clearTimeout(timeout);
-                timeout = setTimeout(later, wait);
-            };
-        }
 
         // 🚀 PERFORMANCE: Smart data sampling untuk large datasets
         function sampleData(data, maxPoints = 500) {
@@ -616,8 +594,8 @@
 
         // Initialize chart when DOM is ready
         waitForLivewire(function() {
-            // 🚀 PERFORMANCE: Debounced chart updates untuk prevent excessive re-renders
-            const debouncedChartUpdate = debounce(function(eventData) {
+            // Handle Livewire events and navigation
+            Livewire.on('chartDataUpdated', function(eventData) {
                 try {
                     const payload = Array.isArray(eventData) && eventData.length > 0 ? eventData[
                         0] : eventData;
@@ -650,14 +628,6 @@
                 } catch (e) {
                     console.error('chartDataUpdated render error:', e, eventData);
                 }
-            }, 300); // 300ms debounce
-
-            // Handle Livewire events and navigation
-            Livewire.on('chartDataUpdated', debouncedChartUpdate);
-
-            // Handle loading state
-            Livewire.on('loadMatrixDataDebounced', function(data) {
-                console.log('Loading matrix data...', data);
             });
 
             // Initialize charts after a short delay to ensure DOM is ready
