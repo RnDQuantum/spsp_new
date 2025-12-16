@@ -80,14 +80,14 @@ class TalentPool extends Component
     public function handleStandardUpdate(int $templateId): void
     {
         // Validate same template
-        if (!$this->selectedEvent || !$this->selectedPositionId) {
+        if (! $this->selectedEvent || ! $this->selectedPositionId) {
             return;
         }
 
         $position = $this->selectedEvent->positionFormations()
             ->find($this->selectedPositionId);
 
-        if (!$position || $position->template_id !== $templateId) {
+        if (! $position || $position->template_id !== $templateId) {
             return;
         }
 
@@ -102,25 +102,26 @@ class TalentPool extends Component
     }
 
     /**
-     * Load event and position from database
+     * 🚀 OPTIMIZED: Load event and position from database with minimal queries
      */
     private function loadEventAndPosition(): void
     {
         $eventCode = session('filter.event_code');
         $positionFormationId = session('filter.position_formation_id');
 
-        if (!$eventCode) {
+        if (! $eventCode) {
             return;
         }
 
-        // Load event with position and template in one query
+        // 🚀 PERFORMANCE: Single optimized query with eager loading
         $this->selectedEvent = AssessmentEvent::query()
             ->where('code', $eventCode)
+            ->where('institution_id', auth()->user()->institution_id)
             ->with([
                 'positionFormations' => function ($query) use ($positionFormationId) {
                     $query->where('id', $positionFormationId)
                         ->with('template');
-                }
+                },
             ])
             ->first();
 
@@ -142,7 +143,7 @@ class TalentPool extends Component
      */
     private function loadMatrixData(): void
     {
-        if (!$this->selectedEvent || !$this->selectedPositionId) {
+        if (! $this->selectedEvent || ! $this->selectedPositionId) {
             return;
         }
 
@@ -172,7 +173,7 @@ class TalentPool extends Component
             // Explicit dispatch is handled by the caller if needed (e.g. handleStandardUpdate).
         } catch (\Exception $e) {
             // Handle error gracefully
-            $this->dispatch('error', 'Failed to load talent pool data: ' . $e->getMessage());
+            $this->dispatch('error', 'Failed to load talent pool data: '.$e->getMessage());
         }
     }
 
@@ -307,7 +308,7 @@ class TalentPool extends Component
     public function getBoxLabelsProperty(): array
     {
         return collect($this->boxConfig)
-            ->mapWithKeys(fn($config, $number) => [$number => $config['label']])
+            ->mapWithKeys(fn ($config, $number) => [$number => $config['label']])
             ->toArray();
     }
 

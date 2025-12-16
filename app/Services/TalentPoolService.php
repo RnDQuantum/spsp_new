@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Models\Aspect;
 use App\Models\AspectAssessment;
 use App\Models\CategoryType;
 use App\Services\Cache\AspectCacheService;
@@ -31,6 +30,11 @@ use Illuminate\Support\Facades\DB;
 class TalentPoolService
 {
     /**
+     * 🚀 OPTIMIZED: Cached position formation to prevent duplicate queries
+     */
+    private ?\App\Models\PositionFormation $cachedPosition = null;
+
+    /**
      * Get complete 9-Box Performance Matrix data
      *
      * Returns:
@@ -38,18 +42,31 @@ class TalentPoolService
      * - Box boundaries (avg ± std dev for both axes)
      * - Box statistics (count and percentage per box)
      *
-     * @param int $eventId Assessment event ID
-     * @param int $positionFormationId Position formation ID
+     * @param  int  $eventId  Assessment event ID
+     * @param  int  $positionFormationId  Position formation ID
      * @return array Complete 9-box matrix data
      */
     public function getNineBoxMatrixData(
         int $eventId,
         int $positionFormationId
     ): array {
-        // 🚀 PERFORMANCE: Additional cache layer untuk complete matrix data
-        $matrixCacheKey = "talent_pool_matrix:{$eventId}:{$positionFormationId}:{$this->buildConfigHash($eventId,$positionFormationId)}";
+        // 🚀 PERFORMANCE: Load position ONCE and cache it
+        $this->loadPosition($positionFormationId);
 
-        return Cache::remember($matrixCacheKey, 60, function () use ($eventId, $positionFormationId) {
+        if (! $this->cachedPosition) {
+            return [
+                'participants' => collect([]),
+                'box_boundaries' => null,
+                'box_statistics' => [],
+                'total_participants' => 0,
+            ];
+        }
+
+        // 🚀 PERFORMANCE: Build config hash ONCE with cached position
+        $configHash = $this->buildConfigHash($eventId, $positionFormationId);
+        $matrixCacheKey = "talent_pool_matrix:{$eventId}:{$positionFormationId}:{$configHash}";
+
+        return Cache::remember($matrixCacheKey, 7200, function () use ($eventId, $positionFormationId) {
             // Get participants position data
             $participantsData = $this->getParticipantsPositionData($eventId, $positionFormationId);
 
@@ -84,24 +101,43 @@ class TalentPoolService
     }
 
     /**
+     * 🚀 OPTIMIZED: Load and cache position formation to prevent duplicate queries
+     */
+    private function loadPosition(int $positionFormationId): void
+    {
+        if ($this->cachedPosition && $this->cachedPosition->id === $positionFormationId) {
+            return; // Already loaded
+        }
+
+        $this->cachedPosition = \App\Models\PositionFormation::find($positionFormationId);
+
+        // 🚀 PERFORMANCE: Preload aspects for this template to prevent N+1 queries
+        if ($this->cachedPosition) {
+            AspectCacheService::preloadByTemplate($this->cachedPosition->template_id);
+        }
+    }
+
+    /**
      * Get participants with their potensi and kinerja ratings
      *
-     * @param int $eventId Assessment event ID
-     * @param int $positionFormationId Position formation ID
+     * @param  int  $eventId  Assessment event ID
+     * @param  int  $positionFormationId  Position formation ID
      * @return array Participants data with category ratings
      */
     public function getParticipantsPositionData(
         int $eventId,
         int $positionFormationId
     ): array {
+        // 🚀 PERFORMANCE: Ensure position is loaded (prevents duplicate queries)
+        $this->loadPosition($positionFormationId);
+
         // Build config hash for cache invalidation (respects 3-layer priority)
         $configHash = $this->buildConfigHash($eventId, $positionFormationId);
 
         $cacheKey = "talent_pool_participants:{$eventId}:{$positionFormationId}:{$configHash}";
 
-        // 🚀 PERFORMANCE: Multi-layer caching dengan TTL yang lebih optimal
-        // Layer 1: Medium-term cache (2 jam) untuk calculated matrix data
-        return Cache::remember($cacheKey, 120, function () use ($eventId, $positionFormationId) {
+        // 🚀 PERFORMANCE: Extended cache TTL (2 jam) - data jarang berubah setelah assessment selesai
+        return Cache::remember($cacheKey, 7200, function () use ($eventId, $positionFormationId) {
             // Get category types for the template
             $categoryTypes = $this->getCategoryTypes($eventId, $positionFormationId);
 
@@ -113,7 +149,7 @@ class TalentPoolService
             $potensiCategory = $categoryTypes->firstWhere('code', 'potensi');
             $kompetensiCategory = $categoryTypes->firstWhere('code', 'kompetensi');
 
-            if (!$potensiCategory || !$kompetensiCategory) {
+            if (! $potensiCategory || ! $kompetensiCategory) {
                 return ['participants' => collect([]), 'category_types' => collect([])];
             }
 
@@ -133,7 +169,7 @@ class TalentPoolService
 
             return [
                 'participants' => $participantsData,
-                'category_types' => $categoryTypes
+                'category_types' => $categoryTypes,
             ];
         });
     }
@@ -141,7 +177,7 @@ class TalentPoolService
     /**
      * Calculate box boundaries using statistics (avg ± std dev)
      *
-     * @param Collection $participants Participants with potensi/kinerja ratings
+     * @param  Collection  $participants  Participants with potensi/kinerja ratings
      * @return array Box boundaries for both axes
      */
     private function calculateBoxBoundaries(Collection $participants): array
@@ -180,8 +216,8 @@ class TalentPoolService
     /**
      * Classify participants into 9 boxes based on boundaries
      *
-     * @param Collection $participants Participants with potensi/kinerja ratings
-     * @param array $boundaries Box boundaries
+     * @param  Collection  $participants  Participants with potensi/kinerja ratings
+     * @param  array  $boundaries  Box boundaries
      * @return Collection Participants with box classification
      */
     private function classifyParticipantsToBoxes(
@@ -215,7 +251,7 @@ class TalentPoolService
     /**
      * Calculate statistics for each box
      *
-     * @param Collection $participants Participants with box classification
+     * @param  Collection  $participants  Participants with box classification
      * @return array Box statistics (count and percentage)
      */
     private function calculateBoxStatistics(Collection $participants): array
@@ -247,20 +283,20 @@ class TalentPoolService
     /**
      * Get category types for the event and position
      *
-     * @param int $eventId Assessment event ID
-     * @param int $positionFormationId Position formation ID
+     * @param  int  $eventId  Assessment event ID
+     * @param  int  $positionFormationId  Position formation ID
      * @return Collection Category types
      */
     private function getCategoryTypes(int $eventId, int $positionFormationId): Collection
     {
-        // Get template ID from position formation
-        $position = \App\Models\PositionFormation::find($positionFormationId);
+        // 🚀 PERFORMANCE: Use cached position instead of querying again
+        $this->loadPosition($positionFormationId);
 
-        if (!$position) {
+        if (! $this->cachedPosition) {
             return collect([]);
         }
 
-        return CategoryType::where('template_id', $position->template_id)
+        return CategoryType::where('template_id', $this->cachedPosition->template_id)
             ->orderBy('code')
             ->get();
     }
@@ -268,8 +304,8 @@ class TalentPoolService
     /**
      * Get aspect assessments for the event and position
      *
-     * @param int $eventId Assessment event ID
-     * @param int $positionFormationId Position formation ID
+     * @param  int  $eventId  Assessment event ID
+     * @param  int  $positionFormationId  Position formation ID
      * @return Collection Aspect assessments
      */
     private function getAspectAssessments(int $eventId, int $positionFormationId): Collection
@@ -304,9 +340,9 @@ class TalentPoolService
     /**
      * Calculate category averages for each participant
      *
-     * @param Collection $assessments Aspect assessments
-     * @param int $potensiCategoryId Potensi category ID
-     * @param int $kompetensiCategoryId Kompetensi category ID
+     * @param  Collection  $assessments  Aspect assessments
+     * @param  int  $potensiCategoryId  Potensi category ID
+     * @param  int  $kompetensiCategoryId  Kompetensi category ID
      * @return Collection Participants with category averages
      */
     private function calculateCategoryAverages(
@@ -346,7 +382,7 @@ class TalentPoolService
     /**
      * Calculate standard deviation
      *
-     * @param Collection $values Numeric values
+     * @param  Collection  $values  Numeric values
      * @return float Standard deviation
      */
     private function calculateStandardDeviation(Collection $values): float
@@ -368,9 +404,9 @@ class TalentPoolService
     /**
      * Determine level (rendah/sedang/tinggi) based on boundaries
      *
-     * @param float $value Rating value
-     * @param float $lowerBound Lower boundary
-     * @param float $upperBound Upper boundary
+     * @param  float  $value  Rating value
+     * @param  float  $lowerBound  Lower boundary
+     * @param  float  $upperBound  Upper boundary
      * @return string Level (rendah/sedang/tinggi)
      */
     private function determineLevel(float $value, float $lowerBound, float $upperBound): string
@@ -387,8 +423,8 @@ class TalentPoolService
     /**
      * Map potensi and kinerja levels to box number
      *
-     * @param string $potensiLevel Potensi level (rendah/sedang/tinggi)
-     * @param string $kinerjaLevel Kinerja level (rendah/sedang/tinggi)
+     * @param  string  $potensiLevel  Potensi level (rendah/sedang/tinggi)
+     * @param  string  $kinerjaLevel  Kinerja level (rendah/sedang/tinggi)
      * @return int Box number (1-9)
      */
     private function mapLevelsToBox(string $potensiLevel, string $kinerjaLevel): int
@@ -435,39 +471,44 @@ class TalentPoolService
     }
 
     /**
+     * 🚀 OPTIMIZED: Cached config hash to prevent redundant calculations
+     */
+    private ?string $cachedConfigHash = null;
+
+    /**
      * Build config hash for cache invalidation (respects 3-layer priority)
      *
-     * @param int $eventId Assessment event ID
-     * @param int $positionFormationId Position formation ID
+     * @param  int  $eventId  Assessment event ID
+     * @param  int  $positionFormationId  Position formation ID
      * @return string Config hash
      */
     private function buildConfigHash(int $eventId, int $positionFormationId): string
     {
-        // Get template ID from position formation
-        $position = \App\Models\PositionFormation::find($positionFormationId);
+        // 🚀 PERFORMANCE: Return cached hash if already calculated
+        if ($this->cachedConfigHash !== null) {
+            return $this->cachedConfigHash;
+        }
 
-        if (!$position) {
+        // 🚀 PERFORMANCE: Use cached position instead of querying again
+        $this->loadPosition($positionFormationId);
+
+        if (! $this->cachedPosition) {
             return md5('no_position');
         }
 
-        $standardService = app(DynamicStandardService::class);
+        // 🚀 PERFORMANCE: Simpler hash based on session adjustments only
+        // Instead of querying all aspects and checking each one, we use the session data directly
+        $templateId = $this->cachedPosition->template_id;
+        $sessionAdjustments = session()->get("standard_adjustment.{$templateId}", []);
+        $selectedStandard = session()->get("selected_standard.{$templateId}");
 
-        // Get active aspects and their ratings for config hash
-        $aspects = Aspect::where('template_id', $position->template_id)
-            ->with('categoryType')
-            ->get();
-
-        $aspectRatings = [];
-        foreach ($aspects as $aspect) {
-            if ($standardService->isAspectActive($position->template_id, $aspect->code)) {
-                $aspectRatings[$aspect->code] = $standardService->getAspectRating($position->template_id, $aspect->code);
-            }
-        }
-
-        return md5(json_encode([
-            'template_id' => $position->template_id,
-            'aspect_ratings' => $aspectRatings,
-            'session' => session()->getId(),
+        $this->cachedConfigHash = md5(json_encode([
+            'template_id' => $templateId,
+            'session_id' => session()->getId(),
+            'selected_standard' => $selectedStandard,
+            'adjustments' => $sessionAdjustments,
         ]));
+
+        return $this->cachedConfigHash;
     }
 }
