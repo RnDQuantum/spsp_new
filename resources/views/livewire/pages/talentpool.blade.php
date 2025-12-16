@@ -79,29 +79,32 @@
 
     <hr class="mt-6 mb-4 border-t border-2 border-gray-400">
 
+    <div class="mt-8 border-t-2 border-gray-400 pt-6">
+        <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100 mb-6 text-center italic">Distribusi Talent Pool 9-Box Matrix</h3>
 
-    <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-        <div>
-            <h2 class="text-sm text-center font-semibold mb-2">Distribusi Peserta per Kotak</h2>
-            <div style="height:280px;">
-                <canvas id="boxPieChart"></canvas>
+        <!-- Content Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+            <!-- Chart Section -->
+            <div class="border border-gray-300 dark:border-gray-600 p-2 rounded-lg bg-gray-50 dark:bg-gray-800 transition-shadow duration-300 hover:shadow-xl" wire:ignore>
+                <canvas id="boxPieChart" class="w-full h-full"></canvas>
             </div>
-        </div>
 
-        <div>
-            <table class="text-xs text-gray-700 border-2 border-gray-300">
-                <thead>
-                    <tr>
-                        <th class="text-center py-1 border-2 border-gray-300">Kotak</th>
-                        <th class="text-center py-1 border-2 border-gray-300">Kategori</th>
-                        <th class="text-center py-1 border-2 border-gray-300">Jumlah</th>
-                        <th class="text-center py-1 border-2 border-gray-300">%</th>
-                    </tr>
-                </thead>
-                <tbody id="boxSummaryBody">
-                    <!-- Diisi via JS -->
-                </tbody>
-            </table>
+            <!-- Table Section -->
+            <div class="rounded-md overflow-hidden">
+                <table class="w-full text-sm text-gray-900 dark:text-gray-100">
+                    <thead>
+                        <tr class="bg-gray-200 dark:bg-gray-700">
+                            <th class="border-2 border-gray-400 dark:border-gray-500 px-4 py-3 text-center font-bold">KOTAK</th>
+                            <th class="border-2 border-gray-400 dark:border-gray-500 px-4 py-3 text-center font-bold">KATEGORI</th>
+                            <th class="border-2 border-gray-400 dark:border-gray-500 px-4 py-3 text-center font-bold">JUMLAH</th>
+                            <th class="border-2 border-gray-400 dark:border-gray-500 px-4 py-3 text-center font-bold">PERSENTASE</th>
+                        </tr>
+                    </thead>
+                    <tbody id="boxSummaryBody" class="bg-white dark:bg-gray-800">
+                        <!-- Diisi via JS -->
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
@@ -422,8 +425,6 @@
             const pieCanvas = document.getElementById('boxPieChart');
             if (!pieCanvas) return;
 
-            const pieCtx = pieCanvas.getContext('2d');
-
             const pieColors = labels.map((label, index) => {
                 const boxNumber = parseInt(label.replace('K-', ''));
                 return BOX_CONFIG[boxNumber]?.color || '#9E9E9E';
@@ -435,38 +436,101 @@
                 existingChart.destroy();
             }
 
-            new Chart(pieCtx, {
+            // Reset canvas dimensions to ensure proper sizing
+            pieCanvas.style.width = '';
+            pieCanvas.style.height = '';
+            pieCanvas.width = pieCanvas.offsetWidth;
+            pieCanvas.height = pieCanvas.offsetHeight;
+
+            const chartData = {
+                labels: labels,
+                datasets: [{
+                    data: data,
+                    backgroundColor: pieColors,
+                    borderColor: '#ffffff',
+                    borderWidth: 2,
+                    datalabels: {
+                        display: false
+                    },
+                    // Hover effects
+                    hoverBackgroundColor: pieColors.map(color => {
+                        // Lighten color on hover
+                        return color + 'dd'; // Add transparency
+                    }),
+                    hoverBorderColor: '#333',
+                    hoverBorderWidth: 3,
+                    hoverOffset: 25 // Push slice out on hover
+                }]
+            };
+
+            const config = {
                 type: 'pie',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        data: data,
-                        backgroundColor: pieColors,
-                        borderWidth: 1,
-                        borderColor: '#ffffff'
-                    }]
-                },
+                data: chartData,
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false,
+                    maintainAspectRatio: true,
+                    // Add padding to prevent label clipping
+                    layout: {
+                        padding: {
+                            top: 50,
+                            bottom: 50,
+                            left: 100,
+                            right: 100
+                        }
+                    },
+                    // Smooth animations
+                    animation: {
+                        animateRotate: true,
+                        animateScale: true,
+                        duration: 800,
+                        easing: 'easeInOutQuart'
+                    },
+                    // Hover mode settings
+                    hover: {
+                        mode: 'nearest',
+                        intersect: true,
+                        animationDuration: 400
+                    },
+                    // Cursor pointer on hover
+                    onHover: (event, activeElements) => {
+                        event.native.target.style.cursor = activeElements.length > 0 ? 'pointer' : 'default';
+                    },
                     plugins: {
                         legend: {
-                            position: 'bottom'
+                            display: false
                         },
                         tooltip: {
+                            enabled: true,
+                            backgroundColor: 'rgba(0, 0, 0, 0.85)',
+                            padding: 14,
+                            cornerRadius: 8,
+                            titleFont: {
+                                size: 15,
+                                weight: 'bold'
+                            },
+                            bodyFont: {
+                                size: 14
+                            },
+                            displayColors: true,
+                            boxWidth: 20,
+                            boxHeight: 20,
+                            boxPadding: 8,
+                            caretSize: 8,
                             callbacks: {
-                                label: function(ctx) {
-                                    const label = ctx.label || '';
-                                    const value = ctx.raw || 0;
-                                    const total = data.reduce((sum, val) => sum + val, 0);
-                                    const percent = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
-                                    return label + ': ' + value + ' orang (' + percent + '%)';
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.parsed;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = total > 0 ? ((value / total) * 100).toFixed(2) : 0;
+                                    return `${label}: ${value} orang (${percentage}%)`;
                                 }
                             }
                         }
                     }
                 }
-            });
+            };
+
+            new Chart(pieCanvas, config);
         }
 
         function updateSummaryTable(boxStatistics) {
@@ -475,6 +539,12 @@
 
             summaryBody.innerHTML = '';
 
+            // Calculate total for final row
+            let totalCount = 0;
+            Object.values(boxStatistics).forEach(stat => {
+                totalCount += stat.count;
+            });
+
             Object.keys(boxStatistics)
                 .sort((a, b) => b - a) // 9 ke 1
                 .forEach(box => {
@@ -482,19 +552,19 @@
                     const config = BOX_CONFIG[box];
 
                     const tdBox = document.createElement('td');
-                    tdBox.className = 'px-5 py-1 border-2 border-gray-300';
+                    tdBox.className = 'border-2 border-gray-400 dark:border-gray-500 px-4 py-3 text-center';
                     tdBox.textContent = config?.code || 'K-' + box;
 
                     const tdLabel = document.createElement('td');
-                    tdLabel.className = 'px-5 py-1 border-2 border-gray-300';
+                    tdLabel.className = 'border-2 border-gray-400 dark:border-gray-500 px-4 py-3';
                     tdLabel.textContent = config?.label || 'Unknown';
 
                     const tdCount = document.createElement('td');
-                    tdCount.className = 'text-center px-5 py-1 border-2 border-gray-300';
-                    tdCount.textContent = boxStatistics[box].count;
+                    tdCount.className = 'border-2 border-gray-400 dark:border-gray-500 px-4 py-3 text-center';
+                    tdCount.textContent = boxStatistics[box].count + ' orang';
 
                     const tdPercent = document.createElement('td');
-                    tdPercent.className = 'text-center px-5 py-1 border-2 border-gray-300';
+                    tdPercent.className = 'border-2 border-gray-400 dark:border-gray-500 px-4 py-3 text-center';
                     tdPercent.textContent = boxStatistics[box].percentage + '%';
 
                     tr.appendChild(tdBox);
@@ -503,6 +573,28 @@
                     tr.appendChild(tdPercent);
                     summaryBody.appendChild(tr);
                 });
+
+            // Add total row
+            const totalRow = document.createElement('tr');
+            totalRow.className = 'bg-gray-100 dark:bg-gray-700 font-semibold';
+
+            const tdTotalLabel = document.createElement('td');
+            tdTotalLabel.className = 'border-2 border-gray-400 dark:border-gray-500 px-4 py-3';
+            tdTotalLabel.colSpan = 2;
+            tdTotalLabel.textContent = 'Total Peserta';
+
+            const tdTotalCount = document.createElement('td');
+            tdTotalCount.className = 'border-2 border-gray-400 dark:border-gray-500 px-4 py-3 text-center';
+            tdTotalCount.textContent = totalCount + ' orang';
+
+            const tdTotalPercent = document.createElement('td');
+            tdTotalPercent.className = 'border-2 border-gray-400 dark:border-gray-500 px-4 py-3 text-center';
+            tdTotalPercent.textContent = '100.00%';
+
+            totalRow.appendChild(tdTotalLabel);
+            totalRow.appendChild(tdTotalCount);
+            totalRow.appendChild(tdTotalPercent);
+            summaryBody.appendChild(totalRow);
         }
 
         // Initialize chart on page load
