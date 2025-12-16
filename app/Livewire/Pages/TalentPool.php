@@ -240,55 +240,55 @@ class TalentPool extends Component
                 'code' => 'K-1',
                 'label' => 'Kinerja di bawah ekspektasi dan potensi rendah',
                 'color' => '#8B0000', // Merah gelap (Dark Red)
-                'overlay_color' => 'rgba(139,0,0,0.12)',
+                'overlay_color' => 'rgba(139, 0, 0, 0.3)',
             ],
             2 => [
                 'code' => 'K-2',
                 'label' => 'Kinerja sesuai ekspektasi dan potensi rendah',
                 'color' => '#FF4500', // Merah-oranye
-                'overlay_color' => 'rgba(255,69,0,0.12)',
+                'overlay_color' => 'rgba(255, 69, 0, 0.3)',
             ],
             3 => [
                 'code' => 'K-3',
                 'label' => 'Kinerja di bawah ekspektasi dan potensi menengah',
                 'color' => '#FF8C00', // Oranye gelap
-                'overlay_color' => 'rgba(255,140,0,0.12)',
+                'overlay_color' => 'rgba(255, 140, 0, 0.3)',
             ],
             4 => [
                 'code' => 'K-4',
                 'label' => 'Kinerja di atas ekspektasi dan potensi rendah',
                 'color' => '#FFD700', // Kuning emas
-                'overlay_color' => 'rgba(255,215,0,0.15)',
+                'overlay_color' => 'rgba(255, 215, 0, 0.4)',
             ],
             5 => [
                 'code' => 'K-5',
                 'label' => 'Kinerja sesuai ekspektasi dan potensi menengah',
                 'color' => '#FFFF00', // Kuning murni
-                'overlay_color' => 'rgba(255,255,0,0.15)',
+                'overlay_color' => 'rgba(255, 255, 0, 0.3)',
             ],
             6 => [
                 'code' => 'K-6',
                 'label' => 'Kinerja di bawah ekspektasi dan potensi tinggi',
                 'color' => '#CCFF00', // Kuning-hijau terang (Electric Lime)
-                'overlay_color' => 'rgba(204,255,0,0.15)',
+                'overlay_color' => 'rgba(204, 255, 0, 0.3)',
             ],
             7 => [
                 'code' => 'K-7',
                 'label' => 'Kinerja di atas ekspektasi dan potensi menengah',
                 'color' => '#32CD32', // Lime Green (hijau terang)
-                'overlay_color' => 'rgba(50,205,50,0.15)',
+                'overlay_color' => 'rgba(50, 205, 50, 0.3)',
             ],
             8 => [
                 'code' => 'K-8',
                 'label' => 'Kinerja sesuai ekspektasi dan potensi tinggi',
                 'color' => '#228B22', // Forest Green (hijau sedang)
-                'overlay_color' => 'rgba(34,139,34,0.15)',
+                'overlay_color' => 'rgba(34, 139, 34, 0.3)',
             ],
             9 => [
                 'code' => 'K-9',
                 'label' => 'Kinerja di atas ekspektasi dan potensi tinggi',
                 'color' => '#006400', // Dark Green (hijau gelap)
-                'overlay_color' => 'rgba(0,100,0,0.12)',
+                'overlay_color' => 'rgba(0, 100, 0, 0.4)',
             ],
         ];
     }
