@@ -2,6 +2,8 @@
     
     {{-- 🚀 PERFORMANCE: Custom loading overlay untuk reload --}}
     <div id="customLoadingOverlay" style="display: none;" 
+         wire:loading.flex
+         wire:target="handleEventSelected, handlePositionSelected"
          class="fixed inset-0 bg-white/90 z-[9999] flex items-center justify-center">
         <div class="flex flex-col items-center">
             <div class="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mb-4"></div>
@@ -580,16 +582,29 @@
 
         // 🚀 NEW: Handle trigger-reload event
         function showLoadingAndReload() {
-            const overlay = document.getElementById('customLoadingOverlay');
-            if (overlay) {
-                overlay.style.display = 'flex';
-            }
+            // Create a fresh overlay to avoid Livewire interference (race condition with wire:loading)
+            const overlay = document.createElement('div');
+            overlay.style.cssText = 'position:fixed; inset:0; background:rgba(255,255,255,0.9); z-index:99999; display:flex; align-items:center; justify-content:center;';
+            overlay.innerHTML = `
+                <div class="flex flex-col items-center">
+                    <div class="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mb-4"></div>
+                    <div class="text-gray-700 font-semibold text-lg">Memuat ulang halaman...</div>
+                </div>
+            `;
+            document.body.appendChild(overlay);
             
-            // Small delay untuk memastikan overlay terlihat
+            // Hide the existing overlay if it's still visible
+            const oldOverlay = document.getElementById('customLoadingOverlay');
+            if (oldOverlay) oldOverlay.style.display = 'none';
+
+            // Reload immediately
             setTimeout(() => {
                 window.location.reload();
-            }, 100);
+            }, 50);
         }
+
+        // 🚀 Expose globally for components
+        window.showLoadingOverlay = showLoadingAndReload;
 
         // Handle Livewire initialization and navigation
         document.addEventListener('livewire:init', () => {
