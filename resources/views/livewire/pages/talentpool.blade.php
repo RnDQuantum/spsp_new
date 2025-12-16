@@ -1,4 +1,13 @@
-<div class="max-w-6xl mx-auto p-6 bg-white rounded-lg shadow-md mt-10">
+<div class="max-w-6xl mx-auto p-6 bg-white rounded-lg shadow-md mt-10 relative">
+    
+    {{-- 🚀 PERFORMANCE: Global loading overlay for better UX during reload --}}
+    <div wire:loading class="absolute inset-0 bg-white/80 z-50 rounded-lg flex items-center justify-center">
+        <div class="flex flex-col items-center">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
+            <div class="text-gray-600 font-medium">Memproses data...</div>
+        </div>
+    </div>
+
     <h1 class="text-center text-2xl font-bold text-gray-800 mb-2">9-Box Performance Matrix</h1>
     <div class="text-center text-gray-600 mb-8 text-sm">Matriks Kinerja dan Potensi Karyawan</div>
 
@@ -556,46 +565,9 @@
             updateSummaryTable(boxStatistics);
         }
 
-        function waitForLivewire(callback) {
-            if (window.Livewire) {
-                callback();
-            } else {
-                setTimeout(() => waitForLivewire(callback), 100);
-            }
-        }
-
-        // Handle Livewire navigation events
-        document.addEventListener('livewire:navigated', function() {
-            // Re-initialize chart after navigation
-            waitForLivewire(function() {
-                setTimeout(initializeChart, 100);
-            });
-        });
-
-        // Handle Livewire navigate away events
-        document.addEventListener('livewire:navigating', function() {
-            // Cleanup chart on navigate away
-            const canvas = document.getElementById('nineBoxChart');
-            if (canvas) {
-                const chart = Chart.getChart(canvas);
-                if (chart) {
-                    chart.destroy();
-                }
-            }
-
-            const pieCanvas = document.getElementById('boxPieChart');
-            if (pieCanvas) {
-                const pieChart = Chart.getChart(pieCanvas);
-                if (pieChart) {
-                    pieChart.destroy();
-                }
-            }
-        });
-
-        // Initialize chart when DOM is ready
-        waitForLivewire(function() {
-            // Handle Livewire events and navigation
-            Livewire.on('chartDataUpdated', function(eventData) {
+        // Handle Livewire initialization and navigation
+        document.addEventListener('livewire:init', () => {
+                Livewire.on('chartDataUpdated', function(eventData) {
                 try {
                     const payload = Array.isArray(eventData) && eventData.length > 0 ? eventData[
                         0] : eventData;
@@ -629,12 +601,26 @@
                     console.error('chartDataUpdated render error:', e, eventData);
                 }
             });
+        });
 
-            // Initialize charts after a short delay to ensure DOM is ready
-            setTimeout(function() {
-                console.log('Initializing charts...');
-                initializeChart();
-            }, 500);
+        document.addEventListener('livewire:navigated', () => {
+                // Delay slightly to ensure DOM is fully ready
+            setTimeout(initializeChart, 100);
+        });
+
+        // Cleanup on navigation
+        document.addEventListener('livewire:navigating', () => {
+            const canvas = document.getElementById('nineBoxChart');
+            if (canvas) {
+                const chart = Chart.getChart(canvas);
+                if (chart) chart.destroy();
+            }
+
+            const pieCanvas = document.getElementById('boxPieChart');
+            if (pieCanvas) {
+                const pieChart = Chart.getChart(pieCanvas);
+                if (pieChart) pieChart.destroy();
+            }
         });
     })();
 </script>

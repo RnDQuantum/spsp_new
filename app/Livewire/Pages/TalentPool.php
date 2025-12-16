@@ -163,8 +163,8 @@ class TalentPool extends Component
             // Apply to component properties
             $this->applyMatrixData($matrix);
 
-            // Dispatch chart update to frontend
-            $this->dispatchChartUpdate();
+            // Note: We DO NOT dispatch chart update here anymore to prevent double rendering on initial load.
+            // Explicit dispatch is handled by the caller if needed (e.g. handleStandardUpdate).
         } catch (\Exception $e) {
             // Handle error gracefully
             $this->dispatch('error', 'Failed to load talent pool data: ' . $e->getMessage());
@@ -289,11 +289,7 @@ class TalentPool extends Component
 
     public function render()
     {
-        // 🚀 PERFORMANCE: Only dispatch chart update if data has changed
-        if (!empty($this->matrixData)) {
-            $this->dispatchChartUpdate();
-        }
-
+        // 🚀 PERFORMANCE: No extra processing in render to keep it fast
         return view('livewire.pages.talentpool', [
             'selectedTemplate' => $this->selectedEvent?->positionFormations?->first()?->template,
         ]);
