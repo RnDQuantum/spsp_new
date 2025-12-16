@@ -9,8 +9,8 @@
         </div>
     </div>
 
-    <h1 class="text-center text-2xl font-bold text-gray-800 mb-2">9-Box Performance Matrix</h1>
-    <div class="text-center text-gray-600 mb-8 text-sm">Matriks Kinerja dan Potensi Karyawan</div>
+    <h1 class="text-center text-2xl font-bold text-gray-800 mb-2">Matriks 9-Kotak Kinerja dan Potensi</h1>
+    <div class="text-center text-gray-600 mb-8 text-sm">9-Box Performance Matrix: Kinerja dan Potensi Karyawan</div>
 
     <!-- Event and Position Selectors -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
@@ -36,12 +36,12 @@
     <!-- Show message if no data -->
     @if (!$this->selectedEvent || !$this->selectedPositionId)
         <div class="text-center py-12 bg-gray-50 rounded-lg">
-            <div class="text-gray-500 text-lg">Silakan pilih Event dan Position untuk melihat 9-Box Performance Matrix
+            <div class="text-gray-500 text-lg">Silakan pilih Kegiatan dan Posisi untuk melihat Matriks 9-Kotak
             </div>
         </div>
     @elseif($this->totalParticipants === 0)
         <div class="text-center py-12 bg-gray-50 rounded-lg">
-            <div class="text-gray-500 text-lg">Tidak ada data peserta untuk Event dan Position yang dipilih</div>
+            <div class="text-gray-500 text-lg">Tidak ada data peserta untuk Kegiatan dan Posisi yang dipilih</div>
         </div>
     @else
         <div style="height:600px; margin-bottom:30px;">
@@ -56,43 +56,43 @@
                 <tr>
                     <td class="py-0.5 pr-4 align-top">
                         <div class="flex items-center">
-                            <div class="w-4 h-4 rounded-full mr-2" style="background:#00C853"></div>
-                            <span class="text-xs text-gray-700">Box 9: Star Performer</span>
+                            <div class="w-4 h-4 rounded-full mr-2" style="background:#388E3C"></div>
+                            <span class="text-xs text-gray-700">K-9: Kinerja di atas ekspektasi dan potensi tinggi</span>
                         </div>
                         <div class="flex items-center mt-0.5">
-                            <div class="w-4 h-4 rounded-full mr-2" style="background:#2196F3"></div>
-                            <span class="text-xs text-gray-700">Box 7: Potential Star</span>
+                            <div class="w-4 h-4 rounded-full mr-2" style="background:#81C784"></div>
+                            <span class="text-xs text-gray-700">K-7: Kinerja di atas ekspektasi dan potensi menengah</span>
                         </div>
                         <div class="flex items-center mt-0.5">
-                            <div class="w-4 h-4 rounded-full mr-2" style="background:#FFC107"></div>
-                            <span class="text-xs text-gray-700">Box 5: Core Performer</span>
+                            <div class="w-4 h-4 rounded-full mr-2" style="background:#FFEB3B"></div>
+                            <span class="text-xs text-gray-700">K-5: Kinerja sesuai ekspektasi dan potensi menengah</span>
                         </div>
                         <div class="flex items-center mt-0.5">
-                            <div class="w-4 h-4 rounded-full mr-2" style="background:#E91E63"></div>
-                            <span class="text-xs text-gray-700">Box 3: Inconsistent</span>
+                            <div class="w-4 h-4 rounded-full mr-2" style="background:#F48FB1"></div>
+                            <span class="text-xs text-gray-700">K-3: Kinerja di bawah ekspektasi dan potensi menengah</span>
                         </div>
                         <div class="flex items-center mt-0.5">
                             <div class="w-4 h-4 rounded-full mr-2" style="background:#D32F2F"></div>
-                            <span class="text-xs text-gray-700">Box 1: Need Attention</span>
+                            <span class="text-xs text-gray-700">K-1: Kinerja di bawah ekspektasi dan potensi rendah</span>
                         </div>
                     </td>
 
                     <td class="py-0.5 pl-2 align-top">
                         <div class="flex items-center">
-                            <div class="w-4 h-4 rounded-full mr-2" style="background:#00BCD4"></div>
-                            <span class="text-xs text-gray-700">Box 8: High Potential</span>
+                            <div class="w-4 h-4 rounded-full mr-2" style="background:#AED581"></div>
+                            <span class="text-xs text-gray-700">K-8: Kinerja sesuai ekspektasi dan potensi tinggi</span>
                         </div>
                         <div class="flex items-center mt-0.5">
-                            <div class="w-4 h-4 rounded-full mr-2" style="background:#FF5722"></div>
-                            <span class="text-xs text-gray-700">Box 6: Enigma</span>
+                            <div class="w-4 h-4 rounded-full mr-2" style="background:#FFEB3B"></div>
+                            <span class="text-xs text-gray-700">K-6: Kinerja di bawah ekspektasi dan potensi tinggi</span>
                         </div>
                         <div class="flex items-center mt-0.5">
-                            <div class="w-4 h-4 rounded-full mr-2" style="background:#9C27B0"></div>
-                            <span class="text-xs text-gray-700">Box 4: Solid Performer</span>
+                            <div class="w-4 h-4 rounded-full mr-2" style="background:#FFF9C4"></div>
+                            <span class="text-xs text-gray-700">K-4: Kinerja di atas ekspektasi dan potensi rendah</span>
                         </div>
                         <div class="flex items-center mt-0.5">
-                            <div class="w-4 h-4 rounded-full mr-2" style="background:#FF9800"></div>
-                            <span class="text-xs text-gray-700">Box 2: Steady Performer</span>
+                            <div class="w-4 h-4 rounded-full mr-2" style="background:#F8BBD0"></div>
+                            <span class="text-xs text-gray-700">K-2: Kinerja sesuai ekspektasi dan potensi rendah</span>
                         </div>
                     </td>
                 </tr>
@@ -106,7 +106,7 @@
 
     <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
         <div>
-            <h2 class="text-sm text-center font-semibold mb-2">Distribusi Peserta per Box</h2>
+            <h2 class="text-sm text-center font-semibold mb-2">Distribusi Peserta per Kotak</h2>
             <div style="height:280px;">
                 <canvas id="boxPieChart"></canvas>
             </div>
@@ -116,7 +116,7 @@
             <table class="text-xs text-gray-700 border-2 border-gray-300">
                 <thead>
                     <tr>
-                        <th class="text-center py-1 border-2 border-gray-300">Box</th>
+                        <th class="text-center py-1 border-2 border-gray-300">Kotak</th>
                         <th class="text-center py-1 border-2 border-gray-300">Kategori</th>
                         <th class="text-center py-1 border-2 border-gray-300">Jumlah</th>
                         <th class="text-center py-1 border-2 border-gray-300">%</th>
@@ -220,7 +220,7 @@
                                     return [
                                         'Kinerja: ' + d.y.toFixed(1),
                                         'Potensi: ' + d.x.toFixed(1),
-                                        'Box: ' + d.box
+                                        'Kotak: K-' + d.box
                                     ];
                                 }
                             }
@@ -281,63 +281,63 @@
                                 x2: potensiLower,
                                 y1: 0,
                                 y2: kinerjaLower,
-                                color: 'rgba(211,47,47,0.08)' // Box 1
+                                color: 'rgba(211,47,47,0.12)' // K-1 Red
                             },
                             {
                                 x1: 0,
                                 x2: potensiLower,
                                 y1: kinerjaLower,
                                 y2: kinerjaUpper,
-                                color: 'rgba(255,152,0,0.08)' // Box 2
+                                color: 'rgba(248,187,208,0.15)' // K-2 Light Pink
                             },
                             {
                                 x1: potensiLower,
                                 x2: potensiUpper,
                                 y1: 0,
                                 y2: kinerjaLower,
-                                color: 'rgba(233,30,99,0.08)' // Box 3
+                                color: 'rgba(244,143,177,0.15)' // K-3 Pink
                             },
                             {
                                 x1: 0,
                                 x2: potensiLower,
                                 y1: kinerjaUpper,
                                 y2: 5,
-                                color: 'rgba(156,39,176,0.08)' // Box 4
+                                color: 'rgba(255,249,196,0.20)' // K-4 Light Yellow
                             },
                             {
                                 x1: potensiLower,
                                 x2: potensiUpper,
                                 y1: kinerjaLower,
                                 y2: kinerjaUpper,
-                                color: 'rgba(255,193,7,0.08)' // Box 5
+                                color: 'rgba(255,235,59,0.15)' // K-5 Yellow
                             },
                             {
                                 x1: potensiUpper,
                                 x2: 5,
                                 y1: 0,
                                 y2: kinerjaLower,
-                                color: 'rgba(255,87,34,0.08)' // Box 6
+                                color: 'rgba(255,235,59,0.15)' // K-6 Yellow
                             },
                             {
                                 x1: potensiLower,
                                 x2: potensiUpper,
                                 y1: kinerjaUpper,
                                 y2: 5,
-                                color: 'rgba(33,150,243,0.08)' // Box 7
+                                color: 'rgba(129,199,132,0.15)' // K-7 Medium Green
                             },
                             {
                                 x1: potensiUpper,
                                 x2: 5,
                                 y1: kinerjaLower,
                                 y2: kinerjaUpper,
-                                color: 'rgba(0,188,212,0.08)' // Box 8
+                                color: 'rgba(174,213,129,0.15)' // K-8 Light Green
                             },
                             {
                                 x1: potensiUpper,
                                 x2: 5,
                                 y1: kinerjaUpper,
                                 y2: 5,
-                                color: 'rgba(0,200,83,0.08)' // Box 9
+                                color: 'rgba(56,142,60,0.12)' // K-9 Dark Green
                             }
                         ];
 
@@ -447,18 +447,18 @@
 
             const colorMap = {
                 1: '#D32F2F',
-                2: '#FF9800',
-                3: '#E91E63',
-                4: '#9C27B0',
-                5: '#FFC107',
-                6: '#FF5722',
-                7: '#2196F3',
-                8: '#00BCD4',
-                9: '#00C853'
+                2: '#F8BBD0',
+                3: '#F48FB1',
+                4: '#FFF9C4',
+                5: '#FFEB3B',
+                6: '#FFEB3B',
+                7: '#81C784',
+                8: '#AED581',
+                9: '#388E3C'
             };
 
             const pieColors = labels.map((label, index) => {
-                const boxNumber = parseInt(label.replace('Box ', ''));
+                const boxNumber = parseInt(label.replace('K-', ''));
                 return colorMap[boxNumber] || '#9E9E9E';
             });
 
@@ -509,15 +509,15 @@
             summaryBody.innerHTML = '';
 
             const boxLabelsMap = {
-                1: 'Need Attention',
-                2: 'Steady Performer',
-                3: 'Inconsistent',
-                4: 'Solid Performer',
-                5: 'Core Performer',
-                6: 'Enigma',
-                7: 'Potential Star',
-                8: 'High Potential',
-                9: 'Star Performer'
+                1: 'Kinerja di bawah ekspektasi dan potensi rendah',
+                2: 'Kinerja sesuai ekspektasi dan potensi rendah',
+                3: 'Kinerja di bawah ekspektasi dan potensi menengah',
+                4: 'Kinerja di atas ekspektasi dan potensi rendah',
+                5: 'Kinerja sesuai ekspektasi dan potensi menengah',
+                6: 'Kinerja di bawah ekspektasi dan potensi tinggi',
+                7: 'Kinerja di atas ekspektasi dan potensi menengah',
+                8: 'Kinerja sesuai ekspektasi dan potensi tinggi',
+                9: 'Kinerja di atas ekspektasi dan potensi tinggi'
             };
 
             Object.keys(boxStatistics)
@@ -527,7 +527,7 @@
 
                     const tdBox = document.createElement('td');
                     tdBox.className = 'px-5 py-1 border-2 border-gray-300';
-                    tdBox.textContent = 'Box ' + box;
+                    tdBox.textContent = 'K-' + box;
 
                     const tdLabel = document.createElement('td');
                     tdLabel.className = 'px-5 py-1 border-2 border-gray-300';
@@ -561,9 +561,9 @@
 
             // Initialize pie chart and summary table
             updatePieChart(
-                Object.keys(boxStatistics).sort((a, b) => b - a).map(box => 'Box ' + box),
+                Object.keys(boxStatistics).sort((a, b) => b - a).map(box => 'K-' + box),
                 Object.keys(boxStatistics).sort((a, b) => b - a).map(box => boxStatistics[box].count),
-                'Talent Pool Distribution'
+                'Distribusi Talent Pool'
             );
 
             updateSummaryTable(boxStatistics);

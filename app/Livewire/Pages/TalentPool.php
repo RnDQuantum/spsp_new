@@ -233,15 +233,15 @@ class TalentPool extends Component
     private function getBoxColor(int $boxNumber): string
     {
         $colors = [
-            1 => '#D32F2F', // Need Attention - Red
-            2 => '#FF9800', // Steady Performer - Orange
-            3 => '#E91E63', // Inconsistent - Pink
-            4 => '#9C27B0', // Solid Performer - Purple
-            5 => '#FFC107', // Core Performer - Amber
-            6 => '#FF5722', // Enigma - Deep Orange
-            7 => '#2196F3', // Potential Star - Blue
-            8 => '#00BCD4', // High Potential - Cyan
-            9 => '#00C853', // Star Performer - Green
+            1 => '#D32F2F', // K-1: Kinerja di bawah ekspektasi dan potensi rendah - Red
+            2 => '#F8BBD0', // K-2: Kinerja sesuai ekspektasi dan potensi rendah - Light Pink
+            3 => '#F48FB1', // K-3: Kinerja di bawah ekspektasi dan potensi menengah - Pink
+            4 => '#FFF9C4', // K-4: Kinerja di atas ekspektasi dan potensi rendah - Light Yellow
+            5 => '#FFEB3B', // K-5: Kinerja sesuai ekspektasi dan potensi menengah - Yellow
+            6 => '#FFEB3B', // K-6: Kinerja di bawah ekspektasi dan potensi tinggi - Yellow
+            7 => '#81C784', // K-7: Kinerja di atas ekspektasi dan potensi menengah - Medium Green
+            8 => '#AED581', // K-8: Kinerja sesuai ekspektasi dan potensi tinggi - Light Green
+            9 => '#388E3C', // K-9: Kinerja di atas ekspektasi dan potensi tinggi - Dark Green
         ];
 
         return $colors[$boxNumber] ?? '#9E9E9E'; // Default gray
@@ -253,15 +253,15 @@ class TalentPool extends Component
     public function getBoxLabelsProperty(): array
     {
         return [
-            1 => 'Need Attention',
-            2 => 'Steady Performer',
-            3 => 'Inconsistent',
-            4 => 'Solid Performer',
-            5 => 'Core Performer',
-            6 => 'Enigma',
-            7 => 'Potential Star',
-            8 => 'High Potential',
-            9 => 'Star Performer',
+            1 => 'Kinerja di bawah ekspektasi dan potensi rendah',
+            2 => 'Kinerja sesuai ekspektasi dan potensi rendah',
+            3 => 'Kinerja di bawah ekspektasi dan potensi menengah',
+            4 => 'Kinerja di atas ekspektasi dan potensi rendah',
+            5 => 'Kinerja sesuai ekspektasi dan potensi menengah',
+            6 => 'Kinerja di bawah ekspektasi dan potensi tinggi',
+            7 => 'Kinerja di atas ekspektasi dan potensi menengah',
+            8 => 'Kinerja sesuai ekspektasi dan potensi tinggi',
+            9 => 'Kinerja di atas ekspektasi dan potensi tinggi',
         ];
     }
 
