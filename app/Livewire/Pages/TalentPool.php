@@ -80,14 +80,14 @@ class TalentPool extends Component
     public function handleStandardUpdate(int $templateId): void
     {
         // Validate same template
-        if (! $this->selectedEvent || ! $this->selectedPositionId) {
+        if (!$this->selectedEvent || !$this->selectedPositionId) {
             return;
         }
 
         $position = $this->selectedEvent->positionFormations()
             ->find($this->selectedPositionId);
 
-        if (! $position || $position->template_id !== $templateId) {
+        if (!$position || $position->template_id !== $templateId) {
             return;
         }
 
@@ -109,17 +109,19 @@ class TalentPool extends Component
         $eventCode = session('filter.event_code');
         $positionFormationId = session('filter.position_formation_id');
 
-        if (! $eventCode) {
+        if (!$eventCode) {
             return;
         }
 
         // Load event with position and template in one query
         $this->selectedEvent = AssessmentEvent::query()
             ->where('code', $eventCode)
-            ->with(['positionFormations' => function ($query) use ($positionFormationId) {
-                $query->where('id', $positionFormationId)
-                    ->with('template');
-            }])
+            ->with([
+                'positionFormations' => function ($query) use ($positionFormationId) {
+                    $query->where('id', $positionFormationId)
+                        ->with('template');
+                }
+            ])
             ->first();
 
         if ($this->selectedEvent && $positionFormationId) {
@@ -140,7 +142,7 @@ class TalentPool extends Component
      */
     private function loadMatrixData(): void
     {
-        if (! $this->selectedEvent || ! $this->selectedPositionId) {
+        if (!$this->selectedEvent || !$this->selectedPositionId) {
             return;
         }
 
@@ -170,7 +172,7 @@ class TalentPool extends Component
             // Explicit dispatch is handled by the caller if needed (e.g. handleStandardUpdate).
         } catch (\Exception $e) {
             // Handle error gracefully
-            $this->dispatch('error', 'Failed to load talent pool data: '.$e->getMessage());
+            $this->dispatch('error', 'Failed to load talent pool data: ' . $e->getMessage());
         }
     }
 
@@ -237,56 +239,56 @@ class TalentPool extends Component
             1 => [
                 'code' => 'K-1',
                 'label' => 'Kinerja di bawah ekspektasi dan potensi rendah',
-                'color' => '#D32F2F', // Red
-                'overlay_color' => 'rgba(211,47,47,0.12)',
+                'color' => '#8B0000', // Merah gelap (Dark Red)
+                'overlay_color' => 'rgba(139,0,0,0.12)',
             ],
             2 => [
                 'code' => 'K-2',
                 'label' => 'Kinerja sesuai ekspektasi dan potensi rendah',
-                'color' => '#F8BBD0', // Light Pink
-                'overlay_color' => 'rgba(248,187,208,0.15)',
+                'color' => '#FF4500', // Merah-oranye
+                'overlay_color' => 'rgba(255,69,0,0.12)',
             ],
             3 => [
                 'code' => 'K-3',
                 'label' => 'Kinerja di bawah ekspektasi dan potensi menengah',
-                'color' => '#F48FB1', // Pink
-                'overlay_color' => 'rgba(244,143,177,0.15)',
+                'color' => '#FF8C00', // Oranye gelap
+                'overlay_color' => 'rgba(255,140,0,0.12)',
             ],
             4 => [
                 'code' => 'K-4',
                 'label' => 'Kinerja di atas ekspektasi dan potensi rendah',
-                'color' => '#FFF9C4', // Light Yellow
-                'overlay_color' => 'rgba(255,249,196,0.20)',
+                'color' => '#FFD700', // Kuning emas
+                'overlay_color' => 'rgba(255,215,0,0.15)',
             ],
             5 => [
                 'code' => 'K-5',
                 'label' => 'Kinerja sesuai ekspektasi dan potensi menengah',
-                'color' => '#FFEB3B', // Yellow
-                'overlay_color' => 'rgba(255,235,59,0.15)',
+                'color' => '#FFFF00', // Kuning murni
+                'overlay_color' => 'rgba(255,255,0,0.15)',
             ],
             6 => [
                 'code' => 'K-6',
                 'label' => 'Kinerja di bawah ekspektasi dan potensi tinggi',
-                'color' => '#FFEB3B', // Yellow
-                'overlay_color' => 'rgba(255,235,59,0.15)',
+                'color' => '#CCFF00', // Kuning-hijau terang (Electric Lime)
+                'overlay_color' => 'rgba(204,255,0,0.15)',
             ],
             7 => [
                 'code' => 'K-7',
                 'label' => 'Kinerja di atas ekspektasi dan potensi menengah',
-                'color' => '#81C784', // Medium Green
-                'overlay_color' => 'rgba(129,199,132,0.15)',
+                'color' => '#32CD32', // Lime Green (hijau terang)
+                'overlay_color' => 'rgba(50,205,50,0.15)',
             ],
             8 => [
                 'code' => 'K-8',
                 'label' => 'Kinerja sesuai ekspektasi dan potensi tinggi',
-                'color' => '#AED581', // Light Green
-                'overlay_color' => 'rgba(174,213,129,0.15)',
+                'color' => '#228B22', // Forest Green (hijau sedang)
+                'overlay_color' => 'rgba(34,139,34,0.15)',
             ],
             9 => [
                 'code' => 'K-9',
                 'label' => 'Kinerja di atas ekspektasi dan potensi tinggi',
-                'color' => '#388E3C', // Dark Green
-                'overlay_color' => 'rgba(56,142,60,0.12)',
+                'color' => '#006400', // Dark Green (hijau gelap)
+                'overlay_color' => 'rgba(0,100,0,0.12)',
             ],
         ];
     }
@@ -305,7 +307,7 @@ class TalentPool extends Component
     public function getBoxLabelsProperty(): array
     {
         return collect($this->boxConfig)
-            ->mapWithKeys(fn ($config, $number) => [$number => $config['label']])
+            ->mapWithKeys(fn($config, $number) => [$number => $config['label']])
             ->toArray();
     }
 
