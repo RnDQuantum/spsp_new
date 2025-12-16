@@ -1,7 +1,17 @@
 <div class="max-w-6xl mx-auto p-6 bg-white rounded-lg shadow-md mt-10 relative">
     
-    {{-- 🚀 PERFORMANCE: Global loading overlay for better UX during reload --}}
-    <div wire:loading class="absolute inset-0 bg-white/80 z-50 rounded-lg flex items-center justify-center">
+    {{-- 🚀 PERFORMANCE: Custom loading overlay untuk reload --}}
+    <div id="customLoadingOverlay" style="display: none;" 
+         class="fixed inset-0 bg-white/90 z-[9999] flex items-center justify-center">
+        <div class="flex flex-col items-center">
+            <div class="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mb-4"></div>
+            <div class="text-gray-700 font-semibold text-lg">Memuat ulang halaman...</div>
+        </div>
+    </div>
+
+    {{-- Loading overlay untuk standard adjustment saja --}}
+    <div wire:loading wire:target="handleStandardUpdate" 
+         class="absolute inset-0 bg-white/80 z-50 rounded-lg flex items-center justify-center">
         <div class="flex flex-col items-center">
             <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
             <div class="text-gray-600 font-medium">Memproses data...</div>
@@ -149,7 +159,10 @@
             if (isProcessing) return;
             isProcessing = true;
             const canvas = document.getElementById('nineBoxChart');
-            if (!canvas) return;
+            if (!canvas) {
+                isProcessing = false;
+                return;
+            }
 
             const ctx = canvas.getContext('2d');
 
@@ -565,12 +578,29 @@
             updateSummaryTable(boxStatistics);
         }
 
+        // 🚀 NEW: Handle trigger-reload event
+        function showLoadingAndReload() {
+            const overlay = document.getElementById('customLoadingOverlay');
+            if (overlay) {
+                overlay.style.display = 'flex';
+            }
+            
+            // Small delay untuk memastikan overlay terlihat
+            setTimeout(() => {
+                window.location.reload();
+            }, 100);
+        }
+
         // Handle Livewire initialization and navigation
         document.addEventListener('livewire:init', () => {
-                Livewire.on('chartDataUpdated', function(eventData) {
+            // Listen for trigger-reload event
+            Livewire.on('trigger-reload', () => {
+                showLoadingAndReload();
+            });
+
+            Livewire.on('chartDataUpdated', function(eventData) {
                 try {
-                    const payload = Array.isArray(eventData) && eventData.length > 0 ? eventData[
-                        0] : eventData;
+                    const payload = Array.isArray(eventData) && eventData.length > 0 ? eventData[0] : eventData;
 
                     const chartId = payload.chartId;
                     if (!chartId || chartId !== 'talentPoolChart') {
@@ -604,7 +634,7 @@
         });
 
         document.addEventListener('livewire:navigated', () => {
-                // Delay slightly to ensure DOM is fully ready
+            // Delay slightly to ensure DOM is fully ready
             setTimeout(initializeChart, 100);
         });
 

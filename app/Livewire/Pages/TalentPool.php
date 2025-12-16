@@ -46,6 +46,7 @@ class TalentPool extends Component
 
     /**
      * Handle event selection
+     * 🚀 PERFORMANCE: Save to session only, redirect happens in JS
      */
     public function handleEventSelected(?string $eventCode): void
     {
@@ -55,11 +56,13 @@ class TalentPool extends Component
             session()->forget('filter.event_code');
         }
 
-        $this->redirect(request()->header('Referer'), navigate: false);
+        // Dispatch event to JavaScript to handle redirect
+        $this->dispatch('trigger-reload');
     }
 
     /**
      * Handle position selection
+     * 🚀 PERFORMANCE: Save to session only, redirect happens in JS
      */
     public function handlePositionSelected(?int $positionFormationId): void
     {
@@ -69,7 +72,8 @@ class TalentPool extends Component
             session()->forget('filter.position_formation_id');
         }
 
-        $this->redirect(request()->header('Referer'), navigate: false);
+        // Dispatch event to JavaScript to handle redirect
+        $this->dispatch('trigger-reload');
     }
 
     /**
