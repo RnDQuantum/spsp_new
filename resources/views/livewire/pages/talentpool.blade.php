@@ -55,45 +55,21 @@
             <tbody>
                 <tr>
                     <td class="py-0.5 pr-4 align-top">
-                        <div class="flex items-center">
-                            <div class="w-4 h-4 rounded-full mr-2" style="background:#388E3C"></div>
-                            <span class="text-xs text-gray-700">K-9: Kinerja di atas ekspektasi dan potensi tinggi</span>
-                        </div>
-                        <div class="flex items-center mt-0.5">
-                            <div class="w-4 h-4 rounded-full mr-2" style="background:#81C784"></div>
-                            <span class="text-xs text-gray-700">K-7: Kinerja di atas ekspektasi dan potensi menengah</span>
-                        </div>
-                        <div class="flex items-center mt-0.5">
-                            <div class="w-4 h-4 rounded-full mr-2" style="background:#FFEB3B"></div>
-                            <span class="text-xs text-gray-700">K-5: Kinerja sesuai ekspektasi dan potensi menengah</span>
-                        </div>
-                        <div class="flex items-center mt-0.5">
-                            <div class="w-4 h-4 rounded-full mr-2" style="background:#F48FB1"></div>
-                            <span class="text-xs text-gray-700">K-3: Kinerja di bawah ekspektasi dan potensi menengah</span>
-                        </div>
-                        <div class="flex items-center mt-0.5">
-                            <div class="w-4 h-4 rounded-full mr-2" style="background:#D32F2F"></div>
-                            <span class="text-xs text-gray-700">K-1: Kinerja di bawah ekspektasi dan potensi rendah</span>
-                        </div>
+                        @foreach ([9, 7, 5, 3, 1] as $boxNumber)
+                            <div class="flex items-center @if(!$loop->first) mt-0.5 @endif">
+                                <div class="w-4 h-4 rounded-full mr-2" style="background:{{ $this->boxConfig[$boxNumber]['color'] }}"></div>
+                                <span class="text-xs text-gray-700">{{ $this->boxConfig[$boxNumber]['code'] }}: {{ $this->boxConfig[$boxNumber]['label'] }}</span>
+                            </div>
+                        @endforeach
                     </td>
 
                     <td class="py-0.5 pl-2 align-top">
-                        <div class="flex items-center">
-                            <div class="w-4 h-4 rounded-full mr-2" style="background:#AED581"></div>
-                            <span class="text-xs text-gray-700">K-8: Kinerja sesuai ekspektasi dan potensi tinggi</span>
-                        </div>
-                        <div class="flex items-center mt-0.5">
-                            <div class="w-4 h-4 rounded-full mr-2" style="background:#FFEB3B"></div>
-                            <span class="text-xs text-gray-700">K-6: Kinerja di bawah ekspektasi dan potensi tinggi</span>
-                        </div>
-                        <div class="flex items-center mt-0.5">
-                            <div class="w-4 h-4 rounded-full mr-2" style="background:#FFF9C4"></div>
-                            <span class="text-xs text-gray-700">K-4: Kinerja di atas ekspektasi dan potensi rendah</span>
-                        </div>
-                        <div class="flex items-center mt-0.5">
-                            <div class="w-4 h-4 rounded-full mr-2" style="background:#F8BBD0"></div>
-                            <span class="text-xs text-gray-700">K-2: Kinerja sesuai ekspektasi dan potensi rendah</span>
-                        </div>
+                        @foreach ([8, 6, 4, 2] as $boxNumber)
+                            <div class="flex items-center @if(!$loop->first) mt-0.5 @endif">
+                                <div class="w-4 h-4 rounded-full mr-2" style="background:{{ $this->boxConfig[$boxNumber]['color'] }}"></div>
+                                <span class="text-xs text-gray-700">{{ $this->boxConfig[$boxNumber]['code'] }}: {{ $this->boxConfig[$boxNumber]['label'] }}</span>
+                            </div>
+                        @endforeach
                     </td>
                 </tr>
             </tbody>
@@ -136,6 +112,9 @@
     (function() {
         let chartInstances = {};
         let isProcessing = false;
+
+        // 🎨 CENTRALIZED CONFIG: Single source of truth from PHP
+        const BOX_CONFIG = @json($this->boxConfig);
 
         // 🚀 PERFORMANCE: Smart data sampling untuk large datasets
         function sampleData(data, maxPoints = 500) {
@@ -281,63 +260,63 @@
                                 x2: potensiLower,
                                 y1: 0,
                                 y2: kinerjaLower,
-                                color: 'rgba(211,47,47,0.12)' // K-1 Red
+                                color: BOX_CONFIG[1].overlay_color
                             },
                             {
                                 x1: 0,
                                 x2: potensiLower,
                                 y1: kinerjaLower,
                                 y2: kinerjaUpper,
-                                color: 'rgba(248,187,208,0.15)' // K-2 Light Pink
+                                color: BOX_CONFIG[2].overlay_color
                             },
                             {
                                 x1: potensiLower,
                                 x2: potensiUpper,
                                 y1: 0,
                                 y2: kinerjaLower,
-                                color: 'rgba(244,143,177,0.15)' // K-3 Pink
+                                color: BOX_CONFIG[3].overlay_color
                             },
                             {
                                 x1: 0,
                                 x2: potensiLower,
                                 y1: kinerjaUpper,
                                 y2: 5,
-                                color: 'rgba(255,249,196,0.20)' // K-4 Light Yellow
+                                color: BOX_CONFIG[4].overlay_color
                             },
                             {
                                 x1: potensiLower,
                                 x2: potensiUpper,
                                 y1: kinerjaLower,
                                 y2: kinerjaUpper,
-                                color: 'rgba(255,235,59,0.15)' // K-5 Yellow
+                                color: BOX_CONFIG[5].overlay_color
                             },
                             {
                                 x1: potensiUpper,
                                 x2: 5,
                                 y1: 0,
                                 y2: kinerjaLower,
-                                color: 'rgba(255,235,59,0.15)' // K-6 Yellow
+                                color: BOX_CONFIG[6].overlay_color
                             },
                             {
                                 x1: potensiLower,
                                 x2: potensiUpper,
                                 y1: kinerjaUpper,
                                 y2: 5,
-                                color: 'rgba(129,199,132,0.15)' // K-7 Medium Green
+                                color: BOX_CONFIG[7].overlay_color
                             },
                             {
                                 x1: potensiUpper,
                                 x2: 5,
                                 y1: kinerjaLower,
                                 y2: kinerjaUpper,
-                                color: 'rgba(174,213,129,0.15)' // K-8 Light Green
+                                color: BOX_CONFIG[8].overlay_color
                             },
                             {
                                 x1: potensiUpper,
                                 x2: 5,
                                 y1: kinerjaUpper,
                                 y2: 5,
-                                color: 'rgba(56,142,60,0.12)' // K-9 Dark Green
+                                color: BOX_CONFIG[9].overlay_color
                             }
                         ];
 
@@ -445,21 +424,9 @@
 
             const pieCtx = pieCanvas.getContext('2d');
 
-            const colorMap = {
-                1: '#D32F2F',
-                2: '#F8BBD0',
-                3: '#F48FB1',
-                4: '#FFF9C4',
-                5: '#FFEB3B',
-                6: '#FFEB3B',
-                7: '#81C784',
-                8: '#AED581',
-                9: '#388E3C'
-            };
-
             const pieColors = labels.map((label, index) => {
                 const boxNumber = parseInt(label.replace('K-', ''));
-                return colorMap[boxNumber] || '#9E9E9E';
+                return BOX_CONFIG[boxNumber]?.color || '#9E9E9E';
             });
 
             // Destroy existing chart if it exists
@@ -508,30 +475,19 @@
 
             summaryBody.innerHTML = '';
 
-            const boxLabelsMap = {
-                1: 'Kinerja di bawah ekspektasi dan potensi rendah',
-                2: 'Kinerja sesuai ekspektasi dan potensi rendah',
-                3: 'Kinerja di bawah ekspektasi dan potensi menengah',
-                4: 'Kinerja di atas ekspektasi dan potensi rendah',
-                5: 'Kinerja sesuai ekspektasi dan potensi menengah',
-                6: 'Kinerja di bawah ekspektasi dan potensi tinggi',
-                7: 'Kinerja di atas ekspektasi dan potensi menengah',
-                8: 'Kinerja sesuai ekspektasi dan potensi tinggi',
-                9: 'Kinerja di atas ekspektasi dan potensi tinggi'
-            };
-
             Object.keys(boxStatistics)
                 .sort((a, b) => b - a) // 9 ke 1
                 .forEach(box => {
                     const tr = document.createElement('tr');
+                    const config = BOX_CONFIG[box];
 
                     const tdBox = document.createElement('td');
                     tdBox.className = 'px-5 py-1 border-2 border-gray-300';
-                    tdBox.textContent = 'K-' + box;
+                    tdBox.textContent = config?.code || 'K-' + box;
 
                     const tdLabel = document.createElement('td');
                     tdLabel.className = 'px-5 py-1 border-2 border-gray-300';
-                    tdLabel.textContent = boxLabelsMap[box] || 'Unknown';
+                    tdLabel.textContent = config?.label || 'Unknown';
 
                     const tdCount = document.createElement('td');
                     tdCount.className = 'text-center px-5 py-1 border-2 border-gray-300';

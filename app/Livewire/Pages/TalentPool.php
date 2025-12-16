@@ -228,23 +228,75 @@ class TalentPool extends Component
     }
 
     /**
+     * Get centralized box configuration (Single Source of Truth)
+     * Contains all box metadata: colors, labels, and overlay colors
+     */
+    public function getBoxConfigProperty(): array
+    {
+        return [
+            1 => [
+                'code' => 'K-1',
+                'label' => 'Kinerja di bawah ekspektasi dan potensi rendah',
+                'color' => '#D32F2F', // Red
+                'overlay_color' => 'rgba(211,47,47,0.12)',
+            ],
+            2 => [
+                'code' => 'K-2',
+                'label' => 'Kinerja sesuai ekspektasi dan potensi rendah',
+                'color' => '#F8BBD0', // Light Pink
+                'overlay_color' => 'rgba(248,187,208,0.15)',
+            ],
+            3 => [
+                'code' => 'K-3',
+                'label' => 'Kinerja di bawah ekspektasi dan potensi menengah',
+                'color' => '#F48FB1', // Pink
+                'overlay_color' => 'rgba(244,143,177,0.15)',
+            ],
+            4 => [
+                'code' => 'K-4',
+                'label' => 'Kinerja di atas ekspektasi dan potensi rendah',
+                'color' => '#FFF9C4', // Light Yellow
+                'overlay_color' => 'rgba(255,249,196,0.20)',
+            ],
+            5 => [
+                'code' => 'K-5',
+                'label' => 'Kinerja sesuai ekspektasi dan potensi menengah',
+                'color' => '#FFEB3B', // Yellow
+                'overlay_color' => 'rgba(255,235,59,0.15)',
+            ],
+            6 => [
+                'code' => 'K-6',
+                'label' => 'Kinerja di bawah ekspektasi dan potensi tinggi',
+                'color' => '#FFEB3B', // Yellow
+                'overlay_color' => 'rgba(255,235,59,0.15)',
+            ],
+            7 => [
+                'code' => 'K-7',
+                'label' => 'Kinerja di atas ekspektasi dan potensi menengah',
+                'color' => '#81C784', // Medium Green
+                'overlay_color' => 'rgba(129,199,132,0.15)',
+            ],
+            8 => [
+                'code' => 'K-8',
+                'label' => 'Kinerja sesuai ekspektasi dan potensi tinggi',
+                'color' => '#AED581', // Light Green
+                'overlay_color' => 'rgba(174,213,129,0.15)',
+            ],
+            9 => [
+                'code' => 'K-9',
+                'label' => 'Kinerja di atas ekspektasi dan potensi tinggi',
+                'color' => '#388E3C', // Dark Green
+                'overlay_color' => 'rgba(56,142,60,0.12)',
+            ],
+        ];
+    }
+
+    /**
      * Get box color based on box number
      */
     private function getBoxColor(int $boxNumber): string
     {
-        $colors = [
-            1 => '#D32F2F', // K-1: Kinerja di bawah ekspektasi dan potensi rendah - Red
-            2 => '#F8BBD0', // K-2: Kinerja sesuai ekspektasi dan potensi rendah - Light Pink
-            3 => '#F48FB1', // K-3: Kinerja di bawah ekspektasi dan potensi menengah - Pink
-            4 => '#FFF9C4', // K-4: Kinerja di atas ekspektasi dan potensi rendah - Light Yellow
-            5 => '#FFEB3B', // K-5: Kinerja sesuai ekspektasi dan potensi menengah - Yellow
-            6 => '#FFEB3B', // K-6: Kinerja di bawah ekspektasi dan potensi tinggi - Yellow
-            7 => '#81C784', // K-7: Kinerja di atas ekspektasi dan potensi menengah - Medium Green
-            8 => '#AED581', // K-8: Kinerja sesuai ekspektasi dan potensi tinggi - Light Green
-            9 => '#388E3C', // K-9: Kinerja di atas ekspektasi dan potensi tinggi - Dark Green
-        ];
-
-        return $colors[$boxNumber] ?? '#9E9E9E'; // Default gray
+        return $this->boxConfig[$boxNumber]['color'] ?? '#9E9E9E';
     }
 
     /**
@@ -252,17 +304,9 @@ class TalentPool extends Component
      */
     public function getBoxLabelsProperty(): array
     {
-        return [
-            1 => 'Kinerja di bawah ekspektasi dan potensi rendah',
-            2 => 'Kinerja sesuai ekspektasi dan potensi rendah',
-            3 => 'Kinerja di bawah ekspektasi dan potensi menengah',
-            4 => 'Kinerja di atas ekspektasi dan potensi rendah',
-            5 => 'Kinerja sesuai ekspektasi dan potensi menengah',
-            6 => 'Kinerja di bawah ekspektasi dan potensi tinggi',
-            7 => 'Kinerja di atas ekspektasi dan potensi menengah',
-            8 => 'Kinerja sesuai ekspektasi dan potensi tinggi',
-            9 => 'Kinerja di atas ekspektasi dan potensi tinggi',
-        ];
+        return collect($this->boxConfig)
+            ->mapWithKeys(fn ($config, $number) => [$number => $config['label']])
+            ->toArray();
     }
 
     /**
