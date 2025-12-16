@@ -85,7 +85,7 @@
         <!-- Content Grid -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
             <!-- Chart Section -->
-            <div class="border border-gray-300 dark:border-gray-600 p-2 rounded-lg bg-gray-50 dark:bg-gray-800 transition-shadow duration-300 hover:shadow-xl" wire:ignore>
+            <div class="border border-gray-300 dark:border-gray-600 p-4 rounded-lg bg-gray-50 dark:bg-gray-800 transition-shadow duration-300 hover:shadow-xl" wire:ignore style="min-height: 400px;">
                 <canvas id="boxPieChart" class="w-full h-full"></canvas>
             </div>
 
@@ -469,13 +469,13 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: true,
-                    // Add padding to prevent label clipping
+                    // Reduce padding to make chart bigger
                     layout: {
                         padding: {
-                            top: 50,
-                            bottom: 50,
-                            left: 100,
-                            right: 100
+                            top: 20,
+                            bottom: 20,
+                            left: 20,
+                            right: 20
                         }
                     },
                     // Smooth animations
