@@ -1,17 +1,6 @@
 <div class="max-w-6xl mx-auto p-6 bg-white rounded-lg shadow-md mt-10 relative">
-    
-    {{-- 🚀 PERFORMANCE: Custom loading overlay untuk reload --}}
-    <div id="customLoadingOverlay" style="display: none;" 
-         wire:loading.flex
-         wire:target="handleEventSelected, handlePositionSelected"
-         class="fixed inset-0 bg-white/90 z-[9999] flex items-center justify-center">
-        <div class="flex flex-col items-center">
-            <div class="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mb-4"></div>
-            <div class="text-gray-700 font-semibold text-lg">Memuat ulang halaman...</div>
-        </div>
-    </div>
 
-    {{-- Loading overlay untuk standard adjustment saja --}}
+    {{-- Loading overlay untuk standard adjustment (live update, no reload) --}}
     <div wire:loading wire:target="handleStandardUpdate" 
          class="absolute inset-0 bg-white/80 z-50 rounded-lg flex items-center justify-center">
         <div class="flex flex-col items-center">
@@ -580,9 +569,9 @@
             updateSummaryTable(boxStatistics);
         }
 
-        // 🚀 NEW: Handle trigger-reload event
+        // 🚀 Handle trigger-reload event with loading overlay
         function showLoadingAndReload() {
-            // Create a fresh overlay to avoid Livewire interference (race condition with wire:loading)
+            // Create loading overlay dynamically
             const overlay = document.createElement('div');
             overlay.style.cssText = 'position:fixed; inset:0; background:rgba(255,255,255,0.9); z-index:99999; display:flex; align-items:center; justify-content:center;';
             overlay.innerHTML = `
@@ -592,12 +581,8 @@
                 </div>
             `;
             document.body.appendChild(overlay);
-            
-            // Hide the existing overlay if it's still visible
-            const oldOverlay = document.getElementById('customLoadingOverlay');
-            if (oldOverlay) oldOverlay.style.display = 'none';
 
-            // Reload immediately
+            // Small delay to ensure session is saved before reload
             setTimeout(() => {
                 window.location.reload();
             }, 50);

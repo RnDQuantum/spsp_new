@@ -46,15 +46,14 @@ class TalentPool extends Component
 
     /**
      * Handle event selection
-     * 🚀 PERFORMANCE: Save to session only, redirect happens in JS
+     * 🚀 PERFORMANCE: Session already saved in EventSelector, just trigger reload
      */
     public function handleEventSelected(?string $eventCode): void
     {
-        if ($eventCode) {
-            session(['filter.event_code' => $eventCode]);
-        } else {
-            session()->forget('filter.event_code');
-        }
+        // Session is already saved in EventSelector::updatedEventCode()
+        // Parameter kept for event listener compatibility
+        // Just ensure it's committed to storage before reload
+        session()->save();
 
         // Dispatch event to JavaScript to handle redirect
         $this->dispatch('trigger-reload');
@@ -62,15 +61,14 @@ class TalentPool extends Component
 
     /**
      * Handle position selection
-     * 🚀 PERFORMANCE: Save to session only, redirect happens in JS
+     * 🚀 PERFORMANCE: Session already saved in PositionSelector, just trigger reload
      */
     public function handlePositionSelected(?int $positionFormationId): void
     {
-        if ($positionFormationId) {
-            session(['filter.position_formation_id' => $positionFormationId]);
-        } else {
-            session()->forget('filter.position_formation_id');
-        }
+        // Session is already saved in PositionSelector::updatedPositionFormationId()
+        // Parameter kept for event listener compatibility
+        // Just ensure it's committed to storage before reload
+        session()->save();
 
         // Dispatch event to JavaScript to handle redirect
         $this->dispatch('trigger-reload');
@@ -82,14 +80,14 @@ class TalentPool extends Component
     public function handleStandardUpdate(int $templateId): void
     {
         // Validate same template
-        if (!$this->selectedEvent || !$this->selectedPositionId) {
+        if (! $this->selectedEvent || ! $this->selectedPositionId) {
             return;
         }
 
         $position = $this->selectedEvent->positionFormations()
             ->find($this->selectedPositionId);
 
-        if (!$position || $position->template_id !== $templateId) {
+        if (! $position || $position->template_id !== $templateId) {
             return;
         }
 
@@ -111,7 +109,7 @@ class TalentPool extends Component
         $eventCode = session('filter.event_code');
         $positionFormationId = session('filter.position_formation_id');
 
-        if (!$eventCode) {
+        if (! $eventCode) {
             return;
         }
 
@@ -142,7 +140,7 @@ class TalentPool extends Component
      */
     private function loadMatrixData(): void
     {
-        if (!$this->selectedEvent || !$this->selectedPositionId) {
+        if (! $this->selectedEvent || ! $this->selectedPositionId) {
             return;
         }
 
@@ -150,6 +148,7 @@ class TalentPool extends Component
             // Check cache first
             if ($this->matrixCacheData !== null) {
                 $this->applyMatrixData($this->matrixCacheData);
+
                 return;
             }
 
@@ -171,7 +170,7 @@ class TalentPool extends Component
             // Explicit dispatch is handled by the caller if needed (e.g. handleStandardUpdate).
         } catch (\Exception $e) {
             // Handle error gracefully
-            $this->dispatch('error', 'Failed to load talent pool data: ' . $e->getMessage());
+            $this->dispatch('error', 'Failed to load talent pool data: '.$e->getMessage());
         }
     }
 
