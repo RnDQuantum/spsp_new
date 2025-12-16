@@ -533,6 +533,20 @@
             new Chart(pieCanvas, config);
         }
 
+        // Helper function to determine if text should be dark or light based on background color
+        function getContrastColor(hexColor) {
+            // Convert hex to RGB
+            const r = parseInt(hexColor.substr(1, 2), 16);
+            const g = parseInt(hexColor.substr(3, 2), 16);
+            const b = parseInt(hexColor.substr(5, 2), 16);
+
+            // Calculate luminance
+            const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+
+            // Return black for light backgrounds, white for dark backgrounds
+            return luminance > 0.5 ? '#000000' : '#ffffff';
+        }
+
         function updateSummaryTable(boxStatistics) {
             const summaryBody = document.getElementById('boxSummaryBody');
             if (!summaryBody) return;
@@ -552,7 +566,10 @@
                     const config = BOX_CONFIG[box];
 
                     const tdBox = document.createElement('td');
-                    tdBox.className = 'border-2 border-gray-400 dark:border-gray-500 px-4 py-3 text-center';
+                    tdBox.className = 'border-2 border-gray-400 dark:border-gray-500 px-4 py-3 text-center font-bold';
+                    const bgColor = config?.color || '#9E9E9E';
+                    tdBox.style.backgroundColor = bgColor;
+                    tdBox.style.color = getContrastColor(bgColor);
                     tdBox.textContent = config?.code || 'K-' + box;
 
                     const tdLabel = document.createElement('td');
