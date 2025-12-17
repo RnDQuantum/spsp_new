@@ -173,10 +173,7 @@
             </div>
         </div>
 
-
-    </div>
-
-    <script>
+        <script>
         (function() {
             let chartInstances = {};
             let isProcessing = false;
@@ -883,5 +880,7 @@
                 }
             });
         })();
-    </script>
+        </script>
+
+    </div>
 </div>
