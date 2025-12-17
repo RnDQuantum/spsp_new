@@ -198,6 +198,7 @@ class Index extends Component
         return $this->matrixData['participants']->map(function ($participant) {
             return [
                 'nama' => $participant['name'],
+                'test_number' => $participant['test_number'],
                 'potensi' => $participant['potensi_rating'],
                 'kinerja' => $participant['kinerja_rating'],
                 'box' => $participant['box_number'],

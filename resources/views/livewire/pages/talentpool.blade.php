@@ -51,13 +51,18 @@
 
     <div>
         <h2 class="text-base font-bold mb-3 text-gray-800 dark:text-gray-100">Keterangan Kotak</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3" style="grid-auto-flow: column; grid-template-rows: repeat(3, auto);">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"
+            style="grid-auto-flow: column; grid-template-rows: repeat(3, auto);">
             @foreach ([1, 2, 3, 4, 5, 6, 7, 8, 9] as $boxNumber)
-                <div class="flex items-center gap-3 p-2 rounded-lg bg-gray-50 dark:bg-gray-800 hover:shadow-md transition-shadow duration-200">
-                    <div class="w-6 h-6 rounded-full flex-shrink-0 shadow-sm" style="background:{{ $this->boxConfig[$boxNumber]['color'] }}"></div>
+                <div
+                    class="flex items-center gap-3 p-2 rounded-lg bg-gray-50 dark:bg-gray-800 hover:shadow-md transition-shadow duration-200">
+                    <div class="w-6 h-6 rounded-full flex-shrink-0 shadow-sm"
+                        style="background:{{ $this->boxConfig[$boxNumber]['color'] }}"></div>
                     <div class="flex-1">
-                        <span class="font-bold text-sm text-gray-900 dark:text-gray-100">{{ $this->boxConfig[$boxNumber]['code'] }}</span>
-                        <span class="text-sm text-gray-700 dark:text-gray-300 ml-1">{{ $this->boxConfig[$boxNumber]['label'] }}</span>
+                        <span
+                            class="font-bold text-sm text-gray-900 dark:text-gray-100">{{ $this->boxConfig[$boxNumber]['code'] }}</span>
+                        <span
+                            class="text-sm text-gray-700 dark:text-gray-300 ml-1">{{ $this->boxConfig[$boxNumber]['label'] }}</span>
                     </div>
                 </div>
             @endforeach
@@ -262,7 +267,8 @@
                             callbacks: {
                                 title: function(ctx) {
                                     const currentPoint = ctx[0].raw;
-                                    const nearbyPoints = findNearbyParticipants(currentPoint, chartData);
+                                    const nearbyPoints = findNearbyParticipants(currentPoint,
+                                    chartData);
 
                                     if (nearbyPoints.length > 1) {
                                         return `${nearbyPoints.length} Peserta di Posisi Ini`;
@@ -271,7 +277,8 @@
                                 },
                                 label: function(ctx) {
                                     const currentPoint = ctx.raw;
-                                    const nearbyPoints = findNearbyParticipants(currentPoint, chartData);
+                                    const nearbyPoints = findNearbyParticipants(currentPoint,
+                                    chartData);
 
                                     if (nearbyPoints.length > 1) {
                                         // Multiple participants - show all names
@@ -590,7 +597,7 @@
                     // Cursor pointer on hover
                     onHover: (event, activeElements) => {
                         event.native.target.style.cursor = activeElements.length > 0 ? 'pointer' :
-                        'default';
+                            'default';
                     },
                     plugins: {
                         legend: {
