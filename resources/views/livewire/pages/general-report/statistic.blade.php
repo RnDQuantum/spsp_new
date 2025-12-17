@@ -54,23 +54,23 @@
                 </thead>
                 <tbody>
                     <tr class="bg-white dark:bg-gray-800">
-                        <td class="border border-black dark:border-gray-600 px-3 py-2">I (Kurang Baik)</td>
+                        <td class="border border-black dark:border-gray-600 px-3 py-2">I (Rendah)</td>
                         <td class="border border-black dark:border-gray-600 px-3 py-2 text-center">1.00 - 1.80</td>
                     </tr>
                     <tr class="bg-white dark:bg-gray-800">
-                        <td class="border border-black dark:border-gray-600 px-3 py-2">II (Cukup Baik)</td>
+                        <td class="border border-black dark:border-gray-600 px-3 py-2">II (Kurang)</td>
                         <td class="border border-black dark:border-gray-600 px-3 py-2 text-center">1.80 - 2.60</td>
                     </tr>
                     <tr class="bg-white dark:bg-gray-800">
-                        <td class="border border-black dark:border-gray-600 px-3 py-2">III (Baik)</td>
+                        <td class="border border-black dark:border-gray-600 px-3 py-2">III (Cukup)</td>
                         <td class="border border-black dark:border-gray-600 px-3 py-2 text-center">2.60 - 3.40</td>
                     </tr>
                     <tr class="bg-white dark:bg-gray-800">
-                        <td class="border border-black dark:border-gray-600 px-3 py-2">IV (Baik Sekali)</td>
+                        <td class="border border-black dark:border-gray-600 px-3 py-2">IV (Baik )</td>
                         <td class="border border-black dark:border-gray-600 px-3 py-2 text-center">3.40 - 4.20</td>
                     </tr>
                     <tr class="bg-white dark:bg-gray-800">
-                        <td class="border border-black dark:border-gray-600 px-3 py-2">V (Sangat Baik)</td>
+                        <td class="border border-black dark:border-gray-600 px-3 py-2">V (Baik Sekali)</td>
                         <td class="border border-black dark:border-gray-600 px-3 py-2 text-center">4.20 - 5.00</td>
                     </tr>
                 </tbody>
@@ -83,7 +83,8 @@
         <div class="bg-cyan-200 dark:bg-cyan-700 p-6 rounded-lg text-center min-w-[160px]">
             <div class="text-sm font-semibold text-gray-900 dark:text-gray-100">Standar Rating</div>
             <div class="text-3xl font-bold text-orange-900 dark:text-orange-400 mt-3">
-                {{ number_format($standardRating, 2) }}</div>
+                {{ number_format($standardRating, 2) }}
+            </div>
         </div>
         <div class="bg-orange-200 dark:bg-orange-700 p-6 rounded-lg text-center min-w-[160px]">
             <div class="text-sm font-semibold text-gray-900 dark:text-gray-100">Rata-rata Rating</div>
@@ -94,7 +95,7 @@
 </div>
 
 <script>
-    (function() {
+    (function () {
         let chartInstances = {};
 
         function coerceNumbers(arr) {
@@ -136,7 +137,7 @@
                                 align: 'top',
                                 anchor: 'end',
                                 offset: 6,
-                                formatter: function(value) {
+                                formatter: function (value) {
                                     if (total === 0) return '0,00%';
                                     const percentage = (value / total * 100).toFixed(2);
                                     return percentage.replace('.', ',') + '%';
@@ -161,7 +162,7 @@
                             tooltip: {
                                 enabled: true,
                                 callbacks: {
-                                    label: function(context) {
+                                    label: function (context) {
                                         const value = context.parsed.y;
                                         const percentage = total === 0 ? '0,00' : (value / total * 100)
                                             .toFixed(2).replace('.', ',');
@@ -198,10 +199,10 @@
                                         weight: 'bold'
                                     },
                                     // ========== TAMBAHKAN CALLBACK INI ==========
-                                    callback: function(value, index) {
+                                    callback: function (value, index) {
                                         const labels = ['I', 'II', 'III', 'IV', 'V'];
-                                        const descriptions = ['Kurang Baik', 'Cukup Baik', 'Baik',
-                                            'Baik Sekali', 'Sangat Baik'
+                                        const descriptions = ['Rendah', 'Kurang', 'Cukup',
+                                            'Baik', 'Baik Sekali'
                                         ];
                                         return [labels[index], descriptions[index]];
                                     }
@@ -223,7 +224,7 @@
                                     font: {
                                         size: 13
                                     },
-                                    callback: function(value) {
+                                    callback: function (value) {
                                         return value;
                                     }
                                 }
@@ -290,21 +291,21 @@
         }
 
         // Initialize chart on page load
-        waitForLivewire(function() {
+        waitForLivewire(function () {
             initialRenderFromServer();
             Livewire.on('chartDataUpdated', onDistributionUpdated);
         });
 
         // Handle Livewire navigate events
-        document.addEventListener('livewire:navigated', function() {
+        document.addEventListener('livewire:navigated', function () {
             // Re-render chart after navigation
-            waitForLivewire(function() {
+            waitForLivewire(function () {
                 initialRenderFromServer();
             });
         });
 
         // Cleanup chart on navigate away
-        document.addEventListener('livewire:navigating', function() {
+        document.addEventListener('livewire:navigating', function () {
             const chartId = `{{ $chartId }}`;
             if (chartInstances[chartId]) {
                 chartInstances[chartId].destroy();
