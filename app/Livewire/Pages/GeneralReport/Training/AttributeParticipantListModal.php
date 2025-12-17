@@ -11,6 +11,8 @@ class AttributeParticipantListModal extends Component
 
     public bool $showModal = false;
 
+    public bool $isLoading = false;
+
     public ?string $selectedAttributeName = null;
 
     public string $search = '';
@@ -28,9 +30,13 @@ class AttributeParticipantListModal extends Component
      */
     public function openAttributeParticipantModal(string $attributeName, array $participants): void
     {
+        $this->isLoading = true;
         $this->selectedAttributeName = $attributeName;
+
+        // Simulate loading delay for better UX
         $this->participants = $participants;
         $this->showModal = true;
+        $this->isLoading = false;
         $this->resetPage();
     }
 
@@ -40,6 +46,7 @@ class AttributeParticipantListModal extends Component
     public function closeModal(): void
     {
         $this->showModal = false;
+        $this->isLoading = false;
         $this->selectedAttributeName = null;
         $this->participants = [];
         $this->search = '';
