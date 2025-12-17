@@ -140,6 +140,9 @@
                 <!-- Chart Section -->
                 <div class="border border-gray-300 dark:border-gray-600 p-4 rounded-lg bg-gray-50 dark:bg-gray-800 transition-shadow duration-300 hover:shadow-xl"
                     wire:ignore style="min-height: 400px;">
+                    <div class="text-center text-xs text-gray-500 dark:text-gray-400 mb-2 italic">
+                        💡 Klik pada chart untuk melihat detail peserta
+                    </div>
                     <canvas id="boxPieChart" class="w-full h-full"></canvas>
                 </div>
 
@@ -608,6 +611,18 @@
                             event.native.target.style.cursor = activeElements.length > 0 ? 'pointer' :
                                 'default';
                         },
+                        // Click handler to open modal
+                        onClick: (event, activeElements) => {
+                            if (activeElements.length > 0) {
+                                const clickedElement = activeElements[0];
+                                const label = chartData.labels[clickedElement.index];
+                                // Extract box number from label (K-1, K-2, etc)
+                                const boxNumber = label.replace('K-', '');
+
+                                // Call the same function used by table buttons
+                                openParticipantModal(boxNumber);
+                            }
+                        },
                         plugins: {
                             legend: {
                                 display: false
@@ -635,7 +650,7 @@
                                         const value = context.parsed;
                                         const total = context.dataset.data.reduce((a, b) => a + b, 0);
                                         const percentage = total > 0 ? ((value / total) * 100).toFixed(2) : 0;
-                                        return `${label}: ${value} orang (${percentage}%)`;
+                                        return `${label}: ${value} orang (${percentage}%) - Klik untuk detail`;
                                     }
                                 }
                             }
