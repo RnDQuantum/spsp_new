@@ -209,6 +209,17 @@
                 };
             });
 
+            // 🎯 Helper: Find all participants at same/nearby position
+            function findNearbyParticipants(currentPoint, allData, threshold = 0.05) {
+                return allData.filter(point => {
+                    const distance = Math.sqrt(
+                        Math.pow(point.x - currentPoint.x, 2) +
+                        Math.pow(point.y - currentPoint.y, 2)
+                    );
+                    return distance <= threshold;
+                });
+            }
+
             // Destroy existing chart if it exists
             const existingChart = Chart.getChart(canvas);
             if (existingChart) {
@@ -238,20 +249,57 @@
                         },
                         tooltip: {
                             enabled: true,
-                            backgroundColor: 'rgba(0,0,0,0.8)',
-                            padding: 12,
+                            backgroundColor: 'rgba(0,0,0,0.9)',
+                            padding: 14,
                             displayColors: false,
+                            titleFont: {
+                                size: 13,
+                                weight: 'bold'
+                            },
+                            bodyFont: {
+                                size: 12
+                            },
                             callbacks: {
                                 title: function(ctx) {
-                                    return ctx[0].raw.nama;
+                                    const currentPoint = ctx[0].raw;
+                                    const nearbyPoints = findNearbyParticipants(currentPoint, chartData);
+
+                                    if (nearbyPoints.length > 1) {
+                                        return `${nearbyPoints.length} Peserta di Posisi Ini`;
+                                    }
+                                    return currentPoint.nama;
                                 },
                                 label: function(ctx) {
-                                    const d = ctx.raw;
+                                    const currentPoint = ctx.raw;
+                                    const nearbyPoints = findNearbyParticipants(currentPoint, chartData);
+
+                                    if (nearbyPoints.length > 1) {
+                                        // Multiple participants - show all names
+                                        const labels = [
+                                            '─────────────────────',
+                                            'Kinerja: ' + currentPoint.y.toFixed(2),
+                                            'Potensi: ' + currentPoint.x.toFixed(2),
+                                            'Kotak: K-' + currentPoint.box,
+                                            '─────────────────────',
+                                            'Daftar Peserta:'
+                                        ];
+
+                                        nearbyPoints.forEach((p, index) => {
+                                            labels.push(`${index + 1}. ${p.nama}`);
+                                        });
+
+                                        return labels;
+                                    }
+
+                                    // Single participant - show normal info
                                     return [
-                                        'Kinerja: ' + d.y.toFixed(1),
-                                        'Potensi: ' + d.x.toFixed(1),
-                                        'Kotak: K-' + d.box
+                                        'Kinerja: ' + currentPoint.y.toFixed(2),
+                                        'Potensi: ' + currentPoint.x.toFixed(2),
+                                        'Kotak: K-' + currentPoint.box
                                     ];
+                                },
+                                labelTextColor: function() {
+                                    return '#ffffff';
                                 }
                             }
                         },
