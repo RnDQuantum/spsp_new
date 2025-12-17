@@ -97,5 +97,5 @@ Route::middleware(['auth', 'institution.access'])->group(function () {
     Route::get('/laporan-alat-tes-detail', App\Livewire\Pages\LaporanAlatTes\DetailLaporanTes::class)->name('laporan-alat-tes-detail');
 
     // Talent Pool Management
-    Route::get('/talentpool', App\Livewire\Pages\TalentPool::class)->name('talentpool');
+    Route::get('/talentpool', App\Livewire\Pages\TalentPool\Index::class)->name('talentpool');
 });
