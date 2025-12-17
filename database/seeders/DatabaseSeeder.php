@@ -40,10 +40,11 @@ class DatabaseSeeder extends Seeder
         $adminUser->assignRole('admin');
         $this->command->info('✅ Admin user created with admin role');
 
-        // 3. Seed master data (institutions, templates, aspects, sub-aspects)
+        // 3. Seed master data (institution categories, institutions, templates, aspects, sub-aspects)
         $this->command->info('📋 Seeding master data...');
         $this->call([
-            InstitutionSeeder::class,
+            InstitutionCategorySeeder::class,
+            InstitutionWithCategoriesSeeder::class,
             ClientSeeder::class,
             AssessmentTemplateSeeder::class,
             MasterDataSeeder::class,

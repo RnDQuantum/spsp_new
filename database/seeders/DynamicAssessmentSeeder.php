@@ -71,9 +71,97 @@ class DynamicAssessmentSeeder extends Seeder
                 'positions' => [['code' => 'dokter_umum', 'name' => 'Dokter Umum', 'quota' => 50, 'template_code' => 'professional_standard_v1'], ['code' => 'perawat', 'name' => 'Perawat', 'quota' => 100, 'template_code' => 'staff_standard_v1'], ['code' => 'apoteker', 'name' => 'Apoteker', 'quota' => 50, 'template_code' => 'supervisor_standard_v1']],
                 'participants_count' => 150, // JUMLAH PESERTA
                 'performance_distribution' => [
-                    'high' => 20, // 25% high performers (exceed standard)
-                    'medium' => 10, // 60% medium performers (around standard)
-                    'low' => 70, // 15% low performers (below standard)
+                    'high' => 20,
+                    'medium' => 10,
+                    'low' => 70,
+                ],
+            ],
+
+            // Configuration 3: PT. Telkom Indonesia - BUMN & Teknologi
+            [
+                'institution_code' => 'telkom',
+                'event' => [
+                    'code' => 'TALENT-TELKOM-2025',
+                    'name' => 'Talent Assessment Telkom 2025',
+                    'description' => 'Assessment program pengembangan talent untuk PT. Telkom Indonesia',
+                    'year' => 2025,
+                    'start_date' => '2025-01-15',
+                    'end_date' => '2025-03-30',
+                    'status' => 'ongoing',
+                ],
+                'batches' => [['code' => 'BATCH-1-JAKARTA', 'name' => 'Gelombang 1 - Jakarta', 'location' => 'Jakarta', 'batch_number' => 1, 'start_date' => '2025-01-15', 'end_date' => '2025-01-16'], ['code' => 'BATCH-2-BANDUNG', 'name' => 'Gelombang 2 - Bandung', 'location' => 'Bandung', 'batch_number' => 2, 'start_date' => '2025-02-15', 'end_date' => '2025-02-16']],
+                'positions' => [['code' => 'it_manager', 'name' => 'IT Manager', 'quota' => 30, 'template_code' => 'supervisor_standard_v1'], ['code' => 'network_engineer', 'name' => 'Network Engineer', 'quota' => 50, 'template_code' => 'staff_standard_v1'], ['code' => 'data_analyst', 'name' => 'Data Analyst', 'quota' => 40, 'template_code' => 'staff_standard_v1']],
+                'participants_count' => 120,
+                'performance_distribution' => [
+                    'high' => 30,
+                    'medium' => 55,
+                    'low' => 15,
+                ],
+            ],
+
+            // Configuration 4: PT. Bank Mandiri - BUMN & Keuangan
+            [
+                'institution_code' => 'mandiri',
+                'event' => [
+                    'code' => 'LEADERSHIP-MANDIRI-2025',
+                    'name' => 'Leadership Development Mandiri 2025',
+                    'description' => 'Program assessment pengembangan kepemimpinan Bank Mandiri',
+                    'year' => 2025,
+                    'start_date' => '2025-02-01',
+                    'end_date' => '2025-04-30',
+                    'status' => 'ongoing',
+                ],
+                'batches' => [['code' => 'BATCH-1-JAKARTA', 'name' => 'Gelombang 1 - Jakarta', 'location' => 'Jakarta', 'batch_number' => 1, 'start_date' => '2025-02-10', 'end_date' => '2025-02-11']],
+                'positions' => [['code' => 'branch_manager', 'name' => 'Branch Manager', 'quota' => 40, 'template_code' => 'supervisor_standard_v1'], ['code' => 'risk_analyst', 'name' => 'Risk Analyst', 'quota' => 30, 'template_code' => 'professional_standard_v1'], ['code' => 'relationship_officer', 'name' => 'Relationship Officer', 'quota' => 30, 'template_code' => 'staff_standard_v1']],
+                'participants_count' => 100,
+                'performance_distribution' => [
+                    'high' => 35,
+                    'medium' => 50,
+                    'low' => 15,
+                ],
+            ],
+
+            // Configuration 5: Universitas Indonesia - Pendidikan
+            [
+                'institution_code' => 'ui',
+                'event' => [
+                    'code' => 'DOSEN-UI-2025',
+                    'name' => 'Seleksi Dosen Universitas Indonesia 2025',
+                    'description' => 'Assessment calon dosen Universitas Indonesia',
+                    'year' => 2025,
+                    'start_date' => '2025-03-01',
+                    'end_date' => '2025-05-31',
+                    'status' => 'draft',
+                ],
+                'batches' => [['code' => 'BATCH-1-DEPOK', 'name' => 'Gelombang 1 - Depok', 'location' => 'Depok', 'batch_number' => 1, 'start_date' => '2025-03-15', 'end_date' => '2025-03-16']],
+                'positions' => [['code' => 'dosen_teknik', 'name' => 'Dosen Teknik', 'quota' => 20, 'template_code' => 'professional_standard_v1'], ['code' => 'dosen_ekonomi', 'name' => 'Dosen Ekonomi', 'quota' => 15, 'template_code' => 'professional_standard_v1'], ['code' => 'dosen_kedokteran', 'name' => 'Dosen Kedokteran', 'quota' => 15, 'template_code' => 'professional_standard_v1']],
+                'participants_count' => 50,
+                'performance_distribution' => [
+                    'high' => 40,
+                    'medium' => 45,
+                    'low' => 15,
+                ],
+            ],
+
+            // Configuration 6: PT. Gojek Indonesia - Swasta & Teknologi
+            [
+                'institution_code' => 'gojek',
+                'event' => [
+                    'code' => 'TECH-GOJEK-2025',
+                    'name' => 'Tech Talent Assessment Gojek 2025',
+                    'description' => 'Assessment program tech talent Gojek Indonesia',
+                    'year' => 2025,
+                    'start_date' => '2025-01-10',
+                    'end_date' => '2025-12-31',
+                    'status' => 'ongoing',
+                ],
+                'batches' => [['code' => 'BATCH-1-JAKARTA', 'name' => 'Gelombang 1 - Jakarta', 'location' => 'Jakarta', 'batch_number' => 1, 'start_date' => '2025-02-01', 'end_date' => '2025-02-02'], ['code' => 'BATCH-2-JAKARTA', 'name' => 'Gelombang 2 - Jakarta', 'location' => 'Jakarta', 'batch_number' => 2, 'start_date' => '2025-06-01', 'end_date' => '2025-06-02']],
+                'positions' => [['code' => 'software_engineer', 'name' => 'Software Engineer', 'quota' => 80, 'template_code' => 'staff_standard_v1'], ['code' => 'product_manager', 'name' => 'Product Manager', 'quota' => 30, 'template_code' => 'supervisor_standard_v1'], ['code' => 'data_scientist', 'name' => 'Data Scientist', 'quota' => 40, 'template_code' => 'professional_standard_v1']],
+                'participants_count' => 150,
+                'performance_distribution' => [
+                    'high' => 35,
+                    'medium' => 50,
+                    'low' => 15,
                 ],
             ],
         ];

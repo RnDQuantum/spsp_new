@@ -23,35 +23,34 @@
                 <!-- Filter 1 -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tahun Data</label>
-                    <select
+                    <select wire:model.live="selectedYear"
                         class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white p-2 border">
-                        <option>2024</option>
-                        <option>2023</option>
-                        <option>2022</option>
+                        @foreach($years as $year)
+                            <option value="{{ $year }}">{{ $year }}</option>
+                        @endforeach
                     </select>
                 </div>
                 <!-- Filter 2 -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Kategori
                         Instansi</label>
-                    <select
+                    <select wire:model.live="selectedCategory"
                         class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white p-2 border">
-                        <option>Semua Kategori</option>
-                        <option>Kementerian</option>
-                        <option>BUMN</option>
-                        <option>Swasta</option>
-                        <option>Pendidikan</option>
+                        <option value="all">Semua Kategori</option>
+                        @foreach($categories as $category)
+                            <option value="{{ $category->code }}">{{ $category->name }}</option>
+                        @endforeach
                     </select>
                 </div>
                 <!-- Filter 3 -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status Klien</label>
-                    <select
+                    <select wire:model.live="selectedStatus"
                         class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white p-2 border">
-                        <option>Semua Status</option>
-                        <option>Aktif</option>
-                        <option>Selesai</option>
-                        <option>Pending</option>
+                        <option value="all">Semua Status</option>
+                        <option value="active">Aktif</option>
+                        <option value="completed">Selesai</option>
+                        <option value="draft">Pending</option>
                     </select>
                 </div>
             </div>
@@ -65,53 +64,33 @@
             </h2>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <!-- Card 1 -->
+                <!-- Card Total Klien -->
                 <div
                     class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg dark:shadow-gray-700/50 border border-gray-200 dark:border-gray-600 flex items-center justify-between">
                     <div>
                         <p class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase">Total Klien</p>
-                        <h3 class="text-3xl font-bold text-gray-800 dark:text-gray-100 mt-1">1,248</h3>
+                        <h3 class="text-3xl font-bold text-gray-800 dark:text-gray-100 mt-1">{{ number_format($stats['total']) }}</h3>
                     </div>
                     <div class="p-3 bg-gray-100 dark:bg-gray-700 rounded-full">
                         <i class="fa-solid fa-users text-2xl text-gray-600 dark:text-gray-300"></i>
                     </div>
                 </div>
 
-                <!-- Card 2 -->
-                <div
-                    class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg dark:shadow-gray-700/50 border border-gray-200 dark:border-gray-600 flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase">Kementerian</p>
-                        <h3 class="text-3xl font-bold text-gray-800 dark:text-gray-100 mt-1">42</h3>
+                @foreach($categories->take(3) as $category)
+                    <!-- Card {{ $category->name }} -->
+                    <div
+                        class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg dark:shadow-gray-700/50 border border-gray-200 dark:border-gray-600 flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase">{{ $category->name }}</p>
+                            <h3 class="text-3xl font-bold text-gray-800 dark:text-gray-100 mt-1">
+                                {{ number_format($stats['categories'][$category->code] ?? 0) }}
+                            </h3>
+                        </div>
+                        <div class="p-3 bg-gray-100 dark:bg-gray-700 rounded-full">
+                            <i class="fa-solid {{ $category->icon ?? 'fa-building' }} text-2xl text-gray-600 dark:text-gray-300"></i>
+                        </div>
                     </div>
-                    <div class="p-3 bg-gray-100 dark:bg-gray-700 rounded-full">
-                        <i class="fa-solid fa-building-flag text-2xl text-gray-600 dark:text-gray-300"></i>
-                    </div>
-                </div>
-
-                <!-- Card 3 -->
-                <div
-                    class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg dark:shadow-gray-700/50 border border-gray-200 dark:border-gray-600 flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase">Swasta & BUMN</p>
-                        <h3 class="text-3xl font-bold text-gray-800 dark:text-gray-100 mt-1">856</h3>
-                    </div>
-                    <div class="p-3 bg-gray-100 dark:bg-gray-700 rounded-full">
-                        <i class="fa-solid fa-briefcase text-2xl text-gray-600 dark:text-gray-300"></i>
-                    </div>
-                </div>
-
-                <!-- Card 4 -->
-                <div
-                    class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg dark:shadow-gray-700/50 border border-gray-200 dark:border-gray-600 flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase">Pendidikan</p>
-                        <h3 class="text-3xl font-bold text-gray-800 dark:text-gray-100 mt-1">150</h3>
-                    </div>
-                    <div class="p-3 bg-gray-100 dark:bg-gray-700 rounded-full">
-                        <i class="fa-solid fa-graduation-cap text-2xl text-gray-600 dark:text-gray-300"></i>
-                    </div>
-                </div>
+                @endforeach
             </div>
         </div>
 
@@ -144,51 +123,42 @@
                         </tr>
                     </thead>
                     <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                        @php
-                            $clients = [
-                                ['name' => 'Kementerian Keuangan', 'category' => 'Kementerian', 'date' => '28 Nov 2024', 'status' => 'Aktif'],
-                                ['name' => 'PT. Telkom Indonesia', 'category' => 'BUMN', 'date' => '25 Nov 2024', 'status' => 'Aktif'],
-                                ['name' => 'Universitas Indonesia', 'category' => 'Pendidikan', 'date' => '22 Nov 2024', 'status' => 'Pending'],
-                                ['name' => 'PT. Bank Mandiri', 'category' => 'BUMN', 'date' => '20 Nov 2024', 'status' => 'Aktif'],
-                                ['name' => 'Kementerian BUMN', 'category' => 'Kementerian', 'date' => '18 Nov 2024', 'status' => 'Selesai'],
-                                ['name' => 'PT. Pertamina', 'category' => 'BUMN', 'date' => '15 Nov 2024', 'status' => 'Aktif'],
-                                ['name' => 'Universitas Gadjah Mada', 'category' => 'Pendidikan', 'date' => '12 Nov 2024', 'status' => 'Pending'],
-                                ['name' => 'Kementerian Pendidikan', 'category' => 'Kementerian', 'date' => '10 Nov 2024', 'status' => 'Aktif'],
-                                ['name' => 'PT. Unilever Indonesia', 'category' => 'Swasta', 'date' => '08 Nov 2024', 'status' => 'Aktif'],
-                                ['name' => 'Institut Teknologi Bandung', 'category' => 'Pendidikan', 'date' => '05 Nov 2024', 'status' => 'Selesai'],
-                            ];
-                        @endphp
-
-                        @foreach($clients as $index => $client)
+                        @forelse($recentClients as $index => $client)
                             <tr>
                                 <td
                                     class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900 dark:text-gray-100">
                                     {{ $index + 1 }}
                                 </td>
                                 <td
-                                    class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
+                                    class="px-6 py-4 text-sm font-medium text-gray-900 dark:text-gray-100">
                                     {{ $client['name'] }}
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400" title="{{ $client['categories'] }}">
                                     {{ $client['category'] }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                     {{ $client['date'] }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    @if($client['status'] == 'Aktif')
+                                    @if($client['status_class'] == 'green')
                                         <span
-                                            class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">Aktif</span>
-                                    @elseif($client['status'] == 'Pending')
+                                            class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">{{ $client['status'] }}</span>
+                                    @elseif($client['status_class'] == 'yellow')
                                         <span
-                                            class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">Pending</span>
+                                            class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">{{ $client['status'] }}</span>
                                     @else
                                         <span
-                                            class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200">Selesai</span>
+                                            class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200">{{ $client['status'] }}</span>
                                     @endif
                                 </td>
                             </tr>
-                        @endforeach
+                        @empty
+                            <tr>
+                                <td colspan="5" class="px-6 py-8 text-center text-sm text-gray-500 dark:text-gray-400">
+                                    Tidak ada data klien yang ditemukan.
+                                </td>
+                            </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>
