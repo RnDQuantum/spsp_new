@@ -1,21 +1,27 @@
-<div>
+<div x-data="{ show: @entangle('showModal') }">
     {{-- Modal Overlay --}}
-    @if ($showModal)
-        <div class="fixed inset-0 z-50 overflow-y-auto" x-data="{ show: @entangle('showModal') }" x-show="show"
-            x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0"
-            x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-200"
-            x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
+    <div x-show="show" x-cloak
+        class="fixed inset-0 z-50 overflow-y-auto"
+        x-transition:enter="transition ease-in-out duration-400"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in-out duration-400"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0">
 
-            {{-- Background Overlay --}}
-            <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" wire:click="closeModal"></div>
+        {{-- Background Overlay --}}
+        <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" wire:click="closeModal"></div>
 
-            {{-- Modal Container --}}
-            <div class="flex min-h-screen items-center justify-center p-4">
-                <div class="relative w-full max-w-4xl bg-white dark:bg-gray-800 rounded-xl shadow-2xl"
-                    x-transition:enter="transition ease-out duration-300"
-                    x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
-                    x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 scale-100"
-                    x-transition:leave-end="opacity-0 scale-95" @click.away="$wire.closeModal()">
+        {{-- Modal Container --}}
+        <div class="flex min-h-screen items-center justify-center p-4">
+            <div class="relative w-full max-w-4xl bg-white dark:bg-gray-800 rounded-xl shadow-2xl"
+                x-transition:enter="transition ease-in-out duration-400"
+                x-transition:enter-start="opacity-0 scale-95 -translate-y-4"
+                x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                x-transition:leave="transition ease-in-out duration-400"
+                x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+                x-transition:leave-end="opacity-0 scale-95 -translate-y-4"
+                @click.away="$wire.closeModal()">
 
                     {{-- Modal Header --}}
                     <div class="flex items-center justify-between border-b-2 border-gray-200 dark:border-gray-700 px-6 py-4"
@@ -223,15 +229,14 @@
                         </div>
                     @endif
 
-                    {{-- Footer --}}
-                    <div class="px-6 py-4 bg-gray-100 dark:bg-gray-750 rounded-b-xl flex justify-end gap-3">
-                        <button wire:click="closeModal"
-                            class="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors font-medium">
-                            Tutup
-                        </button>
-                    </div>
+                {{-- Footer --}}
+                <div class="px-6 py-4 bg-gray-100 dark:bg-gray-750 rounded-b-xl flex justify-end gap-3">
+                    <button wire:click="closeModal"
+                        class="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors font-medium">
+                        Tutup
+                    </button>
                 </div>
             </div>
         </div>
-    @endif
+    </div>
 </div>
