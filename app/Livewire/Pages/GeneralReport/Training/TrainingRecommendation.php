@@ -109,7 +109,7 @@ class TrainingRecommendation extends Component
     {
         $this->aspectId = $aspectId;
 
-        if (! $aspectId) {
+        if (!$aspectId) {
             $this->reset(['selectedAspect', 'totalParticipants', 'recommendedCount', 'notRecommendedCount', 'averageRating', 'standardRating', 'originalStandardRating']);
 
             return;
@@ -153,14 +153,14 @@ class TrainingRecommendation extends Component
     {
         // Validate same template
         $positionFormationId = session('filter.position_formation_id');
-        if (! $this->selectedEvent || ! $positionFormationId) {
+        if (!$this->selectedEvent || !$positionFormationId) {
             return;
         }
 
         $position = $this->selectedEvent->positionFormations()
             ->find($positionFormationId);
 
-        if (! $position || $position->template_id !== $templateId) {
+        if (!$position || $position->template_id !== $templateId) {
             return;
         }
 
@@ -186,17 +186,19 @@ class TrainingRecommendation extends Component
         $eventCode = session('filter.event_code');
         $positionFormationId = session('filter.position_formation_id');
 
-        if (! $eventCode) {
+        if (!$eventCode) {
             return;
         }
 
         // Load event with position and template in one query
         $this->selectedEvent = AssessmentEvent::query()
             ->where('code', $eventCode)
-            ->with(['positionFormations' => function ($query) use ($positionFormationId) {
-                $query->where('id', $positionFormationId)
-                    ->with('template');
-            }])
+            ->with([
+                'positionFormations' => function ($query) use ($positionFormationId) {
+                    $query->where('id', $positionFormationId)
+                        ->with('template');
+                }
+            ])
             ->first();
 
         if ($this->aspectId && $this->selectedEvent && $positionFormationId) {
@@ -227,7 +229,7 @@ class TrainingRecommendation extends Component
     {
         $positionFormationId = session('filter.position_formation_id');
 
-        if (! $this->selectedEvent || ! $this->selectedAspect || ! $positionFormationId) {
+        if (!$this->selectedEvent || !$this->selectedAspect || !$positionFormationId) {
             return;
         }
 
@@ -274,7 +276,7 @@ class TrainingRecommendation extends Component
     {
         $positionFormationId = session('filter.position_formation_id');
 
-        if (! $this->selectedEvent || ! $this->selectedAspect || ! $positionFormationId) {
+        if (!$this->selectedEvent || !$this->selectedAspect || !$positionFormationId) {
             return null;
         }
 
@@ -296,7 +298,7 @@ class TrainingRecommendation extends Component
         // This is acceptable because it's just one query with minimal data
         $positionIds = $participants->pluck('position_formation_id')->unique()->filter()->all();
 
-        if (! empty($positionIds)) {
+        if (!empty($positionIds)) {
             $positions = \App\Models\PositionFormation::whereIn('id', $positionIds)
                 ->select('id', 'name')
                 ->get()
@@ -323,7 +325,7 @@ class TrainingRecommendation extends Component
     {
         $positionFormationId = session('filter.position_formation_id');
 
-        if (! $this->selectedEvent || ! $positionFormationId) {
+        if (!$this->selectedEvent || !$positionFormationId) {
             return null;
         }
 
@@ -337,7 +339,7 @@ class TrainingRecommendation extends Component
             ->with('template')
             ->find($positionFormationId);
 
-        if (! $position?->template) {
+        if (!$position?->template) {
             return collect([]);
         }
 
@@ -416,12 +418,20 @@ class TrainingRecommendation extends Component
     /**
      * Open modal with participants for a specific aspect
      */
-    public function openAttributeModal(int $aspectId, string $aspectName): void
+    public function openAttributeModal(int $aspectId): void
     {
         $positionFormationId = session('filter.position_formation_id');
 
-        if (! $this->selectedEvent || ! $positionFormationId) {
+        if (!$this->selectedEvent || !$positionFormationId) {
             return;
+        }
+
+        // Find aspect name from priorities data
+        $aspectName = '';
+        $priorities = $this->getAspectPriorityData();
+        if ($priorities) {
+            $aspect = $priorities->firstWhere('aspect_id', $aspectId);
+            $aspectName = $aspect['aspect_name'] ?? '';
         }
 
         // Get participants for this aspect
@@ -434,7 +444,8 @@ class TrainingRecommendation extends Component
         );
 
         // Dispatch event to modal component
-        $this->dispatch('openAttributeParticipantModal',
+        $this->dispatch(
+            'openAttributeParticipantModal',
             attributeName: $aspectName,
             participants: $participants->toArray()
         );
