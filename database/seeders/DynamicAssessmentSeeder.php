@@ -164,6 +164,182 @@ class DynamicAssessmentSeeder extends Seeder
                     'low' => 15,
                 ],
             ],
+
+            // Configuration 7: Badan Kepegawaian Negara (BKN) - Kementerian
+            [
+                'institution_code' => 'bkn',
+                'event' => [
+                    'code' => 'CPNS-BKN-2025',
+                    'name' => 'Seleksi CPNS BKN 2025',
+                    'description' => 'Assessment CPNS untuk Badan Kepegawaian Negara tahun 2025',
+                    'year' => 2025,
+                    'start_date' => '2025-08-01',
+                    'end_date' => '2025-12-31',
+                    'status' => 'ongoing',
+                ],
+                'batches' => [['code' => 'BATCH-1-JAKARTA', 'name' => 'Gelombang 1 - Jakarta', 'location' => 'Jakarta', 'batch_number' => 1, 'start_date' => '2025-09-01', 'end_date' => '2025-09-02']],
+                'positions' => [['code' => 'analis_sdm', 'name' => 'Analis SDM', 'quota' => 40, 'template_code' => 'professional_standard_v1'], ['code' => 'admin_kepegawaian', 'name' => 'Admin Kepegawaian', 'quota' => 60, 'template_code' => 'staff_standard_v1']],
+                'participants_count' => 100,
+                'performance_distribution' => [
+                    'high' => 25,
+                    'medium' => 60,
+                    'low' => 15,
+                ],
+            ],
+
+            // Configuration 8: Kementerian Pendidikan dan Kebudayaan - Kementerian & Pendidikan
+            [
+                'institution_code' => 'kemendikbud',
+                'event' => [
+                    'code' => 'GURU-KEMENDIKBUD-2025',
+                    'name' => 'Seleksi Guru Kemendikbud 2025',
+                    'description' => 'Assessment calon guru Kementerian Pendidikan dan Kebudayaan',
+                    'year' => 2025,
+                    'start_date' => '2025-06-01',
+                    'end_date' => '2025-09-30',
+                    'status' => 'ongoing',
+                ],
+                'batches' => [['code' => 'BATCH-1-JAKARTA', 'name' => 'Gelombang 1 - Jakarta', 'location' => 'Jakarta', 'batch_number' => 1, 'start_date' => '2025-07-01', 'end_date' => '2025-07-02'], ['code' => 'BATCH-2-SURABAYA', 'name' => 'Gelombang 2 - Surabaya', 'location' => 'Surabaya', 'batch_number' => 2, 'start_date' => '2025-08-01', 'end_date' => '2025-08-02']],
+                'positions' => [['code' => 'guru_sd', 'name' => 'Guru SD', 'quota' => 100, 'template_code' => 'professional_standard_v1'], ['code' => 'guru_smp', 'name' => 'Guru SMP', 'quota' => 80, 'template_code' => 'professional_standard_v1']],
+                'participants_count' => 180,
+                'performance_distribution' => [
+                    'high' => 30,
+                    'medium' => 50,
+                    'low' => 20,
+                ],
+            ],
+
+            // Configuration 9: PT. Pertamina - BUMN
+            [
+                'institution_code' => 'pertamina',
+                'event' => [
+                    'code' => 'RECRUITMENT-PERTAMINA-2025',
+                    'name' => 'Recruitment Program Pertamina 2025',
+                    'description' => 'Assessment program rekrutmen PT. Pertamina',
+                    'year' => 2025,
+                    'start_date' => '2025-03-01',
+                    'end_date' => '2025-06-30',
+                    'status' => 'ongoing',
+                ],
+                'batches' => [['code' => 'BATCH-1-JAKARTA', 'name' => 'Gelombang 1 - Jakarta', 'location' => 'Jakarta', 'batch_number' => 1, 'start_date' => '2025-04-01', 'end_date' => '2025-04-02']],
+                'positions' => [['code' => 'engineer', 'name' => 'Engineer', 'quota' => 50, 'template_code' => 'professional_standard_v1'], ['code' => 'analyst', 'name' => 'Analyst', 'quota' => 30, 'template_code' => 'staff_standard_v1'], ['code' => 'supervisor', 'name' => 'Supervisor', 'quota' => 20, 'template_code' => 'supervisor_standard_v1']],
+                'participants_count' => 100,
+                'performance_distribution' => [
+                    'high' => 35,
+                    'medium' => 50,
+                    'low' => 15,
+                ],
+            ],
+
+            // Configuration 10: Universitas Gadjah Mada - Pendidikan
+            [
+                'institution_code' => 'ugm',
+                'event' => [
+                    'code' => 'DOSEN-UGM-2025',
+                    'name' => 'Seleksi Dosen UGM 2025',
+                    'description' => 'Assessment calon dosen Universitas Gadjah Mada',
+                    'year' => 2025,
+                    'start_date' => '2025-04-01',
+                    'end_date' => '2025-07-31',
+                    'status' => 'ongoing',
+                ],
+                'batches' => [['code' => 'BATCH-1-YOGYAKARTA', 'name' => 'Gelombang 1 - Yogyakarta', 'location' => 'Yogyakarta', 'batch_number' => 1, 'start_date' => '2025-05-01', 'end_date' => '2025-05-02']],
+                'positions' => [['code' => 'dosen_soshum', 'name' => 'Dosen Sosial Humaniora', 'quota' => 25, 'template_code' => 'professional_standard_v1'], ['code' => 'dosen_saintek', 'name' => 'Dosen Saintek', 'quota' => 25, 'template_code' => 'professional_standard_v1']],
+                'participants_count' => 50,
+                'performance_distribution' => [
+                    'high' => 40,
+                    'medium' => 45,
+                    'low' => 15,
+                ],
+            ],
+
+            // Configuration 11: Institut Teknologi Bandung - Pendidikan & Teknologi
+            [
+                'institution_code' => 'itb',
+                'event' => [
+                    'code' => 'DOSEN-ITB-2025',
+                    'name' => 'Seleksi Dosen ITB 2025',
+                    'description' => 'Assessment calon dosen Institut Teknologi Bandung',
+                    'year' => 2025,
+                    'start_date' => '2025-05-01',
+                    'end_date' => '2025-08-31',
+                    'status' => 'ongoing',
+                ],
+                'batches' => [['code' => 'BATCH-1-BANDUNG', 'name' => 'Gelombang 1 - Bandung', 'location' => 'Bandung', 'batch_number' => 1, 'start_date' => '2025-06-01', 'end_date' => '2025-06-02']],
+                'positions' => [['code' => 'dosen_teknik', 'name' => 'Dosen Teknik', 'quota' => 30, 'template_code' => 'professional_standard_v1'], ['code' => 'dosen_informatika', 'name' => 'Dosen Informatika', 'quota' => 20, 'template_code' => 'professional_standard_v1']],
+                'participants_count' => 50,
+                'performance_distribution' => [
+                    'high' => 45,
+                    'medium' => 40,
+                    'low' => 15,
+                ],
+            ],
+
+            // Configuration 12: PT. Unilever Indonesia - Swasta
+            [
+                'institution_code' => 'unilever',
+                'event' => [
+                    'code' => 'MT-UNILEVER-2025',
+                    'name' => 'Management Trainee Unilever 2025',
+                    'description' => 'Assessment program Management Trainee PT. Unilever Indonesia',
+                    'year' => 2025,
+                    'start_date' => '2025-01-15',
+                    'end_date' => '2025-04-30',
+                    'status' => 'ongoing',
+                ],
+                'batches' => [['code' => 'BATCH-1-JAKARTA', 'name' => 'Gelombang 1 - Jakarta', 'location' => 'Jakarta', 'batch_number' => 1, 'start_date' => '2025-02-15', 'end_date' => '2025-02-16']],
+                'positions' => [['code' => 'mt_marketing', 'name' => 'MT Marketing', 'quota' => 30, 'template_code' => 'staff_standard_v1'], ['code' => 'mt_supply_chain', 'name' => 'MT Supply Chain', 'quota' => 20, 'template_code' => 'staff_standard_v1']],
+                'participants_count' => 50,
+                'performance_distribution' => [
+                    'high' => 40,
+                    'medium' => 45,
+                    'low' => 15,
+                ],
+            ],
+
+            // Configuration 13: PT. Tokopedia - Swasta & Teknologi
+            [
+                'institution_code' => 'tokopedia',
+                'event' => [
+                    'code' => 'TECH-TOKOPEDIA-2025',
+                    'name' => 'Tech Hiring Tokopedia 2025',
+                    'description' => 'Assessment program tech hiring PT. Tokopedia',
+                    'year' => 2025,
+                    'start_date' => '2025-02-01',
+                    'end_date' => '2025-05-31',
+                    'status' => 'ongoing',
+                ],
+                'batches' => [['code' => 'BATCH-1-JAKARTA', 'name' => 'Gelombang 1 - Jakarta', 'location' => 'Jakarta', 'batch_number' => 1, 'start_date' => '2025-03-01', 'end_date' => '2025-03-02']],
+                'positions' => [['code' => 'backend_engineer', 'name' => 'Backend Engineer', 'quota' => 40, 'template_code' => 'staff_standard_v1'], ['code' => 'frontend_engineer', 'name' => 'Frontend Engineer', 'quota' => 30, 'template_code' => 'staff_standard_v1'], ['code' => 'tech_lead', 'name' => 'Tech Lead', 'quota' => 10, 'template_code' => 'supervisor_standard_v1']],
+                'participants_count' => 80,
+                'performance_distribution' => [
+                    'high' => 30,
+                    'medium' => 55,
+                    'low' => 15,
+                ],
+            ],
+
+            // Configuration 14: RSUP Dr. Cipto Mangunkusumo - Kesehatan
+            [
+                'institution_code' => 'rscm',
+                'event' => [
+                    'code' => 'TENAGA-MEDIS-RSCM-2025',
+                    'name' => 'Seleksi Tenaga Medis RSCM 2025',
+                    'description' => 'Assessment tenaga medis RSUP Dr. Cipto Mangunkusumo',
+                    'year' => 2025,
+                    'start_date' => '2025-03-01',
+                    'end_date' => '2025-06-30',
+                    'status' => 'ongoing',
+                ],
+                'batches' => [['code' => 'BATCH-1-JAKARTA', 'name' => 'Gelombang 1 - Jakarta', 'location' => 'Jakarta', 'batch_number' => 1, 'start_date' => '2025-04-01', 'end_date' => '2025-04-02']],
+                'positions' => [['code' => 'dokter_spesialis', 'name' => 'Dokter Spesialis', 'quota' => 20, 'template_code' => 'professional_standard_v1'], ['code' => 'perawat_icu', 'name' => 'Perawat ICU', 'quota' => 40, 'template_code' => 'staff_standard_v1'], ['code' => 'tenaga_laboratorium', 'name' => 'Tenaga Laboratorium', 'quota' => 20, 'template_code' => 'staff_standard_v1']],
+                'participants_count' => 80,
+                'performance_distribution' => [
+                    'high' => 35,
+                    'medium' => 50,
+                    'low' => 15,
+                ],
+            ],
         ];
     }
 
