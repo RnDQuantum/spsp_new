@@ -413,6 +413,33 @@ class TrainingRecommendation extends Component
             : 0;
     }
 
+    /**
+     * Open modal with participants for a specific aspect
+     */
+    public function openAttributeModal(int $aspectId, string $aspectName): void
+    {
+        $positionFormationId = session('filter.position_formation_id');
+
+        if (! $this->selectedEvent || ! $positionFormationId) {
+            return;
+        }
+
+        // Get participants for this aspect
+        $service = app(TrainingRecommendationService::class);
+        $participants = $service->getParticipantsRecommendation(
+            $this->selectedEvent->id,
+            $positionFormationId,
+            $aspectId,
+            $this->tolerancePercentage
+        );
+
+        // Dispatch event to modal component
+        $this->dispatch('openAttributeParticipantModal',
+            attributeName: $aspectName,
+            participants: $participants->toArray()
+        );
+    }
+
     public function render()
     {
         $participants = $this->getParticipantsPaginated();

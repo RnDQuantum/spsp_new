@@ -231,6 +231,7 @@ class TrainingRecommendationService
                 $originalStandardRating = $this->getOriginalStandardRating($aspect, $templateId);
 
                 $aspectData[] = [
+                    'aspect_id' => $aspect->id,
                     'aspect_name' => $aspect->name,
                     'original_standard_rating' => $originalStandardRating,
                     'average_rating' => $averageRating,
@@ -250,6 +251,7 @@ class TrainingRecommendationService
             $action = $gap < 0 ? 'Pelatihan' : 'Dipertahankan';
 
             $aspectDataWithTolerance[] = [
+                'aspect_id' => $data['aspect_id'],
                 'aspect_name' => $data['aspect_name'],
                 'original_standard_rating' => round($data['original_standard_rating'], 2),
                 'adjusted_standard_rating' => round($adjustedStandardRating, 2),

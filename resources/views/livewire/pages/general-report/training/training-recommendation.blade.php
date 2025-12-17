@@ -277,8 +277,13 @@
                         <td class="border-2 border-gray-900 dark:border-gray-600 px-4 py-2 text-center font-semibold">
                             {{ $priority['priority'] }}
                         </td>
-                        <td class="border-2 border-gray-900 dark:border-gray-600 px-4 py-2">
-                            {{ $priority['aspect_name'] }}</td>
+                        <td class="border-2 border-gray-900 dark:border-gray-600 px-4 py-2 cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors"
+                            wire:click="openAttributeModal({{ $priority['aspect_id'] }}, '{{ $priority['aspect_name'] }}')"
+                            title="Klik untuk melihat daftar peserta">
+                            <span class="text-blue-600 dark:text-blue-400 hover:underline">
+                                {{ $priority['aspect_name'] }}
+                            </span>
+                        </td>
                         <td class="border-2 border-gray-900 dark:border-gray-600 px-4 py-2 text-center">
                             {{ number_format($priority['adjusted_standard_rating'], 2, ',', '.') }}
                         </td>
@@ -323,5 +328,8 @@
         </div>
     </div>
     @endif
+
+    <!-- Attribute Participant List Modal -->
+    @livewire('pages.general-report.training.attribute-participant-list-modal')
 
 </div>
