@@ -279,15 +279,15 @@
                                     class="border-2 border-gray-900 dark:border-gray-600 px-4 py-2 text-center font-semibold">
                                     {{ $priority['priority'] }}
                                 </td>
-                                <td class="border-2 border-gray-900 dark:border-gray-600 px-4 py-2 cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors relative"
+                                <td class="border-2 border-gray-900 dark:border-gray-600 px-4 py-2 cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors"
                                     wire:click="openAttributeModal({{ $priority['aspect_id'] }})"
                                     title="Klik untuk melihat daftar peserta">
                                     <span class="text-blue-600 dark:text-blue-400 hover:underline">
                                         {{ $priority['aspect_name'] }}
                                     </span>
                                     <span wire:loading wire:target="openAttributeModal({{ $priority['aspect_id'] }})"
-                                        class="absolute inset-0 flex items-center justify-center bg-blue-50/80 dark:bg-blue-900/50">
-                                        <svg class="animate-spin h-5 w-5 text-blue-600 dark:text-blue-400"
+                                        class="ml-2 inline-flex items-center">
+                                        <svg class="animate-spin h-4 w-4 text-blue-600 dark:text-blue-400"
                                             xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                             <circle class="opacity-25" cx="12" cy="12" r="10"
                                                 stroke="currentColor" stroke-width="4"></circle>
