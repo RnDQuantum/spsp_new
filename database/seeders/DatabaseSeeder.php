@@ -45,7 +45,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             InstitutionCategorySeeder::class,
             InstitutionWithCategoriesSeeder::class,
-            ClientSeeder::class,
+            // ClientSeeder::class, // Disabled: DynamicAssessmentSeeder creates events with participants
             AssessmentTemplateSeeder::class,
             MasterDataSeeder::class,
         ]);

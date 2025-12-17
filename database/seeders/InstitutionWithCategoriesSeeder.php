@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\AssessmentEvent;
 use App\Models\Institution;
 use App\Models\InstitutionCategory;
 use Illuminate\Database\Seeder;
@@ -179,23 +178,8 @@ class InstitutionWithCategoriesSeeder extends Seeder
                 }
             }
 
-            // Create events
-            foreach ($data['events'] as $eventData) {
-                AssessmentEvent::firstOrCreate(
-                    [
-                        'institution_id' => $institution->id,
-                        'code' => strtoupper($institution->code) . '-ASSESSMENT-' . $eventData['year'],
-                    ],
-                    [
-                        'name' => 'Assessment ' . $institution->name . ' ' . $eventData['year'],
-                        'description' => 'Assessment kebutuhan SDM untuk ' . $institution->name,
-                        'year' => $eventData['year'],
-                        'start_date' => $eventData['year'] . '-01-01',
-                        'end_date' => $eventData['year'] . '-12-31',
-                        'status' => $eventData['status'],
-                    ]
-                );
-            }
+            // Note: Events are now created by DynamicAssessmentSeeder with participants
+            // The 'events' key in data array above is kept for reference only
 
             $this->command->info("  ✓ {$institution->name}");
         }
