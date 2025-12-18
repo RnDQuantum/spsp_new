@@ -116,7 +116,6 @@ class Index extends Component
         // 🚀 PERFORMANCE: Single optimized query with eager loading
         $this->selectedEvent = AssessmentEvent::query()
             ->where('code', $eventCode)
-            ->where('institution_id', auth()->user()->institution_id)
             ->with([
                 'positionFormations' => function ($query) use ($positionFormationId) {
                     $query->where('id', $positionFormationId)
