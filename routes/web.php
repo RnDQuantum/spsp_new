@@ -27,16 +27,16 @@ Route::middleware(['auth', 'institution.access'])->group(function () {
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
     Route::get('/dashboard', \App\Livewire\Pages\Dashboard::class)->name('dashboard');
     Route::middleware(['role:admin'])->group(function () {
-        Route::get('/dashboard-admin', \App\Livewire\Pages\DashboardAdmin::class)->name('dashboard-admin');
+        Route::get('/dashboard-admin', \App\Livewire\Pages\Admin\DashboardAdmin::class)->name('dashboard-admin');
         // List Klien Route
-        Route::get('/list-klien', \App\Livewire\Pages\ClientList::class)->name('daftar-klien');
+        Route::get('/list-klien', \App\Livewire\Pages\Admin\ClientList::class)->name('daftar-klien');
 
         // Institution Routes
-        Route::get('/institutions/{institution}', \App\Livewire\Institutions\Show::class)->name('institutions.show');
+        Route::get('/institutions/{institution}', \App\Livewire\Pages\Institutions\Show::class)->name('institutions.show');
 
         // Event Routes
-        Route::get('/events', \App\Livewire\Events\Index::class)->name('events.index');
-        Route::get('/events/{event:code}', \App\Livewire\Events\Show::class)->name('events.show');
+        Route::get('/events', \App\Livewire\Pages\Events\Index::class)->name('events.index');
+        Route::get('/events/{event:code}', \App\Livewire\Pages\Events\Show::class)->name('events.show');
     });
 
 

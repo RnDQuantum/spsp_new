@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Pages;
+namespace App\Livewire\Pages\Admin;
 
 use App\Models\Institution;
 use App\Models\InstitutionCategory;
@@ -24,7 +24,7 @@ class DashboardAdmin extends Component
         $stats = $this->getStatistics();
         $recentClients = $this->getRecentClients();
 
-        return view('livewire.pages.dashboard-admin', [
+        return view('livewire.pages.admin.dashboard-admin', [
             'years' => $this->getAvailableYears(),
             'categories' => InstitutionCategory::where('is_active', true)->orderBy('order')->get(),
             'stats' => $stats,
@@ -51,16 +51,18 @@ class DashboardAdmin extends Component
         $totalClients = $query->count();
 
         $categoryStats = InstitutionCategory::where('is_active', true)
-            ->withCount(['institutions' => function ($q) {
-                if ($this->selectedYear) {
-                    $q->whereHas('assessmentEvents', function ($aq) {
-                        $aq->where('year', $this->selectedYear);
-                    });
+            ->withCount([
+                'institutions' => function ($q) {
+                    if ($this->selectedYear) {
+                        $q->whereHas('assessmentEvents', function ($aq) {
+                            $aq->where('year', $this->selectedYear);
+                        });
+                    }
                 }
-            }])
+            ])
             ->orderBy('order')
             ->get()
-            ->mapWithKeys(fn ($category) => [$category->code => $category->institutions_count]);
+            ->mapWithKeys(fn($category) => [$category->code => $category->institutions_count]);
 
         return [
             'total' => $totalClients,
@@ -111,7 +113,7 @@ class DashboardAdmin extends Component
 
     private function mapStatus(?string $status): string
     {
-        return match($status) {
+        return match ($status) {
             'ongoing' => 'Aktif',
             'completed' => 'Selesai',
             'draft' => 'Pending',
@@ -121,7 +123,7 @@ class DashboardAdmin extends Component
 
     private function getStatusClass(?string $status): string
     {
-        return match($status) {
+        return match ($status) {
             'ongoing' => 'green',
             'completed' => 'gray',
             'draft' => 'yellow',

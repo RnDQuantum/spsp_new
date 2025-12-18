@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Events;
+namespace App\Livewire\Pages\Events;
 
 use App\Models\AssessmentEvent;
 use Livewire\Attributes\Layout;
@@ -27,7 +27,7 @@ class Show extends Component
             ->where('pivot.is_primary', true)
             ->first() ?? $this->event->institution->categories->first();
 
-        return view('livewire.events.show', [
+        return view('livewire.pages.events.show', [
             'primaryCategory' => $primaryCategory,
         ]);
     }

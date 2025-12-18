@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Pages;
+namespace App\Livewire\Pages\Admin;
 
 use App\Models\Institution;
 use App\Models\InstitutionCategory;
@@ -175,7 +175,7 @@ class ClientList extends Component
             ];
         });
 
-        return view('livewire.pages.list-klien', [
+        return view('livewire.pages.admin.list-klien', [
             'clients' => $clients,
             'categories' => InstitutionCategory::where('is_active', true)->orderBy('order')->get(),
             'years' => $this->getAvailableYears(),

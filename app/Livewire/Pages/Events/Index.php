@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Events;
+namespace App\Livewire\Pages\Events;
 
 use App\Models\AssessmentEvent;
 use App\Models\Institution;
@@ -78,10 +78,12 @@ class Index extends Component
         $query = AssessmentEvent::with([
             'institution' => function ($q) {
                 $q->select('id', 'code', 'name')
-                    ->with(['categories' => function ($cq) {
-                        $cq->select('institution_categories.id', 'institution_categories.code', 'institution_categories.name')
-                            ->orderByDesc('category_institution.is_primary');
-                    }]);
+                    ->with([
+                        'categories' => function ($cq) {
+                            $cq->select('institution_categories.id', 'institution_categories.code', 'institution_categories.name')
+                                ->orderByDesc('category_institution.is_primary');
+                        }
+                    ]);
             },
         ])->withCount(['batches', 'participants']);
 
@@ -114,7 +116,7 @@ class Index extends Component
 
         $events = $query->paginate($this->perPage);
 
-        return view('livewire.events.index', [
+        return view('livewire.pages.events.index', [
             'events' => $events,
             'institutions' => Institution::select('id', 'name')->orderBy('name')->get(),
             'categories' => InstitutionCategory::where('is_active', true)->orderBy('order')->get(),

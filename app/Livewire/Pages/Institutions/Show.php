@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Institutions;
+namespace App\Livewire\Pages\Institutions;
 
 use App\Models\Institution;
 use Livewire\Attributes\Layout;
@@ -53,7 +53,7 @@ class Show extends Component
             ->where('pivot.is_primary', true)
             ->first() ?? $this->institution->categories->first();
 
-        return view('livewire.institutions.show', [
+        return view('livewire.pages.institutions.show', [
             'events' => $events,
             'primaryCategory' => $primaryCategory,
             'years' => $this->getAvailableYears(),
