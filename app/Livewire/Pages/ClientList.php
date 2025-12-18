@@ -56,6 +56,15 @@ class ClientList extends Component
 
     public function sortBy(string $field): void
     {
+        // Handle special cases for related fields
+        if ($field === 'category') {
+            $field = 'category_name'; // Use a custom field name for category sorting
+        } elseif ($field === 'status') {
+            $field = 'status_raw'; // Use the raw status field for sorting
+        } elseif ($field === 'date') {
+            $field = 'created_at'; // Use the actual database field
+        }
+
         if ($this->sortField === $field) {
             $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
         } else {
@@ -66,20 +75,65 @@ class ClientList extends Component
 
     public function render()
     {
-        $query = Institution::with([
-            'categories' => function ($q) {
-                $q->select('institution_categories.id', 'institution_categories.code', 'institution_categories.name')
-                    ->orderByDesc('category_institution.is_primary');
-            },
-            'assessmentEvents' => function ($q) {
-                $q->select('id', 'institution_id', 'year', 'status')
-                    ->latest()
-                    ->limit(1);
-            },
-        ]);
+        // Handle sorting for special fields with joins
+        if ($this->sortField === 'category_name') {
+            // For category sorting, use subquery to get primary category name
+            $query = Institution::with([
+                'categories' => function ($q) {
+                    $q->select('institution_categories.id', 'institution_categories.code', 'institution_categories.name')
+                        ->orderByDesc('category_institution.is_primary');
+                },
+                'assessmentEvents' => function ($q) {
+                    $q->select('id', 'institution_id', 'year', 'status')
+                        ->latest()
+                        ->limit(1);
+                },
+            ])->select('institutions.*')
+                ->leftJoin('category_institution', function ($join) {
+                    $join->on('institutions.id', '=', 'category_institution.institution_id')
+                        ->where('category_institution.is_primary', true);
+                })
+                ->leftJoin('institution_categories', 'category_institution.institution_category_id', '=', 'institution_categories.id')
+                ->orderBy('institution_categories.name', $this->sortDirection);
+        } elseif ($this->sortField === 'status_raw') {
+            // For status sorting, use subquery to get latest event status
+            $query = Institution::with([
+                'categories' => function ($q) {
+                    $q->select('institution_categories.id', 'institution_categories.code', 'institution_categories.name')
+                        ->orderByDesc('category_institution.is_primary');
+                },
+                'assessmentEvents' => function ($q) {
+                    $q->select('id', 'institution_id', 'year', 'status')
+                        ->latest()
+                        ->limit(1);
+                },
+            ])->select('institutions.*')
+                ->leftJoin('assessment_events', function ($join) {
+                    $join->on('institutions.id', '=', 'assessment_events.institution_id')
+                        ->where('assessment_events.id', '=', function ($subquery) {
+                            $subquery->selectRaw('MAX(id)')
+                                ->from('assessment_events')
+                                ->whereColumn('institution_id', 'institutions.id');
+                        });
+                })
+                ->orderBy('assessment_events.status', $this->sortDirection);
+        } else {
+            // For regular fields, use the standard approach
+            $query = Institution::with([
+                'categories' => function ($q) {
+                    $q->select('institution_categories.id', 'institution_categories.code', 'institution_categories.name')
+                        ->orderByDesc('category_institution.is_primary');
+                },
+                'assessmentEvents' => function ($q) {
+                    $q->select('id', 'institution_id', 'year', 'status')
+                        ->latest()
+                        ->limit(1);
+                },
+            ])->orderBy($this->sortField, $this->sortDirection);
+        }
 
         if ($this->search) {
-            $query->where('name', 'like', "%{$this->search}%");
+            $query->where('institutions.name', 'like', "%{$this->search}%");
         }
 
         if ($this->categoryFilter !== 'all') {
@@ -99,8 +153,6 @@ class ClientList extends Component
                 $q->where('status', $this->statusFilter);
             });
         }
-
-        $query->orderBy($this->sortField, $this->sortDirection);
 
         $institutions = $query->paginate($this->perPage);
 
