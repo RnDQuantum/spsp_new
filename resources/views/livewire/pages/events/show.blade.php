@@ -202,6 +202,9 @@
                                                     <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                                                         Batch
                                                     </th>
+                                                    <th class="px-4 py-3 text-center text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                                        Aksi
+                                                    </th>
                                                 </tr>
                                             </thead>
                                             <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-600">
@@ -235,6 +238,13 @@
                                                             @else
                                                                 <span class="text-gray-400 dark:text-gray-500 text-xs">-</span>
                                                             @endif
+                                                        </td>
+                                                        <td class="px-4 py-3 text-center">
+                                                            <a href="{{ route('participant_detail', ['eventCode' => $event->code, 'testNumber' => $participant->test_number]) }}"
+                                                               class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-white bg-green-600 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-600 rounded-lg transition-colors shadow-sm hover:shadow">
+                                                                <i class="fa-solid fa-eye mr-1"></i>
+                                                                Detail
+                                                            </a>
                                                         </td>
                                                     </tr>
                                                 @endforeach
@@ -367,6 +377,9 @@
                                                             <th class="px-4 py-2 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                                                                 Formasi Jabatan
                                                             </th>
+                                                            <th class="px-4 py-2 text-center text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                                                Aksi
+                                                            </th>
                                                         </tr>
                                                     </thead>
                                                     <tbody class="bg-white dark:bg-gray-700 divide-y divide-gray-200 dark:divide-gray-600">
@@ -389,6 +402,13 @@
                                                                     @else
                                                                         <span class="text-gray-400 dark:text-gray-500 text-xs">-</span>
                                                                     @endif
+                                                                </td>
+                                                                <td class="px-4 py-2 text-center">
+                                                                    <a href="{{ route('participant_detail', ['eventCode' => $event->code, 'testNumber' => $participant->test_number]) }}"
+                                                                       class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 rounded-lg transition-colors shadow-sm hover:shadow">
+                                                                        <i class="fa-solid fa-eye mr-1"></i>
+                                                                        Detail
+                                                                    </a>
                                                                 </td>
                                                             </tr>
                                                         @endforeach
