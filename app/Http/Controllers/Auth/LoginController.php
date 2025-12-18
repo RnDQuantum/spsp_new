@@ -15,7 +15,20 @@ class LoginController extends Controller
      */
     public function showLoginForm(): View
     {
-        return view('auth.login');
+        // Get all institutions with their client users for dynamic credentials display
+        $institutions = \App\Models\Institution::with(['users' => function ($query) {
+            $query->where('is_active', true)
+                ->whereNotNull('institution_id');
+        }])
+            ->orderBy('name')
+            ->get()
+            ->filter(function ($institution) {
+                return $institution->users->isNotEmpty();
+            });
+
+        return view('auth.login', [
+            'institutions' => $institutions,
+        ]);
     }
 
     /**

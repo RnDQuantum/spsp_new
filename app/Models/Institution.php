@@ -32,6 +32,11 @@ class Institution extends Model
         return $this->hasMany(CustomStandard::class);
     }
 
+    public function users(): HasMany
+    {
+        return $this->hasMany(User::class);
+    }
+
     public function categories(): BelongsToMany
     {
         return $this->belongsToMany(InstitutionCategory::class, 'category_institution')

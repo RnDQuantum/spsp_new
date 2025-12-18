@@ -156,59 +156,106 @@
 
                 {{-- Default Credentials Info --}}
                 <div
-                    class="mt-6 text-center text-sm bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg border border-gray-200 dark:border-gray-600">
-                    <!-- Default -->
-                    <div class="mb-2" x-data="{ clicked: false }">
-                        <span class="font-medium text-gray-700 dark:text-gray-300">Default:</span>
-
-                        <span
-                            @click="
-                document.getElementById('email').value = 'admin@example.com';
-                document.getElementById('password').value = 'password';
-                clicked = true;
-                setTimeout(() => clicked = false, 2000);
-            "
-                            class="text-gray-600 dark:text-gray-400 cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 transition-colors relative inline-flex items-center"
-                            title="Click to auto-fill">
-                            admin@example.com / password
-                            <span x-show="clicked" x-transition class="ml-1 text-green-600 text-xs">✓</span>
-                        </span>
+                    class="mt-6 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600 overflow-hidden">
+                    <!-- Header -->
+                    <div class="bg-gray-100 dark:bg-gray-700 px-4 py-2 border-b border-gray-200 dark:border-gray-600">
+                        <p class="text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wide">
+                            Demo Credentials
+                        </p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                            Klik untuk mengisi otomatis
+                        </p>
                     </div>
 
-                    <!-- Client 1 -->
-                    <div class="mb-2" x-data="{ clicked: false }">
-                        <span class="font-medium text-gray-700 dark:text-gray-300">Client 1:</span>
+                    <!-- Scrollable Content -->
+                    <div class="max-h-64 overflow-y-auto p-4 space-y-2">
+                        <!-- Admin -->
+                        <div class="flex items-center justify-between p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600/50 transition-colors"
+                            x-data="{ clicked: false }">
+                            <div class="flex items-center space-x-2 flex-1">
+                                <div
+                                    class="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none"
+                                        stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-xs font-semibold text-gray-700 dark:text-gray-200">Admin</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 truncate">Super Administrator
+                                    </p>
+                                </div>
+                            </div>
+                            <button type="button"
+                                @click="
+                                    document.getElementById('email').value = 'admin@example.com';
+                                    document.getElementById('password').value = 'password';
+                                    clicked = true;
+                                    setTimeout(() => clicked = false, 2000);
+                                "
+                                class="ml-2 px-3 py-1.5 text-xs font-medium rounded-md bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors flex items-center space-x-1 flex-shrink-0">
+                                <span x-show="!clicked">admin@example.com</span>
+                                <span x-show="clicked" x-transition class="text-green-600 dark:text-green-400">✓
+                                    Filled</span>
+                            </button>
+                        </div>
 
-                        <span
-                            @click="
-                document.getElementById('email').value = 'kemenkes@example.com';
-                document.getElementById('password').value = 'password';
-                clicked = true;
-                setTimeout(() => clicked = false, 2000);
-            "
-                            class="text-gray-600 dark:text-gray-400 cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 transition-colors relative inline-flex items-center"
-                            title="Click to auto-fill">
-                            kemenkes@example.com / password
-                            <span x-show="clicked" x-transition class="ml-1 text-green-600 text-xs">✓</span>
-                        </span>
+                        @if (isset($institutions) && $institutions->count() > 0)
+                            <!-- Dynamic Institutions -->
+                            @foreach ($institutions as $index => $institution)
+                                @if ($institution->users->first())
+                                    @php
+                                        $user = $institution->users->first();
+                                    @endphp
+                                    <div class="flex items-center justify-between p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600/50 transition-colors"
+                                        x-data="{ clicked: false }">
+                                        <div class="flex items-center space-x-2 flex-1">
+                                            <div
+                                                class="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0">
+                                                <svg class="w-4 h-4 text-green-600 dark:text-green-400" fill="none"
+                                                    stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                                </svg>
+                                            </div>
+                                            <div class="flex-1 min-w-0">
+                                                <p class="text-xs font-semibold text-gray-700 dark:text-gray-200 truncate">
+                                                    {{ $institution->name }}
+                                                </p>
+                                                <p class="text-xs text-gray-500 dark:text-gray-400 truncate">
+                                                    {{ $user->name }}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <button type="button"
+                                            @click="
+                                                document.getElementById('email').value = '{{ $user->email }}';
+                                                document.getElementById('password').value = 'password';
+                                                clicked = true;
+                                                setTimeout(() => clicked = false, 2000);
+                                            "
+                                            class="ml-2 px-3 py-1.5 text-xs font-medium rounded-md bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/50 transition-colors flex items-center space-x-1 flex-shrink-0">
+                                            <span x-show="!clicked" class="truncate max-w-[120px]">{{ $user->email }}</span>
+                                            <span x-show="clicked" x-transition class="text-green-600 dark:text-green-400">✓
+                                                Filled</span>
+                                        </button>
+                                    </div>
+                                @endif
+                            @endforeach
+                        @endif
                     </div>
 
-                    <!-- Client 2 -->
-                    <div class="mb-2" x-data="{ clicked: false }">
-                        <span class="font-medium text-gray-700 dark:text-gray-300">Client 2:</span>
-
-                        <span
-                            @click="
-                document.getElementById('email').value = 'kejaksaan@example.com';
-                document.getElementById('password').value = 'password';
-                clicked = true;
-                setTimeout(() => clicked = false, 2000);
-            "
-                            class="text-gray-600 dark:text-gray-400 cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 transition-colors relative inline-flex items-center"
-                            title="Click to auto-fill">
-                            kejaksaan@example.com / password
-                            <span x-show="clicked" x-transition class="ml-1 text-green-600 text-xs">✓</span>
-                        </span>
+                    <!-- Footer Note -->
+                    <div class="bg-gray-100 dark:bg-gray-700 px-4 py-2 border-t border-gray-200 dark:border-gray-600">
+                        <p class="text-xs text-gray-500 dark:text-gray-400 text-center">
+                            <svg class="w-3 h-3 inline-block mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd"
+                                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                            Semua password: <span class="font-mono font-semibold">password</span>
+                        </p>
                     </div>
                 </div>
             </div>
