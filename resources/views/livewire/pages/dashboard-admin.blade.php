@@ -163,12 +163,17 @@
                 </table>
             </div>
 
-            <!-- Tombol Lihat Daftar Klien -->
-            <div class="mt-4 text-center">
+            <!-- Tombol Navigasi -->
+            <div class="mt-4 flex justify-center gap-3">
                 <a href="{{ route('daftar-klien') }}"
                     class="inline-flex items-center px-6 py-3 bg-gray-800 dark:bg-gray-700 text-white font-semibold rounded-lg shadow hover:bg-gray-700 dark:hover:bg-gray-600 transition-colors">
-                    <i class="fa-solid fa-list mr-2"></i>
+                    <i class="fa-solid fa-building mr-2"></i>
                     Lihat Daftar Klien
+                </a>
+                <a href="{{ route('events.index') }}"
+                    class="inline-flex items-center px-6 py-3 bg-blue-600 dark:bg-blue-700 text-white font-semibold rounded-lg shadow hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors">
+                    <i class="fa-solid fa-calendar-check mr-2"></i>
+                    Lihat Daftar Event
                 </a>
             </div>
         </div>
