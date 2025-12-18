@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Pages\IndividualReport;
 
+use App\Livewire\Concerns\SyncsSessionFromUrlParams;
 use App\Models\CategoryAssessment;
 use App\Models\CategoryType;
 use App\Models\Participant;
@@ -14,6 +15,8 @@ use Livewire\Component;
 #[Layout('components.layouts.app', ['title' => '<i>Managerial Competency Mapping</i>'])]
 class GeneralMcMapping extends Component
 {
+    use SyncsSessionFromUrlParams;
+
     public ?Participant $participant = null;
 
     public ?CategoryType $kompetensiCategory = null;
@@ -110,7 +113,7 @@ class GeneralMcMapping extends Component
         }
 
         // Generate unique chart ID
-        $this->chartId = 'generalMcMapping' . uniqid();
+        $this->chartId = 'generalMcMapping'.uniqid();
 
         // Load tolerance from session
         $this->tolerancePercentage = session('individual_report.tolerance', 0);
@@ -126,6 +129,11 @@ class GeneralMcMapping extends Component
             })
             ->where('test_number', $this->testNumber)
             ->firstOrFail();
+
+        // Sync session from URL parameters (only if standalone)
+        if ($this->isStandalone) {
+            $this->syncSessionFromParticipant($this->participant);
+        }
 
         $template = $this->participant->positionFormation->template;
 

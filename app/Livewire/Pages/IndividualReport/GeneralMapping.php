@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Pages\IndividualReport;
 
+use App\Livewire\Concerns\SyncsSessionFromUrlParams;
 use App\Models\CategoryAssessment;
 use App\Models\CategoryType;
 use App\Models\Participant;
@@ -14,6 +15,8 @@ use Livewire\Component;
 #[Layout('components.layouts.app', ['title' => '<i>General Mapping</i>'])]
 class GeneralMapping extends Component
 {
+    use SyncsSessionFromUrlParams;
+
     public ?Participant $participant = null;
 
     public ?CategoryType $potensiCategory = null;
@@ -118,6 +121,9 @@ class GeneralMapping extends Component
             })
             ->where('test_number', $testNumber)
             ->firstOrFail();
+
+        // Sync session from URL parameters
+        $this->syncSessionFromParticipant($this->participant);
 
         $template = $this->participant->positionFormation->template;
 

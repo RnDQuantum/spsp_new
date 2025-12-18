@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Pages\IndividualReport;
 
+use App\Livewire\Concerns\SyncsSessionFromUrlParams;
 use App\Models\CategoryAssessment;
 use App\Models\CategoryType;
 use App\Models\Participant;
@@ -14,6 +15,8 @@ use Livewire\Component;
 #[Layout('components.layouts.app', ['title' => '<i>Spider Plot</i>'])]
 class SpiderPlot extends Component
 {
+    use SyncsSessionFromUrlParams;
+
     public ?Participant $participant = null;
 
     public ?CategoryType $potensiCategory = null;
@@ -76,9 +79,9 @@ class SpiderPlot extends Component
     public function mount($eventCode, $testNumber): void
     {
         // Generate unique chart IDs
-        $this->potensiChartId = 'potensiSpider' . uniqid();
-        $this->kompetensiChartId = 'kompetensiSpider' . uniqid();
-        $this->generalChartId = 'generalSpider' . uniqid();
+        $this->potensiChartId = 'potensiSpider'.uniqid();
+        $this->kompetensiChartId = 'kompetensiSpider'.uniqid();
+        $this->generalChartId = 'generalSpider'.uniqid();
 
         // Load tolerance from session
         $this->tolerancePercentage = session('individual_report.tolerance', 0);
@@ -94,6 +97,9 @@ class SpiderPlot extends Component
             })
             ->where('test_number', $testNumber)
             ->firstOrFail();
+
+        // Sync session from URL parameters
+        $this->syncSessionFromParticipant($this->participant);
 
         $template = $this->participant->positionFormation->template;
 

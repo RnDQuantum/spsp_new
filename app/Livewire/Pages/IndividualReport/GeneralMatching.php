@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Pages\IndividualReport;
 
+use App\Livewire\Concerns\SyncsSessionFromUrlParams;
 use App\Models\CategoryType;
 use App\Models\FinalAssessment;
 use App\Models\Participant;
@@ -13,6 +14,8 @@ use Livewire\Component;
 #[Layout('components.layouts.app', ['title' => '<i>General Matching</i>'])]
 class GeneralMatching extends Component
 {
+    use SyncsSessionFromUrlParams;
+
     // Participant info
     public ?Participant $participant = null;
 
@@ -93,6 +96,11 @@ class GeneralMatching extends Component
             })
             ->where('test_number', $this->testNumber)
             ->firstOrFail();
+
+        // Sync session from URL parameters (only if standalone)
+        if ($this->isStandalone) {
+            $this->syncSessionFromParticipant($this->participant);
+        }
 
         // Load final assessment
         $this->finalAssessment = FinalAssessment::where('participant_id', $this->participant->id)->first();

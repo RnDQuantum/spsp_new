@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Pages\IndividualReport;
 
+use App\Livewire\Concerns\SyncsSessionFromUrlParams;
 use App\Models\AssessmentEvent;
 use App\Models\CategoryAssessment;
 use App\Models\CategoryType;
@@ -17,6 +18,8 @@ use Livewire\Component;
 #[Layout('components.layouts.app', ['title' => 'LAPORAN INDIVIDU'])]
 class FinalReport extends Component
 {
+    use SyncsSessionFromUrlParams;
+
     public $eventCode;
 
     public $testNumber;
@@ -76,6 +79,9 @@ class FinalReport extends Component
             })
             ->where('test_number', $this->testNumber)
             ->firstOrFail();
+
+        // Sync session from URL parameters
+        $this->syncSessionFromParticipant($this->participant);
 
         // Load Final Assessment
         $this->finalAssessment = FinalAssessment::where('participant_id', $this->participant->id)->first();

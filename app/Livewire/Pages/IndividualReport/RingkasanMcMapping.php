@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Pages\IndividualReport;
 
+use App\Livewire\Concerns\SyncsSessionFromUrlParams;
 use App\Models\CategoryType;
 use App\Models\Participant;
 use App\Services\IndividualAssessmentService;
@@ -11,6 +12,8 @@ use Livewire\Component;
 #[Layout('components.layouts.app', ['title' => 'Ringkasan Kompetensi Manajerial'])]
 class RingkasanMcMapping extends Component
 {
+    use SyncsSessionFromUrlParams;
+
     public ?Participant $participant = null;
 
     public ?CategoryType $kompetensiCategory = null;
@@ -39,6 +42,9 @@ class RingkasanMcMapping extends Component
             })
             ->where('test_number', $testNumber)
             ->firstOrFail();
+
+        // Sync session from URL parameters
+        $this->syncSessionFromParticipant($this->participant);
 
         $template = $this->participant->positionFormation->template;
 

@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Pages\IndividualReport;
 
+use App\Livewire\Concerns\SyncsSessionFromUrlParams;
 use App\Models\CategoryAssessment;
 use App\Models\CategoryType;
 use App\Models\Participant;
@@ -14,6 +15,8 @@ use Livewire\Component;
 #[Layout('components.layouts.app', ['title' => '<i>General Psychology Mapping</i>'])]
 class GeneralPsyMapping extends Component
 {
+    use SyncsSessionFromUrlParams;
+
     public ?Participant $participant = null;
 
     public ?CategoryType $potensiCategory = null;
@@ -113,7 +116,7 @@ class GeneralPsyMapping extends Component
         }
 
         // Generate unique chart ID
-        $this->chartId = 'generalPsyMapping' . uniqid();
+        $this->chartId = 'generalPsyMapping'.uniqid();
 
         // Load tolerance from session
         $this->tolerancePercentage = session('individual_report.tolerance', 0);
@@ -132,6 +135,11 @@ class GeneralPsyMapping extends Component
             })
             ->where('test_number', $this->testNumber)
             ->firstOrFail();
+
+        // Sync session from URL parameters (only if standalone)
+        if ($this->isStandalone) {
+            $this->syncSessionFromParticipant($this->participant);
+        }
 
         $template = $this->participant->positionFormation->template;
 

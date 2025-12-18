@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Pages\IndividualReport;
 
+use App\Livewire\Concerns\SyncsSessionFromUrlParams;
 use App\Models\Participant;
 use App\Services\ConclusionService;
 use App\Services\IndividualAssessmentService;
@@ -11,6 +12,8 @@ use Livewire\Component;
 #[Layout('components.layouts.app', ['title' => 'Ringkasan Hasil Asesmen'])]
 class RingkasanAssessment extends Component
 {
+    use SyncsSessionFromUrlParams;
+
     // Participant info
     public ?Participant $participant = null;
 
@@ -87,6 +90,11 @@ class RingkasanAssessment extends Component
             })
             ->where('test_number', $this->testNumber)
             ->firstOrFail();
+
+        // Sync session from URL parameters (only if standalone)
+        if ($this->isStandalone) {
+            $this->syncSessionFromParticipant($this->participant);
+        }
 
         // Load assessment data from service
         $this->loadFinalAssessment();
