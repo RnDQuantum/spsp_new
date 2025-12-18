@@ -103,17 +103,17 @@
 
                     <div class="grid grid-cols-2 gap-4">
                         <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
-                            <div class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ $event->batches->count() }}</div>
+                            <div class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ $batches->count() }}</div>
                             <div class="text-sm text-gray-600 dark:text-gray-400">Total Batch</div>
                         </div>
 
                         <div class="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg border border-purple-200 dark:border-purple-800">
-                            <div class="text-2xl font-bold text-purple-600 dark:text-purple-400">{{ $event->participants->count() }}</div>
+                            <div class="text-2xl font-bold text-purple-600 dark:text-purple-400">{{ $event->participants()->count() }}</div>
                             <div class="text-sm text-gray-600 dark:text-gray-400">Total Peserta</div>
                         </div>
 
                         <div class="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg border border-green-200 dark:border-green-800">
-                            <div class="text-2xl font-bold text-green-600 dark:text-green-400">{{ $event->positionFormations->count() }}</div>
+                            <div class="text-2xl font-bold text-green-600 dark:text-green-400">{{ $positionFormations->count() }}</div>
                             <div class="text-sm text-gray-600 dark:text-gray-400">Formasi Jabatan</div>
                         </div>
 
@@ -137,15 +137,229 @@
             </div>
         </div>
 
+        <!-- Position Formations Section -->
+        @if($positionFormations->count() > 0)
+            <div class="p-6 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+                <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">Daftar Formasi Jabatan</h2>
+                <div class="space-y-4">
+                    @foreach($positionFormations as $formation)
+                        <div class="bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 overflow-hidden">
+                            <div class="bg-gradient-to-r from-green-600 to-green-700 dark:from-green-700 dark:to-green-800 p-4 text-white cursor-pointer hover:from-green-700 hover:to-green-800 dark:hover:from-green-800 dark:hover:to-green-900 transition-colors"
+                                 wire:click="toggleFormation({{ $formation->id }})">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex-1">
+                                        <h3 class="font-bold text-lg">{{ $formation->name }}</h3>
+                                        <p class="text-sm text-green-100 mt-1">Kode: {{ $formation->code }}</p>
+                                    </div>
+                                    <div class="flex items-center gap-4">
+                                        <div class="text-right">
+                                            <div class="text-2xl font-bold">{{ $formation->participants_count }}</div>
+                                            <div class="text-xs text-green-100">dari {{ $formation->quota }} kuota</div>
+                                        </div>
+                                        <div class="text-2xl">
+                                            <i class="fa-solid {{ $expandedFormation === $formation->id ? 'fa-chevron-up' : 'fa-chevron-down' }}"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            @if($expandedFormation === $formation->id)
+                                @if($formationParticipants && $formationParticipants->total() > 0)
+                                    <div class="overflow-x-auto">
+                                        <table class="w-full text-sm">
+                                            <thead class="bg-gray-100 dark:bg-gray-700">
+                                                <tr>
+                                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                                        No
+                                                    </th>
+                                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                                        Foto
+                                                    </th>
+                                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                                        Nama Peserta
+                                                    </th>
+                                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                                        No. Test
+                                                    </th>
+                                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                                        Batch
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-600">
+                                                @foreach($formationParticipants as $index => $participant)
+                                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                                                        <td class="px-4 py-3 text-gray-900 dark:text-gray-100">
+                                                            {{ $formationParticipants->firstItem() + $index }}
+                                                        </td>
+                                                        <td class="px-4 py-3">
+                                                            @if($participant->photo_path)
+                                                                <img src="{{ Storage::url($participant->photo_path) }}"
+                                                                     alt="{{ $participant->name }}"
+                                                                     class="w-10 h-10 rounded-full object-cover">
+                                                            @else
+                                                                <div class="w-10 h-10 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center">
+                                                                    <i class="fa-solid fa-user text-gray-600 dark:text-gray-400 text-xs"></i>
+                                                                </div>
+                                                            @endif
+                                                        </td>
+                                                        <td class="px-4 py-3 font-medium text-gray-900 dark:text-gray-100">
+                                                            {{ $participant->name }}
+                                                        </td>
+                                                        <td class="px-4 py-3 text-gray-600 dark:text-gray-400">
+                                                            {{ $participant->test_number }}
+                                                        </td>
+                                                        <td class="px-4 py-3">
+                                                            @if($participant->batch)
+                                                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                                                                    <i class="fa-solid fa-layer-group mr-1"></i>{{ $participant->batch->name }}
+                                                                </span>
+                                                            @else
+                                                                <span class="text-gray-400 dark:text-gray-500 text-xs">-</span>
+                                                            @endif
+                                                        </td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <div class="p-4 bg-gray-50 dark:bg-gray-700 border-t border-gray-200 dark:border-gray-600">
+                                        {{ $formationParticipants->links(data: ['scrollTo' => false]) }}
+                                    </div>
+                                @else
+                                    <div class="p-4 text-center text-sm text-gray-500 dark:text-gray-400">
+                                        Belum ada peserta terdaftar
+                                    </div>
+                                @endif
+                            @endif
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        @endif
+
         <!-- Batches Section -->
-        @if($event->batches->count() > 0)
+        @if($batches->count() > 0)
             <div class="p-6 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-600">
                 <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">Daftar Batch</h2>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    @foreach($event->batches as $batch)
-                        <div class="bg-white dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600">
-                            <div class="font-semibold text-gray-900 dark:text-gray-100">{{ $batch->name }}</div>
-                            <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">Kode: {{ $batch->code }}</div>
+                <div class="space-y-4">
+                    @foreach($batches as $batch)
+                        <div class="bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 overflow-hidden">
+                            <div class="bg-gradient-to-r from-blue-600 to-blue-700 dark:from-blue-700 dark:to-blue-800 p-4 text-white cursor-pointer hover:from-blue-700 hover:to-blue-800 dark:hover:from-blue-800 dark:hover:to-blue-900 transition-colors"
+                                 wire:click="toggleBatch({{ $batch->id }})">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex-1">
+                                        <h3 class="font-bold text-lg">{{ $batch->name }}</h3>
+                                        <p class="text-sm text-blue-100 mt-1">Kode: {{ $batch->code }}</p>
+                                    </div>
+                                    <div class="flex items-center gap-4">
+                                        <div class="text-2xl font-bold">
+                                            {{ $batch->participants_count }}
+                                            <span class="text-sm text-blue-100">peserta</span>
+                                        </div>
+                                        <div class="text-2xl">
+                                            <i class="fa-solid {{ $expandedBatch === $batch->id ? 'fa-chevron-up' : 'fa-chevron-down' }}"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            @if($expandedBatch === $batch->id)
+                                <div class="p-4 space-y-3">
+                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        @if($batch->location)
+                                            <div class="flex items-start gap-2">
+                                                <i class="fa-solid fa-map-marker-alt text-gray-400 mt-1"></i>
+                                                <div>
+                                                    <div class="text-xs text-gray-500 dark:text-gray-400">Lokasi</div>
+                                                    <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ $batch->location }}</div>
+                                                </div>
+                                            </div>
+                                        @endif
+
+                                        @if($batch->start_date)
+                                            <div class="flex items-start gap-2">
+                                                <i class="fa-solid fa-calendar-alt text-gray-400 mt-1"></i>
+                                                <div>
+                                                    <div class="text-xs text-gray-500 dark:text-gray-400">Periode</div>
+                                                    <div class="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                                        {{ $batch->start_date->translatedFormat('d M Y') }}
+                                                        @if($batch->end_date)
+                                                            - {{ $batch->end_date->translatedFormat('d M Y') }}
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endif
+
+                                        <div class="flex items-start gap-2">
+                                            <i class="fa-solid fa-hashtag text-gray-400 mt-1"></i>
+                                            <div>
+                                                <div class="text-xs text-gray-500 dark:text-gray-400">Nomor Batch</div>
+                                                <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ $batch->batch_number }}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    @if($batchParticipants && $batchParticipants->total() > 0)
+                                        <div class="pt-3 border-t border-gray-200 dark:border-gray-600">
+                                            <div class="overflow-x-auto">
+                                                <table class="w-full text-sm">
+                                                    <thead class="bg-gray-100 dark:bg-gray-600">
+                                                        <tr>
+                                                            <th class="px-4 py-2 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                                                No
+                                                            </th>
+                                                            <th class="px-4 py-2 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                                                Nama Peserta
+                                                            </th>
+                                                            <th class="px-4 py-2 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                                                No. Test
+                                                            </th>
+                                                            <th class="px-4 py-2 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                                                Formasi Jabatan
+                                                            </th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody class="bg-white dark:bg-gray-700 divide-y divide-gray-200 dark:divide-gray-600">
+                                                        @foreach($batchParticipants as $index => $participant)
+                                                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
+                                                                <td class="px-4 py-2 text-gray-900 dark:text-gray-100">
+                                                                    {{ $batchParticipants->firstItem() + $index }}
+                                                                </td>
+                                                                <td class="px-4 py-2 font-medium text-gray-900 dark:text-gray-100">
+                                                                    {{ $participant->name }}
+                                                                </td>
+                                                                <td class="px-4 py-2 text-gray-600 dark:text-gray-400">
+                                                                    {{ $participant->test_number }}
+                                                                </td>
+                                                                <td class="px-4 py-2">
+                                                                    @if($participant->positionFormation)
+                                                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                                                                            <i class="fa-solid fa-briefcase mr-1"></i>{{ $participant->positionFormation->name }}
+                                                                        </span>
+                                                                    @else
+                                                                        <span class="text-gray-400 dark:text-gray-500 text-xs">-</span>
+                                                                    @endif
+                                                                </td>
+                                                            </tr>
+                                                        @endforeach
+                                                    </tbody>
+                                                </table>
+                                            </div>
+
+                                            <div class="mt-3">
+                                                {{ $batchParticipants->links(data: ['scrollTo' => false]) }}
+                                            </div>
+                                        </div>
+                                    @else
+                                        <div class="pt-3 border-t border-gray-200 dark:border-gray-600 text-center text-sm text-gray-500 dark:text-gray-400">
+                                            Belum ada peserta terdaftar
+                                        </div>
+                                    @endif
+                                </div>
+                            @endif
                         </div>
                     @endforeach
                 </div>
