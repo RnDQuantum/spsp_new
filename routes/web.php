@@ -35,9 +35,9 @@ Route::middleware(['auth', 'institution.access'])->group(function () {
     // Institution Routes
     Route::get('/institutions/{institution}', \App\Livewire\Institutions\Show::class)->name('institutions.show');
 
-    // Event Routes (will be created later)
-    // Route::get('/events', \App\Livewire\Events\Index::class)->name('events.index');
-    // Route::get('/events/{assessmentEvent:code}', \App\Livewire\Events\Show::class)->name('events.show');
+    // Event Routes
+    Route::get('/events', \App\Livewire\Events\Index::class)->name('events.index');
+    Route::get('/events/{event:code}', \App\Livewire\Events\Show::class)->name('events.show');
 
     Route::get('/shortlist-peserta', \App\Livewire\Pages\ParticipantsList::class)->name('shortlist');
 
