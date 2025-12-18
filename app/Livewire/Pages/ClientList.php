@@ -2,9 +2,11 @@
 
 namespace App\Livewire\Pages;
 
+use App\Models\Institution;
+use App\Models\InstitutionCategory;
+use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Livewire\Attributes\Layout;
 
 #[Layout('components.layouts.app', ['title' => 'Daftar Klien'])]
 class ClientList extends Component
@@ -12,91 +14,47 @@ class ClientList extends Component
     use WithPagination;
 
     public $search = '';
-    public $categoryFilter = '';
-    public $statusFilter = '';
+
+    public $categoryFilter = 'all';
+
+    public $statusFilter = 'all';
+
+    public $yearFilter = 'all';
+
     public $perPage = 10;
+
     public $sortField = 'name';
+
     public $sortDirection = 'asc';
 
     protected $queryString = [
         'search' => ['except' => ''],
-        'categoryFilter' => ['except' => ''],
-        'statusFilter' => ['except' => ''],
+        'categoryFilter' => ['except' => 'all'],
+        'statusFilter' => ['except' => 'all'],
+        'yearFilter' => ['except' => 'all'],
     ];
 
-    // Sample data - nanti bisa diganti dengan data dari database
-    protected function getClientsData()
-    {
-        return collect([
-            ['name' => 'Kementerian Keuangan', 'category' => 'Kementerian', 'date' => '2024-11-28', 'status' => 'Aktif'],
-            ['name' => 'PT. Telkom Indonesia', 'category' => 'BUMN', 'date' => '2024-11-25', 'status' => 'Aktif'],
-            ['name' => 'Universitas Indonesia', 'category' => 'Pendidikan', 'date' => '2024-11-22', 'status' => 'Pending'],
-            ['name' => 'PT. Bank Mandiri', 'category' => 'BUMN', 'date' => '2024-11-20', 'status' => 'Aktif'],
-            ['name' => 'Kementerian BUMN', 'category' => 'Kementerian', 'date' => '2024-11-18', 'status' => 'Selesai'],
-            ['name' => 'PT. Pertamina', 'category' => 'BUMN', 'date' => '2024-11-15', 'status' => 'Aktif'],
-            ['name' => 'Universitas Gadjah Mada', 'category' => 'Pendidikan', 'date' => '2024-11-12', 'status' => 'Pending'],
-            ['name' => 'Kementerian Pendidikan', 'category' => 'Kementerian', 'date' => '2024-11-10', 'status' => 'Aktif'],
-            ['name' => 'PT. Unilever Indonesia', 'category' => 'Swasta', 'date' => '2024-11-08', 'status' => 'Aktif'],
-            ['name' => 'Institut Teknologi Bandung', 'category' => 'Pendidikan', 'date' => '2024-11-05', 'status' => 'Selesai'],
-            ['name' => 'Kementerian Kesehatan', 'category' => 'Kementerian', 'date' => '2024-11-03', 'status' => 'Aktif'],
-            ['name' => 'PT. Garuda Indonesia', 'category' => 'BUMN', 'date' => '2024-11-01', 'status' => 'Pending'],
-            ['name' => 'Universitas Airlangga', 'category' => 'Pendidikan', 'date' => '2024-10-30', 'status' => 'Aktif'],
-            ['name' => 'PT. Astra International', 'category' => 'Swasta', 'date' => '2024-10-28', 'status' => 'Aktif'],
-            ['name' => 'Kementerian Dalam Negeri', 'category' => 'Kementerian', 'date' => '2024-10-25', 'status' => 'Selesai'],
-            ['name' => 'PT. PLN', 'category' => 'BUMN', 'date' => '2024-10-22', 'status' => 'Aktif'],
-            ['name' => 'Universitas Padjadjaran', 'category' => 'Pendidikan', 'date' => '2024-10-20', 'status' => 'Aktif'],
-            ['name' => 'PT. BCA', 'category' => 'Swasta', 'date' => '2024-10-18', 'status' => 'Pending'],
-            ['name' => 'Kementerian Perhubungan', 'category' => 'Kementerian', 'date' => '2024-10-15', 'status' => 'Aktif'],
-            ['name' => 'PT. Indofood', 'category' => 'Swasta', 'date' => '2024-10-12', 'status' => 'Aktif'],
-            ['name' => 'Universitas Diponegoro', 'category' => 'Pendidikan', 'date' => '2024-10-10', 'status' => 'Selesai'],
-            ['name' => 'PT. Wijaya Karya', 'category' => 'BUMN', 'date' => '2024-10-08', 'status' => 'Aktif'],
-            ['name' => 'Kementerian Perindustrian', 'category' => 'Kementerian', 'date' => '2024-10-05', 'status' => 'Pending'],
-            ['name' => 'PT. Semen Indonesia', 'category' => 'BUMN', 'date' => '2024-10-03', 'status' => 'Aktif'],
-            ['name' => 'Universitas Brawijaya', 'category' => 'Pendidikan', 'date' => '2024-10-01', 'status' => 'Aktif'],
-            ['name' => 'PT. BNI', 'category' => 'BUMN', 'date' => '2024-09-28', 'status' => 'Aktif'],
-            ['name' => 'Kementerian Pertanian', 'category' => 'Kementerian', 'date' => '2024-09-25', 'status' => 'Selesai'],
-            ['name' => 'PT. Adaro Energy', 'category' => 'Swasta', 'date' => '2024-09-22', 'status' => 'Aktif'],
-            ['name' => 'Universitas Hasanuddin', 'category' => 'Pendidikan', 'date' => '2024-09-20', 'status' => 'Pending'],
-            ['name' => 'PT. Angkasa Pura', 'category' => 'BUMN', 'date' => '2024-09-18', 'status' => 'Aktif'],
-            ['name' => 'Kementerian Pariwisata', 'category' => 'Kementerian', 'date' => '2024-09-15', 'status' => 'Aktif'],
-            ['name' => 'PT. BRI', 'category' => 'BUMN', 'date' => '2024-09-12', 'status' => 'Aktif'],
-            ['name' => 'Universitas Sebelas Maret', 'category' => 'Pendidikan', 'date' => '2024-09-10', 'status' => 'Selesai'],
-            ['name' => 'PT. Gudang Garam', 'category' => 'Swasta', 'date' => '2024-09-08', 'status' => 'Aktif'],
-            ['name' => 'Kementerian Ketenagakerjaan', 'category' => 'Kementerian', 'date' => '2024-09-05', 'status' => 'Pending'],
-            ['name' => 'PT. Pelni', 'category' => 'BUMN', 'date' => '2024-09-03', 'status' => 'Aktif'],
-            ['name' => 'Universitas Andalas', 'category' => 'Pendidikan', 'date' => '2024-09-01', 'status' => 'Aktif'],
-            ['name' => 'PT. HM Sampoerna', 'category' => 'Swasta', 'date' => '2024-08-28', 'status' => 'Aktif'],
-            ['name' => 'Kementerian Sosial', 'category' => 'Kementerian', 'date' => '2024-08-25', 'status' => 'Selesai'],
-            ['name' => 'PT. Jasa Marga', 'category' => 'BUMN', 'date' => '2024-08-22', 'status' => 'Aktif'],
-            ['name' => 'Warung Kopi Kenangan', 'category' => 'UMKM', 'date' => '2024-08-20', 'status' => 'Pending'],
-            ['name' => 'Toko Elektronik Maju', 'category' => 'UMKM', 'date' => '2024-08-18', 'status' => 'Aktif'],
-            ['name' => 'CV. Berkah Jaya', 'category' => 'UMKM', 'date' => '2024-08-15', 'status' => 'Aktif'],
-            ['name' => 'PT. Mayora Indah', 'category' => 'Swasta', 'date' => '2024-08-12', 'status' => 'Selesai'],
-            ['name' => 'Kementerian Energi', 'category' => 'Kementerian', 'date' => '2024-08-10', 'status' => 'Aktif'],
-            ['name' => 'UD. Sumber Rezeki', 'category' => 'UMKM', 'date' => '2024-08-08', 'status' => 'Pending'],
-            ['name' => 'PT. Kalbe Farma', 'category' => 'Swasta', 'date' => '2024-08-05', 'status' => 'Aktif'],
-            ['name' => 'Toko Baju Fashion', 'category' => 'UMKM', 'date' => '2024-08-03', 'status' => 'Aktif'],
-            ['name' => 'PT. Bukalapak', 'category' => 'Swasta', 'date' => '2024-08-01', 'status' => 'Aktif'],
-            ['name' => 'Kedai Nasi Padang Sederhana', 'category' => 'UMKM', 'date' => '2024-07-28', 'status' => 'Selesai'],
-        ]);
-    }
-
-    public function updatingSearch()
+    public function updatingSearch(): void
     {
         $this->resetPage();
     }
 
-    public function updatingCategoryFilter()
+    public function updatingCategoryFilter(): void
     {
         $this->resetPage();
     }
 
-    public function updatingStatusFilter()
+    public function updatingStatusFilter(): void
     {
         $this->resetPage();
     }
 
-    public function sortBy($field)
+    public function updatingYearFilter(): void
+    {
+        $this->resetPage();
+    }
+
+    public function sortBy(string $field): void
     {
         if ($this->sortField === $field) {
             $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
@@ -106,50 +64,101 @@ class ClientList extends Component
         }
     }
 
-    public function getClientsProperty()
+    public function render()
     {
-        $clients = $this->getClientsData();
+        $query = Institution::with([
+            'categories' => function ($q) {
+                $q->select('institution_categories.id', 'institution_categories.code', 'institution_categories.name')
+                    ->orderByDesc('category_institution.is_primary');
+            },
+            'assessmentEvents' => function ($q) {
+                $q->select('id', 'institution_id', 'year', 'status')
+                    ->latest()
+                    ->limit(1);
+            },
+        ]);
 
-        // Apply filters
         if ($this->search) {
-            $clients = $clients->filter(function ($client) {
-                return stripos($client['name'], $this->search) !== false;
+            $query->where('name', 'like', "%{$this->search}%");
+        }
+
+        if ($this->categoryFilter !== 'all') {
+            $query->whereHas('categories', function ($q) {
+                $q->where('institution_categories.code', $this->categoryFilter);
             });
         }
 
-        if ($this->categoryFilter) {
-            $clients = $clients->where('category', $this->categoryFilter);
+        if ($this->yearFilter !== 'all') {
+            $query->whereHas('assessmentEvents', function ($q) {
+                $q->where('year', $this->yearFilter);
+            });
         }
 
-        if ($this->statusFilter) {
-            $clients = $clients->where('status', $this->statusFilter);
+        if ($this->statusFilter !== 'all') {
+            $query->whereHas('assessmentEvents', function ($q) {
+                $q->where('status', $this->statusFilter);
+            });
         }
 
-        // Apply sorting
-        $clients = $clients->sortBy($this->sortField, SORT_REGULAR, $this->sortDirection === 'desc');
+        $query->orderBy($this->sortField, $this->sortDirection);
 
-        return $clients->values();
-    }
+        $institutions = $query->paginate($this->perPage);
 
-    public function render()
-    {
-        $clients = $this->clients;
-        $total = $clients->count();
+        $clients = $institutions->map(function ($institution) {
+            $latestEvent = $institution->assessmentEvents->first();
+            $primaryCategory = $institution->categories->first();
 
-        // Manual pagination
-        $currentPage = $this->getPage();
-        $perPage = $this->perPage;
-        $offset = ($currentPage - 1) * $perPage;
-
-        $paginatedClients = $clients->slice($offset, $perPage)->values();
+            return [
+                'id' => $institution->id,
+                'name' => $institution->name,
+                'code' => $institution->code,
+                'category' => $primaryCategory?->name ?? '-',
+                'category_code' => $primaryCategory?->code ?? null,
+                'categories' => $institution->categories->pluck('name')->join(', '),
+                'date' => $institution->created_at->format('d M Y'),
+                'status' => $latestEvent ? $this->mapStatus($latestEvent->status) : 'Pending',
+                'status_raw' => $latestEvent?->status ?? 'draft',
+                'status_class' => $latestEvent ? $this->getStatusClass($latestEvent->status) : 'yellow',
+                'events_count' => $institution->assessmentEvents->count(),
+            ];
+        });
 
         return view('livewire.pages.list-klien', [
-            'clients' => $paginatedClients,
-            'total' => $total,
-            'from' => $total > 0 ? $offset + 1 : 0,
-            'to' => min($offset + $perPage, $total),
-            'currentPage' => $currentPage,
-            'lastPage' => ceil($total / $perPage),
+            'clients' => $clients,
+            'categories' => InstitutionCategory::where('is_active', true)->orderBy('order')->get(),
+            'years' => $this->getAvailableYears(),
+            'total' => $institutions->total(),
+            'from' => $institutions->firstItem() ?? 0,
+            'to' => $institutions->lastItem() ?? 0,
+            'currentPage' => $institutions->currentPage(),
+            'lastPage' => $institutions->lastPage(),
         ]);
+    }
+
+    private function getAvailableYears(): array
+    {
+        $currentYear = date('Y');
+
+        return range($currentYear, $currentYear - 5);
+    }
+
+    private function mapStatus(?string $status): string
+    {
+        return match ($status) {
+            'ongoing' => 'Aktif',
+            'completed' => 'Selesai',
+            'draft' => 'Pending',
+            default => 'Pending'
+        };
+    }
+
+    private function getStatusClass(?string $status): string
+    {
+        return match ($status) {
+            'ongoing' => 'green',
+            'completed' => 'gray',
+            'draft' => 'yellow',
+            default => 'yellow'
+        };
     }
 }

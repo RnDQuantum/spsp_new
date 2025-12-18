@@ -13,28 +13,9 @@
             </p>
         </div>
 
-        <!-- Action Buttons -->
-        <div class="p-6 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-600">
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <!-- Action Buttons -->
-                <div class="flex gap-2">
-                    <button
-                        class="inline-flex items-center px-4 py-2 bg-gray-800 dark:bg-gray-700 text-white font-semibold rounded-lg shadow hover:bg-gray-700 dark:hover:bg-gray-600 transition-colors">
-                        <i class="fa-solid fa-plus mr-2"></i>
-                        Tambah Klien
-                    </button>
-                    <button
-                        class="inline-flex items-center px-4 py-2 bg-green-600 dark:bg-green-700 text-white font-semibold rounded-lg shadow hover:bg-green-700 dark:hover:bg-green-600 transition-colors">
-                        <i class="fa-solid fa-file-excel mr-2"></i>
-                        Export Excel
-                    </button>
-                </div>
-            </div>
-        </div>
-
         <!-- Filters & Search Section -->
         <div class="p-6 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
                 <!-- Search -->
                 <div class="md:col-span-2">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Pencarian</label>
@@ -52,12 +33,22 @@
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Kategori</label>
                     <select wire:model.live="categoryFilter"
                         class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white p-2 border">
-                        <option value="">Semua Kategori</option>
-                        <option value="Kementerian">Kementerian</option>
-                        <option value="BUMN">BUMN</option>
-                        <option value="Swasta">Swasta</option>
-                        <option value="Pendidikan">Pendidikan</option>
-                        <option value="UMKM">UMKM</option>
+                        <option value="all">Semua Kategori</option>
+                        @foreach($categories as $category)
+                            <option value="{{ $category->code }}">{{ $category->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <!-- Filter Tahun -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tahun</label>
+                    <select wire:model.live="yearFilter"
+                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white p-2 border">
+                        <option value="all">Semua Tahun</option>
+                        @foreach($years as $year)
+                            <option value="{{ $year }}">{{ $year }}</option>
+                        @endforeach
                     </select>
                 </div>
 
@@ -66,10 +57,10 @@
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
                     <select wire:model.live="statusFilter"
                         class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white p-2 border">
-                        <option value="">Semua Status</option>
-                        <option value="Aktif">Aktif</option>
-                        <option value="Pending">Pending</option>
-                        <option value="Selesai">Selesai</option>
+                        <option value="all">Semua Status</option>
+                        <option value="draft">Pending</option>
+                        <option value="ongoing">Aktif</option>
+                        <option value="completed">Selesai</option>
                     </select>
                 </div>
             </div>
@@ -186,11 +177,11 @@
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-center">
-                                    <button
+                                    <a href="{{ route('institutions.show', $client['id']) }}"
                                         class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 mr-3"
                                         title="Lihat Detail">
                                         <i class="fa-solid fa-eye"></i>
-                                    </button>
+                                    </a>
                                     <button
                                         class="text-yellow-600 hover:text-yellow-900 dark:text-yellow-400 dark:hover:text-yellow-300 mr-3"
                                         title="Edit">

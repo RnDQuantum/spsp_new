@@ -70,9 +70,17 @@ class DashboardAdmin extends Component
 
     private function getRecentClients()
     {
-        $query = Institution::with(['categories', 'assessmentEvents' => function ($q) {
-            $q->latest()->limit(1);
-        }]);
+        $query = Institution::with([
+            'categories' => function ($q) {
+                $q->select('institution_categories.id', 'institution_categories.code', 'institution_categories.name')
+                    ->orderByDesc('category_institution.is_primary');
+            },
+            'assessmentEvents' => function ($q) {
+                $q->select('id', 'institution_id', 'year', 'status')
+                    ->latest()
+                    ->limit(1);
+            }
+        ]);
 
         if ($this->selectedYear !== 'all' && $this->selectedYear) {
             $query->whereHas('assessmentEvents', function ($q) {
@@ -88,8 +96,7 @@ class DashboardAdmin extends Component
 
         return $query->latest()->limit(10)->get()->map(function ($institution) {
             $latestEvent = $institution->assessmentEvents->first();
-            $primaryCategory = $institution->categories->where('pivot.is_primary', true)->first()
-                ?? $institution->categories->first();
+            $primaryCategory = $institution->categories->first();
 
             return [
                 'name' => $institution->name,
