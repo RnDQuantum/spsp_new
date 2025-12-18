@@ -89,8 +89,7 @@ class GeneralMatching extends Component
             'positionFormation', // Include position formation itself
         ])
             ->whereHas('assessmentEvent', function ($query) {
-                $query->where('code', $this->eventCode)
-                    ->where('institution_id', auth()->user()->institution_id ?? 4); // Add institution filter
+                $query->where('code', $this->eventCode);
             })
             ->where('test_number', $this->testNumber)
             ->firstOrFail();
