@@ -116,7 +116,7 @@
                                 <td
                                     class="border border-black px-3 py-2 text-center 
                                        text-gray-900 dark:text-white">
-                                    {{ ['I', 'II', 'III', 'IV', 'V'][$index] }}
+                                    {{ ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII', 'XIII', 'XIV', 'XV', 'XVI', 'XVII', 'XVIII', 'XIX', 'XX'][$index] }}
                                 </td>
                                 <td
                                     class="border border-black px-3 py-2 
