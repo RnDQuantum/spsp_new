@@ -21,6 +21,13 @@ class ParticipantListModal extends Component
 
     public array $participants = [];
 
+    // 🚀 PERFORMANCE: Cache filtered results to avoid re-computation
+    private ?array $filteredCache = null;
+
+    private ?string $lastSearchTerm = null;
+
+    private ?string $lastSortKey = null;
+
     protected $listeners = ['openParticipantModal'];
 
     /**
@@ -32,6 +39,7 @@ class ParticipantListModal extends Component
         $this->participants = $participants;
         $this->showModal = true;
         $this->resetPage();
+        $this->clearCache();
     }
 
     /**
@@ -44,6 +52,17 @@ class ParticipantListModal extends Component
         $this->participants = [];
         $this->search = '';
         $this->resetPage();
+        $this->clearCache();
+    }
+
+    /**
+     * Clear filter cache
+     */
+    private function clearCache(): void
+    {
+        $this->filteredCache = null;
+        $this->lastSearchTerm = null;
+        $this->lastSortKey = null;
     }
 
     /**
@@ -58,21 +77,34 @@ class ParticipantListModal extends Component
             $this->sortDirection = 'asc';
         }
 
+        $this->clearCache();
         $this->resetPage();
     }
 
     /**
      * Get filtered and sorted participants
+     * 🚀 PERFORMANCE: Cached to avoid re-computation on pagination
      */
     public function getFilteredParticipantsProperty()
     {
+        // 🚀 Check cache validity
+        $currentSortKey = "{$this->sortBy}_{$this->sortDirection}";
+
+        if ($this->filteredCache !== null
+            && $this->lastSearchTerm === $this->search
+            && $this->lastSortKey === $currentSortKey) {
+            return collect($this->filteredCache);
+        }
+
+        // Cache miss - perform filtering and sorting
         $filtered = collect($this->participants);
 
         // Search filter
         if ($this->search) {
-            $filtered = $filtered->filter(function ($participant) {
-                return str_contains(strtolower($participant['name']), strtolower($this->search)) ||
-                    str_contains(strtolower($participant['test_number']), strtolower($this->search));
+            $searchLower = strtolower($this->search);
+            $filtered = $filtered->filter(function ($participant) use ($searchLower) {
+                return str_contains(strtolower($participant['name']), $searchLower) ||
+                    str_contains(strtolower($participant['test_number']), $searchLower);
             });
         }
 
@@ -82,6 +114,11 @@ class ParticipantListModal extends Component
                 ? $a[$this->sortBy] <=> $b[$this->sortBy]
                 : $b[$this->sortBy] <=> $a[$this->sortBy],
         ]);
+
+        // 🚀 Update cache
+        $this->filteredCache = $filtered->values()->all();
+        $this->lastSearchTerm = $this->search;
+        $this->lastSortKey = $currentSortKey;
 
         return $filtered;
     }
@@ -124,13 +161,23 @@ class ParticipantListModal extends Component
 
     public function updatingSearch(): void
     {
+        $this->clearCache();
         $this->resetPage();
     }
 
     public function render()
     {
+        // 🚀 PERFORMANCE: Only compute pagination when modal is actually shown
+        $paginatedData = $this->showModal ? $this->paginatedParticipants : [
+            'data' => collect([]),
+            'total' => 0,
+            'per_page' => 15,
+            'current_page' => 1,
+            'last_page' => 1,
+        ];
+
         return view('livewire.pages.talent-pool.participant-list-modal', [
-            'paginatedData' => $this->paginatedParticipants,
+            'paginatedData' => $paginatedData,
             'boxInfo' => $this->selectedBox ? $this->boxConfig[$this->selectedBox] : null,
         ]);
     }

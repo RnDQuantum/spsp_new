@@ -781,9 +781,19 @@
                     summaryBody.appendChild(totalRow);
                 }
 
+                // 🚀 PERFORMANCE: Prevent modal from opening multiple times
+                let isModalOpening = false;
+
                 // Function to open participant modal
                 function openParticipantModal(boxNumber) {
-                    // Get participants for this box
+                    // 🚀 Debounce: prevent rapid clicks
+                    if (isModalOpening) {
+                        return;
+                    }
+
+                    isModalOpening = true;
+
+                    // Get participants for this box (already in memory, fast)
                     const pesertaData = @json($this->chart);
                     const participantsInBox = pesertaData.filter(p => p.box === parseInt(boxNumber));
 
@@ -800,6 +810,11 @@
                         parseInt(boxNumber),
                         modalData
                     ]);
+
+                    // 🚀 Reset debounce flag after modal transition completes
+                    setTimeout(() => {
+                        isModalOpening = false;
+                    }, 200);
                 }
 
                 // Initialize chart on page load
