@@ -16,11 +16,6 @@ export default defineConfig(({ mode }) => {
             tailwindcss(),
         ],
         server: {
-            host: '0.0.0.0', // Listen on all interfaces
-            port: 5173,      // Explicitly set port
-            hmr: {
-                host: env.VITE_HMR_HOST || 'localhost', // Browser should connect to this host
-            },
             cors: true,
         },
     };
