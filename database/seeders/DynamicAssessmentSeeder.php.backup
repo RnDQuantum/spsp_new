@@ -10,8 +10,10 @@ use App\Models\AssessmentTemplate;
 use App\Models\Batch;
 use App\Models\CategoryType;
 use App\Models\Institution;
+use App\Models\Interpretation;
 use App\Models\Participant;
 use App\Models\PositionFormation;
+use App\Models\PsychologicalTest;
 use App\Services\Assessment\AssessmentCalculationService;
 use App\Services\Cache\AspectCacheService;
 use Illuminate\Database\Seeder;
@@ -19,7 +21,9 @@ use Illuminate\Support\Facades\DB;
 
 class DynamicAssessmentSeeder extends Seeder
 {
-    public function __construct(private readonly AssessmentCalculationService $assessmentService) {}
+    public function __construct(private readonly AssessmentCalculationService $assessmentService)
+    {
+    }
 
     /**
      * KONFIGURASI SEEDER DINAMIS
@@ -358,7 +362,7 @@ class DynamicAssessmentSeeder extends Seeder
     }
 
     /**
-     * Seed single event with all participants (OPTIMIZED)
+     * Seed single event with all participants
      */
     private function seedEvent(array $config): void
     {
@@ -384,7 +388,7 @@ class DynamicAssessmentSeeder extends Seeder
                     ...$batchData,
                 ]);
             }
-            $this->info('  📦 Batches created: '.count($batches));
+            $this->info('  📦 Batches created: ' . count($batches));
 
             // 4. Create positions with their templates
             $positions = [];
@@ -403,7 +407,7 @@ class DynamicAssessmentSeeder extends Seeder
                 $position->load('template');
                 $positions[] = $position;
             }
-            $this->info('  💼 Positions created: '.count($positions));
+            $this->info('  💼 Positions created: ' . count($positions));
 
             // ⚡ CACHE: Pre-load all templates' categories & aspects once
             $templateIds = collect($positions)->pluck('template_id')->unique()->values();
@@ -426,309 +430,73 @@ class DynamicAssessmentSeeder extends Seeder
 
             $this->info('  🚀 Cached categories & aspects for performance');
 
-            // 5. Generate participants with calculated assessments (OPTIMIZED)
-            $this->seedParticipantsOptimized($event, $batches, $positions, $config, $categoriesCache, $aspectsCache);
-        });
-    }
+            // 5. Generate participants with calculated assessments
+            $this->info("  👥 Creating {$config['participants_count']} participants...");
 
-    /**
-     * ⚡ OPTIMIZED: Seed participants in batches with bulk inserts
-     */
-    private function seedParticipantsOptimized(
-        AssessmentEvent $event,
-        array $batches,
-        array $positions,
-        array $config,
-        $categoriesCache,
-        $aspectsCache
-    ): void {
-        $totalParticipants = $config['participants_count'];
-        $this->info("  👥 Creating {$totalParticipants} participants...");
+            $progressBar = $this->command->getOutput()->createProgressBar($config['participants_count']);
+            $progressBar->start();
 
-        $progressBar = $this->command->getOutput()->createProgressBar($totalParticipants);
-        $progressBar->start();
+            // ⚡ OPTIMIZATION: Process in larger chunks with periodic transaction commits
+            $chunkSize = 50; // Reduced chunk size for faster commits
+            $totalChunks = (int) ceil($config['participants_count'] / $chunkSize);
 
-        // ⚡ ADAPTIVE CHUNK SIZE: Larger chunks for better performance
-        $chunkSize = match (true) {
-            $totalParticipants < 500 => 50,
-            $totalParticipants < 2000 => 100,
-            $totalParticipants < 5000 => 150,
-            default => 200
-        };
+            for ($chunk = 0; $chunk < $totalChunks; $chunk++) {
+                $currentChunkSize = min($chunkSize, $config['participants_count'] - ($chunk * $chunkSize));
 
-        $totalChunks = (int) ceil($totalParticipants / $chunkSize);
-        $this->info("\n  📊 Processing in {$totalChunks} chunks of ~{$chunkSize} participants");
+                // ⚡ Use separate transaction per chunk to avoid memory buildup
+                DB::transaction(function () use ($currentChunkSize, $batches, $positions, $event, $config, $progressBar, $categoriesCache, $aspectsCache) {
+                    for ($i = 0; $i < $currentChunkSize; $i++) {
+                        // Determine performance level based on distribution
+                        $performanceLevel = $this->determinePerformanceLevel($config['performance_distribution']);
 
-        for ($chunkIndex = 0; $chunkIndex < $totalChunks; $chunkIndex++) {
-            $currentChunkSize = min($chunkSize, $totalParticipants - ($chunkIndex * $chunkSize));
+                        // Random batch & position
+                        $batch = fake()->randomElement($batches);
+                        $position = fake()->randomElement($positions);
 
-            // ⚡ Process chunk in separate transaction
-            DB::beginTransaction();
-            try {
-                $this->processParticipantChunk(
-                    $currentChunkSize,
-                    $event,
-                    $batches,
-                    $positions,
-                    $config,
-                    $categoriesCache,
-                    $aspectsCache,
-                    $progressBar
-                );
+                        // Create participant
+                        $participant = Participant::factory()->forEvent($event)->forBatch($batch)->forPosition($position)->create();
 
-                DB::commit();
+                        // Get template from position (not from event!)
+                        $template = $position->template;
 
-                // ⚡ Memory management: GC every 5 chunks
-                if ($chunkIndex % 5 === 0 && $chunkIndex > 0) {
-                    gc_collect_cycles();
+                        // ⚡ Get categories from cache instead of query
+                        $categories = $categoriesCache->get($template->id);
+                        $potensiCategory = $categories->firstWhere('code', 'potensi');
+                        $kompetensiCategory = $categories->firstWhere('code', 'kompetensi');
+
+                        // Generate assessment data (RAW DATA like API)
+                        $assessmentsData = $this->generateAssessmentsData($template, $potensiCategory, $kompetensiCategory, $performanceLevel, $aspectsCache);
+
+                        // ⚡ Calculate assessments using SERVICE (without nested transaction)
+                        $this->assessmentService->calculateParticipantWithoutTransaction($participant, $assessmentsData);
+
+                        // Create psychological test
+                        $psychTestFactory = PsychologicalTest::factory()->forParticipant($participant);
+
+                        match ($performanceLevel) {
+                            'high' => $psychTestFactory->highPerformance()->create(),
+                            'medium' => $psychTestFactory->mediumPerformance()->create(),
+                            'low' => $psychTestFactory->lowPerformance()->create(),
+                        };
+
+                        // Create interpretations
+                        Interpretation::factory()->forParticipant($participant)->forCategoryType($potensiCategory)->potensi($performanceLevel)->create();
+
+                        Interpretation::factory()->forParticipant($participant)->forCategoryType($kompetensiCategory)->kompetensi($performanceLevel)->create();
+
+                        $progressBar->advance();
+                    }
+                });
+
+                // ⚡ CRITICAL: Clear entity manager cache every chunk to prevent memory leak
+                if ($chunk % 10 === 0) {
+                    gc_collect_cycles(); // Force garbage collection
                 }
-            } catch (\Exception $e) {
-                DB::rollBack();
-                $progressBar->finish();
-                throw $e;
-            }
-        }
-
-        $progressBar->finish();
-        $this->info("\n  ✅ {$totalParticipants} participants created successfully!");
-    }
-
-    /**
-     * ⚡ Process single chunk of participants with batch inserts
-     */
-    private function processParticipantChunk(
-        int $chunkSize,
-        AssessmentEvent $event,
-        array $batches,
-        array $positions,
-        array $config,
-        $categoriesCache,
-        $aspectsCache,
-        $progressBar
-    ): void {
-        // Prepare batch data arrays
-        $participantsData = [];
-        $psychTestsData = [];
-        $interpretationsData = [];
-
-        // Generate all participants data first
-        for ($i = 0; $i < $chunkSize; $i++) {
-            $performanceLevel = $this->determinePerformanceLevel($config['performance_distribution']);
-            $batch = fake()->randomElement($batches);
-            $position = fake()->randomElement($positions);
-
-            // Generate participant data
-            $participantData = $this->generateParticipantData($event, $batch, $position);
-            $participantsData[] = $participantData;
-        }
-
-        // ⚡ BULK INSERT: Insert all participants at once
-        DB::table('participants')->insert($participantsData);
-
-        // ⚡ Get inserted participants (using username as identifier)
-        $insertedParticipants = Participant::where('event_id', $event->id)
-            ->whereIn('username', collect($participantsData)->pluck('username'))
-            ->get()
-            ->keyBy('username');
-
-        // Process each participant's assessments
-        foreach ($participantsData as $pData) {
-            $participant = $insertedParticipants->get($pData['username']);
-            if (! $participant) {
-                continue;
             }
 
-            // Get performance level (regenerate based on distribution)
-            $performanceLevel = $this->determinePerformanceLevel($config['performance_distribution']);
-
-            // Get position and template
-            $position = collect($positions)->firstWhere('id', $participant->position_formation_id);
-            $template = $position->template;
-
-            // Get categories from cache
-            $categories = $categoriesCache->get($template->id);
-            $potensiCategory = $categories->firstWhere('code', 'potensi');
-            $kompetensiCategory = $categories->firstWhere('code', 'kompetensi');
-
-            // Generate assessment data
-            $assessmentsData = $this->generateAssessmentsData(
-                $template,
-                $potensiCategory,
-                $kompetensiCategory,
-                $performanceLevel,
-                $aspectsCache
-            );
-
-            // ⚡ Calculate assessments (already inside transaction)
-            $this->assessmentService->calculateParticipantWithoutTransaction($participant, $assessmentsData);
-
-            // Prepare psychological test data
-            $psychTestsData[] = $this->generatePsychTestData($participant, $performanceLevel);
-
-            // Prepare interpretations data
-            $interpretationsData[] = $this->generateInterpretationData($participant, $potensiCategory, $performanceLevel, 'potensi');
-            $interpretationsData[] = $this->generateInterpretationData($participant, $kompetensiCategory, $performanceLevel, 'kompetensi');
-
-            $progressBar->advance();
-        }
-
-        // ⚡ BULK INSERT: Insert psychological tests
-        if (! empty($psychTestsData)) {
-            DB::table('psychological_tests')->insert($psychTestsData);
-        }
-
-        // ⚡ BULK INSERT: Insert interpretations
-        if (! empty($interpretationsData)) {
-            DB::table('interpretations')->insert($interpretationsData);
-        }
-    }
-
-    /**
-     * Generate participant data array for bulk insert
-     */
-    private function generateParticipantData(AssessmentEvent $event, Batch $batch, PositionFormation $position): array
-    {
-        $gender = fake()->randomElement(['L', 'P']);
-        $firstName = $gender === 'L' ? fake()->firstNameMale() : fake()->firstNameFemale();
-        $lastName = fake()->lastName();
-        $degrees = ['S.Si', 'S.T', 'S.Kom', 'S.E', 'S.H', 'S.Ak', 'S.Psi', 'S.Pd', 'S.Sos'];
-        $degree = fake()->randomElement($degrees);
-
-        return [
-            'event_id' => $event->id,
-            'batch_id' => $batch->id,
-            'position_formation_id' => $position->id,
-            'username' => $this->generateUniqueUsername(),
-            'test_number' => $this->generateUniqueTestNumber(),
-            'skb_number' => $this->generateUniqueSkbNumber(),
-            'name' => strtoupper($firstName.' '.$lastName).', '.$degree,
-            'email' => $this->generateUniqueEmail(),
-            'phone' => fake()->numerify('08##########'),
-            'gender' => $gender,
-            'photo_path' => null,
-            'assessment_date' => fake()->dateTimeBetween('-30 days', 'now')->format('Y-m-d'),
-            'created_at' => now(),
-            'updated_at' => now(),
-        ];
-    }
-
-    /**
-     * Generate psychological test data for bulk insert
-     */
-    private function generatePsychTestData(Participant $participant, string $performanceLevel): array
-    {
-        $baseData = [
-            'participant_id' => $participant->id,
-            'event_id' => $participant->event_id,
-            'no_test' => $participant->test_number,
-            'username' => $participant->username,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ];
-
-        return match ($performanceLevel) {
-            'high' => array_merge($baseData, [
-                'validitas' => 'Valid - Hasil tes dapat dipercaya dan akurat',
-                'internal' => 'Memiliki kemampuan internal yang sangat baik dengan potensi tinggi dalam penalaran dan analisis',
-                'interpersonal' => 'Keterampilan interpersonal yang sangat baik, mampu memimpin dan berkolaborasi efektif',
-                'kap_kerja' => 'Kapasitas kerja tinggi dengan kemampuan menyelesaikan tugas kompleks secara efisien',
-                'klinik' => 'Tidak ada indikasi klinis yang signifikan, kondisi psikologis stabil',
-                'kesimpulan' => 'Kandidat dengan performa tinggi, memiliki potensi untuk posisi leadership',
-                'psikogram' => json_encode(['Leadership' => 'Sangat Baik', 'Problem Solving' => 'Sangat Baik', 'Adaptability' => 'Baik']),
-                'nilai_pq' => fake()->randomFloat(2, 85, 95),
-                'tingkat_stres' => fake()->randomElement(['Rendah', 'Normal']),
-            ]),
-            'medium' => array_merge($baseData, [
-                'validitas' => 'Valid - Hasil tes dapat dipercaya',
-                'internal' => 'Kemampuan internal yang memadai dengan potensi untuk berkembang',
-                'interpersonal' => 'Keterampilan interpersonal yang baik, mampu bekerja dalam tim',
-                'kap_kerja' => 'Kapasitas kerja yang memadai sesuai dengan standar posisi',
-                'klinik' => 'Tidak ada indikasi klinis yang signifikan',
-                'kesimpulan' => 'Kandidat dengan performa memadai, cocok untuk posisi yang dilamar',
-                'psikogram' => json_encode(['Reliability' => 'Baik', 'Organization' => 'Baik', 'Detail Orientation' => 'Baik']),
-                'nilai_pq' => fake()->randomFloat(2, 70, 84),
-                'tingkat_stres' => fake()->randomElement(['Normal', 'Sedang']),
-            ]),
-            'low' => array_merge($baseData, [
-                'validitas' => 'Valid dengan catatan - Perlu observasi lebih lanjut',
-                'internal' => 'Kemampuan internal perlu pengembangan lebih lanjut',
-                'interpersonal' => 'Keterampilan interpersonal memerlukan pengembangan',
-                'kap_kerja' => 'Kapasitas kerja di bawah standar, memerlukan pelatihan intensif',
-                'klinik' => 'Terdapat beberapa area yang memerlukan perhatian khusus',
-                'kesimpulan' => 'Kandidat memerlukan program pengembangan intensif sebelum dapat optimal',
-                'psikogram' => json_encode(['Adaptability' => 'Cukup', 'Motivation' => 'Perlu Ditingkatkan', 'Planning' => 'Perlu Ditingkatkan']),
-                'nilai_pq' => fake()->randomFloat(2, 50, 69),
-                'tingkat_stres' => fake()->randomElement(['Sedang', 'Tinggi']),
-            ]),
-        };
-    }
-
-    /**
-     * Generate interpretation data for bulk insert
-     */
-    private function generateInterpretationData(
-        Participant $participant,
-        CategoryType $category,
-        string $performanceLevel,
-        string $categoryCode
-    ): array {
-        $interpretations = [
-            'potensi' => [
-                'high' => 'Memiliki potensi yang sangat baik dengan kemampuan di atas rata-rata dalam berbagai aspek. Kandidat menunjukkan kecenderungan untuk berkembang pesat dan mampu mengatasi tantangan kompleks.',
-                'medium' => 'Menunjukkan potensi yang memadai dengan ruang untuk pengembangan lebih lanjut. Dengan bimbingan dan kesempatan yang tepat, kandidat dapat meningkatkan performa secara signifikan.',
-                'low' => 'Memerlukan pengembangan intensif untuk meningkatkan potensi di berbagai aspek. Diperlukan program pelatihan terstruktur dan mentoring berkelanjutan untuk mencapai standar yang diharapkan.',
-            ],
-            'kompetensi' => [
-                'high' => 'Menguasai kompetensi dengan sangat baik dan konsisten di atas standar yang ditetapkan. Kandidat mampu menerapkan kompetensi secara efektif dalam berbagai situasi kerja.',
-                'medium' => 'Memiliki kompetensi yang cukup memadai sesuai dengan standar posisi. Beberapa area masih memerlukan pengembangan untuk mencapai tingkat optimal.',
-                'low' => 'Perlu peningkatan signifikan dalam beberapa area kompetensi kunci. Diperlukan upaya intensif untuk mengembangkan kompetensi yang dipersyaratkan oleh posisi ini.',
-            ],
-        ];
-
-        return [
-            'participant_id' => $participant->id,
-            'category_type_id' => $category->id,
-            'event_id' => $participant->event_id,
-            'interpretation_text' => $interpretations[$categoryCode][$performanceLevel] ?? 'Data interpretasi sedang diproses.',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ];
-    }
-
-    // Unique identifier generators using static counter
-    private static int $participantCounter = 0;
-
-    private function generateUniqueUsername(): string
-    {
-        self::$participantCounter++;
-        $letters = fake()->bothify('???');
-        $numbers = str_pad((string) (self::$participantCounter % 100), 2, '0', STR_PAD_LEFT);
-        $suffix = str_pad((string) ((int) (self::$participantCounter / 100)), 3, '0', STR_PAD_LEFT);
-
-        return strtoupper($letters.$numbers.'-'.$suffix);
-    }
-
-    private function generateUniqueTestNumber(): string
-    {
-        $prefix = fake()->numerify('##-#-#-##');
-        $sequence = str_pad((string) self::$participantCounter, 5, '0', STR_PAD_LEFT);
-
-        return $prefix.'-'.$sequence;
-    }
-
-    private function generateUniqueSkbNumber(): string
-    {
-        $baseNumber = str_pad((string) self::$participantCounter, 5, '0', STR_PAD_LEFT);
-
-        return '244002401200'.$baseNumber;
-    }
-
-    private function generateUniqueEmail(): string
-    {
-        $providers = ['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com'];
-        $provider = fake()->randomElement($providers);
-
-        return 'participant'.self::$participantCounter.'@'.$provider;
+            $progressBar->finish();
+            $this->info("\n  ✅ {$config['participants_count']} participants created successfully!");
+        });
     }
 
     /**
