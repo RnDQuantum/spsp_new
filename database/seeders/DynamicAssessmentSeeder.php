@@ -43,7 +43,7 @@ class DynamicAssessmentSeeder extends Seeder
                 ],
                 'batches' => [['code' => 'BATCH-1-MOJOKERTO', 'name' => 'Gelombang 1 - Mojokerto', 'location' => 'Mojokerto', 'batch_number' => 1, 'start_date' => '2025-09-27', 'end_date' => '2025-09-28'], ['code' => 'BATCH-2-SURABAYA', 'name' => 'Gelombang 2 - Surabaya', 'location' => 'Surabaya', 'batch_number' => 2, 'start_date' => '2025-10-15', 'end_date' => '2025-10-16'], ['code' => 'BATCH-3-JAKARTA', 'name' => 'Gelombang 3 - Jakarta', 'location' => 'Jakarta', 'batch_number' => 3, 'start_date' => '2025-11-05', 'end_date' => '2025-11-06']],
                 'positions' => [['code' => 'fisikawan_medis', 'name' => 'Fisikawan Medis', 'quota' => 20, 'template_code' => 'professional_standard_v1'], ['code' => 'analis_kebijakan', 'name' => 'Analis Kebijakan', 'quota' => 30, 'template_code' => 'staff_standard_v1'], ['code' => 'auditor', 'name' => 'Auditor', 'quota' => 25, 'template_code' => 'supervisor_standard_v1'], ['code' => 'pranata_komputer', 'name' => 'Pranata Komputer', 'quota' => 25, 'template_code' => 'staff_standard_v1']],
-                'participants_count' => 200, // JUMLAH PESERTA
+                'participants_count' => 20000, // JUMLAH PESERTA
                 'performance_distribution' => [
                     'high' => 25, // 25% high performers (exceed standard)
                     'medium' => 60, // 60% medium performers (around standard)
@@ -65,7 +65,7 @@ class DynamicAssessmentSeeder extends Seeder
                 ],
                 'batches' => [['code' => 'BATCH-1-BANDUNG', 'name' => 'Gelombang 1 - Bandung', 'location' => 'Bandung', 'batch_number' => 1, 'start_date' => '2025-10-10', 'end_date' => '2025-10-11'], ['code' => 'BATCH-2-YOGYAKARTA', 'name' => 'Gelombang 2 - Yogyakarta', 'location' => 'Yogyakarta', 'batch_number' => 2, 'start_date' => '2025-11-10', 'end_date' => '2025-11-11']],
                 'positions' => [['code' => 'dokter_umum', 'name' => 'Dokter Umum', 'quota' => 50, 'template_code' => 'professional_standard_v1'], ['code' => 'perawat', 'name' => 'Perawat', 'quota' => 100, 'template_code' => 'staff_standard_v1'], ['code' => 'apoteker', 'name' => 'Apoteker', 'quota' => 50, 'template_code' => 'supervisor_standard_v1']],
-                'participants_count' => 150, // JUMLAH PESERTA
+                'participants_count' => 15000, // JUMLAH PESERTA
                 'performance_distribution' => [
                     'high' => 20,
                     'medium' => 10,
@@ -87,7 +87,7 @@ class DynamicAssessmentSeeder extends Seeder
                 ],
                 'batches' => [['code' => 'BATCH-1-JAKARTA', 'name' => 'Gelombang 1 - Jakarta', 'location' => 'Jakarta', 'batch_number' => 1, 'start_date' => '2025-01-15', 'end_date' => '2025-01-16'], ['code' => 'BATCH-2-BANDUNG', 'name' => 'Gelombang 2 - Bandung', 'location' => 'Bandung', 'batch_number' => 2, 'start_date' => '2025-02-15', 'end_date' => '2025-02-16']],
                 'positions' => [['code' => 'it_manager', 'name' => 'IT Manager', 'quota' => 30, 'template_code' => 'supervisor_standard_v1'], ['code' => 'network_engineer', 'name' => 'Network Engineer', 'quota' => 50, 'template_code' => 'staff_standard_v1'], ['code' => 'data_analyst', 'name' => 'Data Analyst', 'quota' => 40, 'template_code' => 'staff_standard_v1']],
-                'participants_count' => 120,
+                'participants_count' => 1200,
                 'performance_distribution' => [
                     'high' => 30,
                     'medium' => 55,
@@ -109,7 +109,7 @@ class DynamicAssessmentSeeder extends Seeder
                 ],
                 'batches' => [['code' => 'BATCH-1-JAKARTA', 'name' => 'Gelombang 1 - Jakarta', 'location' => 'Jakarta', 'batch_number' => 1, 'start_date' => '2025-02-10', 'end_date' => '2025-02-11']],
                 'positions' => [['code' => 'branch_manager', 'name' => 'Branch Manager', 'quota' => 40, 'template_code' => 'supervisor_standard_v1'], ['code' => 'risk_analyst', 'name' => 'Risk Analyst', 'quota' => 30, 'template_code' => 'professional_standard_v1'], ['code' => 'relationship_officer', 'name' => 'Relationship Officer', 'quota' => 30, 'template_code' => 'staff_standard_v1']],
-                'participants_count' => 100,
+                'participants_count' => 1000,
                 'performance_distribution' => [
                     'high' => 35,
                     'medium' => 50,
@@ -131,7 +131,7 @@ class DynamicAssessmentSeeder extends Seeder
                 ],
                 'batches' => [['code' => 'BATCH-1-DEPOK', 'name' => 'Gelombang 1 - Depok', 'location' => 'Depok', 'batch_number' => 1, 'start_date' => '2025-03-15', 'end_date' => '2025-03-16']],
                 'positions' => [['code' => 'dosen_teknik', 'name' => 'Dosen Teknik', 'quota' => 20, 'template_code' => 'professional_standard_v1'], ['code' => 'dosen_ekonomi', 'name' => 'Dosen Ekonomi', 'quota' => 15, 'template_code' => 'professional_standard_v1'], ['code' => 'dosen_kedokteran', 'name' => 'Dosen Kedokteran', 'quota' => 15, 'template_code' => 'professional_standard_v1']],
-                'participants_count' => 50,
+                'participants_count' => 500,
                 'performance_distribution' => [
                     'high' => 40,
                     'medium' => 45,
@@ -153,7 +153,7 @@ class DynamicAssessmentSeeder extends Seeder
                 ],
                 'batches' => [['code' => 'BATCH-1-JAKARTA', 'name' => 'Gelombang 1 - Jakarta', 'location' => 'Jakarta', 'batch_number' => 1, 'start_date' => '2025-02-01', 'end_date' => '2025-02-02'], ['code' => 'BATCH-2-JAKARTA', 'name' => 'Gelombang 2 - Jakarta', 'location' => 'Jakarta', 'batch_number' => 2, 'start_date' => '2025-06-01', 'end_date' => '2025-06-02']],
                 'positions' => [['code' => 'software_engineer', 'name' => 'Software Engineer', 'quota' => 80, 'template_code' => 'staff_standard_v1'], ['code' => 'product_manager', 'name' => 'Product Manager', 'quota' => 30, 'template_code' => 'supervisor_standard_v1'], ['code' => 'data_scientist', 'name' => 'Data Scientist', 'quota' => 40, 'template_code' => 'professional_standard_v1']],
-                'participants_count' => 150,
+                'participants_count' => 1500,
                 'performance_distribution' => [
                     'high' => 35,
                     'medium' => 50,
@@ -175,7 +175,7 @@ class DynamicAssessmentSeeder extends Seeder
                 ],
                 'batches' => [['code' => 'BATCH-1-JAKARTA', 'name' => 'Gelombang 1 - Jakarta', 'location' => 'Jakarta', 'batch_number' => 1, 'start_date' => '2025-09-01', 'end_date' => '2025-09-02']],
                 'positions' => [['code' => 'analis_sdm', 'name' => 'Analis SDM', 'quota' => 40, 'template_code' => 'professional_standard_v1'], ['code' => 'admin_kepegawaian', 'name' => 'Admin Kepegawaian', 'quota' => 60, 'template_code' => 'staff_standard_v1']],
-                'participants_count' => 100,
+                'participants_count' => 1000,
                 'performance_distribution' => [
                     'high' => 25,
                     'medium' => 60,
@@ -197,7 +197,7 @@ class DynamicAssessmentSeeder extends Seeder
                 ],
                 'batches' => [['code' => 'BATCH-1-JAKARTA', 'name' => 'Gelombang 1 - Jakarta', 'location' => 'Jakarta', 'batch_number' => 1, 'start_date' => '2025-07-01', 'end_date' => '2025-07-02'], ['code' => 'BATCH-2-SURABAYA', 'name' => 'Gelombang 2 - Surabaya', 'location' => 'Surabaya', 'batch_number' => 2, 'start_date' => '2025-08-01', 'end_date' => '2025-08-02']],
                 'positions' => [['code' => 'guru_sd', 'name' => 'Guru SD', 'quota' => 100, 'template_code' => 'professional_standard_v1'], ['code' => 'guru_smp', 'name' => 'Guru SMP', 'quota' => 80, 'template_code' => 'professional_standard_v1']],
-                'participants_count' => 180,
+                'participants_count' => 1800,
                 'performance_distribution' => [
                     'high' => 30,
                     'medium' => 50,
@@ -219,7 +219,7 @@ class DynamicAssessmentSeeder extends Seeder
                 ],
                 'batches' => [['code' => 'BATCH-1-JAKARTA', 'name' => 'Gelombang 1 - Jakarta', 'location' => 'Jakarta', 'batch_number' => 1, 'start_date' => '2025-04-01', 'end_date' => '2025-04-02']],
                 'positions' => [['code' => 'engineer', 'name' => 'Engineer', 'quota' => 50, 'template_code' => 'professional_standard_v1'], ['code' => 'analyst', 'name' => 'Analyst', 'quota' => 30, 'template_code' => 'staff_standard_v1'], ['code' => 'supervisor', 'name' => 'Supervisor', 'quota' => 20, 'template_code' => 'supervisor_standard_v1']],
-                'participants_count' => 100,
+                'participants_count' => 1000,
                 'performance_distribution' => [
                     'high' => 35,
                     'medium' => 50,
@@ -241,7 +241,7 @@ class DynamicAssessmentSeeder extends Seeder
                 ],
                 'batches' => [['code' => 'BATCH-1-YOGYAKARTA', 'name' => 'Gelombang 1 - Yogyakarta', 'location' => 'Yogyakarta', 'batch_number' => 1, 'start_date' => '2025-05-01', 'end_date' => '2025-05-02']],
                 'positions' => [['code' => 'dosen_soshum', 'name' => 'Dosen Sosial Humaniora', 'quota' => 25, 'template_code' => 'professional_standard_v1'], ['code' => 'dosen_saintek', 'name' => 'Dosen Saintek', 'quota' => 25, 'template_code' => 'professional_standard_v1']],
-                'participants_count' => 50,
+                'participants_count' => 500,
                 'performance_distribution' => [
                     'high' => 40,
                     'medium' => 45,
@@ -263,7 +263,7 @@ class DynamicAssessmentSeeder extends Seeder
                 ],
                 'batches' => [['code' => 'BATCH-1-BANDUNG', 'name' => 'Gelombang 1 - Bandung', 'location' => 'Bandung', 'batch_number' => 1, 'start_date' => '2025-06-01', 'end_date' => '2025-06-02']],
                 'positions' => [['code' => 'dosen_teknik', 'name' => 'Dosen Teknik', 'quota' => 30, 'template_code' => 'professional_standard_v1'], ['code' => 'dosen_informatika', 'name' => 'Dosen Informatika', 'quota' => 20, 'template_code' => 'professional_standard_v1']],
-                'participants_count' => 50,
+                'participants_count' => 500,
                 'performance_distribution' => [
                     'high' => 45,
                     'medium' => 40,
@@ -285,7 +285,7 @@ class DynamicAssessmentSeeder extends Seeder
                 ],
                 'batches' => [['code' => 'BATCH-1-JAKARTA', 'name' => 'Gelombang 1 - Jakarta', 'location' => 'Jakarta', 'batch_number' => 1, 'start_date' => '2025-02-15', 'end_date' => '2025-02-16']],
                 'positions' => [['code' => 'mt_marketing', 'name' => 'MT Marketing', 'quota' => 30, 'template_code' => 'staff_standard_v1'], ['code' => 'mt_supply_chain', 'name' => 'MT Supply Chain', 'quota' => 20, 'template_code' => 'staff_standard_v1']],
-                'participants_count' => 50,
+                'participants_count' => 500,
                 'performance_distribution' => [
                     'high' => 40,
                     'medium' => 45,
@@ -307,7 +307,7 @@ class DynamicAssessmentSeeder extends Seeder
                 ],
                 'batches' => [['code' => 'BATCH-1-JAKARTA', 'name' => 'Gelombang 1 - Jakarta', 'location' => 'Jakarta', 'batch_number' => 1, 'start_date' => '2025-03-01', 'end_date' => '2025-03-02']],
                 'positions' => [['code' => 'backend_engineer', 'name' => 'Backend Engineer', 'quota' => 40, 'template_code' => 'staff_standard_v1'], ['code' => 'frontend_engineer', 'name' => 'Frontend Engineer', 'quota' => 30, 'template_code' => 'staff_standard_v1'], ['code' => 'tech_lead', 'name' => 'Tech Lead', 'quota' => 10, 'template_code' => 'supervisor_standard_v1']],
-                'participants_count' => 80,
+                'participants_count' => 800,
                 'performance_distribution' => [
                     'high' => 30,
                     'medium' => 55,
@@ -329,7 +329,7 @@ class DynamicAssessmentSeeder extends Seeder
                 ],
                 'batches' => [['code' => 'BATCH-1-JAKARTA', 'name' => 'Gelombang 1 - Jakarta', 'location' => 'Jakarta', 'batch_number' => 1, 'start_date' => '2025-04-01', 'end_date' => '2025-04-02']],
                 'positions' => [['code' => 'dokter_spesialis', 'name' => 'Dokter Spesialis', 'quota' => 20, 'template_code' => 'professional_standard_v1'], ['code' => 'perawat_icu', 'name' => 'Perawat ICU', 'quota' => 40, 'template_code' => 'staff_standard_v1'], ['code' => 'tenaga_laboratorium', 'name' => 'Tenaga Laboratorium', 'quota' => 20, 'template_code' => 'staff_standard_v1']],
-                'participants_count' => 80,
+                'participants_count' => 800,
                 'performance_distribution' => [
                     'high' => 35,
                     'medium' => 50,
@@ -443,28 +443,37 @@ class DynamicAssessmentSeeder extends Seeder
         $aspectsCache
     ): void {
         $totalParticipants = $config['participants_count'];
-        $this->info("  👥 Creating {$totalParticipants} participants...");
 
-        $progressBar = $this->command->getOutput()->createProgressBar($totalParticipants);
-        $progressBar->start();
-
-        // ⚡ ADAPTIVE CHUNK SIZE: Larger chunks for better performance
+        // ⚡ ADAPTIVE CHUNK SIZE: Optimized for memory stability
         $chunkSize = match (true) {
             $totalParticipants < 500 => 50,
-            $totalParticipants < 2000 => 100,
-            $totalParticipants < 5000 => 150,
-            default => 200
+            $totalParticipants < 2000 => 75,
+            $totalParticipants < 10000 => 100,
+            default => 150  // Reduced from 200 for better memory management
         };
 
         $totalChunks = (int) ceil($totalParticipants / $chunkSize);
-        $this->info("\n  📊 Processing in {$totalChunks} chunks of ~{$chunkSize} participants");
+
+        $this->info("  👥 Creating {$totalParticipants} participants in {$totalChunks} batches");
+        $this->info("  📊 Each batch processes ~{$chunkSize} participants\n");
+
+        $startTime = microtime(true);
+        $processedTotal = 0;
 
         for ($chunkIndex = 0; $chunkIndex < $totalChunks; $chunkIndex++) {
             $currentChunkSize = min($chunkSize, $totalParticipants - ($chunkIndex * $chunkSize));
+            $chunkNumber = $chunkIndex + 1;
+
+            // Create progress bar for THIS chunk only
+            $this->info("     Batch {$chunkNumber}/{$totalChunks}: Processing {$currentChunkSize} participants...");
+            $chunkProgressBar = $this->command->getOutput()->createProgressBar($currentChunkSize);
+            $chunkProgressBar->start();
 
             // ⚡ Process chunk in separate transaction
             DB::beginTransaction();
             try {
+                $chunkStartTime = microtime(true);
+
                 $this->processParticipantChunk(
                     $currentChunkSize,
                     $event,
@@ -473,24 +482,41 @@ class DynamicAssessmentSeeder extends Seeder
                     $config,
                     $categoriesCache,
                     $aspectsCache,
-                    $progressBar
+                    $chunkProgressBar
                 );
 
                 DB::commit();
 
-                // ⚡ Memory management: GC every 5 chunks
-                if ($chunkIndex % 5 === 0 && $chunkIndex > 0) {
+                // ⚡ CRITICAL: Clear Eloquent memory after each chunk
+                $this->clearEloquentMemory();
+
+                $chunkProgressBar->finish();
+                $chunkDuration = microtime(true) - $chunkStartTime;
+                $processedTotal += $currentChunkSize;
+                $overallProgress = round(($processedTotal / $totalParticipants) * 100, 1);
+                $avgSpeed = $processedTotal / (microtime(true) - $startTime);
+
+                $this->info("\n     ✓ Batch {$chunkNumber} completed in ".number_format($chunkDuration, 2).'s');
+                $this->info("     📈 Overall: {$processedTotal}/{$totalParticipants} ({$overallProgress}%) | Speed: ".number_format($avgSpeed, 1)." p/s\n");
+
+                // ⚡ Memory management: Aggressive GC every 3 chunks
+                if ($chunkIndex % 3 === 0 && $chunkIndex > 0) {
                     gc_collect_cycles();
+                    $memoryMB = round(memory_get_usage(true) / 1024 / 1024, 2);
+                    $this->info("     🗑️  Memory cleanup | Current: {$memoryMB} MB\n");
                 }
             } catch (\Exception $e) {
                 DB::rollBack();
-                $progressBar->finish();
+                $chunkProgressBar->finish();
                 throw $e;
             }
         }
 
-        $progressBar->finish();
-        $this->info("\n  ✅ {$totalParticipants} participants created successfully!");
+        $totalDuration = microtime(true) - $startTime;
+        $avgSpeed = $totalParticipants / $totalDuration;
+
+        $this->info("  ✅ {$totalParticipants} participants created successfully!");
+        $this->info('  ⏱️  Total time: '.number_format($totalDuration, 2).'s | Average: '.number_format($avgSpeed, 1).' participants/second');
     }
 
     /**
@@ -810,6 +836,31 @@ class DynamicAssessmentSeeder extends Seeder
             return 'medium';
         } else {
             return 'low';
+        }
+    }
+
+    /**
+     * ⚡ Clear Eloquent memory to prevent memory leak
+     */
+    private function clearEloquentMemory(): void
+    {
+        // Clear query log
+        DB::connection()->flushQueryLog();
+
+        // Reset Eloquent's internal caches
+        Participant::clearBootedModels();
+
+        // Clear model event listeners cache
+        foreach ([
+            Participant::class,
+            \App\Models\CategoryAssessment::class,
+            \App\Models\AspectAssessment::class,
+            \App\Models\SubAspectAssessment::class,
+            \App\Models\FinalAssessment::class,
+        ] as $model) {
+            if (method_exists($model, 'flushEventListeners')) {
+                $model::flushEventListeners();
+            }
         }
     }
 

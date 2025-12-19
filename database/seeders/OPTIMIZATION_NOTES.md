@@ -15,28 +15,33 @@
 - Psychological tests dan interpretations juga di-batch insert
 - Mengurangi overhead INSERT query dari ribuan menjadi puluhan
 
-#### 2. **Adaptive Chunk Sizing**
+#### 2. **Adaptive Chunk Sizing** (UPDATED)
 ```php
 $chunkSize = match (true) {
     $totalParticipants < 500 => 50,
-    $totalParticipants < 2000 => 100,
-    $totalParticipants < 5000 => 150,
-    default => 200
+    $totalParticipants < 2000 => 75,
+    $totalParticipants < 10000 => 100,
+    default => 150  // Reduced from 200 for stability
 };
 ```
 - Chunk size otomatis menyesuaikan dengan total participants
 - Dataset kecil: chunk kecil untuk responsiveness
-- Dataset besar: chunk besar untuk throughput maksimal
+- Dataset besar: chunk lebih kecil (150 instead of 200) untuk stabilitas memory
+- **Updated**: Optimized untuk mencegah memory degradation
 
 #### 3. **Transaction Scope Reduction**
 - **Sebelum**: Transaction per 50 participants
 - **Sesudah**: Transaction per chunk (50-200 participants)
 - Mengurangi commit overhead secara signifikan
 
-#### 4. **Memory Management**
-- Garbage collection setiap 5 chunks (bukan 10)
-- Clear entity manager cache lebih sering
-- Menghindari memory leak pada dataset besar
+#### 4. **Aggressive Memory Management** (ENHANCED)
+- **Eloquent Memory Clearing**: Setiap chunk otomatis clear Eloquent cache
+  - `DB::connection()->flushQueryLog()`
+  - `Model::clearBootedModels()`
+  - Clear event listeners cache
+- **Garbage Collection**: Setiap 3 chunks (bukan 5) dengan memory monitoring
+- **Memory Tracking**: Display current memory usage di log
+- Menghindari memory leak dan degradasi performa pada dataset besar
 
 ### Alur Kerja Baru
 
