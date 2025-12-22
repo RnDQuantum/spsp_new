@@ -2,19 +2,21 @@
     {{-- Include Participant List Modal --}}
     <livewire:pages.talent-pool.participant-list-modal />
 
-    <div class="max-w-6xl mx-auto p-6 bg-white rounded-lg shadow-md mt-10 relative">
+    <div class="max-w-6xl mx-auto p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md mt-10 relative">
 
         {{-- Loading overlay untuk standard adjustment (live update, no reload) --}}
         <div wire:loading wire:target="handleStandardUpdate"
-            class="absolute inset-0 bg-white/80 z-50 rounded-lg flex items-center justify-center">
+            class="absolute inset-0 bg-white/80 dark:bg-gray-900/80 z-50 rounded-lg flex items-center justify-center">
             <div class="flex flex-col items-center">
                 <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
-                <div class="text-gray-600 font-medium">Memproses data...</div>
+                <div class="text-gray-600 dark:text-gray-300 font-medium">Memproses data...</div>
             </div>
         </div>
 
-        <h1 class="text-center text-2xl font-bold text-gray-800 mb-2">Matriks 9-Kotak Kinerja dan Potensi</h1>
-        <div class="text-center text-gray-600 mb-8 text-sm">9-Box Performance Matrix: Kinerja dan Potensi Karyawan</div>
+        <h1 class="text-center text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2">Matriks 9-Kotak Kinerja dan
+            Potensi</h1>
+        <div class="text-center text-gray-600 dark:text-gray-400 mb-8 text-sm">9-Box Performance Matrix: Kinerja dan
+            Potensi Karyawan</div>
 
         <!-- Event and Position Selectors -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
@@ -39,13 +41,15 @@
 
         <!-- Show message if no data -->
         @if (!$this->selectedEvent || !$this->selectedPositionId)
-            <div class="text-center py-12 bg-gray-50 rounded-lg">
-                <div class="text-gray-500 text-lg">Silakan pilih Kegiatan dan Posisi untuk melihat Matriks 9-Kotak
+            <div class="text-center py-12 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                <div class="text-gray-500 dark:text-gray-400 text-lg">Silakan pilih Kegiatan dan Posisi untuk melihat
+                    Matriks 9-Kotak
                 </div>
             </div>
         @elseif($this->totalParticipants === 0)
-            <div class="text-center py-12 bg-gray-50 rounded-lg">
-                <div class="text-gray-500 text-lg">Tidak ada data peserta untuk Kegiatan dan Posisi yang dipilih</div>
+            <div class="text-center py-12 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                <div class="text-gray-500 dark:text-gray-400 text-lg">Tidak ada data peserta untuk Kegiatan dan Posisi
+                    yang dipilih</div>
             </div>
         @else
             <div style="height:600px; margin-bottom:30px;">
@@ -77,49 +81,49 @@
         @if ($this->boxBoundaries)
             <div class="mt-6">
                 <h2 class="text-sm font-semibold mb-2">Statistik Distribusi</h2>
-                <table class="min-w-full border-collapse border-2 border-gray-400 dark:border-gray-500">
+                <table class="min-w-full border-collapse border border-gray-300 dark:border-gray-600">
                     <thead>
-                        <tr class="bg-gray-200 dark:bg-gray-700">
+                        <tr class="bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100">
                             <th
-                                class="border-2 border-gray-400 dark:border-gray-500 px-4 py-2 text-center font-bold text-sm">
+                                class="border border-gray-300 dark:border-gray-600 px-4 py-2 text-center font-bold text-sm">
                                 Kategori</th>
                             <th
-                                class="border-2 border-gray-400 dark:border-gray-500 px-4 py-2 text-center font-bold text-sm">
+                                class="border border-gray-300 dark:border-gray-600 px-4 py-2 text-center font-bold text-sm">
                                 Rata-rata (μ)</th>
                             <th
-                                class="border-2 border-gray-400 dark:border-gray-500 px-4 py-2 text-center font-bold text-sm">
+                                class="border border-gray-300 dark:border-gray-600 px-4 py-2 text-center font-bold text-sm">
                                 Standar Deviasi (σ)</th>
                             <th
-                                class="border-2 border-gray-400 dark:border-gray-500 px-4 py-2 text-center font-bold text-sm">
+                                class="border border-gray-300 dark:border-gray-600 px-4 py-2 text-center font-bold text-sm">
                                 Batas Bawah (μ - σ)</th>
                             <th
-                                class="border-2 border-gray-400 dark:border-gray-500 px-4 py-2 text-center font-bold text-sm">
+                                class="border border-gray-300 dark:border-gray-600 px-4 py-2 text-center font-bold text-sm">
                                 Batas Atas (μ + σ)</th>
                         </tr>
                     </thead>
-                    <tbody class="bg-white dark:bg-gray-800">
+                    <tbody class="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
                         <tr>
-                            <td class="border-2 border-gray-400 dark:border-gray-500 px-4 py-2 font-semibold text-sm">
+                            <td class="border border-gray-300 dark:border-gray-600 px-4 py-2 font-semibold text-sm">
                                 Potensi</td>
-                            <td class="border-2 border-gray-400 dark:border-gray-500 px-4 py-2 text-center text-sm">
+                            <td class="border border-gray-300 dark:border-gray-600 px-4 py-2 text-center text-sm">
                                 {{ number_format($this->boxBoundaries['potensi']['avg'], 2) }}</td>
-                            <td class="border-2 border-gray-400 dark:border-gray-500 px-4 py-2 text-center text-sm">
+                            <td class="border border-gray-300 dark:border-gray-600 px-4 py-2 text-center text-sm">
                                 {{ number_format($this->boxBoundaries['potensi']['std_dev'], 2) }}</td>
-                            <td class="border-2 border-gray-400 dark:border-gray-500 px-4 py-2 text-center text-sm">
+                            <td class="border border-gray-300 dark:border-gray-600 px-4 py-2 text-center text-sm">
                                 {{ number_format($this->boxBoundaries['potensi']['lower_bound'], 2) }}</td>
-                            <td class="border-2 border-gray-400 dark:border-gray-500 px-4 py-2 text-center text-sm">
+                            <td class="border border-gray-300 dark:border-gray-600 px-4 py-2 text-center text-sm">
                                 {{ number_format($this->boxBoundaries['potensi']['upper_bound'], 2) }}</td>
                         </tr>
-                        <tr class="bg-gray-50 dark:bg-gray-750">
-                            <td class="border-2 border-gray-400 dark:border-gray-500 px-4 py-2 font-semibold text-sm">
+                        <tr class="bg-gray-50 dark:bg-gray-900">
+                            <td class="border border-gray-300 dark:border-gray-600 px-4 py-2 font-semibold text-sm">
                                 Kompetensi</td>
-                            <td class="border-2 border-gray-400 dark:border-gray-500 px-4 py-2 text-center text-sm">
+                            <td class="border border-gray-300 dark:border-gray-600 px-4 py-2 text-center text-sm">
                                 {{ number_format($this->boxBoundaries['kinerja']['avg'], 2) }}</td>
-                            <td class="border-2 border-gray-400 dark:border-gray-500 px-4 py-2 text-center text-sm">
+                            <td class="border border-gray-300 dark:border-gray-600 px-4 py-2 text-center text-sm">
                                 {{ number_format($this->boxBoundaries['kinerja']['std_dev'], 2) }}</td>
-                            <td class="border-2 border-gray-400 dark:border-gray-500 px-4 py-2 text-center text-sm">
+                            <td class="border border-gray-300 dark:border-gray-600 px-4 py-2 text-center text-sm">
                                 {{ number_format($this->boxBoundaries['kinerja']['lower_bound'], 2) }}</td>
-                            <td class="border-2 border-gray-400 dark:border-gray-500 px-4 py-2 text-center text-sm">
+                            <td class="border border-gray-300 dark:border-gray-600 px-4 py-2 text-center text-sm">
                                 {{ number_format($this->boxBoundaries['kinerja']['upper_bound'], 2) }}</td>
                         </tr>
                     </tbody>
@@ -128,9 +132,9 @@
         @endif
 
 
-        <hr class="mt-6 mb-4 border-t border-2 border-gray-400">
+        <hr class="mt-6 mb-4 border-t border-2 border-gray-400 dark:border-gray-600">
 
-        <div class="mt-8 border-t-2 border-gray-400 pt-6">
+        <div class="mt-8 border-t-2 border-gray-400 dark:border-gray-600 pt-6">
             <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100 mb-6 text-center italic">Distribusi Talent
                 Pool
                 9-Box Matrix</h3>
@@ -183,6 +187,12 @@
 
                 // 🎨 CENTRALIZED CONFIG: Single source of truth from PHP
                 const BOX_CONFIG = @json($this->boxConfig);
+
+                // Helper for Dark Mode
+                const isDark = () => document.documentElement.classList.contains('dark');
+                const getGridColor = () => isDark() ? 'rgba(255, 255, 255, 0.3)' : '#333';
+                const getTextColor = () => isDark() ? '#e5e7eb' : '#374151'; // gray-200 vs gray-700
+                const getNumberColor = () => isDark() ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0,0,0,0.15)';
 
                 // 🚀 PERFORMANCE: Smart data sampling untuk large datasets
                 function sampleData(data, maxPoints = 500) {
@@ -344,31 +354,41 @@
                                     title: {
                                         display: true,
                                         text: 'POTENSI',
+                                        color: getTextColor(),
                                         font: {
                                             size: 16,
                                             weight: 'bold'
                                         }
                                     },
-                                    min: 0,
-                                    max: 5,
+                                    grid: {
+                                        color: isDark() ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'
+                                    },
                                     ticks: {
+                                        color: getTextColor(),
                                         stepSize: 1
-                                    }
+                                    },
+                                    min: 0,
+                                    max: 5
                                 },
                                 y: {
                                     title: {
                                         display: true,
                                         text: 'KINERJA',
+                                        color: getTextColor(),
                                         font: {
                                             size: 16,
                                             weight: 'bold'
                                         }
                                     },
-                                    min: 0,
-                                    max: 5,
+                                    grid: {
+                                        color: isDark() ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'
+                                    },
                                     ticks: {
+                                        color: getTextColor(),
                                         stepSize: 1
-                                    }
+                                    },
+                                    min: 0,
+                                    max: 5
                                 }
                             }
                         },
@@ -470,7 +490,7 @@
                                     ctx.moveTo(x, yScale.getPixelForValue(5));
                                     ctx.lineTo(x, yScale.getPixelForValue(0));
                                     ctx.lineWidth = 3;
-                                    ctx.strokeStyle = '#333';
+                                    ctx.strokeStyle = getGridColor();
                                     ctx.stroke();
                                 });
 
@@ -479,12 +499,13 @@
                                     ctx.beginPath();
                                     ctx.moveTo(xScale.getPixelForValue(0), y);
                                     ctx.lineTo(xScale.getPixelForValue(5), y);
+                                    ctx.strokeStyle = getGridColor();
                                     ctx.stroke();
                                 });
 
                                 // Draw box numbers - use dynamic boundaries
                                 ctx.font = 'bold 48px Arial';
-                                ctx.fillStyle = 'rgba(0,0,0,0.15)';
+                                ctx.fillStyle = getNumberColor();
                                 ctx.textAlign = 'center';
                                 ctx.textBaseline = 'middle';
 
@@ -841,12 +862,13 @@
                 function showLoadingAndReload() {
                     // Create loading overlay dynamically
                     const overlay = document.createElement('div');
-                    overlay.style.cssText =
-                        'position:fixed; inset:0; background:rgba(255,255,255,0.9); z-index:99999; display:flex; align-items:center; justify-content:center;';
+                    overlay.className =
+                        'fixed inset-0 bg-white/90 dark:bg-gray-900/90 z-[99999] flex items-center justify-center';
+
                     overlay.innerHTML = `
                 <div class="flex flex-col items-center">
                     <div class="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mb-4"></div>
-                    <div class="text-gray-700 font-semibold text-lg">Memuat ulang halaman...</div>
+                    <div class="text-gray-700 dark:text-gray-200 font-semibold text-lg">Memuat ulang halaman...</div>
                 </div>
             `;
                     document.body.appendChild(overlay);
