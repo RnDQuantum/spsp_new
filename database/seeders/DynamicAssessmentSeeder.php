@@ -1052,31 +1052,47 @@ class DynamicAssessmentSeeder extends Seeder
             ];
         }
 
-        // Calculate final assessment
-        $finalTotalScore = 0;
-        $finalWeightedScore = 0;
+        // Calculate final assessment based on actual table structure
+        $potensiData = $categoryResults['potensi'] ?? null;
+        $kompetensiData = $categoryResults['kompetensi'] ?? null;
 
-        foreach ($categoryResults as $result) {
-            $finalTotalScore += $result['score'];
-            $finalWeightedScore += ($result['score'] * $result['weight']) / 100;
+        if ($potensiData && $kompetensiData) {
+            // Get category assessments to get standard scores
+            $potensiCategoryAssessment = collect($categoryAssessmentsData)->firstWhere('category_type_id', $categoriesCache->get($template->id)->firstWhere('code', 'potensi')->id);
+            $kompetensiCategoryAssessment = collect($categoryAssessmentsData)->firstWhere('category_type_id', $categoriesCache->get($template->id)->firstWhere('code', 'kompetensi')->id);
+
+            $totalStandardScore = ($potensiCategoryAssessment['total_standard_score'] ?? 0) + ($kompetensiCategoryAssessment['total_standard_score'] ?? 0);
+            $totalIndividualScore = ($potensiCategoryAssessment['total_individual_score'] ?? 0) + ($kompetensiCategoryAssessment['total_individual_score'] ?? 0);
+
+            $achievementPercentage = $totalStandardScore > 0
+                ? round(($totalIndividualScore / $totalStandardScore) * 100, 2)
+                : 0;
+
+            // Determine conclusion
+            $conclusionCode = $this->determineFinalConclusion($achievementPercentage);
+            $conclusionText = $this->getFinalConclusionText($conclusionCode);
+
+            // Add final assessment
+            $finalAssessmentsData[] = [
+                'participant_id' => $participant->id,
+                'event_id' => $participant->event_id,
+                'batch_id' => $participant->batch_id,
+                'position_formation_id' => $participant->position_formation_id,
+                'potensi_weight' => $potensiData['weight'],
+                'potensi_standard_score' => round($potensiCategoryAssessment['total_standard_score'] ?? 0, 2),
+                'potensi_individual_score' => round($potensiCategoryAssessment['total_individual_score'] ?? 0, 2),
+                'kompetensi_weight' => $kompetensiData['weight'],
+                'kompetensi_standard_score' => round($kompetensiCategoryAssessment['total_standard_score'] ?? 0, 2),
+                'kompetensi_individual_score' => round($kompetensiCategoryAssessment['total_individual_score'] ?? 0, 2),
+                'total_standard_score' => round($totalStandardScore, 2),
+                'total_individual_score' => round($totalIndividualScore, 2),
+                'achievement_percentage' => $achievementPercentage,
+                'conclusion_code' => $conclusionCode,
+                'conclusion_text' => $conclusionText,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ];
         }
-
-        $finalPercentage = min(100, (int) round(($finalWeightedScore / 100) * 100));
-        $finalClass = $this->determineFinalClass($finalPercentage);
-
-        // Add final assessment
-        $finalAssessmentsData[] = [
-            'participant_id' => $participant->id,
-            'event_id' => $participant->event_id,
-            'batch_id' => $participant->batch_id,
-            'position_formation_id' => $participant->position_formation_id,
-            'total_score' => round($finalTotalScore, 2),
-            'weighted_score' => round($finalWeightedScore, 2),
-            'percentage_score' => $finalPercentage,
-            'classification' => $finalClass,
-            'created_at' => $now,
-            'updated_at' => $now,
-        ];
     }
 
     /**
@@ -1152,19 +1168,33 @@ class DynamicAssessmentSeeder extends Seeder
     }
 
     /**
-     * Determine final classification
+     * Determine final conclusion based on achievement percentage
      */
-    private function determineFinalClass(int $percentage): string
+    private function determineFinalConclusion(float $percentage): string
     {
-        if ($percentage >= 90) {
-            return 'Kelas I';
-        } elseif ($percentage >= 75) {
-            return 'Kelas II';
-        } elseif ($percentage >= 60) {
-            return 'Kelas III';
+        if ($percentage >= 120) {
+            return 'SK'; // Sangat Kompeten
+        } elseif ($percentage >= 100) {
+            return 'K'; // Kompeten
+        } elseif ($percentage >= 80) {
+            return 'MS'; // Memenuhi Standard
         } else {
-            return 'Kelas IV';
+            return 'DBS'; // Di Bawah Standard
         }
+    }
+
+    /**
+     * Get final conclusion text
+     */
+    private function getFinalConclusionText(string $code): string
+    {
+        return match ($code) {
+            'SK' => 'SANGAT KOMPETEN',
+            'K' => 'KOMPETEN',
+            'MS' => 'MEMENUHI STANDARD',
+            'DBS' => 'DI BAWAH STANDARD',
+            default => 'MEMENUHI STANDARD',
+        };
     }
 
     /**
