@@ -109,7 +109,7 @@ class TrainingRecommendation extends Component
     {
         $this->aspectId = $aspectId;
 
-        if (!$aspectId) {
+        if (! $aspectId) {
             $this->reset(['selectedAspect', 'totalParticipants', 'recommendedCount', 'notRecommendedCount', 'averageRating', 'standardRating', 'originalStandardRating']);
 
             return;
@@ -153,14 +153,14 @@ class TrainingRecommendation extends Component
     {
         // Validate same template
         $positionFormationId = session('filter.position_formation_id');
-        if (!$this->selectedEvent || !$positionFormationId) {
+        if (! $this->selectedEvent || ! $positionFormationId) {
             return;
         }
 
         $position = $this->selectedEvent->positionFormations()
             ->find($positionFormationId);
 
-        if (!$position || $position->template_id !== $templateId) {
+        if (! $position || $position->template_id !== $templateId) {
             return;
         }
 
@@ -186,7 +186,7 @@ class TrainingRecommendation extends Component
         $eventCode = session('filter.event_code');
         $positionFormationId = session('filter.position_formation_id');
 
-        if (!$eventCode) {
+        if (! $eventCode) {
             return;
         }
 
@@ -197,7 +197,7 @@ class TrainingRecommendation extends Component
                 'positionFormations' => function ($query) use ($positionFormationId) {
                     $query->where('id', $positionFormationId)
                         ->with('template');
-                }
+                },
             ])
             ->first();
 
@@ -229,7 +229,7 @@ class TrainingRecommendation extends Component
     {
         $positionFormationId = session('filter.position_formation_id');
 
-        if (!$this->selectedEvent || !$this->selectedAspect || !$positionFormationId) {
+        if (! $this->selectedEvent || ! $this->selectedAspect || ! $positionFormationId) {
             return;
         }
 
@@ -276,7 +276,7 @@ class TrainingRecommendation extends Component
     {
         $positionFormationId = session('filter.position_formation_id');
 
-        if (!$this->selectedEvent || !$this->selectedAspect || !$positionFormationId) {
+        if (! $this->selectedEvent || ! $this->selectedAspect || ! $positionFormationId) {
             return null;
         }
 
@@ -298,7 +298,7 @@ class TrainingRecommendation extends Component
         // This is acceptable because it's just one query with minimal data
         $positionIds = $participants->pluck('position_formation_id')->unique()->filter()->all();
 
-        if (!empty($positionIds)) {
+        if (! empty($positionIds)) {
             $positions = \App\Models\PositionFormation::whereIn('id', $positionIds)
                 ->select('id', 'name')
                 ->get()
@@ -325,7 +325,7 @@ class TrainingRecommendation extends Component
     {
         $positionFormationId = session('filter.position_formation_id');
 
-        if (!$this->selectedEvent || !$positionFormationId) {
+        if (! $this->selectedEvent || ! $positionFormationId) {
             return null;
         }
 
@@ -339,7 +339,7 @@ class TrainingRecommendation extends Component
             ->with('template')
             ->find($positionFormationId);
 
-        if (!$position?->template) {
+        if (! $position?->template) {
             return collect([]);
         }
 
@@ -422,7 +422,7 @@ class TrainingRecommendation extends Component
     {
         $positionFormationId = session('filter.position_formation_id');
 
-        if (!$this->selectedEvent || !$positionFormationId) {
+        if (! $this->selectedEvent || ! $positionFormationId) {
             return;
         }
 
@@ -443,11 +443,33 @@ class TrainingRecommendation extends Component
             $this->tolerancePercentage
         );
 
+        // 🔥 FIX 1: Filter hanya peserta yang recommended (rating di bawah standar)
+        $participants = $participants->filter(function ($participant) {
+            return $participant['is_recommended'] === true;
+        });
+
+        // 🔥 FIX 2: Hydrate position names (sama seperti getParticipantsPaginated)
+        $positionIds = $participants->pluck('position_formation_id')->unique()->filter()->all();
+
+        if (! empty($positionIds)) {
+            $positions = \App\Models\PositionFormation::whereIn('id', $positionIds)
+                ->select('id', 'name')
+                ->get()
+                ->keyBy('id');
+
+            // Attach position names
+            $participants = $participants->map(function ($participant) use ($positions) {
+                $participant['position'] = $positions->get($participant['position_formation_id'])->name ?? '-';
+
+                return $participant;
+            });
+        }
+
         // Dispatch event to modal component
         $this->dispatch(
             'openAttributeParticipantModal',
             attributeName: $aspectName,
-            participants: $participants->toArray()
+            participants: $participants->values()->toArray()
         );
     }
 
