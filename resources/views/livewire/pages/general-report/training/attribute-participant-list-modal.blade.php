@@ -1,36 +1,18 @@
-<div x-data="{ show: @entangle('showModal'), isLoading: @entangle('isLoading') }">
-    {{-- Loading Overlay --}}
-    <div x-cloak x-show="isLoading" x-transition.opacity.duration.200ms
-        class="fixed inset-0 z-40 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-        <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-2xl border border-gray-200 dark:border-gray-700">
-            <div class="flex flex-col items-center space-y-4">
-                <svg class="animate-spin h-12 w-12 text-blue-600 dark:text-blue-400" xmlns="http://www.w3.org/2000/svg"
-                    fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
-                    </circle>
-                    <path class="opacity-75" fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                    </path>
-                </svg>
-                <div class="text-center">
-                    <p class="text-lg font-semibold text-gray-900 dark:text-gray-100">Memuat Data Peserta...</p>
-                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Mohon tunggu sebentar</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
+<div x-data="{ show: @entangle('showModal') }">
     {{-- Modal Overlay --}}
-    <div x-cloak x-show="show && !isLoading" x-transition.opacity.duration.200ms x-trap.inert.noscroll="show"
+    <div x-cloak x-show="show" x-transition.opacity.duration.150ms
         x-on:keydown.esc.window="$wire.closeModal()" x-on:click.self="$wire.closeModal()"
         class="fixed inset-0 z-30 flex items-end justify-center bg-black/20 p-4 pb-8 backdrop-blur-md sm:items-center lg:p-8"
         role="dialog" aria-modal="true" aria-labelledby="modalTitle">
 
         {{-- Modal Dialog --}}
         <div x-show="show"
-            x-transition:enter="transition ease-out duration-200 delay-100 motion-reduce:transition-opacity"
-            x-transition:enter-start="opacity-0 scale-50" x-transition:enter-end="opacity-100 scale-100"
-            class="flex w-full max-w-4xl flex-col overflow-hidden rounded-radius border border-gray-200 bg-white text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+            x-transition:enter="transition ease-out duration-100 motion-reduce:transition-opacity"
+            x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
+            x-transition:leave="transition ease-in duration-75"
+            x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
+            class="flex w-full max-w-4xl flex-col overflow-hidden rounded-radius border border-gray-200 bg-white text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
+            x-trap="show">
 
             {{-- Dialog Header --}}
             <div
@@ -79,7 +61,16 @@
             </div>
 
             {{-- Dialog Body / Table --}}
-            <div class="max-h-96 overflow-x-auto bg-white dark:bg-gray-800">
+            <div class="max-h-96 overflow-x-auto bg-white dark:bg-gray-800 relative">
+                {{-- Loading Overlay --}}
+                <div wire:loading wire:target="search,sortBy,nextPage,previousPage,gotoPage"
+                    class="absolute inset-0 bg-white/80 dark:bg-gray-800/80 z-20 flex items-center justify-center">
+                    <div class="flex flex-col items-center">
+                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-2"></div>
+                        <div class="text-sm text-gray-600 dark:text-gray-400">Memuat...</div>
+                    </div>
+                </div>
+
                 <table class="w-full text-sm">
                     <thead class="sticky top-0 z-10 bg-gray-50 dark:bg-gray-900">
                         <tr>

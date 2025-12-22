@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Pages\GeneralReport\Training;
 
+use App\Services\TrainingRecommendationService;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -10,8 +11,6 @@ class AttributeParticipantListModal extends Component
     use WithPagination;
 
     public bool $showModal = false;
-
-    public bool $isLoading = false;
 
     public ?string $selectedAttributeName = null;
 
@@ -23,21 +22,43 @@ class AttributeParticipantListModal extends Component
 
     public array $participants = [];
 
+    // 🚀 PERFORMANCE: Data untuk lazy loading
+    public ?int $eventId = null;
+
+    public ?int $positionFormationId = null;
+
+    public ?int $aspectId = null;
+
+    public ?int $tolerancePercentage = null;
+
+    // 🚀 PERFORMANCE: Cache filtered results to avoid re-computation
+    private ?array $filteredCache = null;
+
+    private ?string $lastSearchTerm = null;
+
+    private ?string $lastSortKey = null;
+
     protected $listeners = ['openAttributeParticipantModal'];
 
     /**
-     * Open modal with participants data
+     * Open modal with lazy loading data
+     * 🚀 PERFORMANCE: Only store IDs, load data when modal renders
      */
-    public function openAttributeParticipantModal(string $attributeName, array $participants): void
-    {
-        $this->isLoading = true;
+    public function openAttributeParticipantModal(
+        string $attributeName,
+        int $eventId,
+        int $positionFormationId,
+        int $aspectId,
+        int $tolerancePercentage
+    ): void {
         $this->selectedAttributeName = $attributeName;
-
-        // Simulate loading delay for better UX
-        $this->participants = $participants;
+        $this->eventId = $eventId;
+        $this->positionFormationId = $positionFormationId;
+        $this->aspectId = $aspectId;
+        $this->tolerancePercentage = $tolerancePercentage;
         $this->showModal = true;
-        $this->isLoading = false;
         $this->resetPage();
+        $this->clearCache();
     }
 
     /**
@@ -46,11 +67,73 @@ class AttributeParticipantListModal extends Component
     public function closeModal(): void
     {
         $this->showModal = false;
-        $this->isLoading = false;
         $this->selectedAttributeName = null;
         $this->participants = [];
         $this->search = '';
+        $this->eventId = null;
+        $this->positionFormationId = null;
+        $this->aspectId = null;
+        $this->tolerancePercentage = null;
         $this->resetPage();
+        $this->clearCache();
+    }
+
+    /**
+     * Clear filter cache
+     */
+    private function clearCache(): void
+    {
+        $this->filteredCache = null;
+        $this->lastSearchTerm = null;
+        $this->lastSortKey = null;
+    }
+
+    /**
+     * Load participants data from service
+     * 🚀 PERFORMANCE: Lazy load only when modal is shown
+     */
+    private function loadParticipants(): void
+    {
+        if (! $this->showModal || ! $this->eventId || ! $this->positionFormationId || ! $this->aspectId) {
+            return;
+        }
+
+        // Return if already loaded
+        if (! empty($this->participants)) {
+            return;
+        }
+
+        // Get participants for this aspect
+        $service = app(TrainingRecommendationService::class);
+        $participants = $service->getParticipantsRecommendation(
+            $this->eventId,
+            $this->positionFormationId,
+            $this->aspectId,
+            $this->tolerancePercentage
+        );
+
+        // Filter only recommended participants
+        $participants = $participants->filter(function ($participant) {
+            return $participant['is_recommended'] === true;
+        });
+
+        // Hydrate position names
+        $positionIds = $participants->pluck('position_formation_id')->unique()->filter()->all();
+
+        if (! empty($positionIds)) {
+            $positions = \App\Models\PositionFormation::whereIn('id', $positionIds)
+                ->select('id', 'name')
+                ->get()
+                ->keyBy('id');
+
+            $participants = $participants->map(function ($participant) use ($positions) {
+                $participant['position'] = $positions->get($participant['position_formation_id'])->name ?? '-';
+
+                return $participant;
+            });
+        }
+
+        $this->participants = $participants->values()->toArray();
     }
 
     /**
@@ -65,21 +148,34 @@ class AttributeParticipantListModal extends Component
             $this->sortDirection = 'asc';
         }
 
+        $this->clearCache();
         $this->resetPage();
     }
 
     /**
      * Get filtered and sorted participants
+     * 🚀 PERFORMANCE: Cached to avoid re-computation on pagination
      */
     public function getFilteredParticipantsProperty()
     {
+        // 🚀 Check cache validity
+        $currentSortKey = "{$this->sortBy}_{$this->sortDirection}";
+
+        if ($this->filteredCache !== null
+            && $this->lastSearchTerm === $this->search
+            && $this->lastSortKey === $currentSortKey) {
+            return collect($this->filteredCache);
+        }
+
+        // Cache miss - perform filtering and sorting
         $filtered = collect($this->participants);
 
         // Search filter
         if ($this->search) {
-            $filtered = $filtered->filter(function ($participant) {
-                return str_contains(strtolower($participant['name']), strtolower($this->search)) ||
-                    str_contains(strtolower($participant['test_number']), strtolower($this->search));
+            $searchLower = strtolower($this->search);
+            $filtered = $filtered->filter(function ($participant) use ($searchLower) {
+                return str_contains(strtolower($participant['name']), $searchLower) ||
+                    str_contains(strtolower($participant['test_number']), $searchLower);
             });
         }
 
@@ -89,6 +185,11 @@ class AttributeParticipantListModal extends Component
                 ? $a[$this->sortBy] <=> $b[$this->sortBy]
                 : $b[$this->sortBy] <=> $a[$this->sortBy],
         ]);
+
+        // 🚀 Update cache
+        $this->filteredCache = $filtered->values()->all();
+        $this->lastSearchTerm = $this->search;
+        $this->lastSortKey = $currentSortKey;
 
         return $filtered;
     }
@@ -113,13 +214,28 @@ class AttributeParticipantListModal extends Component
 
     public function updatingSearch(): void
     {
+        $this->clearCache();
         $this->resetPage();
     }
 
     public function render()
     {
+        // 🚀 PERFORMANCE: Load participants only when modal is shown
+        if ($this->showModal) {
+            $this->loadParticipants();
+        }
+
+        // 🚀 PERFORMANCE: Only compute pagination when modal is actually shown
+        $paginatedData = $this->showModal ? $this->paginatedParticipants : [
+            'data' => collect([]),
+            'total' => 0,
+            'per_page' => 15,
+            'current_page' => 1,
+            'last_page' => 1,
+        ];
+
         return view('livewire.pages.general-report.training.attribute-participant-list-modal', [
-            'paginatedData' => $this->paginatedParticipants,
+            'paginatedData' => $paginatedData,
         ]);
     }
 }

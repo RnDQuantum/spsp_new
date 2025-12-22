@@ -417,6 +417,7 @@ class TrainingRecommendation extends Component
 
     /**
      * Open modal with participants for a specific aspect
+     * 🚀 PERFORMANCE: Dispatch only IDs, let modal lazy load the data
      */
     public function openAttributeModal(int $aspectId): void
     {
@@ -434,42 +435,14 @@ class TrainingRecommendation extends Component
             $aspectName = $aspect['aspect_name'] ?? '';
         }
 
-        // Get participants for this aspect
-        $service = app(TrainingRecommendationService::class);
-        $participants = $service->getParticipantsRecommendation(
-            $this->selectedEvent->id,
-            $positionFormationId,
-            $aspectId,
-            $this->tolerancePercentage
-        );
-
-        // 🔥 FIX 1: Filter hanya peserta yang recommended (rating di bawah standar)
-        $participants = $participants->filter(function ($participant) {
-            return $participant['is_recommended'] === true;
-        });
-
-        // 🔥 FIX 2: Hydrate position names (sama seperti getParticipantsPaginated)
-        $positionIds = $participants->pluck('position_formation_id')->unique()->filter()->all();
-
-        if (! empty($positionIds)) {
-            $positions = \App\Models\PositionFormation::whereIn('id', $positionIds)
-                ->select('id', 'name')
-                ->get()
-                ->keyBy('id');
-
-            // Attach position names
-            $participants = $participants->map(function ($participant) use ($positions) {
-                $participant['position'] = $positions->get($participant['position_formation_id'])->name ?? '-';
-
-                return $participant;
-            });
-        }
-
-        // Dispatch event to modal component
+        // Dispatch event to modal component with minimal data
         $this->dispatch(
             'openAttributeParticipantModal',
             attributeName: $aspectName,
-            participants: $participants->values()->toArray()
+            eventId: $this->selectedEvent->id,
+            positionFormationId: $positionFormationId,
+            aspectId: $aspectId,
+            tolerancePercentage: $this->tolerancePercentage
         );
     }
 
