@@ -12,15 +12,12 @@ use App\Models\CategoryType;
 use App\Models\Institution;
 use App\Models\Participant;
 use App\Models\PositionFormation;
-use App\Services\Assessment\AssessmentCalculationService;
 use App\Services\Cache\AspectCacheService;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
 class DynamicAssessmentSeeder extends Seeder
 {
-    public function __construct(private readonly AssessmentCalculationService $assessmentService) {}
-
     /**
      * KONFIGURASI SEEDER DINAMIS
      *
@@ -43,7 +40,7 @@ class DynamicAssessmentSeeder extends Seeder
                 ],
                 'batches' => [['code' => 'BATCH-1-MOJOKERTO', 'name' => 'Gelombang 1 - Mojokerto', 'location' => 'Mojokerto', 'batch_number' => 1, 'start_date' => '2025-09-27', 'end_date' => '2025-09-28'], ['code' => 'BATCH-2-SURABAYA', 'name' => 'Gelombang 2 - Surabaya', 'location' => 'Surabaya', 'batch_number' => 2, 'start_date' => '2025-10-15', 'end_date' => '2025-10-16'], ['code' => 'BATCH-3-JAKARTA', 'name' => 'Gelombang 3 - Jakarta', 'location' => 'Jakarta', 'batch_number' => 3, 'start_date' => '2025-11-05', 'end_date' => '2025-11-06']],
                 'positions' => [['code' => 'fisikawan_medis', 'name' => 'Fisikawan Medis', 'quota' => 20, 'template_code' => 'professional_standard_v1'], ['code' => 'analis_kebijakan', 'name' => 'Analis Kebijakan', 'quota' => 30, 'template_code' => 'staff_standard_v1'], ['code' => 'auditor', 'name' => 'Auditor', 'quota' => 25, 'template_code' => 'supervisor_standard_v1'], ['code' => 'pranata_komputer', 'name' => 'Pranata Komputer', 'quota' => 25, 'template_code' => 'staff_standard_v1']],
-                'participants_count' => 20000, // JUMLAH PESERTA
+                'participants_count' => 2000, // JUMLAH PESERTA
                 'performance_distribution' => [
                     'high' => 25, // 25% high performers (exceed standard)
                     'medium' => 60, // 60% medium performers (around standard)
@@ -65,7 +62,7 @@ class DynamicAssessmentSeeder extends Seeder
                 ],
                 'batches' => [['code' => 'BATCH-1-BANDUNG', 'name' => 'Gelombang 1 - Bandung', 'location' => 'Bandung', 'batch_number' => 1, 'start_date' => '2025-10-10', 'end_date' => '2025-10-11'], ['code' => 'BATCH-2-YOGYAKARTA', 'name' => 'Gelombang 2 - Yogyakarta', 'location' => 'Yogyakarta', 'batch_number' => 2, 'start_date' => '2025-11-10', 'end_date' => '2025-11-11']],
                 'positions' => [['code' => 'dokter_umum', 'name' => 'Dokter Umum', 'quota' => 50, 'template_code' => 'professional_standard_v1'], ['code' => 'perawat', 'name' => 'Perawat', 'quota' => 100, 'template_code' => 'staff_standard_v1'], ['code' => 'apoteker', 'name' => 'Apoteker', 'quota' => 50, 'template_code' => 'supervisor_standard_v1']],
-                'participants_count' => 15000, // JUMLAH PESERTA
+                'participants_count' => 1500, // JUMLAH PESERTA
                 'performance_distribution' => [
                     'high' => 20,
                     'medium' => 10,
@@ -87,7 +84,7 @@ class DynamicAssessmentSeeder extends Seeder
                 ],
                 'batches' => [['code' => 'BATCH-1-JAKARTA', 'name' => 'Gelombang 1 - Jakarta', 'location' => 'Jakarta', 'batch_number' => 1, 'start_date' => '2025-01-15', 'end_date' => '2025-01-16'], ['code' => 'BATCH-2-BANDUNG', 'name' => 'Gelombang 2 - Bandung', 'location' => 'Bandung', 'batch_number' => 2, 'start_date' => '2025-02-15', 'end_date' => '2025-02-16']],
                 'positions' => [['code' => 'it_manager', 'name' => 'IT Manager', 'quota' => 30, 'template_code' => 'supervisor_standard_v1'], ['code' => 'network_engineer', 'name' => 'Network Engineer', 'quota' => 50, 'template_code' => 'staff_standard_v1'], ['code' => 'data_analyst', 'name' => 'Data Analyst', 'quota' => 40, 'template_code' => 'staff_standard_v1']],
-                'participants_count' => 1200,
+                'participants_count' => 120,
                 'performance_distribution' => [
                     'high' => 30,
                     'medium' => 55,
@@ -109,7 +106,7 @@ class DynamicAssessmentSeeder extends Seeder
                 ],
                 'batches' => [['code' => 'BATCH-1-JAKARTA', 'name' => 'Gelombang 1 - Jakarta', 'location' => 'Jakarta', 'batch_number' => 1, 'start_date' => '2025-02-10', 'end_date' => '2025-02-11']],
                 'positions' => [['code' => 'branch_manager', 'name' => 'Branch Manager', 'quota' => 40, 'template_code' => 'supervisor_standard_v1'], ['code' => 'risk_analyst', 'name' => 'Risk Analyst', 'quota' => 30, 'template_code' => 'professional_standard_v1'], ['code' => 'relationship_officer', 'name' => 'Relationship Officer', 'quota' => 30, 'template_code' => 'staff_standard_v1']],
-                'participants_count' => 1000,
+                'participants_count' => 100,
                 'performance_distribution' => [
                     'high' => 35,
                     'medium' => 50,
@@ -131,7 +128,7 @@ class DynamicAssessmentSeeder extends Seeder
                 ],
                 'batches' => [['code' => 'BATCH-1-DEPOK', 'name' => 'Gelombang 1 - Depok', 'location' => 'Depok', 'batch_number' => 1, 'start_date' => '2025-03-15', 'end_date' => '2025-03-16']],
                 'positions' => [['code' => 'dosen_teknik', 'name' => 'Dosen Teknik', 'quota' => 20, 'template_code' => 'professional_standard_v1'], ['code' => 'dosen_ekonomi', 'name' => 'Dosen Ekonomi', 'quota' => 15, 'template_code' => 'professional_standard_v1'], ['code' => 'dosen_kedokteran', 'name' => 'Dosen Kedokteran', 'quota' => 15, 'template_code' => 'professional_standard_v1']],
-                'participants_count' => 500,
+                'participants_count' => 50,
                 'performance_distribution' => [
                     'high' => 40,
                     'medium' => 45,
@@ -153,7 +150,7 @@ class DynamicAssessmentSeeder extends Seeder
                 ],
                 'batches' => [['code' => 'BATCH-1-JAKARTA', 'name' => 'Gelombang 1 - Jakarta', 'location' => 'Jakarta', 'batch_number' => 1, 'start_date' => '2025-02-01', 'end_date' => '2025-02-02'], ['code' => 'BATCH-2-JAKARTA', 'name' => 'Gelombang 2 - Jakarta', 'location' => 'Jakarta', 'batch_number' => 2, 'start_date' => '2025-06-01', 'end_date' => '2025-06-02']],
                 'positions' => [['code' => 'software_engineer', 'name' => 'Software Engineer', 'quota' => 80, 'template_code' => 'staff_standard_v1'], ['code' => 'product_manager', 'name' => 'Product Manager', 'quota' => 30, 'template_code' => 'supervisor_standard_v1'], ['code' => 'data_scientist', 'name' => 'Data Scientist', 'quota' => 40, 'template_code' => 'professional_standard_v1']],
-                'participants_count' => 1500,
+                'participants_count' => 150,
                 'performance_distribution' => [
                     'high' => 35,
                     'medium' => 50,
@@ -175,7 +172,7 @@ class DynamicAssessmentSeeder extends Seeder
                 ],
                 'batches' => [['code' => 'BATCH-1-JAKARTA', 'name' => 'Gelombang 1 - Jakarta', 'location' => 'Jakarta', 'batch_number' => 1, 'start_date' => '2025-09-01', 'end_date' => '2025-09-02']],
                 'positions' => [['code' => 'analis_sdm', 'name' => 'Analis SDM', 'quota' => 40, 'template_code' => 'professional_standard_v1'], ['code' => 'admin_kepegawaian', 'name' => 'Admin Kepegawaian', 'quota' => 60, 'template_code' => 'staff_standard_v1']],
-                'participants_count' => 1000,
+                'participants_count' => 100,
                 'performance_distribution' => [
                     'high' => 25,
                     'medium' => 60,
@@ -197,7 +194,7 @@ class DynamicAssessmentSeeder extends Seeder
                 ],
                 'batches' => [['code' => 'BATCH-1-JAKARTA', 'name' => 'Gelombang 1 - Jakarta', 'location' => 'Jakarta', 'batch_number' => 1, 'start_date' => '2025-07-01', 'end_date' => '2025-07-02'], ['code' => 'BATCH-2-SURABAYA', 'name' => 'Gelombang 2 - Surabaya', 'location' => 'Surabaya', 'batch_number' => 2, 'start_date' => '2025-08-01', 'end_date' => '2025-08-02']],
                 'positions' => [['code' => 'guru_sd', 'name' => 'Guru SD', 'quota' => 100, 'template_code' => 'professional_standard_v1'], ['code' => 'guru_smp', 'name' => 'Guru SMP', 'quota' => 80, 'template_code' => 'professional_standard_v1']],
-                'participants_count' => 1800,
+                'participants_count' => 180,
                 'performance_distribution' => [
                     'high' => 30,
                     'medium' => 50,
@@ -219,7 +216,7 @@ class DynamicAssessmentSeeder extends Seeder
                 ],
                 'batches' => [['code' => 'BATCH-1-JAKARTA', 'name' => 'Gelombang 1 - Jakarta', 'location' => 'Jakarta', 'batch_number' => 1, 'start_date' => '2025-04-01', 'end_date' => '2025-04-02']],
                 'positions' => [['code' => 'engineer', 'name' => 'Engineer', 'quota' => 50, 'template_code' => 'professional_standard_v1'], ['code' => 'analyst', 'name' => 'Analyst', 'quota' => 30, 'template_code' => 'staff_standard_v1'], ['code' => 'supervisor', 'name' => 'Supervisor', 'quota' => 20, 'template_code' => 'supervisor_standard_v1']],
-                'participants_count' => 1000,
+                'participants_count' => 100,
                 'performance_distribution' => [
                     'high' => 35,
                     'medium' => 50,
@@ -241,7 +238,7 @@ class DynamicAssessmentSeeder extends Seeder
                 ],
                 'batches' => [['code' => 'BATCH-1-YOGYAKARTA', 'name' => 'Gelombang 1 - Yogyakarta', 'location' => 'Yogyakarta', 'batch_number' => 1, 'start_date' => '2025-05-01', 'end_date' => '2025-05-02']],
                 'positions' => [['code' => 'dosen_soshum', 'name' => 'Dosen Sosial Humaniora', 'quota' => 25, 'template_code' => 'professional_standard_v1'], ['code' => 'dosen_saintek', 'name' => 'Dosen Saintek', 'quota' => 25, 'template_code' => 'professional_standard_v1']],
-                'participants_count' => 500,
+                'participants_count' => 50,
                 'performance_distribution' => [
                     'high' => 40,
                     'medium' => 45,
@@ -263,7 +260,7 @@ class DynamicAssessmentSeeder extends Seeder
                 ],
                 'batches' => [['code' => 'BATCH-1-BANDUNG', 'name' => 'Gelombang 1 - Bandung', 'location' => 'Bandung', 'batch_number' => 1, 'start_date' => '2025-06-01', 'end_date' => '2025-06-02']],
                 'positions' => [['code' => 'dosen_teknik', 'name' => 'Dosen Teknik', 'quota' => 30, 'template_code' => 'professional_standard_v1'], ['code' => 'dosen_informatika', 'name' => 'Dosen Informatika', 'quota' => 20, 'template_code' => 'professional_standard_v1']],
-                'participants_count' => 500,
+                'participants_count' => 50,
                 'performance_distribution' => [
                     'high' => 45,
                     'medium' => 40,
@@ -285,7 +282,7 @@ class DynamicAssessmentSeeder extends Seeder
                 ],
                 'batches' => [['code' => 'BATCH-1-JAKARTA', 'name' => 'Gelombang 1 - Jakarta', 'location' => 'Jakarta', 'batch_number' => 1, 'start_date' => '2025-02-15', 'end_date' => '2025-02-16']],
                 'positions' => [['code' => 'mt_marketing', 'name' => 'MT Marketing', 'quota' => 30, 'template_code' => 'staff_standard_v1'], ['code' => 'mt_supply_chain', 'name' => 'MT Supply Chain', 'quota' => 20, 'template_code' => 'staff_standard_v1']],
-                'participants_count' => 500,
+                'participants_count' => 50,
                 'performance_distribution' => [
                     'high' => 40,
                     'medium' => 45,
@@ -307,7 +304,7 @@ class DynamicAssessmentSeeder extends Seeder
                 ],
                 'batches' => [['code' => 'BATCH-1-JAKARTA', 'name' => 'Gelombang 1 - Jakarta', 'location' => 'Jakarta', 'batch_number' => 1, 'start_date' => '2025-03-01', 'end_date' => '2025-03-02']],
                 'positions' => [['code' => 'backend_engineer', 'name' => 'Backend Engineer', 'quota' => 40, 'template_code' => 'staff_standard_v1'], ['code' => 'frontend_engineer', 'name' => 'Frontend Engineer', 'quota' => 30, 'template_code' => 'staff_standard_v1'], ['code' => 'tech_lead', 'name' => 'Tech Lead', 'quota' => 10, 'template_code' => 'supervisor_standard_v1']],
-                'participants_count' => 800,
+                'participants_count' => 80,
                 'performance_distribution' => [
                     'high' => 30,
                     'medium' => 55,
@@ -329,7 +326,7 @@ class DynamicAssessmentSeeder extends Seeder
                 ],
                 'batches' => [['code' => 'BATCH-1-JAKARTA', 'name' => 'Gelombang 1 - Jakarta', 'location' => 'Jakarta', 'batch_number' => 1, 'start_date' => '2025-04-01', 'end_date' => '2025-04-02']],
                 'positions' => [['code' => 'dokter_spesialis', 'name' => 'Dokter Spesialis', 'quota' => 20, 'template_code' => 'professional_standard_v1'], ['code' => 'perawat_icu', 'name' => 'Perawat ICU', 'quota' => 40, 'template_code' => 'staff_standard_v1'], ['code' => 'tenaga_laboratorium', 'name' => 'Tenaga Laboratorium', 'quota' => 20, 'template_code' => 'staff_standard_v1']],
-                'participants_count' => 800,
+                'participants_count' => 80,
                 'performance_distribution' => [
                     'high' => 35,
                     'medium' => 50,
@@ -444,12 +441,12 @@ class DynamicAssessmentSeeder extends Seeder
     ): void {
         $totalParticipants = $config['participants_count'];
 
-        // ⚡ ADAPTIVE CHUNK SIZE: Optimized for memory stability
+        // ⚡ ADAPTIVE CHUNK SIZE: Optimized for speed (bulk insert approach allows larger chunks)
         $chunkSize = match (true) {
-            $totalParticipants < 500 => 50,
-            $totalParticipants < 2000 => 75,
-            $totalParticipants < 10000 => 100,
-            default => 150  // Reduced from 200 for better memory management
+            $totalParticipants < 500 => 100,
+            $totalParticipants < 2000 => 150,
+            $totalParticipants < 10000 => 200,
+            default => 250
         };
 
         $totalChunks = (int) ceil($totalParticipants / $chunkSize);
@@ -499,8 +496,8 @@ class DynamicAssessmentSeeder extends Seeder
                 $this->info("\n     ✓ Batch {$chunkNumber} completed in ".number_format($chunkDuration, 2).'s');
                 $this->info("     📈 Overall: {$processedTotal}/{$totalParticipants} ({$overallProgress}%) | Speed: ".number_format($avgSpeed, 1)." p/s\n");
 
-                // ⚡ Memory management: Aggressive GC every 3 chunks
-                if ($chunkIndex % 3 === 0 && $chunkIndex > 0) {
+                // ⚡ Memory management: Lighter GC every 5 chunks (bulk insert uses less memory)
+                if ($chunkIndex % 5 === 0 && $chunkIndex > 0) {
                     gc_collect_cycles();
                     $memoryMB = round(memory_get_usage(true) / 1024 / 1024, 2);
                     $this->info("     🗑️  Memory cleanup | Current: {$memoryMB} MB\n");
@@ -520,7 +517,7 @@ class DynamicAssessmentSeeder extends Seeder
     }
 
     /**
-     * ⚡ Process single chunk of participants with batch inserts
+     * ⚡ Process single chunk of participants with batch inserts (OPTIMIZED)
      */
     private function processParticipantChunk(
         int $chunkSize,
@@ -536,6 +533,10 @@ class DynamicAssessmentSeeder extends Seeder
         $participantsData = [];
         $psychTestsData = [];
         $interpretationsData = [];
+        $categoryAssessmentsData = [];
+        $aspectAssessmentsData = [];
+        $subAspectAssessmentsData = [];
+        $finalAssessmentsData = [];
 
         // Generate all participants data first
         for ($i = 0; $i < $chunkSize; $i++) {
@@ -557,7 +558,11 @@ class DynamicAssessmentSeeder extends Seeder
             ->get()
             ->keyBy('username');
 
-        // Process each participant's assessments
+        // ⚡ NEW APPROACH: Generate ALL assessment data first, then bulk insert
+        $categoryIdCounter = DB::table('category_assessments')->max('id') ?? 0;
+        $aspectIdCounter = DB::table('aspect_assessments')->max('id') ?? 0;
+        $subAspectIdCounter = DB::table('sub_aspect_assessments')->max('id') ?? 0;
+
         foreach ($participantsData as $pData) {
             $participant = $insertedParticipants->get($pData['username']);
             if (! $participant) {
@@ -585,8 +590,21 @@ class DynamicAssessmentSeeder extends Seeder
                 $aspectsCache
             );
 
-            // ⚡ Calculate assessments (already inside transaction)
-            $this->assessmentService->calculateParticipantWithoutTransaction($participant, $assessmentsData);
+            // ⚡ NEW: Generate all assessment records manually (FAST)
+            $this->generateAssessmentRecords(
+                $participant,
+                $template,
+                $assessmentsData,
+                $categoriesCache,
+                $aspectsCache,
+                $categoryIdCounter,
+                $aspectIdCounter,
+                $subAspectIdCounter,
+                $categoryAssessmentsData,
+                $aspectAssessmentsData,
+                $subAspectAssessmentsData,
+                $finalAssessmentsData
+            );
 
             // Prepare psychological test data
             $psychTestsData[] = $this->generatePsychTestData($participant, $performanceLevel);
@@ -598,14 +616,45 @@ class DynamicAssessmentSeeder extends Seeder
             $progressBar->advance();
         }
 
+        // ⚡ BULK INSERT: All assessment data in chunks (avoid MySQL placeholder limit)
+        // MySQL has a limit of 65,535 placeholders per query
+        // Each sub_aspect has 10 columns, so max ~6,500 rows per insert
+        // We use 1000 rows per chunk to be safe
+        $insertChunkSize = 1000;
+
+        if (! empty($categoryAssessmentsData)) {
+            foreach (array_chunk($categoryAssessmentsData, $insertChunkSize) as $chunk) {
+                DB::table('category_assessments')->insert($chunk);
+            }
+        }
+        if (! empty($aspectAssessmentsData)) {
+            foreach (array_chunk($aspectAssessmentsData, $insertChunkSize) as $chunk) {
+                DB::table('aspect_assessments')->insert($chunk);
+            }
+        }
+        if (! empty($subAspectAssessmentsData)) {
+            foreach (array_chunk($subAspectAssessmentsData, $insertChunkSize) as $chunk) {
+                DB::table('sub_aspect_assessments')->insert($chunk);
+            }
+        }
+        if (! empty($finalAssessmentsData)) {
+            foreach (array_chunk($finalAssessmentsData, $insertChunkSize) as $chunk) {
+                DB::table('final_assessments')->insert($chunk);
+            }
+        }
+
         // ⚡ BULK INSERT: Insert psychological tests
         if (! empty($psychTestsData)) {
-            DB::table('psychological_tests')->insert($psychTestsData);
+            foreach (array_chunk($psychTestsData, $insertChunkSize) as $chunk) {
+                DB::table('psychological_tests')->insert($chunk);
+            }
         }
 
         // ⚡ BULK INSERT: Insert interpretations
         if (! empty($interpretationsData)) {
-            DB::table('interpretations')->insert($interpretationsData);
+            foreach (array_chunk($interpretationsData, $insertChunkSize) as $chunk) {
+                DB::table('interpretations')->insert($chunk);
+            }
         }
     }
 
@@ -840,6 +889,285 @@ class DynamicAssessmentSeeder extends Seeder
     }
 
     /**
+     * ⚡ Generate all assessment records manually (without Eloquent overhead)
+     * This method calculates and prepares all data for bulk insert
+     */
+    private function generateAssessmentRecords(
+        Participant $participant,
+        AssessmentTemplate $template,
+        array $assessmentsData,
+        $categoriesCache,
+        $aspectsCache,
+        int &$categoryIdCounter,
+        int &$aspectIdCounter,
+        int &$subAspectIdCounter,
+        array &$categoryAssessmentsData,
+        array &$aspectAssessmentsData,
+        array &$subAspectAssessmentsData,
+        array &$finalAssessmentsData
+    ): void {
+        $categoryResults = [];
+        $now = now();
+
+        // Process each category (potensi, kompetensi)
+        foreach ($assessmentsData as $categoryCode => $categoryData) {
+            $categoryIdCounter++;
+            $categoryId = $categoryIdCounter;
+
+            // Get category from cache
+            $category = $categoriesCache->get($template->id)->firstWhere('code', $categoryCode);
+
+            // Initialize category totals
+            $categoryTotalStandardRating = 0;
+            $categoryTotalStandardScore = 0;
+            $categoryTotalIndividualRating = 0;
+            $categoryTotalIndividualScore = 0;
+
+            // Process each aspect in category
+            foreach ($categoryData as $aspectData) {
+                $aspectIdCounter++;
+                $aspectId = $aspectIdCounter;
+
+                // Get aspect from cache
+                $aspect = $aspectsCache->get($category->id)?->firstWhere('code', $aspectData['aspect_code']);
+                if (! $aspect) {
+                    continue;
+                }
+
+                // Calculate aspect values
+                $hasSubAspects = isset($aspectData['sub_aspects']) && ! empty($aspectData['sub_aspects']);
+
+                // Initialize variables
+                $standardRating = 0;
+                $individualRating = 0;
+
+                if ($hasSubAspects) {
+                    // Has sub-aspects: calculate from sub-aspects
+                    $subAspectRatings = [];
+                    $standardRating = (float) collect($aspect->subAspects)->avg('standard_rating');
+
+                    foreach ($aspectData['sub_aspects'] as $subAspectData) {
+                        $subAspectIdCounter++;
+
+                        $subAspect = $aspect->subAspects->firstWhere('code', $subAspectData['sub_aspect_code']);
+                        if (! $subAspect) {
+                            continue;
+                        }
+
+                        $rating = (int) $subAspectData['individual_rating'];
+                        $subAspectRatings[] = $rating;
+
+                        // Add sub-aspect assessment
+                        $subAspectAssessmentsData[] = [
+                            'id' => $subAspectIdCounter,
+                            'aspect_assessment_id' => $aspectId,
+                            'participant_id' => $participant->id,
+                            'event_id' => $participant->event_id,
+                            'sub_aspect_id' => $subAspect->id,
+                            'standard_rating' => (int) $subAspect->standard_rating,
+                            'individual_rating' => $rating,
+                            'rating_label' => $this->getRatingLabel($rating),
+                            'created_at' => $now,
+                            'updated_at' => $now,
+                        ];
+                    }
+
+                    $individualRating = (float) collect($subAspectRatings)->avg();
+                } else {
+                    // No sub-aspects: use aspect's own rating
+                    $standardRating = (float) $aspect->standard_rating;
+                    $individualRating = (float) $aspectData['individual_rating'];
+                }
+
+                // Calculate scores (weight is 100% for seeder simplicity)
+                $weight = (float) $aspect->weight_percentage;
+                $standardScore = $standardRating * $weight;
+                $individualScore = $individualRating * $weight;
+                $gapRating = $individualRating - $standardRating;
+                $gapScore = $individualScore - $standardScore;
+                $percentageScore = (int) round(($individualRating / 5) * 100);
+
+                // Determine conclusion
+                $conclusionCode = $this->determineAspectConclusion($gapRating);
+                $conclusionText = $this->getAspectConclusionText($conclusionCode);
+
+                // Add to category totals
+                $categoryTotalStandardRating += $standardRating;
+                $categoryTotalStandardScore += $standardScore;
+                $categoryTotalIndividualRating += $individualRating;
+                $categoryTotalIndividualScore += $individualScore;
+
+                // Add aspect assessment
+                $aspectAssessmentsData[] = [
+                    'id' => $aspectId,
+                    'category_assessment_id' => $categoryId,
+                    'participant_id' => $participant->id,
+                    'event_id' => $participant->event_id,
+                    'batch_id' => $participant->batch_id,
+                    'position_formation_id' => $participant->position_formation_id,
+                    'aspect_id' => $aspect->id,
+                    'standard_rating' => round($standardRating, 2),
+                    'standard_score' => round($standardScore, 2),
+                    'individual_rating' => round($individualRating, 2),
+                    'individual_score' => round($individualScore, 2),
+                    'gap_rating' => round($gapRating, 2),
+                    'gap_score' => round($gapScore, 2),
+                    'percentage_score' => $percentageScore,
+                    'conclusion_code' => $conclusionCode,
+                    'conclusion_text' => $conclusionText,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ];
+            }
+
+            // Calculate category gaps
+            $categoryGapRating = $categoryTotalIndividualRating - $categoryTotalStandardRating;
+            $categoryGapScore = $categoryTotalIndividualScore - $categoryTotalStandardScore;
+            $categoryConclusionCode = $this->determineCategoryConclusion($categoryGapScore);
+            $categoryConclusionText = $this->getCategoryConclusionText($categoryConclusionCode);
+
+            // Add category assessment
+            $categoryAssessmentsData[] = [
+                'id' => $categoryId,
+                'participant_id' => $participant->id,
+                'event_id' => $participant->event_id,
+                'batch_id' => $participant->batch_id,
+                'position_formation_id' => $participant->position_formation_id,
+                'category_type_id' => $category->id,
+                'total_standard_rating' => round($categoryTotalStandardRating, 2),
+                'total_standard_score' => round($categoryTotalStandardScore, 2),
+                'total_individual_rating' => round($categoryTotalIndividualRating, 2),
+                'total_individual_score' => round($categoryTotalIndividualScore, 2),
+                'gap_rating' => round($categoryGapRating, 2),
+                'gap_score' => round($categoryGapScore, 2),
+                'conclusion_code' => $categoryConclusionCode,
+                'conclusion_text' => $categoryConclusionText,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ];
+
+            $categoryResults[$categoryCode] = [
+                'weight' => $category->weight_percentage,
+                'score' => $categoryTotalIndividualScore,
+            ];
+        }
+
+        // Calculate final assessment
+        $finalTotalScore = 0;
+        $finalWeightedScore = 0;
+
+        foreach ($categoryResults as $result) {
+            $finalTotalScore += $result['score'];
+            $finalWeightedScore += ($result['score'] * $result['weight']) / 100;
+        }
+
+        $finalPercentage = min(100, (int) round(($finalWeightedScore / 100) * 100));
+        $finalClass = $this->determineFinalClass($finalPercentage);
+
+        // Add final assessment
+        $finalAssessmentsData[] = [
+            'participant_id' => $participant->id,
+            'event_id' => $participant->event_id,
+            'batch_id' => $participant->batch_id,
+            'position_formation_id' => $participant->position_formation_id,
+            'total_score' => round($finalTotalScore, 2),
+            'weighted_score' => round($finalWeightedScore, 2),
+            'percentage_score' => $finalPercentage,
+            'classification' => $finalClass,
+            'created_at' => $now,
+            'updated_at' => $now,
+        ];
+    }
+
+    /**
+     * Get rating label for sub-aspect
+     */
+    private function getRatingLabel(int $rating): string
+    {
+        return match ($rating) {
+            1 => 'Sangat Kurang',
+            2 => 'Kurang',
+            3 => 'Cukup',
+            4 => 'Baik',
+            5 => 'Sangat Baik',
+            default => 'Cukup',
+        };
+    }
+
+    /**
+     * Determine aspect conclusion
+     */
+    private function determineAspectConclusion(float $gapRating): string
+    {
+        if ($gapRating < -0.5) {
+            return 'below_standard';
+        } elseif ($gapRating < 0.5) {
+            return 'meets_standard';
+        } else {
+            return 'exceeds_standard';
+        }
+    }
+
+    /**
+     * Get aspect conclusion text
+     */
+    private function getAspectConclusionText(string $code): string
+    {
+        return match ($code) {
+            'below_standard' => 'Kurang Memenuhi Standard',
+            'meets_standard' => 'Memenuhi Standard',
+            'exceeds_standard' => 'Melebihi Standard',
+            default => 'Memenuhi Standard',
+        };
+    }
+
+    /**
+     * Determine category conclusion
+     */
+    private function determineCategoryConclusion(float $gapScore): string
+    {
+        if ($gapScore < -10) {
+            return 'DBS';
+        } elseif ($gapScore < 0) {
+            return 'MS';
+        } elseif ($gapScore < 20) {
+            return 'K';
+        } else {
+            return 'SK';
+        }
+    }
+
+    /**
+     * Get category conclusion text
+     */
+    private function getCategoryConclusionText(string $code): string
+    {
+        return match ($code) {
+            'DBS' => 'DI BAWAH STANDARD',
+            'MS' => 'MEMENUHI STANDARD',
+            'K' => 'KOMPETEN',
+            'SK' => 'SANGAT KOMPETEN',
+            default => 'MEMENUHI STANDARD',
+        };
+    }
+
+    /**
+     * Determine final classification
+     */
+    private function determineFinalClass(int $percentage): string
+    {
+        if ($percentage >= 90) {
+            return 'Kelas I';
+        } elseif ($percentage >= 75) {
+            return 'Kelas II';
+        } elseif ($percentage >= 60) {
+            return 'Kelas III';
+        } else {
+            return 'Kelas IV';
+        }
+    }
+
+    /**
      * ⚡ Clear Eloquent memory to prevent memory leak
      */
     private function clearEloquentMemory(): void
@@ -851,13 +1179,15 @@ class DynamicAssessmentSeeder extends Seeder
         Participant::clearBootedModels();
 
         // Clear model event listeners cache
-        foreach ([
-            Participant::class,
-            \App\Models\CategoryAssessment::class,
-            \App\Models\AspectAssessment::class,
-            \App\Models\SubAspectAssessment::class,
-            \App\Models\FinalAssessment::class,
-        ] as $model) {
+        foreach (
+            [
+                Participant::class,
+                \App\Models\CategoryAssessment::class,
+                \App\Models\AspectAssessment::class,
+                \App\Models\SubAspectAssessment::class,
+                \App\Models\FinalAssessment::class,
+            ] as $model
+        ) {
             if (method_exists($model, 'flushEventListeners')) {
                 $model::flushEventListeners();
             }
