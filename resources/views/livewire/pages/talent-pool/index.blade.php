@@ -373,7 +373,7 @@
                                 y: {
                                     title: {
                                         display: true,
-                                        text: 'KINERJA',
+                                        text: 'KOMPETENSI',
                                         color: getTextColor(),
                                         font: {
                                             size: 16,
