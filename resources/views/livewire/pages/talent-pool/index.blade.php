@@ -194,6 +194,39 @@
                 const getTextColor = () => isDark() ? '#e5e7eb' : '#374151'; // gray-200 vs gray-700
                 const getNumberColor = () => isDark() ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0,0,0,0.15)';
 
+                // 🌓 Dark Mode Observer: Update chart otomatis saat ganti mode
+                const observer = new MutationObserver((mutations) => {
+                    mutations.forEach((mutation) => {
+                        if (mutation.attributeName === 'class') {
+                            const canvas = document.getElementById('nineBoxChart');
+                            if (!canvas) return;
+
+                            const chart = Chart.getChart(canvas);
+                            if (chart) {
+                                const textColor = getTextColor();
+
+                                // Update Axes Colors
+                                if (chart.options.scales.x.title) chart.options.scales.x.title.color =
+                                    textColor;
+                                if (chart.options.scales.y.title) chart.options.scales.y.title.color =
+                                    textColor;
+                                if (chart.options.scales.x.ticks) chart.options.scales.x.ticks.color =
+                                    textColor;
+                                if (chart.options.scales.y.ticks) chart.options.scales.y.ticks.color =
+                                    textColor;
+
+                                // Grid & Numbers will update automatically in beforeDraw because isDark() is checked live
+                                chart.update();
+                            }
+                        }
+                    });
+                });
+
+                observer.observe(document.documentElement, {
+                    attributes: true,
+                    attributeFilter: ['class']
+                });
+
                 // 🚀 PERFORMANCE: Smart data sampling untuk large datasets
                 function sampleData(data, maxPoints = 500) {
                     if (data.length <= maxPoints) return data;
