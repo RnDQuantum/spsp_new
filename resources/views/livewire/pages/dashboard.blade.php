@@ -192,11 +192,11 @@
                         window.potensiChart_{{ $potensiChartId }} = new Chart(ctxPotensi.getContext('2d'), {
                             type: 'radar',
                             data: {
-                                labels: @js($potensiLabels),
+                                labels: @js($potensiLabels ?? []),
                                 datasets: hasParticipantData ? [{
                                         // === LAYER 1: PESERTA (PASTI BAWAH) ===
-                                        label: @js($participant ? $participant->name : 'Peserta'),
-                                        data: @js($potensiIndividualRatings),
+                                        label: @js($participant->name ?? 'Peserta'),
+                                        data: @js($potensiIndividualRatings ?? []),
                                         fill: true,
                                         backgroundColor: '#5db010', // HIJAU SOLID
                                         borderColor: '#8fd006',
@@ -231,7 +231,7 @@
                                     {
                                         // === LAYER 2: STANDARD (TENGAH) ===
                                         label: 'Standar', // UBAH DARI: 'Tolerance {{ $tolerancePercentage }}%'
-                                        data: @js($potensiStandardRatings),
+                                        data: @js($potensiStandardRatings ?? []),
                                         borderColor: '#b50505', // MERAH SOLID
                                         backgroundColor: '#b50505',
                                         borderWidth: 2,
@@ -264,7 +264,7 @@
                                     {
                                         // === LAYER 3: TOLERANCE (PASTI ATAS) ===
                                         label: 'Toleransi {{ $tolerancePercentage }}%', // UBAH DARI: 'Standard'
-                                        data: @js($potensiOriginalStandardRatings),
+                                        data: @js($potensiOriginalStandardRatings ?? []),
                                         fill: true,
                                         backgroundColor: '#fafa05', // KUNING SOLID
                                         borderColor: '#e6d105',
@@ -300,7 +300,7 @@
                                     // Standar (hijau) - tidak ada perubahan
                                     {
                                         label: 'Standar',
-                                        data: @js($potensiStandardRatings),
+                                        data: @js($potensiStandardRatings ?? []),
                                         fill: true,
                                         backgroundColor: '#5db010', // HIJAU SOLID
                                         borderColor: '#8fd006',
@@ -333,7 +333,7 @@
                                     // Toleransi (kuning) - tidak ada perubahan
                                     {
                                         label: 'Toleransi {{ $tolerancePercentage }}%',
-                                        data: @js($potensiOriginalStandardRatings),
+                                        data: @js($potensiOriginalStandardRatings ?? []),
                                         fill: true,
                                         backgroundColor: '#fafa05', // KUNING SOLID
                                         borderColor: '#e6d105',
@@ -473,11 +473,11 @@
                         window.kompetensiChart_{{ $kompetensiChartId }} = new Chart(ctxKompetensi.getContext('2d'), {
                             type: 'radar',
                             data: {
-                                labels: @js($kompetensiLabels),
+                                labels: @js($kompetensiLabels ?? []),
                                 datasets: hasParticipantData ? [{
                                     // Peserta (hijau)
-                                    label: @js($participant ? $participant->name : 'Peserta'),
-                                    data: @js($kompetensiIndividualRatings),
+                                    label: @js($participant->name ?? 'Peserta'),
+                                    data: @js($kompetensiIndividualRatings ?? []),
                                     fill: true,
                                     backgroundColor: '#5db010',
                                     borderColor: '#8fd006',
@@ -511,7 +511,7 @@
                                 }, {
                                     // Standard (merah) - PERUBAHAN LABEL
                                     label: 'Standar', // UBAH DARI: 'Tolerance {{ $tolerancePercentage }}%'
-                                    data: @js($kompetensiStandardRatings),
+                                    data: @js($kompetensiStandardRatings ?? []),
                                     borderColor: '#b50505',
                                     backgroundColor: '#b50505',
                                     borderWidth: 2,
@@ -543,7 +543,7 @@
                                 }, {
                                     // Tolerance (kuning) - PERUBAHAN LABEL
                                     label: 'Toleransi {{ $tolerancePercentage }}%', // UBAH DARI: 'Standard'
-                                    data: @js($kompetensiOriginalStandardRatings),
+                                    data: @js($kompetensiOriginalStandardRatings ?? []),
                                     fill: true,
                                     backgroundColor: '#fafa05',
                                     borderColor: '#e6d105',
@@ -578,7 +578,7 @@
                                     // Standar (hijau) - tidak ada perubahan
                                     {
                                         label: 'Standar',
-                                        data: @js($kompetensiStandardRatings),
+                                        data: @js($kompetensiStandardRatings ?? []),
                                         fill: true,
                                         backgroundColor: '#5db010', // HIJAU SOLID
                                         borderColor: '#8fd006',
@@ -611,7 +611,7 @@
                                     // Toleransi (kuning) - tidak ada perubahan
                                     {
                                         label: 'Toleransi {{ $tolerancePercentage }}%',
-                                        data: @js($kompetensiOriginalStandardRatings),
+                                        data: @js($kompetensiOriginalStandardRatings ?? []),
                                         fill: true,
                                         backgroundColor: '#fafa05', // KUNING SOLID
                                         borderColor: '#e6d105',
@@ -750,11 +750,11 @@
                         window.generalChart_{{ $generalChartId }} = new Chart(ctxGeneral.getContext('2d'), {
                             type: 'radar',
                             data: {
-                                labels: @js($generalLabels),
+                                labels: @js($generalLabels ?? []),
                                 datasets: hasParticipantData ? [{
                                     // Peserta (hijau)
-                                    label: @js($participant ? $participant->name : 'Peserta'),
-                                    data: @js($generalIndividualRatings),
+                                    label: @js($participant->name ?? 'Peserta'),
+                                    data: @js($generalIndividualRatings ?? []),
                                     fill: true,
                                     backgroundColor: '#5db010',
                                     borderColor: '#8fd006',
@@ -788,7 +788,7 @@
                                 }, {
                                     // Standard (merah) - PERUBAHAN LABEL
                                     label: 'Standar', // UBAH DARI: 'Tolerance {{ $tolerancePercentage }}%'
-                                    data: @js($generalStandardRatings),
+                                    data: @js($generalStandardRatings ?? []),
                                     borderColor: '#b50505',
                                     backgroundColor: '#b50505',
                                     borderWidth: 2,
@@ -820,7 +820,7 @@
                                 }, {
                                     // Tolerance (kuning) - PERUBAHAN LABEL
                                     label: 'Toleransi {{ $tolerancePercentage }}%', // UBAH DARI: 'Standard'
-                                    data: @js($generalOriginalStandardRatings),
+                                    data: @js($generalOriginalStandardRatings ?? []),
                                     fill: true,
                                     backgroundColor: '#fafa05',
                                     borderColor: '#e6d105',
@@ -855,7 +855,7 @@
                                     // Standar (hijau) - tidak ada perubahan
                                     {
                                         label: 'Standar',
-                                        data: @js($generalStandardRatings),
+                                        data: @js($generalStandardRatings ?? []),
                                         fill: true,
                                         backgroundColor: '#5db010', // HIJAU SOLID
                                         borderColor: '#8fd006',
@@ -888,7 +888,7 @@
                                     // Toleransi (kuning) - tidak ada perubahan
                                     {
                                         label: 'Toleransi {{ $tolerancePercentage }}%',
-                                        data: @js($generalOriginalStandardRatings),
+                                        data: @js($generalOriginalStandardRatings ?? []),
                                         fill: true,
                                         backgroundColor: '#fafa05', // KUNING SOLID
                                         borderColor: '#e6d105',
