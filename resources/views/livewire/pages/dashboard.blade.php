@@ -1,9 +1,4 @@
 <div>
-    @if (session('force_reload'))
-        <script>
-            window.location.reload();
-        </script>
-    @endif
     <div class="bg-white dark:bg-gray-900 mx-auto my-8 shadow-lg dark:shadow-gray-800/50 overflow-hidden"
         style="max-width: 1400px;">
         <!-- Header - DARK MODE READY -->
@@ -63,44 +58,38 @@
                 <!-- Charts - Vertical Layout -->
                 <div class="space-y-6 mt-8">
                     <!-- Chart Potensi (Pentagon) -->
-                    @if (count($potensiLabels) > 0)
-                        <div
-                            class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg dark:shadow-gray-700/50 border border-gray-200 dark:border-gray-600">
-                            <h3 class="text-lg text-center font-semibold text-gray-800 dark:text-gray-100 mb-4">
-                                <i>Potential Mapping (Rating)</i>
-                            </h3>
-                            <div class="relative" style="height: 600px;" wire:ignore>
-                                <canvas id="potensiChart-{{ $potensiChartId }}"></canvas>
-                            </div>
+                    <div
+                        class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg dark:shadow-gray-700/50 border border-gray-200 dark:border-gray-600">
+                        <h3 class="text-lg text-center font-semibold text-gray-800 dark:text-gray-100 mb-4">
+                            <i>Potential Mapping (Rating)</i>
+                        </h3>
+                        <div class="relative" style="height: 600px;" wire:ignore>
+                            <canvas id="potensiChart-{{ $potensiChartId }}"></canvas>
                         </div>
-                    @endif
+                    </div>
 
                     <!-- Chart Kompetensi (Nonagon) -->
-                    @if (count($kompetensiLabels) > 0)
-                        <div
-                            class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg dark:shadow-gray-700/50 border border-gray-200 dark:border-gray-600">
-                            <h3 class="text-lg text-center font-semibold text-gray-800 dark:text-gray-100 mb-4">
-                                <i>Managerial Potency Mapping
-                                    (Rating)</i>
-                            </h3>
-                            <div class="relative" style="height: 600px;" wire:ignore>
-                                <canvas id="kompetensiChart-{{ $kompetensiChartId }}"></canvas>
-                            </div>
+                    <div
+                        class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg dark:shadow-gray-700/50 border border-gray-200 dark:border-gray-600">
+                        <h3 class="text-lg text-center font-semibold text-gray-800 dark:text-gray-100 mb-4">
+                            <i>Managerial Potency Mapping
+                                (Rating)</i>
+                        </h3>
+                        <div class="relative" style="height: 600px;" wire:ignore>
+                            <canvas id="kompetensiChart-{{ $kompetensiChartId }}"></canvas>
                         </div>
-                    @endif
+                    </div>
 
                     <!-- Chart General (Tetradecagon) -->
-                    @if (count($generalLabels) > 0)
-                        <div
-                            class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg dark:shadow-gray-700/50 border border-gray-200 dark:border-gray-600">
-                            <h3 class="text-lg text-center font-semibold text-gray-800 dark:text-gray-100 mb-4">
-                                <i>General Mapping (Rating)</i>
-                            </h3>
-                            <div class="relative" style="height: 600px;" wire:ignore>
-                                <canvas id="generalChart-{{ $generalChartId }}"></canvas>
-                            </div>
+                    <div
+                        class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg dark:shadow-gray-700/50 border border-gray-200 dark:border-gray-600">
+                        <h3 class="text-lg text-center font-semibold text-gray-800 dark:text-gray-100 mb-4">
+                            <i>General Mapping (Rating)</i>
+                        </h3>
+                        <div class="relative" style="height: 600px;" wire:ignore>
+                            <canvas id="generalChart-{{ $generalChartId }}"></canvas>
                         </div>
-                    @endif
+                    </div>
                 </div>
             </div>
         @else
@@ -114,11 +103,10 @@
     </div>
 
     <!-- Chart Scripts - DARK MODE READY -->
-    @if (count($allAspectsData) > 0)
-        @push('scripts')
-            <script>
-                (function() {
-                    'use strict';
+    <script>
+            (function() {
+                'use strict';
+                console.log('[Dashboard Script] IIFE executed');
 
                     // ========================================
                     // STEP 1: DEFINE ALL CONSTANTS FIRST
@@ -1791,10 +1779,11 @@
                             setupLivewireListeners();
                         });
 
-                        // Setup dark mode listener
-                        setupDarkModeListener();
-
-
+                        // Setup dark mode listener only once
+                        if (!window.dashboardDarkModeSetup) {
+                            setupDarkModeListener();
+                            window.dashboardDarkModeSetup = true;
+                        }
                     }
 
                     // Run on initial page load
@@ -1823,7 +1812,5 @@
                         }
                     });
                 })();
-            </script>
-        @endpush
-    @endif
+    </script>
 </div>
