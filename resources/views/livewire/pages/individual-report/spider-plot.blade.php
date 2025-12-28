@@ -79,11 +79,6 @@
     <!-- Chart Scripts - DARK MODE FIXED -->
     <script>
         (function() {
-            // Prevent multiple initializations
-            if (window['spiderChartSetup_{{ $potensiChartId }}']) return;
-            window['spiderChartSetup_{{ $potensiChartId }}'] = true;
-
-            // 🌙 DARK MODE COLORS
             // 🌙 DARK MODE COLORS
             const getColors = () => {
                 const dark = document.documentElement.classList.contains('dark');
@@ -106,18 +101,41 @@
                 }
             }
 
-            // Wait for DOM and Chart.js
-            function init() {
-                initializePotensiChart();
-                initializeKompetensiChart();
-                initializeGeneralChart();
+            // Main initialization function
+            function initSpiderPlots() {
+                console.log('[Spider Plot] Initializing charts...');
+
+                waitForChartJs(function() {
+                    initializePotensiChart();
+                    initializeKompetensiChart();
+                    initializeGeneralChart();
+                });
+
                 setupLivewireListeners();
+
+                // Setup dark mode listener only once
+                if (!window.spiderPlotDarkModeSetup) {
+                    setupDarkModeListener();
+                    window.spiderPlotDarkModeSetup = true;
+                }
             }
 
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', () => waitForChartJs(init));
-            } else {
-                waitForChartJs(init);
+            // Cleanup function
+            function cleanupSpiderCharts() {
+                console.log('[Spider Plot] Cleaning up charts...');
+
+                if (window.potensiChart_{{ $potensiChartId }}) {
+                    window.potensiChart_{{ $potensiChartId }}.destroy();
+                    window.potensiChart_{{ $potensiChartId }} = null;
+                }
+                if (window.kompetensiChart_{{ $kompetensiChartId }}) {
+                    window.kompetensiChart_{{ $kompetensiChartId }}.destroy();
+                    window.kompetensiChart_{{ $kompetensiChartId }} = null;
+                }
+                if (window.generalChart_{{ $generalChartId }}) {
+                    window.generalChart_{{ $generalChartId }}.destroy();
+                    window.generalChart_{{ $generalChartId }} = null;
+                }
             }
 
             // ========================================
@@ -775,26 +793,55 @@
                 });
             }
 
-            // 🌙 DARK MODE LISTENER
-            new MutationObserver(() => {
-                const colors = getColors();
+            // 🌙 DARK MODE LISTENER SETUP
+            function setupDarkModeListener() {
+                new MutationObserver(() => {
+                    const colors = getColors();
 
-                [window.potensiChart_{{ $potensiChartId }},
-                    window.kompetensiChart_{{ $kompetensiChartId }},
-                    window.generalChart_{{ $generalChartId }}
-                ].forEach(chart => {
-                    if (chart) {
-                        chart.options.scales.r.ticks.color = colors.ticks;
-                        chart.options.scales.r.pointLabels.color = colors.pointLabels;
-                        chart.options.scales.r.grid.color = colors.grid;
-                        chart.options.scales.r.angleLines.color = colors.grid;
-                        chart.options.plugins.legend.labels.color = colors.legend;
-                        chart.update('active');
-                    }
+                    [window.potensiChart_{{ $potensiChartId }},
+                        window.kompetensiChart_{{ $kompetensiChartId }},
+                        window.generalChart_{{ $generalChartId }}
+                    ].forEach(chart => {
+                        if (chart) {
+                            chart.options.scales.r.ticks.color = colors.ticks;
+                            chart.options.scales.r.pointLabels.color = colors.pointLabels;
+                            chart.options.scales.r.grid.color = colors.grid;
+                            chart.options.scales.r.angleLines.color = colors.angleLines;
+                            chart.options.plugins.legend.labels.color = colors.legend;
+                            chart.update('active');
+                        }
+                    });
+                }).observe(document.documentElement, {
+                    attributes: true,
+                    attributeFilter: ['class']
                 });
-            }).observe(document.documentElement, {
-                attributes: true,
-                attributeFilter: ['class']
+            }
+
+            // ========================================
+            // INITIALIZATION & WIRE:NAVIGATE SUPPORT
+            // ========================================
+
+            // Initialize on first load
+            initSpiderPlots();
+
+            // Reinitialize when navigated to this page
+            document.addEventListener('livewire:navigated', function() {
+                const isSpiderPlotPage = document.getElementById('potensiChart-{{ $potensiChartId }}') !== null;
+
+                if (isSpiderPlotPage) {
+                    console.log('[Spider Plot] Navigated to page, reinitializing...');
+                    initSpiderPlots();
+                }
+            });
+
+            // Cleanup when navigating away
+            document.addEventListener('livewire:navigating', function() {
+                const isSpiderPlotPage = document.getElementById('potensiChart-{{ $potensiChartId }}') !== null;
+
+                if (isSpiderPlotPage) {
+                    console.log('[Spider Plot] Navigating away, cleaning up...');
+                    cleanupSpiderCharts();
+                }
             });
         })();
     </script>
