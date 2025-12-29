@@ -308,6 +308,9 @@
 
         var LARAVEL_PATH = "C:\\laragon\\www\\spsp_new";
         var APP_URL = "http://127.0.0.1:8000";
+        var MYSQL_PATH = "C:\\laragon\\bin\\mysql\\mysql-8.0.30-winx64";
+        var MYSQL_BIN = MYSQL_PATH + "\\bin\\mysqld.exe";
+        var MYSQL_CONFIG = MYSQL_PATH + "\\my.ini";
 
         function addLog(message, type) {
             var logs = document.getElementById("logs");
@@ -385,22 +388,40 @@
                     return;
                 }
                 addLog("Path Laravel: " + LARAVEL_PATH, "success");
-                updateInfo("Memulai services...", "");
-                shell.Run('cmd /c start "PHP Artisan" cmd /k "cd /d ' + LARAVEL_PATH + ' && php artisan serve"', 1);
+                updateInfo("Memulai MySQL, PHP, dan Vite...", "");
+
+                // Start MySQL first
+                addLog("Starting MySQL Server...", "info");
+                setStatus("db", "loading");
+                shell.Run('cmd /c start "MySQL Server" /min "' + MYSQL_BIN + '" --defaults-file="' + MYSQL_CONFIG + '"', 0);
+
                 setTimeout(function () {
-                    setStatus("php", true);
-                    addLog("PHP Server running at " + APP_URL, "success");
-                }, 3000);
-                setTimeout(function () {
-                    shell.Run('cmd /c start "Vite Dev" cmd /k "cd /d ' + LARAVEL_PATH + ' && npm run dev"', 1);
+                    setStatus("db", true);
+                    addLog("MySQL Server running on port 3307", "success");
+
+                    // Start PHP Artisan after MySQL is ready
+                    addLog("Starting PHP Artisan Server...", "info");
+                    setStatus("php", "loading");
+                    shell.Run('cmd /c start "PHP Artisan" cmd /k "cd /d ' + LARAVEL_PATH + ' && php artisan serve"', 1);
+
                     setTimeout(function () {
-                        setStatus("vite", true);
-                        addLog("Vite Dev Server running", "success");
-                        isRunning = true;
-                        updateUI();
-                        updateInfo("Aplikasi berjalan! Klik OPEN BROWSER", "success");
-                        setTimeout(openBrowser, 2000);
-                    }, 3000);
+                        setStatus("php", true);
+                        addLog("PHP Server running at " + APP_URL, "success");
+
+                        // Start Vite after PHP is ready
+                        addLog("Starting Vite Dev Server...", "info");
+                        setStatus("vite", "loading");
+                        shell.Run('cmd /c start "Vite Dev" cmd /k "cd /d ' + LARAVEL_PATH + ' && npm run dev"', 1);
+
+                        setTimeout(function () {
+                            setStatus("vite", true);
+                            addLog("Vite Dev Server running", "success");
+                            isRunning = true;
+                            updateUI();
+                            updateInfo("Aplikasi berjalan! MySQL, PHP, dan Vite aktif.", "success");
+                            setTimeout(openBrowser, 2000);
+                        }, 3000);
+                    }, 1000);
                 }, 3000);
             } catch (e) {
                 addLog("FATAL ERROR: " + e.message, "error");
@@ -413,6 +434,10 @@
                 addLog("=== MENGHENTIKAN APLIKASI ===", "info");
                 updateInfo("Menghentikan services...", "");
 
+                // Hentikan proses MySQL
+                addLog("Stopping MySQL...", "info");
+                shell.Run("taskkill /F /IM mysqld.exe /T", 0, false);
+
                 // Hentikan proses PHP & Node
                 addLog("Stopping PHP...", "info");
                 shell.Run("taskkill /F /IM php.exe /T", 0, false);
@@ -422,10 +447,12 @@
 
                 // Tutup terminal yang terbuka (cmd window dengan title kita)
                 addLog("Closing opened terminal windows...", "info");
+                shell.Run('taskkill /FI "WINDOWTITLE eq MySQL Server*" /F', 0, false);
                 shell.Run('taskkill /FI "WINDOWTITLE eq PHP Artisan*" /F', 0, false);
                 shell.Run('taskkill /FI "WINDOWTITLE eq Vite Dev*" /F', 0, false);
 
                 // Reset status UI
+                setStatus("db", false);
                 setStatus("php", false);
                 setStatus("vite", false);
                 isRunning = false;
@@ -465,6 +492,12 @@
             addLog("Folder Laravel ditemukan!", "success");
         } else {
             addLog("WARNING: Folder Laravel tidak ditemukan", "error");
+        }
+
+        if (fso.FileExists(MYSQL_BIN)) {
+            addLog("MySQL binary found!", "success");
+        } else {
+            addLog("WARNING: MySQL binary not found at: " + MYSQL_BIN, "error");
         }
 
         window.resizeTo(650, 810);
