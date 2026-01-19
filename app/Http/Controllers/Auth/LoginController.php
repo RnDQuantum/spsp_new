@@ -45,7 +45,6 @@ class LoginController extends Controller
 
         if (Auth::attempt($credentials, $remember)) {
             $request->session()->regenerate();
-            session()->flash('force_reload', true);
 
             // Redirect berdasarkan role
             $user = Auth::user();

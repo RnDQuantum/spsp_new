@@ -17,6 +17,10 @@ export default defineConfig(({ mode }) => {
         ],
         server: {
             cors: true,
+            host: '0.0.0.0', // This allows connections from outside a container
+            hmr: {
+                host: 'localhost', // This tells the browser to connect via localhost
+            }
         },
     };
 });

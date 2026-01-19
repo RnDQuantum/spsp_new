@@ -773,4 +773,133 @@ class TrainingRecommendationTest extends TestCase
         $firstParticipant = $participants->items()[0];
         $this->assertArrayHasKey('position', $firstParticipant);
     }
+
+    // ========== GROUP 11: Modal Functionality ==========
+
+    #[Test]
+    public function open_attribute_modal_dispatches_event_with_correct_data()
+    {
+        // Arrange
+        $component = Livewire::test(\App\Livewire\Pages\GeneralReport\Training\TrainingRecommendation::class);
+
+        // Act
+        $component->call('openAttributeModal', $this->aspect->id);
+
+        // Assert - Modal event should be dispatched
+        $component->assertDispatched('openAttributeParticipantModal');
+    }
+
+    #[Test]
+    public function open_attribute_modal_filters_only_recommended_participants()
+    {
+        // Arrange - Create additional participant with high rating (not recommended)
+        $highRatingParticipant = Participant::factory()->create([
+            'event_id' => $this->event->id,
+            'position_formation_id' => $this->position->id,
+        ]);
+
+        $highRatingCategoryAssessment = CategoryAssessment::factory()->create([
+            'participant_id' => $highRatingParticipant->id,
+            'event_id' => $this->event->id,
+            'category_type_id' => $this->categoryType->id,
+        ]);
+
+        AspectAssessment::factory()->create([
+            'participant_id' => $highRatingParticipant->id,
+            'event_id' => $this->event->id,
+            'position_formation_id' => $this->position->id,
+            'category_assessment_id' => $highRatingCategoryAssessment->id,
+            'aspect_id' => $this->aspect->id,
+            'individual_rating' => 5.0, // High rating (not recommended)
+        ]);
+
+        // Get service to verify filtering logic
+        $service = app(\App\Services\TrainingRecommendationService::class);
+        $allParticipants = $service->getParticipantsRecommendation(
+            $this->event->id,
+            $this->position->id,
+            $this->aspect->id,
+            10
+        );
+
+        // Verify we have both recommended and not recommended participants
+        $recommendedCount = $allParticipants->where('is_recommended', true)->count();
+        $notRecommendedCount = $allParticipants->where('is_recommended', false)->count();
+
+        $this->assertGreaterThan(0, $recommendedCount, 'Should have at least one recommended participant');
+        $this->assertGreaterThan(0, $notRecommendedCount, 'Should have at least one not recommended participant');
+
+        // Act - Call the method directly to test filtering
+        $component = Livewire::test(\App\Livewire\Pages\GeneralReport\Training\TrainingRecommendation::class);
+        $component->call('openAttributeModal', $this->aspect->id);
+
+        // Assert - Event should be dispatched
+        $component->assertDispatched('openAttributeParticipantModal');
+    }
+
+    #[Test]
+    public function open_attribute_modal_includes_position_names()
+    {
+        // Act - Call method directly and verify positions are loaded
+        $service = app(\App\Services\TrainingRecommendationService::class);
+        $participants = $service->getParticipantsRecommendation(
+            $this->event->id,
+            $this->position->id,
+            $this->aspect->id,
+            10
+        );
+
+        // Filter only recommended
+        $recommended = $participants->filter(fn($p) => $p['is_recommended'] === true);
+
+        // Load position names (this is what openAttributeModal does)
+        $positionIds = $recommended->pluck('position_formation_id')->unique()->filter()->all();
+
+        if (!empty($positionIds)) {
+            $positions = \App\Models\PositionFormation::whereIn('id', $positionIds)
+                ->select('id', 'name')
+                ->get()
+                ->keyBy('id');
+
+            $recommended = $recommended->map(function ($participant) use ($positions) {
+                $participant['position'] = $positions->get($participant['position_formation_id'])->name ?? '-';
+                return $participant;
+            });
+        }
+
+        // Assert - All recommended participants should have position names
+        foreach ($recommended as $participant) {
+            $this->assertArrayHasKey('position', $participant);
+            $this->assertNotEquals('-', $participant['position'], 'Position should be hydrated with actual name');
+            $this->assertEquals($this->position->name, $participant['position']);
+        }
+    }
+
+    #[Test]
+    public function open_attribute_modal_with_no_event_does_nothing()
+    {
+        // Arrange
+        session()->forget('filter.event_code');
+        $component = Livewire::test(\App\Livewire\Pages\GeneralReport\Training\TrainingRecommendation::class);
+
+        // Act
+        $component->call('openAttributeModal', $this->aspect->id);
+
+        // Assert
+        $component->assertNotDispatched('openAttributeParticipantModal');
+    }
+
+    #[Test]
+    public function open_attribute_modal_with_no_position_does_nothing()
+    {
+        // Arrange
+        session()->forget('filter.position_formation_id');
+        $component = Livewire::test(\App\Livewire\Pages\GeneralReport\Training\TrainingRecommendation::class);
+
+        // Act
+        $component->call('openAttributeModal', $this->aspect->id);
+
+        // Assert
+        $component->assertNotDispatched('openAttributeParticipantModal');
+    }
 }

@@ -91,10 +91,20 @@ class Dashboard extends Component
 
     public function mount(): void
     {
-        // Generate static chart IDs (same across re-renders)
-        $this->potensiChartId = 'potensiSpider' . uniqid();
-        $this->kompetensiChartId = 'kompetensiSpider' . uniqid();
-        $this->generalChartId = 'generalSpider' . uniqid();
+        // Generate static chart IDs (same across re-renders and navigations)
+        // Use session-based IDs to ensure consistency with wire:navigate
+        if (!session()->has('dashboard.chart_ids')) {
+            session()->put('dashboard.chart_ids', [
+                'potensi' => 'potensiSpider' . uniqid(),
+                'kompetensi' => 'kompetensiSpider' . uniqid(),
+                'general' => 'generalSpider' . uniqid(),
+            ]);
+        }
+
+        $chartIds = session('dashboard.chart_ids');
+        $this->potensiChartId = $chartIds['potensi'];
+        $this->kompetensiChartId = $chartIds['kompetensi'];
+        $this->generalChartId = $chartIds['general'];
 
         // Load tolerance from session
         $this->tolerancePercentage = session('individual_report.tolerance', 0);

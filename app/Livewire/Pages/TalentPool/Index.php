@@ -172,7 +172,7 @@ class Index extends Component
             // Explicit dispatch is handled by the caller if needed (e.g. handleStandardUpdate).
         } catch (\Exception $e) {
             // Handle error gracefully
-            $this->dispatch('error', 'Failed to load talent pool data: '.$e->getMessage());
+            $this->dispatch('error', 'Failed to load talent pool data: ' . $e->getMessage());
         }
     }
 
@@ -201,7 +201,8 @@ class Index extends Component
                 'potensi' => $participant['potensi_rating'],
                 'kinerja' => $participant['kinerja_rating'],
                 'box' => $participant['box_number'],
-                'color' => $this->getBoxColor($participant['box_number']),
+                // Gunakan dot_color (terang) untuk titik di scatter plot
+                'color' => $this->boxConfig[$participant['box_number']]['dot_color'] ?? '#FFFFFF',
             ];
         })->toArray();
     }
@@ -239,57 +240,66 @@ class Index extends Component
         return [
             1 => [
                 'code' => 'K-1',
-                'label' => 'Kinerja di bawah ekspektasi dan potensi rendah',
-                'color' => '#8B0000', // Merah gelap (Dark Red)
-                'overlay_color' => 'rgba(139, 0, 0, 0.3)',
+                'label' => 'Kompetensi di bawah ekspektasi dan potensi rendah',
+                'color' => '#8B0000', // Merah Gelap
+                'dot_color' => '#74FFFF', // Inverted: Cyan Terang
+                'overlay_color' => 'rgba(139, 0, 0, 0.85)',
             ],
             2 => [
                 'code' => 'K-2',
-                'label' => 'Kinerja sesuai ekspektasi dan potensi rendah',
-                'color' => '#FF4500', // Merah-oranye
-                'overlay_color' => 'rgba(255, 69, 0, 0.3)',
+                'label' => 'Kompetensi sesuai ekspektasi dan potensi rendah',
+                'color' => '#EA580C', // Orange Tua
+                'dot_color' => '#15A7F3', // Inverted: Biru Terang
+                'overlay_color' => 'rgba(234, 88, 12, 0.85)',
             ],
             3 => [
                 'code' => 'K-3',
-                'label' => 'Kinerja di bawah ekspektasi dan potensi menengah',
-                'color' => '#FF8C00', // Oranye gelap
-                'overlay_color' => 'rgba(255, 140, 0, 0.3)',
+                'label' => 'Kompetensi di bawah ekspektasi dan potensi menengah',
+                'color' => '#D97706', // Amber Tua
+                'dot_color' => '#2688F9', // Inverted: Biru Azure
+                'overlay_color' => 'rgba(217, 119, 6, 0.85)',
             ],
             4 => [
                 'code' => 'K-4',
-                'label' => 'Kinerja di atas ekspektasi dan potensi rendah',
-                'color' => '#FFD700', // Kuning emas
-                'overlay_color' => 'rgba(255, 215, 0, 0.4)',
+                'label' => 'Kompetensi di atas ekspektasi dan potensi rendah',
+                'color' => '#CA8A04', // Kuning Emas Gelap
+                'dot_color' => '#3575FB', // Inverted: Biru
+                'overlay_color' => 'rgba(202, 138, 4, 0.85)',
             ],
             5 => [
                 'code' => 'K-5',
-                'label' => 'Kinerja sesuai ekspektasi dan potensi menengah',
-                'color' => '#FFFF00', // Kuning murni
-                'overlay_color' => 'rgba(255, 255, 0, 0.3)',
+                'label' => 'Kompetensi sesuai ekspektasi dan potensi menengah',
+                'color' => '#EAB308', // Kuning Mustard
+                'dot_color' => '#154CF7', // Inverted: Biru Elektrik
+                'overlay_color' => 'rgba(234, 179, 8, 0.8)',
             ],
             6 => [
                 'code' => 'K-6',
-                'label' => 'Kinerja di bawah ekspektasi dan potensi tinggi',
-                'color' => '#CCFF00', // Kuning-hijau terang (Electric Lime)
-                'overlay_color' => 'rgba(204, 255, 0, 0.3)',
+                'label' => 'Kompetensi di bawah ekspektasi dan potensi tinggi',
+                'color' => '#65A30D', // Lime Tua
+                'dot_color' => '#9A5CF2', // Inverted: Ungu
+                'overlay_color' => 'rgba(101, 163, 13, 0.85)',
             ],
             7 => [
                 'code' => 'K-7',
-                'label' => 'Kinerja di atas ekspektasi dan potensi menengah',
-                'color' => '#32CD32', // Lime Green (hijau terang)
-                'overlay_color' => 'rgba(50, 205, 50, 0.3)',
+                'label' => 'Kompetensi di atas ekspektasi dan potensi menengah',
+                'color' => '#16A34A', // Hijau Cerah
+                'dot_color' => '#E95CB5', // Inverted: Magenta/Pink
+                'overlay_color' => 'rgba(22, 163, 74, 0.85)',
             ],
             8 => [
                 'code' => 'K-8',
-                'label' => 'Kinerja sesuai ekspektasi dan potensi tinggi',
-                'color' => '#228B22', // Forest Green (hijau sedang)
-                'overlay_color' => 'rgba(34, 139, 34, 0.3)',
+                'label' => 'Kompetensi sesuai ekspektasi dan potensi tinggi',
+                'color' => '#15803D', // Hijau Hutan
+                'dot_color' => '#EA7FC2', // Inverted: Pink
+                'overlay_color' => 'rgba(21, 128, 61, 0.85)',
             ],
             9 => [
                 'code' => 'K-9',
-                'label' => 'Kinerja di atas ekspektasi dan potensi tinggi',
-                'color' => '#006400', // Dark Green (hijau gelap)
-                'overlay_color' => 'rgba(0, 100, 0, 0.4)',
+                'label' => 'Kompetensi di atas ekspektasi dan potensi tinggi',
+                'color' => '#14532D', // Hijau Sangat Gelap
+                'dot_color' => '#EBACD2', // Inverted: Pink Muda
+                'overlay_color' => 'rgba(20, 83, 45, 0.9)',
             ],
         ];
     }
@@ -308,7 +318,7 @@ class Index extends Component
     public function getBoxLabelsProperty(): array
     {
         return collect($this->boxConfig)
-            ->mapWithKeys(fn ($config, $number) => [$number => $config['label']])
+            ->mapWithKeys(fn($config, $number) => [$number => $config['label']])
             ->toArray();
     }
 
