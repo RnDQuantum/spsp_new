@@ -16,7 +16,7 @@ class DashboardAdmin extends Component
 
     public function mount(): void
     {
-        $this->selectedYear = date('Y');
+        $this->selectedYear = 'all';
     }
 
     public function render()
@@ -42,7 +42,7 @@ class DashboardAdmin extends Component
     {
         $query = Institution::query();
 
-        if ($this->selectedYear) {
+        if ($this->selectedYear && $this->selectedYear !== 'all') {
             $query->whereHas('assessmentEvents', function ($q) {
                 $q->where('year', $this->selectedYear);
             });
@@ -53,7 +53,7 @@ class DashboardAdmin extends Component
         $categoryStats = InstitutionCategory::where('is_active', true)
             ->withCount([
                 'institutions' => function ($q) {
-                    if ($this->selectedYear) {
+                    if ($this->selectedYear && $this->selectedYear !== 'all') {
                         $q->whereHas('assessmentEvents', function ($aq) {
                             $aq->where('year', $this->selectedYear);
                         });
@@ -84,7 +84,7 @@ class DashboardAdmin extends Component
             }
         ]);
 
-        if ($this->selectedYear !== 'all' && $this->selectedYear) {
+        if ($this->selectedYear && $this->selectedYear !== 'all') {
             $query->whereHas('assessmentEvents', function ($q) {
                 $q->where('year', $this->selectedYear);
             });
