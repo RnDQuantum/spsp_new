@@ -161,7 +161,23 @@ Mengubah properti `$matrixData` menjadi privat (`private`), sehingga Livewire ti
        }
 
        setTimeout(() => { isModalOpening = false; }, 200);
-   }
+    }
+    ```
+
+3. **Penambahan `wire:ignore` pada Container Chart & Tabel:**
+   Untuk mencegah Livewire merusak/menghapus canvas Chart.js dan baris tabel summary hasil render Javascript saat terjadi server-side request (seperti ketika memicu pembukaan modal), wrapper elemen untuk Scatter Chart (`nineBoxChart`) dan Summary Table (`boxSummaryBody`) ditambahkan atribut `wire:ignore`:
+   ```html
+   <!-- Scatter Chart Container -->
+   <div wire:ignore style="height:600px; margin-bottom:30px;">
+       <canvas id="nineBoxChart"></canvas>
+   </div>
+
+   <!-- Table Section Container -->
+   <div class="rounded-md overflow-hidden" wire:ignore>
+       <table class="w-full text-sm text-gray-900 dark:text-gray-100">
+           ...
+       </table>
+   </div>
    ```
 
 ---

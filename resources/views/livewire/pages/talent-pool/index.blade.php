@@ -52,7 +52,7 @@
                     yang dipilih</div>
             </div>
         @else
-            <div style="height:600px; margin-bottom:30px;">
+            <div wire:ignore style="height:600px; margin-bottom:30px;">
                 <canvas id="nineBoxChart"></canvas>
             </div>
         @endif
@@ -151,7 +151,7 @@
                 </div>
 
                 <!-- Table Section -->
-                <div class="rounded-md overflow-hidden">
+                <div class="rounded-md overflow-hidden" wire:ignore>
                     <table class="w-full text-sm text-gray-900 dark:text-gray-100">
                         <thead>
                             <tr class="bg-gray-200 dark:bg-gray-700">
