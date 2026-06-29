@@ -19,9 +19,6 @@ class Index extends Component
 
     public int $totalParticipants = 0;
 
-    // Cache properties
-    private ?array $matrixCacheData = null;
-
     /**
      * Listen to filter component events
      */
@@ -134,12 +131,20 @@ class Index extends Component
      */
     private function getMatrixData(): array
     {
-        if ($this->matrixData === null) {
-            if (! $this->selectedEvent || ! $this->selectedPositionId) {
-                $this->loadEventAndPosition();
-            }
-            $this->loadMatrixData();
+        if ($this->matrixData !== null) {
+            return $this->matrixData;
         }
+
+        if (! $this->selectedEvent || ! $this->selectedPositionId) {
+            $this->loadEventAndPosition();
+        }
+
+        // Guard: if still null after load, return early
+        if (! $this->selectedEvent || ! $this->selectedPositionId) {
+            return [];
+        }
+
+        $this->loadMatrixData();
         return $this->matrixData ?? [];
     }
 
@@ -148,8 +153,10 @@ class Index extends Component
      */
     private function clearCache(): void
     {
-        $this->matrixCacheData = null;
         $this->matrixData = null;
+        if ($this->selectedEvent && $this->selectedPositionId) {
+            cache()->forget("talent_pool_{$this->selectedEvent->id}_{$this->selectedPositionId}");
+        }
     }
 
     /**
@@ -162,29 +169,16 @@ class Index extends Component
         }
 
         try {
-            // Check cache first
-            if ($this->matrixCacheData !== null) {
-                $this->applyMatrixData($this->matrixCacheData);
+            $cacheKey = "talent_pool_{$this->selectedEvent->id}_{$this->selectedPositionId}";
 
-                return;
-            }
+            $matrix = cache()->remember($cacheKey, now()->addMinutes(5), function () {
+                return app(TalentPoolService::class)->getNineBoxMatrixData(
+                    $this->selectedEvent->id,
+                    $this->selectedPositionId
+                );
+            });
 
-            // 🚀 PERFORMANCE: Direct service call with proper error handling
-            // Call service
-            $service = app(TalentPoolService::class);
-            $matrix = $service->getNineBoxMatrixData(
-                $this->selectedEvent->id,
-                $this->selectedPositionId
-            );
-
-            // Cache result
-            $this->matrixCacheData = $matrix;
-
-            // Apply to component properties
             $this->applyMatrixData($matrix);
-
-            // Note: We DO NOT dispatch chart update here anymore to prevent double rendering on initial load.
-            // Explicit dispatch is handled by the caller if needed (e.g. handleStandardUpdate).
         } catch (\Exception $e) {
             // Handle error gracefully
             $this->dispatch('error', 'Failed to load talent pool data: ' . $e->getMessage());
@@ -339,28 +333,11 @@ class Index extends Component
     }
 
     /**
-     * Dispatch chart update to JavaScript
+     * Dispatch chart update notification to JavaScript
      */
     private function dispatchChartUpdate(): void
     {
-        $data = [
-            'chartId' => 'talentPoolChart',
-            'labels' => ['Box 1', 'Box 2', 'Box 3', 'Box 4', 'Box 5', 'Box 6', 'Box 7', 'Box 8', 'Box 9'],
-            'data' => $this->matrixData['box_statistics'] ?? [],
-            'boxBoundaries' => $this->matrixData['box_boundaries'] ?? [],
-            'boxStatistics' => $this->matrixData['box_statistics'] ?? [],
-            'pesertaData' => $this->chart,
-            'aspectName' => 'Talent Pool Distribution',
-        ];
-
-        // Debug logging
-        logger('TalentPool: Dispatching chart update', [
-            'total_participants' => $this->totalParticipants,
-            'matrix_data_count' => count($this->matrixData),
-            'chart_data_count' => count($this->chart),
-        ]);
-
-        $this->dispatch('chartDataUpdated', $data);
+        $this->dispatch('chartDataNeedsUpdate');
     }
 
     /**
