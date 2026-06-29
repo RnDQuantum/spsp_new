@@ -150,6 +150,102 @@ class Sidebar extends Component
         return false;
     }
 
+    /**
+     * Get dynamic menu items for the sidebar
+     */
+    public function getMenuItemsProperty(): array
+    {
+        $rawMenu = config('sidebar-menu', []);
+        return $this->processMenuItems($rawMenu);
+    }
+
+    /**
+     * Recursively process raw menu items to resolve routes, parameters, active states, and roles.
+     */
+    private function processMenuItems(array $items): array
+    {
+        $processed = [];
+
+        foreach ($items as $key => $item) {
+            // 1. Role Check
+            if (isset($item['role'])) {
+                if (!auth()->check() || !auth()->user()->hasRole($item['role'])) {
+                    continue;
+                }
+            }
+
+            // 2. Divider / Section types
+            if (isset($item['type']) && in_array($item['type'], ['divider', 'section'])) {
+                $processed[$key] = $item;
+                continue;
+            }
+
+            // 3. Resolve active state and disabled state
+            $requiresParticipant = $item['requires_participant'] ?? false;
+            $canShowReports = $this->canShowIndividualReports();
+
+            // Resolve children first if dropdown
+            if (isset($item['type']) && $item['type'] === 'dropdown') {
+                $item['items'] = $this->processMenuItems($item['items'] ?? []);
+
+                // Determine active state for the dropdown group
+                $isActiveDropdown = false;
+                foreach ($item['items'] as $subItem) {
+                    if ($subItem['active'] ?? false) {
+                        $isActiveDropdown = true;
+                        break;
+                    }
+                }
+                
+                // Also check if any wildcards defined
+                if (isset($item['active']) && request()->routeIs($item['active'])) {
+                    $isActiveDropdown = true;
+                }
+
+                $item['active'] = $isActiveDropdown ? ($item['active'] ?? 'true') : '';
+                $processed[$key] = $item;
+                continue;
+            }
+
+            // 4. Resolve URL and parameters for standard items
+            $isDisabled = $requiresParticipant && !$canShowReports;
+            $item['disabled'] = $isDisabled;
+
+            if ($isDisabled) {
+                $item['href'] = '#';
+                $item['active'] = false;
+            } else {
+                if (isset($item['route'])) {
+                    // Inject parameters if required
+                    $params = [];
+                    if ($requiresParticipant) {
+                        $params = [
+                            'eventCode' => $this->eventCode,
+                            'testNumber' => $this->testNumber,
+                        ];
+                    }
+                    try {
+                        $item['href'] = route($item['route'], $params);
+                    } catch (\Exception $e) {
+                        $item['href'] = '#';
+                    }
+                } else {
+                    $item['href'] = $item['href'] ?? '#';
+                }
+
+                // Check active state
+                $item['active'] = false;
+                if (isset($item['route'])) {
+                    $item['active'] = $this->isActiveRoute($item['route'], $requiresParticipant ? ['eventCode' => $this->eventCode, 'testNumber' => $this->testNumber] : []);
+                }
+            }
+
+            $processed[$key] = $item;
+        }
+
+        return $processed;
+    }
+
     public function render()
     {
         return view('livewire.components.sidebar');

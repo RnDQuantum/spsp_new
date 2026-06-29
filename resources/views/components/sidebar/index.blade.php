@@ -1,0 +1,37 @@
+@props([
+    'menuItems' => [],
+])
+
+<nav x-cloak
+    class="fixed left-0 z-40 flex h-svh shrink-0 flex-col border-r border-neutral-200/60 bg-white/95 backdrop-blur-md p-4 transition-all duration-300 ease-in-out shadow-sm dark:border-neutral-800/60 dark:bg-neutral-950/95"
+    x-bind:class="[
+        getSidebarWidthClass(),
+        getSidebarTransformClass()
+    ]"
+    aria-label="sidebar navigation">
+
+    <!-- Sidebar Brand/Logo -->
+    <x-sidebar.brand />
+
+    <!-- Sidebar Menu -->
+    <div class="flex flex-col gap-1.5 pb-6 flex-1 overflow-y-auto overflow-x-hidden scrollbar-hidden sidebar-scroll-container" wire:navigate:scroll
+        x-data="{
+            init() {
+                let scrollPos = localStorage.getItem('sidebarScroll');
+                if (scrollPos) {
+                    this.$el.scrollTop = parseInt(scrollPos);
+                }
+            },
+            saveScroll() {
+                localStorage.setItem('sidebarScroll', this.$el.scrollTop);
+            }
+        }"
+        @scroll.debounce.100ms="saveScroll">
+        <x-sidebar.menu :items="$menuItems" />
+    </div>
+
+    <!-- Close All Menus Button -->
+    <div class="pt-4 border-t border-neutral-200/60 dark:border-neutral-800/60">
+        <x-sidebar.close-all-button />
+    </div>
+</nav>

@@ -1,3 +1,7 @@
+@props([
+    'title' => null,
+])
+
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="antialiased">
 
@@ -36,37 +40,13 @@
     </script>
 </head>
 
-<body class="bg-neutral-50 dark:bg-neutral-900 h-svh overflow-hidden">
-    <div x-data="sidebarState()" 
-        x-on:resize.window.debounce.100ms="handleResize()"
-        x-on:livewire:navigated.window="currentPath = window.location.pathname"
-        x-on:modal-opened.window="modalOpen = true"
-        x-on:modal-closed.window="modalOpen = false"
-        class="relative flex w-full flex-col md:flex-row h-full">
-        
-        <!-- Skip to main content for screen readers -->
-        <a class="sr-only" href="#main-content">skip to the main content</a>
-
-        <!-- Dark overlay for when the sidebar is open on smaller screens -->
-        <div x-cloak x-show="sidebarIsOpen" class="fixed inset-0 z-20 bg-neutral-950/10 backdrop-blur-xs md:hidden"
-            aria-hidden="true" x-on:click="sidebarIsOpen = false" x-transition.opacity></div>
-
-        <!-- Sidebar Component -->
-        @persist('sidebar')
-            <livewire:components.sidebar />
-        @endpersist
-
-        <!-- Main Content Area with Navbar -->
-        <div id="main-content" class="h-full w-full bg-white/80 transition-[margin] duration-300 will-change-[margin] dark:bg-neutral-950/80 overflow-y-auto"
-            x-bind:class="[getContentMarginClass().margin]">
-            <x-navbar.index :title="$title ?? 'Dashboard'">
-                {{ $slot }}
-            </x-navbar.index>
-        </div>
+<body class="bg-neutral-50 dark:bg-neutral-900">
+    <div class="h-svh w-full overflow-y-auto bg-white/80 backdrop-blur-sm dark:bg-neutral-950/80">
+        <x-navbar.index :showSidebarToggle="false" :title="$title ?? 'Dashboard'">
+            {{ $slot }}
+        </x-navbar.index>
     </div>
-
     @livewireScripts
-    @stack('scripts')
 </body>
 
 </html>
