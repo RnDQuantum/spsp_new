@@ -847,23 +847,11 @@
 
                     isModalOpening = true;
 
-                    // Get participants for this box (already in memory, fast)
-                    const pesertaData = @json($this->chart);
-                    const participantsInBox = pesertaData.filter(p => p.box === parseInt(boxNumber));
-
-                    // Transform data for modal (rename keys to match modal expectations)
-                    const modalData = participantsInBox.map(p => ({
-                        name: p.nama,
-                        test_number: p.test_number,
-                        potensi_rating: p.potensi,
-                        kinerja_rating: p.kinerja
-                    }));
-
-                    // Dispatch Livewire event to open modal
-                    Livewire.dispatch('openParticipantModal', [
-                        parseInt(boxNumber),
-                        modalData
-                    ]);
+                    // Let the Livewire component retrieve the participants and trigger the modal opening
+                    const component = Livewire.find('{{ $this->getId() }}');
+                    if (component) {
+                        component.openBoxModal(parseInt(boxNumber));
+                    }
 
                     // 🚀 Reset debounce flag after modal transition completes
                     setTimeout(() => {
@@ -872,23 +860,32 @@
                 }
 
                 // Initialize chart on page load
-                function initializeChart() {
-                    // Get data from Livewire component
-                    const pesertaData = @json($this->chart);
-                    const boxBoundaries = @json($this->boxBoundaries);
-                    const boxStatistics = @json($this->boxStatistics);
+                async function initializeChart() {
+                    const component = Livewire.find('{{ $this->getId() }}');
+                    if (!component) return;
 
-                    // Initialize scatter chart
-                    updateScatterChart(pesertaData, boxBoundaries);
+                    try {
+                        const data = await component.getChartInitializationData();
+                        if (!data) return;
 
-                    // Initialize pie chart and summary table
-                    updatePieChart(
-                        Object.keys(boxStatistics).sort((a, b) => b - a).map(box => 'K-' + box),
-                        Object.keys(boxStatistics).sort((a, b) => b - a).map(box => boxStatistics[box].count),
-                        'Distribusi Talent Pool'
-                    );
+                        const pesertaData = data.pesertaData || [];
+                        const boxBoundaries = data.boxBoundaries;
+                        const boxStatistics = data.boxStatistics || {};
 
-                    updateSummaryTable(boxStatistics);
+                        // Initialize scatter chart
+                        updateScatterChart(pesertaData, boxBoundaries);
+
+                        // Initialize pie chart and summary table
+                        updatePieChart(
+                            Object.keys(boxStatistics).sort((a, b) => b - a).map(box => 'K-' + box),
+                            Object.keys(boxStatistics).sort((a, b) => b - a).map(box => boxStatistics[box].count),
+                            'Distribusi Talent Pool'
+                        );
+
+                        updateSummaryTable(boxStatistics);
+                    } catch (e) {
+                        console.error('Error fetching chart data on init:', e);
+                    }
                 }
 
                 // 🚀 Handle trigger-reload event with loading overlay

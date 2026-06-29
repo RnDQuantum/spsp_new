@@ -14,8 +14,8 @@ class Index extends Component
 
     public ?int $selectedPositionId = null;
 
-    // Data from TalentPoolService
-    public array $matrixData = [];
+    // Data from TalentPoolService (private to avoid Livewire serialization payload size issues)
+    private ?array $matrixData = null;
 
     public int $totalParticipants = 0;
 
@@ -130,11 +130,26 @@ class Index extends Component
     }
 
     /**
+     * Get or lazy load the matrix data from service
+     */
+    private function getMatrixData(): array
+    {
+        if ($this->matrixData === null) {
+            if (! $this->selectedEvent || ! $this->selectedPositionId) {
+                $this->loadEventAndPosition();
+            }
+            $this->loadMatrixData();
+        }
+        return $this->matrixData ?? [];
+    }
+
+    /**
      * Clear all caches
      */
     private function clearCache(): void
     {
         $this->matrixCacheData = null;
+        $this->matrixData = null;
     }
 
     /**
@@ -190,11 +205,12 @@ class Index extends Component
      */
     public function getChartDataProperty(): array
     {
-        if (empty($this->matrixData['participants'])) {
+        $matrix = $this->getMatrixData();
+        if (empty($matrix['participants'])) {
             return [];
         }
 
-        return $this->matrixData['participants']->map(function ($participant) {
+        return $matrix['participants']->map(function ($participant) {
             return [
                 'nama' => $participant['name'],
                 'test_number' => $participant['test_number'],
@@ -220,7 +236,7 @@ class Index extends Component
      */
     public function getBoxBoundariesProperty(): ?array
     {
-        return $this->matrixData['box_boundaries'] ?? null;
+        return $this->getMatrixData()['box_boundaries'] ?? null;
     }
 
     /**
@@ -228,7 +244,7 @@ class Index extends Component
      */
     public function getBoxStatisticsProperty(): array
     {
-        return $this->matrixData['box_statistics'] ?? [];
+        return $this->getMatrixData()['box_statistics'] ?? [];
     }
 
     /**
@@ -345,6 +361,42 @@ class Index extends Component
         ]);
 
         $this->dispatch('chartDataUpdated', $data);
+    }
+
+    /**
+     * Get chart data and configurations for initial JavaScript load
+     */
+    public function getChartInitializationData(): array
+    {
+        return [
+            'pesertaData' => $this->chart,
+            'boxBoundaries' => $this->boxBoundaries,
+            'boxStatistics' => $this->boxStatistics,
+        ];
+    }
+
+    /**
+     * Retrieve participants for a specific box and trigger modal opening on the client
+     */
+    public function openBoxModal(int $boxNumber): void
+    {
+        $matrix = $this->getMatrixData();
+        if (empty($matrix['participants'])) {
+            return;
+        }
+
+        $participantsInBox = $matrix['participants']
+            ->filter(fn($p) => (int)$p['box_number'] === $boxNumber)
+            ->map(fn($p) => [
+                'name' => $p['name'],
+                'test_number' => $p['test_number'],
+                'potensi_rating' => $p['potensi_rating'],
+                'kinerja_rating' => $p['kinerja_rating']
+            ])
+            ->values()
+            ->toArray();
+
+        $this->dispatch('openParticipantModal', $boxNumber, $participantsInBox);
     }
 
     public function render()
