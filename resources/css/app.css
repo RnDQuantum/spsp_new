@@ -1,5 +1,14 @@
 @import 'tailwindcss';
 
+/* Force font-display swap to prevent invisible text during font load (reduces CLS) */
+@layer base {
+    @font-face {
+        font-family: "Instrument Sans";
+        font-display: swap;
+        src: local("Instrument Sans");
+    }
+}
+
 @source '../views';
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 
@@ -36,4 +45,34 @@
 
 .mary-table-pagination button {
     @apply cursor-pointer
+}
+
+/* Tablet Responsive */
+@media (min-width: 768px) and (max-width: 1023px) {
+    .sidebar-mobile {
+        @apply hidden;
+    }
+}
+
+/* Mobile Navigation */
+.mobile-bottom-nav {
+    @apply fixed bottom-0 left-0 right-0 bg-white dark:bg-neutral-900 border-t border-neutral-200 dark:border-neutral-800;
+    @apply flex justify-around items-center p-2;
+    @apply z-50;
+    @apply md:hidden;
+}
+
+.mobile-nav-item {
+    @apply flex flex-col items-center gap-1;
+    @apply p-2 rounded-lg transition-colors duration-200;
+}
+
+/* Hide scrollbar but keep functionality */
+.scrollbar-hidden {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+}
+
+.scrollbar-hidden::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
 }

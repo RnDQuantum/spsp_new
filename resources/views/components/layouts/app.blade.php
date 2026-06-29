@@ -1,45 +1,79 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="antialiased">
 
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta name="csrf-token" content="{{ csrf_token() }}">
-        <title>{{ isset($title) ? strip_tags($title) : config('app.name') }}</title>
-        {{-- <title>{{ $title ?? config('app.name') }}</title> --}}
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
-        @livewireStyles
-        <link rel="icon" type="image/x-icon" href="{{ asset('images/thumb-qhrmi.webp') }}">
-        {{-- Preload Sidebar Images (Dynamic/Alpine) --}}
-        <link rel="preload" as="image" href="{{ asset('images/thumb-qhrmi.webp') }}" fetchpriority="high">
-        <link rel="preload" as="image" href="{{ asset('images/thumb-qhrmi-hd.webp') }}" fetchpriority="high">
-    </head>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <body class="bg-gray-100 min-h-screen" x-data="{
-        sidebarMinimized: $persist(true).as('sidebar_minimized'),
-        init() {
-            // Listen for sidebar toggle events to keep in sync
-            this.$watch('sidebarMinimized', value => {
-                this.$dispatch('sidebar-toggled', { minimized: value });
-            });
+    <title>{{ isset($title) ? strip_tags($title) : config('app.name') }}</title>
+
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @livewireStyles
+
+    {{-- Favicon & Preloads --}}
+    <link rel="icon" type="image/x-icon" href="{{ asset('images/thumb-qhrmi.webp') }}">
+    <link rel="preload" as="image" href="{{ asset('images/thumb-qhrmi.webp') }}" fetchpriority="high">
+    <link rel="preload" as="image" href="{{ asset('images/thumb-qhrmi-hd.webp') }}" fetchpriority="high">
+
+    {{-- Preconnect hints for external resources --}}
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    {{-- Google Fonts: Instrument Sans --}}
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        // Initialize dark mode from localStorage before page renders
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia(
+                '(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
         }
-    }" x-init="init()"
-        @sidebar-toggled.window="sidebarMinimized = $event.detail.minimized">
+    </script>
+</head>
 
-        {{-- SIDEBAR --}}
-        <livewire:components.sidebar />
+<body class="bg-neutral-50 dark:bg-neutral-900 h-svh overflow-hidden">
+    <div x-data="sidebarState()" 
+        x-on:resize.window.debounce.100ms="handleResize()"
+        x-on:livewire:navigated.window="currentPath = window.location.pathname"
+        x-on:modal-opened.window="modalOpen = true"
+        x-on:modal-closed.window="modalOpen = false"
+        class="relative flex w-full flex-col md:flex-row h-full">
+        
+        <!-- Skip to main content for screen readers -->
+        <a class="sr-only" href="#main-content">skip to the main content</a>
 
-        {{-- NAVBAR --}}
-        <x-navbar :title="$title ?? 'Dashboard'" />
+        <!-- Dark overlay for when the sidebar is open on smaller screens -->
+        <div x-cloak x-show="sidebarIsOpen" class="fixed inset-0 z-20 bg-neutral-950/10 backdrop-blur-xs md:hidden"
+            aria-hidden="true" x-on:click="sidebarIsOpen = false" x-transition.opacity></div>
 
-        {{-- MAIN CONTENT --}}
-        <div :class="sidebarMinimized ? 'md:ml-20' : 'md:ml-64'"
-            class="transition-all duration-300 pt-16 md:pt-20 px-4 sm:px-6 lg:px-8 py-6 min-h-screen bg-gray-100 dark:bg-gray-900">
-            {{ $slot }}
+        <!-- Sidebar Component -->
+        @persist('sidebar')
+            <livewire:components.sidebar />
+        @endpersist
+
+        <!-- Main Content Area with Navbar -->
+        <div id="main-content" class="h-full w-full bg-white/80 transition-[margin] duration-300 will-change-[margin] dark:bg-neutral-950/80 overflow-y-auto"
+            x-bind:class="[getContentMarginClass().margin]">
+            
+            <x-navbar :title="$title ?? 'Dashboard'" />
+
+            <main class="flex-1">
+                <div class="p-6 lg:p-8">
+                    <div class="max-w-7xl mx-auto">
+                        {{ $slot }}
+                    </div>
+                </div>
+            </main>
         </div>
+    </div>
 
-        @livewireScripts
-        @stack('scripts')
-    </body>
+    @livewireScripts
+    @stack('scripts')
+</body>
 
 </html>

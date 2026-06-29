@@ -1,565 +1,595 @@
-<!-- Sidebar -->
-<div x-data="{
-    mobileOpen: false,
-    minimized: $persist(true).as('sidebar_minimized'),
-    individualOpen: $persist(false).as('sidebar_individual_open'),
-    generalOpen: $persist(false).as('sidebar_general_open'),
-    scrollPosition: 0,
-    init() {
-        // Restore scroll position after DOM is ready
-        this.$nextTick(() => {
-            const savedScroll = localStorage.getItem('sidebar_scroll_position');
-            if (savedScroll && this.$refs.sidebarNav) {
-                this.$refs.sidebarNav.scrollTop = parseInt(savedScroll);
-            }
-        });
-        // Dispatch initial state
-        this.$dispatch('sidebar-toggled', { minimized: this.minimized });
+<nav x-cloak
+    class="fixed left-0 top-0 z-40 flex h-svh shrink-0 flex-col border-r border-neutral-200/60 bg-white/95 backdrop-blur-md p-4 transition-all duration-300 ease-in-out shadow-sm dark:border-neutral-800/60 dark:bg-neutral-950/95"
+    x-bind:class="[
+        getSidebarWidthClass(),
+        getSidebarTransformClass()
+    ]"
+    aria-label="sidebar navigation">
 
-        // Save scroll position before page unload
-        window.addEventListener('beforeunload', () => {
-            this.saveScrollPosition();
-        });
-
-        // Save scroll position on Livewire navigation
-        document.addEventListener('livewire:navigating', () => {
-            this.saveScrollPosition();
-        });
-    },
-    saveScrollPosition() {
-        if (this.$refs.sidebarNav) {
-            localStorage.setItem('sidebar_scroll_position', this.$refs.sidebarNav.scrollTop);
-        }
-    }
-}" x-init="init()" @sidebar-toggled.window="minimized = $event.detail.minimized">
-    <!-- Mobile Toggle Button -->
-    <button @click="mobileOpen = !mobileOpen"
-        class="fixed top-4 left-4 z-50 p-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg shadow-lg md:hidden hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-        </svg>
-    </button>
-
-    <!-- Overlay untuk Mobile -->
-    <div x-show="mobileOpen" @click="mobileOpen = false"
-        x-transition:enter="transition-opacity ease-linear duration-300" x-transition:enter-start="opacity-0"
-        x-transition:enter-end="opacity-100" x-transition:leave="transition-opacity ease-linear duration-300"
-        x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
-        class="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden" style="display: none;">
-    </div>
-
-    <!-- Sidebar -->
-    <aside x-transition:enter="transition ease-in-out duration-300 transform"
-        x-transition:enter-start="-translate-x-full" x-transition:enter-end="translate-x-0"
-        x-transition:leave="transition ease-in-out duration-300 transform" x-transition:leave-start="translate-x-0"
-        x-transition:leave-end="-translate-x-full"
-        :class="[
-            mobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0',
-            minimized ? 'w-20' : 'w-64'
-        ]"
-        class="fixed top-0 left-0 z-40 h-screen bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transition-all duration-300 shadow-lg">
-        <!-- Toggle Button Desktop -->
-        <button
-            @click="minimized = !minimized; if (minimized) { individualOpen = false; generalOpen = false }; $dispatch('sidebar-toggled', { minimized: minimized })"
-            class="hidden md:block absolute -right-3 top-6 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-full p-1.5 border-2 border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-500 transition-all shadow-md">
-            <svg :class="minimized ? 'rotate-180' : ''" class="w-4 h-4 transition-transform duration-300" fill="none"
-                stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-            </svg>
-        </button>
-
-        <div class="h-full flex flex-col">
-            <!-- Logo/Brand -->
-            <div :class="minimized ? 'text-center' : ''"
-                class="px-4 py-3.5 border-b border-gray-200 dark:border-gray-700">
-                <img :src="minimized ? '{{ asset('images/thumb-qhrmi.webp') }}' : '{{ asset('images/thumb-qhrmi-hd.webp') }}'"
-                    :alt="minimized ? 'MD' : 'My Dashboard'"
-                    :class="minimized ? 'h-12 mx-auto p-1 bg-gray-100 rounded-md' : 'ml-6 h-12 p-1 bg-gray-100 rounded-md'"
-                    class="object-contain transition-all duration-300" fetchpriority="high">
+    <!-- Brand/Logo -->
+    <a href="{{ route('dashboard') }}" wire:navigate class="flex items-center justify-center mb-8 group">
+        <span class="sr-only">homepage</span>
+        <div class="flex items-center gap-3 overflow-hidden">
+            <div
+                class="shrink-0 w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105 p-1">
+                <img src="{{ asset('images/thumb-qhrmi.webp') }}" class="w-8 h-8 object-contain" alt="Logo">
             </div>
-
-            <!-- Menu dengan Scroll -->
-            <nav x-ref="sidebarNav" @scroll.debounce.500ms="saveScrollPosition()"
-                class="flex-1 px-3 py-4 overflow-y-auto space-y-1">
-                @if (auth()->user()->hasRole('admin'))
-                    <!-- Dashboard Admin-->
-                    <a wire:navigate href="{{ route('dashboard-admin') }}"
-                        x-tooltip.raw="minimized ? 'Dashboard' : null" @class([
-                            'group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200',
-                            'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border-l-4 border-blue-700 dark:border-blue-400' => $this->isActiveRoute(
-                                'dashboard-admin'),
-                            'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' => !$this->isActiveRoute(
-                                'dashboard-admin'),
-                        ])
-                        :class="minimized ? 'justify-center px-2' : ''">
-                        <i class="fa-solid fa-house w-5 text-center" :class="!minimized && 'mr-3'"></i>
-                        <span x-show="!minimized" x-transition:enter="transition ease-out duration-200"
-                            x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">Beranda
-                            Admin</span>
-                    </a>
-                @endif
-
-                <!-- Dashboard -->
-                <a wire:navigate href="{{ route('dashboard') }}" x-tooltip.raw="minimized ? 'Dashboard' : null"
-                    @class([
-                        'group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200',
-                        'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border-l-4 border-blue-700 dark:border-blue-400' => $this->isActiveRoute(
-                            'dashboard'),
-                        'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' => !$this->isActiveRoute(
-                            'dashboard'),
-                    ]) :class="minimized ? 'justify-center px-2' : ''">
-                    <i class="fa-solid fa-house w-5 text-center" :class="!minimized && 'mr-3'"></i>
-                    <span x-show="!minimized" x-transition:enter="transition ease-out duration-200"
-                        x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">Beranda</span>
-                </a>
-
-                <!-- Daftar Peserta -->
-                <a wire:navigate href="{{ route('shortlist') }}" x-tooltip.raw="minimized ? 'Shortlist Peserta' : null"
-                    @class([
-                        'group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200',
-                        'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border-l-4 border-blue-700 dark:border-blue-400' => $this->isActiveRoute(
-                            'shortlist'),
-                        'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' => !$this->isActiveRoute(
-                            'shortlist'),
-                    ]) :class="minimized ? 'justify-center px-2' : ''">
-                    <i class="fa-solid fa-users w-5 text-center" :class="!minimized && 'mr-3'"></i>
-                    <span x-show="!minimized" x-transition:enter="transition ease-out duration-200"
-                        x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">Daftar
-                        Peserta</span>
-                </a>
-
-                <!-- Standar -->
-                <a wire:navigate href="{{ route('custom-standards.index') }}"
-                    x-tooltip.raw="minimized ? 'Shortlist Peserta' : null" @class([
-                        'group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200',
-                        'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border-l-4 border-blue-700 dark:border-blue-400' => $this->isActiveRoute(
-                            'custom-standards.index'),
-                        'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' => !$this->isActiveRoute(
-                            'custom-standards.index'),
-                    ])
-                    :class="minimized ? 'justify-center px-2' : ''">
-                    <i class="fa-solid fa-chart-line w-5 text-center" :class="!minimized && 'mr-3'"></i>
-                    <span x-show="!minimized" x-transition:enter="transition ease-out duration-200"
-                        x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">Tambah Standar</span>
-                </a>
-
-                <!-- Individual Report dengan Sub Menu -->
-                <div>
-                    <button id="btn-individual"
-                        @click="if (minimized) { minimized = false; $dispatch('sidebar-toggled', { minimized: minimized }); individualOpen = true } else { individualOpen = !individualOpen }"
-                        x-tooltip.raw="minimized ? 'Individual Report' : null"
-                        class="w-full group flex items-center px-3 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 rounded-lg transition-all duration-200 italic"
-                        :class="minimized ? 'justify-center px-2' : 'justify-between'" aria-haspopup="true"
-                        :aria-expanded="individualOpen" aria-controls="submenu-individual">
-                        <div class="flex items-center">
-                            <i class="fa-solid fa-file-lines w-5 text-center" :class="!minimized && 'mr-3'"></i>
-                            <span x-show="!minimized" x-transition:enter="transition ease-out duration-200"
-                                x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">Individual
-                                Report</span>
-                        </div>
-                        <svg x-show="!minimized" :class="individualOpen ? 'rotate-180' : ''"
-                            class="w-4 h-4 transition-transform duration-200" fill="currentColor" viewBox="0 0 20 20"
-                            aria-hidden="true">
-                            <path fill-rule="evenodd"
-                                d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                                clip-rule="evenodd"></path>
-                        </svg>
-                    </button>
-
-                    <!-- Sub Menu Individual Report -->
-                    <div x-show="individualOpen" x-transition:enter="transition ease-out duration-200"
-                        x-transition:enter-start="opacity-0 -translate-y-1"
-                        x-transition:enter-end="opacity-100 translate-y-0"
-                        x-transition:leave="transition ease-in duration-150"
-                        x-transition:leave-start="opacity-100 translate-y-0"
-                        x-transition:leave-end="opacity-0 -translate-y-1" id="submenu-individual"
-                        class="ml-4 mt-1 space-y-1" role="menu" aria-labelledby="btn-individual"
-                        style="display: none;">
-                        @if (!$this->canShowIndividualReports())
-                            <div
-                                class="mx-2 my-2 p-2.5 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-600/50 rounded-lg">
-                                <div class="flex items-start gap-2">
-                                    <i
-                                        class="fa-solid fa-circle-exclamation text-yellow-600 dark:text-yellow-400 text-sm mt-0.5"></i>
-                                    <div class="flex-1">
-                                        <p class="text-xs font-semibold text-yellow-800 dark:text-yellow-300 mb-1">
-                                            Pilih
-                                            Peserta</p>
-                                        <p class="text-xs text-yellow-700 dark:text-yellow-400/90 leading-relaxed">
-                                            Pilih Proyek & Peserta di
-                                            <a href="{{ route('dashboard') }}"
-                                                class="underline hover:text-yellow-600 dark:hover:text-yellow-300 font-medium">Beranda</a>
-                                            atau pilih salah satu peserta di
-                                            <a href="{{ route('shortlist') }}" wire:navigate
-                                                class="underline hover:text-yellow-600 dark:hover:text-yellow-300 font-medium">Daftar
-                                                Peserta</a>
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        @endif
-
-                        @if ($this->canShowIndividualReports())
-                            <a wire:navigate
-                                href="{{ route('general_matching', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) }}"
-                                role="menuitem" @class([
-                                    'block px-3 py-2 text-xs rounded-lg transition-all duration-200',
-                                    'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium italic' => $this->isActiveRoute(
-                                        'general_matching'),
-                                    'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 italic' => !$this->isActiveRoute(
-                                        'general_matching'),
-                                ])>
-                                <i class="fa-solid fa-circle-dot mr-2 text-xs"></i>General Matching
-                            </a>
-                        @else
-                            <span role="menuitem" title="Pilih data terlebih dahulu"
-                                class="block px-3 py-2 text-xs rounded-lg transition-all duration-200 text-gray-400 dark:text-gray-600 cursor-not-allowed italic">
-                                <i class="fa-solid fa-circle-dot mr-2 text-xs"></i>General Matching
-                            </span>
-                        @endif
-
-                        @if ($this->canShowIndividualReports())
-                            <a wire:navigate
-                                href="{{ route('general_mapping', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) }}"
-                                role="menuitem" @class([
-                                    'block px-3 py-2 text-xs rounded-lg transition-all duration-200',
-                                    'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium italic' => $this->isActiveRoute(
-                                        'general_mapping'),
-                                    'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 italic' => !$this->isActiveRoute(
-                                        'general_mapping'),
-                                ])>
-                                <i class="fa-solid fa-circle-dot mr-2 text-xs"></i>General Mapping
-                            </a>
-                        @else
-                            <span role="menuitem" title="Pilih data terlebih dahulu"
-                                class="block px-3 py-2 text-xs rounded-lg transition-all duration-200 text-gray-400 dark:text-gray-600 cursor-not-allowed italic">
-                                <i class="fa-solid fa-circle-dot mr-2 text-xs"></i>General Mapping
-                            </span>
-                        @endif
-
-                        @if ($this->canShowIndividualReports())
-                            <a wire:navigate
-                                href="{{ route('general_psy_mapping', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) }}"
-                                role="menuitem" @class([
-                                    'block px-3 py-2 text-xs rounded-lg transition-all duration-200',
-                                    'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium italic' => $this->isActiveRoute(
-                                        'general_psy_mapping'),
-                                    'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 italic' => !$this->isActiveRoute(
-                                        'general_psy_mapping'),
-                                ])>
-                                <div class="flex items-start gap-2">
-                                    <i class="fa-solid fa-circle-dot text-xs mt-0.5 flex-shrink-0"></i>
-                                    <span class="flex-1 leading-tight">General Psychology Mapping</span>
-                                </div>
-                            </a>
-                        @else
-                            <span role="menuitem" title="Pilih data terlebih dahulu"
-                                class="block px-3 py-2 text-xs rounded-lg transition-all duration-200 text-gray-400 dark:text-gray-600 cursor-not-allowed italic">
-                                <div class="flex items-start gap-2">
-                                    <i class="fa-solid fa-circle-dot text-xs mt-0.5 flex-shrink-0"></i>
-                                    <span class="flex-1 leading-tight">General Psychology Mapping</span>
-                                </div>
-                            </span>
-                        @endif
-
-                        @if ($this->canShowIndividualReports())
-                            <a wire:navigate
-                                href="{{ route('general_mc_mapping', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) }}"
-                                role="menuitem" @class([
-                                    'block px-3 py-2 text-xs rounded-lg transition-all duration-200',
-                                    'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium italic' => $this->isActiveRoute(
-                                        'general_mc_mapping'),
-                                    'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 italic' => !$this->isActiveRoute(
-                                        'general_mc_mapping'),
-                                ])>
-                                <div class="flex items-start gap-2">
-                                    <i class="fa-solid fa-circle-dot text-xs mt-0.5 flex-shrink-0"></i>
-                                    <span class="flex-1 leading-tight">General Managerial Competency Mapping</span>
-                                </div>
-                            </a>
-                        @else
-                            <span role="menuitem" title="Pilih data terlebih dahulu"
-                                class="block px-3 py-2 text-xs rounded-lg transition-all duration-200 text-gray-400 dark:text-gray-600 cursor-not-allowed italic">
-                                <div class="flex items-start gap-2">
-                                    <i class="fa-solid fa-circle-dot text-xs mt-0.5 flex-shrink-0"></i>
-                                    <span class="flex-1 leading-tight">General Managerial Competency Mapping</span>
-                                </div>
-                            </span>
-                        @endif
-
-                        @if ($this->canShowIndividualReports())
-                            <a wire:navigate
-                                href="{{ route('spider_plot', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) }}"
-                                role="menuitem" @class([
-                                    'block px-3 py-2 text-xs rounded-lg transition-all duration-200',
-                                    'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium italic' => $this->isActiveRoute(
-                                        'spider_plot'),
-                                    'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 italic' => !$this->isActiveRoute(
-                                        'spider_plot'),
-                                ])>
-                                <i class="fa-solid fa-circle-dot mr-2 text-xs"></i>Spider Plot
-                            </a>
-                        @else
-                            <span role="menuitem" title="Pilih data terlebih dahulu"
-                                class="block px-3 py-2 text-xs rounded-lg transition-all duration-200 text-gray-400 dark:text-gray-600 cursor-not-allowed italic">
-                                <i class="fa-solid fa-circle-dot mr-2 text-xs"></i>Spider Plot
-                            </span>
-                        @endif
-
-                        @if ($this->canShowIndividualReports())
-                            <a wire:navigate
-                                href="{{ route('ringkasan_mc_mapping', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) }}"
-                                role="menuitem" @class([
-                                    'block px-3 py-2 text-xs rounded-lg transition-all duration-200',
-                                    'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium' => $this->isActiveRoute(
-                                        'ringkasan_mc_mapping'),
-                                    'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' => !$this->isActiveRoute(
-                                        'ringkasan_mc_mapping'),
-                                ])>
-                                <div class="flex items-start gap-2">
-                                    <i class="fa-solid fa-circle-dot text-xs mt-0.5 flex-shrink-0"></i>
-                                    <span class="flex-1 leading-tight">Ringkasan <i>Managerial Competency
-                                            Mapping</i></span>
-                                </div>
-                            </a>
-                        @else
-                            <span role="menuitem" title="Pilih data terlebih dahulu"
-                                class="block px-3 py-2 text-xs rounded-lg transition-all duration-200 text-gray-400 dark:text-gray-600 cursor-not-allowed">
-                                <div class="flex items-start gap-2">
-                                    <i class="fa-solid fa-circle-dot text-xs mt-0.5 flex-shrink-0"></i>
-                                    <span class="flex-1 leading-tight">Ringkasan <i>Managerial Competency
-                                            Mapping</i></span>
-                                </div>
-                            </span>
-                        @endif
-
-                        @if ($this->canShowIndividualReports())
-                            <a wire:navigate
-                                href="{{ route('ringkasan_assessment', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) }}"
-                                role="menuitem" @class([
-                                    'block px-3 py-2 text-xs rounded-lg transition-all duration-200',
-                                    'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium' => $this->isActiveRoute(
-                                        'ringkasan_assessment'),
-                                    'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' => !$this->isActiveRoute(
-                                        'ringkasan_assessment'),
-                                ])>
-                                <div class="flex items-start gap-2">
-                                    <i class="fa-solid fa-circle-dot text-xs mt-0.5 flex-shrink-0"></i>
-                                    <span class="flex-1 leading-tight">Ringkasan Hasil Asesmen Individu</span>
-                                </div>
-                            </a>
-                        @else
-                            <span role="menuitem" title="Pilih data terlebih dahulu"
-                                class="block px-3 py-2 text-xs rounded-lg transition-all duration-200 text-gray-400 dark:text-gray-600 cursor-not-allowed">
-                                <div class="flex items-start gap-2">
-                                    <i class="fa-solid fa-circle-dot text-xs mt-0.5 flex-shrink-0"></i>
-                                    <span class="flex-1 leading-tight">Ringkasan Hasil Asesmen Individu</span>
-                                </div>
-                            </span>
-                        @endif
-
-                        @if ($this->canShowIndividualReports())
-                            <a wire:navigate
-                                href="{{ route('final_report', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) }}"
-                                role="menuitem" @class([
-                                    'block px-3 py-2 text-xs rounded-lg transition-all duration-200',
-                                    'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium' => $this->isActiveRoute(
-                                        'final_report'),
-                                    'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' => !$this->isActiveRoute(
-                                        'final_report'),
-                                ])>
-                                <i class="fa-solid fa-circle-dot mr-2 text-xs"></i>Laporan Individu
-                            </a>
-                        @else
-                            <span role="menuitem" title="Pilih data terlebih dahulu"
-                                class="block px-3 py-2 text-xs rounded-lg transition-all duration-200 text-gray-400 dark:text-gray-600 cursor-not-allowed">
-                                <i class="fa-solid fa-circle-dot mr-2 text-xs"></i>Laporan Individu
-                            </span>
-                        @endif
-                    </div>
-                </div>
-
-                <!-- General Report dengan Sub Menu -->
-                <div>
-                    <button id="btn-general"
-                        @click="if (minimized) { minimized = false; $dispatch('sidebar-toggled', { minimized: minimized }); generalOpen = true } else { generalOpen = !generalOpen }"
-                        x-tooltip.raw="minimized ? 'General Report' : null"
-                        class="w-full group flex items-center px-3 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 rounded-lg transition-all duration-200 italic"
-                        :class="minimized ? 'justify-center px-2' : 'justify-between'" aria-haspopup="true"
-                        :aria-expanded="generalOpen" aria-controls="submenu-general">
-                        <div class="flex items-center">
-                            <i class="fa-solid fa-chart-bar w-5 text-center" :class="!minimized && 'mr-3'"></i>
-                            <span x-show="!minimized" x-transition:enter="transition ease-out duration-200"
-                                x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">General
-                                Report</span>
-                        </div>
-                        <svg x-show="!minimized" :class="generalOpen ? 'rotate-180' : ''"
-                            class="w-4 h-4 transition-transform duration-200" fill="currentColor" viewBox="0 0 20 20"
-                            aria-hidden="true">
-                            <path fill-rule="evenodd"
-                                d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                                clip-rule="evenodd"></path>
-                        </svg>
-                    </button>
-
-                    <!-- Sub Menu General Report -->
-                    <div x-show="generalOpen" x-transition:enter="transition ease-out duration-200"
-                        x-transition:enter-start="opacity-0 -translate-y-1"
-                        x-transition:enter-end="opacity-100 translate-y-0"
-                        x-transition:leave="transition ease-in duration-150"
-                        x-transition:leave-start="opacity-100 translate-y-0"
-                        x-transition:leave-end="opacity-0 -translate-y-1" id="submenu-general"
-                        class="ml-4 mt-1 space-y-1" role="menu" aria-labelledby="btn-general"
-                        style="display: none;">
-                        <a wire:navigate href="{{ route('ranking-psy-mapping') }}" role="menuitem"
-                            @class([
-                                'block px-3 py-2 text-xs rounded-lg transition-all duration-200',
-                                'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium italic' => $this->isActiveRoute(
-                                    'ranking-psy-mapping'),
-                                'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 italic' => !$this->isActiveRoute(
-                                    'ranking-psy-mapping'),
-                            ])>
-                            <div class="flex items-start gap-2">
-                                <i class="fa-solid fa-circle-dot text-xs mt-0.5 flex-shrink-0"></i>
-                                <span class="flex-1 leading-tight">Ranking Psychology Mapping</span>
-                            </div>
-                        </a>
-                        <a wire:navigate href="{{ route('ranking-mc-mapping') }}" role="menuitem"
-                            @class([
-                                'block px-3 py-2 text-xs rounded-lg transition-all duration-200',
-                                'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium italic' => $this->isActiveRoute(
-                                    'ranking-mc-mapping'),
-                                'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 italic' => !$this->isActiveRoute(
-                                    'ranking-mc-mapping'),
-                            ])>
-                            <div class="flex items-start gap-2">
-                                <i class="fa-solid fa-circle-dot text-xs mt-0.5 flex-shrink-0"></i>
-                                <span class="flex-1 leading-tight">Ranking Managerial Competency Mapping</span>
-                            </div>
-                        </a>
-                        <a wire:navigate href="{{ route('rekap-ranking-assessment') }}" role="menuitem"
-                            @class([
-                                'block px-3 py-2 text-xs rounded-lg transition-all duration-200',
-                                'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium' => $this->isActiveRoute(
-                                    'rekap-ranking-assessment'),
-                                'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' => !$this->isActiveRoute(
-                                    'rekap-ranking-assessment'),
-                            ])>
-                            <div class="flex items-start gap-2">
-                                <i class="fa-solid fa-circle-dot text-xs mt-0.5 flex-shrink-0"></i>
-                                <span class="flex-1 leading-tight"><i>Ranking</i> Ringkasan Hasil Asesmen</span>
-                            </div>
-                        </a>
-                        <a wire:navigate href="{{ route('statistic') }}" role="menuitem"
-                            @class([
-                                'block px-3 py-2 text-xs rounded-lg transition-all duration-200',
-                                'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium' => $this->isActiveRoute(
-                                    'statistic'),
-                                'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' => !$this->isActiveRoute(
-                                    'statistic'),
-                            ])>
-                            <i class="fa-solid fa-circle-dot mr-2 text-xs"></i>Statistik
-                        </a>
-                        <a wire:navigate href="{{ route('training-recommendation') }}" role="menuitem"
-                            @class([
-                                'block px-3 py-2 text-xs rounded-lg transition-all duration-200',
-                                'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium' => $this->isActiveRoute(
-                                    'training-recommendation'),
-                                'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' => !$this->isActiveRoute(
-                                    'training-recommendation'),
-                            ])>
-                            <div class="flex items-start gap-2">
-                                <i class="fa-solid fa-circle-dot text-xs mt-0.5 flex-shrink-0"></i>
-                                <span class="flex-1 leading-tight"><i>Training Recommendation</i></span>
-                            </div>
-                        </a>
-                        <a wire:navigate href="{{ route('standard-mc') }}" role="menuitem"
-                            @class([
-                                'block px-3 py-2 text-xs rounded-lg transition-all duration-200',
-                                'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium' => $this->isActiveRoute(
-                                    'standard-mc'),
-                                'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' => !$this->isActiveRoute(
-                                    'standard-mc'),
-                            ])>
-                            <div class="flex items-start gap-2">
-                                <i class="fa-solid fa-circle-dot text-xs mt-0.5 flex-shrink-0"></i>
-                                <span class="flex-1 leading-tight">Standar <i>Managerial Competency Mapping</i></span>
-                            </div>
-                        </a>
-                        <a wire:navigate href="{{ route('standard-psikometrik') }}" role="menuitem"
-                            @class([
-                                'block px-3 py-2 text-xs rounded-lg transition-all duration-200',
-                                'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium' => $this->isActiveRoute(
-                                    'standard-psikometrik'),
-                                'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' => !$this->isActiveRoute(
-                                    'standard-psikometrik'),
-                            ])>
-                            <div class="flex items-start gap-2">
-                                <i class="fa-solid fa-circle-dot text-xs mt-0.5 flex-shrink-0"></i>
-                                <span class="flex-1 leading-tight">Standar <i>Potential Mapping</i></span>
-                            </div>
-                        </a>
-                        <a wire:navigate href="{{ route('general-report.mmpi') }}" role="menuitem"
-                            @class([
-                                'block px-3 py-2 text-xs rounded-lg transition-all duration-200',
-                                'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium' => $this->isActiveRoute(
-                                    'general-report.mmpi'),
-                                'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' => !$this->isActiveRoute(
-                                    'general-report.mmpi'),
-                            ])>
-                            <i class="fa-solid fa-circle-dot mr-2 text-xs"></i>MMPI
-                        </a>
-                    </div>
-                </div>
-
-                <a wire:navigate href="{{ route('laporan-alat-tes') }}"
-                    x-tooltip.raw="minimized ? 'Laporan Tes' : null" @class([
-                        'group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200',
-                        'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border-l-4 border-blue-700 dark:border-blue-400' => $this->isActiveRoute(
-                            'laporan-alat-tes'),
-                        'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' => !$this->isActiveRoute(
-                            'laporan-alat-tes'),
-                    ])
-                    :class="minimized ? 'justify-center px-2' : ''">
-                    <i class="fa-solid fa-newspaper w-5 text-center" :class="!minimized && 'mr-3'"></i>
-                    <span x-show="!minimized" x-transition:enter="transition ease-out duration-200"
-                        x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"><i>Laporan Alat
-                            Tes</i></span>
-                </a>
-
-                <!-- Talent Pool Management -->
-                <a wire:navigate href="{{ route('talentpool') }}" x-tooltip.raw="minimized ? 'Talent Pool' : null"
-                    @class([
-                        'group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200',
-                        'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border-l-4 border-blue-700 dark:border-blue-400' => $this->isActiveRoute(
-                            'talentpool'),
-                        'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' => !$this->isActiveRoute(
-                            'talentpool'),
-                    ]) :class="minimized ? 'justify-center px-2' : ''">
-                    <i class="fa-solid fa-briefcase w-5 text-center" :class="!minimized && 'mr-3'"></i>
-                    <span x-show="!minimized" x-transition:enter="transition ease-out duration-200"
-                        x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"><i>Talent Pool
-                            Management</i></span>
-                </a>
-            </nav>
-
-            <!-- Footer - User Info (Optional) -->
-            <div x-show="!minimized" x-transition:enter="transition ease-out duration-200"
-                x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
-                class="px-4 py-3 border-t border-gray-200 dark:border-gray-700">
-                <div class="flex items-center gap-2">
-                    <div
-                        class="w-8 h-8 bg-blue-600 dark:bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-semibold">
-                        {{ strtoupper(substr(auth()->user()?->name ?? 'U', 0, 2)) }}
-                    </div>
-                    <div class="flex-1 min-w-0">
-                        <p class="text-xs font-medium text-gray-900 dark:text-gray-100 truncate">
-                            {{ auth()->user()?->name ?? 'User' }}
-                        </p>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">Online</p>
-                    </div>
-                </div>
+            <div x-show="!sidebarIsMini" x-transition class="flex flex-col">
+                <span class="text-lg font-bold text-neutral-900 dark:text-white leading-none">SPSP</span>
+                <span class="text-[10px] text-neutral-500 dark:text-neutral-400 leading-tight">Quantum HRM</span>
             </div>
         </div>
-    </aside>
-</div>
+    </a>
+
+    <!-- Menu dengan Scroll -->
+    <div class="flex flex-col gap-1.5 pb-6 flex-1 overflow-y-auto overflow-x-hidden scrollbar-hidden sidebar-scroll-container" wire:navigate:scroll
+        x-data="{
+            init() {
+                let scrollPos = localStorage.getItem('sidebarScroll');
+                if (scrollPos) {
+                    this.$el.scrollTop = parseInt(scrollPos);
+                }
+            },
+            saveScroll() {
+                localStorage.setItem('sidebarScroll', this.$el.scrollTop);
+            }
+        }"
+        @scroll.debounce.100ms="saveScroll">
+
+        @if (auth()->user()->hasRole('admin'))
+            <!-- Dashboard Admin -->
+            <a href="{{ route('dashboard-admin') }}" class="group flex items-center rounded-xl gap-3 px-3 py-2.5 text-sm font-medium transition-all duration-200 relative overflow-hidden shrink-0"
+                x-bind:class="[
+                    sidebarIsMini ? 'justify-center px-2.5 py-3' : '',
+                    isActive('{{ route('dashboard-admin') }}')
+                        ? 'text-red-600 bg-red-50/70 dark:text-red-400 dark:bg-red-950/50'
+                        : 'text-neutral-700 hover:text-red-600 hover:bg-red-50/50 dark:text-neutral-300 dark:hover:text-red-400 dark:hover:bg-red-950/50'
+                ]" 
+                x-bind:title="'Beranda Admin'" 
+                x-bind:aria-current="isActive('{{ route('dashboard-admin') }}') ? 'page' : 'false'" 
+                wire:navigate>
+                <div class="shrink-0 w-5 h-5 flex items-center justify-center">
+                    <i class="fa-solid fa-house-laptop text-base group-hover:scale-110 transition-transform duration-200"></i>
+                </div>
+                <span x-show="!sidebarIsMini" x-transition class="truncate">Beranda Admin</span>
+                <div class="absolute inset-x-0 bottom-0 h-0.5 bg-linear-to-r from-red-500 to-orange-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"
+                    x-bind:class="isActive('{{ route('dashboard-admin') }}') ? 'scale-x-100' : ''">
+                </div>
+            </a>
+        @endif
+
+        <!-- Beranda (Dashboard) -->
+        <a href="{{ route('dashboard') }}" class="group flex items-center rounded-xl gap-3 px-3 py-2.5 text-sm font-medium transition-all duration-200 relative overflow-hidden shrink-0"
+            x-bind:class="[
+                sidebarIsMini ? 'justify-center px-2.5 py-3' : '',
+                isActive('{{ route('dashboard') }}')
+                    ? 'text-red-600 bg-red-50/70 dark:text-red-400 dark:bg-red-950/50'
+                    : 'text-neutral-700 hover:text-red-600 hover:bg-red-50/50 dark:text-neutral-300 dark:hover:text-red-400 dark:hover:bg-red-950/50'
+            ]" 
+            x-bind:title="'Beranda'" 
+            x-bind:aria-current="isActive('{{ route('dashboard') }}') ? 'page' : 'false'" 
+            wire:navigate>
+            <div class="shrink-0 w-5 h-5 flex items-center justify-center">
+                <i class="fa-solid fa-house text-base group-hover:scale-110 transition-transform duration-200"></i>
+            </div>
+            <span x-show="!sidebarIsMini" x-transition class="truncate">Beranda</span>
+            <div class="absolute inset-x-0 bottom-0 h-0.5 bg-linear-to-r from-red-500 to-orange-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"
+                x-bind:class="isActive('{{ route('dashboard') }}') ? 'scale-x-100' : ''">
+            </div>
+        </a>
+
+        <!-- Daftar Peserta (Shortlist) -->
+        <a href="{{ route('shortlist') }}" class="group flex items-center rounded-xl gap-3 px-3 py-2.5 text-sm font-medium transition-all duration-200 relative overflow-hidden shrink-0"
+            x-bind:class="[
+                sidebarIsMini ? 'justify-center px-2.5 py-3' : '',
+                isActive('{{ route('shortlist') }}')
+                    ? 'text-red-600 bg-red-50/70 dark:text-red-400 dark:bg-red-950/50'
+                    : 'text-neutral-700 hover:text-red-600 hover:bg-red-50/50 dark:text-neutral-300 dark:hover:text-red-400 dark:hover:bg-red-950/50'
+            ]" 
+            x-bind:title="'Daftar Peserta'" 
+            x-bind:aria-current="isActive('{{ route('shortlist') }}') ? 'page' : 'false'" 
+            wire:navigate>
+            <div class="shrink-0 w-5 h-5 flex items-center justify-center">
+                <i class="fa-solid fa-users text-base group-hover:scale-110 transition-transform duration-200"></i>
+            </div>
+            <span x-show="!sidebarIsMini" x-transition class="truncate">Daftar Peserta</span>
+            <div class="absolute inset-x-0 bottom-0 h-0.5 bg-linear-to-r from-red-500 to-orange-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"
+                x-bind:class="isActive('{{ route('shortlist') }}') ? 'scale-x-100' : ''">
+            </div>
+        </a>
+
+        <!-- Tambah Standar (custom-standards.index) -->
+        <a href="{{ route('custom-standards.index') }}" class="group flex items-center rounded-xl gap-3 px-3 py-2.5 text-sm font-medium transition-all duration-200 relative overflow-hidden shrink-0"
+            x-bind:class="[
+                sidebarIsMini ? 'justify-center px-2.5 py-3' : '',
+                isActive('{{ route('custom-standards.index') }}')
+                    ? 'text-red-600 bg-red-50/70 dark:text-red-400 dark:bg-red-950/50'
+                    : 'text-neutral-700 hover:text-red-600 hover:bg-red-50/50 dark:text-neutral-300 dark:hover:text-red-400 dark:hover:bg-red-950/50'
+            ]" 
+            x-bind:title="'Tambah Standar'" 
+            x-bind:aria-current="isActive('{{ route('custom-standards.index') }}') ? 'page' : 'false'" 
+            wire:navigate>
+            <div class="shrink-0 w-5 h-5 flex items-center justify-center">
+                <i class="fa-solid fa-chart-line text-base group-hover:scale-110 transition-transform duration-200"></i>
+            </div>
+            <span x-show="!sidebarIsMini" x-transition class="truncate">Tambah Standar</span>
+            <div class="absolute inset-x-0 bottom-0 h-0.5 bg-linear-to-r from-red-500 to-orange-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"
+                x-bind:class="isActive('{{ route('custom-standards.index') }}') ? 'scale-x-100' : ''">
+            </div>
+        </a>
+
+        <!-- Divider -->
+        <div class="h-px bg-neutral-200 dark:bg-neutral-800 my-3 shrink-0" x-show="!sidebarIsMini" x-transition></div>
+
+        <!-- Individual Report Dropdown -->
+        <div x-data="{
+            isExpanded: localStorage.getItem('sidebar-dropdown-individual') === 'true',
+            init() {
+                this.$watch('isExpanded', value => localStorage.setItem('sidebar-dropdown-individual', value));
+                
+                const checkChildren = () => {
+                    const current = window.location.pathname;
+                    if (current.includes('/general-matching/') || 
+                        current.includes('/general-mapping/') ||
+                        current.includes('/general-psy-mapping/') ||
+                        current.includes('/general-mc-mapping/') ||
+                        current.includes('/spider-plot/') ||
+                        current.includes('/ringkasan-mc-mapping/') ||
+                        current.includes('/ringkasan-assessment/') ||
+                        current.includes('/final-report/')) {
+                        this.isExpanded = true;
+                    }
+                };
+                checkChildren();
+                window.addEventListener('livewire:navigated', checkChildren);
+            }
+        }" x-on:close-all-dropdowns.window="isExpanded = false" class="flex flex-col shrink-0">
+            <button type="button" x-on:click="isExpanded = !isExpanded" id="individual-btn"
+                aria-controls="individual-submenu" x-bind:aria-expanded="isExpanded ? 'true' : 'false'"
+                class="group flex items-center justify-between rounded-xl gap-3 px-3 py-2.5 text-sm font-medium transition-all duration-200 relative overflow-hidden"
+                x-bind:class="{
+                    'justify-center px-2.5 py-3': sidebarIsMini,
+                    'text-red-600 bg-red-50/70 dark:text-red-400 dark:bg-red-950/50': isExpanded,
+                    'text-neutral-700 hover:text-red-600 hover:bg-red-50/50 dark:text-neutral-300 dark:hover:text-red-400 dark:hover:bg-red-950/50':
+                        !isExpanded
+                }"
+                x-bind:title="sidebarIsMini ? 'Individual Report' : ''">
+
+                <div class="flex items-center gap-3">
+                    <div class="shrink-0 w-5 h-5 flex items-center justify-center">
+                        <i class="fa-solid fa-file-invoice text-base group-hover:scale-110 transition-transform duration-200"></i>
+                    </div>
+                    <span x-show="!sidebarIsMini" x-transition class="truncate">
+                        Individual Report
+                    </span>
+                </div>
+
+                <svg x-show="!sidebarIsMini" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
+                    class="w-4 h-4 text-neutral-400 group-hover:text-red-600 transition-all duration-200 shrink-0"
+                    x-bind:class="isExpanded ? 'rotate-180 text-red-600 dark:text-red-400' : 'rotate-0'" aria-hidden="true">
+                    <path fill-rule="evenodd"
+                        d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z"
+                        clip-rule="evenodd" />
+                </svg>
+
+                <div
+                    class="absolute inset-x-0 bottom-0 h-0.5 bg-linear-to-r from-red-500 to-orange-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300">
+                </div>
+            </button>
+
+            <ul x-cloak x-show="isExpanded" x-collapse id="individual-submenu" x-bind:class="sidebarIsMini ? 'hidden' : ''"
+                class="mt-1 mb-1 ml-2 pl-4 border-l-2 border-neutral-200 dark:border-neutral-700 space-y-0.5">
+                
+                @if (!$this->canShowIndividualReports())
+                    <li class="mx-2 my-2 p-2.5 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-600/50 rounded-lg">
+                        <div class="flex items-start gap-2">
+                            <i class="fa-solid fa-circle-exclamation text-yellow-600 dark:text-yellow-400 text-sm mt-0.5"></i>
+                            <div class="flex-1">
+                                <p class="text-xs font-semibold text-yellow-800 dark:text-yellow-300 mb-1">Pilih Peserta</p>
+                                <p class="text-[10px] text-yellow-700 dark:text-yellow-400/90 leading-normal">
+                                    Pilih Proyek & Peserta di <a href="{{ route('dashboard') }}" class="underline font-medium">Beranda</a> atau di <a href="{{ route('shortlist') }}" class="underline font-medium">Daftar Peserta</a>.
+                                </p>
+                            </div>
+                        </div>
+                    </li>
+                @endif
+
+                <!-- General Matching -->
+                <li>
+                    @if ($this->canShowIndividualReports())
+                        <a href="{{ route('general_matching', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) }}" wire:navigate
+                            class="group flex items-center rounded-lg gap-2 px-3 py-1.5 text-xs transition-all duration-200"
+                            x-bind:class="isActive('{{ route('general_matching', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) }}')
+                                ? 'text-red-600 bg-red-50/30 dark:text-red-400 dark:bg-red-950/30 font-medium'
+                                : 'text-neutral-600 hover:text-red-600 hover:bg-red-50/30 dark:text-neutral-400 dark:hover:text-red-400 dark:hover:bg-red-950/30'">
+                            <span class="w-1.5 h-1.5 rounded-full bg-neutral-300 group-hover:bg-red-500 transition-colors duration-200 dark:bg-neutral-600"
+                                x-bind:class="isActive('{{ route('general_matching', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) }}') ? 'bg-red-500' : ''"></span>
+                            General Matching
+                        </a>
+                    @else
+                        <span class="group flex items-center rounded-lg gap-2 px-3 py-1.5 text-xs text-neutral-400 dark:text-neutral-600 cursor-not-allowed">
+                            <span class="w-1.5 h-1.5 rounded-full bg-neutral-200 dark:bg-neutral-800"></span>
+                            General Matching
+                        </span>
+                    @endif
+                </li>
+
+                <!-- General Mapping -->
+                <li>
+                    @if ($this->canShowIndividualReports())
+                        <a href="{{ route('general_mapping', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) }}" wire:navigate
+                            class="group flex items-center rounded-lg gap-2 px-3 py-1.5 text-xs transition-all duration-200"
+                            x-bind:class="isActive('{{ route('general_mapping', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) }}')
+                                ? 'text-red-600 bg-red-50/30 dark:text-red-400 dark:bg-red-950/30 font-medium'
+                                : 'text-neutral-600 hover:text-red-600 hover:bg-red-50/30 dark:text-neutral-400 dark:hover:text-red-400 dark:hover:bg-red-950/30'">
+                            <span class="w-1.5 h-1.5 rounded-full bg-neutral-300 group-hover:bg-red-500 transition-colors duration-200 dark:bg-neutral-600"
+                                x-bind:class="isActive('{{ route('general_mapping', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) }}') ? 'bg-red-500' : ''"></span>
+                            General Mapping
+                        </a>
+                    @else
+                        <span class="group flex items-center rounded-lg gap-2 px-3 py-1.5 text-xs text-neutral-400 dark:text-neutral-600 cursor-not-allowed">
+                            <span class="w-1.5 h-1.5 rounded-full bg-neutral-200 dark:bg-neutral-800"></span>
+                            General Mapping
+                        </span>
+                    @endif
+                </li>
+
+                <!-- General Psychology Mapping -->
+                <li>
+                    @if ($this->canShowIndividualReports())
+                        <a href="{{ route('general_psy_mapping', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) }}" wire:navigate
+                            class="group flex items-center rounded-lg gap-2 px-3 py-1.5 text-xs transition-all duration-200"
+                            x-bind:class="isActive('{{ route('general_psy_mapping', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) }}')
+                                ? 'text-red-600 bg-red-50/30 dark:text-red-400 dark:bg-red-950/30 font-medium'
+                                : 'text-neutral-600 hover:text-red-600 hover:bg-red-50/30 dark:text-neutral-400 dark:hover:text-red-400 dark:hover:bg-red-950/30'">
+                            <span class="w-1.5 h-1.5 rounded-full bg-neutral-300 group-hover:bg-red-500 transition-colors duration-200 dark:bg-neutral-600"
+                                x-bind:class="isActive('{{ route('general_psy_mapping', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) }}') ? 'bg-red-500' : ''"></span>
+                            General Psy Mapping
+                        </a>
+                    @else
+                        <span class="group flex items-center rounded-lg gap-2 px-3 py-1.5 text-xs text-neutral-400 dark:text-neutral-600 cursor-not-allowed">
+                            <span class="w-1.5 h-1.5 rounded-full bg-neutral-200 dark:bg-neutral-800"></span>
+                            General Psy Mapping
+                        </span>
+                    @endif
+                </li>
+
+                <!-- General Managerial Competency Mapping -->
+                <li>
+                    @if ($this->canShowIndividualReports())
+                        <a href="{{ route('general_mc_mapping', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) }}" wire:navigate
+                            class="group flex items-center rounded-lg gap-2 px-3 py-1.5 text-xs transition-all duration-200"
+                            x-bind:class="isActive('{{ route('general_mc_mapping', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) }}')
+                                ? 'text-red-600 bg-red-50/30 dark:text-red-400 dark:bg-red-950/30 font-medium'
+                                : 'text-neutral-600 hover:text-red-600 hover:bg-red-50/30 dark:text-neutral-400 dark:hover:text-red-400 dark:hover:bg-red-950/30'">
+                            <span class="w-1.5 h-1.5 rounded-full bg-neutral-300 group-hover:bg-red-500 transition-colors duration-200 dark:bg-neutral-600"
+                                x-bind:class="isActive('{{ route('general_mc_mapping', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) }}') ? 'bg-red-500' : ''"></span>
+                            General MC Mapping
+                        </a>
+                    @else
+                        <span class="group flex items-center rounded-lg gap-2 px-3 py-1.5 text-xs text-neutral-400 dark:text-neutral-600 cursor-not-allowed">
+                            <span class="w-1.5 h-1.5 rounded-full bg-neutral-200 dark:bg-neutral-800"></span>
+                            General MC Mapping
+                        </span>
+                    @endif
+                </li>
+
+                <!-- Spider Plot -->
+                <li>
+                    @if ($this->canShowIndividualReports())
+                        <a href="{{ route('spider_plot', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) }}" wire:navigate
+                            class="group flex items-center rounded-lg gap-2 px-3 py-1.5 text-xs transition-all duration-200"
+                            x-bind:class="isActive('{{ route('spider_plot', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) }}')
+                                ? 'text-red-600 bg-red-50/30 dark:text-red-400 dark:bg-red-950/30 font-medium'
+                                : 'text-neutral-600 hover:text-red-600 hover:bg-red-50/30 dark:text-neutral-400 dark:hover:text-red-400 dark:hover:bg-red-950/30'">
+                            <span class="w-1.5 h-1.5 rounded-full bg-neutral-300 group-hover:bg-red-500 transition-colors duration-200 dark:bg-neutral-600"
+                                x-bind:class="isActive('{{ route('spider_plot', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) }}') ? 'bg-red-500' : ''"></span>
+                            Spider Plot
+                        </a>
+                    @else
+                        <span class="group flex items-center rounded-lg gap-2 px-3 py-1.5 text-xs text-neutral-400 dark:text-neutral-600 cursor-not-allowed">
+                            <span class="w-1.5 h-1.5 rounded-full bg-neutral-200 dark:bg-neutral-800"></span>
+                            Spider Plot
+                        </span>
+                    @endif
+                </li>
+
+                <!-- Ringkasan MC Mapping -->
+                <li>
+                    @if ($this->canShowIndividualReports())
+                        <a href="{{ route('ringkasan_mc_mapping', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) }}" wire:navigate
+                            class="group flex items-center rounded-lg gap-2 px-3 py-1.5 text-xs transition-all duration-200"
+                            x-bind:class="isActive('{{ route('ringkasan_mc_mapping', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) }}')
+                                ? 'text-red-600 bg-red-50/30 dark:text-red-400 dark:bg-red-950/30 font-medium'
+                                : 'text-neutral-600 hover:text-red-600 hover:bg-red-50/30 dark:text-neutral-400 dark:hover:text-red-400 dark:hover:bg-red-950/30'">
+                            <span class="w-1.5 h-1.5 rounded-full bg-neutral-300 group-hover:bg-red-500 transition-colors duration-200 dark:bg-neutral-600"
+                                x-bind:class="isActive('{{ route('ringkasan_mc_mapping', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) }}') ? 'bg-red-500' : ''"></span>
+                            Ringkasan MC Mapping
+                        </a>
+                    @else
+                        <span class="group flex items-center rounded-lg gap-2 px-3 py-1.5 text-xs text-neutral-400 dark:text-neutral-600 cursor-not-allowed">
+                            <span class="w-1.5 h-1.5 rounded-full bg-neutral-200 dark:bg-neutral-800"></span>
+                            Ringkasan MC Mapping
+                        </span>
+                    @endif
+                </li>
+
+                <!-- Ringkasan Assessment -->
+                <li>
+                    @if ($this->canShowIndividualReports())
+                        <a href="{{ route('ringkasan_assessment', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) }}" wire:navigate
+                            class="group flex items-center rounded-lg gap-2 px-3 py-1.5 text-xs transition-all duration-200"
+                            x-bind:class="isActive('{{ route('ringkasan_assessment', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) }}')
+                                ? 'text-red-600 bg-red-50/30 dark:text-red-400 dark:bg-red-950/30 font-medium'
+                                : 'text-neutral-600 hover:text-red-600 hover:bg-red-50/30 dark:text-neutral-400 dark:hover:text-red-400 dark:hover:bg-red-950/30'">
+                            <span class="w-1.5 h-1.5 rounded-full bg-neutral-300 group-hover:bg-red-500 transition-colors duration-200 dark:bg-neutral-600"
+                                x-bind:class="isActive('{{ route('ringkasan_assessment', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) }}') ? 'bg-red-500' : ''"></span>
+                            Ringkasan Asesmen
+                        </a>
+                    @else
+                        <span class="group flex items-center rounded-lg gap-2 px-3 py-1.5 text-xs text-neutral-400 dark:text-neutral-600 cursor-not-allowed">
+                            <span class="w-1.5 h-1.5 rounded-full bg-neutral-200 dark:bg-neutral-800"></span>
+                            Ringkasan Asesmen
+                        </span>
+                    @endif
+                </li>
+
+                <!-- Laporan Individu -->
+                <li>
+                    @if ($this->canShowIndividualReports())
+                        <a href="{{ route('final_report', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) }}" wire:navigate
+                            class="group flex items-center rounded-lg gap-2 px-3 py-1.5 text-xs transition-all duration-200"
+                            x-bind:class="isActive('{{ route('final_report', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) }}')
+                                ? 'text-red-600 bg-red-50/30 dark:text-red-400 dark:bg-red-950/30 font-medium'
+                                : 'text-neutral-600 hover:text-red-600 hover:bg-red-50/30 dark:text-neutral-400 dark:hover:text-red-400 dark:hover:bg-red-950/30'">
+                            <span class="w-1.5 h-1.5 rounded-full bg-neutral-300 group-hover:bg-red-500 transition-colors duration-200 dark:bg-neutral-600"
+                                x-bind:class="isActive('{{ route('final_report', ['eventCode' => $eventCode, 'testNumber' => $testNumber]) }}') ? 'bg-red-500' : ''"></span>
+                            Laporan Individu
+                        </a>
+                    @else
+                        <span class="group flex items-center rounded-lg gap-2 px-3 py-1.5 text-xs text-neutral-400 dark:text-neutral-600 cursor-not-allowed">
+                            <span class="w-1.5 h-1.5 rounded-full bg-neutral-200 dark:bg-neutral-800"></span>
+                            Laporan Individu
+                        </span>
+                    @endif
+                </li>
+            </ul>
+        </div>
+
+        <!-- General Report Dropdown -->
+        <div x-data="{
+            isExpanded: localStorage.getItem('sidebar-dropdown-general') === 'true',
+            init() {
+                this.$watch('isExpanded', value => localStorage.setItem('sidebar-dropdown-general', value));
+                
+                const checkChildren = () => {
+                    const current = window.location.pathname;
+                    if (current.includes('/ranking-psy-mapping') || 
+                        current.includes('/ranking-mc-mapping') ||
+                        current.includes('/rekap-ranking-assessment') ||
+                        current.includes('/statistic') ||
+                        current.includes('/training-recommendation') ||
+                        current.includes('/standard-mc') ||
+                        current.includes('/standard-psikometrik') ||
+                        current.includes('/general-report/mmpi')) {
+                        this.isExpanded = true;
+                    }
+                };
+                checkChildren();
+                window.addEventListener('livewire:navigated', checkChildren);
+            }
+        }" x-on:close-all-dropdowns.window="isExpanded = false" class="flex flex-col shrink-0">
+            <button type="button" x-on:click="isExpanded = !isExpanded" id="general-btn"
+                aria-controls="general-submenu" x-bind:aria-expanded="isExpanded ? 'true' : 'false'"
+                class="group flex items-center justify-between rounded-xl gap-3 px-3 py-2.5 text-sm font-medium transition-all duration-200 relative overflow-hidden"
+                x-bind:class="{
+                    'justify-center px-2.5 py-3': sidebarIsMini,
+                    'text-red-600 bg-red-50/70 dark:text-red-400 dark:bg-red-950/50': isExpanded,
+                    'text-neutral-700 hover:text-red-600 hover:bg-red-50/50 dark:text-neutral-300 dark:hover:text-red-400 dark:hover:bg-red-950/50':
+                        !isExpanded
+                }"
+                x-bind:title="sidebarIsMini ? 'General Report' : ''">
+
+                <div class="flex items-center gap-3">
+                    <div class="shrink-0 w-5 h-5 flex items-center justify-center">
+                        <i class="fa-solid fa-chart-pie text-base group-hover:scale-110 transition-transform duration-200"></i>
+                    </div>
+                    <span x-show="!sidebarIsMini" x-transition class="truncate">
+                        General Report
+                    </span>
+                </div>
+
+                <svg x-show="!sidebarIsMini" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
+                    class="w-4 h-4 text-neutral-400 group-hover:text-red-600 transition-all duration-200 shrink-0"
+                    x-bind:class="isExpanded ? 'rotate-180 text-red-600 dark:text-red-400' : 'rotate-0'" aria-hidden="true">
+                    <path fill-rule="evenodd"
+                        d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z"
+                        clip-rule="evenodd" />
+                </svg>
+
+                <div
+                    class="absolute inset-x-0 bottom-0 h-0.5 bg-linear-to-r from-red-500 to-orange-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300">
+                </div>
+            </button>
+
+            <ul x-cloak x-show="isExpanded" x-collapse id="general-submenu" x-bind:class="sidebarIsMini ? 'hidden' : ''"
+                class="mt-1 mb-1 ml-2 pl-4 border-l-2 border-neutral-200 dark:border-neutral-700 space-y-0.5">
+                
+                <!-- Ranking Psychology Mapping -->
+                <li>
+                    <a href="{{ route('ranking-psy-mapping') }}" wire:navigate
+                        class="group flex items-center rounded-lg gap-2 px-3 py-1.5 text-xs transition-all duration-200"
+                        x-bind:class="isActive('{{ route('ranking-psy-mapping') }}')
+                            ? 'text-red-600 bg-red-50/30 dark:text-red-400 dark:bg-red-950/30 font-medium'
+                            : 'text-neutral-600 hover:text-red-600 hover:bg-red-50/30 dark:text-neutral-400 dark:hover:text-red-400 dark:hover:bg-red-950/30'">
+                        <span class="w-1.5 h-1.5 rounded-full bg-neutral-300 group-hover:bg-red-500 transition-colors duration-200 dark:bg-neutral-600"
+                            x-bind:class="isActive('{{ route('ranking-psy-mapping') }}') ? 'bg-red-500' : ''"></span>
+                        Ranking Psy Mapping
+                    </a>
+                </li>
+
+                <!-- Ranking Managerial Competency Mapping -->
+                <li>
+                    <a href="{{ route('ranking-mc-mapping') }}" wire:navigate
+                        class="group flex items-center rounded-lg gap-2 px-3 py-1.5 text-xs transition-all duration-200"
+                        x-bind:class="isActive('{{ route('ranking-mc-mapping') }}')
+                            ? 'text-red-600 bg-red-50/30 dark:text-red-400 dark:bg-red-950/30 font-medium'
+                            : 'text-neutral-600 hover:text-red-600 hover:bg-red-50/30 dark:text-neutral-400 dark:hover:text-red-400 dark:hover:bg-red-950/30'">
+                        <span class="w-1.5 h-1.5 rounded-full bg-neutral-300 group-hover:bg-red-500 transition-colors duration-200 dark:bg-neutral-600"
+                            x-bind:class="isActive('{{ route('ranking-mc-mapping') }}') ? 'bg-red-500' : ''"></span>
+                        Ranking MC Mapping
+                    </a>
+                </li>
+
+                <!-- Rekap Ranking Assessment -->
+                <li>
+                    <a href="{{ route('rekap-ranking-assessment') }}" wire:navigate
+                        class="group flex items-center rounded-lg gap-2 px-3 py-1.5 text-xs transition-all duration-200"
+                        x-bind:class="isActive('{{ route('rekap-ranking-assessment') }}')
+                            ? 'text-red-600 bg-red-50/30 dark:text-red-400 dark:bg-red-950/30 font-medium'
+                            : 'text-neutral-600 hover:text-red-600 hover:bg-red-50/30 dark:text-neutral-400 dark:hover:text-red-400 dark:hover:bg-red-950/30'">
+                        <span class="w-1.5 h-1.5 rounded-full bg-neutral-300 group-hover:bg-red-500 transition-colors duration-200 dark:bg-neutral-600"
+                            x-bind:class="isActive('{{ route('rekap-ranking-assessment') }}') ? 'bg-red-500' : ''"></span>
+                        Ranking Ringkasan Asesmen
+                    </a>
+                </li>
+
+                <!-- Statistik -->
+                <li>
+                    <a href="{{ route('statistic') }}" wire:navigate
+                        class="group flex items-center rounded-lg gap-2 px-3 py-1.5 text-xs transition-all duration-200"
+                        x-bind:class="isActive('{{ route('statistic') }}')
+                            ? 'text-red-600 bg-red-50/30 dark:text-red-400 dark:bg-red-950/30 font-medium'
+                            : 'text-neutral-600 hover:text-red-600 hover:bg-red-50/30 dark:text-neutral-400 dark:hover:text-red-400 dark:hover:bg-red-950/30'">
+                        <span class="w-1.5 h-1.5 rounded-full bg-neutral-300 group-hover:bg-red-500 transition-colors duration-200 dark:bg-neutral-600"
+                            x-bind:class="isActive('{{ route('statistic') }}') ? 'bg-red-500' : ''"></span>
+                        Statistik
+                    </a>
+                </li>
+
+                <!-- Training Recommendation -->
+                <li>
+                    <a href="{{ route('training-recommendation') }}" wire:navigate
+                        class="group flex items-center rounded-lg gap-2 px-3 py-1.5 text-xs transition-all duration-200"
+                        x-bind:class="isActive('{{ route('training-recommendation') }}')
+                            ? 'text-red-600 bg-red-50/30 dark:text-red-400 dark:bg-red-950/30 font-medium'
+                            : 'text-neutral-600 hover:text-red-600 hover:bg-red-50/30 dark:text-neutral-400 dark:hover:text-red-400 dark:hover:bg-red-950/30'">
+                        <span class="w-1.5 h-1.5 rounded-full bg-neutral-300 group-hover:bg-red-500 transition-colors duration-200 dark:bg-neutral-600"
+                            x-bind:class="isActive('{{ route('training-recommendation') }}') ? 'bg-red-500' : ''"></span>
+                        Training Recommendation
+                    </a>
+                </li>
+
+                <!-- Standar MC -->
+                <li>
+                    <a href="{{ route('standard-mc') }}" wire:navigate
+                        class="group flex items-center rounded-lg gap-2 px-3 py-1.5 text-xs transition-all duration-200"
+                        x-bind:class="isActive('{{ route('standard-mc') }}')
+                            ? 'text-red-600 bg-red-50/30 dark:text-red-400 dark:bg-red-950/30 font-medium'
+                            : 'text-neutral-600 hover:text-red-600 hover:bg-red-50/30 dark:text-neutral-400 dark:hover:text-red-400 dark:hover:bg-red-950/30'">
+                        <span class="w-1.5 h-1.5 rounded-full bg-neutral-300 group-hover:bg-red-500 transition-colors duration-200 dark:bg-neutral-600"
+                            x-bind:class="isActive('{{ route('standard-mc') }}') ? 'bg-red-500' : ''"></span>
+                        Standar MC Mapping
+                    </a>
+                </li>
+
+                <!-- Standar Potential Mapping -->
+                <li>
+                    <a href="{{ route('standard-psikometrik') }}" wire:navigate
+                        class="group flex items-center rounded-lg gap-2 px-3 py-1.5 text-xs transition-all duration-200"
+                        x-bind:class="isActive('{{ route('standard-psikometrik') }}')
+                            ? 'text-red-600 bg-red-50/30 dark:text-red-400 dark:bg-red-950/30 font-medium'
+                            : 'text-neutral-600 hover:text-red-600 hover:bg-red-50/30 dark:text-neutral-400 dark:hover:text-red-400 dark:hover:bg-red-950/30'">
+                        <span class="w-1.5 h-1.5 rounded-full bg-neutral-300 group-hover:bg-red-500 transition-colors duration-200 dark:bg-neutral-600"
+                            x-bind:class="isActive('{{ route('standard-psikometrik') }}') ? 'bg-red-500' : ''"></span>
+                        Standar Potential Mapping
+                    </a>
+                </li>
+
+                <!-- MMPI -->
+                <li>
+                    <a href="{{ route('general-report.mmpi') }}" wire:navigate
+                        class="group flex items-center rounded-lg gap-2 px-3 py-1.5 text-xs transition-all duration-200"
+                        x-bind:class="isActive('{{ route('general-report.mmpi') }}')
+                            ? 'text-red-600 bg-red-50/30 dark:text-red-400 dark:bg-red-950/30 font-medium'
+                            : 'text-neutral-600 hover:text-red-600 hover:bg-red-50/30 dark:text-neutral-400 dark:hover:text-red-400 dark:hover:bg-red-950/30'">
+                        <span class="w-1.5 h-1.5 rounded-full bg-neutral-300 group-hover:bg-red-500 transition-colors duration-200 dark:bg-neutral-600"
+                            x-bind:class="isActive('{{ route('general-report.mmpi') }}') ? 'bg-red-500' : ''"></span>
+                        MMPI
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Laporan Alat Tes -->
+        <a href="{{ route('laporan-alat-tes') }}" class="group flex items-center rounded-xl gap-3 px-3 py-2.5 text-sm font-medium transition-all duration-200 relative overflow-hidden shrink-0"
+            x-bind:class="[
+                sidebarIsMini ? 'justify-center px-2.5 py-3' : '',
+                isActive('{{ route('laporan-alat-tes') }}')
+                    ? 'text-red-600 bg-red-50/70 dark:text-red-400 dark:bg-red-950/50'
+                    : 'text-neutral-700 hover:text-red-600 hover:bg-red-50/50 dark:text-neutral-300 dark:hover:text-red-400 dark:hover:bg-red-950/50'
+            ]" 
+            x-bind:title="'Laporan Alat Tes'" 
+            x-bind:aria-current="isActive('{{ route('laporan-alat-tes') }}') ? 'page' : 'false'" 
+            wire:navigate>
+            <div class="shrink-0 w-5 h-5 flex items-center justify-center">
+                <i class="fa-solid fa-square-poll-vertical text-base group-hover:scale-110 transition-transform duration-200"></i>
+            </div>
+            <span x-show="!sidebarIsMini" x-transition class="truncate">Laporan Alat Tes</span>
+            <div class="absolute inset-x-0 bottom-0 h-0.5 bg-linear-to-r from-red-500 to-orange-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"
+                x-bind:class="isActive('{{ route('laporan-alat-tes') }}') ? 'scale-x-100' : ''">
+            </div>
+        </a>
+
+        <!-- Talent Pool Management -->
+        <a href="{{ route('talentpool') }}" class="group flex items-center rounded-xl gap-3 px-3 py-2.5 text-sm font-medium transition-all duration-200 relative overflow-hidden shrink-0"
+            x-bind:class="[
+                sidebarIsMini ? 'justify-center px-2.5 py-3' : '',
+                isActive('{{ route('talentpool') }}')
+                    ? 'text-red-600 bg-red-50/70 dark:text-red-400 dark:bg-red-950/50'
+                    : 'text-neutral-700 hover:text-red-600 hover:bg-red-50/50 dark:text-neutral-300 dark:hover:text-red-400 dark:hover:bg-red-950/50'
+            ]" 
+            x-bind:title="'Talent Pool Management'" 
+            x-bind:aria-current="isActive('{{ route('talentpool') }}') ? 'page' : 'false'" 
+            wire:navigate>
+            <div class="shrink-0 w-5 h-5 flex items-center justify-center">
+                <i class="fa-solid fa-briefcase text-base group-hover:scale-110 transition-transform duration-200"></i>
+            </div>
+            <span x-show="!sidebarIsMini" x-transition class="truncate">Talent Pool Management</span>
+            <div class="absolute inset-x-0 bottom-0 h-0.5 bg-linear-to-r from-red-500 to-orange-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"
+                x-bind:class="isActive('{{ route('talentpool') }}') ? 'scale-x-100' : ''">
+            </div>
+        </a>
+
+    </div>
+
+    <!-- Close All Menus Button -->
+    <div class="pt-4 border-t border-neutral-200/60 dark:border-neutral-800/60">
+        <div x-data="{
+            closeAllMenus() {
+                localStorage.setItem('sidebar-dropdown-individual', 'false');
+                localStorage.setItem('sidebar-dropdown-general', 'false');
+                window.dispatchEvent(new CustomEvent('close-all-dropdowns'));
+            }
+        }">
+            <button 
+                type="button" 
+                @click="closeAllMenus()" 
+                aria-label="Tutup Semua Menu"
+                class="w-full group flex items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 relative overflow-hidden text-neutral-700 hover:text-red-600 hover:bg-red-50/50 dark:text-neutral-300 dark:hover:text-red-400 dark:hover:bg-red-950/50 border border-neutral-200 dark:border-neutral-700 hover:border-red-300 dark:hover:border-red-800"
+                x-bind:class="sidebarIsMini ? 'px-2.5 py-3' : ''"
+                x-bind:title="sidebarIsMini ? 'Tutup Semua Menu' : ''"
+            >
+                <div class="flex items-center gap-2">
+                    <div class="shrink-0 w-5 h-5 flex items-center justify-center">
+                        <i class="fa-solid fa-xmark text-base group-hover:scale-110 group-hover:rotate-180 transition-transform duration-300"></i>
+                    </div>
+                    
+                    <span x-show="!sidebarIsMini" x-transition class="truncate">
+                        Tutup Semua Menu
+                    </span>
+                </div>
+            </button>
+        </div>
+    </div>
+</nav>
