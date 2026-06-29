@@ -162,7 +162,7 @@ class Sidebar extends Component
     /**
      * Recursively process raw menu items to resolve routes, parameters, active states, and roles.
      */
-    private function processMenuItems(array $items): array
+    private function processMenuItems(array $items, bool $parentRequiresParticipant = false): array
     {
         $processed = [];
 
@@ -181,12 +181,12 @@ class Sidebar extends Component
             }
 
             // 3. Resolve active state and disabled state
-            $requiresParticipant = $item['requires_participant'] ?? false;
+            $requiresParticipant = ($item['requires_participant'] ?? false) || $parentRequiresParticipant;
             $canShowReports = $this->canShowIndividualReports();
 
             // Resolve children first if dropdown
             if (isset($item['type']) && $item['type'] === 'dropdown') {
-                $item['items'] = $this->processMenuItems($item['items'] ?? []);
+                $item['items'] = $this->processMenuItems($item['items'] ?? [], $requiresParticipant);
 
                 // Determine active state for the dropdown group
                 $isActiveDropdown = false;
