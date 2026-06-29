@@ -25,59 +25,60 @@ Route::middleware(['guest'])->group(function () {
 // Route::middleware(['auth', 'institution.access'])->group(function () {
 Route::middleware(['auth', 'institution.access'])->group(function () {
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
-    Route::get('/dashboard', \App\Livewire\Pages\Dashboard::class)->name('dashboard');
+    Route::livewire('/dashboard', \App\Livewire\Pages\Dashboard::class)->name('dashboard');
     Route::middleware(['role:admin'])->group(function () {
-        Route::get('/dashboard-admin', \App\Livewire\Pages\Admin\DashboardAdmin::class)->name('dashboard-admin');
+        Route::livewire('/dashboard-admin', \App\Livewire\Pages\Admin\DashboardAdmin::class)->name('dashboard-admin');
         // List Klien Route
-        Route::get('/list-klien', \App\Livewire\Pages\Admin\ClientList::class)->name('daftar-klien');
+        Route::livewire('/list-klien', \App\Livewire\Pages\Admin\ClientList::class)->name('daftar-klien');
 
         // Institution Routes
-        Route::get('/institutions/{institution}', \App\Livewire\Pages\Institutions\Show::class)->name('institutions.show');
+        Route::livewire('/institutions/{institution}', \App\Livewire\Pages\Institutions\Show::class)->name('institutions.show');
 
         // Event Routes
-        Route::get('/events', \App\Livewire\Pages\Events\Index::class)->name('events.index');
-        Route::get('/events/{event:code}', \App\Livewire\Pages\Events\Show::class)->name('events.show');
+        Route::livewire('/events', \App\Livewire\Pages\Events\Index::class)->name('events.index');
+        Route::livewire('/events/{event:code}', \App\Livewire\Pages\Events\Show::class)->name('events.show');
     });
 
 
-    Route::get('/shortlist-peserta', \App\Livewire\Pages\ParticipantsList::class)->name('shortlist');
+    Route::livewire('/shortlist-peserta', \App\Livewire\Pages\ParticipantsList::class)->name('shortlist');
 
     // Detail Peserta Route
-    Route::get('/participant-detail/{eventCode}/{testNumber}', \App\Livewire\Pages\ParticipantDetail::class)->name('participant_detail');
+    Route::livewire('/participant-detail/{eventCode}/{testNumber}', \App\Livewire\Pages\ParticipantDetail::class)->name('participant_detail');
 
     // Individual Report Route - General Matching
-    Route::get('/general-matching/{eventCode}/{testNumber}', App\Livewire\Pages\IndividualReport\GeneralMatching::class)->name('general_matching');
+    Route::livewire('/general-matching/{eventCode}/{testNumber}', App\Livewire\Pages\IndividualReport\GeneralMatching::class)->name('general_matching');
 
     // Individual Report Route - General Mapping
-    Route::get('/general-mapping/{eventCode}/{testNumber}', App\Livewire\Pages\IndividualReport\GeneralMapping::class)->name('general_mapping');
+    Route::livewire('/general-mapping/{eventCode}/{testNumber}', App\Livewire\Pages\IndividualReport\GeneralMapping::class)->name('general_mapping');
 
     // Individual Report Route - General MC Mapping (Kompetensi Only)
-    Route::get('/general-mc-mapping/{eventCode}/{testNumber}', App\Livewire\Pages\IndividualReport\GeneralMcMapping::class)->name('general_mc_mapping');
+    Route::livewire('/general-mc-mapping/{eventCode}/{testNumber}', App\Livewire\Pages\IndividualReport\GeneralMcMapping::class)->name('general_mc_mapping');
 
     // Individual Report Route - General PSY Mapping (Potensi Only)
-    Route::get('/general-psy-mapping/{eventCode}/{testNumber}', App\Livewire\Pages\IndividualReport\GeneralPsyMapping::class)->name('general_psy_mapping');
+    Route::livewire('/general-psy-mapping/{eventCode}/{testNumber}', App\Livewire\Pages\IndividualReport\GeneralPsyMapping::class)->name('general_psy_mapping');
 
     // Individual Report Route - Spider Plot
-    Route::get('/spider-plot/{eventCode}/{testNumber}', App\Livewire\Pages\IndividualReport\SpiderPlot::class)->name('spider_plot');
+    Route::livewire('/spider-plot/{eventCode}/{testNumber}', App\Livewire\Pages\IndividualReport\SpiderPlot::class)->name('spider_plot');
 
     // Individual Report Route - Ringkasan MC Mapping (Kompetensi Summary)
-    Route::get('/ringkasan-mc-mapping/{eventCode}/{testNumber}', App\Livewire\Pages\IndividualReport\RingkasanMcMapping::class)->name('ringkasan_mc_mapping');
+    Route::livewire('/ringkasan-mc-mapping/{eventCode}/{testNumber}', App\Livewire\Pages\IndividualReport\RingkasanMcMapping::class)->name('ringkasan_mc_mapping');
 
     // Individual Report Route - Ringkasan Asesmen
-    Route::get('/ringkasan-assessment/{eventCode}/{testNumber}', App\Livewire\Pages\IndividualReport\RingkasanAssessment::class)->name('ringkasan_assessment');
+    Route::livewire('/ringkasan-assessment/{eventCode}/{testNumber}', App\Livewire\Pages\IndividualReport\RingkasanAssessment::class)->name('ringkasan_assessment');
 
     // General report Routes
-    Route::get('/ranking-psy-mapping', App\Livewire\Pages\GeneralReport\Ranking\RankingPsyMapping::class)->name('ranking-psy-mapping');
+    Route::livewire('/ranking-psy-mapping', App\Livewire\Pages\GeneralReport\Ranking\RankingPsyMapping::class)->name('ranking-psy-mapping');
 
-    Route::get('/ranking-mc-mapping', App\Livewire\Pages\GeneralReport\Ranking\RankingMcMapping::class)->name('ranking-mc-mapping');
+    // General Report Route - MMPI Results
+    Route::livewire('/ranking-mc-mapping', App\Livewire\Pages\GeneralReport\Ranking\RankingMcMapping::class)->name('ranking-mc-mapping');
 
-    Route::get('/rekap-ranking-assessment', App\Livewire\Pages\GeneralReport\Ranking\RekapRankingAssessment::class)->name('rekap-ranking-assessment');
+    Route::livewire('/rekap-ranking-assessment', App\Livewire\Pages\GeneralReport\Ranking\RekapRankingAssessment::class)->name('rekap-ranking-assessment');
 
-    Route::get('/statistic', App\Livewire\Pages\GeneralReport\Statistic::class)->name('statistic');
+    Route::livewire('/statistic', App\Livewire\Pages\GeneralReport\Statistic::class)->name('statistic');
 
-    Route::get('/training-recommendation', App\Livewire\Pages\GeneralReport\Training\TrainingRecommendation::class)->name('training-recommendation');
+    Route::livewire('/training-recommendation', App\Livewire\Pages\GeneralReport\Training\TrainingRecommendation::class)->name('training-recommendation');
 
-    Route::get('/standard-mc', App\Livewire\Pages\GeneralReport\StandardMc::class)->name('standard-mc');
+    Route::livewire('/standard-mc', App\Livewire\Pages\GeneralReport\StandardMc::class)->name('standard-mc');
     Route::get('/standard-mc-copy', function () {
         return view('livewire.pages.general-report.standard-mc-copy');
     })->name('standard-mc-copy');
@@ -90,20 +91,20 @@ Route::middleware(['auth', 'institution.access'])->group(function () {
         return view('livewire.pages.general-report.ranking.capacitybuilding-psy');
     })->name('cb-psy');
 
-    Route::get('/standard-psikometrik', App\Livewire\Pages\GeneralReport\StandardPsikometrik::class)->name('standard-psikometrik');
-    Route::get('/general-report/mmpi', App\Livewire\Pages\GeneralReport\MmpiResultsReport::class)->name('general-report.mmpi');
+    Route::livewire('/standard-psikometrik', App\Livewire\Pages\GeneralReport\StandardPsikometrik::class)->name('standard-psikometrik');
+    Route::livewire('/general-report/mmpi', App\Livewire\Pages\GeneralReport\MmpiResultsReport::class)->name('general-report.mmpi');
 
-    Route::get('/final-report/{eventCode}/{testNumber}', App\Livewire\Pages\IndividualReport\FinalReport::class)->name('final_report');
+    Route::livewire('/final-report/{eventCode}/{testNumber}', App\Livewire\Pages\IndividualReport\FinalReport::class)->name('final_report');
 
     // Custom Standards Routes
-    Route::get('/custom-standards', App\Livewire\Pages\CustomStandards\Index::class)->name('custom-standards.index');
-    Route::get('/custom-standards/create', App\Livewire\Pages\CustomStandards\Create::class)->name('custom-standards.create');
-    Route::get('/custom-standards/{customStandard}/edit', App\Livewire\Pages\CustomStandards\Edit::class)->name('custom-standards.edit');
+    Route::livewire('/custom-standards', App\Livewire\Pages\CustomStandards\Index::class)->name('custom-standards.index');
+    Route::livewire('/custom-standards/create', App\Livewire\Pages\CustomStandards\Create::class)->name('custom-standards.create');
+    Route::livewire('/custom-standards/{customStandard}/edit', App\Livewire\Pages\CustomStandards\Edit::class)->name('custom-standards.edit');
 
     // Laporan Alat Tes
-    Route::get('/laporan-alat-tes', App\Livewire\Pages\LaporanAlatTes\LaporanAlatTes::class)->name('laporan-alat-tes');
-    Route::get('/laporan-alat-tes-detail', App\Livewire\Pages\LaporanAlatTes\DetailLaporanTes::class)->name('laporan-alat-tes-detail');
+    Route::livewire('/laporan-alat-tes', App\Livewire\Pages\LaporanAlatTes\LaporanAlatTes::class)->name('laporan-alat-tes');
+    Route::livewire('/laporan-alat-tes-detail', App\Livewire\Pages\LaporanAlatTes\DetailLaporanTes::class)->name('laporan-alat-tes-detail');
 
     // Talent Pool Management
-    Route::get('/talentpool', App\Livewire\Pages\TalentPool\Index::class)->name('talentpool');
+    Route::livewire('/talentpool', App\Livewire\Pages\TalentPool\Index::class)->name('talentpool');
 });
