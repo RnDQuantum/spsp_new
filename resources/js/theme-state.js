@@ -25,8 +25,10 @@ export function themeState() {
         applyTheme() {
             if (this.darkMode) {
                 document.documentElement.classList.add("dark");
+                document.documentElement.setAttribute("data-theme", "dark");
             } else {
                 document.documentElement.classList.remove("dark");
+                document.documentElement.setAttribute("data-theme", "light");
             }
         },
 

@@ -24,7 +24,7 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tahun Data</label>
                     <select wire:model.live="selectedYear"
-                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white p-2 border">
+                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 text-black bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white p-2 border">
                         <option value="all">Semua Tahun</option>
                         @foreach($years as $year)
                         <option value="{{ $year }}">{{ $year }}</option>
@@ -36,7 +36,7 @@
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Kategori
                         Instansi</label>
                     <select wire:model.live="selectedCategory"
-                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white p-2 border">
+                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 text-black bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white p-2 border">
                         <option value="all">Semua Kategori</option>
                         @foreach($categories as $category)
                         <option value="{{ $category->code }}">{{ $category->name }}</option>
@@ -47,7 +47,7 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status Klien</label>
                     <select wire:model.live="selectedStatus"
-                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white p-2 border">
+                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 text-black bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white p-2 border">
                         <option value="all">Semua Status</option>
                         <option value="active">Aktif</option>
                         <option value="completed">Selesai</option>
