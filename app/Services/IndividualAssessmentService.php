@@ -9,6 +9,7 @@ use App\Models\CategoryType;
 use App\Models\Participant;
 use App\Services\Cache\AspectCacheService;
 use Illuminate\Support\Collection;
+use App\Support\AspectRatingCalculator;
 
 /**
  * IndividualAssessmentService - Single Source of Truth for Individual Assessment Calculations
@@ -254,36 +255,21 @@ class IndividualAssessmentService
             return [null, null];
         }
 
-        $activeSubAspectsStandardSum = 0;
-        $activeSubAspectsIndividualSum = 0;
-        $activeSubAspectsCount = 0;
+        $standardRating = AspectRatingCalculator::averageFromSubAspects(
+            $assessment->subAspectAssessments,
+            fn ($subAssessment) => $standardService->getSubAspectRating($templateId, $subAssessment->subAspect->code),
+            fn ($subAssessment) => $standardService->isSubAspectActive($templateId, $subAssessment->subAspect->code),
+            null
+        );
 
-        foreach ($assessment->subAspectAssessments as $subAssessment) {
-            // Check if sub-aspect is active
-            if (! $standardService->isSubAspectActive($templateId, $subAssessment->subAspect->code)) {
-                continue; // Skip inactive sub-aspects
-            }
+        $individualRating = AspectRatingCalculator::averageFromSubAspects(
+            $assessment->subAspectAssessments,
+            fn ($subAssessment) => $subAssessment->individual_rating,
+            fn ($subAssessment) => $standardService->isSubAspectActive($templateId, $subAssessment->subAspect->code),
+            null
+        );
 
-            // Get adjusted sub-aspect standard rating from session
-            $adjustedSubStandardRating = $standardService->getSubAspectRating(
-                $templateId,
-                $subAssessment->subAspect->code
-            );
-
-            $activeSubAspectsStandardSum += $adjustedSubStandardRating;
-            $activeSubAspectsIndividualSum += $subAssessment->individual_rating;
-            $activeSubAspectsCount++;
-        }
-
-        if ($activeSubAspectsCount > 0) {
-            return [
-                round($activeSubAspectsStandardSum / $activeSubAspectsCount, 2),
-                round($activeSubAspectsIndividualSum / $activeSubAspectsCount, 2),
-            ];
-        }
-
-        // No active sub-aspects, return null
-        return [null, null];
+        return [$standardRating, $individualRating];
     }
 
     /**

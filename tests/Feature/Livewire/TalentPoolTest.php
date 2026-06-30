@@ -253,6 +253,7 @@ class TalentPoolTest extends TestCase
 
         for ($i = 1; $i <= 4; $i++) {
             $potensiAspects[] = \App\Models\Aspect::factory()->create([
+                'template_id' => $this->position->template_id,
                 'category_type_id' => $potensiCategory->id,
                 'code' => "potensi-{$i}",
                 'name' => "Potensi Aspect {$i}",
@@ -263,6 +264,7 @@ class TalentPoolTest extends TestCase
 
         for ($i = 1; $i <= 7; $i++) {
             $kompetensiAspects[] = \App\Models\Aspect::factory()->create([
+                'template_id' => $this->position->template_id,
                 'category_type_id' => $kompetensiCategory->id,
                 'code' => "kompetensi-{$i}",
                 'name' => "Kompetensi Aspect {$i}",

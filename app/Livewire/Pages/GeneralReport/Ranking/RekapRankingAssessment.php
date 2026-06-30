@@ -200,73 +200,14 @@ class RekapRankingAssessment extends Component
             return null;
         }
 
-        // 🚀 OPTIMIZATION: Build combined rankings locally instead of calling getCombinedRankings()
-        // This avoids duplicate queries since getCombinedRankings() would call getRankings() again
-        // Logic replicated from RankingService::getCombinedRankings() (lines 676-743)
-
-        $kompetensiRankingsKeyed = $kompetensiRankings->keyBy('participant_id');
-
-        $participantScores = [];
-        foreach ($potensiRankings as $potensiRank) {
-            $participantId = $potensiRank['participant_id'];
-
-            $kompetensiRank = $kompetensiRankingsKeyed->get($participantId);
-            if (! $kompetensiRank) {
-                continue;
-            }
-
-            // Calculate weighted total score
-            $weightedPotensiScore = $potensiRank['individual_score'] * ($this->potensiWeight / 100);
-            $weightedKompetensiScore = $kompetensiRank['individual_score'] * ($this->kompetensiWeight / 100);
-            $totalIndividualScore = round($weightedPotensiScore + $weightedKompetensiScore, 2);
-
-            // Calculate weighted standard score (with tolerance)
-            $weightedPotensiStd = $potensiRank['adjusted_standard_score'] * ($this->potensiWeight / 100);
-            $weightedKompetensiStd = $kompetensiRank['adjusted_standard_score'] * ($this->kompetensiWeight / 100);
-            $totalStandardScore = round($weightedPotensiStd + $weightedKompetensiStd, 2);
-
-            // Calculate weighted original standard score
-            $weightedOrigPotensiStd = $potensiRank['original_standard_score'] * ($this->potensiWeight / 100);
-            $weightedOrigKompetensiStd = $kompetensiRank['original_standard_score'] * ($this->kompetensiWeight / 100);
-            $totalOriginalStandardScore = round($weightedOrigPotensiStd + $weightedOrigKompetensiStd, 2);
-
-            // Calculate gaps
-            $totalGapScore = round($totalIndividualScore - $totalStandardScore, 2);
-            $totalOriginalGapScore = round($totalIndividualScore - $totalOriginalStandardScore, 2);
-
-            // Calculate percentage
-            $percentage = $totalStandardScore > 0
-                ? ($totalIndividualScore / $totalStandardScore) * 100
-                : 0;
-
-            // Determine conclusion
-            $conclusion = ConclusionService::getGapBasedConclusion($totalOriginalGapScore, $totalGapScore);
-
-            $participantScores[] = [
-                'participant_id' => $participantId,
-                'participant_name' => $potensiRank['participant_name'] ?? '',
-                'total_individual_score' => $totalIndividualScore,
-                'total_standard_score' => $totalStandardScore,
-                'total_original_standard_score' => $totalOriginalStandardScore,
-                'total_gap_score' => $totalGapScore,
-                'total_original_gap_score' => $totalOriginalGapScore,
-                'percentage' => round($percentage, 2),
-                'conclusion' => $conclusion,
-                'potensi_weight' => $this->potensiWeight,
-                'kompetensi_weight' => $this->kompetensiWeight,
-            ];
-        }
-
-        // Sort by total_individual_score DESC, then participant_name ASC (tiebreaker)
-        $rankings = collect($participantScores)
-            ->sortBy([
-                ['total_individual_score', 'desc'],
-                ['participant_name', 'asc'],
-            ])
-            ->values();
-
-        // Add rank number
-        $this->rankingsCache = $rankings->map(fn ($row, $index) => [...$row, 'rank' => $index + 1]);
+        // 🚀 OPTIMIZATION: Build combined rankings by reusing RankingService helper to avoid duplicate queries
+        $rankingService = app(RankingService::class);
+        $this->rankingsCache = $rankingService->combineCategoryRankings(
+            $potensiRankings,
+            $kompetensiRankings,
+            $this->potensiWeight,
+            $this->kompetensiWeight
+        );
 
         return $this->rankingsCache;
     }
