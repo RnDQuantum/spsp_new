@@ -201,9 +201,9 @@ class AuditPhase1FixTest extends TestCase
     // ========================================
 
     /**
-     * Test: hasCategoryAdjustments returns true when custom standard is selected
+     * Test: hasCategoryAdjustments returns false when custom standard is selected (only tracks temporary session adjustments)
      */
-    public function test_has_category_adjustments_detects_custom_standard(): void
+    public function test_has_category_adjustments_ignores_custom_standard(): void
     {
         // Arrange
         $institution = $this->createInstitution();
@@ -221,8 +221,8 @@ class AuditPhase1FixTest extends TestCase
         // Clear cache to force re-evaluation
         $this->dynamicService = app(DynamicStandardService::class);
 
-        // Assert: Should detect custom standard as "has adjustments"
-        $this->assertTrue($this->dynamicService->hasCategoryAdjustments($templateId, 'potensi'));
+        // Assert: Should NOT detect custom standard as "has adjustments" (should be false)
+        $this->assertFalse($this->dynamicService->hasCategoryAdjustments($templateId, 'potensi'));
     }
 
     /**

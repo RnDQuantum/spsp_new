@@ -692,19 +692,6 @@ class DynamicStandardService
         // 🛡️ FIX (Audit 3.4): Auto-preload to prevent silent fail in production
         AspectCacheService::preloadByTemplate($templateId);
 
-        // 🛡️ FIX (Audit 3.3): Check custom standard selection first
-        // Previously this method only checked session adjustments, missing custom standards
-        $customStandardId = Session::get("selected_standard.{$templateId}");
-        if ($customStandardId) {
-            $customStandard = $this->getCustomStandard($customStandardId);
-            if ($customStandard) {
-                // Custom standard is selected and active — counts as "has adjustments"
-                $this->categoryAdjustmentsCache[$cacheKey] = true;
-
-                return true;
-            }
-        }
-
         $adjustments = $this->getAdjustments($templateId);
 
         if (empty($adjustments)) {
