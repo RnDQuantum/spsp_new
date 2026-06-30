@@ -309,7 +309,7 @@
                                 <!-- PSIKOGRAM -->
                                 <td
                                     class="py-4 px-4 text-sm text-gray-500 dark:text-gray-300 border border-gray-200 dark:border-gray-600 w-72">
-                                    <div class="whitespace-pre-line">{{ $result->psikogram ?? '-' }}</div>
+                                    <div class="whitespace-pre-line">{{ $result->psikogram_formatted }}</div>
                                 </td>
 
                                 <!-- NILAI PQ -->

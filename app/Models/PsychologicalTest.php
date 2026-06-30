@@ -43,4 +43,21 @@ class PsychologicalTest extends Model
     {
         return $this->belongsTo(AssessmentEvent::class, 'event_id');
     }
+
+    public function getPsikogramFormattedAttribute(): string
+    {
+        $value = $this->psikogram;
+        if (is_array($value)) {
+            $parts = [];
+            foreach ($value as $k => $v) {
+                if (is_numeric($k)) {
+                    $parts[] = $v;
+                } else {
+                    $parts[] = "{$k}: {$v}";
+                }
+            }
+            return implode("\n", $parts);
+        }
+        return (string) ($value ?? '-');
+    }
 }
