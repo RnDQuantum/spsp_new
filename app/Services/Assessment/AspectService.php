@@ -162,7 +162,7 @@ class AspectService
                 'gap_score' => 0,
                 'percentage_score' => 0,
                 'conclusion_code' => 'meets_standard',
-                'conclusion_text' => 'Memenuhi Standard',
+                'conclusion_text' => 'Memenuhi Standar',
             ]
         );
     }
@@ -187,10 +187,10 @@ class AspectService
     private function getConclusionText(string $code): string
     {
         return match ($code) {
-            'below_standard' => 'Kurang Memenuhi Standard',
-            'meets_standard' => 'Memenuhi Standard',
-            'exceeds_standard' => 'Melebihi Standard',
-            default => 'Memenuhi Standard',
+            'below_standard' => 'Kurang Memenuhi Standar',
+            'meets_standard' => 'Memenuhi Standar',
+            'exceeds_standard' => 'Melebihi Standar',
+            default => 'Memenuhi Standar',
         };
     }
 }

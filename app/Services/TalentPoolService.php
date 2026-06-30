@@ -602,9 +602,11 @@ class TalentPoolService
         $sessionAdjustments = session()->get("standard_adjustment.{$templateId}", []);
         $selectedStandard = session()->get("selected_standard.{$templateId}");
 
+        $hasAdjustments = ! empty($sessionAdjustments) || $selectedStandard !== null;
+
         $this->cachedConfigHash = md5(json_encode([
             'template_id' => $templateId,
-            'session_id' => session()->getId(),
+            'session_id' => $hasAdjustments ? session()->getId() : 'default',
             'selected_standard' => $selectedStandard,
             'adjustments' => $sessionAdjustments,
         ]));

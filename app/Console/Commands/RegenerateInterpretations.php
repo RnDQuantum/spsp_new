@@ -49,34 +49,36 @@ class RegenerateInterpretations extends Command
             });
         }
 
-        $participants = $query->get();
+        $totalCount = $query->count();
 
-        if ($participants->isEmpty()) {
+        if ($totalCount === 0) {
             $this->error('No participants found with the given criteria.');
 
             return Command::FAILURE;
         }
 
-        $this->info("Found {$participants->count()} participants to process.");
+        $this->info("Found {$totalCount} participants to process.");
 
-        $progressBar = $this->output->createProgressBar($participants->count());
+        $progressBar = $this->output->createProgressBar($totalCount);
         $progressBar->start();
 
         $successCount = 0;
         $errorCount = 0;
 
-        foreach ($participants as $participant) {
-            try {
-                $generator->generateForParticipant($participant);
-                $successCount++;
-            } catch (\Exception $e) {
-                $errorCount++;
-                $this->newLine();
-                $this->error("Failed for participant {$participant->id} ({$participant->name}): {$e->getMessage()}");
-            }
+        $query->chunk(100, function ($participants) use ($generator, $progressBar, &$successCount, &$errorCount) {
+            foreach ($participants as $participant) {
+                try {
+                    $generator->generateForParticipant($participant);
+                    $successCount++;
+                } catch (\Exception $e) {
+                    $errorCount++;
+                    $this->newLine();
+                    $this->error("Failed for participant {$participant->id} ({$participant->name}): {$e->getMessage()}");
+                }
 
-            $progressBar->advance();
-        }
+                $progressBar->advance();
+            }
+        });
 
         $progressBar->finish();
         $this->newLine(2);
