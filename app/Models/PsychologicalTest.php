@@ -13,23 +13,24 @@ class PsychologicalTest extends Model
     protected $fillable = [
         'participant_id',
         'event_id',
-        'raw_score',
-        'iq_score',
-        'validity_status',
-        'internal_status',
-        'interpersonal_status',
-        'work_capacity_status',
-        'clinical_status',
-        'conclusion_code',
-        'conclusion_text',
-        'notes',
+        'no_test',
+        'username',
+        'validitas',
+        'internal',
+        'interpersonal',
+        'kap_kerja',
+        'klinik',
+        'kesimpulan',
+        'psikogram',
+        'nilai_pq',
+        'tingkat_stres',
     ];
 
     protected function casts(): array
     {
         return [
-            'raw_score' => 'decimal:2',
-            'iq_score' => 'integer',
+            'nilai_pq' => 'decimal:2',
+            'psikogram' => 'array',
         ];
     }
 
