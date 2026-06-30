@@ -23,7 +23,6 @@ class Index extends Component
      * Listen to filter component events
      */
     protected $listeners = [
-        'event-selected' => 'handleEventSelected',
         'position-selected' => 'handlePositionSelected',
         'standard-adjusted' => 'handleStandardUpdate',
         'standard-switched' => 'handleStandardUpdate',

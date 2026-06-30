@@ -67,8 +67,8 @@ class PositionSelector extends Component
         $this->positionFormationId = null;
         session()->forget('filter.position_formation_id');
 
-        // Reload available positions
-        $this->loadAvailablePositions();
+        // Reload available positions without dispatching intermediate event
+        $this->loadAvailablePositions(shouldDispatch: false);
 
         // Dispatch to parent that position was reset
         $this->dispatch('position-selected', positionFormationId: $this->positionFormationId);
@@ -77,7 +77,7 @@ class PositionSelector extends Component
     /**
      * Load available positions based on current event from session
      */
-    private function loadAvailablePositions(): void
+    private function loadAvailablePositions(bool $shouldDispatch = true): void
     {
         $eventCode = session('filter.event_code');
 
@@ -116,8 +116,10 @@ class PositionSelector extends Component
                 session(['filter.position_formation_id' => $this->positionFormationId]);
 
                 // Dispatch event to notify parent that default was selected
-                \Log::info('PositionSelector: Dispatching position-selected', ['positionFormationId' => $this->positionFormationId]);
-                $this->dispatch('position-selected', positionFormationId: $this->positionFormationId);
+                if ($shouldDispatch) {
+                    \Log::info('PositionSelector: Dispatching position-selected', ['positionFormationId' => $this->positionFormationId]);
+                    $this->dispatch('position-selected', positionFormationId: $this->positionFormationId);
+                }
             }
         }
     }

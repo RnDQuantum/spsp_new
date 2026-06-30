@@ -847,12 +847,13 @@
                 }, 200);
             }
 
-            // Initialize chart on page load
-            async function initializeChart() {
-                try {
-                    const data = await $wire.getChartInitializationData();
-                    if (!data) return;
+            // 🎨 DATA: Initial data passed directly from PHP to avoid AJAX on first load
+            let initialChartData = @json($this->getChartInitializationData());
 
+            // Initialize chart with data (either local or fetched via AJAX)
+            function renderChartWithData(data) {
+                if (!data) return;
+                try {
                     const pesertaData = data.pesertaData || [];
                     const boxBoundaries = data.boxBoundaries;
                     const boxStatistics = data.boxStatistics || {};
@@ -869,8 +870,13 @@
 
                     updateSummaryTable(boxStatistics);
                 } catch (e) {
-                    console.error('Error fetching chart data on init:', e);
+                    console.error('Error rendering chart:', e);
                 }
+            }
+
+            // Initialize chart on page load
+            async function initializeChart() {
+                renderChartWithData(initialChartData);
             }
 
             // 🚀 Disable full-screen loading overlay and page reload
@@ -881,8 +887,13 @@
             // 🚀 Expose globally for components (keeps choice components click handler safe)
             window.showLoadingOverlay = showLoadingAndReload;
 
-            $wire.on('chartDataNeedsUpdate', () => {
-                initializeChart();
+            $wire.on('chartDataNeedsUpdate', async () => {
+                try {
+                    const data = await $wire.getChartInitializationData();
+                    renderChartWithData(data);
+                } catch (e) {
+                    console.error('Error fetching updated chart data:', e);
+                }
             });
 
             // Delay slightly to ensure DOM is fully ready
