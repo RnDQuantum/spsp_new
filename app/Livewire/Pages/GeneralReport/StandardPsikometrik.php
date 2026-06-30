@@ -418,9 +418,6 @@ class StandardPsikometrik extends Component
         // Get DynamicStandardService instance (handles priority: Session → Custom Standard → Quantum Default)
         $dynamicService = app(DynamicStandardService::class);
 
-        // Check if there are session-based temporary adjustments (not custom standard selection)
-        $hasSessionAdjustments = $dynamicService->hasCategoryAdjustments($templateId, 'potensi');
-
         // Load ONLY Potensi category type with aspects and sub-aspects from selected position's template
         // 🚀 OPTIMIZATION: Eager load all relationships in one query with specific columns
         $categories = CategoryType::query()

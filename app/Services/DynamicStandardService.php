@@ -49,14 +49,45 @@ class DynamicStandardService
     /**
      * 🚀 OPTIMIZATION: Get CustomStandard with request-scoped caching
      * Single query per customStandardId per request lifecycle
+     *
+     * 🛡️ FIX (Audit 2.1): Only returns ACTIVE custom standards.
+     * If standard has been deactivated, returns null and self-heals session.
      */
     private function getCustomStandard(int $customStandardId): ?CustomStandard
     {
         if (! isset($this->customStandardCache[$customStandardId])) {
-            $this->customStandardCache[$customStandardId] = CustomStandard::find($customStandardId);
+            $standard = CustomStandard::where('id', $customStandardId)
+                ->where('is_active', true)
+                ->first();
+
+            $this->customStandardCache[$customStandardId] = $standard;
+
+            // Self-healing: if standard is inactive, clear stale session references
+            if (! $standard) {
+                $this->clearInactiveStandardFromSession($customStandardId);
+            }
         }
 
         return $this->customStandardCache[$customStandardId];
+    }
+
+    /**
+     * Self-healing: clear inactive standard references from session
+     *
+     * When a CustomStandard is deactivated by admin, any user session still
+     * referencing it via selected_standard.{templateId} gets cleaned up.
+     */
+    private function clearInactiveStandardFromSession(int $customStandardId): void
+    {
+        $sessionData = Session::all();
+        foreach ($sessionData as $key => $value) {
+            if (str_starts_with($key, 'selected_standard.') && is_numeric($value) && (int) $value === $customStandardId) {
+                Session::forget($key);
+                // Also clear any session adjustments for the same template
+                $templateId = str_replace('selected_standard.', '', $key);
+                Session::forget("standard_adjustment.{$templateId}");
+            }
+        }
     }
 
     // ========================================
@@ -658,6 +689,22 @@ class DynamicStandardService
             return $this->categoryAdjustmentsCache[$cacheKey];
         }
 
+        // 🛡️ FIX (Audit 3.4): Auto-preload to prevent silent fail in production
+        AspectCacheService::preloadByTemplate($templateId);
+
+        // 🛡️ FIX (Audit 3.3): Check custom standard selection first
+        // Previously this method only checked session adjustments, missing custom standards
+        $customStandardId = Session::get("selected_standard.{$templateId}");
+        if ($customStandardId) {
+            $customStandard = $this->getCustomStandard($customStandardId);
+            if ($customStandard) {
+                // Custom standard is selected and active — counts as "has adjustments"
+                $this->categoryAdjustmentsCache[$cacheKey] = true;
+
+                return true;
+            }
+        }
+
         $adjustments = $this->getAdjustments($templateId);
 
         if (empty($adjustments)) {
@@ -671,16 +718,6 @@ class DynamicStandardService
         $category = AspectCacheService::getCategoryByCode($templateId, $categoryCode);
 
         if (! $category) {
-            // 🛡️ GUARD: Fail fast if cache not preloaded (helps catch bugs early)
-            // Only throw in non-production to avoid breaking production if cache fails
-            if (app()->environment(['local', 'testing'])) {
-                throw new \RuntimeException(
-                    "AspectCacheService not preloaded for template {$templateId}. ".
-                    "Call AspectCacheService::preloadByTemplate({$templateId}) before using hasCategoryAdjustments(). ".
-                    "Category '{$categoryCode}' not found in cache."
-                );
-            }
-
             $this->categoryAdjustmentsCache[$cacheKey] = false;
 
             return false;
