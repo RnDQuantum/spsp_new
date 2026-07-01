@@ -7,6 +7,7 @@ namespace App\Services;
 use App\Models\Aspect;
 use App\Models\AspectAssessment;
 use Illuminate\Support\Collection;
+use App\Support\AspectRatingCalculator;
 
 /**
  * RankingService - Single Source of Truth for Ranking Calculations
@@ -100,7 +101,7 @@ class RankingService
             'category' => $categoryCode,
             'aspect_weights' => $aspectWeightsForHash,
             'sub_aspect_status' => $subAspectStatusForHash,  // 🔑 CRITICAL: Include sub-aspect active status
-            'session' => session()->getId(), // Isolates per-user session adjustments
+            'session' => $this->hasAnyAdjustments($templateId) ? session()->getId() : 'default', // Isolates per-user session adjustments
         ]));
 
         $cacheKey = "rankings:{$categoryCode}:{$eventId}:{$positionFormationId}:{$templateId}:{$configHash}";
@@ -152,10 +153,12 @@ class RankingService
 
             // CONDITIONAL QUERY EXECUTION:
             // - Fast path: Use toBase() when all sub-aspects active
-            // - Recalculation path: Use Eloquent with eager loading when needed
+            // - Recalculation path: Use Eloquent with eager loading and chunking when needed
+            $participantScores = [];
+
             if ($hasInactiveSubAspects) {
-                // RECALCULATION PATH: Eager load sub-aspect assessments
-                $assessments = AspectAssessment::query()
+                // RECALCULATION PATH: Eager load sub-aspect assessments in chunks to prevent memory exhaustion
+                AspectAssessment::query()
                     ->where('aspect_assessments.event_id', $eventId)
                     ->where('aspect_assessments.position_formation_id', $positionFormationId)
                     ->whereIn('aspect_assessments.aspect_id', $activeAspectIds)
@@ -164,71 +167,81 @@ class RankingService
                         'aspect.subAspects',  // For aspect structure
                         'subAspectAssessments.subAspect',  // For recalculation
                     ])
-                    ->get();
+                    ->chunk(500, function ($chunk) use (&$participantScores, $standardsCache, $aspectIdToCode) {
+                        foreach ($chunk as $assessment) {
+                            $participantId = $assessment->participant_id;
+
+                            if (! isset($participantScores[$participantId])) {
+                                $participantName = $assessment->participant->name;
+
+                                $participantScores[$participantId] = [
+                                    'participant_id' => $participantId,
+                                    'participant_name' => $participantName,
+                                    'individual_rating' => 0,
+                                    'individual_score' => 0,
+                                ];
+                            }
+
+                            $aspectId = $assessment->aspect_id;
+                            $aspectCode = $aspectIdToCode[$aspectId] ?? null;
+
+                            if (! $aspectCode || ! isset($standardsCache[$aspectCode])) {
+                                continue;
+                            }
+
+                            $adjustedWeight = $standardsCache[$aspectCode]['weight'];
+
+                            if (! empty($standardsCache[$aspectCode]['sub_aspects'])) {
+                                $individualRating = $this->recalculateIndividualRatingFromCache(
+                                    $assessment,
+                                    $standardsCache[$aspectCode]['sub_aspects']
+                                );
+                            } else {
+                                $individualRating = (float) $assessment->individual_rating;
+                            }
+
+                            $individualScore = round($individualRating * $adjustedWeight, 2);
+
+                            $participantScores[$participantId]['individual_rating'] += $individualRating;
+                            $participantScores[$participantId]['individual_score'] += $individualScore;
+                        }
+                    });
             } else {
                 // FAST PATH: Use toBase() - no eager loading, no model hydration
                 $assessments = $query->toBase()->get();
-            }
 
-            if ($assessments->isEmpty()) {
-                return collect();
-            }
-
-            // Group by participant and recalculate scores with adjusted weights
-            $participantScores = [];
-
-            foreach ($assessments as $assessment) {
-                $participantId = $hasInactiveSubAspects
-                    ? $assessment->participant_id  // Eloquent model
-                    : $assessment->participant_id; // stdClass from toBase()
-
-                if (! isset($participantScores[$participantId])) {
-                    $participantName = $hasInactiveSubAspects
-                        ? $assessment->participant->name  // Eloquent relationship
-                        : $assessment->participant_name;  // Direct join column
-
-                    $participantScores[$participantId] = [
-                        'participant_id' => $participantId,
-                        'participant_name' => $participantName,
-                        'individual_rating' => 0,
-                        'individual_score' => 0,
-                    ];
+                if ($assessments->isEmpty()) {
+                    return collect();
                 }
 
-                // Get aspect code for lookup
-                $aspectId = $hasInactiveSubAspects
-                    ? $assessment->aspect_id  // Eloquent model
-                    : $assessment->aspect_id; // stdClass
+                foreach ($assessments as $assessment) {
+                    $participantId = $assessment->participant_id;
 
-                $aspectCode = $aspectIdToCode[$aspectId] ?? null;
+                    if (! isset($participantScores[$participantId])) {
+                        $participantName = $assessment->participant_name;
 
-                if (! $aspectCode || ! isset($standardsCache[$aspectCode])) {
-                    continue;
+                        $participantScores[$participantId] = [
+                            'participant_id' => $participantId,
+                            'participant_name' => $participantName,
+                            'individual_rating' => 0,
+                            'individual_score' => 0,
+                        ];
+                    }
+
+                    $aspectId = $assessment->aspect_id;
+                    $aspectCode = $aspectIdToCode[$aspectId] ?? null;
+
+                    if (! $aspectCode || ! isset($standardsCache[$aspectCode])) {
+                        continue;
+                    }
+
+                    $adjustedWeight = $standardsCache[$aspectCode]['weight'];
+                    $individualRating = (float) $assessment->individual_rating;
+                    $individualScore = round($individualRating * $adjustedWeight, 2);
+
+                    $participantScores[$participantId]['individual_rating'] += $individualRating;
+                    $participantScores[$participantId]['individual_score'] += $individualScore;
                 }
-
-                // Get adjusted weight from cache (works for both Default & Custom Standard)
-                $adjustedWeight = $standardsCache[$aspectCode]['weight'];
-
-                // 🎯 CRITICAL: Recalculate individual_rating if sub-aspects inactive
-                if ($hasInactiveSubAspects && ! empty($standardsCache[$aspectCode]['sub_aspects'])) {
-                    // RECALCULATION PATH: Calculate from active sub-aspects only
-                    $individualRating = $this->recalculateIndividualRatingFromCache(
-                        $assessment,
-                        $standardsCache[$aspectCode]['sub_aspects']
-                    );
-                } else {
-                    // FAST PATH: Use database value (all sub-aspects active OR no sub-aspects)
-                    $individualRating = $hasInactiveSubAspects
-                        ? (float) $assessment->individual_rating  // Eloquent model
-                        : (float) $assessment->individual_rating; // stdClass
-                }
-
-                // Calculate weighted score
-                $individualScore = round($individualRating * $adjustedWeight, 2);
-
-                // Accumulate
-                $participantScores[$participantId]['individual_rating'] += $individualRating;
-                $participantScores[$participantId]['individual_score'] += $individualScore;
             }
 
             // Convert to collection and sort by score DESC, then name ASC (tiebreaker)
@@ -458,22 +471,12 @@ class RankingService
 
             // Calculate aspect rating from sub-aspects if exist
             if (! empty($aspectData['sub_aspects'])) {
-                $subAspectRatingSum = 0;
-                $activeSubAspectsCount = 0;
-
-                foreach ($aspectData['sub_aspects'] as $subAspectCode => $subAspectData) {
-                    // 🚀 USE CACHE: Check if sub-aspect is active
-                    if (! $subAspectData['active']) {
-                        continue;
-                    }
-
-                    $subAspectRatingSum += $subAspectData['rating'];
-                    $activeSubAspectsCount++;
-                }
-
-                $aspectRating = $activeSubAspectsCount > 0
-                    ? round($subAspectRatingSum / $activeSubAspectsCount, 2)
-                    : $aspectData['rating'];
+                $aspectRating = AspectRatingCalculator::averageFromSubAspects(
+                    $aspectData['sub_aspects'],
+                    fn ($subAspectData) => $subAspectData['rating'],
+                    fn ($subAspectData) => $subAspectData['active'],
+                    (float) $aspectData['rating']
+                );
             } else {
                 $aspectRating = $aspectData['rating'];
             }
@@ -508,27 +511,12 @@ class RankingService
             return $standardService->getAspectRating($templateId, $aspect->code);
         }
 
-        $subAspectRatingSum = 0;
-        $activeSubAspectsCount = 0;
-
-        foreach ($aspect->subAspects as $subAspect) {
-            // Check if sub-aspect is active
-            if (! $standardService->isSubAspectActive($templateId, $subAspect->code)) {
-                continue; // Skip inactive sub-aspects
-            }
-
-            // Get adjusted sub-aspect rating from session
-            $subRating = $standardService->getSubAspectRating($templateId, $subAspect->code);
-            $subAspectRatingSum += $subRating;
-            $activeSubAspectsCount++;
-        }
-
-        if ($activeSubAspectsCount > 0) {
-            return round($subAspectRatingSum / $activeSubAspectsCount, 2);
-        }
-
-        // Fallback to session rating if no active sub-aspects
-        return $standardService->getAspectRating($templateId, $aspect->code);
+        return AspectRatingCalculator::averageFromSubAspects(
+            $aspect->subAspects,
+            fn ($subAspect) => $standardService->getSubAspectRating($templateId, $subAspect->code),
+            fn ($subAspect) => $standardService->isSubAspectActive($templateId, $subAspect->code),
+            (float) $standardService->getAspectRating($templateId, $aspect->code)
+        );
     }
 
     /**
@@ -551,25 +539,12 @@ class RankingService
             return (float) $assessment->individual_rating;
         }
 
-        $subAspectIndividualSum = 0;
-        $activeSubAspectsCount = 0;
-
-        foreach ($assessment->subAspectAssessments as $subAssessment) {
-            // Check if sub-aspect is active
-            if (! $standardService->isSubAspectActive($templateId, $subAssessment->subAspect->code)) {
-                continue; // Skip inactive sub-aspects
-            }
-
-            $subAspectIndividualSum += $subAssessment->individual_rating;
-            $activeSubAspectsCount++;
-        }
-
-        if ($activeSubAspectsCount > 0) {
-            return round($subAspectIndividualSum / $activeSubAspectsCount, 2);
-        }
-
-        // Fallback to direct rating if no active sub-aspects
-        return (float) $assessment->individual_rating;
+        return AspectRatingCalculator::averageFromSubAspects(
+            $assessment->subAspectAssessments,
+            fn ($subAssessment) => $subAssessment->individual_rating,
+            fn ($subAssessment) => $standardService->isSubAspectActive($templateId, $subAssessment->subAspect->code),
+            (float) $assessment->individual_rating
+        );
     }
 
     /**
@@ -791,7 +766,7 @@ class RankingService
         $configHash = md5(json_encode([
             'potensi_weight' => $standardService->getCategoryWeight($templateId, 'potensi'),
             'kompetensi_weight' => $standardService->getCategoryWeight($templateId, 'kompetensi'),
-            'session' => session()->getId(), // Isolates per-user session adjustments
+            'session' => $this->hasAnyAdjustments($templateId) ? session()->getId() : 'default', // Isolates per-user session adjustments
         ]));
 
         $cacheKey = "combined_rankings:{$eventId}:{$positionFormationId}:{$templateId}:{$configHash}";
@@ -822,82 +797,106 @@ class RankingService
                 $tolerancePercentage
             );
 
-            if ($potensiRankings->isEmpty() || $kompetensiRankings->isEmpty()) {
-                return collect();
-            }
-
-            // OPTIMIZED: Name is already in getRankings result
-            // No need to query participants table again
-
-            // OPTIMIZED: Key by participant_id for O(1) lookup instead of O(n)
-            $kompetensiRankingsKeyed = $kompetensiRankings->keyBy('participant_id');
-
-            // Combine scores with category weights
-            $participantScores = [];
-            foreach ($potensiRankings as $potensiRank) {
-                $participantId = $potensiRank['participant_id'];
-
-                // OPTIMIZED: O(1) lookup instead of O(n) firstWhere
-                $kompetensiRank = $kompetensiRankingsKeyed->get($participantId);
-                if (! $kompetensiRank) {
-                    continue;
-                }
-
-                // Calculate weighted total score
-                $weightedPotensiScore = $potensiRank['individual_score'] * ($potensiWeight / 100);
-                $weightedKompetensiScore = $kompetensiRank['individual_score'] * ($kompetensiWeight / 100);
-                $totalIndividualScore = round($weightedPotensiScore + $weightedKompetensiScore, 2);
-
-                // Calculate weighted standard score (with tolerance)
-                $weightedPotensiStd = $potensiRank['adjusted_standard_score'] * ($potensiWeight / 100);
-                $weightedKompetensiStd = $kompetensiRank['adjusted_standard_score'] * ($kompetensiWeight / 100);
-                $totalStandardScore = round($weightedPotensiStd + $weightedKompetensiStd, 2);
-
-                // Calculate weighted original standard score
-                $weightedOrigPotensiStd = $potensiRank['original_standard_score'] * ($potensiWeight / 100);
-                $weightedOrigKompetensiStd = $kompetensiRank['original_standard_score'] * ($kompetensiWeight / 100);
-                $totalOriginalStandardScore = round($weightedOrigPotensiStd + $weightedOrigKompetensiStd, 2);
-
-                // Calculate gaps
-                $totalGapScore = round($totalIndividualScore - $totalStandardScore, 2);
-                $totalOriginalGapScore = round($totalIndividualScore - $totalOriginalStandardScore, 2);
-
-                // Calculate percentage
-                $percentage = $totalStandardScore > 0
-                    ? ($totalIndividualScore / $totalStandardScore) * 100
-                    : 0;
-
-                // Determine conclusion using same logic as IndividualAssessmentService
-                $conclusion = ConclusionService::getGapBasedConclusion($totalOriginalGapScore, $totalGapScore);
-
-                $participantScores[] = [
-                    'participant_id' => $participantId,
-                    'participant_name' => $potensiRank['participant_name'] ?? '',
-                    'total_individual_score' => $totalIndividualScore,
-                    'total_standard_score' => $totalStandardScore,
-                    'total_original_standard_score' => $totalOriginalStandardScore,
-                    'total_gap_score' => $totalGapScore,
-                    'total_original_gap_score' => $totalOriginalGapScore,
-                    'percentage' => round($percentage, 2),
-                    'conclusion' => $conclusion,
-                    'potensi_weight' => $potensiWeight,
-                    'kompetensi_weight' => $kompetensiWeight,
-                ];
-            }
-
-            // Sort by total_individual_score DESC, then participant_name ASC (tiebreaker)
-            $rankings = collect($participantScores)
-                ->sortBy([
-                    ['total_individual_score', 'desc'],
-                    ['participant_name', 'asc'],
-                ])
-                ->values();
-
-            // Add rank number
-            return $rankings->map(function ($row, $index) {
-                return array_merge($row, ['rank' => $index + 1]);
-            });
+            return $this->combineCategoryRankings(
+                $potensiRankings,
+                $kompetensiRankings,
+                $potensiWeight,
+                $kompetensiWeight
+            );
         }); // End of Cache::remember closure
+    }
+
+    /**
+     * Helper to combine Potensi and Kompetensi rankings with weights.
+     * This avoids code duplication between Livewire component and RankingService.
+     *
+     * @param  Collection  $potensiRankings  Collection of Potensi rankings
+     * @param  Collection  $kompetensiRankings  Collection of Kompetensi rankings
+     * @param  int  $potensiWeight  Potensi weight percentage
+     * @param  int  $kompetensiWeight  Kompetensi weight percentage
+     * @return Collection Combined rankings collection
+     */
+    public function combineCategoryRankings(
+        Collection $potensiRankings,
+        Collection $kompetensiRankings,
+        int $potensiWeight,
+        int $kompetensiWeight
+    ): Collection {
+        if (($potensiWeight + $kompetensiWeight) === 0) {
+            return collect();
+        }
+
+        if ($potensiRankings->isEmpty() || $kompetensiRankings->isEmpty()) {
+            return collect();
+        }
+
+        // Key by participant_id for O(1) lookup instead of O(n)
+        $kompetensiRankingsKeyed = $kompetensiRankings->keyBy('participant_id');
+        $participantScores = [];
+
+        foreach ($potensiRankings as $potensiRank) {
+            $participantId = $potensiRank['participant_id'];
+
+            // O(1) lookup
+            $kompetensiRank = $kompetensiRankingsKeyed->get($participantId);
+            if (! $kompetensiRank) {
+                continue;
+            }
+
+            // Calculate weighted total score
+            $weightedPotensiScore = $potensiRank['individual_score'] * ($potensiWeight / 100);
+            $weightedKompetensiScore = $kompetensiRank['individual_score'] * ($kompetensiWeight / 100);
+            $totalIndividualScore = round($weightedPotensiScore + $weightedKompetensiScore, 2);
+
+            // Calculate weighted standard score (with tolerance)
+            $weightedPotensiStd = $potensiRank['adjusted_standard_score'] * ($potensiWeight / 100);
+            $weightedKompetensiStd = $kompetensiRank['adjusted_standard_score'] * ($kompetensiWeight / 100);
+            $totalStandardScore = round($weightedPotensiStd + $weightedKompetensiStd, 2);
+
+            // Calculate weighted original standard score
+            $weightedOrigPotensiStd = $potensiRank['original_standard_score'] * ($potensiWeight / 100);
+            $weightedOrigKompetensiStd = $kompetensiRank['original_standard_score'] * ($kompetensiWeight / 100);
+            $totalOriginalStandardScore = round($weightedOrigPotensiStd + $weightedOrigKompetensiStd, 2);
+
+            // Calculate gaps
+            $totalGapScore = round($totalIndividualScore - $totalStandardScore, 2);
+            $totalOriginalGapScore = round($totalIndividualScore - $totalOriginalStandardScore, 2);
+
+            // Calculate percentage
+            $percentage = $totalStandardScore > 0
+                ? ($totalIndividualScore / $totalStandardScore) * 100
+                : 0;
+
+            // Determine conclusion
+            $conclusion = ConclusionService::getGapBasedConclusion($totalOriginalGapScore, $totalGapScore);
+
+            $participantScores[] = [
+                'participant_id' => $participantId,
+                'participant_name' => $potensiRank['participant_name'] ?? '',
+                'total_individual_score' => $totalIndividualScore,
+                'total_standard_score' => $totalStandardScore,
+                'total_original_standard_score' => $totalOriginalStandardScore,
+                'total_gap_score' => $totalGapScore,
+                'total_original_gap_score' => $totalOriginalGapScore,
+                'percentage' => round($percentage, 2),
+                'conclusion' => $conclusion,
+                'potensi_weight' => $potensiWeight,
+                'kompetensi_weight' => $kompetensiWeight,
+            ];
+        }
+
+        // Sort by total_individual_score DESC, then participant_name ASC (tiebreaker)
+        $rankings = collect($participantScores)
+            ->sortBy([
+                ['total_individual_score', 'desc'],
+                ['participant_name', 'asc'],
+            ])
+            ->values();
+
+        // Add rank number
+        return $rankings->map(function ($row, $index) {
+            return array_merge($row, ['rank' => $index + 1]);
+        });
     }
 
     /**
@@ -944,5 +943,19 @@ class RankingService
             'potensi_weight' => $participantRanking['potensi_weight'],
             'kompetensi_weight' => $participantRanking['kompetensi_weight'],
         ];
+    }
+
+    /**
+     * Check if there are any session adjustments or custom standards for a template
+     *
+     * @param  int  $templateId  Template ID
+     * @return bool True if there are any adjustments, false otherwise
+     */
+    private function hasAnyAdjustments(int $templateId): bool
+    {
+        $sessionAdjustments = session()->get("standard_adjustment.{$templateId}", []);
+        $selectedStandard = session()->get("selected_standard.{$templateId}");
+
+        return ! empty($sessionAdjustments) || $selectedStandard !== null;
     }
 }

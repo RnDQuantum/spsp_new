@@ -9,6 +9,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class CustomStandard extends Model
 {
     use HasFactory;
+
+    protected static function booted(): void
+    {
+        static::addGlobalScope(new \App\Models\Scopes\InstitutionScope);
+    }
+
     protected $fillable = [
         'institution_id',
         'template_id',

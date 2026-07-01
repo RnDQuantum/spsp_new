@@ -126,7 +126,7 @@ class TalentPoolPerformanceTest extends TestCase
 
         $startTime = microtime(true);
 
-        $component = Livewire::test(\App\Livewire\Pages\TalentPool::class)
+        $component = Livewire::test(\App\Livewire\Pages\TalentPool\Index::class)
             ->set('selectedEvent', $this->event)
             ->set('selectedPositionId', $this->position->id);
 
@@ -139,14 +139,9 @@ class TalentPoolPerformanceTest extends TestCase
             'Component should render within 3 seconds, but took ' . $renderTime . ' seconds'
         );
 
-        // Verify component state
-        $component->assertPropertyExists('matrixData');
-        $component->assertPropertyExists('totalParticipants');
-        $component->assertPropertyExists('isLoading');
-
-        // Verify data is loaded
+        // Verify component state and data is loaded
         $this->assertGreaterThan(0, $component->get('totalParticipants'));
-        $this->assertFalse($component->get('isLoading'));
+        $this->assertNotEmpty($component->get('chartData'));
     }
 
     /**
@@ -157,13 +152,13 @@ class TalentPoolPerformanceTest extends TestCase
     {
         // Create additional position
         $position2 = PositionFormation::factory()->create([
-            'assessment_event_id' => $this->event->id,
+            'event_id' => $this->event->id,
             'template_id' => $this->position->template_id
         ]);
 
         Cache::flush();
 
-        $component = Livewire::test(\App\Livewire\Pages\TalentPool::class)
+        $component = Livewire::test(\App\Livewire\Pages\TalentPool\Index::class)
             ->set('selectedEvent', $this->event);
 
         // Test position change performance
@@ -305,7 +300,7 @@ class TalentPoolPerformanceTest extends TestCase
 
         // Create position formation
         $this->position = PositionFormation::factory()->create([
-            'assessment_event_id' => $this->event->id
+            'event_id' => $this->event->id
         ]);
 
         // Create category types
@@ -331,13 +326,31 @@ class TalentPoolPerformanceTest extends TestCase
         ]);
 
         // Create participants
-        $participants = Participant::factory()->count(50)->create();
+        $participants = Participant::factory()->count(50)->create([
+            'event_id' => $this->event->id,
+            'position_formation_id' => $this->position->id,
+        ]);
 
         // Create aspect assessments for each participant
         foreach ($participants as $participant) {
+            $potensiCatAss = \App\Models\CategoryAssessment::factory()->create([
+                'participant_id' => $participant->id,
+                'category_type_id' => $potensiCategory->id,
+                'event_id' => $this->event->id,
+                'position_formation_id' => $this->position->id,
+            ]);
+
+            $kompetensiCatAss = \App\Models\CategoryAssessment::factory()->create([
+                'participant_id' => $participant->id,
+                'category_type_id' => $kompetensiCategory->id,
+                'event_id' => $this->event->id,
+                'position_formation_id' => $this->position->id,
+            ]);
+
             // Create assessments for potensi aspects
             foreach ($potensiAspects as $aspect) {
                 AspectAssessment::factory()->create([
+                    'category_assessment_id' => $potensiCatAss->id,
                     'participant_id' => $participant->id,
                     'aspect_id' => $aspect->id,
                     'event_id' => $this->event->id,
@@ -349,6 +362,7 @@ class TalentPoolPerformanceTest extends TestCase
             // Create assessments for kompetensi aspects
             foreach ($kompetensiAspects as $aspect) {
                 AspectAssessment::factory()->create([
+                    'category_assessment_id' => $kompetensiCatAss->id,
                     'participant_id' => $participant->id,
                     'aspect_id' => $aspect->id,
                     'event_id' => $this->event->id,

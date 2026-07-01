@@ -310,15 +310,79 @@ class TalentPoolService
      */
     private function getAspectAssessments(int $eventId, int $positionFormationId): Collection
     {
-        // 🚀 PERFORMANCE: Optimized query with database-level aggregation
-        // Instead of fetching all raw records, calculate averages at SQL level
+        $templateId = $this->cachedPosition->template_id;
+        $dynamicService = app(DynamicStandardService::class);
+
+        // Filter out inactive aspects (Priority: Session -> Custom -> Quantum)
+        $potensiActiveIds = $dynamicService->getActiveAspectIds($templateId, 'potensi');
+        $kompetensiActiveIds = $dynamicService->getActiveAspectIds($templateId, 'kompetensi');
+        $allActiveAspectIds = array_merge($potensiActiveIds, $kompetensiActiveIds);
+
+        // Check if any sub-aspects are inactive (requires recalculation)
+        $hasInactiveSubAspects = $dynamicService->hasActiveSubAspectAdjustments($templateId);
+
+        if ($hasInactiveSubAspects) {
+            $activeSubAspectIds = $this->getActiveSubAspectIds($templateId, $dynamicService);
+
+            // Inner query: Calculates individual rating for each aspect.
+            // For aspects with sub-aspects, it averages the active sub-aspects.
+            // For aspects without sub-aspects (or where all sub-aspects are inactive), it falls back to raw individual_rating.
+            $innerQuery = AspectAssessment::query()
+                ->join('participants', 'participants.id', '=', 'aspect_assessments.participant_id')
+                ->join('aspects', 'aspects.id', '=', 'aspect_assessments.aspect_id')
+                ->join('category_types', 'category_types.id', '=', 'aspects.category_type_id')
+                ->leftJoin('sub_aspect_assessments', function ($join) use ($activeSubAspectIds) {
+                    $join->on('sub_aspect_assessments.aspect_assessment_id', '=', 'aspect_assessments.id')
+                         ->whereIn('sub_aspect_assessments.sub_aspect_id', $activeSubAspectIds);
+                })
+                ->where('aspect_assessments.event_id', $eventId)
+                ->where('aspect_assessments.position_formation_id', $positionFormationId)
+                ->whereIn('aspect_assessments.aspect_id', $allActiveAspectIds)
+                ->select(
+                    'aspect_assessments.participant_id',
+                    'participants.name',
+                    'participants.test_number',
+                    'category_types.code as category_code',
+                    'aspect_assessments.aspect_id',
+                    DB::raw('COALESCE(AVG(sub_aspect_assessments.individual_rating), aspect_assessments.individual_rating) as aspect_rating')
+                )
+                ->groupBy(
+                    'aspect_assessments.participant_id',
+                    'participants.name',
+                    'participants.test_number',
+                    'category_types.code',
+                    'aspect_assessments.aspect_id',
+                    'aspect_assessments.individual_rating'
+                );
+
+            // Outer query: Averages the aspect averages per category per participant
+            return DB::table(DB::raw("({$innerQuery->toSql()}) as sub"))
+                ->mergeBindings($innerQuery->getQuery())
+                ->select(
+                    'participant_id',
+                    'name',
+                    'test_number',
+                    'category_code',
+                    DB::raw('AVG(aspect_rating) as rating')
+                )
+                ->groupBy(
+                    'participant_id',
+                    'name',
+                    'test_number',
+                    'category_code'
+                )
+                ->orderBy('participant_id')
+                ->get();
+        }
+
+        // FAST PATH: All sub-aspects active (and filters inactive aspects)
         return AspectAssessment::query()
             ->join('participants', 'participants.id', '=', 'aspect_assessments.participant_id')
             ->join('aspects', 'aspects.id', '=', 'aspect_assessments.aspect_id')
             ->join('category_types', 'category_types.id', '=', 'aspects.category_type_id')
             ->where('aspect_assessments.event_id', $eventId)
             ->where('aspect_assessments.position_formation_id', $positionFormationId)
-            ->whereIn('category_types.code', ['potensi', 'kompetensi']) // Only fetch needed categories
+            ->whereIn('aspect_assessments.aspect_id', $allActiveAspectIds)
             ->select(
                 'aspect_assessments.participant_id',
                 'participants.name',
@@ -335,6 +399,42 @@ class TalentPoolService
             ->orderBy('aspect_assessments.participant_id')
             ->toBase()
             ->get();
+    }
+
+    /**
+     * Get active sub-aspect IDs for the template
+     */
+    private function getActiveSubAspectIds(int $templateId, DynamicStandardService $dynamicService): array
+    {
+        $activeIds = [];
+
+        // Potensi aspects
+        $potensiAspects = AspectCacheService::getAspectsByCategory($templateId, 'potensi');
+        foreach ($potensiAspects as $aspect) {
+            if (! $dynamicService->isAspectActive($templateId, $aspect->code)) {
+                continue;
+            }
+            foreach ($aspect->subAspects as $subAspect) {
+                if ($dynamicService->isSubAspectActive($templateId, $subAspect->code)) {
+                    $activeIds[] = $subAspect->id;
+                }
+            }
+        }
+
+        // Kompetensi aspects
+        $kompetensiAspects = AspectCacheService::getAspectsByCategory($templateId, 'kompetensi');
+        foreach ($kompetensiAspects as $aspect) {
+            if (! $dynamicService->isAspectActive($templateId, $aspect->code)) {
+                continue;
+            }
+            foreach ($aspect->subAspects as $subAspect) {
+                if ($dynamicService->isSubAspectActive($templateId, $subAspect->code)) {
+                    $activeIds[] = $subAspect->id;
+                }
+            }
+        }
+
+        return $activeIds;
     }
 
     /**
@@ -502,9 +602,11 @@ class TalentPoolService
         $sessionAdjustments = session()->get("standard_adjustment.{$templateId}", []);
         $selectedStandard = session()->get("selected_standard.{$templateId}");
 
+        $hasAdjustments = ! empty($sessionAdjustments) || $selectedStandard !== null;
+
         $this->cachedConfigHash = md5(json_encode([
             'template_id' => $templateId,
-            'session_id' => session()->getId(),
+            'session_id' => $hasAdjustments ? session()->getId() : 'default',
             'selected_standard' => $selectedStandard,
             'adjustments' => $sessionAdjustments,
         ]));

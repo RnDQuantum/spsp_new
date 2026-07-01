@@ -52,6 +52,13 @@ class Edit extends Component
             return null;
         }
 
+        // Enforce full aspect weights and other rules from validationResult
+        $validation = $this->validationResult;
+        if (! $validation['valid']) {
+            session()->flash('error', implode(' | ', $validation['errors']));
+            return null;
+        }
+
         // Update
         $service->update($this->customStandard, [
             'code' => $this->code,

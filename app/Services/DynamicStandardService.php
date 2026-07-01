@@ -10,6 +10,8 @@ use App\Models\CategoryType;
 use App\Models\CustomStandard;
 use App\Services\Cache\AspectCacheService;
 use Illuminate\Support\Facades\Session;
+use App\Support\WeightValidator;
+use App\Support\AspectRatingCalculator;
 
 class DynamicStandardService
 {
@@ -49,19 +51,110 @@ class DynamicStandardService
     /**
      * 🚀 OPTIMIZATION: Get CustomStandard with request-scoped caching
      * Single query per customStandardId per request lifecycle
+     *
+     * 🛡️ FIX (Audit 2.1): Only returns ACTIVE custom standards.
+     * If standard has been deactivated, returns null and self-heals session.
      */
     private function getCustomStandard(int $customStandardId): ?CustomStandard
     {
         if (! isset($this->customStandardCache[$customStandardId])) {
-            $this->customStandardCache[$customStandardId] = CustomStandard::find($customStandardId);
+            $standard = CustomStandard::where('id', $customStandardId)
+                ->where('is_active', true)
+                ->first();
+
+            $this->customStandardCache[$customStandardId] = $standard;
+
+            // Self-healing: if standard is inactive, clear stale session references
+            if (! $standard) {
+                $this->clearInactiveStandardFromSession($customStandardId);
+            }
         }
 
         return $this->customStandardCache[$customStandardId];
     }
 
+    /**
+     * Self-healing: clear inactive standard references from session
+     *
+     * When a CustomStandard is deactivated by admin, any user session still
+     * referencing it via selected_standard.{templateId} gets cleaned up.
+     */
+    private function clearInactiveStandardFromSession(int $customStandardId): void
+    {
+        $sessionData = Session::all();
+        foreach ($sessionData as $key => $value) {
+            if (str_starts_with($key, 'selected_standard.') && is_numeric($value) && (int) $value === $customStandardId) {
+                Session::forget($key);
+                // Also clear any session adjustments for the same template
+                $templateId = str_replace('selected_standard.', '', $key);
+                Session::forget("standard_adjustment.{$templateId}");
+            }
+        }
+    }
+
     // ========================================
     // CORE REFACTORED METHODS
     // ========================================
+
+    /**
+     * Consolidate 3-layer priority resolution:
+     * 1. Session Adjustment (temporary)
+     * 2. Custom Standard (persistent)
+     * 3. Quantum Default (fallback)
+     */
+    private function resolve(int $templateId, string $type, string $code, callable $fallback)
+    {
+        // Layer 1: Session Adjustment
+        $adjustments = $this->getAdjustments($templateId);
+        if (isset($adjustments[$type][$code])) {
+            return $adjustments[$type][$code];
+        }
+
+        // Layer 2: Custom Standard
+        $customStandardId = Session::get("selected_standard.{$templateId}");
+        if ($customStandardId) {
+            $customStandard = $this->getCustomStandard($customStandardId);
+            if ($customStandard) {
+                switch ($type) {
+                    case 'category_weights':
+                        if (isset($customStandard->category_weights[$code])) {
+                            return $customStandard->category_weights[$code];
+                        }
+                        break;
+                    case 'aspect_weights':
+                        if (isset($customStandard->aspect_configs[$code]['weight'])) {
+                            return $customStandard->aspect_configs[$code]['weight'];
+                        }
+                        break;
+                    case 'aspect_ratings':
+                        // Specialized rating lookup (data-driven)
+                        $rating = $this->getAspectRatingFromCustomStandard($customStandard, $code, $templateId);
+                        if ($rating !== null) {
+                            return $rating;
+                        }
+                        break;
+                    case 'sub_aspect_ratings':
+                        if (isset($customStandard->sub_aspect_configs[$code]['rating'])) {
+                            return $customStandard->sub_aspect_configs[$code]['rating'];
+                        }
+                        break;
+                    case 'active_aspects':
+                        if (isset($customStandard->aspect_configs[$code]['active'])) {
+                            return $customStandard->aspect_configs[$code]['active'];
+                        }
+                        break;
+                    case 'active_sub_aspects':
+                        if (isset($customStandard->sub_aspect_configs[$code]['active'])) {
+                            return $customStandard->sub_aspect_configs[$code]['active'];
+                        }
+                        break;
+                }
+            }
+        }
+
+        // Layer 3: Quantum Default
+        return $fallback();
+    }
 
     /**
      * Get original value - prioritizes Custom Standard if selected, otherwise Quantum Default
@@ -223,31 +316,12 @@ class DynamicStandardService
 
         // DATA-DRIVEN: Check if aspect has sub-aspects
         if ($aspect->subAspects->isNotEmpty()) {
-            // Has sub-aspects: calculate from custom standard's sub-aspect configs
-            $activeSubAspects = $aspect->subAspects->filter(function ($subAspect) use ($customStandard) {
-                // Check if sub-aspect is active in custom standard
-                $isActive = $customStandard->sub_aspect_configs[$subAspect->code]['active'] ?? true;
-
-                return $isActive;
-            });
-
-            if ($activeSubAspects->isEmpty()) {
-                return null;
-            }
-
-            // Calculate weighted average from custom standard's sub-aspect ratings
-            $totalRating = 0;
-            $count = 0;
-
-            foreach ($activeSubAspects as $subAspect) {
-                $rating = $customStandard->sub_aspect_configs[$subAspect->code]['rating']
-                    ?? $subAspect->standard_rating; // Fallback to quantum if not in custom std
-
-                $totalRating += $rating;
-                $count++;
-            }
-
-            return $count > 0 ? round($totalRating / $count, 2) : null;
+            return AspectRatingCalculator::averageFromSubAspects(
+                $aspect->subAspects,
+                fn ($subAspect) => $customStandard->sub_aspect_configs[$subAspect->code]['rating'] ?? $subAspect->standard_rating,
+                fn ($subAspect) => $customStandard->sub_aspect_configs[$subAspect->code]['active'] ?? true,
+                null
+            );
         }
 
         // No sub-aspects: use aspect's own rating from custom standard
@@ -658,6 +732,9 @@ class DynamicStandardService
             return $this->categoryAdjustmentsCache[$cacheKey];
         }
 
+        // 🛡️ FIX (Audit 3.4): Auto-preload to prevent silent fail in production
+        AspectCacheService::preloadByTemplate($templateId);
+
         $adjustments = $this->getAdjustments($templateId);
 
         if (empty($adjustments)) {
@@ -671,16 +748,6 @@ class DynamicStandardService
         $category = AspectCacheService::getCategoryByCode($templateId, $categoryCode);
 
         if (! $category) {
-            // 🛡️ GUARD: Fail fast if cache not preloaded (helps catch bugs early)
-            // Only throw in non-production to avoid breaking production if cache fails
-            if (app()->environment(['local', 'testing'])) {
-                throw new \RuntimeException(
-                    "AspectCacheService not preloaded for template {$templateId}. ".
-                    "Call AspectCacheService::preloadByTemplate({$templateId}) before using hasCategoryAdjustments(). ".
-                    "Category '{$categoryCode}' not found in cache."
-                );
-            }
-
             $this->categoryAdjustmentsCache[$cacheKey] = false;
 
             return false;
@@ -750,24 +817,12 @@ class DynamicStandardService
      */
     public function getCategoryWeight(int $templateId, string $categoryCode): int
     {
-        // Priority 1: Session adjustment
-        $adjustments = $this->getAdjustments($templateId);
-
-        if (isset($adjustments['category_weights'][$categoryCode])) {
-            return (int) $adjustments['category_weights'][$categoryCode];
-        }
-
-        // Priority 2: Custom standard
-        $customStandardId = Session::get("selected_standard.{$templateId}");
-        if ($customStandardId) {
-            $customStandard = $this->getCustomStandard($customStandardId);
-            if ($customStandard && isset($customStandard->category_weights[$categoryCode])) {
-                return (int) $customStandard->category_weights[$categoryCode];
-            }
-        }
-
-        // Priority 3: Quantum default
-        return $this->getOriginalCategoryWeight($templateId, $categoryCode);
+        return (int) $this->resolve(
+            $templateId,
+            'category_weights',
+            $categoryCode,
+            fn () => $this->getOriginalCategoryWeight($templateId, $categoryCode)
+        );
     }
 
     /**
@@ -776,24 +831,12 @@ class DynamicStandardService
      */
     public function getAspectWeight(int $templateId, string $aspectCode): int
     {
-        // Priority 1: Session adjustment
-        $adjustments = $this->getAdjustments($templateId);
-
-        if (isset($adjustments['aspect_weights'][$aspectCode])) {
-            return (int) $adjustments['aspect_weights'][$aspectCode];
-        }
-
-        // Priority 2: Custom standard
-        $customStandardId = Session::get("selected_standard.{$templateId}");
-        if ($customStandardId) {
-            $customStandard = $this->getCustomStandard($customStandardId);
-            if ($customStandard && isset($customStandard->aspect_configs[$aspectCode]['weight'])) {
-                return (int) $customStandard->aspect_configs[$aspectCode]['weight'];
-            }
-        }
-
-        // Priority 3: Quantum default
-        return $this->getOriginalAspectWeight($templateId, $aspectCode);
+        return (int) $this->resolve(
+            $templateId,
+            'aspect_weights',
+            $aspectCode,
+            fn () => $this->getOriginalAspectWeight($templateId, $aspectCode)
+        );
     }
 
     /**
@@ -802,33 +845,12 @@ class DynamicStandardService
      */
     public function getAspectRating(int $templateId, string $aspectCode): float
     {
-        // Priority 1: Session adjustment
-        $adjustments = $this->getAdjustments($templateId);
-
-        if (isset($adjustments['aspect_ratings'][$aspectCode])) {
-            return (float) $adjustments['aspect_ratings'][$aspectCode];
-        }
-
-        // Priority 2: Custom standard (DATA-DRIVEN)
-        $customStandardId = Session::get("selected_standard.{$templateId}");
-        if ($customStandardId) {
-            $customStandard = $this->getCustomStandard($customStandardId);
-            if ($customStandard) {
-                // Use data-driven calculation (handles both with/without sub-aspects)
-                $rating = $this->getAspectRatingFromCustomStandard(
-                    $customStandard,
-                    $aspectCode,
-                    $templateId
-                );
-
-                if ($rating !== null) {
-                    return $rating;
-                }
-            }
-        }
-
-        // Priority 3: Quantum default
-        return $this->getOriginalAspectRating($templateId, $aspectCode);
+        return (float) $this->resolve(
+            $templateId,
+            'aspect_ratings',
+            $aspectCode,
+            fn () => $this->getOriginalAspectRating($templateId, $aspectCode)
+        );
     }
 
     /**
@@ -837,24 +859,12 @@ class DynamicStandardService
      */
     public function getSubAspectRating(int $templateId, string $subAspectCode): int
     {
-        // Priority 1: Session adjustment
-        $adjustments = $this->getAdjustments($templateId);
-
-        if (isset($adjustments['sub_aspect_ratings'][$subAspectCode])) {
-            return (int) $adjustments['sub_aspect_ratings'][$subAspectCode];
-        }
-
-        // Priority 2: Custom standard
-        $customStandardId = Session::get("selected_standard.{$templateId}");
-        if ($customStandardId) {
-            $customStandard = $this->getCustomStandard($customStandardId);
-            if ($customStandard && isset($customStandard->sub_aspect_configs[$subAspectCode]['rating'])) {
-                return (int) $customStandard->sub_aspect_configs[$subAspectCode]['rating'];
-            }
-        }
-
-        // Priority 3: Quantum default
-        return $this->getOriginalSubAspectRating($templateId, $subAspectCode);
+        return (int) $this->resolve(
+            $templateId,
+            'sub_aspect_ratings',
+            $subAspectCode,
+            fn () => $this->getOriginalSubAspectRating($templateId, $subAspectCode)
+        );
     }
 
     // ========================================
@@ -1008,9 +1018,9 @@ class DynamicStandardService
 
         // Validate category weights sum to 100
         if (isset($adjustments['category_weights'])) {
-            $total = array_sum($adjustments['category_weights']);
-            if ($total !== 100) {
-                $errors['category_weights'] = "Total bobot kategori harus 100% (saat ini: {$total}%)";
+            $error = WeightValidator::validateTotal($adjustments['category_weights']);
+            if ($error) {
+                $errors['category_weights'] = $error;
             }
         }
 
@@ -1044,24 +1054,12 @@ class DynamicStandardService
      */
     public function isAspectActive(int $templateId, string $aspectCode): bool
     {
-        // Priority 1: Session adjustment
-        $adjustments = $this->getAdjustments($templateId);
-
-        if (isset($adjustments['active_aspects'][$aspectCode])) {
-            return (bool) $adjustments['active_aspects'][$aspectCode];
-        }
-
-        // Priority 2: Custom standard
-        $customStandardId = Session::get("selected_standard.{$templateId}");
-        if ($customStandardId) {
-            $customStandard = $this->getCustomStandard($customStandardId);
-            if ($customStandard && isset($customStandard->aspect_configs[$aspectCode]['active'])) {
-                return (bool) $customStandard->aspect_configs[$aspectCode]['active'];
-            }
-        }
-
-        // Priority 3: Default is active (true)
-        return true;
+        return (bool) $this->resolve(
+            $templateId,
+            'active_aspects',
+            $aspectCode,
+            fn () => true // Default is active
+        );
     }
 
     /**
@@ -1070,24 +1068,12 @@ class DynamicStandardService
      */
     public function isSubAspectActive(int $templateId, string $subAspectCode): bool
     {
-        // Priority 1: Session adjustment
-        $adjustments = $this->getAdjustments($templateId);
-
-        if (isset($adjustments['active_sub_aspects'][$subAspectCode])) {
-            return (bool) $adjustments['active_sub_aspects'][$subAspectCode];
-        }
-
-        // Priority 2: Custom standard
-        $customStandardId = Session::get("selected_standard.{$templateId}");
-        if ($customStandardId) {
-            $customStandard = $this->getCustomStandard($customStandardId);
-            if ($customStandard && isset($customStandard->sub_aspect_configs[$subAspectCode]['active'])) {
-                return (bool) $customStandard->sub_aspect_configs[$subAspectCode]['active'];
-            }
-        }
-
-        // Priority 3: Default is active (true)
-        return true;
+        return (bool) $this->resolve(
+            $templateId,
+            'active_sub_aspects',
+            $subAspectCode,
+            fn () => true // Default is active
+        );
     }
 
     /**
@@ -1190,23 +1176,29 @@ class DynamicStandardService
 
         // Rule 2: Total weight per category must = 100%
         if (isset($data['aspect_weights'])) {
-            $potensiWeightTotal = 0;
-            $kompetensiWeightTotal = 0;
+            $potensiWeights = [];
+            $kompetensiWeights = [];
 
             foreach ($data['aspect_weights'] as $aspectCode => $weight) {
                 if (isset($potensiAspects[$aspectCode])) {
-                    $potensiWeightTotal += $weight;
+                    $potensiWeights[] = $weight;
                 } elseif (isset($kompetensiAspects[$aspectCode])) {
-                    $kompetensiWeightTotal += $weight;
+                    $kompetensiWeights[] = $weight;
                 }
             }
 
-            if ($potensiWeightTotal > 0 && $potensiWeightTotal !== 100) {
-                $errors[] = "Total bobot Potensi harus 100% (saat ini: {$potensiWeightTotal}%)";
+            if (!empty($potensiWeights)) {
+                $error = WeightValidator::validateTotal($potensiWeights);
+                if ($error) {
+                    $errors[] = "Total bobot Potensi harus 100% (saat ini: " . array_sum($potensiWeights) . "%)";
+                }
             }
 
-            if ($kompetensiWeightTotal > 0 && $kompetensiWeightTotal !== 100) {
-                $errors[] = "Total bobot Kompetensi harus 100% (saat ini: {$kompetensiWeightTotal}%)";
+            if (!empty($kompetensiWeights)) {
+                $error = WeightValidator::validateTotal($kompetensiWeights);
+                if ($error) {
+                    $errors[] = "Total bobot Kompetensi harus 100% (saat ini: " . array_sum($kompetensiWeights) . "%)";
+                }
             }
         }
 

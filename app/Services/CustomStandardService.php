@@ -157,6 +157,9 @@ class CustomStandardService
 
     /**
      * Get currently selected custom standard model
+     *
+     * 🛡️ FIX (Audit 2.1): Only returns ACTIVE custom standards.
+     * Self-heals session if standard has been deactivated by admin.
      */
     public function getSelectedStandard(int $templateId): ?CustomStandard
     {
@@ -166,7 +169,16 @@ class CustomStandardService
             return null;
         }
 
-        return CustomStandard::find($id);
+        $standard = CustomStandard::where('id', $id)
+            ->where('is_active', true)
+            ->first();
+
+        // Self-healing: if standard is inactive, clear stale session reference
+        if (! $standard) {
+            $this->clearSelection($templateId);
+        }
+
+        return $standard;
     }
 
     /**

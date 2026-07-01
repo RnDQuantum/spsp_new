@@ -1,531 +1,851 @@
-# Database Structure - SPSP Assessment System
+# Dokumentasi Struktur Database & ERD - SPSP Assessment System
 
-> **Version**: 1.0
-> **Last Updated**: 2025-12-01
-> **Purpose**: Complete reference for database schema, relationships, and data flow
-
----
-
-## Table of Contents
-
-1. [Overview](#overview)
-2. [Core Assessment Tables](#core-assessment-tables)
-3. [Entity Relationships](#entity-relationships)
-4. [Data Hierarchy](#data-hierarchy)
-5. [Sample Data Examples](#sample-data-examples)
-6. [Key Insights for Testing](#key-insights-for-testing)
+> **Versi**: 2.0 (Terbaru)  
+> **Terakhir Diperbarui**: 2026-07-01  
+> **Tujuan**: Referensi lengkap untuk skema database, hubungan antar tabel, representasi ERD, dan aliran data sistem SPSP.
 
 ---
 
-## Overview
+## Daftar Isi
 
-The SPSP system uses a **hierarchical assessment structure** with the following key concepts:
-
-- **Template-Based**: Each position uses an assessment template (e.g., Staff, Supervisor, Manager)
-- **Dual Category**: All assessments have **Potensi** (Potential) and **Kompetensi** (Competency)
-- **Aspect-Based**: Categories contain multiple aspects (e.g., Kecerdasan, Integritas)
-- **Sub-Aspect Structure**: Some aspects have sub-aspects (Potensi), some don't (Kompetensi)
-- **Weighted Scores**: Category weights + Aspect weights → Final score
-
----
-
-## Core Assessment Tables
-
-### 1. Master Data Tables (Template & Structure)
-
-#### `assessment_templates`
-Defines assessment structures (e.g., Staff, Supervisor, Manager).
-
-| Column | Type | Description |
-|--------|------|-------------|
-| id | bigint | Primary key |
-| code | varchar | Unique code (e.g., `staff_standard_v1`) |
-| name | varchar | Display name |
-| description | text | Template purpose |
-
-**Sample Data**:
-```
-id=1, code='staff_standard_v1', name='Standar Asesmen Staff'
-id=2, code='supervisor_standard_v1', name='Standar Asesmen Supervisor'
-id=3, code='manager_standard_v1', name='Standar Asesmen Manager'
-```
+1. [Gambaran Umum](#gambaran-umum)
+2. [Diagram Hubungan Entitas (ERD)](#diagram-hubungan-entitas-erd)
+3. [Tabel Master Data (Struktur & Template)](#1-tabel-master-data-struktur--template)
+4. [Tabel Manajemen Event & Peserta](#2-tabel-manajemen-event--peserta)
+5. [Tabel Hasil & Agregasi Penilaian (BI Workloads)](#3-tabel-hasil--agregasi-penilaian-bi-workloads)
+6. [Tabel Konfigurasi Kustom, Tes Fisik, & Interpretasi AI](#4-tabel-konfigurasi-kustom-tes-fisik--interpretasi-ai)
+7. [Tabel Pengguna & Multi-Tenancy](#5-tabel-pengguna--multi-tenancy)
+8. [Panduan Relasi & Aliran Kalkulasi](#panduan-relasi--aliran-kalkulasi)
 
 ---
 
-#### `category_types`
-Two categories per template: **Potensi** and **Kompetensi**.
+## Gambaran Umum
 
-| Column | Type | Description |
-|--------|------|-------------|
-| id | bigint | Primary key |
-| template_id | bigint | FK to assessment_templates |
-| code | varchar | `potensi` or `kompetensi` |
-| name | varchar | Display name |
-| weight_percentage | int | Category weight (sum = 100%) |
-| order | int | Display order |
+Sistem SPSP (Sistem Pemetaan & Statistik Psikologi) menggunakan **arsitektur data berorientasi BI (Business Intelligence)**. Database dirancang untuk mendukung kueri analitik cepat pada data historis statis yang di-import dari sistem Quantum. 
 
-**Sample Data** (template_id=1, Staff Standard):
-```
-id=1, template_id=1, code='potensi', weight_percentage=50
-id=2, template_id=1, code='kompetensi', weight_percentage=50
-```
-
-**Key Point**: Category weights vary by template!
-- Staff: 50/50
-- Supervisor: 30/70 (more Kompetensi)
-- Manager: 40/60
+Sistem ini memiliki karakteristik utama sebagai berikut:
+- **Template-Based**: Struktur penilaian didasarkan pada template standar (misalnya: Staff, Supervisor, Manager).
+- **Dual Category**: Setiap template terbagi menjadi dua kategori utama: **Potensi** (Psikometrik) dan **Kompetensi** (Behavioral).
+- **Hierarki 3 Tingkat**: Template → Kategori → Aspek → Sub-Aspek.
+  - *Aspek Potensi* memiliki sub-aspek (nilai aspek dihitung dari rata-rata sub-aspek).
+  - *Aspek Kompetensi* tidak memiliki sub-aspek (nilai aspek diinput secara langsung).
+- **Imutabilitas Data**: Nilai mentah dari asesmen peserta bersifat permanen (immutable), sedangkan bobot, standar kelulusan, dan status aktif aspek dapat diubah dinamis via standard overlay (Layered Priority System).
 
 ---
 
-#### `aspects`
-Individual assessment dimensions within a category.
+## Diagram Hubungan Entitas (ERD)
 
-| Column | Type | Description |
-|--------|------|-------------|
-| id | bigint | Primary key |
-| template_id | bigint | FK to assessment_templates |
-| category_type_id | bigint | FK to category_types |
-| code | varchar | Unique code (e.g., `kecerdasan`) |
-| name | varchar | Display name |
-| weight_percentage | int | Aspect weight within category |
-| standard_rating | decimal | Default standard rating (1-5) |
-| order | int | Display order |
+Berikut adalah visualisasi hubungan antar tabel (Entity Relationship Diagram) di SPSP menggunakan Mermaid:
 
-**Sample Data** (Potensi category):
-```
-id=1, code='kecerdasan', name='Kecerdasan', weight_percentage=25, standard_rating=3.00
-id=2, code='cara_kerja', name='Cara Kerja', weight_percentage=20, standard_rating=3.60
-id=3, code='potensi_kerja', name='Potensi Kerja', weight_percentage=20, standard_rating=3.00
-```
+```mermaid
+erDiagram
+    %% Hubungan Multi-Tenancy & Pengguna
+    institutions ||--o{ users : "memiliki"
+    institutions ||--o{ category_institution : "dikelompokkan"
+    institution_categories ||--o{ category_institution : "memiliki"
+    institutions ||--o{ assessment_events : "menyelenggarakan"
+    institutions ||--o{ custom_standards : "memiliki"
+    users ||--o{ custom_standards : "membuat"
 
-**Sample Data** (Kompetensi category):
-```
-id=6, code='integritas', name='Integritas', weight_percentage=15, standard_rating=3.00
-id=7, code='kerjasama', name='Kerjasama', weight_percentage=14, standard_rating=3.00
-```
+    %% Hubungan Master Penilaian
+    assessment_templates ||--o{ category_types : "memiliki"
+    assessment_templates ||--o{ aspects : "memiliki"
+    assessment_templates ||--o{ position_formations : "digunakan oleh"
+    assessment_templates ||--o{ custom_standards : "dikustomisasi oleh"
+    category_types ||--o{ aspects : "memiliki"
+    category_types ||--o{ category_assessments : "menilai"
+    category_types ||--o{ interpretations : "memiliki"
+    aspects ||--o{ sub_aspects : "memiliki"
+    aspects ||--o{ aspect_assessments : "menilai"
+    sub_aspects ||--o{ sub_aspect_assessments : "menilai"
 
-**CRITICAL DIFFERENCE**:
-- **Potensi aspects** have sub-aspects → rating calculated from sub-aspects
-- **Kompetensi aspects** NO sub-aspects → use direct `standard_rating`
+    %% Hubungan Event & Peserta
+    assessment_events ||--o{ batches : "memiliki"
+    assessment_events ||--o{ position_formations : "memiliki"
+    assessment_events ||--o{ participants : "diikuti oleh"
+    assessment_events ||--o{ category_assessments : "merekam"
+    assessment_events ||--o{ aspect_assessments : "merekam"
+    assessment_events ||--o{ sub_aspect_assessments : "merekam"
+    assessment_events ||--o{ final_assessments : "merekam"
+    assessment_events ||--o{ psychological_tests : "menyimpan"
+    assessment_events ||--o{ interpretations : "menyimpan"
 
----
+    batches ||--o{ participants : "dikelompokkan"
+    position_formations ||--o{ participants : "memiliki"
 
-#### `sub_aspects`
-Sub-dimensions for Potensi aspects ONLY.
+    %% Hubungan Hasil Penilaian
+    participants ||--o{ category_assessments : "memiliki"
+    participants ||--o{ aspect_assessments : "memiliki"
+    participants ||--o{ sub_aspect_assessments : "memiliki"
+    participants ||--|| final_assessments : "memiliki"
+    participants ||--|| psychological_tests : "melakukan"
+    participants ||--o{ interpretations : "memiliki"
 
-| Column | Type | Description |
-|--------|------|-------------|
-| id | bigint | Primary key |
-| aspect_id | bigint | FK to aspects |
-| code | varchar | Unique code |
-| name | varchar | Display name |
-| standard_rating | int | Default rating (1-5) |
-| order | int | Display order |
+    category_assessments ||--o{ aspect_assessments : "terdiri dari"
+    aspect_assessments ||--o{ sub_aspect_assessments : "terdiri dari"
 
-**Sample Data** (aspect_id=1, Kecerdasan):
-```
-id=1, aspect_id=1, code='kecerdasan_umum', name='Kecerdasan Umum', standard_rating=3
-id=2, aspect_id=1, code='daya_tangkap', name='Daya Tangkap', standard_rating=3
-id=3, aspect_id=1, code='daya_analisa', name='Daya Analisa', standard_rating=3
-id=4, aspect_id=1, code='kemampuan_logika', name='Kemampuan Logika', standard_rating=3
-```
-
-**Aspect Rating Calculation** (DATA-DRIVEN):
-```
-Kecerdasan rating = AVG(3, 3, 3, 3) = 3.00
+    %% Hubungan Polimorfik Interpretasi
+    interpretation_templates }o--o| aspects : "menafsirkan (polimorfik)"
+    interpretation_templates }o--o| sub_aspects : "menafsirkan (polimorfik)"
 ```
 
 ---
 
-### 2. Event & Participant Tables
+## 1. Tabel Master Data (Struktur & Template)
 
-#### `institutions`
-Organizations running assessments.
+### `assessment_templates`
+Mendefinisikan tipe standar jabatan/template dasar asesmen.
 
-| Column | Type | Description |
-|--------|------|-------------|
-| id | bigint | Primary key |
-| code | varchar | Unique code (e.g., `kemenkes`) |
-| name | varchar | Institution name |
+| Kolom | Tipe | Nullable | Deskripsi |
+| :--- | :--- | :--- | :--- |
+| `id` | bigint | No | Primary Key |
+| `code` | varchar(255) | No | Kode unik template (e.g., `staff_standard_v1`) |
+| `name` | varchar(255) | No | Nama tampilan template |
+| `description` | text | Yes | Deskripsi atau penjelasan mengenai target jabatan |
+| `created_at` / `updated_at` | timestamp | Yes | Audit timestamps |
 
----
-
-#### `assessment_events`
-Assessment events for institutions.
-
-| Column | Type | Description |
-|--------|------|-------------|
-| id | bigint | Primary key |
-| institution_id | bigint | FK to institutions |
-| code | varchar | Unique code |
-| name | varchar | Event name |
-| year | int | Assessment year |
-| status | enum | `draft`, `ongoing`, `completed`, `cancelled` |
-
-**Sample Data**:
-```
-id=1, code='P3K-KEMENKES-2025', name='Seleksi P3K Kementerian Kesehatan 2025', status='ongoing'
+*Contoh Data*:
+```json
+{
+  "id": 1,
+  "code": "staff_standard_v1",
+  "name": "Standar Asesmen Staff",
+  "description": "Template untuk posisi staff/staf (entry level). Fokus balanced antara potensi dan kompetensi dasar. Potensi 50%, Kompetensi 50%."
+}
 ```
 
 ---
 
-#### `batches`
-Assessment batches within an event.
+### `category_types`
+Menyimpan kategori utama di dalam template. Secara default bernilai `potensi` (psikometrik) dan `kompetensi` (behavioral).
 
-| Column | Type | Description |
-|--------|------|-------------|
-| id | bigint | Primary key |
-| event_id | bigint | FK to assessment_events |
-| code | varchar | Batch code |
-| name | varchar | Batch name |
-| batch_number | int | Sequence number |
+| Kolom | Tipe | Nullable | Deskripsi |
+| :--- | :--- | :--- | :--- |
+| `id` | bigint | No | Primary Key |
+| `template_id` | bigint | No | Foreign Key ke `assessment_templates.id` |
+| `code` | varchar(255) | No | Kode kategori (`potensi` atau `kompetensi`) |
+| `name` | varchar(255) | No | Nama kategori untuk UI |
+| `weight_percentage` | int | No | Bobot default kategori dalam presentase (e.g. 50, 60, dll) |
+| `order` | int | No | Urutan tampilan di UI |
 
-**Sample Data**:
-```
-id=1, event_id=1, code='BATCH-1-BANDUNG', batch_number=1
-id=2, event_id=1, code='BATCH-2-YOGYAKARTA', batch_number=2
-```
-
----
-
-#### `position_formations`
-Positions available in an event (each position has a template).
-
-| Column | Type | Description |
-|--------|------|-------------|
-| id | bigint | Primary key |
-| event_id | bigint | FK to assessment_events |
-| template_id | bigint | FK to assessment_templates |
-| code | varchar | Position code |
-| name | varchar | Position name |
-| quota | int | Available slots |
-
-**Sample Data**:
-```
-id=1, code='dokter_umum', name='Dokter Umum', template_id=4 (professional_standard_v1), quota=50
-id=2, code='perawat', name='Perawat', template_id=1 (staff_standard_v1), quota=100
-id=3, code='apoteker', name='Apoteker', template_id=2 (supervisor_standard_v1), quota=50
-```
-
-**CRITICAL**: Different positions in the same event can use **different templates**!
-
----
-
-#### `participants`
-Individuals being assessed.
-
-| Column | Type | Description |
-|--------|------|-------------|
-| id | bigint | Primary key |
-| event_id | bigint | FK to assessment_events |
-| batch_id | bigint | FK to batches (nullable) |
-| position_formation_id | bigint | FK to position_formations |
-| username | varchar | Unique username |
-| test_number | varchar | Unique test number |
-| name | varchar | Participant name |
-| email | varchar | Email address |
-| gender | varchar | L/P |
-
-**Sample Data**:
-```
-id=1, event_id=1, batch_id=2, position_formation_id=3, name='BRENNAN SMITHAM, S.Pd'
-id=2, event_id=1, batch_id=1, position_formation_id=2, name='CHRIS ROGAHN, S.Kom'
+*Contoh Data*:
+```json
+{
+  "id": 1,
+  "template_id": 1,
+  "code": "potensi",
+  "name": "Potensi",
+  "weight_percentage": 50,
+  "order": 1
+}
 ```
 
 ---
 
-### 3. Assessment Result Tables
+### `aspects`
+Menyimpan aspek-aspek penilaian di bawah setiap kategori.
 
-#### `category_assessments`
-Aggregated scores at the category level (Potensi/Kompetensi).
+| Kolom | Tipe | Nullable | Deskripsi |
+| :--- | :--- | :--- | :--- |
+| `id` | bigint | No | Primary Key |
+| `template_id` | bigint | No | Foreign Key ke `assessment_templates.id` |
+| `category_type_id` | bigint | No | Foreign Key ke `category_types.id` |
+| `code` | varchar(255) | No | Kode unik aspek (e.g., `intelektual`) |
+| `name` | varchar(255) | No | Nama aspek |
+| `description` | text | Yes | Deskripsi aspek |
+| `weight_percentage` | int | No | Bobot aspek dalam kategorinya |
+| `standard_rating` | decimal(8,2) | No | Nilai standar kelulusan default (1.00 - 5.00) |
+| `order` | int | No | Urutan tampilan |
 
-| Column | Type | Description |
-|--------|------|-------------|
-| id | bigint | Primary key |
-| participant_id | bigint | FK to participants |
-| category_type_id | bigint | FK to category_types |
-| total_standard_rating | decimal | Sum of standard ratings |
-| total_standard_score | decimal | Weighted standard score |
-| total_individual_rating | decimal | Sum of individual ratings |
-| total_individual_score | decimal | Weighted individual score |
-| gap_rating | decimal | Individual - Standard (rating) |
-| gap_score | decimal | Individual - Standard (score) |
-| conclusion_code | varchar | `above_standard`, `meets_standard`, `below_standard` |
-
-**Calculation Example**:
-```sql
--- Potensi category with 3 aspects (weights: 25, 20, 20)
-total_standard_rating = 3.0 + 3.6 + 3.0 = 9.6
-total_standard_score = (3.0*25) + (3.6*20) + (3.0*20) = 167.0
+*Contoh Data*:
+```json
+{
+  "id": 1,
+  "template_id": 1,
+  "category_type_id": 1,
+  "code": "intelektual",
+  "name": "Intelektual",
+  "description": "Mengukur kemampuan berpikir, analisa, logika, dan kreativitas dalam penyelesaian masalah.",
+  "weight_percentage": 25,
+  "standard_rating": "3.00",
+  "order": 1
+}
 ```
 
 ---
 
-#### `aspect_assessments`
-Individual aspect scores for each participant.
+### `sub_aspects`
+Menyimpan sub-aspek penunjang aspek utama (Hanya untuk aspek dari kategori `potensi`).
 
-| Column | Type | Description |
-|--------|------|-------------|
-| id | bigint | Primary key |
-| participant_id | bigint | FK to participants |
-| aspect_id | bigint | FK to aspects |
-| standard_rating | decimal | Standard rating (1-5) |
-| standard_score | decimal | standard_rating * weight |
-| individual_rating | decimal | Participant's rating (1-5) |
-| individual_score | decimal | individual_rating * weight |
-| gap_rating | decimal | Individual - Standard |
-| gap_score | decimal | Individual - Standard |
-| percentage_score | int | (individual/standard) * 100 |
-| conclusion_code | varchar | Conclusion code |
+| Kolom | Tipe | Nullable | Deskripsi |
+| :--- | :--- | :--- | :--- |
+| `id` | bigint | No | Primary Key |
+| `aspect_id` | bigint | No | Foreign Key ke `aspects.id` |
+| `code` | varchar(255) | No | Kode unik sub-aspek (e.g., `kecerdasan_umum`) |
+| `name` | varchar(255) | No | Nama sub-aspek |
+| `description` | text | Yes | Penjelasan detail sub-aspek |
+| `standard_rating` | int | No | Nilai standar default (integer 1 - 5) |
+| `order` | int | No | Urutan tampilan |
 
-**Sample Data**:
-```
-id=1062, participant_id=85, aspect_id=13,
-standard_rating=4.00, standard_score=120.00,
-individual_rating=2.50, individual_score=75.00,
-gap_rating=-1.50, gap_score=-45.00, percentage_score=50
-```
-
----
-
-#### `sub_aspect_assessments`
-Sub-aspect ratings (for Potensi aspects only).
-
-| Column | Type | Description |
-|--------|------|-------------|
-| id | bigint | Primary key |
-| aspect_assessment_id | bigint | FK to aspect_assessments |
-| participant_id | bigint | FK to participants |
-| sub_aspect_id | bigint | FK to sub_aspects |
-| standard_rating | int | Standard rating (1-5) |
-| individual_rating | int | Participant's rating (1-5) |
-
-**Aspect Rating Calculation**:
-```
-Kecerdasan individual_rating = AVG(sub_aspect_1, sub_aspect_2, ..., sub_aspect_n)
+*Contoh Data*:
+```json
+{
+  "id": 1,
+  "aspect_id": 1,
+  "code": "kecerdasan_umum",
+  "name": "Kecerdasan Umum",
+  "description": "Kemampuan intelektual secara umum",
+  "standard_rating": 3,
+  "order": 1
+}
 ```
 
 ---
 
-#### `final_assessments`
-Combined Potensi + Kompetensi final scores.
+## 2. Tabel Manajemen Event & Peserta
 
-| Column | Type | Description |
-|--------|------|-------------|
-| id | bigint | Primary key |
-| participant_id | bigint | FK to participants (UNIQUE) |
-| potensi_weight | int | Potensi category weight % |
-| kompetensi_weight | int | Kompetensi category weight % |
-| potensi_standard_score | decimal | Potensi weighted score |
-| kompetensi_standard_score | decimal | Kompetensi weighted score |
-| total_standard_score | decimal | Sum of both |
-| total_individual_score | decimal | Sum of both |
-| achievement_percentage | decimal | (individual/standard) * 100 |
-| conclusion_code | varchar | Final conclusion |
+### `assessment_events`
+Mendefinisikan event/proyek asesmen yang diadakan oleh suatu instansi.
 
----
+| Kolom | Tipe | Nullable | Deskripsi |
+| :--- | :--- | :--- | :--- |
+| `id` | bigint | No | Primary Key |
+| `institution_id` | bigint | No | Foreign Key ke `institutions.id` |
+| `code` | varchar(255) | No | Kode event unik (e.g., `P3K-KEJAKSAAN-2025`) |
+| `name` | varchar(255) | No | Nama kegiatan |
+| `description` | text | Yes | Keterangan tambahan event |
+| `year` | int | No | Tahun penyelenggaraan |
+| `start_date` | date | No | Tanggal mulai event |
+| `end_date` | date | No | Tanggal selesai event |
+| `status` | enum | No | Status event (`draft`, `ongoing`, `completed`, `cancelled`) |
+| `last_synced_at` | timestamp | Yes | Waktu sinkronisasi data terakhir dari API Quantum |
 
-## Entity Relationships
-
-### Visual Hierarchy
-
-```
-Institution
-  └─> AssessmentEvent (1 event per institution)
-       ├─> Batch (multiple batches per event)
-       ├─> PositionFormation (multiple positions per event)
-       │    └─> AssessmentTemplate (1 template per position)
-       │         └─> CategoryType (2 categories: Potensi + Kompetensi)
-       │              └─> Aspect (multiple aspects per category)
-       │                   └─> SubAspect (ONLY for Potensi aspects)
-       └─> Participant (multiple participants per event)
-            ├─> belongs to: Batch
-            ├─> belongs to: PositionFormation
-            ├─> has: CategoryAssessment (2 per participant: Potensi + Kompetensi)
-            │    └─> has: AspectAssessment (multiple per category)
-            │         └─> has: SubAspectAssessment (ONLY for Potensi aspects)
-            └─> has: FinalAssessment (1 per participant)
+*Contoh Data*:
+```json
+{
+  "id": 1,
+  "institution_id": 1,
+  "code": "P3K-KEJAKSAAN-2025",
+  "name": "Seleksi P3K Kejaksaan 2025",
+  "description": "Assessment P3K untuk Kejaksaan RI tahun 2025",
+  "year": 2025,
+  "start_date": "2025-09-01",
+  "end_date": "2025-12-31",
+  "status": "completed"
+}
 ```
 
 ---
 
-## Data Hierarchy
+### `batches`
+Gelombang/kelompok jadwal tes peserta dalam satu event.
 
-### Template → Category → Aspect → Sub-Aspect
+| Kolom | Tipe | Nullable | Deskripsi |
+| :--- | :--- | :--- | :--- |
+| `id` | bigint | No | Primary Key |
+| `event_id` | bigint | No | Foreign Key ke `assessment_events.id` |
+| `code` | varchar(255) | No | Kode gelombang |
+| `name` | varchar(255) | No | Nama gelombang |
+| `location` | varchar(255) | Yes | Lokasi penyelenggaraan tes |
+| `batch_number` | int | No | Urutan gelombang |
+| `start_date` | date | No | Tanggal tes dimulai |
+| `end_date` | date | No | Tanggal tes berakhir |
 
-**Example: Staff Standard V1**
-
-```
-Template: staff_standard_v1
-  ├── Category: Potensi (50%)
-  │   ├── Aspect: Kecerdasan (25%) - standard_rating: 3.0
-  │   │   ├── SubAspect: Kecerdasan Umum (rating: 3)
-  │   │   ├── SubAspect: Daya Tangkap (rating: 3)
-  │   │   ├── SubAspect: Daya Analisa (rating: 3)
-  │   │   └── SubAspect: Kemampuan Logika (rating: 3)
-  │   ├── Aspect: Cara Kerja (20%) - calculated from sub-aspects
-  │   └── Aspect: Potensi Kerja (20%) - calculated from sub-aspects
-  │
-  └── Category: Kompetensi (50%)
-      ├── Aspect: Integritas (15%) - standard_rating: 3.0 (DIRECT)
-      ├── Aspect: Kerjasama (14%) - standard_rating: 3.0 (DIRECT)
-      ├── Aspect: Komunikasi (14%) - standard_rating: 3.0 (DIRECT)
-      └── ... (7 total kompetensi aspects)
-```
-
----
-
-## Sample Data Examples
-
-### Complete Assessment Flow for 1 Participant
-
-**Participant**: BRENNAN SMITHAM, S.Pd (id=1)
-- Event: P3K-KEMENKES-2025
-- Position: Apoteker (Supervisor template, Potensi 30%, Kompetensi 70%)
-- Batch: BATCH-2-YOGYAKARTA
-
-**Step 1: Sub-Aspect Assessments** (Potensi aspects ONLY)
-```
-Kecerdasan sub-aspects:
-  - Kecerdasan Umum: standard=3, individual=4
-  - Daya Tangkap: standard=3, individual=3
-  - Daya Analisa: standard=3, individual=4
-  - Kemampuan Logika: standard=3, individual=3
-```
-
-**Step 2: Aspect Assessment** (Calculated)
-```
-Kecerdasan aspect:
-  - standard_rating = AVG(3,3,3,3) = 3.0
-  - individual_rating = AVG(4,3,4,3) = 3.5
-  - weight = 25%
-  - standard_score = 3.0 * 25 = 75.0
-  - individual_score = 3.5 * 25 = 87.5
-```
-
-**Step 3: Category Assessment** (Aggregated)
-```
-Potensi category:
-  - total_standard_score = SUM(all aspect scores in Potensi)
-  - total_individual_score = SUM(all aspect scores in Potensi)
-  - gap_score = individual - standard
-```
-
-**Step 4: Final Assessment** (Weighted)
-```
-Final:
-  - potensi_score * 30% + kompetensi_score * 70% = total
-  - achievement_percentage = (total_individual / total_standard) * 100
+*Contoh Data*:
+```json
+{
+  "id": 1,
+  "event_id": 1,
+  "code": "BATCH-1-MOJOKERTO",
+  "name": "Gelombang 1 - Mojokerto",
+  "location": "Mojokerto",
+  "batch_number": 1,
+  "start_date": "2025-09-27",
+  "end_date": "2025-09-28"
+}
 ```
 
 ---
 
-## Key Insights for Testing
+### `position_formations`
+Daftar jabatan/formasi lowongan yang dibuka dalam suatu event. Relasi krusial yang mengikat formasi dengan `assessment_templates` dasar.
 
-### 1. Data-Driven Aspect Rating
+| Kolom | Tipe | Nullable | Deskripsi |
+| :--- | :--- | :--- | :--- |
+| `id` | bigint | No | Primary Key |
+| `event_id` | bigint | No | Foreign Key ke `assessment_events.id` |
+| `template_id` | bigint | No | Foreign Key ke `assessment_templates.id` |
+| `code` | varchar(255) | No | Kode formasi jabatan |
+| `name` | varchar(255) | No | Nama formasi jabatan |
+| `quota` | int | No | Kuota formasi yang tersedia |
 
-**Potensi aspects** (WITH sub-aspects):
-```php
-// ✅ CORRECT: Calculate from sub-aspects
-$rating = $subAspects->avg('individual_rating');
-```
-
-**Kompetensi aspects** (NO sub-aspects):
-```php
-// ✅ CORRECT: Use direct rating from aspects table
-$rating = $aspect->standard_rating;
-```
-
-### 2. Template Variability
-
-Different positions in same event can have:
-- Different category weights (e.g., 50/50 vs 30/70)
-- Different aspect weights
-- Different standard ratings
-
-**Test Implication**: Always filter by `position_formation_id` to get correct template!
-
-### 3. Active/Inactive Filtering
-
-- DynamicStandardService can mark aspects/sub-aspects as inactive
-- Inactive aspects: `weight = 0`
-- Inactive sub-aspects: excluded from average calculation
-
-### 4. 3-Layer Priority System
-
-When getting standards:
-1. **Session Adjustment** (temporary, highest priority)
-2. **Custom Standard** (persistent, saved in DB)
-3. **Quantum Default** (from aspects/sub_aspects table, fallback)
-
-### 5. Tolerance Application
-
-RankingService applies tolerance to standards:
-```php
-$adjustedStandard = $originalStandard * (1 - $tolerancePercentage/100);
-// Example: 10% tolerance on 100.0 → 90.0
-```
-
-### 6. Ranking Sort Order
-
-**ALWAYS**:
-1. Sort by `individual_score` DESC (highest first)
-2. Tiebreaker: `participant_name` ASC (alphabetical)
-
-### 7. Database Indexes
-
-**Performance-critical queries**:
-- `aspect_assessments`: indexed on `(event_id, aspect_id)`, `(participant_id, aspect_id)`
-- `category_assessments`: indexed on `(event_id, category_type_id)`, `(participant_id, category_type_id)`
-- `final_assessments`: indexed on `(event_id, achievement_percentage)`
-
----
-
-## Factory Usage for Testing
-
-### Required Factories
-
-When creating test data, you'll need:
-
-1. **Institution** → `Institution::factory()`
-2. **AssessmentTemplate** → `AssessmentTemplate::factory()` (OR use existing seeded data)
-3. **CategoryType** → `CategoryType::factory()`
-4. **Aspect** → `Aspect::factory()`
-5. **SubAspect** → `SubAspect::factory()` (ONLY for Potensi)
-6. **AssessmentEvent** → `AssessmentEvent::factory()`
-7. **Batch** → `Batch::factory()`
-8. **PositionFormation** → `PositionFormation::factory()`
-9. **Participant** → `Participant::factory()`
-10. **AspectAssessment** → `AspectAssessment::factory()`
-11. **SubAspectAssessment** → `SubAspectAssessment::factory()`
-12. **CategoryAssessment** → `CategoryAssessment::factory()`
-13. **FinalAssessment** → `FinalAssessment::factory()`
-
-### Recommended Approach for RankingService Tests
-
-**Option A: Use Seeded Data** (FASTEST)
-```php
-// Run seeder first: php artisan db:seed
-$event = AssessmentEvent::first();
-$position = PositionFormation::first();
-// Test with real seeded participants
-```
-
-**Option B: Minimal Factory Setup** (FLEXIBLE)
-```php
-// Create minimal template structure
-$template = $this->createTemplateWithCategories();
-$event = AssessmentEvent::factory()->create();
-$position = PositionFormation::factory()->create([
-    'event_id' => $event->id,
-    'template_id' => $template->id,
-]);
-// Create 3-5 participants with assessments
+*Contoh Data*:
+```json
+{
+  "id": 1,
+  "event_id": 1,
+  "template_id": 4,
+  "code": "fisikawan_medis",
+  "name": "Fisikawan Medis",
+  "quota": 20
+}
 ```
 
 ---
 
-**Version**: 1.0
-**Last Updated**: 2025-12-01
-**Next Review**: After RankingService tests complete
-**Maintainer**: Development Team
+### `participants`
+Data diri lengkap peserta ujian yang mengikuti event tertentu.
+
+| Kolom | Tipe | Nullable | Deskripsi |
+| :--- | :--- | :--- | :--- |
+| `id` | bigint | No | Primary Key |
+| `event_id` | bigint | No | Foreign Key ke `assessment_events.id` |
+| `batch_id` | bigint | Yes | Foreign Key ke `batches.id` (nullable) |
+| `position_formation_id` | bigint | No | Foreign Key ke `position_formations.id` |
+| `username` | varchar(255) | No | Username unik peserta |
+| `test_number` | varchar(255) | No | Nomor ujian peserta (unik) |
+| `skb_number` | varchar(255) | No | Nomor SKB peserta |
+| `name` | varchar(255) | No | Nama lengkap peserta |
+| `email` | varchar(255) | Yes | Alamat email peserta |
+| `phone` | varchar(255) | Yes | Nomor telepon |
+| `gender` | varchar(255) | Yes | Jenis kelamin (`L` / `P`) |
+| `photo_path` | varchar(255) | Yes | Path foto peserta |
+| `assessment_date` | date | No | Tanggal pelaksanaan asesmen |
+
+*Contoh Data*:
+```json
+{
+  "id": 1,
+  "event_id": 1,
+  "batch_id": 1,
+  "position_formation_id": 1,
+  "username": "SRV01-000",
+  "test_number": "68-7-2-34-00001",
+  "skb_number": "24400240120000001",
+  "name": "MARIADI ASTUTI, S.Kom",
+  "email": "participant1@hotmail.com",
+  "phone": "080459449674",
+  "gender": "L",
+  "photo_path": null,
+  "assessment_date": "2026-06-15"
+}
+```
+
+---
+
+## 3. Tabel Hasil & Agregasi Penilaian (BI Workloads)
+
+Tabel-tabel di bawah ini menyimpan data nilai individu peserta. Kolom standar (`standard_*`) di dalam tabel-tabel ini adalah **snapshot awal saat import**. Aplikasi SPSP membaca standar dinamis dari `DynamicStandardService` saat kalkulasi on-the-fly.
+
+### `sub_aspect_assessments`
+Menyimpan nilai mentah sub-aspek potensi peserta.
+
+| Kolom | Tipe | Nullable | Deskripsi |
+| :--- | :--- | :--- | :--- |
+| `id` | bigint | No | Primary Key |
+| `aspect_assessment_id` | bigint | No | Foreign Key ke `aspect_assessments.id` |
+| `participant_id` | bigint | No | Foreign Key ke `participants.id` |
+| `event_id` | bigint | No | Foreign Key ke `assessment_events.id` |
+| `sub_aspect_id` | bigint | No | Foreign Key ke `sub_aspects.id` |
+| `standard_rating` | int | No | Standar nilai default (dari snapshot) |
+| `individual_rating` | int | No | Nilai yang dicapai peserta (1 - 5) |
+| `rating_label` | varchar(255) | No | Label teks nilai (e.g. `Cukup`, `Kurang`, `Baik`) |
+
+*Contoh Data*:
+```json
+{
+  "id": 1,
+  "aspect_assessment_id": 1,
+  "participant_id": 1,
+  "event_id": 1,
+  "sub_aspect_id": 131,
+  "standard_rating": 3,
+  "individual_rating": 3,
+  "rating_label": "Cukup"
+}
+```
+
+---
+
+### `aspect_assessments`
+Menyimpan nilai aspek peserta (baik Potensi yang dirata-ratakan dari sub-aspek, maupun Kompetensi yang langsung dinilai).
+
+| Kolom | Tipe | Nullable | Deskripsi |
+| :--- | :--- | :--- | :--- |
+| `id` | bigint | No | Primary Key |
+| `category_assessment_id` | bigint | No | Foreign Key ke `category_assessments.id` |
+| `participant_id` | bigint | No | Foreign Key ke `participants.id` |
+| `event_id` | bigint | No | Foreign Key ke `assessment_events.id` |
+| `batch_id` | bigint | Yes | Foreign Key ke `batches.id` |
+| `position_formation_id` | bigint | Yes | Foreign Key ke `position_formations.id` |
+| `aspect_id` | bigint | No | Foreign Key ke `aspects.id` |
+| `standard_rating` | decimal(5,2) | No | Rating standar snapshot |
+| `standard_score` | decimal(8,2) | No | Skor standar (standard_rating * bobot aspek) |
+| `individual_rating` | decimal(5,2) | No | Rating aktual peserta |
+| `individual_score` | decimal(8,2) | No | Skor aktual peserta (individual_rating * bobot aspek) |
+| `gap_rating` | decimal(8,2) | No | Selisih rating (`individual_rating` - `standard_rating`) |
+| `gap_score` | decimal(8,2) | No | Selisih skor (`individual_score` - `standard_score`) |
+| `percentage_score` | int | Yes | Persentase pencapaian standar (e.g. 68) |
+| `conclusion_code` | varchar(255) | Yes | Kode kesimpulan aspek (`meets_standard` / `below_standard` / `above_standard`) |
+| `conclusion_text` | varchar(255) | Yes | Deskripsi kesimpulan aspek |
+
+*Contoh Data*:
+```json
+{
+  "id": 1,
+  "category_assessment_id": 1,
+  "participant_id": 1,
+  "event_id": 1,
+  "batch_id": 1,
+  "position_formation_id": 1,
+  "aspect_id": 43,
+  "standard_rating": "3.00",
+  "standard_score": "45.00",
+  "individual_rating": "3.40",
+  "individual_score": "51.00",
+  "gap_rating": "0.40",
+  "gap_score": "6.00",
+  "percentage_score": 68,
+  "conclusion_code": "meets_standard",
+  "conclusion_text": "Memenuhi Standard"
+}
+```
+
+---
+
+### `category_assessments`
+Agregasi skor pada tingkat Kategori (Potensi / Kompetensi).
+
+| Kolom | Tipe | Nullable | Deskripsi |
+| :--- | :--- | :--- | :--- |
+| `id` | bigint | No | Primary Key |
+| `participant_id` | bigint | No | Foreign Key ke `participants.id` |
+| `event_id` | bigint | No | Foreign Key ke `assessment_events.id` |
+| `batch_id` | bigint | Yes | Foreign Key ke `batches.id` |
+| `position_formation_id` | bigint | Yes | Foreign Key ke `position_formations.id` |
+| `category_type_id` | bigint | No | Foreign Key ke `category_types.id` |
+| `total_standard_rating` | decimal(8,2) | No | Total standar rating dari semua aspek aktif |
+| `total_standard_score` | decimal(8,2) | No | Total standar skor dari semua aspek aktif |
+| `total_individual_rating` | decimal(8,2) | No | Total rating aktual peserta |
+| `total_individual_score` | decimal(8,2) | No | Total skor aktual peserta |
+| `gap_rating` | decimal(8,2) | No | Selisih total rating |
+| `gap_score` | decimal(8,2) | No | Selisih total skor |
+| `conclusion_code` | varchar(255) | No | Kode kelulusan kategori (e.g. `SK` = Sangat Kompeten, `K` = Kompeten) |
+| `conclusion_text` | varchar(255) | No | Deskripsi teks kelulusan |
+
+*Contoh Data*:
+```json
+{
+  "id": 1,
+  "participant_id": 1,
+  "event_id": 1,
+  "batch_id": 1,
+  "position_formation_id": 1,
+  "category_type_id": 7,
+  "total_standard_rating": "27.00",
+  "total_standard_score": "340.00",
+  "total_individual_rating": "31.68",
+  "total_individual_score": "398.48",
+  "gap_rating": "4.68",
+  "gap_score": "58.48",
+  "conclusion_code": "SK",
+  "conclusion_text": "SANGAT KOMPETEN"
+}
+```
+
+---
+
+### `final_assessments`
+Hasil akhir penilaian gabungan (Potensi + Kompetensi) untuk setiap peserta. Hanya ada satu record final per peserta.
+
+| Kolom | Tipe | Nullable | Deskripsi |
+| :--- | :--- | :--- | :--- |
+| `id` | bigint | No | Primary Key |
+| `participant_id` | bigint | No | Foreign Key unik ke `participants.id` |
+| `event_id` | bigint | No | Foreign Key ke `assessment_events.id` |
+| `batch_id` | bigint | Yes | Foreign Key ke `batches.id` |
+| `position_formation_id` | bigint | Yes | Foreign Key ke `position_formations.id` |
+| `potensi_weight` | int | No | Bobot kategori Potensi saat itu (%) |
+| `potensi_standard_score` | decimal(8,2) | No | Skor standar kategori Potensi |
+| `potensi_individual_score` | decimal(8,2) | No | Skor aktual Potensi peserta |
+| `kompetensi_weight` | int | No | Bobot kategori Kompetensi (%) |
+| `kompetensi_standard_score` | decimal(8,2) | No | Skor standar kategori Kompetensi |
+| `kompetensi_individual_score` | decimal(8,2) | No | Skor aktual Kompetensi peserta |
+| `total_standard_score` | decimal(8,2) | No | Akumulasi total skor standar |
+| `total_individual_score` | decimal(8,2) | No | Akumulasi total skor aktual peserta |
+| `achievement_percentage` | decimal(5,2) | No | Persentase kecocokan final (`individual_score` / `standard_score` * 100) |
+| `conclusion_code` | varchar(255) | No | Kode rekomendasi akhir (e.g. `K` = Kompeten, `C` = Cukup, `TK` = Tidak Kompeten) |
+| `conclusion_text` | varchar(255) | No | Deskripsi rekomendasi akhir |
+
+*Contoh Data*:
+```json
+{
+  "id": 1,
+  "participant_id": 1,
+  "event_id": 1,
+  "batch_id": 1,
+  "position_formation_id": 1,
+  "potensi_weight": 45,
+  "potensi_standard_score": "340.00",
+  "potensi_individual_score": "398.48",
+  "kompetensi_weight": 55,
+  "kompetensi_standard_score": "400.00",
+  "kompetensi_individual_score": "475.00",
+  "total_standard_score": "740.00",
+  "total_individual_score": "873.48",
+  "achievement_percentage": "118.04",
+  "conclusion_code": "K",
+  "conclusion_text": "KOMPETEN"
+}
+```
+
+---
+
+## 4. Tabel Konfigurasi Kustom, Tes Fisik, & Interpretasi AI
+
+### `custom_standards`
+Menyimpan modifikasi (overlay) bobot dan nilai standar yang disesuaikan oleh instansi (client) secara permanen.
+
+| Kolom | Tipe | Nullable | Deskripsi |
+| :--- | :--- | :--- | :--- |
+| `id` | bigint | No | Primary Key |
+| `institution_id` | bigint | No | Foreign Key ke `institutions.id` |
+| `template_id` | bigint | No | Foreign Key ke `assessment_templates.id` |
+| `code` | varchar(255) | No | Kode kustom standar unik untuk instansi |
+| `name` | varchar(255) | No | Nama kustom standar (e.g. "Standar Kejaksaan Agung Khusus") |
+| `description` | text | Yes | Keterangan standar kustom |
+| `category_weights` | json | No | Kustomisasi bobot kategori Potensi & Kompetensi |
+| `aspect_configs` | json | No | Kustomisasi bobot, standar rating, dan status aktif aspek |
+| `sub_aspect_configs` | json | No | Kustomisasi standar rating dan status aktif sub-aspek |
+| `is_active` | tinyint | No | Menyatakan apakah standar aktif (1/0) |
+| `created_by` | bigint | Yes | ID user pembuat standar (`users.id`) |
+
+*Contoh Data*:
+```json
+{
+  "id": 1,
+  "institution_id": 1,
+  "template_id": 1,
+  "code": "std_kustom_kejaksaan_2026",
+  "name": "Standard Kustom Kejaksaan 2026",
+  "description": "Standar penyesuaian khusus formasi analis hukum",
+  "category_weights": {
+    "potensi": 60,
+    "kompetensi": 40
+  },
+  "aspect_configs": {
+    "intelektual": {
+      "weight": 30,
+      "active": true
+    },
+    "komunikasi": {
+      "weight": 10,
+      "rating": 4.0,
+      "active": true
+    }
+  },
+  "sub_aspect_configs": {
+    "kecerdasan_umum": {
+      "rating": 4,
+      "active": true
+    },
+    "daya_analisa": {
+      "rating": 3,
+      "active": false
+    }
+  },
+  "is_active": 1,
+  "created_by": 2
+}
+```
+
+---
+
+### `psychological_tests`
+Menyimpan data mentah tes psikologi tambahan, seperti hasil tes klinis, tingkat stres, dan detail psikogram.
+
+| Kolom | Tipe | Nullable | Deskripsi |
+| :--- | :--- | :--- | :--- |
+| `id` | bigint | No | Primary Key |
+| `event_id` | bigint | No | Foreign Key ke `assessment_events.id` |
+| `participant_id` | bigint | No | Foreign Key ke `participants.id` |
+| `no_test` | varchar(30) | Yes | Nomor tes |
+| `username` | varchar(100) | Yes | Username peserta |
+| `validitas` | text | Yes | Hasil validitas tes |
+| `internal` | text | Yes | Hasil deskripsi profil internal peserta |
+| `interpersonal` | text | Yes | Keterangan kecakapan interpersonal |
+| `kap_kerja` | text | Yes | Kapasitas kerja peserta |
+| `klinik` | text | Yes | Catatan klinis |
+| `kesimpulan` | text | Yes | Kesimpulan psikologis |
+| `psikogram` | text | Yes | JSON array berisi poin-poin psikogram |
+| `nilai_pq` | decimal(10,2) | Yes | Nilai Psychological Quotient (PQ) |
+| `tingkat_stres` | varchar(20) | Yes | Tingkat stres (`Rendah`, `Sedang`, `Tinggi`) |
+
+*Contoh Data*:
+```json
+{
+  "id": 1,
+  "event_id": 1,
+  "participant_id": 1,
+  "no_test": "68-7-2-34-00001",
+  "username": "SRV01-000",
+  "validitas": "Valid - Hasil tes dapat dipercaya dan akurat",
+  "internal": "Memiliki kemampuan internal yang sangat baik dengan potensi tinggi...",
+  "interpersonal": "Keterampilan interpersonal yang sangat baik...",
+  "kap_kerja": "Kapasitas kerja tinggi dengan kemampuan menyelesaikan tugas kompleks secara efisien",
+  "klinik": "Tidak ada indikasi klinis yang signifikan, kondisi psikologis stabil",
+  "kesimpulan": "Kandidat dengan performa tinggi, memiliki potensi untuk posisi leadership",
+  "psikogram": {
+    "Leadership": "Sangat Baik",
+    "Problem Solving": "Sangat Baik",
+    "Adaptability": "Baik"
+  },
+  "nilai_pq": "90.51",
+  "tingkat_stres": "Rendah"
+}
+```
+
+---
+
+### `interpretations`
+Menyimpan narasi laporan interpretasi hasil asesmen per kategori untuk peserta.
+
+| Kolom | Tipe | Nullable | Deskripsi |
+| :--- | :--- | :--- | :--- |
+| `id` | bigint | No | Primary Key |
+| `participant_id` | bigint | No | Foreign Key ke `participants.id` |
+| `event_id` | bigint | No | Foreign Key ke `assessment_events.id` |
+| `category_type_id` | bigint | Yes | Foreign Key ke `category_types.id` (nullable) |
+| `interpretation_text` | text | No | Teks narasi interpretasi |
+
+*Contoh Data*:
+```json
+{
+  "id": 1,
+  "participant_id": 1,
+  "event_id": 1,
+  "category_type_id": 7,
+  "interpretation_text": "Memiliki potensi yang sangat baik dengan kemampuan di atas rata-rata dalam berbagai aspek. Kandidat menunjukkan kecenderungan untuk berkembang pesat dan mampu mengatasi tantangan kompleks."
+}
+```
+
+---
+
+### `interpretation_templates`
+Menyimpan template narasi interpretasi dinamis berdasarkan pencapaian skor/rating. Menggunakan relasi **polimorfik** ke `aspects` atau `sub_aspects`.
+
+| Kolom | Tipe | Nullable | Deskripsi |
+| :--- | :--- | :--- | :--- |
+| `id` | bigint | No | Primary Key |
+| `interpretable_type` | enum | No | Jenis target penafsiran (`sub_aspect` atau `aspect`) |
+| `interpretable_id` | bigint | Yes | ID target (`aspects.id` atau `sub_aspects.id`) |
+| `interpretable_name` | varchar(255) | Yes | Nama aspek/sub-aspek (opsi pencocokan fleksibel) |
+| `rating_value` | tinyint | No | Rating pencapaian (1 - 5) yang memicu template ini |
+| `template_text` | text | No | Narasi penjelasan hasil template |
+| `tone` | enum | No | Nada narasi (`positive`, `neutral`, `negative`) |
+| `category` | enum | No | Klasifikasi narasi (`strength`, `development_area`, `neutral`) |
+| `version` | varchar(10) | No | Versi template |
+| `is_active` | tinyint | No | Status aktif template (1/0) |
+
+*Contoh Data*:
+```json
+{
+  "id": 1,
+  "interpretable_type": "sub_aspect",
+  "interpretable_id": null,
+  "interpretable_name": "Kepekaan Interpersonal",
+  "rating_value": 2,
+  "template_text": "Kepekaan interpersonal yang dimiliki individu masih perlu ditingkatkan. Individu terkadang kesulitan dalam memahami kebutuhan orang-orang yang ada di sekitarnya sehingga responnya kurang sesuai dengan harapan.",
+  "tone": "neutral",
+  "category": "development_area",
+  "version": "v2.0",
+  "is_active": 1
+}
+```
+
+---
+
+## 5. Tabel Pengguna & Multi-Tenancy
+
+Sistem SPSP mengisolasi data antar instansi (client) menggunakan mekanisme **Multi-Tenancy berbasis kolom** (`institution_id`).
+
+### `users`
+Tabel pengguna pengelola sistem.
+
+| Kolom | Tipe | Nullable | Deskripsi |
+| :--- | :--- | :--- | :--- |
+| `id` | bigint | No | Primary Key |
+| `institution_id` | bigint | Yes | Foreign Key ke `institutions.id`. Jika `NULL`, maka pengguna adalah **Quantum Admin (Superadmin)**. |
+| `name` | varchar(255) | No | Nama lengkap pengguna |
+| `email` | varchar(255) | No | Email pengguna (Unique) |
+| `email_verified_at` | timestamp | Yes | Waktu verifikasi email |
+| `password` | varchar(255) | No | Hash password |
+| `is_active` | tinyint | No | Status aktif pengguna (1/0) |
+| `last_login_at` | timestamp | Yes | Waktu login terakhir |
+| `remember_token` | varchar(100) | Yes | Token autentikasi Laravel |
+
+*Contoh Data*:
+```json
+{
+  "id": 1,
+  "institution_id": null,
+  "name": "Admin User",
+  "email": "admin@example.com",
+  "is_active": 1,
+  "last_login_at": "2026-06-30 08:09:07"
+}
+```
+
+---
+
+### `institutions`
+Instansi client penyewa SaaS SPSP.
+
+| Kolom | Tipe | Nullable | Deskripsi |
+| :--- | :--- | :--- | :--- |
+| `id` | bigint | No | Primary Key |
+| `code` | varchar(255) | No | Kode unik instansi (e.g. `kejaksaan`, `kemenkes`) |
+| `name` | varchar(255) | No | Nama lengkap instansi |
+| `logo_path` | varchar(255) | Yes | Path file logo instansi |
+| `api_key` | varchar(255) | Yes | API Key untuk autentikasi integrasi data |
+
+*Contoh Data*:
+```json
+{
+  "id": 1,
+  "code": "kejaksaan",
+  "name": "Kejaksaan Agung RI",
+  "logo_path": "logos/kejaksaan.png",
+  "api_key": "4x470qTGHZoJe92TuY0cEAl0bv6UWJ5W"
+}
+```
+
+---
+
+### `institution_categories`
+Daftar pengelompokan instansi (e.g. Kementerian, BUMN, Pemda).
+
+| Kolom | Tipe | Nullable | Deskripsi |
+| :--- | :--- | :--- | :--- |
+| `id` | bigint | No | Primary Key |
+| `code` | varchar(255) | No | Kode kelompok instansi |
+| `name` | varchar(255) | No | Nama kelompok instansi |
+| `description` | text | Yes | Keterangan kelompok |
+| `icon` | varchar(255) | Yes | Icon representasi |
+| `color` | varchar(255) | Yes | Kode warna hex tampilan |
+| `order` | int | No | Urutan tampilan |
+| `is_active` | tinyint | No | Status keaktifan kelompok |
+
+*Contoh Data*:
+```json
+{
+  "id": 1,
+  "code": "kementerian",
+  "name": "Kementerian",
+  "description": "Kementerian dan Lembaga Pemerintah",
+  "icon": "fa-building-flag",
+  "color": "#3B82F6",
+  "order": 1,
+  "is_active": 1
+}
+```
+
+---
+
+### `category_institution` (Pivot)
+Tabel relasi many-to-many antara `institutions` and `institution_categories`.
+
+| Kolom | Tipe | Nullable | Deskripsi |
+| :--- | :--- | :--- | :--- |
+| `id` | bigint | No | Primary Key |
+| `institution_id` | bigint | No | Foreign Key ke `institutions.id` |
+| `institution_category_id` | bigint | No | Foreign Key ke `institution_categories.id` |
+| `is_primary` | tinyint | No | Menyatakan kategori utama instansi tersebut (1/0) |
+
+*Contoh Data*:
+```json
+{
+  "id": 1,
+  "institution_id": 1,
+  "institution_category_id": 1,
+  "is_primary": 1
+}
+```
+
+---
+
+## Panduan Relasi & Aliran Kalkulasi
+
+### 1. Hubungan Template terhadap Pengguna (Multi-Tenancy)
+1. Setiap data instansi diisolasi via `institution_id` di `assessment_events` dan `custom_standards`.
+2. Saat pengguna instansi mengakses sistem, `User::institution_id` membatasi scope event yang dapat dibaca.
+3. Kustomisasi standar disimpan pada `custom_standards` dengan foreign key `institution_id`. Ini memastikan instansi lain tidak melihat atau menggunakan standar kustom instansi lain.
+
+### 2. Hubungan Tingkat Prioritas Nilai Standar (3-Layer Priority)
+Saat sistem menghitung skor peserta, nilai standar kelulusan dan bobot aspek diselesaikan secara dinamis melalui `DynamicStandardService` dengan urutan prioritas:
+1. **Layer 1: Session Adjustment (Highest)** - Penyesuaian sementara oleh pengguna saat eksplorasi (disimpan di session, hilang saat logout).
+2. **Layer 2: Custom Standard (Medium)** - Standar kustom instansi yang tersimpan pada `custom_standards` di database.
+3. **Layer 3: Quantum Default (Lowest)** - Nilai standar dasar yang tersimpan di kolom `standard_rating` pada tabel `aspects` dan `sub_aspects` (snapshot awal).
+
+### 3. Rumus Kalkulasi Skor (BI Engine Logic)
+Data individual (`individual_rating`) yang di-input peserta bersifat statis. Seluruh skor dihitung dinamis di sisi memori server saat laporan dimuat:
+
+- **Aspek Potensi (Kalkulasi Rata-Rata Sub-Aspek)**:
+  $$Rating Aktual Aspek = \frac{\sum{Sub-Aspect Individual Rating}}{Jumlah Sub-Aspect Aktif}$$
+  *Catatan*: Jika sub-aspek dinonaktifkan dalam konfigurasi standar, maka nilainya dikeluarkan dari kalkulasi rata-rata.
+
+- **Skor Aspek**:
+  $$Score = Rating \times Bobot Aspek$$
+
+- **Total Skor Kategori (Potensi/Kompetensi)**:
+  $$Total Score = \sum{Individual Score Aspek-Aspek Aktif}$$
+
+- **Akumulasi Skor Final**:
+  $$Total Final Score = (Skor Potensi \times Bobot Potensi) + (Skor Kompetensi \times Bobot Kompetensi)$$
+
+- **Persentase Kecocokan (Achievement %)**:
+  $$Achievement \% = \left(\frac{Total Individual Score Final}{Total Standard Score Final}\right) \times 100\%$$
+
+---
+
+## Contoh Data Lengkap Aliran Penilaian (1 Peserta)
+
+Berikut contoh alur nilai aktual untuk satu peserta fiktif bernama **MARIADI ASTUTI, S.Kom**:
+
+### A. Sub-Aspek Potensi (Tabel `sub_aspect_assessments`)
+Di bawah aspek **Intelektual**:
+- **Kecerdasan Umum**: Standard = 3, Aktual = 4 (Rating Label: Baik)
+- **Daya Tangkap**: Standard = 3, Aktual = 3 (Rating Label: Cukup)
+- **Daya Analisa**: Standard = 3, Aktual = 4 (Rating Label: Baik)
+- **Kemampuan Logika**: Standard = 3, Aktual = 3 (Rating Label: Cukup)
+
+### B. Aspek Penilaian (Tabel `aspect_assessments`)
+1. **Aspek Potensi (Intelektual)** (Bobot = 25%):
+   - **Standard Rating** = Rata-rata standard sub-aspek = (3+3+3+3) / 4 = **3.00**
+   - **Individual Rating** = Rata-rata aktual sub-aspek = (4+3+4+3) / 4 = **3.50**
+   - **Standard Score** = 3.00 * 25 = **75.00**
+   - **Individual Score** = 3.50 * 25 = **87.50**
+   - **Gap Rating** = +0.50, **Gap Score** = +12.50
+   - **Percentage Score** = (3.50 / 3.00) * 100 = **116.6%**
+
+2. **Aspek Kompetensi (Integritas)** (Bobot = 15%):
+   - **Standard Rating** = **3.00** (Langsung dari aspek)
+   - **Individual Rating** = **3.00** (Langsung diinput)
+   - **Standard Score** = 3.00 * 15 = **45.00**
+   - **Individual Score** = 3.00 * 15 = **45.00**
+   - **Gap Rating** = **0.00**, **Gap Score** = **0.00**
+
+### C. Kategori Penilaian (Tabel `category_assessments`)
+Kategori **Potensi** (Total akumulasi dari semua aspek potensi aktif):
+- **Total Standard Score** = **340.00**
+- **Total Individual Score** = **398.48**
+- **Conclusion Code** = `SK` (Sangat Kompeten)
+
+### D. Hasil Akhir (Tabel `final_assessments`)
+Gabungan Potensi (Bobot 45%) & Kompetensi (Bobot 55%):
+- **Potensi Individual Score** = **398.48** (Bobot 45%)
+- **Kompetensi Individual Score** = **475.00** (Bobot 55%)
+- **Total Standard Score** = **740.00**
+- **Total Individual Score** = **873.48**
+- **Achievement Percentage** = (873.48 / 740.00) * 100 = **118.04%**
+- **Conclusion Code** = `K` (Kompeten)

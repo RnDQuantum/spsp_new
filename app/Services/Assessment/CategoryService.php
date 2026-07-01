@@ -112,7 +112,7 @@ class CategoryService
                 'gap_rating' => 0,
                 'gap_score' => 0,
                 'conclusion_code' => 'MS',
-                'conclusion_text' => 'MEMENUHI STANDARD',
+                'conclusion_text' => 'MEMENUHI STANDAR',
             ]
         );
     }
@@ -123,9 +123,9 @@ class CategoryService
     private function determineCategoryConclusion(float $gapScore): string
     {
         if ($gapScore < -10) {
-            return 'DBS'; // Di Bawah Standard
+            return 'DBS'; // Di Bawah Standar
         } elseif ($gapScore < 0) {
-            return 'MS'; // Memenuhi Standard
+            return 'MS'; // Memenuhi Standar
         } elseif ($gapScore < 20) {
             return 'K'; // Kompeten
         } else {
@@ -139,11 +139,11 @@ class CategoryService
     private function getCategoryConclusionText(string $code): string
     {
         return match ($code) {
-            'DBS' => 'DI BAWAH STANDARD',
-            'MS' => 'MEMENUHI STANDARD',
+            'DBS' => 'DI BAWAH STANDAR',
+            'MS' => 'MEMENUHI STANDAR',
             'K' => 'KOMPETEN',
             'SK' => 'SANGAT KOMPETEN',
-            default => 'MEMENUHI STANDARD',
+            default => 'MEMENUHI STANDAR',
         };
     }
 }

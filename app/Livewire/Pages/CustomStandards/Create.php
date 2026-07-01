@@ -89,6 +89,13 @@ class Create extends Component
             return null;
         }
 
+        // Enforce full aspect weights and other rules from validationResult
+        $validation = $this->validationResult;
+        if (! $validation['valid']) {
+            session()->flash('error', implode(' | ', $validation['errors']));
+            return null;
+        }
+
         // Create
         $service->create([
             'institution_id' => $user->institution_id,

@@ -309,7 +309,7 @@
                                 <!-- PSIKOGRAM -->
                                 <td
                                     class="py-4 px-4 text-sm text-gray-500 dark:text-gray-300 border border-gray-200 dark:border-gray-600 w-72">
-                                    <div class="whitespace-pre-line">{{ $result->psikogram ?? '-' }}</div>
+                                    <div class="whitespace-pre-line">{{ $result->psikogram_formatted }}</div>
                                 </td>
 
                                 <!-- NILAI PQ -->
@@ -380,7 +380,7 @@
                                     </svg>
                                     <p class="text-base font-medium dark:text-gray-300">Tidak ada data ditemukan</p>
                                     <p class="text-sm text-gray-400 dark:text-gray-500 mt-1">Pastikan tabel
-                                        mmpi_results
+                                        psychological_tests
                                         ada dan berisi data.</p>
                                     <button type="button" wire:click="$refresh"
                                         class="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600">

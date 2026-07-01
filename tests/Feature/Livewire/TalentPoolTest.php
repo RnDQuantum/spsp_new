@@ -203,7 +203,7 @@ class TalentPoolTest extends TestCase
             'filter.position_formation_id' => $this->position->id,
         ]);
 
-        $component = Livewire::test(\App\Livewire\Pages\TalentPool::class);
+        $component = Livewire::test(\App\Livewire\Pages\TalentPool\Index::class);
 
         // Component should render without errors
         $component->assertStatus(200);
@@ -211,9 +211,10 @@ class TalentPoolTest extends TestCase
         // Component should have data properties
         $this->assertNotNull($component->selectedEvent);
         $this->assertNotNull($component->selectedPositionId);
-        $this->assertArrayHasKey('participants', $component->matrixData);
-        $this->assertArrayHasKey('box_boundaries', $component->matrixData);
-        $this->assertArrayHasKey('box_statistics', $component->matrixData);
+        $this->assertGreaterThan(0, $component->totalParticipants);
+        $this->assertNotEmpty($component->get('chartData'));
+        $this->assertNotNull($component->get('boxBoundaries'));
+        $this->assertNotEmpty($component->get('boxStatistics'));
     }
 
     /**
@@ -252,6 +253,7 @@ class TalentPoolTest extends TestCase
 
         for ($i = 1; $i <= 4; $i++) {
             $potensiAspects[] = \App\Models\Aspect::factory()->create([
+                'template_id' => $this->position->template_id,
                 'category_type_id' => $potensiCategory->id,
                 'code' => "potensi-{$i}",
                 'name' => "Potensi Aspect {$i}",
@@ -262,6 +264,7 @@ class TalentPoolTest extends TestCase
 
         for ($i = 1; $i <= 7; $i++) {
             $kompetensiAspects[] = \App\Models\Aspect::factory()->create([
+                'template_id' => $this->position->template_id,
                 'category_type_id' => $kompetensiCategory->id,
                 'code' => "kompetensi-{$i}",
                 'name' => "Kompetensi Aspect {$i}",
@@ -280,11 +283,30 @@ class TalentPoolTest extends TestCase
 
         // Create aspect assessments for each participant
         foreach ($participants as $participant) {
+            $potensiCatAss = \App\Models\CategoryAssessment::factory()->create([
+                'participant_id' => $participant->id,
+                'category_type_id' => $potensiCategory->id,
+                'event_id' => $this->event->id,
+                'position_formation_id' => $this->position->id,
+            ]);
+
+            $kompetensiCatAss = \App\Models\CategoryAssessment::factory()->create([
+                'participant_id' => $participant->id,
+                'category_type_id' => $kompetensiCategory->id,
+                'event_id' => $this->event->id,
+                'position_formation_id' => $this->position->id,
+            ]);
+
             foreach ($allAspects as $aspect) {
                 // Generate realistic rating distribution (2.0 - 5.0)
                 $rating = $this->generateRealisticRating();
 
+                $catAssId = $aspect->category_type_id === $potensiCategory->id
+                    ? $potensiCatAss->id
+                    : $kompetensiCatAss->id;
+
                 AspectAssessment::factory()->create([
+                    'category_assessment_id' => $catAssId,
                     'participant_id' => $participant->id,
                     'aspect_id' => $aspect->id,
                     'event_id' => $this->event->id,

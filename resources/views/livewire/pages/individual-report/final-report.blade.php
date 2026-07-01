@@ -290,7 +290,7 @@
                                     <div class="border-b border-gray-300 pb-2">
                                         <div class="font-semibold mb-1">7. Psikogram</div>
                                         <div class="pl-4 text-gray-700 dark:text-gray-300 whitespace-pre-line">
-                                            {{ $psychologicalTest->psikogram ?? '-' }}
+                                            {{ $psychologicalTest->psikogram_formatted }}
                                         </div>
                                     </div>
 

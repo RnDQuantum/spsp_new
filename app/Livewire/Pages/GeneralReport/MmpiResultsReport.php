@@ -67,11 +67,11 @@ class MmpiResultsReport extends Component
     public function render()
     {
         // Cek apakah tabel ada dan berisi data
-        $tableExists = DB::getSchemaBuilder()->hasTable('mmpi_results');
+        $tableExists = DB::getSchemaBuilder()->hasTable('psychological_tests');
         $dataCount = 0;
 
         if ($tableExists) {
-            $dataCount = DB::table('mmpi_results')->count();
+            $dataCount = DB::table('psychological_tests')->count();
         }
 
         // Ambil data dengan filter

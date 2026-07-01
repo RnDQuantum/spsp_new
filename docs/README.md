@@ -21,7 +21,20 @@ Start here if you're new to SPSP or want to understand the business logic.
 
 ---
 
-### 2. Architecture Decisions
+### 2. Database Schema & Relations
+Understand the database structure, table definitions, relationships, and calculations.
+
+**[DATABASE_STRUCTURE.md](./DATABASE_STRUCTURE.md)**
+- Comprehensive database schema (20 business & system tables)
+- Entity Relationship Diagram (ERD) with Mermaid visualizer
+- Deep dive on 3-Layer Priority system data flow
+- Sample data and step-by-step scoring calculation walkthroughs
+
+**Target Audience:** Database administrators, back-end developers, QA engineers
+
+---
+
+### 3. Architecture Decisions
 Understand WHY the system is built the way it is.
 
 **[ARCHITECTURE_DECISION_RECORDS.md](./ARCHITECTURE_DECISION_RECORDS.md)**
@@ -36,7 +49,7 @@ Understand WHY the system is built the way it is.
 
 ---
 
-### 3. Visual Flow Diagrams
+### 4. Visual Flow Diagrams
 Quick visual reference for understanding system flows.
 
 **[SYSTEM_FLOW_DIAGRAMS.md](./SYSTEM_FLOW_DIAGRAMS.md)**
@@ -52,7 +65,7 @@ Quick visual reference for understanding system flows.
 
 ---
 
-### 4. Performance Optimizations
+### 5. Performance Optimizations
 Deep dives into specific optimization work.
 
 **[CRITICAL_FIX_CUSTOM_STANDARD_PERFORMANCE.md](./CRITICAL_FIX_CUSTOM_STANDARD_PERFORMANCE.md)**
@@ -281,6 +294,7 @@ Follow these standards:
 docs/
 ├── README.md                                  ← You are here
 ├── SPSP_BUSINESS_CONCEPTS.md                  ← Start here for concepts
+├── DATABASE_STRUCTURE.md                      ← Database schema and ERD
 ├── ARCHITECTURE_DECISION_RECORDS.md           ← Understand "why"
 ├── SYSTEM_FLOW_DIAGRAMS.md                    ← Visual reference
 ├── CRITICAL_FIX_CUSTOM_STANDARD_PERFORMANCE.md ← Performance fix
@@ -306,8 +320,9 @@ docs/
 
 ### For Understanding Business Logic:
 1. SPSP_BUSINESS_CONCEPTS.md (Sections 1-3)
-2. SYSTEM_FLOW_DIAGRAMS.md (Sections 1-3)
-3. ARCHITECTURE_DECISION_RECORDS.md (ADR-002)
+2. DATABASE_STRUCTURE.md (Overview & ERD)
+3. SYSTEM_FLOW_DIAGRAMS.md (Sections 1-3)
+4. ARCHITECTURE_DECISION_RECORDS.md (ADR-002)
 
 ### For Performance Work:
 1. CRITICAL_FIX_CUSTOM_STANDARD_PERFORMANCE.md (Full read)
@@ -316,11 +331,12 @@ docs/
 
 ### For Feature Development:
 1. SPSP_BUSINESS_CONCEPTS.md (Full read)
-2. ARCHITECTURE_DECISION_RECORDS.md (All ADRs)
-3. SYSTEM_FLOW_DIAGRAMS.md (Relevant sections)
+2. DATABASE_STRUCTURE.md (Relational & Config Tables)
+3. ARCHITECTURE_DECISION_RECORDS.md (All ADRs)
+4. SYSTEM_FLOW_DIAGRAMS.md (Relevant sections)
 
 ---
 
-**Last Updated:** December 2025
+**Last Updated:** July 2026
 **Maintainers:** SPSP Development Team
 **Feedback:** Welcome! Create GitHub issues or PRs.

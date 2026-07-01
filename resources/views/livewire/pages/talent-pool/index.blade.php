@@ -4,8 +4,8 @@
 
     <div class="max-w-6xl mx-auto p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md mt-10 relative">
 
-        {{-- Loading overlay untuk standard adjustment (live update, no reload) --}}
-        <div wire:loading wire:target="handleStandardUpdate"
+        {{-- Loading overlay untuk dynamic updates (live update, no reload) --}}
+        <div wire:loading wire:target="handleStandardUpdate, handleEventSelected, handlePositionSelected"
             class="absolute inset-0 bg-white/80 dark:bg-gray-900/80 z-50 rounded-lg flex items-center justify-center">
             <div class="flex flex-col items-center">
                 <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
@@ -847,12 +847,13 @@
                 }, 200);
             }
 
-            // Initialize chart on page load
-            async function initializeChart() {
-                try {
-                    const data = await $wire.getChartInitializationData();
-                    if (!data) return;
+            // 🎨 DATA: Initial data passed directly from PHP to avoid AJAX on first load
+            let initialChartData = @json($this->getChartInitializationData());
 
+            // Initialize chart with data (either local or fetched via AJAX)
+            function renderChartWithData(data) {
+                if (!data) return;
+                try {
                     const pesertaData = data.pesertaData || [];
                     const boxBoundaries = data.boxBoundaries;
                     const boxStatistics = data.boxStatistics || {};
@@ -869,41 +870,30 @@
 
                     updateSummaryTable(boxStatistics);
                 } catch (e) {
-                    console.error('Error fetching chart data on init:', e);
+                    console.error('Error rendering chart:', e);
                 }
             }
 
-            // 🚀 Handle trigger-reload event with loading overlay
-            function showLoadingAndReload() {
-                // Create loading overlay dynamically
-                const overlay = document.createElement('div');
-                overlay.className =
-                    'fixed inset-0 bg-white/90 dark:bg-gray-900/90 z-[99999] flex items-center justify-center';
-
-                overlay.innerHTML = `
-            <div class="flex flex-col items-center">
-                <div class="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mb-4"></div>
-                <div class="text-gray-700 dark:text-gray-200 font-semibold text-lg">Memuat ulang halaman...</div>
-            </div>
-        `;
-                document.body.appendChild(overlay);
-
-                // Small delay to ensure session is saved before reload
-                setTimeout(() => {
-                    window.location.reload();
-                }, 50);
+            // Initialize chart on page load
+            async function initializeChart() {
+                renderChartWithData(initialChartData);
             }
 
-            // 🚀 Expose globally for components
+            // 🚀 Disable full-screen loading overlay and page reload
+            function showLoadingAndReload() {
+                // No-op: handled dynamically by wire:loading on the component card
+            }
+
+            // 🚀 Expose globally for components (keeps choice components click handler safe)
             window.showLoadingOverlay = showLoadingAndReload;
 
-            // Register Livewire v3 component events
-            $wire.on('trigger-reload', () => {
-                showLoadingAndReload();
-            });
-
-            $wire.on('chartDataNeedsUpdate', () => {
-                initializeChart();
+            $wire.on('chartDataNeedsUpdate', async () => {
+                try {
+                    const data = await $wire.getChartInitializationData();
+                    renderChartWithData(data);
+                } catch (e) {
+                    console.error('Error fetching updated chart data:', e);
+                }
             });
 
             // Delay slightly to ensure DOM is fully ready

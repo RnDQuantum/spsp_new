@@ -23,7 +23,6 @@ class Index extends Component
      * Listen to filter component events
      */
     protected $listeners = [
-        'event-selected' => 'handleEventSelected',
         'position-selected' => 'handlePositionSelected',
         'standard-adjusted' => 'handleStandardUpdate',
         'standard-switched' => 'handleStandardUpdate',
@@ -43,32 +42,40 @@ class Index extends Component
 
     /**
      * Handle event selection
-     * 🚀 PERFORMANCE: Session already saved in EventSelector, just trigger reload
+     * 🚀 PERFORMANCE: Session already saved in EventSelector, just dynamic load
      */
     public function handleEventSelected(?string $eventCode): void
     {
-        // Session is already saved in EventSelector::updatedEventCode()
-        // Parameter kept for event listener compatibility
-        // Just ensure it's committed to storage before reload
+        if ($eventCode) {
+            session(['filter.event_code' => $eventCode]);
+            // Clear position filter on event change to avoid mismatch
+            session()->forget('filter.position_formation_id');
+            $this->selectedPositionId = null;
+        }
         session()->save();
 
-        // Dispatch event to JavaScript to handle redirect
-        $this->dispatch('trigger-reload');
+        // Reload data dynamically
+        $this->loadEventAndPosition();
+        $this->loadMatrixData();
+        $this->dispatchChartUpdate();
     }
 
     /**
      * Handle position selection
-     * 🚀 PERFORMANCE: Session already saved in PositionSelector, just trigger reload
+     * 🚀 PERFORMANCE: Session already saved in PositionSelector, just dynamic load
      */
     public function handlePositionSelected(?int $positionFormationId): void
     {
-        // Session is already saved in PositionSelector::updatedPositionFormationId()
-        // Parameter kept for event listener compatibility
-        // Just ensure it's committed to storage before reload
+        if ($positionFormationId) {
+            session(['filter.position_formation_id' => $positionFormationId]);
+            $this->selectedPositionId = $positionFormationId;
+        }
         session()->save();
 
-        // Dispatch event to JavaScript to handle redirect
-        $this->dispatch('trigger-reload');
+        // Reload data dynamically
+        $this->loadEventAndPosition();
+        $this->loadMatrixData();
+        $this->dispatchChartUpdate();
     }
 
     /**

@@ -80,11 +80,14 @@ class TrainingRecommendationService
             }
         }
 
+        $hasAdjustments = ! empty(session()->get("standard_adjustment.{$aspect->template_id}", []))
+            || session()->get("selected_standard.{$aspect->template_id}") !== null;
+
         $configHash = md5(json_encode([
             'aspect_code' => $aspect->code,
             'aspect_rating' => $aspectRating,
             'sub_aspect_ratings' => $subAspectRatings,
-            'session' => session()->getId(),
+            'session' => $hasAdjustments ? session()->getId() : 'default',
         ]));
 
         $cacheKey = "training_participants:{$aspectId}:{$eventId}:{$positionFormationId}:{$configHash}";
@@ -188,10 +191,13 @@ class TrainingRecommendationService
             $aspectRatings[$aspect->code] = $standardService->getAspectRating($templateId, $aspect->code);
         }
 
+        $hasAdjustments = ! empty(session()->get("standard_adjustment.{$templateId}", []))
+            || session()->get("selected_standard.{$templateId}") !== null;
+
         $configHash = md5(json_encode([
             'template_id' => $templateId,
             'aspect_ratings' => $aspectRatings,
-            'session' => session()->getId(),
+            'session' => $hasAdjustments ? session()->getId() : 'default',
         ]));
 
         $cacheKey = "training_priority:{$templateId}:{$eventId}:{$positionFormationId}:{$configHash}";
@@ -323,11 +329,14 @@ class TrainingRecommendationService
             }
         }
 
+        $hasAdjustments = ! empty(session()->get("standard_adjustment.{$aspect->template_id}", []))
+            || session()->get("selected_standard.{$aspect->template_id}") !== null;
+
         $configHash = md5(json_encode([
             'aspect_code' => $aspect->code,
             'aspect_rating' => $aspectRating,
             'sub_aspect_ratings' => $subAspectRatings,
-            'session' => session()->getId(), // Isolates per-user session adjustments
+            'session' => $hasAdjustments ? session()->getId() : 'default', // Isolates per-user session adjustments
         ]));
 
         $cacheKey = "training_summary:{$aspectId}:{$eventId}:{$positionFormationId}:{$configHash}";
