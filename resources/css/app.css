@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&display=swap');
 @import 'tailwindcss';
 
 /* Force font-display swap to prevent invisible text during font load (reduces CLS) */
@@ -14,6 +15,12 @@
 
 @theme {
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-display: 'Lora', Georgia, Cambria, 'Times New Roman', Times, serif;
+    --color-slate-charcoal: #1e293b;
+    --color-forest-green: #15803d;
+    --color-sage-green: #10b981;
+    --color-rust-red: #b91c1c;
+    --color-warm-white: #faf9f6;
 }
 
 

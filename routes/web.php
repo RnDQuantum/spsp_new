@@ -13,6 +13,8 @@ Route::get('/', function () {
     return view('welcome');
 })->name('welcome');
 
+Route::get('/hca-report-demo', App\Livewire\HcaReport\HcaReportPage::class)->name('hca-report-demo');
+
 Route::middleware(['guest'])->group(function () {
     // Authentication Routes
     Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
