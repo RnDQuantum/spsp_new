@@ -10,14 +10,14 @@
     <!-- Section Header -->
     <div class="border-b border-warm-border pb-6 mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-            <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400 block mb-1">Dimensi Utama (Layer 1–3)</span>
+            <span class="text-[11px] font-bold uppercase tracking-widest text-slate-400 block mb-1">Dimensi Utama (Layer 1–3)</span>
             <h2 class="font-display text-2xl md:text-3xl text-primary-ink font-semibold">
                 Human Capital <span class="text-accent-amber italic">Index</span>
             </h2>
         </div>
         <!-- Metric Snapshot -->
         <div class="flex items-center gap-3">
-            <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Status Kesiapan:</span>
+            <span class="text-[11px] font-bold uppercase tracking-widest text-slate-400">Status Kesiapan:</span>
             <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-forest-green border border-emerald-100">
                 <i class="fas fa-circle-check mr-1.5 text-xs"></i> Ready for Promotion
             </span>
@@ -42,7 +42,7 @@
                 <div class="absolute flex flex-col items-center justify-center">
                     <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Score Index</span>
                     <span class="text-4xl md:text-5xl font-extrabold text-primary-ink leading-none tracking-tight">4.12</span>
-                    <span class="text-[10px] font-semibold text-slate-500 mt-1">out of 5.00</span>
+                    <span class="text-[11px] font-semibold text-slate-500 mt-1">out of 5.00</span>
                 </div>
             </div>
 
@@ -58,13 +58,13 @@
         </div>
 
         <!-- Right: Radar Chart (7 cols) -->
-        <div class="lg:col-span-7 bg-warm-ivory border border-warm-border rounded-xl p-6 relative flex flex-col items-center">
+        <div class="lg:col-span-7 p-6 md:p-8 relative flex flex-col items-center">
             
             <!-- Chart Header -->
             <div class="w-full flex justify-between items-center mb-6">
-                <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Visualisasi 5 Pilar</span>
+                <span class="text-[11px] font-bold uppercase tracking-widest text-slate-400">Visualisasi 5 Pilar</span>
                 <!-- Custom SVG Legend -->
-                <div class="flex items-center gap-3 text-[10px] font-semibold text-slate-600">
+                <div class="flex items-center gap-3 text-[11px] font-semibold text-slate-600">
                     <span class="flex items-center gap-1">
                         <svg class="w-4 h-2" viewBox="0 0 16 8">
                             <line x1="0" y1="4" x2="16" y2="4" stroke="#15803d" stroke-width="2"></line>
@@ -95,7 +95,7 @@
     </div>
 
     <!-- Values / Metrics Grid Table (For absolute readability & print fallback) -->
-    <div class="mt-8 overflow-hidden border border-warm-border rounded-xl">
+    <div class="mt-8 overflow-x-auto border-t border-warm-border">
         <table class="w-full border-collapse text-left text-xs">
             <thead>
                 <tr class="bg-warm-ivory border-b border-warm-border text-slate-400 font-bold uppercase tracking-wider">

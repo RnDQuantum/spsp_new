@@ -3,7 +3,7 @@
     <!-- Section Header -->
     <div class="border-b border-warm-border pb-6 mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-            <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400 block mb-1">Highlight Karakter & Kelebihan Utama</span>
+            <span class="text-[11px] font-bold uppercase tracking-widest text-slate-400 block mb-1">Highlight Karakter & Kelebihan Utama</span>
             <h2 class="font-display text-2xl md:text-3xl text-primary-ink font-semibold">
                 Kekuatan <span class="text-accent-amber italic">Psikologis</span>
             </h2>
@@ -32,7 +32,7 @@
                         <div class="w-8 h-8 rounded-lg bg-accent-amber/10 text-accent-amber border border-accent-amber/20 flex items-center justify-center shrink-0">
                             <i class="fas {{ $strength['icon'] }} text-xs"></i>
                         </div>
-                        <span class="text-[9px] font-bold uppercase tracking-wider text-slate-500 bg-warm-ivory px-2 py-0.5 rounded border border-warm-border">
+                        <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500 bg-warm-ivory px-2 py-0.5 rounded border border-warm-border">
                             {{ $strength['tag'] }}
                         </span>
                     </div>

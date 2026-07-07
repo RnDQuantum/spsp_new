@@ -4,10 +4,10 @@
     <div class="flex items-center justify-between border-b border-warm-border pb-6">
         <div class="flex items-center gap-2">
             <span class="w-2.5 h-2.5 rounded-full bg-accent-amber"></span>
-            <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Human Capital Assessment</span>
+            <span class="text-xs font-bold uppercase tracking-widest text-slate-400">Human Capital Assessment</span>
         </div>
-        <div class="px-3 py-1 bg-red-50 text-red-700 text-[10px] font-bold uppercase tracking-widest rounded border border-red-100 flex items-center gap-1.5">
-            <i class="fas fa-eye-slash text-[9px]"></i>
+        <div class="px-3 py-1 bg-red-50 text-red-700 text-xs font-bold uppercase tracking-widest rounded border border-red-100 flex items-center gap-1.5">
+            <i class="fas fa-eye-slash text-xs"></i>
             Highly Confidential
         </div>
     </div>
@@ -15,7 +15,7 @@
     <!-- Main Title Content Area (Asymmetrical Layout) -->
     <div class="my-auto py-12 md:py-20 flex flex-col md:flex-row gap-12 items-start justify-between">
         <div class="w-full md:w-3/5 space-y-6">
-            <span class="inline-block text-xs font-bold text-accent-amber uppercase tracking-widest bg-accent-amber/10 px-3 py-1 rounded">
+            <span class="inline-block text-xs font-semibold text-accent-amber mb-1">
                 Executive Talent Mapping
             </span>
             <h1 class="font-display text-4xl md:text-5xl lg:text-6xl text-primary-ink font-semibold leading-tight">
@@ -31,17 +31,17 @@
         <!-- Asymmetric Right Grid Accent -->
         <div class="w-full md:w-2/5 border-l-2 border-warm-border pl-8 space-y-8 py-2">
             <div>
-                <span class="text-[9px] font-bold uppercase tracking-widest text-slate-400 block mb-1">Kode Dokumen</span>
+                <span class="text-[11px] font-bold uppercase tracking-widest text-slate-400 block mb-1">Kode Dokumen</span>
                 <span class="font-mono text-sm text-slate-700 font-semibold uppercase tracking-wider">HCA-2026-BS09</span>
             </div>
             <div>
-                <span class="text-[9px] font-bold uppercase tracking-widest text-slate-400 block mb-1">Metode Assessment</span>
+                <span class="text-[11px] font-bold uppercase tracking-widest text-slate-400 block mb-1">Metode Assessment</span>
                 <span class="text-sm text-slate-700 font-semibold flex items-center gap-1.5">
                     <i class="fas fa-layer-group text-accent-amber"></i> 3-Layer Integrated Assessment
                 </span>
             </div>
             <div>
-                <span class="text-[9px] font-bold uppercase tracking-widest text-slate-400 block mb-1">Status Laporan</span>
+                <span class="text-[11px] font-bold uppercase tracking-widest text-slate-400 block mb-1">Status Laporan</span>
                 <span class="inline-flex items-center gap-1.5 text-xs text-accent-amber font-semibold bg-amber-50 border border-amber-100 px-2 py-0.5 rounded-full">
                     <span class="w-1.5 h-1.5 rounded-full bg-accent-amber animate-pulse"></span>
                     Verified & Locked
@@ -51,7 +51,7 @@
     </div>
 
     <!-- Candidate Detailed Identitas Grid -->
-    <div class="bg-warm-ivory rounded-xl p-8 border border-warm-border flex flex-col md:flex-row items-center justify-between gap-8">
+    <div class="py-8 border-t border-b border-warm-border flex flex-col md:flex-row items-center justify-between gap-8">
         <!-- Photo Placeholder (Rounded, Premium Frame) -->
         <div class="shrink-0 flex items-center justify-center relative">
             <div class="w-28 h-28 rounded-full overflow-hidden border-2 border-warm-border shadow-sm bg-slate-300">
@@ -68,26 +68,26 @@
         <!-- Details Grid -->
         <div class="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-8 text-sm">
             <div>
-                <span class="text-[9px] font-bold uppercase tracking-widest text-slate-400 block mb-0.5">Nama Lengkap</span>
+                <span class="text-[11px] font-bold uppercase tracking-widest text-slate-400 block mb-0.5">Nama Lengkap</span>
                 <span class="font-display font-semibold text-slate-800 text-base">Budi Santoso, M.B.A.</span>
             </div>
             <div>
-                <span class="text-[9px] font-bold uppercase tracking-widest text-slate-400 block mb-0.5">Nomor Ujian / Tes</span>
+                <span class="text-[11px] font-bold uppercase tracking-widest text-slate-400 block mb-0.5">Nomor Ujian / Tes</span>
                 <span class="font-mono text-slate-700 font-semibold text-sm">TS-00918-2026</span>
             </div>
             <div>
-                <span class="text-[9px] font-bold uppercase tracking-widest text-slate-400 block mb-0.5">Posisi Target</span>
+                <span class="text-[11px] font-bold uppercase tracking-widest text-slate-400 block mb-0.5">Posisi Target</span>
                 <span class="text-slate-700 font-semibold">VP of Talent Development</span>
             </div>
             <div>
-                <span class="text-[9px] font-bold uppercase tracking-widest text-slate-400 block mb-0.5">Tanggal Asesmen</span>
+                <span class="text-[11px] font-bold uppercase tracking-widest text-slate-400 block mb-0.5">Tanggal Asesmen</span>
                 <span class="text-slate-700 font-semibold">06 Juli 2026</span>
             </div>
         </div>
     </div>
 
     <!-- Bottom Footer (Authorized Sign-off) -->
-    <div class="mt-8 border-t border-warm-border pt-6 flex flex-col sm:flex-row items-center justify-between text-[10px] text-slate-400">
+    <div class="mt-8 border-t border-warm-border pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500">
         <div>
             Lembaga Penyelenggara: <strong class="text-slate-500">SPSP (Sistem Pemetaan Staf Integratif)</strong>
         </div>

@@ -58,14 +58,14 @@
                 </div>
 
                 <!-- Participant Brief Profile -->
-                <div class="p-6 border-b border-warm-border/10 bg-black/10 flex items-center gap-4">
+                <div class="p-6 border-b border-warm-border/10 flex items-center gap-4">
                     <div class="w-12 h-12 rounded-full bg-slate-700 overflow-hidden border-2 border-accent-amber flex items-center justify-center font-display font-bold text-white text-lg">
                         BS
                     </div>
                     <div class="overflow-hidden">
                         <h2 class="font-semibold text-white text-sm truncate">Budi Santoso, M.B.A.</h2>
                         <p class="text-xs text-slate-400 truncate">VP of Talent Development</p>
-                        <span class="inline-flex mt-1 items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-accent-amber/20 text-accent-amber border border-accent-amber/30">
+                        <span class="inline-flex mt-1 items-center px-1.5 py-0.5 rounded text-xs font-medium bg-accent-amber/20 text-accent-amber border border-accent-amber/30">
                             Active Talent
                         </span>
                     </div>
@@ -75,7 +75,7 @@
                 <nav class="flex-1 overflow-y-auto p-4 space-y-6 scrollbar-hidden">
                     @foreach ($menuGroups as $group)
                         <div>
-                            <span class="px-3 text-[10px] font-bold uppercase tracking-widest text-slate-400 flex items-center gap-2 mb-2">
+                            <span class="px-3 text-[11px] font-semibold tracking-wide text-slate-400 flex items-center gap-2 mb-2">
                                 <i class="fas {{ $group['icon'] }} text-accent-amber text-xs w-4"></i>
                                 {{ $group['title'] }}
                             </span>
@@ -88,7 +88,7 @@
                                                 class="w-full text-left px-3 py-2 rounded-md text-xs font-medium transition-all duration-200 flex items-center justify-between {{ $activeSection === $section['code'] ? 'bg-accent-amber text-white shadow-sm' : 'text-slate-300 hover:bg-[#2c2724] hover:text-white' }}"
                                             >
                                                 <span>{{ $section['label'] }}</span>
-                                                <i class="fas fa-chevron-right text-[10px] opacity-60"></i>
+                                                 <i class="fas fa-chevron-right text-xs opacity-60"></i>
                                             </button>
                                         @else
                                             <div 
@@ -97,8 +97,8 @@
                                             >
                                                 <span>{{ $section['label'] }}</span>
                                                 <div class="flex items-center gap-1">
-                                                    <span class="text-[9px] bg-slate-700 text-slate-400 px-1 py-0.5 rounded font-mono scale-90 group-hover:block hidden">DRAFT</span>
-                                                    <i class="fas fa-lock text-[9px] opacity-40"></i>
+                                                    <span class="text-[11px] bg-slate-700 text-slate-400 px-1.5 py-0.5 rounded font-mono scale-90 group-hover:block hidden">DRAFT</span>
+                                                    <i class="fas fa-lock text-xs opacity-40"></i>
                                                 </div>
                                             </div>
                                         @endif
@@ -110,7 +110,7 @@
                 </nav>
 
                 <!-- Footer details -->
-                <div class="p-4 border-t border-warm-border/10 text-center text-[10px] text-slate-400">
+                <div class="p-4 border-t border-warm-border/10 text-center text-xs text-slate-500">
                     <p class="font-mono">CONFIDENTIAL &copy; {{ date('Y') }} SPSP</p>
                 </div>
             </aside>

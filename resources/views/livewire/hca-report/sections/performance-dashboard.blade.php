@@ -9,7 +9,7 @@
     <!-- Section Header -->
     <div class="border-b border-warm-border pb-6 mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-            <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400 block mb-1">Layer 3: Kinerja Aktual</span>
+            <span class="text-[11px] font-bold uppercase tracking-widest text-slate-400 block mb-1">Layer 3: Kinerja Aktual</span>
             <h2 class="font-display text-2xl md:text-3xl text-primary-ink font-semibold">
                 Performance <span class="text-accent-amber italic">Dashboard</span>
             </h2>
@@ -26,11 +26,11 @@
     <!-- Charts & Metrics Grid -->
     <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-center mb-10">
         <!-- Left: Line Chart (8 cols) -->
-        <div class="md:col-span-8 bg-warm-ivory border border-warm-border rounded-xl p-6 relative flex flex-col items-center">
+        <div class="md:col-span-8 p-6 md:p-8 relative flex flex-col items-center">
             <div class="w-full flex justify-between items-center mb-6">
-                <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Tren KPI 5 Tahun</span>
+                <span class="text-[11px] font-bold uppercase tracking-widest text-slate-400">Tren KPI 5 Tahun</span>
                 <!-- Custom SVG Legend -->
-                <div class="flex items-center gap-3 text-[10px] font-semibold text-slate-600">
+                <div class="flex items-center gap-3 text-[11px] font-semibold text-slate-600">
                     <span class="flex items-center gap-1.5">
                         <svg class="w-4 h-2" viewBox="0 0 16 8">
                             <line x1="0" y1="4" x2="16" y2="4" stroke="#15803d" stroke-width="2.5"></line>
@@ -74,7 +74,7 @@
     <!-- Snapshot Grid Table (Details of current year) -->
     <div>
         <h3 class="font-display font-semibold text-primary-ink text-sm mb-4">Breakdown Metrik Kinerja (Tahun Buku 2026)</h3>
-        <div class="overflow-hidden border border-warm-border rounded-xl">
+        <div class="overflow-x-auto border-t border-warm-border">
             <table class="w-full border-collapse text-left text-xs">
                 <thead>
                     <tr class="bg-warm-ivory border-b border-warm-border text-slate-400 font-bold uppercase tracking-wider">
@@ -93,7 +93,7 @@
                             <td class="py-3 px-4 text-center font-mono">{{ $row['target'] }}</td>
                             <td class="py-3 px-4 text-center font-mono font-bold text-forest-green">{{ $row['actual'] }}</td>
                             <td class="py-3 px-4 text-right">
-                                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold border {{ $row['statusClass'] }}">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold border {{ $row['statusClass'] }}">
                                     {{ $row['status'] }}
                                 </span>
                             </td>

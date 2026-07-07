@@ -3,7 +3,7 @@
     <!-- Section Header -->
     <div class="border-b border-warm-border pb-6 mb-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-            <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400 block mb-1">Konteks Historis & Pengalaman</span>
+            <span class="text-[11px] font-bold uppercase tracking-widest text-slate-400 block mb-1">Konteks Historis & Pengalaman</span>
             <h2 class="font-display text-2xl md:text-3xl text-primary-ink font-semibold">
                 Riwayat <span class="text-accent-amber italic">Karier</span>
             </h2>
@@ -37,7 +37,7 @@
                         <span class="inline-block text-xs font-bold px-2.5 py-0.5 rounded-full font-mono {{ $index === 0 ? 'text-accent-amber bg-accent-amber/10 border border-accent-amber/20' : 'text-slate-500 bg-warm-ivory border border-warm-border' }}">
                             {{ $item['period'] }}
                         </span>
-                        <p class="text-[11px] text-slate-500 font-semibold uppercase tracking-wider block mt-1">
+                        <p class="text-[11px] text-slate-500 font-semibold block mt-0.5">
                             {{ $item['unit'] }}
                         </p>
                     </div>

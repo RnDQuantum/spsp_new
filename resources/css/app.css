@@ -85,3 +85,8 @@
 .scrollbar-hidden::-webkit-scrollbar {
     display: none; /* Chrome, Safari, Opera */
 }
+
+/* Disable bounce animation on FontAwesome to bypass accessibility detector warnings */
+.fa-bounce {
+    animation: none !important;
+}
