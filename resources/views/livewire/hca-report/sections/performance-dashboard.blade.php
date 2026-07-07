@@ -3,15 +3,15 @@
     data-years="{{ json_encode($years) }}"
     data-trends="{{ json_encode($kpiTrends) }}"
     data-benchmarks="{{ json_encode($kpiBenchmarks) }}"
-    class="w-full max-w-4xl mx-auto bg-white border border-slate-200 shadow-xl rounded-2xl p-8 md:p-12 print:border-none print:shadow-none"
+    class="w-full max-w-4xl mx-auto bg-white border border-warm-border rounded-xl p-8 md:p-12 print:border-none"
 >
     
     <!-- Section Header -->
-    <div class="border-b border-slate-100 pb-6 mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div class="border-b border-warm-border pb-6 mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
             <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400 block mb-1">Layer 3: Kinerja Aktual</span>
-            <h2 class="font-display text-2xl md:text-3xl text-slate-charcoal font-semibold">
-                Performance <span class="text-forest-green italic">Dashboard</span>
+            <h2 class="font-display text-2xl md:text-3xl text-primary-ink font-semibold">
+                Performance <span class="text-accent-amber italic">Dashboard</span>
             </h2>
         </div>
         <!-- Latest Score Badge -->
@@ -26,7 +26,7 @@
     <!-- Charts & Metrics Grid -->
     <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-center mb-10">
         <!-- Left: Line Chart (8 cols) -->
-        <div class="md:col-span-8 bg-slate-50 border border-slate-100 rounded-xl p-6 relative flex flex-col items-center">
+        <div class="md:col-span-8 bg-warm-ivory border border-warm-border rounded-xl p-6 relative flex flex-col items-center">
             <div class="w-full flex justify-between items-center mb-6">
                 <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Tren KPI 5 Tahun</span>
                 <!-- Custom SVG Legend -->
@@ -54,14 +54,14 @@
 
         <!-- Right: Trend Summary Text (4 cols) -->
         <div class="md:col-span-4 space-y-4">
-            <h3 class="font-display font-semibold text-slate-charcoal text-base">Analisa Kinerja</h3>
+            <h3 class="font-display font-semibold text-primary-ink text-base">Analisa Kinerja</h3>
             <p class="text-xs text-slate-600 leading-relaxed">
                 Terdapat tren peningkatan kinerja yang stabil dari tahun 2022 hingga 2026. Pencapaian KPI tahun terakhir sebesar <strong class="text-forest-green">98.20%</strong> menandakan konsistensi tinggi dalam mengeksekusi inisiatif strategis di tingkat VP.
             </p>
             <div class="p-4 bg-emerald-50/50 border border-emerald-100 rounded-lg text-xs space-y-1.5">
                 <div class="flex justify-between font-semibold">
                     <span class="text-slate-500">Rata-rata 5 Tahun:</span>
-                    <span class="text-slate-800 font-mono">95.40%</span>
+                    <span class="text-primary-ink font-mono">95.40%</span>
                 </div>
                 <div class="flex justify-between font-semibold">
                     <span class="text-slate-500">Pertumbuhan/Tahun:</span>
@@ -73,11 +73,11 @@
 
     <!-- Snapshot Grid Table (Details of current year) -->
     <div>
-        <h3 class="font-display font-semibold text-slate-charcoal text-sm mb-4">Breakdown Metrik Kinerja (Tahun Buku 2026)</h3>
-        <div class="overflow-hidden border border-slate-200 rounded-xl">
+        <h3 class="font-display font-semibold text-primary-ink text-sm mb-4">Breakdown Metrik Kinerja (Tahun Buku 2026)</h3>
+        <div class="overflow-hidden border border-warm-border rounded-xl">
             <table class="w-full border-collapse text-left text-xs">
                 <thead>
-                    <tr class="bg-slate-50 border-b border-slate-200 text-slate-400 font-bold uppercase tracking-wider">
+                    <tr class="bg-warm-ivory border-b border-warm-border text-slate-400 font-bold uppercase tracking-wider">
                         <th class="py-3 px-4 w-5/12">Metrik KPI</th>
                         <th class="py-3 px-4 text-center">Bobot</th>
                         <th class="py-3 px-4 text-center">Target</th>
@@ -85,10 +85,10 @@
                         <th class="py-3 px-4 text-right">Status</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100 font-medium text-slate-700">
+                <tbody class="divide-y divide-warm-border font-medium text-slate-700">
                     @foreach ($kpiBreakdown as $row)
-                        <tr class="hover:bg-slate-50/55 transition-colors">
-                            <td class="py-3 px-4 font-semibold text-slate-800">{{ $row['metric'] }}</td>
+                        <tr class="hover:bg-warm-ivory/50 transition-colors">
+                            <td class="py-3 px-4 font-semibold text-primary-ink">{{ $row['metric'] }}</td>
                             <td class="py-3 px-4 text-center font-mono text-slate-500">{{ $row['weight'] }}</td>
                             <td class="py-3 px-4 text-center font-mono">{{ $row['target'] }}</td>
                             <td class="py-3 px-4 text-center font-mono font-bold text-forest-green">{{ $row['actual'] }}</td>
@@ -191,7 +191,7 @@
                         min: 85,
                         max: 100,
                         grid: {
-                            color: '#f1f5f9'
+                            color: '#f0ebe4'
                         },
                         ticks: {
                             stepSize: 5,

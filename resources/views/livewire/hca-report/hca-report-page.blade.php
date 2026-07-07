@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-warm-white font-sans text-slate-charcoal leading-relaxed">
+<div class="min-h-screen bg-warm-ivory font-sans text-primary-ink leading-relaxed">
     @if ($printMode)
         <!-- PRINT FLAT VIEW -->
         <div class="print-container bg-white p-0">
@@ -45,10 +45,10 @@
         <!-- WEB INTERACTIVE VIEW -->
         <div class="flex flex-col md:flex-row min-h-screen">
             <!-- Left Sidebar (TOC) -->
-            <aside class="w-full md:w-80 bg-slate-charcoal text-slate-100 flex flex-col border-r border-slate-700 shrink-0">
+            <aside class="w-full md:w-80 bg-primary-ink text-slate-200 flex flex-col border-r border-warm-border/10 shrink-0">
                 <!-- Branded Header -->
-                <div class="p-6 border-b border-slate-700 flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-lg bg-forest-green flex items-center justify-center font-display font-bold text-white text-xl shadow-md">
+                <div class="p-6 border-b border-warm-border/10 flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-lg bg-accent-amber flex items-center justify-center font-display font-bold text-white text-xl shadow-md">
                         HC
                     </div>
                     <div>
@@ -58,14 +58,14 @@
                 </div>
 
                 <!-- Participant Brief Profile -->
-                <div class="p-6 border-b border-slate-700 bg-slate-800/50 flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-full bg-slate-600 overflow-hidden border-2 border-forest-green flex items-center justify-center font-display font-bold text-white text-lg">
+                <div class="p-6 border-b border-warm-border/10 bg-black/10 flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-full bg-slate-700 overflow-hidden border-2 border-accent-amber flex items-center justify-center font-display font-bold text-white text-lg">
                         BS
                     </div>
                     <div class="overflow-hidden">
                         <h2 class="font-semibold text-white text-sm truncate">Budi Santoso, M.B.A.</h2>
                         <p class="text-xs text-slate-400 truncate">VP of Talent Development</p>
-                        <span class="inline-flex mt-1 items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-forest-green/20 text-sage-green border border-forest-green/30">
+                        <span class="inline-flex mt-1 items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-accent-amber/20 text-accent-amber border border-accent-amber/30">
                             Active Talent
                         </span>
                     </div>
@@ -76,7 +76,7 @@
                     @foreach ($menuGroups as $group)
                         <div>
                             <span class="px-3 text-[10px] font-bold uppercase tracking-widest text-slate-400 flex items-center gap-2 mb-2">
-                                <i class="fas {{ $group['icon'] }} text-forest-green text-xs w-4"></i>
+                                <i class="fas {{ $group['icon'] }} text-accent-amber text-xs w-4"></i>
                                 {{ $group['title'] }}
                             </span>
                             <ul class="space-y-1">
@@ -85,7 +85,7 @@
                                         @if ($section['active'])
                                             <button 
                                                 wire:click="setSection('{{ $section['code'] }}')"
-                                                class="w-full text-left px-3 py-2 rounded-md text-xs font-medium transition-all duration-200 flex items-center justify-between {{ $activeSection === $section['code'] ? 'bg-forest-green text-white shadow-sm' : 'text-slate-300 hover:bg-slate-700 hover:text-white' }}"
+                                                class="w-full text-left px-3 py-2 rounded-md text-xs font-medium transition-all duration-200 flex items-center justify-between {{ $activeSection === $section['code'] ? 'bg-accent-amber text-white shadow-sm' : 'text-slate-300 hover:bg-[#2c2724] hover:text-white' }}"
                                             >
                                                 <span>{{ $section['label'] }}</span>
                                                 <i class="fas fa-chevron-right text-[10px] opacity-60"></i>
@@ -110,18 +110,18 @@
                 </nav>
 
                 <!-- Footer details -->
-                <div class="p-4 border-t border-slate-700 text-center text-[10px] text-slate-400">
+                <div class="p-4 border-t border-warm-border/10 text-center text-[10px] text-slate-400">
                     <p class="font-mono">CONFIDENTIAL &copy; {{ date('Y') }} SPSP</p>
                 </div>
             </aside>
 
             <!-- Right Content Area -->
-            <main class="flex-1 flex flex-col min-h-0 bg-warm-white">
+            <main class="flex-1 flex flex-col min-h-0 bg-warm-ivory">
                 <!-- Top Toolbar (Sticky) -->
-                <header class="bg-white border-b border-slate-200 px-8 py-4 flex items-center justify-between shrink-0 sticky top-0 z-30">
+                <header class="bg-white border-b border-warm-border px-8 py-4 flex items-center justify-between shrink-0 sticky top-0 z-30">
                     <div class="flex items-center gap-2">
                         <span class="text-xs font-bold uppercase tracking-widest text-slate-400">Section Aktif</span>
-                        <span class="text-xs font-semibold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200">
+                        <span class="text-xs font-semibold text-primary-ink/80 bg-warm-ivory px-2.5 py-1 rounded-md border border-warm-border">
                             @switch($activeSection)
                                 @case('cover') 01 — Cover Page @break
                                 @case('hci') 04 — Human Capital Index @break
@@ -135,7 +135,7 @@
                     <div class="flex items-center gap-3">
                         <button 
                             wire:click="togglePrintMode(true)"
-                            class="bg-forest-green hover:bg-forest-green/90 text-white font-medium text-xs px-4 py-2 rounded-md shadow-sm transition-all duration-200 flex items-center gap-2 cursor-pointer"
+                            class="bg-[#171412] hover:bg-[#2c2724] text-warm-ivory font-medium text-xs px-4 py-2 rounded-md shadow-sm transition-all duration-200 flex items-center gap-2 cursor-pointer"
                         >
                             <i class="fas fa-print"></i>
                             Cetak PDF

@@ -4,15 +4,15 @@
     data-actual="{{ json_encode($actualRatings) }}"
     data-standard="{{ json_encode($standardRatings) }}"
     data-tolerance="{{ json_encode($toleranceRatings) }}"
-    class="w-full max-w-4xl mx-auto bg-white border border-slate-200 shadow-xl rounded-2xl p-8 md:p-12 print:border-none print:shadow-none"
+    class="w-full max-w-4xl mx-auto bg-white border border-warm-border rounded-xl p-8 md:p-12 print:border-none"
 >
     
     <!-- Section Header -->
-    <div class="border-b border-slate-100 pb-6 mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div class="border-b border-warm-border pb-6 mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
             <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400 block mb-1">Dimensi Utama (Layer 1–3)</span>
-            <h2 class="font-display text-2xl md:text-3xl text-slate-charcoal font-semibold">
-                Human Capital <span class="text-forest-green italic">Index</span>
+            <h2 class="font-display text-2xl md:text-3xl text-primary-ink font-semibold">
+                Human Capital <span class="text-accent-amber italic">Index</span>
             </h2>
         </div>
         <!-- Metric Snapshot -->
@@ -34,21 +34,21 @@
             <div class="relative w-48 h-48 flex items-center justify-center">
                 <!-- SVG Circle Track -->
                 <svg class="w-full h-full transform -rotate-90">
-                    <circle cx="96" cy="96" r="80" stroke="#f1f5f9" stroke-width="12" fill="transparent"></circle>
-                    <circle cx="96" cy="96" r="80" stroke="#15803d" stroke-width="12" fill="transparent" 
+                    <circle cx="96" cy="96" r="80" stroke="#f0ebe4" stroke-width="12" fill="transparent"></circle>
+                    <circle cx="96" cy="96" r="80" stroke="#b45309" stroke-width="12" fill="transparent" 
                             stroke-dasharray="502.4" stroke-dashoffset="88.4" stroke-linecap="round"></circle> <!-- 82.40% progress -->
                 </svg>
                 <!-- Inner Score Content -->
                 <div class="absolute flex flex-col items-center justify-center">
                     <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Score Index</span>
-                    <span class="text-4xl md:text-5xl font-extrabold text-slate-charcoal leading-none tracking-tight">4.12</span>
+                    <span class="text-4xl md:text-5xl font-extrabold text-primary-ink leading-none tracking-tight">4.12</span>
                     <span class="text-[10px] font-semibold text-slate-500 mt-1">out of 5.00</span>
                 </div>
             </div>
 
             <!-- Narrative / Interpretation -->
             <div class="space-y-3">
-                <div class="inline-block text-xs font-bold text-forest-green bg-emerald-50 border border-emerald-100 px-2.5 py-0.5 rounded">
+                <div class="inline-block text-xs font-bold text-accent-amber bg-accent-amber/10 border border-accent-amber/20 px-2.5 py-0.5 rounded">
                     Talent Category: {{ $talentCategory }} ({{ $talentIndexPercent }}%)
                 </div>
                 <p class="text-sm text-slate-600">
@@ -58,7 +58,7 @@
         </div>
 
         <!-- Right: Radar Chart (7 cols) -->
-        <div class="lg:col-span-7 bg-slate-50 border border-slate-100 rounded-xl p-6 relative flex flex-col items-center">
+        <div class="lg:col-span-7 bg-warm-ivory border border-warm-border rounded-xl p-6 relative flex flex-col items-center">
             
             <!-- Chart Header -->
             <div class="w-full flex justify-between items-center mb-6">
@@ -95,10 +95,10 @@
     </div>
 
     <!-- Values / Metrics Grid Table (For absolute readability & print fallback) -->
-    <div class="mt-8 overflow-hidden border border-slate-200 rounded-xl">
+    <div class="mt-8 overflow-hidden border border-warm-border rounded-xl">
         <table class="w-full border-collapse text-left text-xs">
             <thead>
-                <tr class="bg-slate-50 border-b border-slate-200 text-slate-400 font-bold uppercase tracking-wider">
+                <tr class="bg-warm-ivory border-b border-warm-border text-slate-400 font-bold uppercase tracking-wider">
                     <th class="py-3 px-4 w-1/3">Pilar Human Capital</th>
                     <th class="py-3 px-4 text-center">Standar Min.</th>
                     <th class="py-3 px-4 text-center">Batas Toleransi</th>
@@ -106,10 +106,10 @@
                     <th class="py-3 px-4 text-right">Deviasi/Gap</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-slate-100 font-medium text-slate-700">
+            <tbody class="divide-y divide-warm-border font-medium text-slate-700">
                 @foreach ($labels as $index => $label)
-                    <tr class="hover:bg-slate-50/55 transition-colors">
-                        <td class="py-3 px-4 font-semibold text-slate-800">{{ $label }}</td>
+                    <tr class="hover:bg-warm-ivory/50 transition-colors">
+                        <td class="py-3 px-4 font-semibold text-primary-ink">{{ $label }}</td>
                         <td class="py-3 px-4 text-center font-mono">{{ number_format($standardRatings[$index], 2) }}</td>
                         <td class="py-3 px-4 text-center font-mono text-slate-400">{{ number_format($toleranceRatings[$index], 2) }}</td>
                         <td class="py-3 px-4 text-center font-mono font-bold text-forest-green bg-emerald-50/30">{{ number_format($actualRatings[$index], 2) }}</td>
@@ -225,13 +225,13 @@
                             backdropColor: 'transparent'
                         },
                         grid: {
-                            color: '#e2e8f0'
+                            color: '#f0ebe4'
                         },
                         angleLines: {
-                            color: '#e2e8f0'
+                            color: '#f0ebe4'
                         },
                         pointLabels: {
-                            color: '#1e293b',
+                            color: '#171412',
                             font: {
                                 size: 11,
                                 weight: '600',

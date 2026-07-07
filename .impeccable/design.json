@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-07-07T08:38:45Z",
+  "title": "Design System: Human Capital Assessment Report",
+  "extensions": {
+    "colorMeta": {
+      "primary": { "role": "primary", "displayName": "Deep Espresso Charcoal", "canonical": "#171412", "tonalRamp": ["#000000", "#171412", "#2c2724", "#4a423d", "#6e625a", "#94877e", "#bea797", "#f0ebe4"] },
+      "accent": { "role": "accent", "displayName": "Amber Gold", "canonical": "#b45309", "tonalRamp": ["#78350f", "#92400e", "#b45309", "#d97706", "#f59e0b", "#fbbf24", "#fcd34d", "#fef3c7"] },
+      "neutral-bg": { "role": "neutral", "displayName": "Warm Ivory Paper", "canonical": "#faf8f5", "tonalRamp": ["#1c1917", "#44403c", "#78716c", "#a8a29e", "#d6d3d1", "#e7e5e4", "#f5f5f4", "#faf8f5"] },
+      "neutral-border": { "role": "neutral", "displayName": "Warm Beige Border", "canonical": "#f0ebe4", "tonalRamp": ["#3e3935", "#655e58", "#8b827b", "#b2a8a1", "#d8ce87", "#e7dfd9", "#faf8f5", "#f0ebe4"] },
+      "neutral-card": { "role": "neutral", "displayName": "Pure White", "canonical": "#ffffff", "tonalRamp": ["#ffffff", "#fafafa", "#f5f5f5", "#e5e5e5", "#d4d4d4", "#a3a3a3", "#737373", "#171717"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Large page titles and hero metrics." },
+      "headline": { "displayName": "Headline", "purpose": "Section titles." },
+      "title": { "displayName": "Title", "purpose": "Card titles and subheadings." },
+      "body": { "displayName": "Body", "purpose": "Paragraphs, explanations, and descriptions." },
+      "label": { "displayName": "Label", "purpose": "Badges, tables, chart labels, and micro-copy." }
+    },
+    "shadows": [
+      { "name": "micro-hover", "value": "0 2px 4px rgba(0,0,0,0.02)", "purpose": "Tiny feedback shadow on card hover." }
+    ],
+    "motion": [],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" },
+      { "name": "xl", "value": "1280px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Used for main actions like generating PDF or primary triggers.",
+      "html": "<button class=\"ds-btn-primary\">CETAK PDF</button>",
+      "css": ".ds-btn-primary { background: #171412; color: #faf8f5; padding: 8px 16px; border: none; border-radius: 4px; font-family: 'Instrument Sans', sans-serif; font-weight: 500; font-size: 0.875rem; letter-spacing: 0.05em; cursor: pointer; transition: background 0.15s ease-in-out; } .ds-btn-primary:hover { background: #2c2724; }"
+    },
+    {
+      "name": "Report Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Standard container for content, KPI metrics, and tables.",
+      "html": "<div class=\"ds-card\"><h3 class=\"ds-card-title\">Human Capital Index</h3><p class=\"ds-card-body\">Indeks komprehensif kapasitas modal manusia.</p></div>",
+      "css": ".ds-card { background: #ffffff; border: 1px solid #f0ebe4; border-radius: 8px; padding: 24px; font-family: 'Instrument Sans', sans-serif; } .ds-card-title { font-family: 'Lora', serif; font-size: 1.25rem; font-weight: 600; color: #171412; margin: 0 0 8px 0; } .ds-card-body { font-size: 1rem; color: #4a423d; margin: 0; line-height: 1.6; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Executive Journal",
+    "overview": "The 'Executive Journal' theme elevates the Human Capital Assessment Report from a standard data dashboard to a premium, high-readability printed and digital journal. It utilizes high-contrast editorial typography, wide margins, warm background surfaces that prevent screen glare, and precise borders instead of heavy drop shadows.",
+    "keyCharacteristics": [
+      "Editorial serif headings paired with clean geometric sans-serif UI elements.",
+      "Warm ivory backgrounds with white content surfaces to mimic premium paper.",
+      "Warm beige borders replacing cool/blue slates for a structured, non-digital look.",
+      "Amber-gold accents used sparingly to guide focus on key statistics and indexes."
+    ],
+    "rules": [
+      { "name": "The 10% Accent Rule", "body": "The Amber Gold accent is used strictly on 10% or less of any given screen. Its rarity is the point; when everything is highlighted, nothing is.", "section": "colors" },
+      { "name": "The Ink Contrast Rule", "body": "All body and detail text must maintain a minimum contrast ratio of 4.5:1 against their backgrounds. Text must never fade into a light gray.", "section": "colors" },
+      { "name": "The No-Shout Letter Spacing Rule", "body": "Headings must never have letter-spacing less than -0.04em. Tighter spacing causes characters to touch and degrades editorial readability.", "section": "typography" },
+      { "name": "The Balanced Headline Rule", "body": "All h1, h2, and h3 tags must apply text-wrap: balance to prevent awkward line breaks.", "section": "typography" },
+      { "name": "The Border Depth Rule", "body": "Use borders instead of shadows to differentiate layout containers. Borders must be solid 1px with #f0ebe4 (Warm Beige).", "section": "elevation" }
+    ],
+    "dos": [
+      "Do use Lora for display headings and Instrument Sans for body and data labels.",
+      "Do maintain a high contrast ratio (4.5:1) for all text against backgrounds.",
+      "Do wrap large text containers with a maximum width of 75ch.",
+      "Do use @media print rules to optimize the layout for PDF exports."
+    ],
+    "donts": [
+      "Don't use border-left or border-right accents thicker than 1px on cards/callouts.",
+      "Don't use gradient text or background-clip text effects.",
+      "Don't use decorative glassmorphism or blurs.",
+      "Don't use heavy card shadows or box shadows with blur radii greater than 8px.",
+      "Don't use rounded corners larger than 12px for cards or inputs.",
+      "Don't use neon or high-saturation colors for core UI components."
+    ]
+  }
+}
