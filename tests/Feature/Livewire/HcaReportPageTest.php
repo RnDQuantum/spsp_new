@@ -54,23 +54,31 @@ class HcaReportPageTest extends TestCase
             
             // Switch to Kekuatan Psikologis (active in Phase A)
             ->call('setSection', 'strengths')
-            ->assertSet('activeSection', 'strengths');
+            ->assertSet('activeSection', 'strengths')
+            
+            // Switch to Executive Summary (newly active in Phase B)
+            ->call('setSection', 'exec_summary')
+            ->assertSet('activeSection', 'exec_summary')
+            
+            // Switch to DISC (newly active in Phase B)
+            ->call('setSection', 'disc')
+            ->assertSet('activeSection', 'disc')
+            
+            // Switch to 9-Box Matrix (newly active in Phase B)
+            ->call('setSection', 'nine_box')
+            ->assertSet('activeSection', 'nine_box');
     }
 
     /**
-     * Test that switching to an inactive/draft section does not change the state
+     * Test that switching to a non-existent section does not change the state
      */
-    public function test_switching_to_inactive_section_does_not_change_state(): void
+    public function test_switching_to_invalid_section_does_not_change_state(): void
     {
         Livewire::test(HcaReportPage::class)
             ->assertSet('activeSection', 'cover')
             
-            // Switch to 'exec_summary' (which is inactive/draft in Phase A)
-            ->call('setSection', 'exec_summary')
-            ->assertSet('activeSection', 'cover') // should remain 'cover'
-            
-            // Switch to 'disc' (inactive in Phase A)
-            ->call('setSection', 'disc')
+            // Switch to a completely invalid code
+            ->call('setSection', 'invalid_section_code_999')
             ->assertSet('activeSection', 'cover'); // should remain 'cover'
     }
 

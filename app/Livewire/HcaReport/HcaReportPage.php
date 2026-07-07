@@ -30,8 +30,8 @@ class HcaReportPage extends Component
             'icon' => 'fa-file-invoice',
             'sections' => [
                 ['code' => 'cover', 'label' => '01 — Cover Page', 'active' => true],
-                ['code' => 'exec_summary', 'label' => '02 — Ringkasan Eksekutif', 'active' => false],
-                ['code' => 'participant_id', 'label' => '03 — Identitas Peserta', 'active' => false],
+                ['code' => 'exec_summary', 'label' => '02 — Ringkasan Eksekutif', 'active' => true],
+                ['code' => 'participant_id', 'label' => '03 — Identitas Peserta', 'active' => true],
                 ['code' => 'hci', 'label' => '04 — Human Capital Index', 'active' => true],
             ]
         ],
@@ -39,22 +39,22 @@ class HcaReportPage extends Component
             'title' => 'Kompetensi & Potensi (Layer 1–2)',
             'icon' => 'fa-layer-group',
             'sections' => [
-                ['code' => 'competency', 'label' => '05 — Layer 1: Kompetensi', 'active' => false],
+                ['code' => 'competency', 'label' => '05 — Layer 1: Kompetensi', 'active' => true],
                 ['code' => 'career', 'label' => '06 — Riwayat Karier', 'active' => true],
-                ['code' => 'potential', 'label' => '07 — Layer 2: Potensi', 'active' => false],
-                ['code' => 'cognitive', 'label' => '08 — IQ & Profil Kognitif', 'active' => false],
+                ['code' => 'potential', 'label' => '07 — Layer 2: Potensi', 'active' => true],
+                ['code' => 'cognitive', 'label' => '08 — IQ & Profil Kognitif', 'active' => true],
             ]
         ],
         [
             'title' => 'Kepribadian & Perilaku',
             'icon' => 'fa-brain',
             'sections' => [
-                ['code' => 'big_five', 'label' => '09 — Big Five Personality', 'active' => false],
-                ['code' => 'disc', 'label' => '10 — DISC Profile', 'active' => false],
-                ['code' => 'learning_agility', 'label' => '11 — Learning Agility', 'active' => false],
-                ['code' => 'leadership_potential', 'label' => '12 — Leadership Potential', 'active' => false],
-                ['code' => 'eq', 'label' => '13 — Emotional Intelligence (EQ)', 'active' => false],
-                ['code' => 'integrity', 'label' => '14 — Values & Integrity', 'active' => false],
+                ['code' => 'big_five', 'label' => '09 — Big Five Personality', 'active' => true],
+                ['code' => 'disc', 'label' => '10 — DISC Profile', 'active' => true],
+                ['code' => 'learning_agility', 'label' => '11 — Learning Agility', 'active' => true],
+                ['code' => 'leadership_potential', 'label' => '12 — Leadership Potential', 'active' => true],
+                ['code' => 'eq', 'label' => '13 — Emotional Intelligence (EQ)', 'active' => true],
+                ['code' => 'integrity', 'label' => '14 — Values & Integrity', 'active' => true],
             ]
         ],
         [
@@ -62,26 +62,26 @@ class HcaReportPage extends Component
             'icon' => 'fa-chart-line',
             'sections' => [
                 ['code' => 'performance', 'label' => '15 — Performance Dashboard', 'active' => true],
-                ['code' => 'nine_box', 'label' => '16 — Talent 9-Box Matrix', 'active' => false],
-                ['code' => 'succession', 'label' => '17 — Succession Readiness', 'active' => false],
+                ['code' => 'nine_box', 'label' => '16 — Talent 9-Box Matrix', 'active' => true],
+                ['code' => 'succession', 'label' => '17 — Succession Readiness', 'active' => true],
             ]
         ],
         [
             'title' => 'Kesehatan & Risiko',
             'icon' => 'fa-heart-circle-check',
             'sections' => [
-                ['code' => 'personal_profile', 'label' => '18 — Profil Personal (Pelengkap)', 'active' => false],
-                ['code' => 'mental_health', 'label' => '19 — Kesehatan Jiwa', 'active' => false],
+                ['code' => 'personal_profile', 'label' => '18 — Profil Personal (Pelengkap)', 'active' => true],
+                ['code' => 'mental_health', 'label' => '19 — Kesehatan Jiwa', 'active' => true],
                 ['code' => 'strengths', 'label' => '20 — Kekuatan Psikologis', 'active' => true],
-                ['code' => 'risk_indicators', 'label' => '21 — Indikator Risiko', 'active' => false],
+                ['code' => 'risk_indicators', 'label' => '21 — Indikator Risiko', 'active' => true],
             ]
         ],
         [
             'title' => 'Rekomendasi',
             'icon' => 'fa-lightbulb',
             'sections' => [
-                ['code' => 'development_rec', 'label' => '22 — Rekomendasi Pengembangan', 'active' => false],
-                ['code' => 'next_role_rec', 'label' => '23 — Rekomendasi Peran Berikutnya', 'active' => false],
+                ['code' => 'development_rec', 'label' => '22 — Rekomendasi Pengembangan', 'active' => true],
+                ['code' => 'next_role_rec', 'label' => '23 — Rekomendasi Peran Berikutnya', 'active' => true],
             ]
         ]
     ];

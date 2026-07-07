@@ -10,16 +10,16 @@
     <!-- Section Header -->
     <div class="border-b border-warm-border pb-6 mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-            <span class="text-[11px] font-bold uppercase tracking-widest text-slate-400 block mb-1">Dimensi Utama (Layer 1–3)</span>
+            <span class="text-[11px] font-bold uppercase tracking-widest text-slate-400 block mb-1">{{ $subtitle }}</span>
             <h2 class="font-display text-2xl md:text-3xl text-primary-ink font-semibold">
-                Human Capital <span class="text-accent-amber italic">Index</span>
+                {{ explode(' ', $title)[0] }} <span class="text-accent-amber italic">{{ count(explode(' ', $title)) > 1 ? implode(' ', array_slice(explode(' ', $title), 1)) : '' }}</span>
             </h2>
         </div>
         <!-- Metric Snapshot -->
         <div class="flex items-center gap-3">
-            <span class="text-[11px] font-bold uppercase tracking-widest text-slate-400">Status Kesiapan:</span>
+            <span class="text-[11px] font-bold uppercase tracking-widest text-slate-400">Status:</span>
             <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-forest-green border border-emerald-100">
-                <i class="fas fa-circle-check mr-1.5 text-xs"></i> Ready for Promotion
+                <i class="fas fa-circle-check mr-1.5 text-xs"></i> {{ $talentCategory }}
             </span>
         </div>
     </div>
@@ -36,12 +36,12 @@
                 <svg class="w-full h-full transform -rotate-90">
                     <circle cx="96" cy="96" r="80" stroke="#f0ebe4" stroke-width="12" fill="transparent"></circle>
                     <circle cx="96" cy="96" r="80" stroke="#b45309" stroke-width="12" fill="transparent" 
-                            stroke-dasharray="502.4" stroke-dashoffset="88.4" stroke-linecap="round"></circle> <!-- 82.40% progress -->
+                            stroke-dasharray="502.4" stroke-dashoffset="{{ 502.4 * (1 - $talentIndexPercent / 100) }}" stroke-linecap="round"></circle>
                 </svg>
                 <!-- Inner Score Content -->
                 <div class="absolute flex flex-col items-center justify-center">
                     <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Score Index</span>
-                    <span class="text-4xl md:text-5xl font-extrabold text-primary-ink leading-none tracking-tight">4.12</span>
+                    <span class="text-4xl md:text-5xl font-extrabold text-primary-ink leading-none tracking-tight">{{ number_format($talentIndex, 2) }}</span>
                     <span class="text-[11px] font-semibold text-slate-500 mt-1">out of 5.00</span>
                 </div>
             </div>
@@ -52,7 +52,7 @@
                     Talent Category: {{ $talentCategory }} ({{ $talentIndexPercent }}%)
                 </div>
                 <p class="text-sm text-slate-600">
-                    Budi Santoso menunjukkan profil kompetensi dan potensi yang sangat kokoh. Indeks Kinerja dan Potensi berada jauh di atas standar institusi, menandakan kesiapan tinggi untuk peran kepemimpinan berikutnya.
+                    {{ $desc }}
                 </p>
             </div>
         </div>

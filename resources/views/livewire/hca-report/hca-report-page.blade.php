@@ -7,9 +7,24 @@
                 <livewire:hca-report.sections.cover />
             </div>
 
+            <!-- 02 Ringkasan Eksekutif -->
+            <div class="page-break p-8">
+                <livewire:hca-report.sections.executive-summary />
+            </div>
+
+            <!-- 03 Identitas Peserta -->
+            <div class="page-break p-8">
+                <livewire:hca-report.sections.participant-profile />
+            </div>
+
             <!-- 04 HCI -->
             <div class="page-break p-8">
-                <livewire:hca-report.sections.index-radar-section />
+                <livewire:hca-report.sections.index-radar-section sectionCode="hci" />
+            </div>
+
+            <!-- 05 Kompetensi -->
+            <div class="page-break p-8">
+                <livewire:hca-report.sections.score-list-section sectionCode="competency" />
             </div>
 
             <!-- 06 Riwayat Karier -->
@@ -17,14 +32,89 @@
                 <livewire:hca-report.sections.timeline-section />
             </div>
 
+            <!-- 07 Potensi -->
+            <div class="page-break p-8">
+                <livewire:hca-report.sections.index-radar-section sectionCode="potential" />
+            </div>
+
+            <!-- 08 IQ -->
+            <div class="page-break p-8">
+                <livewire:hca-report.sections.score-list-section sectionCode="cognitive" />
+            </div>
+
+            <!-- 09 Big Five -->
+            <div class="page-break p-8">
+                <livewire:hca-report.sections.score-list-section sectionCode="big_five" />
+            </div>
+
+            <!-- 10 DISC -->
+            <div class="page-break p-8">
+                <livewire:hca-report.sections.disc-profile />
+            </div>
+
+            <!-- 11 Learning Agility -->
+            <div class="page-break p-8">
+                <livewire:hca-report.sections.score-list-section sectionCode="learning_agility" />
+            </div>
+
+            <!-- 12 Leadership Potential -->
+            <div class="page-break p-8">
+                <livewire:hca-report.sections.score-list-section sectionCode="leadership_potential" />
+            </div>
+
+            <!-- 13 EQ -->
+            <div class="page-break p-8">
+                <livewire:hca-report.sections.index-radar-section sectionCode="eq" />
+            </div>
+
+            <!-- 14 Values & Integrity -->
+            <div class="page-break p-8">
+                <livewire:hca-report.sections.score-list-section sectionCode="integrity" />
+            </div>
+
             <!-- 15 Performance Dashboard -->
             <div class="page-break p-8">
                 <livewire:hca-report.sections.performance-dashboard />
             </div>
 
+            <!-- 16 9-Box Matrix -->
+            <div class="page-break p-8">
+                <livewire:hca-report.sections.nine-box-matrix />
+            </div>
+
+            <!-- 17 Succession Readiness -->
+            <div class="page-break p-8">
+                <livewire:hca-report.sections.succession-readiness />
+            </div>
+
+            <!-- 18 Profil Personal -->
+            <div class="page-break p-8">
+                <livewire:hca-report.sections.qualitative-list-section sectionCode="personal_profile" />
+            </div>
+
+            <!-- 19 Kesehatan Jiwa -->
+            <div class="page-break p-8">
+                <livewire:hca-report.sections.mental-health-section />
+            </div>
+
             <!-- 20 Kekuatan Psikologis -->
+            <div class="page-break p-8">
+                <livewire:hca-report.sections.qualitative-list-section sectionCode="strengths" />
+            </div>
+
+            <!-- 21 Indikator Risiko -->
+            <div class="page-break p-8">
+                <livewire:hca-report.sections.risk-indicators />
+            </div>
+
+            <!-- 22 Rekomendasi Pengembangan -->
+            <div class="page-break p-8">
+                <livewire:hca-report.sections.development-recommendation />
+            </div>
+
+            <!-- 23 Rekomendasi Peran Berikutnya -->
             <div class="p-8">
-                <livewire:hca-report.sections.qualitative-list-section />
+                <livewire:hca-report.sections.next-role-recommendation />
             </div>
         </div>
 
@@ -122,13 +212,18 @@
                     <div class="flex items-center gap-2">
                         <span class="text-xs font-bold uppercase tracking-widest text-slate-400">Section Aktif</span>
                         <span class="text-xs font-semibold text-primary-ink/80 bg-warm-ivory px-2.5 py-1 rounded-md border border-warm-border">
-                            @switch($activeSection)
-                                @case('cover') 01 — Cover Page @break
-                                @case('hci') 04 — Human Capital Index @break
-                                @case('career') 06 — Riwayat Karier @break
-                                @case('performance') 15 — Performance Dashboard @break
-                                @case('strengths') 20 — Kekuatan Psikologis @break
-                            @endswitch
+                            @php
+                                $activeLabel = '';
+                                foreach ($menuGroups as $group) {
+                                    foreach ($group['sections'] as $sec) {
+                                        if ($sec['code'] === $activeSection) {
+                                            $activeLabel = $sec['label'];
+                                            break 2;
+                                        }
+                                    }
+                                }
+                            @endphp
+                            {{ $activeLabel }}
                         </span>
                     </div>
 
@@ -152,17 +247,55 @@
                                 @case('cover')
                                     <livewire:hca-report.sections.cover />
                                     @break
+                                @case('exec_summary')
+                                    <livewire:hca-report.sections.executive-summary />
+                                    @break
+                                @case('participant_id')
+                                    <livewire:hca-report.sections.participant-profile />
+                                    @break
                                 @case('hci')
-                                    <livewire:hca-report.sections.index-radar-section />
+                                @case('potential')
+                                @case('eq')
+                                    <livewire:hca-report.sections.index-radar-section :sectionCode="$activeSection" :key="'radar_' . $activeSection" />
+                                    @break
+                                @case('competency')
+                                @case('cognitive')
+                                @case('big_five')
+                                @case('learning_agility')
+                                @case('leadership_potential')
+                                @case('integrity')
+                                    <livewire:hca-report.sections.score-list-section :sectionCode="$activeSection" :key="'scores_' . $activeSection" />
                                     @break
                                 @case('career')
                                     <livewire:hca-report.sections.timeline-section />
                                     @break
+                                @case('disc')
+                                    <livewire:hca-report.sections.disc-profile />
+                                    @break
                                 @case('performance')
                                     <livewire:hca-report.sections.performance-dashboard />
                                     @break
+                                @case('nine_box')
+                                    <livewire:hca-report.sections.nine-box-matrix />
+                                    @break
+                                @case('succession')
+                                    <livewire:hca-report.sections.succession-readiness />
+                                    @break
+                                @case('personal_profile')
                                 @case('strengths')
-                                    <livewire:hca-report.sections.qualitative-list-section />
+                                    <livewire:hca-report.sections.qualitative-list-section :sectionCode="$activeSection" :key="'qualitative_' . $activeSection" />
+                                    @break
+                                @case('mental_health')
+                                    <livewire:hca-report.sections.mental-health-section />
+                                    @break
+                                @case('risk_indicators')
+                                    <livewire:hca-report.sections.risk-indicators />
+                                    @break
+                                @case('development_rec')
+                                    <livewire:hca-report.sections.development-recommendation />
+                                    @break
+                                @case('next_role_rec')
+                                    <livewire:hca-report.sections.next-role-recommendation />
                                     @break
                             @endswitch
                         </div>

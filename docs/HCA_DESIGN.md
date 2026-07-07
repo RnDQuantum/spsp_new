@@ -121,3 +121,69 @@ Run command:
 php artisan test --filter=HcaReportPageTest
 ```
 Result: **PASS (5 tests, 15 assertions)**
+
+---
+
+## 6. Phase B Specification: Component & Pattern Rollout
+
+This phase expands our refined visual layout across all remaining 18 sections by using unified component templates to prevent code duplication, while creating specialized components for unique data visual structures.
+
+### A. Pattern Re-use Mapping
+
+1. **Index + Radar Component (`IndexRadarSection`)**:
+   - **Target Sections**: `07 — Layer 2: Potensi`, `13 — Emotional Intelligence (EQ)`.
+   - **Design Guidelines**: Parameterized dimensions and thresholds. Keep grid color to Warm Beige (`#f0ebe4`), actual values in Forest Green, and standard boundaries in Rust Red.
+2. **Score List Component (`ScoreListSection`)**:
+   - **Target Sections**: `05 — Layer 1: Kompetensi`, `08 — IQ & Profil Kognitif`, `11 — Learning Agility`, `12 — Leadership Potential`, `14 — Values & Integrity`.
+   - **Design Guidelines**: Use horizontal progress bars. Employ a single-hue sequential scale (e.g. Amber/Gold tints) to represent values instead of colorful rainbow lines. Align all bars to a clean grid with textual value markers on the right.
+3. **Qualitative Cards Component (`QualitativeListSection`)**:
+   - **Target Sections**: `18 — Profil Personal (Pelengkap)`.
+   - **Design Guidelines**: Flat cards with Warm Beige borders. Clearly mark this section with a disclaimer label indicating its informal supplemental nature.
+
+### B. Specialized Layout Components (Unique Sections)
+
+1. **02 — Ringkasan Eksekutif (Executive Summary)**:
+   - **Layout**: High-density snapshot card.
+   - **Visual**: Display a single composite Talent Index score in large prominent typography, next to a 5-pillar key rating indicator.
+2. **03 — Identitas Peserta (Participant Profile)**:
+   - **Layout**: Factual data table.
+   - **Visual**: A highly readable 2-column metadata list. Optimize for high-contrast reading with zero charts.
+3. **10 — DISC Profile**:
+   - **Layout**: 2x2 DISC Grid.
+   - **Visual**: Graphically highlight the dominant quadrant (Dominance, Influence, Steadiness, Compliance) using gold accent boundaries, paired with narrative columns for behaviors.
+4. **16 — Talent 9-Box Matrix**:
+   - **Layout**: Standard 3x3 HR grid.
+   - **Visual**: Highlight the candidate's active box (e.g. "Future Leader") using Amber Gold backgrounds and high-contrast text, while keeping other boxes in subtle Warm Beige lines.
+5. **17 — Succession Readiness**:
+   - **Layout**: Horizon timeline.
+   - **Visual**: Segment kesiapan into 3 timeframes (Siap sekarang, <1 tahun, <2 tahun) utilizing a linear sequence.
+6. **19 — Kesehatan Jiwa (Mental Health)**:
+   - **Layout**: Metric + Narrative split.
+   - **Visual**: Gauge indicator for overall well-being score, paired with text blocks for psychologist comments.
+7. **21 — Indikator Risiko**:
+   - **Layout**: Non-alarmist gauge card.
+   - **Visual**: Low/Medium/High indicator with subtle warm colors, avoiding bright warning colors if the risk is low.
+8. **22 — Rekomendasi Pengembangan**:
+   - **Layout**: Two-column contrast grid.
+   - **Visual**: High-contrast list separating "Kekuatan Utama" (Strengths) and "Area Pengembangan" (Development Areas).
+9. **23 — Rekomendasi Peran Berikutnya**:
+   - **Layout**: Progressive action roadmap.
+   - **Visual**: 3-phase chronological steps (Fase 1/2/3) with horizontal paths, showing transition target positions.
+
+---
+
+## 7. Phase C Specification: Integration & Print Assembly
+
+This phase stitches all 23 sections together into a single, cohesive web application and designs the flat print rendering pipeline.
+
+### A. Navigation & Lazy Loading
+- **Sidebar TOC**: Handles active state swapping. Use Livewire conditional rendering (`@if($activeSection === 'code')`) to load components lazily, preventing the DOM from loading all 23 sections at once in web view.
+- **Section Swapping**: Add subtle fade-in transitions (`transition-all duration-200`) when swapping active views to improve user experience.
+
+### B. Print Mode (Cetak PDF)
+- **Flattened Layout**: When `printMode` is toggled true:
+  - Hide the sidebar TOC and top sticky header controls using utility CSS classes (`print:hidden`).
+  - Render all 23 sections in sequence.
+  - Apply CSS page-break rules (`page-break-after: always;`) to each major section wrapper to guarantee clean page boundaries during PDF export.
+  - Enforce `max-w-full` on printing view layouts so they span the entire paper width dynamically.
+
