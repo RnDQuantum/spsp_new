@@ -9,15 +9,15 @@ This document details the completed visual design, technical implementation, and
 To elevate the report from a generic data dashboard to a high-readability executive report, we implemented the **"Executive Journal"** theme.
 
 ### Color Palette
-- **Dominant UI / Chrome**: Slate/Deep Navy (`#0f172a` / `#1e293b`) — Used for structure, headers, and navigation sidebars.
-- **Accents & Branding**: Amber/Gold (`#b45309` / `#d97706`) — Used selectively for the cover highlights, active statuses, large index numbers, and the primary radial progress ring.
-- **Backgrounds**: Warm Ivory (`#fafaf9` / `#fdfbf7`) — Used for body backgrounds to reduce screen glare and mimic physical paper texture.
-- **Card Backgrounds**: Pure White (`#ffffff`) with subtle slate-100 borders (`#f1f5f9`).
+- **Dominant UI / Chrome**: Deep Espresso Charcoal (`#171412`) — Used for structure, headers, navigation sidebars, and primary text.
+- **Accents & Branding**: Amber/Gold (`#b45309`) — Used selectively for active statuses, large index numbers, and the primary radial progress ring.
+- **Backgrounds**: Warm Ivory Paper (`#faf8f5`) — Used for body backgrounds to reduce screen glare and mimic physical paper texture.
+- **Card Backgrounds**: Pure White (`#ffffff`) with custom Warm Beige Border (`#f0ebe4`).
 
 ### Semantic Color Scale (Data Visualization)
 - **Aktual (Actual Score)**: Forest Green (`#15803d` / `rgba(21, 128, 61, 0.08)`) — Solid line & soft background fill.
 - **Standar (Minimum Standard)**: Rust Red/Crimson (`#b91c1c`) — Hard line reference.
-- **Toleransi (Tolerance Boundary)**: Slate Gray dashed line (`#6b7280` / `[4, 4]` dash array) — Acts as a secondary reference without clashing with the primary data series.
+- **Toleransi (Tolerance Boundary)**: Slate Gray dashed line (`#94a3b8` / `[4, 4]` dash array) — Acts as a secondary reference without clashing with the primary data series.
 
 ### Typography
 - **Headings & Accents**: `Lora` (Google Font) — An elegant, editorial serif used for headers and descriptive sub-titles.
@@ -44,22 +44,22 @@ To prevent the main application's sidebar and navbar from compressing the report
 
 ## 3. Section Component Implementations (Phase A Samples)
 
-We implemented 5 representative section components, validating different data visualization and narrative needs:
+We implemented 5 representative section components, validating different data visualization and narrative needs (all optimized at `max-w-5xl` container width):
 
 ### 01 — Cover Page
-- **Visuals**: Full-height warm-ivory block with deep navy branding bands, a gold-accented corporate framing, confidential metadata badge, and participant's identification card.
+- **Visuals**: Centered warm-ivory page sheet with subtle Amber Gold branding accents, sentence-case metadata details, and a flat border-t/b candidate profile details area to avoid nested cards.
 
 ### 04 — Human Capital Index (HCI)
-- **Visuals**: Large Gold circular progress ring showing `4.12 out of 5.00` (82.4% progress) alongside a detailed Chart.js 5-pilar Radar Chart showing actual vs. standard vs. tolerance score deviations. Included a tabular fallback for print readability.
+- **Visuals**: Large Gold circular progress ring showing `4.12 out of 5.00` (82.4% progress) alongside a borderless radar chart with expanded padding (p-8) for readability, and a flat tabular breakdown with top/bottom border dividers.
 
 ### 06 — Riwayat Karier Timeline
-- **Visuals**: A vertical chronological timeline with custom navy dot markers, gold connectives, and narrative boxes tracking job history, divisions, and major promotions.
+- **Visuals**: A vertical chronological timeline with a custom active Amber Gold pulse dot marker, neutral-colored historical timeline markers, Title Case department labels, and achievements list.
 
 ### 15 — Performance Dashboard
-- **Visuals**: 5-year KPI trend line chart (Forest Green gradient fill vs. Target dotted line) paired with a divisional performance metric breakdown table (revenue, retention, savings, automation indexes).
+- **Visuals**: 5-year KPI trend line chart (Forest Green gradient fill vs. Target dotted line) on a borderless, wide layout container, paired with a flat, border-t/b performance metric breakdown table.
 
 ### 20 — Kekuatan Psikologis
-- **Visuals**: Grid of qualitative cards with left gold borders, showcasing key psychology highlights, descriptions, and assessment evidence.
+- **Visuals**: Grid of qualitative cards with full Warm Beige borders, gold-tinted top icon highlights, and a subtle scale hover transition, avoiding side-stripe accent borders.
 
 ---
 
