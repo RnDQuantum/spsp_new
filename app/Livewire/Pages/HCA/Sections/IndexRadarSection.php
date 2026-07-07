@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Livewire\HcaReport\Sections;
+namespace App\Livewire\Pages\HCA\Sections;
 
 use Livewire\Component;
 use Illuminate\View\View;
@@ -60,7 +60,7 @@ class IndexRadarSection extends Component
     public function render(): View
     {
         $data = $this->datasets[$this->sectionCode] ?? $this->datasets['hci'];
-        return view('livewire.hca-report.sections.index-radar-section', [
+        return view('livewire.pages.h-c-a.sections.index-radar-section', [
             'title' => $data['title'],
             'subtitle' => $data['subtitle'],
             'desc' => $data['desc'],

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Livewire\HcaReport\Sections;
+namespace App\Livewire\Pages\HCA\Sections;
 
 use Livewire\Component;
 use Illuminate\View\View;
@@ -22,6 +22,6 @@ class ExecutiveSummary extends Component
 
     public function render(): View
     {
-        return view('livewire.hca-report.sections.executive-summary');
+        return view('livewire.pages.h-c-a.sections.executive-summary');
     }
 }

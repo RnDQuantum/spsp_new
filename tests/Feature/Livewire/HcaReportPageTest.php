@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Livewire;
 
-use App\Livewire\HcaReport\HcaReportPage;
+use App\Livewire\Pages\HCA\HcaReportPage;
 use Livewire\Livewire;
 use Tests\TestCase;
 

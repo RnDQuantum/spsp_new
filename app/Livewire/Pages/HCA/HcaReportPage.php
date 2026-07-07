@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Livewire\HcaReport;
+namespace App\Livewire\Pages\HCA;
 
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -116,6 +116,6 @@ class HcaReportPage extends Component
      */
     public function render(): View
     {
-        return view('livewire.hca-report.hca-report-page');
+        return view('livewire.pages.h-c-a.hca-report-page');
     }
 }

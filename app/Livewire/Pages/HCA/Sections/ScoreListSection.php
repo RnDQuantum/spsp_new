@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Livewire\HcaReport\Sections;
+namespace App\Livewire\Pages\HCA\Sections;
 
 use Livewire\Component;
 use Illuminate\View\View;
@@ -109,7 +109,7 @@ class ScoreListSection extends Component
     public function render(): View
     {
         $data = $this->datasets[$this->sectionCode] ?? $this->datasets['competency'];
-        return view('livewire.hca-report.sections.score-list-section', [
+        return view('livewire.pages.h-c-a.sections.score-list-section', [
             'title' => $data['title'],
             'subtitle' => $data['subtitle'],
             'desc' => $data['desc'],

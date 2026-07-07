@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Livewire\HcaReport\Sections;
+namespace App\Livewire\Pages\HCA\Sections;
 
 use Livewire\Component;
 use Illuminate\View\View;
@@ -91,7 +91,7 @@ class QualitativeListSection extends Component
     public function render(): View
     {
         $data = $this->datasets[$this->sectionCode] ?? $this->datasets['strengths'];
-        return view('livewire.hca-report.sections.qualitative-list-section', [
+        return view('livewire.pages.h-c-a.sections.qualitative-list-section', [
             'title' => $data['title'],
             'subtitle' => $data['subtitle'],
             'desc' => $data['desc'],

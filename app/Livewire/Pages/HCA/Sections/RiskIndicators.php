@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Livewire\HcaReport\Sections;
+namespace App\Livewire\Pages\HCA\Sections;
 
 use Livewire\Component;
 use Illuminate\View\View;
@@ -20,6 +20,6 @@ class RiskIndicators extends Component
 
     public function render(): View
     {
-        return view('livewire.hca-report.sections.risk-indicators');
+        return view('livewire.pages.h-c-a.sections.risk-indicators');
     }
 }

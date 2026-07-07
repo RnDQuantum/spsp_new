@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Livewire\HcaReport\Sections;
+namespace App\Livewire\Pages\HCA\Sections;
 
 use Livewire\Component;
 use Illuminate\View\View;
@@ -23,6 +23,6 @@ class MentalHealthSection extends Component
 
     public function render(): View
     {
-        return view('livewire.hca-report.sections.mental-health-section');
+        return view('livewire.pages.h-c-a.sections.mental-health-section');
     }
 }
