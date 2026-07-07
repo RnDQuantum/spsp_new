@@ -196,6 +196,9 @@
                     legend: {
                         display: false
                     },
+                    datalabels: {
+                        display: false
+                    },
                     tooltip: {
                         callbacks: {
                             label: function(context) {

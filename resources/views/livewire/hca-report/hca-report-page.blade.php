@@ -228,6 +228,13 @@
                     </div>
 
                     <div class="flex items-center gap-3">
+                        <a 
+                            href="{{ route('dashboard') }}"
+                            class="border border-warm-border hover:bg-warm-ivory text-primary-ink font-semibold text-xs px-4 py-2 rounded-md transition-all duration-200 flex items-center gap-2 cursor-pointer"
+                        >
+                            <i class="fas fa-arrow-left"></i>
+                            Kembali ke SPSP
+                        </a>
                         <button 
                             wire:click="togglePrintMode(true)"
                             class="bg-[#171412] hover:bg-[#2c2724] text-warm-ivory font-medium text-xs px-4 py-2 rounded-md shadow-sm transition-all duration-200 flex items-center gap-2 cursor-pointer"
