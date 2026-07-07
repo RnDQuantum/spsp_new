@@ -33,9 +33,9 @@ class IndexRadarSection extends Component
             'talentIndexPercent' => 85.00,
             'talentCategory' => 'High Potential',
             'labels' => ['Cognitive', 'Innovation', 'Agility', 'Strategy', 'EQ'],
-            'actualRatings' => [4.50, 4.10, 4.00, 4.30, 4.35],
-            'standardRatings' => [3.00, 3.00, 3.00, 3.00, 3.00],
-            'toleranceRatings' => [2.70, 2.70, 2.70, 2.70, 2.70],
+            'actualRatings' => [2.50, 4.10, 4.00, 4.30, 4.35],
+            'standardRatings' => [4.00, 4.00, 3.00, 3.00, 3.00],
+            'toleranceRatings' => [3.70, 2.70, 2.70, 2.70, 2.70],
         ],
         'eq' => [
             'title' => 'Emotional Intelligence (EQ)',
