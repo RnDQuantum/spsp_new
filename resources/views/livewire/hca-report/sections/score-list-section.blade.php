@@ -33,7 +33,7 @@
             <div class="flex flex-col md:flex-row md:items-center gap-4 md:gap-8">
                 <!-- Label & Description -->
                 <div class="w-full md:w-1/3 shrink-0">
-                    <h3 class="text-xs font-bold text-primary-ink flex items-center gap-2">
+                    <h3 class="text-sm font-bold text-primary-ink flex items-center gap-2">
                         <span class="w-1.5 h-1.5 rounded-full bg-accent-amber"></span>
                         {{ $score['label'] }}
                     </h3>

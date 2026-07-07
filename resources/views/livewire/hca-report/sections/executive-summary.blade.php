@@ -56,7 +56,7 @@
                             <div class="hidden sm:block w-32 h-2 bg-warm-ivory border border-warm-border rounded-full overflow-hidden">
                                 <div class="h-full bg-accent-amber rounded-full" style="width: {{ ($pillar['rating'] / 5) * 100 }}%"></div>
                             </div>
-                            <span class="text-xs font-semibold text-slate-500 bg-warm-ivory px-2 py-0.5 rounded border border-warm-border">
+                            <span class="text-xs font-semibold text-slate-500 bg-warm-ivory px-2 py-0.5 rounded border border-warm-border inline-block w-24 text-center">
                                 {{ $pillar['label'] }}
                             </span>
                             <span class="text-xs font-mono font-bold text-primary-ink w-8 text-right">

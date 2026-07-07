@@ -94,35 +94,29 @@
         </div>
     </div>
 
-    <!-- Values / Metrics Grid Table (For absolute readability & print fallback) -->
-    <div class="mt-8 overflow-x-auto border-t border-warm-border">
-        <table class="w-full border-collapse text-left text-xs">
-            <thead>
-                <tr class="bg-warm-ivory border-b border-warm-border text-slate-400 font-bold uppercase tracking-wider">
-                    <th class="py-3 px-4 w-1/3">Pilar Human Capital</th>
-                    <th class="py-3 px-4 text-center">Standar Min.</th>
-                    <th class="py-3 px-4 text-center">Batas Toleransi</th>
-                    <th class="py-3 px-4 text-center">Skor Aktual</th>
-                    <th class="py-3 px-4 text-right">Deviasi/Gap</th>
+    <div class="mt-8">
+        <x-hca-table :headers="[
+            ['label' => 'Pilar Human Capital', 'class' => 'w-1/3'],
+            ['label' => 'Standar Min.', 'class' => 'text-center'],
+            ['label' => 'Batas Toleransi', 'class' => 'text-center'],
+            ['label' => 'Skor Aktual', 'class' => 'text-center'],
+            ['label' => 'Deviasi/Gap', 'class' => 'text-right']
+        ]">
+            @foreach ($labels as $index => $label)
+                <tr class="hover:bg-warm-ivory/50 transition-colors">
+                    <td class="py-3 px-4 font-semibold text-primary-ink">{{ $label }}</td>
+                    <td class="py-3 px-4 text-center font-mono">{{ number_format($standardRatings[$index], 2) }}</td>
+                    <td class="py-3 px-4 text-center font-mono text-slate-400">{{ number_format($toleranceRatings[$index], 2) }}</td>
+                    <td class="py-3 px-4 text-center font-mono font-bold text-forest-green bg-emerald-50/30">{{ number_format($actualRatings[$index], 2) }}</td>
+                    <td class="py-3 px-4 text-right font-mono font-semibold {{ $actualRatings[$index] >= $standardRatings[$index] ? 'text-forest-green' : 'text-rust-red' }}">
+                        @php
+                            $gap = $actualRatings[$index] - $standardRatings[$index];
+                        @endphp
+                        {{ $gap >= 0 ? '+' : '' }}{{ number_format($gap, 2) }}
+                    </td>
                 </tr>
-            </thead>
-            <tbody class="divide-y divide-warm-border font-medium text-slate-700">
-                @foreach ($labels as $index => $label)
-                    <tr class="hover:bg-warm-ivory/50 transition-colors">
-                        <td class="py-3 px-4 font-semibold text-primary-ink">{{ $label }}</td>
-                        <td class="py-3 px-4 text-center font-mono">{{ number_format($standardRatings[$index], 2) }}</td>
-                        <td class="py-3 px-4 text-center font-mono text-slate-400">{{ number_format($toleranceRatings[$index], 2) }}</td>
-                        <td class="py-3 px-4 text-center font-mono font-bold text-forest-green bg-emerald-50/30">{{ number_format($actualRatings[$index], 2) }}</td>
-                        <td class="py-3 px-4 text-right font-mono font-semibold {{ $actualRatings[$index] >= $standardRatings[$index] ? 'text-forest-green' : 'text-rust-red' }}">
-                            @php
-                                $gap = $actualRatings[$index] - $standardRatings[$index];
-                            @endphp
-                            {{ $gap >= 0 ? '+' : '' }}{{ number_format($gap, 2) }}
-                        </td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
+            @endforeach
+        </x-hca-table>
     </div>
 
 </div>

@@ -133,9 +133,9 @@
         </script>
     @else
         <!-- WEB INTERACTIVE VIEW -->
-        <div class="flex flex-col md:flex-row min-h-screen">
+        <div class="flex flex-col md:flex-row min-h-screen md:h-screen md:overflow-hidden">
             <!-- Left Sidebar (TOC) -->
-            <aside class="w-full md:w-80 bg-primary-ink text-slate-200 flex flex-col border-r border-warm-border/10 shrink-0">
+            <aside class="w-full md:w-80 bg-primary-ink text-slate-200 flex flex-col border-r border-warm-border/10 shrink-0 md:h-full">
                 <!-- Branded Header -->
                 <div class="p-6 border-b border-warm-border/10 flex items-center gap-3">
                     <div class="w-10 h-10 rounded-lg bg-accent-amber flex items-center justify-center font-display font-bold text-white text-xl shadow-md">
@@ -206,7 +206,7 @@
             </aside>
 
             <!-- Right Content Area -->
-            <main class="flex-1 flex flex-col min-h-0 bg-warm-ivory">
+            <main class="flex-1 flex flex-col min-h-0 bg-warm-ivory md:h-full">
                 <!-- Top Toolbar (Sticky) -->
                 <header class="bg-white border-b border-warm-border px-8 py-4 flex items-center justify-between shrink-0 sticky top-0 z-30">
                     <div class="flex items-center gap-2">

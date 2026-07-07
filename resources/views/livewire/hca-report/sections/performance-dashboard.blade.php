@@ -74,34 +74,27 @@
     <!-- Snapshot Grid Table (Details of current year) -->
     <div>
         <h3 class="font-display font-semibold text-primary-ink text-sm mb-4">Breakdown Metrik Kinerja (Tahun Buku 2026)</h3>
-        <div class="overflow-x-auto border-t border-warm-border">
-            <table class="w-full border-collapse text-left text-xs">
-                <thead>
-                    <tr class="bg-warm-ivory border-b border-warm-border text-slate-400 font-bold uppercase tracking-wider">
-                        <th class="py-3 px-4 w-5/12">Metrik KPI</th>
-                        <th class="py-3 px-4 text-center">Bobot</th>
-                        <th class="py-3 px-4 text-center">Target</th>
-                        <th class="py-3 px-4 text-center">Realisasi</th>
-                        <th class="py-3 px-4 text-right">Status</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-warm-border font-medium text-slate-700">
-                    @foreach ($kpiBreakdown as $row)
-                        <tr class="hover:bg-warm-ivory/50 transition-colors">
-                            <td class="py-3 px-4 font-semibold text-primary-ink">{{ $row['metric'] }}</td>
-                            <td class="py-3 px-4 text-center font-mono text-slate-500">{{ $row['weight'] }}</td>
-                            <td class="py-3 px-4 text-center font-mono">{{ $row['target'] }}</td>
-                            <td class="py-3 px-4 text-center font-mono font-bold text-forest-green">{{ $row['actual'] }}</td>
-                            <td class="py-3 px-4 text-right">
-                                <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold border {{ $row['statusClass'] }}">
-                                    {{ $row['status'] }}
-                                </span>
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
+        <x-hca-table :headers="[
+            ['label' => 'Metrik KPI', 'class' => 'w-5/12'],
+            ['label' => 'Bobot', 'class' => 'text-center'],
+            ['label' => 'Target', 'class' => 'text-center'],
+            ['label' => 'Realisasi', 'class' => 'text-center'],
+            ['label' => 'Status', 'class' => 'text-right']
+        ]">
+            @foreach ($kpiBreakdown as $row)
+                <tr class="hover:bg-warm-ivory/50 transition-colors">
+                    <td class="py-3 px-4 font-semibold text-primary-ink">{{ $row['metric'] }}</td>
+                    <td class="py-3 px-4 text-center font-mono text-slate-500">{{ $row['weight'] }}</td>
+                    <td class="py-3 px-4 text-center font-mono">{{ $row['target'] }}</td>
+                    <td class="py-3 px-4 text-center font-mono font-bold text-forest-green">{{ $row['actual'] }}</td>
+                    <td class="py-3 px-4 text-right">
+                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold border {{ $row['statusClass'] }}">
+                            {{ $row['status'] }}
+                        </span>
+                    </td>
+                </tr>
+            @endforeach
+        </x-hca-table>
     </div>
 
 </div>
