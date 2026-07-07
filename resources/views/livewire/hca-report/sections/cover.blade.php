@@ -1,4 +1,4 @@
-<div class="w-full max-w-4xl mx-auto bg-white border border-warm-border rounded-xl overflow-hidden print:border-none min-h-[900px] flex flex-col justify-between p-12 md:p-16 relative">
+<div class="w-full max-w-5xl mx-auto bg-white border border-warm-border rounded-xl overflow-hidden print:border-none min-h-[900px] flex flex-col justify-between p-12 md:p-16 relative">
     
     <!-- Top Decorative Accents & Confidentiality -->
     <div class="flex items-center justify-between border-b border-warm-border pb-6">

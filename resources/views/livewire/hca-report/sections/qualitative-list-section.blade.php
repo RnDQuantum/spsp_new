@@ -1,4 +1,4 @@
-<div class="w-full max-w-4xl mx-auto bg-white border border-warm-border rounded-xl p-8 md:p-12 print:border-none">
+<div class="w-full max-w-5xl mx-auto bg-white border border-warm-border rounded-xl p-8 md:p-12 print:border-none">
     
     <!-- Section Header -->
     <div class="border-b border-warm-border pb-6 mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">

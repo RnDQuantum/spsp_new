@@ -4,7 +4,7 @@
     data-actual="{{ json_encode($actualRatings) }}"
     data-standard="{{ json_encode($standardRatings) }}"
     data-tolerance="{{ json_encode($toleranceRatings) }}"
-    class="w-full max-w-4xl mx-auto bg-white border border-warm-border rounded-xl p-8 md:p-12 print:border-none"
+    class="w-full max-w-5xl mx-auto bg-white border border-warm-border rounded-xl p-8 md:p-12 print:border-none"
 >
     
     <!-- Section Header -->
