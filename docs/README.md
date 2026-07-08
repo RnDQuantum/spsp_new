@@ -13,6 +13,10 @@ Start here to understand the core business logic of the system.
     *   Core business concepts (Assessment structure, Standards, Rankings)
     *   **3-Layer Priority System** (Session → Custom → Quantum)
     *   User flows, scenarios, and data architecture
+*   **[USER_FLOW_AND_MENUS.md](./USER_FLOW_AND_MENUS.md)**
+    *   Main User Navigation Flow (Selecting Event, Position, and Participant)
+    *   Operational 3-Layer Priority System walkthrough in UI
+    *   Detailed menus breakdown (Individual Report, General Report, Talent Pool)
 
 ### 2. Database Schema & Relations
 Understand the database structure, table definitions, relationships, and calculations.
