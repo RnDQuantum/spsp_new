@@ -73,16 +73,18 @@ erDiagram
     batches ||--o{ participants : "dikelompokkan"
     position_formations ||--o{ participants : "memiliki"
 
-    %% Hubungan Hasil Penilaian
     participants ||--o{ category_assessments : "memiliki"
     participants ||--o{ aspect_assessments : "memiliki"
     participants ||--o{ sub_aspect_assessments : "memiliki"
     participants ||--|| final_assessments : "memiliki"
     participants ||--|| psychological_tests : "melakukan"
     participants ||--o{ interpretations : "memiliki"
+    participants ||--o{ test_results : "memiliki"
 
     category_assessments ||--o{ aspect_assessments : "terdiri dari"
     aspect_assessments ||--o{ sub_aspect_assessments : "terdiri dari"
+
+    assessment_events ||--o{ test_results : "merekam"
 
     %% Hubungan Polimorfik Interpretasi
     interpretation_templates }o--o| aspects : "menafsirkan (polimorfik)"
@@ -496,6 +498,61 @@ Hasil akhir penilaian gabungan (Potensi + Kompetensi) untuk setiap peserta. Hany
   "achievement_percentage": "118.04",
   "conclusion_code": "K",
   "conclusion_text": "KOMPETEN"
+}
+```
+
+---
+
+### `test_results`
+Menyimpan respons data mentah (raw data) ujian online dari API Quantum HRMI per alat tes per peserta. Berfungsi sebagai Single Source of Truth sebelum data dikonversi ke rating 1-5 SPSP.
+
+| Kolom | Tipe | Nullable | Deskripsi |
+| :--- | :--- | :--- | :--- |
+| `id` | bigint | No | Primary Key |
+| `participant_id` | bigint | No | Foreign Key ke `participants.id` |
+| `event_id` | bigint | No | Foreign Key ke `assessment_events.id` |
+| `test_code` | varchar(50) | No | Kode alat tes (e.g. `A.1`, `B.2`, `D.2`) |
+| `test_name` | varchar(255) | No | Nama alat tes dari API (e.g. "Typical CFIT3A") |
+| `test_category` | varchar(100) | No | Kategori/tipe tes (e.g. "Kecerdasan / IQ") |
+| `status` | varchar(20) | No | Status tes (`completed` / `incomplete`) |
+| `test_started_at` | timestamp | Yes | Waktu mulai tes |
+| `summary_data` | json | No | Skor akhir kuantitatif/numerik hasil parser |
+| `interpretation_data` | json | Yes | Teks interpretasi deskriptif & saran pengembangan |
+| `raw_response` | json | No | Backup respons asli API (minus detail Kraeplin) |
+| `conversion_status` | enum | No | Status konversi rating (`pending`, `converted`, `skipped`, `not_applicable`) |
+| `converted_at` | timestamp | Yes | Waktu ketika data dikonversi ke rating SPSP |
+
+*Contoh Data*:
+```json
+{
+  "id": 1,
+  "participant_id": 15436,
+  "event_id": 1,
+  "test_code": "A.1",
+  "test_name": "Typical CFIT3A",
+  "test_category": "Kecerdasan / IQ",
+  "status": "completed",
+  "test_started_at": "2025-11-28 08:23:27",
+  "summary_data": {
+    "iq": 70,
+    "total": 12,
+    "kategori": "Borderline",
+    "hasil_sub": {
+      "sub1": {"nilai": 4, "rating": 2, "deskripsi": "Kurang", "persentase": 30.76, "total_soal": 13}
+    }
+  },
+  "interpretation_data": {
+    "interpretasi_hasil": {
+      "Kecerdasan Umum": "Kategori ini berada di ambang batas antara fungsi intelektual rendah..."
+    }
+  },
+  "raw_response": {
+    "iq": 70,
+    "total": 12,
+    "kategori": "Borderline"
+  },
+  "conversion_status": "pending",
+  "converted_at": null
 }
 ```
 

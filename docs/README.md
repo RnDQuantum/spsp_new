@@ -25,6 +25,10 @@ Understand the database structure, table definitions, relationships, and calcula
     *   Entity Relationship Diagram (ERD) with Mermaid visualizer
     *   Deep dive on 3-Layer Priority system data flow
     *   Sample data and step-by-step scoring calculation walkthroughs
+*   **[ONLINE_TEST_API_INTEGRATION.md](./ONLINE_TEST_API_INTEGRATION.md)**
+    *   Database schema for raw test results (`test_results`)
+    *   Custom parser logic for 9 test instruments (CFIT, IST, Character, Kraeplin, etc.)
+    *   CLI commands for testing and importing JSON payloads
 
 ### 3. Architecture Decisions
 Understand WHY the system is built the way it is.
