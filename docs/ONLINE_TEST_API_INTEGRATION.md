@@ -14,6 +14,9 @@ Karena format data dari API ujian online berisi data mentah dengan berbagai maca
 
 Sebagai gantinya, kita menerapkan **Opsi A: Simpan Data Mentah Terlebih Dahulu** sebagai fondasi (Single Source of Truth), baru kemudian diproses oleh engine konversi ke rating SPSP pada tahap berikutnya.
 
+> [!NOTE]
+> **Catatan Pengembangan**: Karena API Quantum saat ini masih dalam tahap pengembangan (belum matang), integrasi disimulasikan menggunakan **Seeder / Data Dummy** untuk memasok data ke tabel `test_results` selama masa development dan pengujian awal.
+
 ---
 
 ## 🗄️ 2. Struktur Database

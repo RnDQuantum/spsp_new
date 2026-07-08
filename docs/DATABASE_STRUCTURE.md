@@ -31,6 +31,62 @@ Sistem ini memiliki karakteristik utama sebagai berikut:
   - *Aspek Kompetensi* tidak memiliki sub-aspek (nilai aspek diinput secara langsung).
 - **Imutabilitas Data**: Nilai mentah dari asesmen peserta bersifat permanen (immutable), sedangkan bobot, standar kelulusan, dan status aktif aspek dapat diubah dinamis via standard overlay (Layered Priority System).
 
+### Hierarki Struktur Data Asesmen
+
+Berdasarkan rancangan database dan ERD SPSP, seluruh tabel dikelompokkan ke dalam struktur hierarkis berikut untuk memudahkan pemahaman keterkaitan data:
+
+```
+[1. HIERARKI DEFINISI & MASTER DATA]
+Institutions (Instansi Client)
+  ├── custom_standards (Konfigurasi Bobot & Nilai Kelulusan Kustom Instansi)
+  └── assessment_events (Event Seleksi/Asesmen yang Diselenggarakan)
+        ├── batches (Gelombang Pembagian Kelompok Hari Ujian)
+        │     └── Participant (Peserta Ujian)
+        └── position_formations (Formasi Jabatan yang Dibuka)
+              │ (mengikat template master)
+              ▼
+        assessment_templates (Template Master Standar Kompetensi Jabatan)
+              └── category_types (Kategori Penilaian: Potensi & Kompetensi)
+                    └── aspects (Aspek-Aspek Penilaian)
+                          ├── sub_aspects (Sub-Aspek Potensi - e.g. Daya Analisa)
+                          └── interpretation_templates (Template Narasi Tafsir Skor Polimorfik)
+
+[2. HIERARKI TRANSAKSI & HASIL PENILAIAN PESERTA]
+Participant (Peserta Ujian)
+  ├── test_results (Data Mentah Ujian Online - *Data Dummy Seeder*)
+  ├── psychological_tests (Laporan Klinis MMPI, Stres, Psikogram)
+  ├── interpretations (Teks Narasi Hasil per Kategori Peserta)
+  └── final_assessments (Agregasi Rekomendasi Akhir & Skor Kelulusan)
+        └── category_assessments (Total Skor Kategori Potensi & Kompetensi)
+              └── aspect_assessments (Skor Aspek Potensi/Kompetensi Peserta)
+                    └── sub_aspect_assessments (Skor Detail Sub-Aspek Peserta)
+```
+
+---
+
+#### Aliran Konversi & Kalkulasi Data Hasil (Bottom-Up)
+
+Meskipun secara relasional database (Foreign Key) seluruh tabel transaksi di atas merujuk ke tabel `participants` via `participant_id`, secara bisnis aliran kalkulasi data mengalir bertahap dari bawah ke atas:
+
+1. **Pengisian Data Awal**: 
+   * Saat API sesungguhnya belum matang (development stage), data mentah di-populate ke tabel `test_results` menggunakan **Seeder (Data Dummy)**.
+2. **Konversi (Tahap 2)**: 
+   * Nilai mentah di `test_results` dipetakan ke skala rating SPSP (1-5), lalu di-insert ke `sub_aspect_assessments` (Potensi) atau `aspect_assessments` (Kompetensi).
+3. **Agregasi Aspek**: 
+   * Rating pada `aspect_assessments` (untuk Potensi) dihitung otomatis dari rata-rata nilai `sub_aspect_assessments` di bawahnya.
+4. **Agregasi Kategori**: 
+   * Skor pada `category_assessments` dihitung dari jumlahan `individual_score` (rating aspek aktif * bobot aspek).
+5. **Agregasi Final**: 
+   * `final_assessments` menggabungkan skor dari record `category_assessments` (Potensi & Kompetensi) sesuai bobot kategori masing-masing.
+
+---
+
+#### 3. Struktur Data Mentah (Source API / Dummy Seeder)
+Tabel ini bertindak sebagai penampung respons API Quantum HRMI apa adanya (Single Source of Truth) sebelum dikonversi ke dalam Hierarki Struktur Hasil di atas. Selama tahap pengembangan di mana API belum production-ready, data di tabel ini disuplai via **Seeder / Data Dummy** untuk simulasi.
+```
+test_results (Data Mentah Hasil Ujian Online per Peserta - e.g. A.1, B.2, D.2)
+```
+
 ---
 
 ## Diagram Hubungan Entitas (ERD)
@@ -504,7 +560,9 @@ Hasil akhir penilaian gabungan (Potensi + Kompetensi) untuk setiap peserta. Hany
 ---
 
 ### `test_results`
-Menyimpan respons data mentah (raw data) ujian online dari API Quantum HRMI per alat tes per peserta. Berfungsi sebagai Single Source of Truth sebelum data dikonversi ke rating 1-5 SPSP.
+Menyimpan respons data mentah (raw data) ujian online dari API Quantum HRMI per alat tes per peserta. Berfungsi sebagai Single Source of Truth sebelum data dikonversi ke rating 1-5 SPSP. 
+
+*Catatan: Selama tahap pengembangan (API belum siap sepenuhnya), data di tabel ini disuplai menggunakan seeder berisi **data dummy** untuk simulasi.*
 
 | Kolom | Tipe | Nullable | Deskripsi |
 | :--- | :--- | :--- | :--- |
