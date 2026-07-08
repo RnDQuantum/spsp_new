@@ -153,8 +153,8 @@ Menyimpan aspek-aspek penilaian di bawah setiap kategori.
 | `code` | varchar(255) | No | Kode unik aspek (e.g., `intelektual`) |
 | `name` | varchar(255) | No | Nama aspek |
 | `description` | text | Yes | Deskripsi aspek |
-| `weight_percentage` | int | No | Bobot aspek dalam kategorinya |
-| `standard_rating` | decimal(8,2) | No | Nilai standar kelulusan default (1.00 - 5.00) |
+| `weight_percentage` | int | Yes | Bobot aspek dalam kategorinya |
+| `standard_rating` | decimal(5,2) | Yes | Nilai standar kelulusan default (1.00 - 5.00) |
 | `order` | int | No | Urutan tampilan |
 
 *Contoh Data*:
@@ -184,7 +184,7 @@ Menyimpan sub-aspek penunjang aspek utama (Hanya untuk aspek dari kategori `pote
 | `code` | varchar(255) | No | Kode unik sub-aspek (e.g., `kecerdasan_umum`) |
 | `name` | varchar(255) | No | Nama sub-aspek |
 | `description` | text | Yes | Penjelasan detail sub-aspek |
-| `standard_rating` | int | No | Nilai standar default (integer 1 - 5) |
+| `standard_rating` | int | Yes | Nilai standar default (integer 1 - 5) |
 | `order` | int | No | Urutan tampilan |
 
 *Contoh Data*:
@@ -217,7 +217,7 @@ Mendefinisikan event/proyek asesmen yang diadakan oleh suatu instansi.
 | `year` | int | No | Tahun penyelenggaraan |
 | `start_date` | date | No | Tanggal mulai event |
 | `end_date` | date | No | Tanggal selesai event |
-| `status` | enum | No | Status event (`draft`, `ongoing`, `completed`, `cancelled`) |
+| `status` | enum | No | Status event (`draft`, `ongoing`, `completed`) |
 | `last_synced_at` | timestamp | Yes | Waktu sinkronisasi data terakhir dari API Quantum |
 
 *Contoh Data*:
@@ -246,7 +246,7 @@ Gelombang/kelompok jadwal tes peserta dalam satu event.
 | `event_id` | bigint | No | Foreign Key ke `assessment_events.id` |
 | `code` | varchar(255) | No | Kode gelombang |
 | `name` | varchar(255) | No | Nama gelombang |
-| `location` | varchar(255) | Yes | Lokasi penyelenggaraan tes |
+| `location` | varchar(255) | No | Lokasi penyelenggaraan tes |
 | `batch_number` | int | No | Urutan gelombang |
 | `start_date` | date | No | Tanggal tes dimulai |
 | `end_date` | date | No | Tanggal tes berakhir |
@@ -277,7 +277,7 @@ Daftar jabatan/formasi lowongan yang dibuka dalam suatu event. Relasi krusial ya
 | `template_id` | bigint | No | Foreign Key ke `assessment_templates.id` |
 | `code` | varchar(255) | No | Kode formasi jabatan |
 | `name` | varchar(255) | No | Nama formasi jabatan |
-| `quota` | int | No | Kuota formasi yang tersedia |
+| `quota` | int | Yes | Kuota formasi yang tersedia |
 
 *Contoh Data*:
 ```json
@@ -707,7 +707,7 @@ Instansi client penyewa SaaS SPSP.
 | `code` | varchar(255) | No | Kode unik instansi (e.g. `kejaksaan`, `kemenkes`) |
 | `name` | varchar(255) | No | Nama lengkap instansi |
 | `logo_path` | varchar(255) | Yes | Path file logo instansi |
-| `api_key` | varchar(255) | Yes | API Key untuk autentikasi integrasi data |
+| `api_key` | varchar(255) | No | API Key untuk autentikasi integrasi data |
 
 *Contoh Data*:
 ```json

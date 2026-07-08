@@ -477,7 +477,7 @@ If you're implementing similar optimization:
   - Explains 3-layer priority system
   - Cache invalidation strategy
 
-- [OPTIMASI_STANDARDMC_PERFORMANCE.md](./OPTIMASI_STANDARDMC_PERFORMANCE.md)
+- [OPTIMIZATION_STANDARD_MC.md](./OPTIMIZATION_STANDARD_MC.md)
   - StandardMc component optimization
   - Component-level caching
   - Livewire optimization

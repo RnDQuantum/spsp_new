@@ -763,25 +763,12 @@ Why?
 ## 📚 Related Documentation
 
 - [CRITICAL_FIX_CUSTOM_STANDARD_PERFORMANCE.md](./CRITICAL_FIX_CUSTOM_STANDARD_PERFORMANCE.md) - Performance optimization details
-- [OPTIMASI_STANDARDMC_PERFORMANCE.md](./OPTIMASI_STANDARDMC_PERFORMANCE.md) - StandardMc component optimization
-- [OPTIMASI_TRAINING_RECOMMENDATION_PERFORMANCE.md](./OPTIMASI_TRAINING_RECOMMENDATION_PERFORMANCE.md) - Training recommendation optimization
+- [OPTIMIZATION_STANDARD_MC.md](./OPTIMIZATION_STANDARD_MC.md) - StandardMc component optimization
+- [OPTIMIZATION_TRAINING_RECOMMENDATION.md](./OPTIMIZATION_TRAINING_RECOMMENDATION.md) - Training recommendation optimization
 
 ---
 
-## 🔧 For Developers
-
-### When Adding New Features:
-
-**Checklist:**
-- [ ] Does it respect 3-layer priority?
-- [ ] Does it use DynamicStandardService for standards?
-- [ ] Does it cache properly?
-- [ ] Does it invalidate cache on baseline change?
-- [ ] Is it data-driven (not hard-coded)?
-- [ ] Does it work with both Quantum Default & Custom Standard?
-- [ ] Have you tested with 4,905 participants scale?
-
-### Common Pitfalls:
+## 🔧 Common Pitfalls
 
 ```php
 // ❌ WRONG: Recalculating historical data
@@ -811,5 +798,5 @@ Cache::remember($cacheKey, 60, fn() => $this->calculateRankings());
 
 ---
 
-**Last Updated:** December 2025
+**Last Updated:** July 2026
 **Maintainer:** SPSP Development Team
