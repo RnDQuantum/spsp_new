@@ -1,0 +1,94 @@
+kind: source
+name: db-mysql-lokal
+type: mysql
+host: "127.0.0.1"
+port: 3306
+database: nama_database_anda
+user: root
+password: "password_anda"
+
+---
+# TOOL 1: Untuk melihat semua tabel yang ada di dalam database proyek
+kind: tool
+name: eksplorasi_daftar_tabel
+type: mysql-sql
+description: "Melihat daftar semua tabel yang tersedia di dalam database saat ini"
+source: db-mysql-lokal
+statement: "SHOW TABLES;"
+
+---
+# TOOL 2: Untuk mengintip struktur kolom (skema) dari tabel tertentu
+kind: tool
+name: eksplorasi_struktur_tabel
+type: mysql-sql
+description: "Melihat struktur kolom, tipe data, dan kunci (primary key) dari tabel spesifik. Butuh parameter nama_tabel."
+source: db-mysql-lokal
+templateParameters:
+  - name: nama_tabel
+    type: string
+    description: "Nama tabel yang ingin dilihat strukturnya"
+statement: "DESCRIBE {{.nama_tabel}};"
+
+---
+# TOOL 3: Tool general untuk eksekusi kueri baca (SELECT) secara fleksibel
+kind: tool
+name: eksekusi_baca_sql
+type: mysql-sql
+description: "Mengeksekusi perintah SELECT SQL kustom secara aman untuk membaca data berdasarkan analisis AI."
+source: db-mysql-lokal
+templateParameters:
+  - name: kueri_select
+    type: string
+    description: "Kueri SELECT SQL yang ingin dieksekusi"
+statement: "{{.kueri_select}};"
+
+---
+# TOOL 4: Mencari kolom tertentu di seluruh tabel database
+kind: tool
+name: eksplorasi_cari_kolom
+type: mysql-sql
+description: "Mencari kolom tertentu di seluruh tabel untuk menganalisis relasi antar tabel (foreign key)."
+source: db-mysql-lokal
+templateParameters:
+  - name: nama_kolom
+    type: string
+    description: "Kata kunci nama kolom yang ingin dicari (misal: participant_id)"
+statement: "SELECT TABLE_NAME, COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE COLUMN_NAME LIKE CONCAT('%', '{{.nama_kolom}}', '%') AND TABLE_SCHEMA = 'spsp_new';"
+
+---
+# TOOL 5: Melihat indeks yang terdaftar pada tabel tertentu
+kind: tool
+name: eksplorasi_indeks_tabel
+type: mysql-sql
+description: "Melihat daftar indeks (primary key, unique, index) pada tabel tertentu."
+source: db-mysql-lokal
+templateParameters:
+  - name: nama_tabel
+    type: string
+    description: "Nama tabel yang ingin diperiksa indeksnya"
+statement: "SHOW INDEX FROM {{.nama_tabel}};"
+
+---
+# TOOL 6: Melihat status, estimasi baris, dan ukuran dari semua tabel
+kind: tool
+name: eksplorasi_ukuran_tabel
+type: mysql-sql
+description: "Menampilkan status performa, estimasi jumlah baris (Rows), dan ukuran semua tabel di database."
+source: db-mysql-lokal
+statement: "SHOW TABLE STATUS;"
+
+---
+# TOOL 7: Mengambil sampel data baris secara cepat dari tabel tertentu
+kind: tool
+name: eksplorasi_sample_data
+type: mysql-sql
+description: "Mengambil beberapa baris data secara instan dari tabel tertentu."
+source: db-mysql-lokal
+templateParameters:
+  - name: nama_tabel
+    type: string
+    description: "Nama tabel yang ingin diambil sampel datanya"
+  - name: jumlah_baris
+    type: integer
+    description: "Jumlah baris data yang ingin diambil (limit)"
+statement: "SELECT * FROM {{.nama_tabel}} LIMIT {{.jumlah_baris}};"
