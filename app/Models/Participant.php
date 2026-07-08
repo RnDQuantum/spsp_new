@@ -73,4 +73,9 @@ class Participant extends Model
     {
         return $this->hasOne(PsychologicalTest::class);
     }
+
+    public function testResults(): HasMany
+    {
+        return $this->hasMany(TestResult::class);
+    }
 }
