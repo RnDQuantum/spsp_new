@@ -83,9 +83,9 @@
             const getColors = () => {
                 const dark = document.documentElement.classList.contains('dark');
                 return {
-                    grid: dark ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)', // Lebih pekat (0.15 -> 0.5)
-                    angleLines: dark ? 'rgba(255, 255, 255, 0.5)' :
-                    'rgba(0, 0, 0, 0.5)', // Lebih pekat (0.15 -> 0.5)
+                    grid: dark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.15)', // Lembut (0.5 -> 0.15)
+                    angleLines: dark ? 'rgba(255, 255, 255, 0.15)' :
+                    'rgba(0, 0, 0, 0.15)', // Lembut (0.5 -> 0.15)
                     ticks: dark ? '#ffffff' : '#000000', // Warna solid
                     pointLabels: dark ? '#ffffff' : '#000000', // Warna solid
                     legend: dark ? '#ffffff' : '#000000' // Warna solid

@@ -285,8 +285,8 @@
                     function getGridColors() {
                         const isDark = document.documentElement.classList.contains('dark');
                         return {
-                            grid: isDark ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)',
-                            angleLines: isDark ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)',
+                            grid: isDark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.15)', // Lembut
+                            angleLines: isDark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.15)', // Lembut
                             ticks: isDark ? '#ffffff' : '#000000', // Warna solid untuk ticks
                             pointLabels: isDark ? '#ffffff' : '#000000' // Warna solid untuk label
                         };
@@ -623,8 +623,8 @@
                     function getGridColors() {
                         const isDark = document.documentElement.classList.contains('dark');
                         return {
-                            grid: isDark ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)',
-                            angleLines: isDark ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)',
+                            grid: isDark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.15)', // Lembut
+                            angleLines: isDark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.15)', // Lembut
                             ticks: isDark ? '#ffffff' : '#000000', // Warna solid untuk ticks
                             pointLabels: isDark ? '#ffffff' : '#000000' // Warna solid untuk label
                         };

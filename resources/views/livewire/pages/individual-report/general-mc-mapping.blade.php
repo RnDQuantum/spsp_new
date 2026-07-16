@@ -482,9 +482,9 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                     const getColors = () => {
                         const dark = document.documentElement.classList.contains('dark');
                         return {
-                            grid: dark ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)', // Lebih pekat (0.15 -> 0.5)
-                            angleLines: dark ? 'rgba(255, 255, 255, 0.5)' :
-                            'rgba(0, 0, 0, 0.5)', // Lebih pekat (0.15 -> 0.5)
+                            grid: dark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.15)', // Lembut
+                            angleLines: dark ? 'rgba(255, 255, 255, 0.15)' :
+                            'rgba(0, 0, 0, 0.15)', // Lembut
                             ticks: dark ? '#ffffff' : '#000000', // Warna solid
                             labels: dark ? '#ffffff' : '#000000', // Warna solid
                             tickBg: 'transparent' // Tambahkan property untuk background label

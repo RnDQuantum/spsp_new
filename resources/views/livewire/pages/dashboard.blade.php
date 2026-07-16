@@ -116,7 +116,7 @@
                     const darkModeColors = {
                         background: '#1f2937', // gray-800
                         text: '#ffffff', // gray-50
-                        grid: '#898989', // gray-600
+                        grid: 'rgba(255, 255, 255, 0.15)', // Lembut
                         pointLabels: '#d1d5db', // gray-300
                         legend: '#ffffff', // gray-50
                     };
@@ -125,7 +125,7 @@
                     const lightModeColors = {
                         background: '#ffffff',
                         text: '#000000', // gray-900
-                        grid: '#898989', // gray-300
+                        grid: 'rgba(0, 0, 0, 0.15)', // Lembut
                         pointLabels: '#000000', // gray-900
                         legend: '#000000', // gray-900
                     };
