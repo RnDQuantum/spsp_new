@@ -70,11 +70,14 @@ class ParticipantSelector extends Component
     /**
      * Load initial participants when dropdown opens
      */
-    public function loadInitial(): void
+    public function loadInitial(bool $force = false): void
     {
-        // Only load if not already loaded and filters are set
-        if (empty($this->availableParticipants)) {
+        // Load if forced, or empty, or only contains the currently selected participant
+        if ($force || empty($this->availableParticipants) || (count($this->availableParticipants) === 1 && $this->participantId)) {
             $this->page = 1;
+            if ($force) {
+                $this->search = '';
+            }
             $this->loadAvailableParticipants();
         }
     }
