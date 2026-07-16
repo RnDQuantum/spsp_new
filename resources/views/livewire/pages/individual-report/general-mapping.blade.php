@@ -244,27 +244,42 @@
 
 
             <!-- Legend -->
-            <div class="flex justify-center text-sm gap-8 text-gray-900 dark:text-gray-100 mb-2"
+            <div class="flex justify-center text-sm gap-2 mb-2"
                 id="rating-legend-{{ $chartId }}">
                 <!-- GANTI URUTAN LEGEND INI -->
-                <span class="legend-item ... " data-chart="rating" data-dataset="0">
+                <span class="legend-item flex items-center gap-2 cursor-pointer select-none 
+            hover:bg-gray-100 dark:hover:bg-gray-600 
+            px-3 py-2 rounded-lg transition-all duration-200 
+            border border-gray-300 dark:border-gray-600 
+            shadow-sm bg-white dark:bg-gray-700 
+            text-gray-900 dark:text-white" data-chart="rating" data-dataset="0">
                     <span class="inline-block w-12 h-3 rounded-sm" style="background-color: #5db010;"></span>
-                    <span class="font-semibold ...">{{ $participant->name }}</span>
+                    <span class="font-semibold" style="color: #5db010;">{{ $participant->name }}</span>
                 </span>
-                <span class="legend-item ... " data-chart="rating" data-dataset="1">
+                <span class="legend-item flex items-center gap-2 cursor-pointer select-none 
+            hover:bg-gray-100 dark:hover:bg-gray-600 
+            px-3 py-2 rounded-lg transition-all duration-200 
+            border border-gray-300 dark:border-gray-600 
+            shadow-sm bg-white dark:bg-gray-700 
+            text-gray-900 dark:text-white" data-chart="rating" data-dataset="1">
                     <span class="inline-block w-12 h-3 rounded-sm" style="background-color: #b50505;"></span>
-                    <span class="font-semibold ...">Standard</span>
+                    <span class="font-semibold">Standard</span>
                 </span>
-                <span class="legend-item ... " data-chart="rating" data-dataset="2">
+                <span class="legend-item flex items-center gap-2 cursor-pointer select-none 
+            hover:bg-gray-100 dark:hover:bg-gray-600 
+            px-3 py-2 rounded-lg transition-all duration-200 
+            border border-gray-300 dark:border-gray-600 
+            shadow-sm bg-white dark:bg-gray-700 
+            text-gray-900 dark:text-white" data-chart="rating" data-dataset="2">
                     <span class="inline-block w-12 h-3 rounded-sm" style="background-color: #fafa05;"></span>
-                    <span class="font-semibold ..." x-data
+                    <span class="font-semibold" x-data
                         x-text="'Tolerance ' + $wire.tolerancePercentage + '%'"></span>
                 </span>
             </div>
 
 
             <div class="flex justify-center mb-6">
-                <div style="width: 900px; height: 900px; position: relative;">
+                <div style="width: 100%; max-width: 1100px; height: 600px; position: relative;">
                     <canvas id="spiderRatingChart-{{ $chartId }}"></canvas>
                 </div>
             </div>
@@ -288,7 +303,7 @@
                             grid: isDark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.15)', // Lembut
                             angleLines: isDark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.15)', // Lembut
                             ticks: isDark ? '#ffffff' : '#000000', // Warna solid untuk ticks
-                            pointLabels: isDark ? '#ffffff' : '#000000' // Warna solid untuk label
+                            pointLabels: isDark ? '#d1d5db' : '#000000' // Warna solid untuk label (konsisten dengan dashboard)
                         };
                     }
 
@@ -458,18 +473,15 @@
                                             showLabelBackdrop: false,
                                             display: false, // SEMBUNYIKAN TICKS DEFAULT
                                             font: {
-                                                size: 12,
-                                                weight: 'bold'
+                                                size: 16
                                             },
                                             z: 2
                                         },
                                         pointLabels: {
                                             font: {
-                                                size: 11,
-                                                weight: '600'
+                                                size: 16
                                             },
                                             color: colors.pointLabels,
-                                            padding: 15,
                                             z: 3
                                         },
                                         grid: {
@@ -496,14 +508,13 @@
                                     const xCenter = scale.xCenter;
 
                                     ctx.save();
-                                    ctx.font = `bold ${scale.options.ticks.font.size}px sans-serif`;
+                                    ctx.font = scale.options.ticks.font.size + 'px sans-serif';
                                     ctx.fillStyle = scale.options.ticks.color || '#000';
                                     ctx.textAlign = 'center';
                                     ctx.textBaseline = 'middle';
 
-                                    // Offset untuk menggeser posisi
-                                    const offsetX = 10; // geser ke kanan
-                                    const offsetY = 0; // tidak geser vertikal
+                                    const offsetX = 10;
+                                    const offsetY = 0;
 
                                     ticks.forEach((tick) => {
                                         const value = tick.value;
@@ -585,26 +596,41 @@
                 Plot Chart (Score)</div>
 
             <!-- Legend -->
-            <div class="flex justify-center text-sm gap-8 text-gray-900 dark:text-gray-100 mb-0"
+            <div class="flex justify-center text-sm gap-2 mb-0"
                 id="score-legend-{{ $chartId }}">
                 <!-- GANTI URUTAN LEGEND INI -->
-                <span class="legend-item ... " data-chart="rating" data-dataset="0">
+                <span class="legend-item flex items-center gap-2 cursor-pointer select-none 
+            hover:bg-gray-100 dark:hover:bg-gray-600 
+            px-3 py-2 rounded-lg transition-all duration-200 
+            border border-gray-300 dark:border-gray-600 
+            shadow-sm bg-white dark:bg-gray-700 
+            text-gray-900 dark:text-white" data-chart="score" data-dataset="0">
                     <span class="inline-block w-12 h-3 rounded-sm" style="background-color: #5db010;"></span>
-                    <span class="font-semibold ...">{{ $participant->name }}</span>
+                    <span class="font-semibold" style="color: #5db010;">{{ $participant->name }}</span>
                 </span>
-                <span class="legend-item ... " data-chart="rating" data-dataset="1">
+                <span class="legend-item flex items-center gap-2 cursor-pointer select-none 
+            hover:bg-gray-100 dark:hover:bg-gray-600 
+            px-3 py-2 rounded-lg transition-all duration-200 
+            border border-gray-300 dark:border-gray-600 
+            shadow-sm bg-white dark:bg-gray-700 
+            text-gray-900 dark:text-white" data-chart="score" data-dataset="1">
                     <span class="inline-block w-12 h-3 rounded-sm" style="background-color: #b50505;"></span>
-                    <span class="font-semibold ...">Standard</span>
+                    <span class="font-semibold">Standard</span>
                 </span>
-                <span class="legend-item ... " data-chart="rating" data-dataset="2">
+                <span class="legend-item flex items-center gap-2 cursor-pointer select-none 
+            hover:bg-gray-100 dark:hover:bg-gray-600 
+            px-3 py-2 rounded-lg transition-all duration-200 
+            border border-gray-300 dark:border-gray-600 
+            shadow-sm bg-white dark:bg-gray-700 
+            text-gray-900 dark:text-white" data-chart="score" data-dataset="2">
                     <span class="inline-block w-12 h-3 rounded-sm" style="background-color: #fafa05;"></span>
-                    <span class="font-semibold ..." x-data
+                    <span class="font-semibold" x-data
                         x-text="'Tolerance ' + $wire.tolerancePercentage + '%'"></span>
                 </span>
             </div>
 
             <div class="flex justify-center mb-6">
-                <div style="width: 900px; height: 900px; position: relative;">
+                <div style="width: 100%; max-width: 1100px; height: 600px; position: relative;">
                     <canvas id="spiderScoreChart-{{ $chartId }}"></canvas>
                 </div>
             </div>
@@ -626,7 +652,7 @@
                             grid: isDark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.15)', // Lembut
                             angleLines: isDark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.15)', // Lembut
                             ticks: isDark ? '#ffffff' : '#000000', // Warna solid untuk ticks
-                            pointLabels: isDark ? '#ffffff' : '#000000' // Warna solid untuk label
+                            pointLabels: isDark ? '#d1d5db' : '#000000' // Warna solid untuk label (konsisten dengan dashboard)
                         };
                     }
 
@@ -793,18 +819,15 @@
                                             showLabelBackdrop: false,
                                             display: false, // SEMBUNYIKAN TICKS DEFAULT
                                             font: {
-                                                size: 11,
-                                                weight: 'bold'
+                                                size: 16
                                             },
                                             z: 2
                                         },
                                         pointLabels: {
                                             font: {
-                                                size: 14,
-                                                weight: '600',
+                                                size: 16
                                             },
                                             color: colors.pointLabels,
-                                            padding: 15,
                                             z: 3
                                         },
                                         grid: {
@@ -831,14 +854,13 @@
                                     const xCenter = scale.xCenter;
 
                                     ctx.save();
-                                    ctx.font = `bold ${scale.options.ticks.font.size}px sans-serif`;
+                                    ctx.font = scale.options.ticks.font.size + 'px sans-serif';
                                     ctx.fillStyle = scale.options.ticks.color || '#000';
                                     ctx.textAlign = 'center';
                                     ctx.textBaseline = 'middle';
 
-                                    // Offset untuk menggeser posisi
-                                    const offsetX = 10; // geser ke kanan
-                                    const offsetY = 0; // tidak geser vertikal
+                                    const offsetX = 10;
+                                    const offsetY = 0;
 
                                     ticks.forEach((tick) => {
                                         const value = tick.value;

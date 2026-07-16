@@ -384,7 +384,7 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
 
 
                 <div class="flex justify-center mb-2">
-                    <div style="width: 900px; height: 900px; position: relative;">
+                    <div style="width: 100%; max-width: 1100px; height: 600px; position: relative;">
                         <canvas id="spiderRatingChart-{{ $chartId }}"></canvas>
                     </div>
                 </div>
@@ -449,7 +449,7 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
 
 
                 <div class="flex justify-center mb-2">
-                    <div style="width: 900px; height: 900px; position: relative;">
+                    <div style="width: 100%; max-width: 1100px; height: 600px; position: relative;">
                         <canvas id="spiderScoreChart-{{ $chartId }}"></canvas>
                     </div>
                 </div>
@@ -486,7 +486,7 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                             angleLines: dark ? 'rgba(255, 255, 255, 0.15)' :
                             'rgba(0, 0, 0, 0.15)', // Lembut
                             ticks: dark ? '#ffffff' : '#000000', // Warna solid
-                            labels: dark ? '#ffffff' : '#000000', // Warna solid
+                            labels: dark ? '#d1d5db' : '#000000', // Warna solid (konsisten dengan dashboard)
                             tickBg: 'transparent' // Tambahkan property untuk background label
                         };
                     };
@@ -665,29 +665,26 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                                             stepSize: 1,
                                             color: colors.ticks,
                                             font: {
-                                                size: 14,
-                                                weight: 'bold'
+                                                size: 16
                                             },
                                             backdropColor: colors.tickBg,
                                             showLabelBackdrop: false,
-                                            z: 2 // Tambahkan z-index
+                                            z: 2
                                         },
                                         pointLabels: {
                                             font: {
-                                                size: 14,
-                                                weight: '400'
+                                                size: 16
                                             },
                                             color: colors.labels,
-                                            z: 3,
-                                            padding: 16 // Tambahkan z-index
+                                            z: 3
                                         },
                                         grid: {
                                             color: colors.grid,
-                                            z: 1 // Tambahkan z-index
+                                            z: 1
                                         },
                                         angleLines: {
                                             color: colors.angleLines,
-                                            z: 1 // Tambahkan z-index
+                                            z: 1
                                         }
                                     }
                                 }
@@ -705,13 +702,13 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                                     const xCenter = scale.xCenter;
 
                                     ctx.save();
-                                    ctx.font = `bold ${scale.options.ticks.font.size}px sans-serif`;
+                                    ctx.font = scale.options.ticks.font.size + 'px sans-serif';
                                     ctx.fillStyle = scale.options.ticks.color || '#000';
                                     ctx.textAlign = 'center';
                                     ctx.textBaseline = 'middle';
 
-                                    const offsetX = 10; // geser ke kanan
-                                    const offsetY = 0; // tidak geser vertikal
+                                    const offsetX = 10;
+                                    const offsetY = 0;
 
                                     ticks.forEach((tick) => {
                                         const value = tick.value;
@@ -865,8 +862,7 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                                             stepSize: 20,
                                             color: colors.ticks,
                                             font: {
-                                                size: 14,
-                                                weight: 'bold'
+                                                size: 16
                                             },
                                             backdropColor: colors.tickBg,
                                             showLabelBackdrop: false,
@@ -877,20 +873,18 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                                         },
                                         pointLabels: {
                                             font: {
-                                                size: 14,
-                                                weight: '400'
+                                                size: 16
                                             },
                                             color: colors.labels,
-                                            z: 3,
-                                            padding: 16 // Tambahkan z-index
+                                            z: 3
                                         },
                                         grid: {
                                             color: colors.grid,
-                                            z: 1 // Tambahkan z-index
+                                            z: 1
                                         },
                                         angleLines: {
                                             color: colors.angleLines,
-                                            z: 1 // Tambahkan z-index
+                                            z: 1
                                         }
                                     }
                                 }
@@ -908,13 +902,13 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
                                     const xCenter = scale.xCenter;
 
                                     ctx.save();
-                                    ctx.font = `bold ${scale.options.ticks.font.size}px sans-serif`;
+                                    ctx.font = scale.options.ticks.font.size + 'px sans-serif';
                                     ctx.fillStyle = scale.options.ticks.color || '#000';
                                     ctx.textAlign = 'center';
                                     ctx.textBaseline = 'middle';
 
-                                    const offsetX = 10; // geser ke kanan
-                                    const offsetY = 0; // tidak geser vertikal
+                                    const offsetX = 10;
+                                    const offsetY = 0;
 
                                     ticks.forEach((tick) => {
                                         const value = tick.value;

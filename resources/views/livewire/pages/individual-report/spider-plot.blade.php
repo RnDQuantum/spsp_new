@@ -87,7 +87,7 @@
                     angleLines: dark ? 'rgba(255, 255, 255, 0.15)' :
                     'rgba(0, 0, 0, 0.15)', // Lembut (0.5 -> 0.15)
                     ticks: dark ? '#ffffff' : '#000000', // Warna solid
-                    pointLabels: dark ? '#ffffff' : '#000000', // Warna solid
+                    pointLabels: dark ? '#d1d5db' : '#000000', // Warna solid (konsisten dengan dashboard)
                     legend: dark ? '#ffffff' : '#000000' // Warna solid
                 };
             };
@@ -250,7 +250,7 @@
                                 labels: {
                                     color: colors.legend,
                                     font: {
-                                        size: 14
+                                        size: 16
                                     }
                                 }
                             },
@@ -268,29 +268,26 @@
                                     stepSize: 1,
                                     color: colors.ticks,
                                     font: {
-                                        size: 16,
-                                        weight: 'bold'
+                                        size: 16
                                     },
                                     backdropColor: 'transparent',
                                     showLabelBackdrop: false,
-                                    z: 2 // Gunakan z-index 2 bukan 1000
+                                    z: 2
                                 },
                                 pointLabels: {
                                     color: colors.pointLabels,
                                     font: {
-                                        size: 14,
-                                        weight: '400'
+                                        size: 16
                                     },
-                                    z: 3,
-                                    padding: 16 // Gunakan z-index 3 bukan 1000
+                                    z: 3
                                 },
                                 grid: {
                                     color: colors.grid,
-                                    z: 1 // Tambahkan z-index 1
+                                    z: 1
                                 },
                                 angleLines: {
                                     color: colors.angleLines,
-                                    z: 1 // Tambahkan z-index 1
+                                    z: 1
                                 }
                             }
                         }
@@ -308,7 +305,7 @@
                             const xCenter = scale.xCenter;
 
                             ctx.save();
-                            ctx.font = `bold ${scale.options.ticks.font.size}px sans-serif`;
+                            ctx.font = scale.options.ticks.font.size + 'px sans-serif';
                             ctx.fillStyle = scale.options.ticks.color || '#000';
                             ctx.textAlign = 'center';
                             ctx.textBaseline = 'middle';
@@ -439,7 +436,7 @@
                                 labels: {
                                     color: colors.legend,
                                     font: {
-                                        size: 14
+                                        size: 16
                                     }
                                 }
                             },
@@ -457,29 +454,26 @@
                                     stepSize: 1,
                                     color: colors.ticks,
                                     font: {
-                                        size: 16,
-                                        weight: 'bold'
+                                        size: 16
                                     },
                                     backdropColor: 'transparent',
                                     showLabelBackdrop: false,
-                                    z: 2 // Gunakan z-index 2 bukan 1000
+                                    z: 2
                                 },
                                 pointLabels: {
                                     color: colors.pointLabels,
                                     font: {
-                                        size: 14,
-                                        weight: '400'
+                                        size: 16
                                     },
-                                    z: 3,
-                                    padding: 16 // Gunakan z-index 3 bukan 1000
+                                    z: 3
                                 },
                                 grid: {
                                     color: colors.grid,
-                                    z: 1 // Tambahkan z-index 1
+                                    z: 1
                                 },
                                 angleLines: {
                                     color: colors.angleLines,
-                                    z: 1 // Tambahkan z-index 1
+                                    z: 1
                                 }
                             }
                         }
@@ -497,7 +491,7 @@
                             const xCenter = scale.xCenter;
 
                             ctx.save();
-                            ctx.font = `bold ${scale.options.ticks.font.size}px sans-serif`;
+                            ctx.font = scale.options.ticks.font.size + 'px sans-serif';
                             ctx.fillStyle = scale.options.ticks.color || '#000';
                             ctx.textAlign = 'center';
                             ctx.textBaseline = 'middle';
@@ -627,7 +621,7 @@
                                 labels: {
                                     color: colors.legend,
                                     font: {
-                                        size: 14
+                                        size: 16
                                     }
                                 }
                             },
@@ -645,29 +639,26 @@
                                     stepSize: 1,
                                     color: colors.ticks,
                                     font: {
-                                        size: 16,
-                                        weight: 'bold'
+                                        size: 16
                                     },
                                     backdropColor: 'transparent',
                                     showLabelBackdrop: false,
-                                    z: 2 // Gunakan z-index 2 bukan 1000
+                                    z: 2
                                 },
                                 pointLabels: {
                                     color: colors.pointLabels,
                                     font: {
-                                        size: 14,
-                                        weight: '400'
+                                        size: 16
                                     },
-                                    z: 3,
-                                    padding: 16 // Gunakan z-index 3 bukan 1000
+                                    z: 3
                                 },
                                 grid: {
                                     color: colors.grid,
-                                    z: 1 // Tambahkan z-index 1
+                                    z: 1
                                 },
                                 angleLines: {
                                     color: colors.angleLines,
-                                    z: 1 // Tambahkan z-index 1
+                                    z: 1
                                 }
                             }
                         }
@@ -685,7 +676,7 @@
                             const xCenter = scale.xCenter;
 
                             ctx.save();
-                            ctx.font = `bold ${scale.options.ticks.font.size}px sans-serif`;
+                            ctx.font = scale.options.ticks.font.size + 'px sans-serif';
                             ctx.fillStyle = scale.options.ticks.color || '#000';
                             ctx.textAlign = 'center';
                             ctx.textBaseline = 'middle';

@@ -63,6 +63,49 @@
                         <h3 class="text-lg text-center font-semibold text-gray-800 dark:text-gray-100 mb-4">
                             <i>Potential Mapping (Rating)</i>
                         </h3>
+
+                        <!-- Custom HTML Legend -->
+                        <div class="flex justify-center text-sm gap-2 mb-4" id="potensi-legend-{{ $potensiChartId }}">
+                            @if ($participant)
+                                <span class="legend-item flex items-center gap-2 cursor-pointer select-none 
+                                    hover:bg-gray-100 dark:hover:bg-gray-600 px-3 py-2 rounded-lg transition-all duration-200 
+                                    border border-gray-300 dark:border-gray-600 shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                    data-chart="potensi" data-dataset="0">
+                                    <span class="inline-block w-12 h-3 rounded-sm" style="background-color: #5db010;"></span>
+                                    <span class="font-semibold" style="color: #5db010;">{{ $participant->name }}</span>
+                                </span>
+                                <span class="legend-item flex items-center gap-2 cursor-pointer select-none 
+                                    hover:bg-gray-100 dark:hover:bg-gray-600 px-3 py-2 rounded-lg transition-all duration-200 
+                                    border border-gray-300 dark:border-gray-600 shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                    data-chart="potensi" data-dataset="1">
+                                    <span class="inline-block w-12 h-3 rounded-sm" style="background-color: #b50505;"></span>
+                                    <span class="font-semibold">Standard</span>
+                                </span>
+                                <span class="legend-item flex items-center gap-2 cursor-pointer select-none 
+                                    hover:bg-gray-100 dark:hover:bg-gray-600 px-3 py-2 rounded-lg transition-all duration-200 
+                                    border border-gray-300 dark:border-gray-600 shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                    data-chart="potensi" data-dataset="2">
+                                    <span class="inline-block w-12 h-3 rounded-sm" style="background-color: #fafa05;"></span>
+                                    <span class="font-semibold">Tolerance {{ $tolerancePercentage }}%</span>
+                                </span>
+                            @else
+                                <span class="legend-item flex items-center gap-2 cursor-pointer select-none 
+                                    hover:bg-gray-100 dark:hover:bg-gray-600 px-3 py-2 rounded-lg transition-all duration-200 
+                                    border border-gray-300 dark:border-gray-600 shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                    data-chart="potensi" data-dataset="0">
+                                    <span class="inline-block w-12 h-3 rounded-sm" style="background-color: #5db010;"></span>
+                                    <span class="font-semibold">Standard</span>
+                                </span>
+                                <span class="legend-item flex items-center gap-2 cursor-pointer select-none 
+                                    hover:bg-gray-100 dark:hover:bg-gray-600 px-3 py-2 rounded-lg transition-all duration-200 
+                                    border border-gray-300 dark:border-gray-600 shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                    data-chart="potensi" data-dataset="1">
+                                    <span class="inline-block w-12 h-3 rounded-sm" style="background-color: #fafa05;"></span>
+                                    <span class="font-semibold">Tolerance {{ $tolerancePercentage }}%</span>
+                                </span>
+                            @endif
+                        </div>
+
                         <div class="relative" style="height: 600px;" wire:ignore>
                             <canvas id="potensiChart-{{ $potensiChartId }}"></canvas>
                         </div>
@@ -75,6 +118,49 @@
                             <i>Managerial Potency Mapping
                                 (Rating)</i>
                         </h3>
+
+                        <!-- Custom HTML Legend -->
+                        <div class="flex justify-center text-sm gap-2 mb-4" id="kompetensi-legend-{{ $kompetensiChartId }}">
+                            @if ($participant)
+                                <span class="legend-item flex items-center gap-2 cursor-pointer select-none 
+                                    hover:bg-gray-100 dark:hover:bg-gray-600 px-3 py-2 rounded-lg transition-all duration-200 
+                                    border border-gray-300 dark:border-gray-600 shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                    data-chart="kompetensi" data-dataset="0">
+                                    <span class="inline-block w-12 h-3 rounded-sm" style="background-color: #5db010;"></span>
+                                    <span class="font-semibold" style="color: #5db010;">{{ $participant->name }}</span>
+                                </span>
+                                <span class="legend-item flex items-center gap-2 cursor-pointer select-none 
+                                    hover:bg-gray-100 dark:hover:bg-gray-600 px-3 py-2 rounded-lg transition-all duration-200 
+                                    border border-gray-300 dark:border-gray-600 shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                    data-chart="kompetensi" data-dataset="1">
+                                    <span class="inline-block w-12 h-3 rounded-sm" style="background-color: #b50505;"></span>
+                                    <span class="font-semibold">Standard</span>
+                                </span>
+                                <span class="legend-item flex items-center gap-2 cursor-pointer select-none 
+                                    hover:bg-gray-100 dark:hover:bg-gray-600 px-3 py-2 rounded-lg transition-all duration-200 
+                                    border border-gray-300 dark:border-gray-600 shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                    data-chart="kompetensi" data-dataset="2">
+                                    <span class="inline-block w-12 h-3 rounded-sm" style="background-color: #fafa05;"></span>
+                                    <span class="font-semibold">Tolerance {{ $tolerancePercentage }}%</span>
+                                </span>
+                            @else
+                                <span class="legend-item flex items-center gap-2 cursor-pointer select-none 
+                                    hover:bg-gray-100 dark:hover:bg-gray-600 px-3 py-2 rounded-lg transition-all duration-200 
+                                    border border-gray-300 dark:border-gray-600 shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                    data-chart="kompetensi" data-dataset="0">
+                                    <span class="inline-block w-12 h-3 rounded-sm" style="background-color: #5db010;"></span>
+                                    <span class="font-semibold">Standard</span>
+                                </span>
+                                <span class="legend-item flex items-center gap-2 cursor-pointer select-none 
+                                    hover:bg-gray-100 dark:hover:bg-gray-600 px-3 py-2 rounded-lg transition-all duration-200 
+                                    border border-gray-300 dark:border-gray-600 shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                    data-chart="kompetensi" data-dataset="1">
+                                    <span class="inline-block w-12 h-3 rounded-sm" style="background-color: #fafa05;"></span>
+                                    <span class="font-semibold">Tolerance {{ $tolerancePercentage }}%</span>
+                                </span>
+                            @endif
+                        </div>
+
                         <div class="relative" style="height: 600px;" wire:ignore>
                             <canvas id="kompetensiChart-{{ $kompetensiChartId }}"></canvas>
                         </div>
@@ -86,6 +172,49 @@
                         <h3 class="text-lg text-center font-semibold text-gray-800 dark:text-gray-100 mb-4">
                             <i>General Mapping (Rating)</i>
                         </h3>
+
+                        <!-- Custom HTML Legend -->
+                        <div class="flex justify-center text-sm gap-2 mb-4" id="general-legend-{{ $generalChartId }}">
+                            @if ($participant)
+                                <span class="legend-item flex items-center gap-2 cursor-pointer select-none 
+                                    hover:bg-gray-100 dark:hover:bg-gray-600 px-3 py-2 rounded-lg transition-all duration-200 
+                                    border border-gray-300 dark:border-gray-600 shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                    data-chart="general" data-dataset="0">
+                                    <span class="inline-block w-12 h-3 rounded-sm" style="background-color: #5db010;"></span>
+                                    <span class="font-semibold" style="color: #5db010;">{{ $participant->name }}</span>
+                                </span>
+                                <span class="legend-item flex items-center gap-2 cursor-pointer select-none 
+                                    hover:bg-gray-100 dark:hover:bg-gray-600 px-3 py-2 rounded-lg transition-all duration-200 
+                                    border border-gray-300 dark:border-gray-600 shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                    data-chart="general" data-dataset="1">
+                                    <span class="inline-block w-12 h-3 rounded-sm" style="background-color: #b50505;"></span>
+                                    <span class="font-semibold">Standard</span>
+                                </span>
+                                <span class="legend-item flex items-center gap-2 cursor-pointer select-none 
+                                    hover:bg-gray-100 dark:hover:bg-gray-600 px-3 py-2 rounded-lg transition-all duration-200 
+                                    border border-gray-300 dark:border-gray-600 shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                    data-chart="general" data-dataset="2">
+                                    <span class="inline-block w-12 h-3 rounded-sm" style="background-color: #fafa05;"></span>
+                                    <span class="font-semibold">Tolerance {{ $tolerancePercentage }}%</span>
+                                </span>
+                            @else
+                                <span class="legend-item flex items-center gap-2 cursor-pointer select-none 
+                                    hover:bg-gray-100 dark:hover:bg-gray-600 px-3 py-2 rounded-lg transition-all duration-200 
+                                    border border-gray-300 dark:border-gray-600 shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                    data-chart="general" data-dataset="0">
+                                    <span class="inline-block w-12 h-3 rounded-sm" style="background-color: #5db010;"></span>
+                                    <span class="font-semibold">Standard</span>
+                                </span>
+                                <span class="legend-item flex items-center gap-2 cursor-pointer select-none 
+                                    hover:bg-gray-100 dark:hover:bg-gray-600 px-3 py-2 rounded-lg transition-all duration-200 
+                                    border border-gray-300 dark:border-gray-600 shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                    data-chart="general" data-dataset="1">
+                                    <span class="inline-block w-12 h-3 rounded-sm" style="background-color: #fafa05;"></span>
+                                    <span class="font-semibold">Tolerance {{ $tolerancePercentage }}%</span>
+                                </span>
+                            @endif
+                        </div>
+
                         <div class="relative" style="height: 600px;" wire:ignore>
                             <canvas id="generalChart-{{ $generalChartId }}"></canvas>
                         </div>
@@ -171,6 +300,70 @@
                             window.generalChart_{{ $generalChartId }}.destroy();
                             window.generalChart_{{ $generalChartId }} = null;
                         }
+                    }
+
+                    // ========================================
+                    // CUSTOM HTML LEGEND LOGIC FOR DASHBOARD
+                    // ========================================
+                    window.toggleDashboardDataset = function(chartType, datasetIndex) {
+                        let chart;
+                        let legendId;
+                        if (chartType === 'potensi') {
+                            chart = window.potensiChart_{{ $potensiChartId }};
+                            legendId = 'potensi-legend-{{ $potensiChartId }}';
+                        } else if (chartType === 'kompetensi') {
+                            chart = window.kompetensiChart_{{ $kompetensiChartId }};
+                            legendId = 'kompetensi-legend-{{ $kompetensiChartId }}';
+                        } else if (chartType === 'general') {
+                            chart = window.generalChart_{{ $generalChartId }};
+                            legendId = 'general-legend-{{ $generalChartId }}';
+                        }
+
+                        if (!chart) return;
+
+                        const meta = chart.getDatasetMeta(datasetIndex);
+                        meta.hidden = meta.hidden === null ? !chart.data.datasets[datasetIndex].hidden : null;
+                        chart.update();
+
+                        updateDashboardLegendStyles(chartType, legendId);
+                    };
+
+                    function updateDashboardLegendStyles(chartType, legendId) {
+                        let chart;
+                        if (chartType === 'potensi') {
+                            chart = window.potensiChart_{{ $potensiChartId }};
+                        } else if (chartType === 'kompetensi') {
+                            chart = window.kompetensiChart_{{ $kompetensiChartId }};
+                        } else if (chartType === 'general') {
+                            chart = window.generalChart_{{ $generalChartId }};
+                        }
+
+                        const legendContainer = document.getElementById(legendId);
+                        if (!legendContainer || !chart) return;
+
+                        legendContainer.querySelectorAll('.legend-item').forEach(item => {
+                            const idx = parseInt(item.dataset.dataset);
+                            const meta = chart.getDatasetMeta(idx);
+                            const isHidden = meta && meta.hidden !== null ? meta.hidden : (chart.data.datasets[idx]?.hidden || false);
+                            if (isHidden) {
+                                item.classList.add('opacity-50', 'line-through', 'bg-gray-50', 'dark:bg-gray-600');
+                                item.classList.remove('bg-white', 'dark:bg-gray-700', 'shadow-sm');
+                            } else {
+                                item.classList.remove('opacity-50', 'line-through', 'bg-gray-50', 'dark:bg-gray-600');
+                                item.classList.add('bg-white', 'dark:bg-gray-700', 'shadow-sm');
+                            }
+                        });
+                    }
+
+                    function setupDashboardLegendListeners(chartType, legendId) {
+                        const legendContainer = document.getElementById(legendId);
+                        if (!legendContainer) return;
+                        legendContainer.onclick = (e) => {
+                            const item = e.target.closest('.legend-item');
+                            if (!item) return;
+                            window.toggleDashboardDataset(chartType, parseInt(item.dataset.dataset));
+                        };
+                        updateDashboardLegendStyles(chartType, legendId);
                     }
 
                     // ========================================
@@ -401,14 +594,7 @@
                                 },
                                 plugins: {
                                     legend: {
-                                        display: true,
-                                        position: 'top',
-                                        labels: {
-                                            color: colors.legend,
-                                            font: {
-                                                size: 16
-                                            }
-                                        }
+                                        display: false
                                     },
                                     datalabels: {
                                         display: true
@@ -453,6 +639,7 @@
                             }]
 
                         });
+                        setupDashboardLegendListeners('potensi', 'potensi-legend-{{ $potensiChartId }}');
                     }
 
                     // ========================================
@@ -679,14 +866,7 @@
                                 },
                                 plugins: {
                                     legend: {
-                                        display: true,
-                                        position: 'top',
-                                        labels: {
-                                            color: colors.legend,
-                                            font: {
-                                                size: 16
-                                            }
-                                        }
+                                        display: false
                                     },
                                     datalabels: {
                                         display: true
@@ -730,6 +910,7 @@
                                 }
                             }]
                         });
+                        setupDashboardLegendListeners('kompetensi', 'kompetensi-legend-{{ $kompetensiChartId }}');
                     }
 
                     // ========================================
@@ -956,14 +1137,7 @@
                                 },
                                 plugins: {
                                     legend: {
-                                        display: true,
-                                        position: 'top',
-                                        labels: {
-                                            color: colors.legend,
-                                            font: {
-                                                size: 16
-                                            }
-                                        }
+                                        display: false
                                     },
                                     datalabels: {
                                         display: true
@@ -1007,6 +1181,7 @@
                                 }
                             }]
                         });
+                        setupDashboardLegendListeners('general', 'general-legend-{{ $generalChartId }}');
                     }
 
                     // ========================================
@@ -1146,14 +1321,7 @@
                                 },
                                 plugins: {
                                     legend: {
-                                        display: true,
-                                        position: 'top',
-                                        labels: {
-                                            color: colors.legend,
-                                            font: {
-                                                size: 16
-                                            }
-                                        }
+                                        display: false
                                     },
                                     datalabels: {
                                         display: true
@@ -1196,6 +1364,7 @@
                                 }
                             }]
                         });
+                        setupDashboardLegendListeners('potensi', 'potensi-legend-{{ $potensiChartId }}');
                     }
 
                     function initializeKompetensiChartWithData(data, hasParticipant, tolerancePercentage, participantName) {
@@ -1329,13 +1498,7 @@
                                 },
                                 plugins: {
                                     legend: {
-                                        display: true,
-                                        labels: {
-                                            color: colors.legend,
-                                            font: {
-                                                size: 16
-                                            }
-                                        }
+                                        display: false
                                     },
                                     datalabels: {
                                         display: true
@@ -1373,6 +1536,7 @@
                                 }
                             }]
                         });
+                        setupDashboardLegendListeners('kompetensi', 'kompetensi-legend-{{ $kompetensiChartId }}');
                     }
 
                     function initializeGeneralChartWithData(data, hasParticipant, tolerancePercentage, participantName) {
@@ -1452,7 +1616,7 @@
                                 fill: true,
                                 backgroundColor: '#fafa05',
                                 borderColor: '#e6d105',
-                                pointBackgroundColor: '#e6d105',
+                                pointBackgroundColor: '#fafa05',
                                 pointBorderColor: '#fff',
                                 borderWidth: 2,
                                 pointRadius: 3,
@@ -1506,13 +1670,7 @@
                                 },
                                 plugins: {
                                     legend: {
-                                        display: true,
-                                        labels: {
-                                            color: colors.legend,
-                                            font: {
-                                                size: 16
-                                            }
-                                        }
+                                        display: false
                                     },
                                     datalabels: {
                                         display: true
@@ -1550,6 +1708,7 @@
                                 }
                             }]
                         });
+                        setupDashboardLegendListeners('general', 'general-legend-{{ $generalChartId }}');
                     }
 
 
