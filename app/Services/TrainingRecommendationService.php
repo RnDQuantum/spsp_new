@@ -80,8 +80,8 @@ class TrainingRecommendationService
             }
         }
 
-        $hasAdjustments = ! empty(session()->get("standard_adjustment.{$aspect->template_id}", []))
-            || session()->get("selected_standard.{$aspect->template_id}") !== null;
+        $hasAdjustments = ! empty(app(\App\Services\DynamicStandardService::class)->getAdjustments($aspect->template_id))
+            || app(\App\Services\CustomStandardService::class)->getSelected($aspect->template_id) !== null;
 
         $configHash = md5(json_encode([
             'aspect_code' => $aspect->code,
@@ -191,8 +191,8 @@ class TrainingRecommendationService
             $aspectRatings[$aspect->code] = $standardService->getAspectRating($templateId, $aspect->code);
         }
 
-        $hasAdjustments = ! empty(session()->get("standard_adjustment.{$templateId}", []))
-            || session()->get("selected_standard.{$templateId}") !== null;
+        $hasAdjustments = ! empty(app(\App\Services\DynamicStandardService::class)->getAdjustments($templateId))
+            || app(\App\Services\CustomStandardService::class)->getSelected($templateId) !== null;
 
         $configHash = md5(json_encode([
             'template_id' => $templateId,
@@ -329,8 +329,8 @@ class TrainingRecommendationService
             }
         }
 
-        $hasAdjustments = ! empty(session()->get("standard_adjustment.{$aspect->template_id}", []))
-            || session()->get("selected_standard.{$aspect->template_id}") !== null;
+        $hasAdjustments = ! empty(app(\App\Services\DynamicStandardService::class)->getAdjustments($aspect->template_id))
+            || app(\App\Services\CustomStandardService::class)->getSelected($aspect->template_id) !== null;
 
         $configHash = md5(json_encode([
             'aspect_code' => $aspect->code,

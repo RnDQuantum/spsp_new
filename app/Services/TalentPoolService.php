@@ -599,8 +599,8 @@ class TalentPoolService
         // 🚀 PERFORMANCE: Simpler hash based on session adjustments only
         // Instead of querying all aspects and checking each one, we use the session data directly
         $templateId = $this->cachedPosition->template_id;
-        $sessionAdjustments = session()->get("standard_adjustment.{$templateId}", []);
-        $selectedStandard = session()->get("selected_standard.{$templateId}");
+        $sessionAdjustments = app(\App\Services\DynamicStandardService::class)->getAdjustments($templateId);
+        $selectedStandard = app(\App\Services\CustomStandardService::class)->getSelected($templateId);
 
         $hasAdjustments = ! empty($sessionAdjustments) || $selectedStandard !== null;
 

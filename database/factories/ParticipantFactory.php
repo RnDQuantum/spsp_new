@@ -31,6 +31,12 @@ class ParticipantFactory extends Factory
         self::$counter++;
 
         return [
+            'event_id' => AssessmentEvent::factory(),
+            'institution_id' => function (array $attributes) {
+                $event = AssessmentEvent::find($attributes['event_id']);
+                return $event ? $event->institution_id : null;
+            },
+            'position_formation_id' => PositionFormation::factory(),
             'username' => $this->generateUsername(),
             'test_number' => $this->generateTestNumber(),
             'skb_number' => $this->generateSkbNumber(),
@@ -102,6 +108,7 @@ class ParticipantFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'event_id' => $event->id,
+            'institution_id' => $event->institution_id,
         ]);
     }
 
@@ -113,6 +120,7 @@ class ParticipantFactory extends Factory
         return $this->state(fn (array $attributes) => [
             'batch_id' => $batch->id,
             'event_id' => $batch->event_id,
+            'institution_id' => $batch->institution_id,
         ]);
     }
 
@@ -123,6 +131,8 @@ class ParticipantFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'position_formation_id' => $position->id,
+            'event_id' => $position->event_id,
+            'institution_id' => $position->institution_id,
         ]);
     }
 

@@ -99,7 +99,7 @@ class StatisticService
         $adjustmentHash = md5(json_encode($adjustments));
 
         // Check selected standard
-        $selectedStandard = session("selected_standard.{$templateId}");
+        $selectedStandard = app(\App\Services\CustomStandardService::class)->getSelected($templateId);
 
         return sprintf(
             'statistic:distribution:%d:%d:%d:%d:%s:%s',

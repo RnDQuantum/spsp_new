@@ -24,6 +24,10 @@ class BatchFactory extends Factory
 
         return [
             'event_id' => AssessmentEvent::factory(),
+            'institution_id' => function (array $attributes) {
+                $event = AssessmentEvent::find($attributes['event_id']);
+                return $event ? $event->institution_id : null;
+            },
             'code' => 'BATCH-'.str_pad((string) $batchCounter, 3, '0', STR_PAD_LEFT),
             'name' => 'Batch '.$batchCounter++,
             'batch_number' => $batchCounter - 1,

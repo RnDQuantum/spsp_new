@@ -20,6 +20,10 @@ class PositionFormationFactory extends Factory
     {
         return [
             'event_id' => AssessmentEvent::factory(),
+            'institution_id' => function (array $attributes) {
+                $event = AssessmentEvent::find($attributes['event_id']);
+                return $event ? $event->institution_id : null;
+            },
             'template_id' => AssessmentTemplate::factory(),
             'code' => strtoupper(fake()->unique()->bothify('POS-####')),
             'name' => fake()->jobTitle(),

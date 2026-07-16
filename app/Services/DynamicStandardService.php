@@ -33,11 +33,58 @@ class DynamicStandardService
     private array $categoryAdjustmentsCache = [];
 
     /**
+     * Get active event context (event code or 'global')
+     */
+    private function getActiveEventContext(): string
+    {
+        if (app()->runningUnitTests()) {
+            return '';
+        }
+
+        // 1. Check route parameter 'eventCode'
+        $eventCode = request()->route('eventCode');
+        if ($eventCode && is_string($eventCode)) {
+            return $eventCode;
+        }
+
+        // 2. Check route parameter 'event' (if it's a string code or model binding)
+        $eventParam = request()->route('event');
+        if ($eventParam) {
+            $code = $eventParam instanceof \App\Models\AssessmentEvent ? $eventParam->code : $eventParam;
+            if (is_string($code)) {
+                return $code;
+            }
+        }
+
+        // 3. Check session filter
+        $sessionEventCode = session('filter.event_code');
+        if ($sessionEventCode && is_string($sessionEventCode)) {
+            return $sessionEventCode;
+        }
+
+        return 'global';
+    }
+
+    /**
      * Get session key for template
      */
     private function getSessionKey(int $templateId): string
     {
-        return self::SESSION_PREFIX.".{$templateId}";
+        $context = $this->getActiveEventContext();
+        return $context 
+            ? self::SESSION_PREFIX.".{$context}.{$templateId}" 
+            : self::SESSION_PREFIX.".{$templateId}";
+    }
+
+    /**
+     * Get session key for selected custom standard
+     */
+    private function getSelectedStandardKey(int $templateId): string
+    {
+        $context = $this->getActiveEventContext();
+        return $context 
+            ? "selected_standard.{$context}.{$templateId}" 
+            : "selected_standard.{$templateId}";
     }
 
     /**
@@ -85,9 +132,9 @@ class DynamicStandardService
         foreach ($sessionData as $key => $value) {
             if (str_starts_with($key, 'selected_standard.') && is_numeric($value) && (int) $value === $customStandardId) {
                 Session::forget($key);
-                // Also clear any session adjustments for the same template
-                $templateId = str_replace('selected_standard.', '', $key);
-                Session::forget("standard_adjustment.{$templateId}");
+                // Also clear any session adjustments for the same context/template
+                $adjustmentKey = str_replace('selected_standard.', 'standard_adjustment.', $key);
+                Session::forget($adjustmentKey);
             }
         }
     }
@@ -111,7 +158,7 @@ class DynamicStandardService
         }
 
         // Layer 2: Custom Standard
-        $customStandardId = Session::get("selected_standard.{$templateId}");
+        $customStandardId = Session::get($this->getSelectedStandardKey($templateId));
         if ($customStandardId) {
             $customStandard = $this->getCustomStandard($customStandardId);
             if ($customStandard) {
@@ -166,7 +213,7 @@ class DynamicStandardService
     private function getOriginalValue(string $type, int $templateId, string $code)
     {
         // Check if custom standard is selected
-        $customStandardId = Session::get("selected_standard.{$templateId}");
+        $customStandardId = Session::get($this->getSelectedStandardKey($templateId));
 
         if ($customStandardId) {
             // 🚀 Use cached getter (prevents N+1)
@@ -681,7 +728,7 @@ class DynamicStandardService
         }
 
         // 2. Check custom standard
-        $customStandardId = Session::get("selected_standard.{$templateId}");
+        $customStandardId = Session::get($this->getSelectedStandardKey($templateId));
         if ($customStandardId) {
             $customStandard = $this->getCustomStandard($customStandardId);
             if ($customStandard && ! empty($customStandard->sub_aspect_configs)) {

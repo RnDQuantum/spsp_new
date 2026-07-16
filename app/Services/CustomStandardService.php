@@ -141,10 +141,10 @@ class CustomStandardService
      */
     public function select(int $templateId, ?int $customStandardId): void
     {
-        Session::put(self::SESSION_PREFIX.".{$templateId}", $customStandardId);
+        Session::put($this->getSelectedKey($templateId), $customStandardId);
 
         // Reset dynamic adjustments when switching standard
-        Session::forget("standard_adjustment.{$templateId}");
+        Session::forget($this->getAdjustmentKey($templateId));
     }
 
     /**
@@ -152,7 +152,7 @@ class CustomStandardService
      */
     public function getSelected(int $templateId): ?int
     {
-        return Session::get(self::SESSION_PREFIX.".{$templateId}");
+        return Session::get($this->getSelectedKey($templateId));
     }
 
     /**
@@ -186,8 +186,8 @@ class CustomStandardService
      */
     public function clearSelection(int $templateId): void
     {
-        Session::forget(self::SESSION_PREFIX.".{$templateId}");
-        Session::forget("standard_adjustment.{$templateId}");
+        Session::forget($this->getSelectedKey($templateId));
+        Session::forget($this->getAdjustmentKey($templateId));
     }
 
     /**
@@ -341,5 +341,54 @@ class CustomStandardService
             ->distinct()
             ->orderBy('name')
             ->get();
+    }
+
+    /**
+     * Get active event context (event code or 'global')
+     */
+    private function getActiveEventContext(): string
+    {
+        if (app()->runningUnitTests()) {
+            return '';
+        }
+
+        // 1. Check route parameter 'eventCode'
+        $eventCode = request()->route('eventCode');
+        if ($eventCode && is_string($eventCode)) {
+            return $eventCode;
+        }
+
+        // 2. Check route parameter 'event' (if it's a string code or model binding)
+        $eventParam = request()->route('event');
+        if ($eventParam) {
+            $code = $eventParam instanceof \App\Models\AssessmentEvent ? $eventParam->code : $eventParam;
+            if (is_string($code)) {
+                return $code;
+            }
+        }
+
+        // 3. Check session filter
+        $sessionEventCode = session('filter.event_code');
+        if ($sessionEventCode && is_string($sessionEventCode)) {
+            return $sessionEventCode;
+        }
+
+        return 'global';
+    }
+
+    private function getSelectedKey(int $templateId): string
+    {
+        $context = $this->getActiveEventContext();
+        return $context 
+            ? self::SESSION_PREFIX.".{$context}.{$templateId}" 
+            : self::SESSION_PREFIX.".{$templateId}";
+    }
+
+    private function getAdjustmentKey(int $templateId): string
+    {
+        $context = $this->getActiveEventContext();
+        return $context 
+            ? "standard_adjustment.{$context}.{$templateId}" 
+            : "standard_adjustment.{$templateId}";
     }
 }

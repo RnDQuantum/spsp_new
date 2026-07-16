@@ -953,8 +953,8 @@ class RankingService
      */
     private function hasAnyAdjustments(int $templateId): bool
     {
-        $sessionAdjustments = session()->get("standard_adjustment.{$templateId}", []);
-        $selectedStandard = session()->get("selected_standard.{$templateId}");
+        $sessionAdjustments = app(\App\Services\DynamicStandardService::class)->getAdjustments($templateId);
+        $selectedStandard = app(\App\Services\CustomStandardService::class)->getSelected($templateId);
 
         return ! empty($sessionAdjustments) || $selectedStandard !== null;
     }

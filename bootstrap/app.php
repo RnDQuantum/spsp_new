@@ -11,6 +11,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        $middleware->web(append: [
+            \App\Http\Middleware\EnsureUserBelongsToInstitution::class,
+        ]);
         $middleware->alias([
             'institution.access' => \App\Http\Middleware\EnsureUserBelongsToInstitution::class,
             'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,

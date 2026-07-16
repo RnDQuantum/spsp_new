@@ -43,19 +43,6 @@ return new class extends Migration
                 ->whereColumn('assessment_events.id', 'participants.event_id')
                 ->select('institution_id')
         ]);
-
-        // 3. Make columns not nullable
-        Schema::table('batches', function (Blueprint $table) {
-            $table->foreignId('institution_id')->nullable(false)->change();
-        });
-
-        Schema::table('position_formations', function (Blueprint $table) {
-            $table->foreignId('institution_id')->nullable(false)->change();
-        });
-
-        Schema::table('participants', function (Blueprint $table) {
-            $table->foreignId('institution_id')->nullable(false)->change();
-        });
     }
 
     /**

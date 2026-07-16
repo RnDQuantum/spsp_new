@@ -27,9 +27,11 @@ class InstitutionScope implements Scope
             return;
         }
 
-        // Clients only see their institution's data
+        // Clients only see their institution's data (fail-closed)
         if ($user->institution_id) {
             $builder->where('institution_id', $user->institution_id);
+        } else {
+            $builder->whereRaw('1 = 0');
         }
     }
 }
