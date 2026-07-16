@@ -13,17 +13,28 @@ class PositionFormation extends Model
 
     protected $fillable = [
         'event_id',
+        'institution_id',
         'template_id',
         'code',
         'name',
         'quota',
     ];
 
+    protected static function booted()
+    {
+        static::addGlobalScope(new \App\Models\Scopes\InstitutionScope);
+    }
+
     protected function casts(): array
     {
         return [
             'quota' => 'integer',
         ];
+    }
+
+    public function institution(): BelongsTo
+    {
+        return $this->belongsTo(Institution::class);
     }
 
     public function assessmentEvent(): BelongsTo

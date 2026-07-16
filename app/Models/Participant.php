@@ -14,6 +14,7 @@ class Participant extends Model
 
     protected $fillable = [
         'event_id',
+        'institution_id',
         'batch_id',
         'position_formation_id',
         'username',
@@ -27,11 +28,21 @@ class Participant extends Model
         'assessment_date',
     ];
 
+    protected static function booted()
+    {
+        static::addGlobalScope(new \App\Models\Scopes\InstitutionScope);
+    }
+
     protected function casts(): array
     {
         return [
             'assessment_date' => 'date',
         ];
+    }
+
+    public function institution(): BelongsTo
+    {
+        return $this->belongsTo(Institution::class);
     }
 
     public function assessmentEvent(): BelongsTo

@@ -464,6 +464,7 @@ class DynamicAssessmentSeeder extends Seeder
             foreach ($config['batches'] as $batchData) {
                 $batches[] = Batch::create([
                     'event_id' => $event->id,
+                    'institution_id' => $institution->id,
                     ...$batchData,
                 ]);
             }
@@ -476,6 +477,7 @@ class DynamicAssessmentSeeder extends Seeder
 
                 $position = PositionFormation::create([
                     'event_id' => $event->id,
+                    'institution_id' => $institution->id,
                     'template_id' => $positionTemplate->id,
                     'code' => $positionData['code'],
                     'name' => $positionData['name'],
@@ -756,6 +758,7 @@ class DynamicAssessmentSeeder extends Seeder
 
         return [
             'event_id' => $event->id,
+            'institution_id' => $event->institution_id,
             'batch_id' => $batch->id,
             'position_formation_id' => $position->id,
             'username' => $this->generateUniqueUsername(),
