@@ -5,12 +5,61 @@
  * including toggle, mini mode, and responsive behavior.
  */
 
+let globalState = null;
+
+function getGlobalState() {
+    if (!globalState) {
+        const rawState = {
+            sidebarIsOpen: window.innerWidth >= 768,
+            sidebarIsMini: false,
+            modalOpen: false,
+            currentPath: window.location.pathname,
+        };
+
+        if (window.Alpine) {
+            globalState = window.Alpine.reactive(rawState);
+        } else {
+            globalState = rawState;
+        }
+
+        // Keep currentPath updated on Livewire navigation
+        document.addEventListener('livewire:navigated', () => {
+            globalState.currentPath = window.location.pathname;
+        });
+    }
+    return globalState;
+}
+
 export function sidebarState() {
     return {
-        sidebarIsOpen: window.innerWidth >= 768,
-        sidebarIsMini: false,
-        modalOpen: false,
-        currentPath: window.location.pathname,
+        // Delegate properties reactively to the global state
+        get sidebarIsOpen() {
+            return getGlobalState().sidebarIsOpen;
+        },
+        set sidebarIsOpen(val) {
+            getGlobalState().sidebarIsOpen = val;
+        },
+
+        get sidebarIsMini() {
+            return getGlobalState().sidebarIsMini;
+        },
+        set sidebarIsMini(val) {
+            getGlobalState().sidebarIsMini = val;
+        },
+
+        get modalOpen() {
+            return getGlobalState().modalOpen;
+        },
+        set modalOpen(val) {
+            getGlobalState().modalOpen = val;
+        },
+
+        get currentPath() {
+            return getGlobalState().currentPath;
+        },
+        set currentPath(val) {
+            getGlobalState().currentPath = val;
+        },
 
         /**
          * Handle window resize events
