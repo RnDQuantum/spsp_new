@@ -129,6 +129,10 @@ class Dashboard extends Component
     {
         Log::info('Dashboard: handleEventSelected called', ['eventCode' => $eventCode]);
 
+        // Explicitly clear participant when event changes
+        session()->forget('filter.participant_id');
+        $this->participant = null;
+
         // Clear cache before reload
         $this->clearCache();
 
@@ -147,6 +151,10 @@ class Dashboard extends Component
     public function handlePositionSelected(?int $positionFormationId): void
     {
         Log::info('Dashboard: handlePositionSelected called', ['positionFormationId' => $positionFormationId]);
+
+        // Explicitly clear participant when position changes
+        session()->forget('filter.participant_id');
+        $this->participant = null;
 
         // Clear cache before reload
         $this->clearCache();
