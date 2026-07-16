@@ -340,7 +340,7 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
 
                 <!-- Legend Rating - DARK MODE READY -->
                 <!-- GANTI URUTAN LEGEND INI -->
-                <div class="flex justify-center text-sm gap-2 mb-2" id="rating-legend-{{ $chartId }}">
+                <div class="flex justify-center text-sm gap-2 mb-8" id="rating-legend-{{ $chartId }}">
                     <!-- Dataset 0: Peserta - HIJAU -->
                     <span
                         class="legend-item flex items-center gap-2 cursor-pointer select-none 
@@ -405,7 +405,7 @@ $conclusion = strtoupper(trim($rankingInfo['conclusion'])); @endphp
 
                 <!-- Legend Score - DARK MODE READY -->
                 <!-- GANTI URUTAN LEGEND INI -->
-                <div class="flex justify-center text-sm gap-8 mb-2" id="score-legend-{{ $chartId }}">
+                <div class="flex justify-center text-sm gap-2 mb-8" id="score-legend-{{ $chartId }}">
                     <!-- Dataset 0: Peserta - HIJAU -->
                     <span
                         class="legend-item flex items-center gap-2 cursor-pointer select-none 

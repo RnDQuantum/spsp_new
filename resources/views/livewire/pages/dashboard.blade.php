@@ -65,7 +65,7 @@
                         </h3>
 
                         <!-- Custom HTML Legend -->
-                        <div class="flex justify-center text-sm gap-2 mb-4" id="potensi-legend-{{ $potensiChartId }}">
+                        <div class="flex justify-center text-sm gap-2 mb-8" id="potensi-legend-{{ $potensiChartId }}">
                             @if ($participant)
                                 <span class="legend-item flex items-center gap-2 cursor-pointer select-none 
                                     hover:bg-gray-100 dark:hover:bg-gray-600 px-3 py-2 rounded-lg transition-all duration-200 
@@ -120,7 +120,7 @@
                         </h3>
 
                         <!-- Custom HTML Legend -->
-                        <div class="flex justify-center text-sm gap-2 mb-4" id="kompetensi-legend-{{ $kompetensiChartId }}">
+                        <div class="flex justify-center text-sm gap-2 mb-8" id="kompetensi-legend-{{ $kompetensiChartId }}">
                             @if ($participant)
                                 <span class="legend-item flex items-center gap-2 cursor-pointer select-none 
                                     hover:bg-gray-100 dark:hover:bg-gray-600 px-3 py-2 rounded-lg transition-all duration-200 
@@ -174,7 +174,7 @@
                         </h3>
 
                         <!-- Custom HTML Legend -->
-                        <div class="flex justify-center text-sm gap-2 mb-4" id="general-legend-{{ $generalChartId }}">
+                        <div class="flex justify-center text-sm gap-2 mb-8" id="general-legend-{{ $generalChartId }}">
                             @if ($participant)
                                 <span class="legend-item flex items-center gap-2 cursor-pointer select-none 
                                     hover:bg-gray-100 dark:hover:bg-gray-600 px-3 py-2 rounded-lg transition-all duration-200 

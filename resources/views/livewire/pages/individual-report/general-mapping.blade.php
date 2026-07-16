@@ -244,7 +244,7 @@
 
 
             <!-- Legend -->
-            <div class="flex justify-center text-sm gap-2 mb-2"
+            <div class="flex justify-center text-sm gap-2 mb-8"
                 id="rating-legend-{{ $chartId }}">
                 <!-- GANTI URUTAN LEGEND INI -->
                 <span class="legend-item flex items-center gap-2 cursor-pointer select-none 
@@ -596,7 +596,7 @@
                 Plot Chart (Score)</div>
 
             <!-- Legend -->
-            <div class="flex justify-center text-sm gap-2 mb-0"
+            <div class="flex justify-center text-sm gap-2 mb-8"
                 id="score-legend-{{ $chartId }}">
                 <!-- GANTI URUTAN LEGEND INI -->
                 <span class="legend-item flex items-center gap-2 cursor-pointer select-none 
