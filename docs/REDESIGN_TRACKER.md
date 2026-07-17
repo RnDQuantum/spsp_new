@@ -50,7 +50,7 @@ Dasbor koordinasi utama bagi lembaga klien dan manajemen.
 
 | Halaman / Fitur | Berkas View (`resources/views/livewire/pages/`) | Pola Legacy / Masalah Desain | Status |
 | :--- | :--- | :--- | :--- |
-| **Main Spider Plot Dashboard** | `dashboard.blade.php` | Dasbor utama yang memuat filter event, posisi, dan radar chart. Header masih menggunakan bar hitam tebal, tombol dan pilihan filter belum selaras dengan tema ivory/espresso. | [ ] Pending |
+| **Main Spider Plot Dashboard** | `dashboard.blade.php` | Dasbor utama yang memuat filter event, posisi, dan radar chart. | **Selesai** |
 | **Participant Detail** | `participant-detail.blade.php` | Detail profil peserta, riwayat asesmen, dan kartu identitas peserta masih menggunakan layout kaku. | [ ] Pending |
 | **Talent Shortlist** | `shortlist.blade.php` | Tabel shortlist kandidat dengan kolom-kolom persentase kesesuaian. Memerlukan badge kecil dan border lembut. | [ ] Pending |
 | **Talent Pool Grid** | `talent-pool/index.blade.php` | Grid matriks 9-box talent pool. Memerlukan penyesuaian warna box agar selaras dengan palet Executive Journal. | [ ] Pending |
@@ -109,13 +109,13 @@ Komponen pembungkus utama aplikasi (app shell) yang merender navigasi samping, a
 
 | Halaman / Fitur | Berkas View (`resources/views/`) | Pola Legacy / Masalah Desain | Status |
 | :--- | :--- | :--- | :--- |
-| **Parent Portal Layout** | `components/layouts/app.blade.php` | Struktur pembungkus utama, menggunakan transisi lama dan margin default. | [ ] Pending |
-| **Sidebar Wrapper** | `components/sidebar/index.blade.php` | Menggunakan background putih/gelap standar (`bg-white`/`dark:bg-neutral-950`) alih-alih Espresso Charcoal (`#171412`). | [ ] Pending |
-| **Sidebar Brand Logo** | `components/sidebar/brand.blade.php` | Desain logo brand samping. | [ ] Pending |
-| **Sidebar Menu Item** | `components/sidebar/menu-item.blade.php` | Menggunakan aksen aktif merah (`text-red-600`/`bg-red-50`) alih-alih Espresso Charcoal/Amber Gold. | [ ] Pending |
-| **Sidebar Dropdown** | `components/sidebar/menu-dropdown.blade.php` | Sub-menu dropdown samping, menggunakan hover/active merah. | [ ] Pending |
-| **Navigation Bar** | `components/navbar/index.blade.php` | Navigasi atas, menggunakan border standar dan font default. | [ ] Pending |
-| **Navbar User Menu** | `components/navbar/user-menu.blade.php` | Dropdown menu profil pengguna. | [ ] Pending |
+| **Parent Portal Layout** | `components/layouts/app.blade.php` | Struktur pembungkus utama, menggunakan transisi lama dan margin default. | **Selesai** |
+| **Sidebar Wrapper** | `components/sidebar/index.blade.php` | Menggunakan background putih/gelap standar (`bg-white`/`dark:bg-neutral-950`) alih-alih Espresso Charcoal (`#171412`). | **Selesai** |
+| **Sidebar Brand Logo** | `components/sidebar/brand.blade.php` | Desain logo brand samping. | **Selesai** |
+| **Sidebar Menu Item** | `components/sidebar/menu-item.blade.php` | Menggunakan aksen aktif merah (`text-red-600`/`bg-red-50`) alih-alih Espresso Charcoal/Amber Gold. | **Selesai** |
+| **Sidebar Dropdown** | `components/sidebar/menu-dropdown.blade.php` | Sub-menu dropdown samping, menggunakan hover/active merah. | **Selesai** |
+| **Navigation Bar** | `components/navbar/index.blade.php` | Navigasi atas, menggunakan border standar dan font default. | **Selesai** |
+| **Navbar User Menu** | `components/navbar/user-menu.blade.php` | Dropdown menu profil pengguna. | **Selesai** |
 
 ---
 
