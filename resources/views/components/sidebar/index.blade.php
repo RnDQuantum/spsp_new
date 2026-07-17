@@ -3,7 +3,7 @@
 ])
 
 <nav x-cloak
-    class="fixed left-0 z-40 flex h-svh shrink-0 flex-col border-r border-neutral-200/60 bg-white/95 backdrop-blur-md p-4 motion-safe:transition-[width,transform,background-color,border-color] motion-safe:duration-250 ease-[cubic-bezier(0.16,1,0.3,1)] shadow-sm dark:border-neutral-800/60 dark:bg-neutral-950/95"
+    class="fixed left-0 z-40 flex h-svh shrink-0 flex-col border-r border-neutral-800/40 bg-primary-ink p-4 motion-safe:transition-[width,transform,background-color,border-color] motion-safe:duration-250 ease-[cubic-bezier(0.16,1,0.3,1)] shadow-xs"
     x-bind:class="[
         getSidebarWidthClass(),
         getSidebarTransformClass()
@@ -31,7 +31,7 @@
     </div>
 
     <!-- Close All Menus Button -->
-    <div class="pt-4 border-t border-neutral-200/60 dark:border-neutral-800/60">
+    <div class="pt-4 border-t border-neutral-800/50">
         <x-sidebar.close-all-button />
     </div>
 </nav>

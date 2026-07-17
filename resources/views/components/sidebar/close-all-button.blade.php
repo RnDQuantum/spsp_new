@@ -17,7 +17,7 @@
         type="button" 
         @click="closeAllMenus()" 
         aria-label="Tutup Semua Menu"
-        class="w-full group flex items-center justify-center rounded-xl px-[14px] py-2.5 text-sm font-medium transition-[color,background-color,border-color] duration-200 relative overflow-hidden text-neutral-700 hover:text-red-600 hover:bg-red-50/50 dark:text-neutral-300 dark:hover:text-red-400 dark:hover:bg-red-950/50 border border-neutral-200 dark:border-neutral-700 hover:border-red-300 dark:hover:border-red-800"
+        class="w-full group flex items-center justify-center rounded-xl px-[14px] py-2.5 text-sm font-medium transition-[color,background-color,border-color] duration-200 relative overflow-hidden text-neutral-400 hover:text-white hover:bg-[#2c2724]/40 border border-neutral-800 hover:border-accent-amber/50"
         x-bind:title="sidebarIsMini ? 'Tutup Semua Menu' : ''"
     >
         <div class="flex items-center justify-center">

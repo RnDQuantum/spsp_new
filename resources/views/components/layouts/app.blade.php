@@ -38,7 +38,7 @@
     </script>
 </head>
 
-<body class="bg-neutral-50 dark:bg-neutral-900 h-svh overflow-hidden">
+<body class="bg-warm-ivory dark:bg-neutral-950 h-svh overflow-hidden">
     <div x-data="sidebarState()" 
         x-on:resize.window.debounce.100ms="handleResize()"
         x-on:livewire:navigated.window="currentPath = window.location.pathname"
@@ -59,7 +59,7 @@
         @endpersist
 
         <!-- Main Content Area with Navbar -->
-        <div id="main-content" class="h-full w-full bg-white/80 motion-safe:transition-[margin] motion-safe:duration-250 ease-[cubic-bezier(0.16,1,0.3,1)] will-change-[margin] dark:bg-neutral-950/80 overflow-y-auto"
+        <div id="main-content" class="h-full w-full bg-warm-ivory/90 motion-safe:transition-[margin] motion-safe:duration-250 ease-[cubic-bezier(0.16,1,0.3,1)] will-change-[margin] dark:bg-neutral-950/90 overflow-y-auto"
             x-bind:class="[getContentMarginClass().margin]">
             <x-navbar.index :title="$title ?? 'Dashboard'">
                 {{ $slot }}

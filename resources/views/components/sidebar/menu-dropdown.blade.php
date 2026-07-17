@@ -43,8 +43,8 @@
         aria-controls="{{ Str::slug($title) }}" x-bind:aria-expanded="isExpanded ? 'true' : 'false'"
         class="group flex items-center justify-between rounded-xl px-[14px] py-2.5 text-sm font-medium transition-[color,background-color] duration-200 relative overflow-hidden w-full"
         x-bind:class="{
-            'text-red-600 bg-red-50/70 dark:text-red-400 dark:bg-red-950/50': isActiveDropdown(),
-            'text-neutral-700 hover:text-red-600 hover:bg-red-50/50 dark:text-neutral-300 dark:hover:text-red-400 dark:hover:bg-red-950/50':
+            'text-white bg-[#2c2724]': isActiveDropdown(),
+            'text-neutral-400 hover:text-white hover:bg-[#2c2724]/40':
                 !isActiveDropdown()
         }"
         x-bind:title="sidebarIsMini ? '{{ $title }}' : ''">
@@ -63,9 +63,9 @@
         </div>
 
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
-            class="w-4 h-4 text-neutral-400 group-hover:text-red-600 transition-[transform,color,max-width,opacity,margin] duration-250 ease-[cubic-bezier(0.16,1,0.3,1)] shrink-0"
+            class="w-4 h-4 text-neutral-400 group-hover:text-white transition-[transform,color,max-width,opacity,margin] duration-250 ease-[cubic-bezier(0.16,1,0.3,1)] shrink-0"
             x-bind:class="[
-                isExpanded ? 'rotate-180 text-red-600 dark:text-red-400' : 'rotate-0',
+                isExpanded ? 'rotate-180 text-white' : 'rotate-0',
                 sidebarIsMini ? 'max-w-0 opacity-0 ml-0 pointer-events-none' : 'max-w-[16px] opacity-100 ml-2'
             ]" aria-hidden="true">
             <path fill-rule="evenodd"
@@ -74,23 +74,24 @@
         </svg>
 
         <div
-            class="absolute inset-x-0 bottom-0 h-0.5 bg-linear-to-r from-red-500 to-orange-600 transform motion-safe:scale-x-0 motion-safe:group-hover:scale-x-100 motion-safe:transition-transform duration-300">
+            class="absolute inset-x-0 bottom-0 h-0.5 bg-accent-amber transform motion-safe:scale-x-0 motion-safe:group-hover:scale-x-100 motion-safe:transition-transform duration-300"
+            x-bind:class="isActiveDropdown() ? 'motion-safe:scale-x-100 scale-x-100' : ''">
         </div>
     </button>
 
     <ul x-cloak x-collapse x-show="isExpanded" aria-labelledby="{{ Str::slug($title) }}-btn"
         id="{{ Str::slug($title) }}" x-bind:class="sidebarIsMini ? 'hidden' : ''"
-        class="mt-1 mb-1 ml-2 pl-4 border-l-2 border-neutral-200 dark:border-neutral-700 space-y-0.5">
+        class="mt-1 mb-1 ml-2 pl-4 border-l-2 border-neutral-800 space-y-0.5">
 
         {{-- Show selected participant warning if Individual Report and reports cannot be shown --}}
         @if ($title === 'Individual Report' && isset($this) && method_exists($this, 'canShowIndividualReports') && !$this->canShowIndividualReports())
-            <li class="mx-2 my-2 p-2.5 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-600/50 rounded-lg">
+            <li class="mx-2 my-2 p-2.5 bg-accent-amber/10 border border-accent-amber/30 rounded-lg">
                 <div class="flex items-start gap-2">
-                    <i class="fa-solid fa-circle-exclamation text-yellow-600 dark:text-yellow-400 text-sm mt-0.5"></i>
+                    <i class="fa-solid fa-circle-exclamation text-accent-amber text-sm mt-0.5"></i>
                     <div class="flex-1">
-                        <p class="text-xs font-semibold text-yellow-800 dark:text-yellow-300 mb-1">Pilih Peserta</p>
-                        <p class="text-[10px] text-yellow-700 dark:text-yellow-400/90 leading-normal">
-                            Pilih Proyek & Peserta di <a href="{{ route('dashboard') }}" class="underline font-medium">Beranda</a> atau di <a href="{{ route('shortlist') }}" class="underline font-medium">Daftar Peserta</a>.
+                        <p class="text-xs font-semibold text-accent-amber mb-1">Pilih Peserta</p>
+                        <p class="text-[10px] text-neutral-400 leading-normal">
+                            Pilih Proyek & Peserta di <a href="{{ route('dashboard') }}" class="text-white hover:underline font-medium">Beranda</a> atau di <a href="{{ route('shortlist') }}" class="text-white hover:underline font-medium">Daftar Peserta</a>.
                         </p>
                     </div>
                 </div>
@@ -114,20 +115,20 @@
                         @if(!isset($item['target']) || $item['target'] !== '_blank') wire:navigate @endif
                         class="group flex items-center rounded-lg gap-2 px-3 py-1.5 text-sm transition-all duration-200"
                         x-bind:class="isActive('{{ $subHref }}')
-                            ? 'text-red-600 bg-red-50/30 dark:text-red-400 dark:bg-red-950/30'
-                            : 'text-neutral-700 hover:text-red-600 hover:bg-red-50/30 dark:text-neutral-300 dark:hover:text-red-400 dark:hover:bg-red-950/30'">
+                            ? 'text-white bg-[#2c2724]'
+                            : 'text-neutral-400 hover:text-white hover:bg-[#2c2724]/40'">
 
                         @if (isset($item['icon']))
                             <i class="{{ $item['icon'] }} text-xs w-4 text-center group-hover:scale-110 transition-transform duration-200"></i>
                         @else
-                            <span class="w-1.5 h-1.5 rounded-full bg-neutral-300 group-hover:bg-red-500 transition-colors duration-200 dark:bg-neutral-600"
-                                x-bind:class="isActive('{{ $subHref }}') ? 'bg-red-500' : ''"></span>
+                            <span class="w-1.5 h-1.5 rounded-full bg-neutral-600 group-hover:bg-accent-amber transition-colors duration-200"
+                                x-bind:class="isActive('{{ $subHref }}') ? 'bg-accent-amber' : ''"></span>
                         @endif
 
                         {{ $item['title'] }}
 
                         @if (isset($item['badge']))
-                            <span class="ml-auto inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold leading-none text-white bg-red-500 rounded-full">
+                            <span class="ml-auto inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold leading-none text-white bg-accent-amber rounded-full">
                                 {{ $item['badge'] }}
                             </span>
                         @endif

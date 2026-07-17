@@ -7,8 +7,8 @@
         </div>
         <div class="flex flex-col sidebar-text-transition overflow-hidden"
             x-bind:class="sidebarIsMini ? 'max-w-0 opacity-0 ml-0 pointer-events-none' : 'max-w-[180px] opacity-100 ml-3'">
-            <span class="text-lg font-bold text-neutral-900 dark:text-white leading-none">SPSP</span>
-            <span class="text-[10px] text-neutral-500 dark:text-neutral-400 leading-tight">Quantum HRM</span>
+            <span class="text-lg font-bold text-white leading-none">SPSP</span>
+            <span class="text-[10px] text-neutral-400 leading-tight">Quantum HRM</span>
         </div>
     </div>
 </a>

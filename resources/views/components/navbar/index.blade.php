@@ -3,7 +3,7 @@
     'title' => 'Dashboard',
 ])
 
-<nav class="sticky top-0 z-30 flex items-center justify-between border-b border-neutral-200/60 bg-white/95 backdrop-blur-md px-4 py-2.5 dark:border-neutral-800/60 dark:bg-neutral-950/95 shadow-sm w-full"
+<nav class="sticky top-0 z-30 flex items-center justify-between border-b border-warm-border bg-white/80 backdrop-blur-md px-4 py-2.5 dark:border-neutral-900 dark:bg-neutral-950/80 shadow-xs w-full"
     aria-label="top navigation bar">
 
     <div class="flex items-center gap-3">
@@ -13,7 +13,7 @@
         @endif
 
         <!-- Page Title -->
-        <h2 class="text-sm md:text-base font-semibold text-neutral-800 dark:text-neutral-200 truncate max-w-[200px] sm:max-w-xs md:max-w-md lg:max-w-lg">
+        <h2 class="text-sm md:text-base font-bold text-primary-ink dark:text-neutral-100 truncate max-w-[200px] sm:max-w-xs md:max-w-md lg:max-w-lg font-sans">
             {!! $title !!}
         </h2>
     </div>
