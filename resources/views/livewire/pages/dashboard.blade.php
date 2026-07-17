@@ -1,30 +1,26 @@
 <div>
-    <div class="bg-white dark:bg-gray-900 mx-auto my-8 shadow-lg dark:shadow-gray-800/50 overflow-hidden"
+    <div class="mx-auto my-8 border border-warm-border dark:border-neutral-800 bg-white dark:bg-neutral-950 overflow-hidden shadow-xs"
         style="max-width: 1400px;">
         <!-- Header - DARK MODE READY -->
-        <div class="border-b-4 border-black dark:border-gray-300 py-3 bg-gray-300 dark:bg-gray-600">
-            <h1 class="text-center text-lg font-bold uppercase tracking-wide text-gray-900 dark:text-gray-100">
-                ANALISA <i>SPIDER PLOT</i>
+        <div class="px-8 py-6 bg-white dark:bg-neutral-950 border-b border-warm-border dark:border-neutral-800">
+            <h1 class="font-display text-2xl font-bold tracking-tight text-primary-ink dark:text-neutral-100 uppercase">
+                Analisis Spider Plot
             </h1>
             @if ($participant)
-                <p class="text-center text-sm font-semibold text-gray-700 dark:text-gray-300 mt-1">
-                    {{ $participant->name }}
-                </p>
-                <p class="text-center text-sm font-semibold text-gray-700 dark:text-gray-300 mt-1">
-                    {{ $participant->assessmentEvent->name }}
-                </p>
-                <p class="text-center text-sm font-semibold text-gray-700 dark:text-gray-300 mt-1">
-                    {{ $participant->positionFormation->name }} - {{ $participant->positionFormation->template->name }}
-                </p>
+                <div class="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-xs font-semibold text-primary-ink/75 dark:text-neutral-400">
+                    <span class="flex items-center gap-1.5"><i class="fa-regular fa-user text-accent-amber"></i> {{ $participant->name }}</span>
+                    <span class="flex items-center gap-1.5"><i class="fa-regular fa-calendar text-accent-amber"></i> {{ $participant->assessmentEvent->name }}</span>
+                    <span class="flex items-center gap-1.5"><i class="fa-regular fa-address-card text-accent-amber"></i> {{ $participant->positionFormation->name }} - {{ $participant->positionFormation->template->name }}</span>
+                </div>
             @else
-                <p class="text-center text-sm font-semibold text-gray-700 dark:text-gray-300 mt-1">
+                <div class="mt-2 text-xs font-semibold text-primary-ink/60 dark:text-neutral-500">
                     Tampilan Standar Proyek
-                </p>
+                </div>
             @endif
         </div>
 
         <!-- Filters Section - DARK MODE READY -->
-        <div class="p-6 bg-gray-50 dark:bg-gray-800 border-b-2 border-gray-200 dark:border-gray-600">
+        <div class="p-6 bg-warm-ivory dark:bg-neutral-900 border-b border-warm-border dark:border-neutral-800">
             <div class="max-w-6xl mx-auto space-y-4">
                 <!-- Event Selector -->
                 @livewire('components.event-selector', ['showLabel' => true])
@@ -50,58 +46,51 @@
 
         <!-- Charts Grid - DARK MODE READY -->
         @if (count($allAspectsData) > 0)
-            <div class="p-6">
-                <h1 class="text-3xl text-center font-bold text-gray-800 dark:text-gray-100 mb-8"><i>Static Pribadi
-                        Spider
-                        Plot</i> (SPSP)</h1>
+            <div class="p-8 bg-white dark:bg-neutral-950">
+                <h2 class="text-center font-display text-xl font-bold text-primary-ink dark:text-neutral-100 mb-8">Static Pribadi Spider Plot (SPSP)</h2>
 
                 <!-- Charts - Vertical Layout -->
-                <div class="space-y-6 mt-8">
+                <div class="space-y-8 mt-8">
                     <!-- Chart Potensi (Pentagon) -->
                     <div
-                        class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg dark:shadow-gray-700/50 border border-gray-200 dark:border-gray-600">
-                        <h3 class="text-lg text-center font-semibold text-gray-800 dark:text-gray-100 mb-4">
-                            <i>Potential Mapping (Rating)</i>
+                        class="bg-white dark:bg-neutral-950 p-8 border border-warm-border dark:border-neutral-800 rounded-md shadow-xs">
+                        <h3 class="text-center font-display text-lg font-bold text-primary-ink dark:text-neutral-100 mb-4">
+                            Potential Mapping (Rating)
                         </h3>
 
                         <!-- Custom HTML Legend -->
                         <div class="flex justify-center text-sm gap-2 mb-8" id="potensi-legend-{{ $potensiChartId }}">
                             @if ($participant)
                                 <span class="legend-item flex items-center gap-2 cursor-pointer select-none 
-                                    hover:bg-gray-100 dark:hover:bg-gray-600 px-3 py-2 rounded-lg transition-all duration-200 
-                                    border border-gray-300 dark:border-gray-600 shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                    hover:bg-warm-ivory dark:hover:bg-neutral-900 px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-neutral-800 shadow-xs bg-white dark:bg-neutral-950 text-xs font-semibold text-primary-ink dark:text-neutral-200"
                                     data-chart="potensi" data-dataset="0">
-                                    <span class="inline-block w-12 h-3 rounded-sm" style="background-color: #5db010;"></span>
-                                    <span class="font-semibold" style="color: #5db010;">{{ $participant->name }}</span>
+                                    <span class="inline-block w-3 h-3 rounded-full" style="background-color: #5db010;"></span>
+                                    <span>{{ $participant->name }}</span>
                                 </span>
                                 <span class="legend-item flex items-center gap-2 cursor-pointer select-none 
-                                    hover:bg-gray-100 dark:hover:bg-gray-600 px-3 py-2 rounded-lg transition-all duration-200 
-                                    border border-gray-300 dark:border-gray-600 shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                    hover:bg-warm-ivory dark:hover:bg-neutral-900 px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-neutral-800 shadow-xs bg-white dark:bg-neutral-950 text-xs font-semibold text-primary-ink dark:text-neutral-200"
                                     data-chart="potensi" data-dataset="1">
-                                    <span class="inline-block w-12 h-3 rounded-sm" style="background-color: #b50505;"></span>
-                                    <span class="font-semibold">Standard</span>
+                                    <span class="inline-block w-3 h-3 rounded-full" style="background-color: #b50505;"></span>
+                                    <span>Standard</span>
                                 </span>
                                 <span class="legend-item flex items-center gap-2 cursor-pointer select-none 
-                                    hover:bg-gray-100 dark:hover:bg-gray-600 px-3 py-2 rounded-lg transition-all duration-200 
-                                    border border-gray-300 dark:border-gray-600 shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                    hover:bg-warm-ivory dark:hover:bg-neutral-900 px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-neutral-800 shadow-xs bg-white dark:bg-neutral-950 text-xs font-semibold text-primary-ink dark:text-neutral-200"
                                     data-chart="potensi" data-dataset="2">
-                                    <span class="inline-block w-12 h-3 rounded-sm" style="background-color: #fafa05;"></span>
-                                    <span class="font-semibold">Tolerance {{ $tolerancePercentage }}%</span>
+                                    <span class="inline-block w-3 h-3 rounded-full" style="background-color: #fafa05;"></span>
+                                    <span>Tolerance {{ $tolerancePercentage }}%</span>
                                 </span>
                             @else
                                 <span class="legend-item flex items-center gap-2 cursor-pointer select-none 
-                                    hover:bg-gray-100 dark:hover:bg-gray-600 px-3 py-2 rounded-lg transition-all duration-200 
-                                    border border-gray-300 dark:border-gray-600 shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                    hover:bg-warm-ivory dark:hover:bg-neutral-900 px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-neutral-800 shadow-xs bg-white dark:bg-neutral-950 text-xs font-semibold text-primary-ink dark:text-neutral-200"
                                     data-chart="potensi" data-dataset="0">
-                                    <span class="inline-block w-12 h-3 rounded-sm" style="background-color: #5db010;"></span>
-                                    <span class="font-semibold">Standard</span>
+                                    <span class="inline-block w-3 h-3 rounded-full" style="background-color: #5db010;"></span>
+                                    <span>Standard</span>
                                 </span>
                                 <span class="legend-item flex items-center gap-2 cursor-pointer select-none 
-                                    hover:bg-gray-100 dark:hover:bg-gray-600 px-3 py-2 rounded-lg transition-all duration-200 
-                                    border border-gray-300 dark:border-gray-600 shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                    hover:bg-warm-ivory dark:hover:bg-neutral-900 px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-neutral-800 shadow-xs bg-white dark:bg-neutral-950 text-xs font-semibold text-primary-ink dark:text-neutral-200"
                                     data-chart="potensi" data-dataset="1">
-                                    <span class="inline-block w-12 h-3 rounded-sm" style="background-color: #fafa05;"></span>
-                                    <span class="font-semibold">Tolerance {{ $tolerancePercentage }}%</span>
+                                    <span class="inline-block w-3 h-3 rounded-full" style="background-color: #fafa05;"></span>
+                                    <span>Tolerance {{ $tolerancePercentage }}%</span>
                                 </span>
                             @endif
                         </div>
@@ -113,50 +102,44 @@
 
                     <!-- Chart Kompetensi (Nonagon) -->
                     <div
-                        class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg dark:shadow-gray-700/50 border border-gray-200 dark:border-gray-600">
-                        <h3 class="text-lg text-center font-semibold text-gray-800 dark:text-gray-100 mb-4">
-                            <i>Managerial Potency Mapping
-                                (Rating)</i>
+                        class="bg-white dark:bg-neutral-950 p-8 border border-warm-border dark:border-neutral-800 rounded-md shadow-xs">
+                        <h3 class="text-center font-display text-lg font-bold text-primary-ink dark:text-neutral-100 mb-4">
+                            Managerial Potency Mapping (Rating)
                         </h3>
 
                         <!-- Custom HTML Legend -->
                         <div class="flex justify-center text-sm gap-2 mb-8" id="kompetensi-legend-{{ $kompetensiChartId }}">
                             @if ($participant)
                                 <span class="legend-item flex items-center gap-2 cursor-pointer select-none 
-                                    hover:bg-gray-100 dark:hover:bg-gray-600 px-3 py-2 rounded-lg transition-all duration-200 
-                                    border border-gray-300 dark:border-gray-600 shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                    hover:bg-warm-ivory dark:hover:bg-neutral-900 px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-neutral-800 shadow-xs bg-white dark:bg-neutral-950 text-xs font-semibold text-primary-ink dark:text-neutral-200"
                                     data-chart="kompetensi" data-dataset="0">
-                                    <span class="inline-block w-12 h-3 rounded-sm" style="background-color: #5db010;"></span>
-                                    <span class="font-semibold" style="color: #5db010;">{{ $participant->name }}</span>
+                                    <span class="inline-block w-3 h-3 rounded-full" style="background-color: #5db010;"></span>
+                                    <span>{{ $participant->name }}</span>
                                 </span>
                                 <span class="legend-item flex items-center gap-2 cursor-pointer select-none 
-                                    hover:bg-gray-100 dark:hover:bg-gray-600 px-3 py-2 rounded-lg transition-all duration-200 
-                                    border border-gray-300 dark:border-gray-600 shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                    hover:bg-warm-ivory dark:hover:bg-neutral-900 px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-neutral-800 shadow-xs bg-white dark:bg-neutral-950 text-xs font-semibold text-primary-ink dark:text-neutral-200"
                                     data-chart="kompetensi" data-dataset="1">
-                                    <span class="inline-block w-12 h-3 rounded-sm" style="background-color: #b50505;"></span>
-                                    <span class="font-semibold">Standard</span>
+                                    <span class="inline-block w-3 h-3 rounded-full" style="background-color: #b50505;"></span>
+                                    <span>Standard</span>
                                 </span>
                                 <span class="legend-item flex items-center gap-2 cursor-pointer select-none 
-                                    hover:bg-gray-100 dark:hover:bg-gray-600 px-3 py-2 rounded-lg transition-all duration-200 
-                                    border border-gray-300 dark:border-gray-600 shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                    hover:bg-warm-ivory dark:hover:bg-neutral-900 px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-neutral-800 shadow-xs bg-white dark:bg-neutral-950 text-xs font-semibold text-primary-ink dark:text-neutral-200"
                                     data-chart="kompetensi" data-dataset="2">
-                                    <span class="inline-block w-12 h-3 rounded-sm" style="background-color: #fafa05;"></span>
-                                    <span class="font-semibold">Tolerance {{ $tolerancePercentage }}%</span>
+                                    <span class="inline-block w-3 h-3 rounded-full" style="background-color: #fafa05;"></span>
+                                    <span>Tolerance {{ $tolerancePercentage }}%</span>
                                 </span>
                             @else
                                 <span class="legend-item flex items-center gap-2 cursor-pointer select-none 
-                                    hover:bg-gray-100 dark:hover:bg-gray-600 px-3 py-2 rounded-lg transition-all duration-200 
-                                    border border-gray-300 dark:border-gray-600 shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                    hover:bg-warm-ivory dark:hover:bg-neutral-900 px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-neutral-800 shadow-xs bg-white dark:bg-neutral-950 text-xs font-semibold text-primary-ink dark:text-neutral-200"
                                     data-chart="kompetensi" data-dataset="0">
-                                    <span class="inline-block w-12 h-3 rounded-sm" style="background-color: #5db010;"></span>
-                                    <span class="font-semibold">Standard</span>
+                                    <span class="inline-block w-3 h-3 rounded-full" style="background-color: #5db010;"></span>
+                                    <span>Standard</span>
                                 </span>
                                 <span class="legend-item flex items-center gap-2 cursor-pointer select-none 
-                                    hover:bg-gray-100 dark:hover:bg-gray-600 px-3 py-2 rounded-lg transition-all duration-200 
-                                    border border-gray-300 dark:border-gray-600 shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                    hover:bg-warm-ivory dark:hover:bg-neutral-900 px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-neutral-800 shadow-xs bg-white dark:bg-neutral-950 text-xs font-semibold text-primary-ink dark:text-neutral-200"
                                     data-chart="kompetensi" data-dataset="1">
-                                    <span class="inline-block w-12 h-3 rounded-sm" style="background-color: #fafa05;"></span>
-                                    <span class="font-semibold">Tolerance {{ $tolerancePercentage }}%</span>
+                                    <span class="inline-block w-3 h-3 rounded-full" style="background-color: #fafa05;"></span>
+                                    <span>Tolerance {{ $tolerancePercentage }}%</span>
                                 </span>
                             @endif
                         </div>
@@ -168,49 +151,44 @@
 
                     <!-- Chart General (Tetradecagon) -->
                     <div
-                        class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg dark:shadow-gray-700/50 border border-gray-200 dark:border-gray-600">
-                        <h3 class="text-lg text-center font-semibold text-gray-800 dark:text-gray-100 mb-4">
-                            <i>General Mapping (Rating)</i>
+                        class="bg-white dark:bg-neutral-950 p-8 border border-warm-border dark:border-neutral-800 rounded-md shadow-xs">
+                        <h3 class="text-center font-display text-lg font-bold text-primary-ink dark:text-neutral-100 mb-4">
+                            General Mapping (Rating)
                         </h3>
 
                         <!-- Custom HTML Legend -->
                         <div class="flex justify-center text-sm gap-2 mb-8" id="general-legend-{{ $generalChartId }}">
                             @if ($participant)
                                 <span class="legend-item flex items-center gap-2 cursor-pointer select-none 
-                                    hover:bg-gray-100 dark:hover:bg-gray-600 px-3 py-2 rounded-lg transition-all duration-200 
-                                    border border-gray-300 dark:border-gray-600 shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                    hover:bg-warm-ivory dark:hover:bg-neutral-900 px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-neutral-800 shadow-xs bg-white dark:bg-neutral-950 text-xs font-semibold text-primary-ink dark:text-neutral-200"
                                     data-chart="general" data-dataset="0">
-                                    <span class="inline-block w-12 h-3 rounded-sm" style="background-color: #5db010;"></span>
-                                    <span class="font-semibold" style="color: #5db010;">{{ $participant->name }}</span>
+                                    <span class="inline-block w-3 h-3 rounded-full" style="background-color: #5db010;"></span>
+                                    <span>{{ $participant->name }}</span>
                                 </span>
                                 <span class="legend-item flex items-center gap-2 cursor-pointer select-none 
-                                    hover:bg-gray-100 dark:hover:bg-gray-600 px-3 py-2 rounded-lg transition-all duration-200 
-                                    border border-gray-300 dark:border-gray-600 shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                    hover:bg-warm-ivory dark:hover:bg-neutral-900 px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-neutral-800 shadow-xs bg-white dark:bg-neutral-950 text-xs font-semibold text-primary-ink dark:text-neutral-200"
                                     data-chart="general" data-dataset="1">
-                                    <span class="inline-block w-12 h-3 rounded-sm" style="background-color: #b50505;"></span>
-                                    <span class="font-semibold">Standard</span>
+                                    <span class="inline-block w-3 h-3 rounded-full" style="background-color: #b50505;"></span>
+                                    <span>Standard</span>
                                 </span>
                                 <span class="legend-item flex items-center gap-2 cursor-pointer select-none 
-                                    hover:bg-gray-100 dark:hover:bg-gray-600 px-3 py-2 rounded-lg transition-all duration-200 
-                                    border border-gray-300 dark:border-gray-600 shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                    hover:bg-warm-ivory dark:hover:bg-neutral-900 px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-neutral-800 shadow-xs bg-white dark:bg-neutral-950 text-xs font-semibold text-primary-ink dark:text-neutral-200"
                                     data-chart="general" data-dataset="2">
-                                    <span class="inline-block w-12 h-3 rounded-sm" style="background-color: #fafa05;"></span>
-                                    <span class="font-semibold">Tolerance {{ $tolerancePercentage }}%</span>
+                                    <span class="inline-block w-3 h-3 rounded-full" style="background-color: #fafa05;"></span>
+                                    <span>Tolerance {{ $tolerancePercentage }}%</span>
                                 </span>
                             @else
                                 <span class="legend-item flex items-center gap-2 cursor-pointer select-none 
-                                    hover:bg-gray-100 dark:hover:bg-gray-600 px-3 py-2 rounded-lg transition-all duration-200 
-                                    border border-gray-300 dark:border-gray-600 shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                    hover:bg-warm-ivory dark:hover:bg-neutral-900 px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-neutral-800 shadow-xs bg-white dark:bg-neutral-950 text-xs font-semibold text-primary-ink dark:text-neutral-200"
                                     data-chart="general" data-dataset="0">
-                                    <span class="inline-block w-12 h-3 rounded-sm" style="background-color: #5db010;"></span>
-                                    <span class="font-semibold">Standard</span>
+                                    <span class="inline-block w-3 h-3 rounded-full" style="background-color: #5db010;"></span>
+                                    <span>Standard</span>
                                 </span>
                                 <span class="legend-item flex items-center gap-2 cursor-pointer select-none 
-                                    hover:bg-gray-100 dark:hover:bg-gray-600 px-3 py-2 rounded-lg transition-all duration-200 
-                                    border border-gray-300 dark:border-gray-600 shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                    hover:bg-warm-ivory dark:hover:bg-neutral-900 px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-neutral-800 shadow-xs bg-white dark:bg-neutral-950 text-xs font-semibold text-primary-ink dark:text-neutral-200"
                                     data-chart="general" data-dataset="1">
-                                    <span class="inline-block w-12 h-3 rounded-sm" style="background-color: #fafa05;"></span>
-                                    <span class="font-semibold">Tolerance {{ $tolerancePercentage }}%</span>
+                                    <span class="inline-block w-3 h-3 rounded-full" style="background-color: #fafa05;"></span>
+                                    <span>Tolerance {{ $tolerancePercentage }}%</span>
                                 </span>
                             @endif
                         </div>
@@ -222,10 +200,13 @@
                 </div>
             </div>
         @else
-            <div class="p-6">
-                <div class="text-center text-gray-500 dark:text-gray-400">
-                    <p class="text-lg">Silakan pilih Event dan Jabatan untuk melihat data standar.</p>
-                    <p class="text-sm mt-2">Pilih Peserta untuk melihat perbandingan dengan standar.</p>
+            <div class="p-12 bg-white dark:bg-neutral-950 text-center">
+                <div class="max-w-md mx-auto p-6 bg-warm-ivory dark:bg-neutral-900/50 border border-warm-border dark:border-neutral-800 rounded-md">
+                    <i class="fa-solid fa-folder-open text-accent-amber text-2xl mb-3"></i>
+                    <p class="font-display font-bold text-primary-ink dark:text-neutral-100 text-lg">Silakan pilih Event dan Jabatan</p>
+                    <p class="text-sm text-primary-ink/70 dark:text-neutral-400 mt-2">
+                        Pilih Event dan Jabatan pada filter di atas untuk melihat data standar. Anda juga dapat memilih Peserta untuk melihat perbandingan hasil dengan standar.
+                    </p>
                 </div>
             </div>
         @endif
@@ -569,7 +550,8 @@
                                             stepSize: 1,
                                             color: colors.text,
                                             font: {
-                                                size: 16
+                                                size: 16,
+                                                family: "'Instrument Sans', sans-serif"
                                             },
                                             backdropColor: 'transparent',
                                             showLabelBackdrop: false,
@@ -582,7 +564,8 @@
                                         pointLabels: {
                                             color: colors.pointLabels,
                                             font: {
-                                                size: 16
+                                                size: 16,
+                                                family: "'Instrument Sans', sans-serif"
                                             },
                                             z: 3
                                         },
@@ -617,7 +600,7 @@
                                     const xCenter = scale.xCenter;
 
                                     ctx.save();
-                                    ctx.font = scale.options.ticks.font.size + 'px sans-serif';
+                                    ctx.font = scale.options.ticks.font.size + "px 'Instrument Sans', sans-serif";
                                     ctx.fillStyle = scale.options.ticks.color || '#000';
                                     ctx.textAlign = 'center';
                                     ctx.textBaseline = 'middle';
@@ -841,7 +824,8 @@
                                             stepSize: 1,
                                             color: colors.text,
                                             font: {
-                                                size: 16
+                                                size: 16,
+                                                family: "'Instrument Sans', sans-serif"
                                             },
                                             backdropColor: 'transparent',
                                             showLabelBackdrop: false,
@@ -854,7 +838,8 @@
                                         pointLabels: {
                                             color: colors.pointLabels,
                                             font: {
-                                                size: 16
+                                                size: 16,
+                                                family: "'Instrument Sans', sans-serif"
                                             },
                                             z: 3
                                         },
@@ -889,7 +874,7 @@
                                     const xCenter = scale.xCenter;
 
                                     ctx.save();
-                                    ctx.font = scale.options.ticks.font.size + 'px sans-serif';
+                                    ctx.font = scale.options.ticks.font.size + "px 'Instrument Sans', sans-serif";
                                     ctx.fillStyle = scale.options.ticks.color || '#000';
                                     ctx.textAlign = 'center';
                                     ctx.textBaseline = 'middle';
@@ -1112,7 +1097,8 @@
                                             stepSize: 1,
                                             color: colors.text,
                                             font: {
-                                                size: 16
+                                                size: 16,
+                                                family: "'Instrument Sans', sans-serif"
                                             },
                                             backdropColor: 'transparent',
                                             showLabelBackdrop: false,
@@ -1125,7 +1111,8 @@
                                         pointLabels: {
                                             color: colors.pointLabels,
                                             font: {
-                                                size: 16
+                                                size: 16,
+                                                family: "'Instrument Sans', sans-serif"
                                             },
                                             z: 3
                                         },
@@ -1160,7 +1147,7 @@
                                     const xCenter = scale.xCenter;
 
                                     ctx.save();
-                                    ctx.font = scale.options.ticks.font.size + 'px sans-serif';
+                                    ctx.font = scale.options.ticks.font.size + "px 'Instrument Sans', sans-serif";
                                     ctx.fillStyle = scale.options.ticks.color || '#000';
                                     ctx.textAlign = 'center';
                                     ctx.textBaseline = 'middle';
@@ -1295,7 +1282,8 @@
                                             stepSize: 1, // ✅ FIX 1: Tambah stepSize
                                             color: colors.text,
                                             font: {
-                                                size: 16
+                                                size: 16,
+                                                family: "'Instrument Sans', sans-serif"
                                             },
                                             backdropColor: 'transparent',
                                             showLabelBackdrop: false,
@@ -1309,7 +1297,8 @@
                                         pointLabels: {
                                             color: colors.pointLabels,
                                             font: {
-                                                size: 16
+                                                size: 16,
+                                                family: "'Instrument Sans', sans-serif"
                                             },
                                             z: 3
                                         },
@@ -1344,7 +1333,7 @@
                                     const xCenter = scale.xCenter;
 
                                     ctx.save();
-                                    ctx.font = scale.options.ticks.font.size + 'px sans-serif';
+                                    ctx.font = scale.options.ticks.font.size + "px 'Instrument Sans', sans-serif";
                                     ctx.fillStyle = scale.options.ticks.color || '#000';
                                     ctx.textAlign = 'center';
                                     ctx.textBaseline = 'middle';
@@ -1472,7 +1461,8 @@
                                             stepSize: 1, // ✅ FIX 1: Tambah stepSize
                                             color: colors.text,
                                             font: {
-                                                size: 16
+                                                size: 16,
+                                                family: "'Instrument Sans', sans-serif"
                                             },
                                             backdropColor: 'transparent',
                                             showLabelBackdrop: false,
@@ -1486,7 +1476,8 @@
                                         pointLabels: {
                                             color: colors.pointLabels,
                                             font: {
-                                                size: 16
+                                                size: 16,
+                                                family: "'Instrument Sans', sans-serif"
                                             },
                                             z: 3
                                         },
@@ -1517,7 +1508,7 @@
                                     } = chart;
                                     const scale = scales.r;
                                     ctx.save();
-                                    ctx.font = '16px sans-serif';
+                                    ctx.font = "16px 'Instrument Sans', sans-serif";
                                     ctx.fillStyle = scale.options.ticks.color;
                                     ctx.textAlign = 'center';
                                     ctx.textBaseline = 'middle';
@@ -1644,7 +1635,8 @@
                                             stepSize: 1, // ✅ FIX 1: Tambah stepSize
                                             color: colors.text,
                                             font: {
-                                                size: 16
+                                                size: 16,
+                                                family: "'Instrument Sans', sans-serif"
                                             },
                                             backdropColor: 'transparent',
                                             showLabelBackdrop: false,
@@ -1658,7 +1650,8 @@
                                         pointLabels: {
                                             color: colors.pointLabels,
                                             font: {
-                                                size: 16
+                                                size: 16,
+                                                family: "'Instrument Sans', sans-serif"
                                             },
                                             z: 3
                                         },
@@ -1689,7 +1682,7 @@
                                     } = chart;
                                     const scale = scales.r;
                                     ctx.save();
-                                    ctx.font = '16px sans-serif';
+                                    ctx.font = "16px 'Instrument Sans', sans-serif";
                                     ctx.fillStyle = scale.options.ticks.color;
                                     ctx.textAlign = 'center';
                                     ctx.textBaseline = 'middle';
