@@ -1,14 +1,10 @@
-# Product
-
-## Register
-
-product
+# Product - HCA & SPSP Report Dashboards
 
 ## Users
 Executive and management-level decision makers who need to review assessment results for key personnel. They need clear, high-readability reports to make quick, informed strategic HR/talent management decisions.
 
 ## Product Purpose
-To deliver an executive Human Capital Assessment (HCA) Report that is engaging, easy to navigate, and visually striking. Success means presenting complex assessment data (competency, performance, timeline, etc.) clearly without overwhelming the user.
+To deliver executive Human Capital Assessment (HCA) and SPSP Individual Reports (such as General Mapping, Spider Plot) that are engaging, easy to navigate, and visually striking. Success means presenting complex assessment data (competency, performance, timeline, etc.) clearly without overwhelming the user.
 
 ## Brand Personality
 Editorial, professional, elegant. Structured as a warm-toned "Executive Journal" using high-quality editorial typography (Lora & Instrument Sans) and structured layouts that mirror premium printed executive reports. It avoids standard cold technology grays/slates.
@@ -16,7 +12,7 @@ Editorial, professional, elegant. Structured as a warm-toned "Executive Journal"
 ## Anti-references
 - Generic SaaS layouts with excessive card grids and faint gray borders/text.
 - Default Tailwind Slate/Emerald color palettes that scream "AI-generated dashboard".
-- Overly bright, saturated, or neon color palettes that look unprofessional.
+- Overly bright, saturated, or neon color palettes that look unprofessional for UI structures.
 - Hard-to-read small fonts with poor contrast.
 
 ## Design Principles
