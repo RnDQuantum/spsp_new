@@ -15,6 +15,11 @@ colors:
   actual-spsp: "#5db010"
   standard-spsp: "#b50505"
   tolerance-spsp: "#fafa05"
+  # Dark Mode specific colors (Unified Warm Dark)
+  dark-bg: "#0f0d0c"
+  dark-card: "#171412"
+  dark-border: "#25211e"
+  dark-surface: "#1f1b18"
 typography:
   display:
     fontFamily: "Lora, Georgia, serif"
@@ -103,6 +108,13 @@ All colors are chosen to balance a premium corporate tone with excellent readabi
   - Participant (Actual): `#5db010` (Hijau)
   - Standard: `#b50505` (Merah)
   - Tolerance: `#fafa05` (Kuning)
+
+### Dark Mode (Unified Warm Dark)
+To ensure cohesive harmony with the Deep Espresso Charcoal (`#171412`) sidebar, SPSP reports adopt a custom warm-dark editorial palette instead of standard cold grays:
+- **Main Layout Background**: `#0f0d0c` (Espresso Hitam).
+- **Cards, Tables, & Panels**: `#171412` (Deep Espresso - matches the sidebar color, ensuring layout integration).
+- **Layout Borders & Dividers**: `#25211e` (Warm Dark Border - replacing cool neutral borders).
+- **Hover & Selected Surfaces**: `#1f1b18` (Warm Dark Surface - used for active toggle backgrounds and table row hovers).
 
 ---
 

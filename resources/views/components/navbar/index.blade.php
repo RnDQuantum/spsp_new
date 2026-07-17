@@ -3,7 +3,7 @@
     'title' => 'Dashboard',
 ])
 
-<nav class="sticky top-0 z-30 flex items-center justify-between border-b border-warm-border bg-white/80 backdrop-blur-md px-4 py-2.5 dark:border-neutral-900 dark:bg-neutral-950/80 shadow-xs w-full"
+<nav class="sticky top-0 z-30 flex items-center justify-between border-b border-warm-border bg-white/80 backdrop-blur-md px-4 py-2.5 dark:border-[#25211e] dark:bg-[#0f0d0c]/80 shadow-xs w-full"
     aria-label="top navigation bar">
 
     <div class="flex items-center gap-3">

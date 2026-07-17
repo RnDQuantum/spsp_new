@@ -1,8 +1,8 @@
 <div>
-    <div class="mx-auto my-8 border border-warm-border dark:border-neutral-800 bg-white dark:bg-neutral-950 overflow-hidden shadow-xs"
+    <div class="mx-auto my-8 border border-warm-border dark:border-[#25211e] bg-white dark:bg-[#171412] overflow-hidden shadow-xs"
         style="max-width: 1400px;">
         <!-- Header - DARK MODE READY -->
-        <div class="px-8 py-6 bg-white dark:bg-neutral-950 border-b border-warm-border dark:border-neutral-800">
+        <div class="px-8 py-6 bg-white dark:bg-[#171412] border-b border-warm-border dark:border-[#25211e]">
             <h1 class="font-display text-2xl font-bold tracking-tight text-primary-ink dark:text-neutral-100 uppercase">
                 Analisis Spider Plot
             </h1>
@@ -20,7 +20,7 @@
         </div>
 
         <!-- Filters Section - DARK MODE READY -->
-        <div class="p-6 bg-warm-ivory dark:bg-neutral-900 border-b border-warm-border dark:border-neutral-800">
+        <div class="p-6 bg-warm-ivory dark:bg-[#1f1b18] border-b border-warm-border dark:border-[#25211e]">
             <div class="max-w-6xl mx-auto space-y-4">
                 <!-- Event Selector -->
                 @livewire('components.event-selector', ['showLabel' => true])
@@ -46,14 +46,14 @@
 
         <!-- Charts Grid - DARK MODE READY -->
         @if (count($allAspectsData) > 0)
-            <div class="p-8 bg-white dark:bg-neutral-950">
+            <div class="p-8 bg-white dark:bg-[#171412]">
                 <h2 class="text-center font-display text-xl font-bold text-primary-ink dark:text-neutral-100 mb-8">Static Pribadi Spider Plot (SPSP)</h2>
 
                 <!-- Charts - Vertical Layout -->
                 <div class="space-y-8 mt-8">
                     <!-- Chart Potensi (Pentagon) -->
                     <div
-                        class="bg-white dark:bg-neutral-950 p-8 border border-warm-border dark:border-neutral-800 rounded-md shadow-xs">
+                        class="bg-white dark:bg-[#171412] p-8 border border-warm-border dark:border-[#25211e] rounded-md shadow-xs">
                         <h3 class="text-center font-display text-lg font-bold text-primary-ink dark:text-neutral-100 mb-4">
                             Potential Mapping (Rating)
                         </h3>
@@ -62,32 +62,32 @@
                         <div class="flex justify-center text-sm gap-2 mb-8" id="potensi-legend-{{ $potensiChartId }}">
                             @if ($participant)
                                 <span class="legend-item flex items-center gap-2 cursor-pointer select-none 
-                                    hover:bg-warm-ivory dark:hover:bg-neutral-900 px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-neutral-800 shadow-xs bg-white dark:bg-neutral-950 text-xs font-semibold text-primary-ink dark:text-neutral-200"
+                                    hover:bg-warm-ivory dark:hover:bg-neutral-900 px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-[#25211e] shadow-xs bg-white dark:bg-[#171412] text-xs font-semibold text-primary-ink dark:text-neutral-200"
                                     data-chart="potensi" data-dataset="0">
                                     <span class="inline-block w-3 h-3 rounded-full" style="background-color: #5db010;"></span>
                                     <span>{{ $participant->name }}</span>
                                 </span>
                                 <span class="legend-item flex items-center gap-2 cursor-pointer select-none 
-                                    hover:bg-warm-ivory dark:hover:bg-neutral-900 px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-neutral-800 shadow-xs bg-white dark:bg-neutral-950 text-xs font-semibold text-primary-ink dark:text-neutral-200"
+                                    hover:bg-warm-ivory dark:hover:bg-neutral-900 px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-[#25211e] shadow-xs bg-white dark:bg-[#171412] text-xs font-semibold text-primary-ink dark:text-neutral-200"
                                     data-chart="potensi" data-dataset="1">
                                     <span class="inline-block w-3 h-3 rounded-full" style="background-color: #b50505;"></span>
                                     <span>Standard</span>
                                 </span>
                                 <span class="legend-item flex items-center gap-2 cursor-pointer select-none 
-                                    hover:bg-warm-ivory dark:hover:bg-neutral-900 px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-neutral-800 shadow-xs bg-white dark:bg-neutral-950 text-xs font-semibold text-primary-ink dark:text-neutral-200"
+                                    hover:bg-warm-ivory dark:hover:bg-neutral-900 px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-[#25211e] shadow-xs bg-white dark:bg-[#171412] text-xs font-semibold text-primary-ink dark:text-neutral-200"
                                     data-chart="potensi" data-dataset="2">
                                     <span class="inline-block w-3 h-3 rounded-full" style="background-color: #fafa05;"></span>
                                     <span>Tolerance {{ $tolerancePercentage }}%</span>
                                 </span>
                             @else
                                 <span class="legend-item flex items-center gap-2 cursor-pointer select-none 
-                                    hover:bg-warm-ivory dark:hover:bg-neutral-900 px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-neutral-800 shadow-xs bg-white dark:bg-neutral-950 text-xs font-semibold text-primary-ink dark:text-neutral-200"
+                                    hover:bg-warm-ivory dark:hover:bg-neutral-900 px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-[#25211e] shadow-xs bg-white dark:bg-[#171412] text-xs font-semibold text-primary-ink dark:text-neutral-200"
                                     data-chart="potensi" data-dataset="0">
                                     <span class="inline-block w-3 h-3 rounded-full" style="background-color: #5db010;"></span>
                                     <span>Standard</span>
                                 </span>
                                 <span class="legend-item flex items-center gap-2 cursor-pointer select-none 
-                                    hover:bg-warm-ivory dark:hover:bg-neutral-900 px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-neutral-800 shadow-xs bg-white dark:bg-neutral-950 text-xs font-semibold text-primary-ink dark:text-neutral-200"
+                                    hover:bg-warm-ivory dark:hover:bg-neutral-900 px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-[#25211e] shadow-xs bg-white dark:bg-[#171412] text-xs font-semibold text-primary-ink dark:text-neutral-200"
                                     data-chart="potensi" data-dataset="1">
                                     <span class="inline-block w-3 h-3 rounded-full" style="background-color: #fafa05;"></span>
                                     <span>Tolerance {{ $tolerancePercentage }}%</span>
@@ -102,7 +102,7 @@
 
                     <!-- Chart Kompetensi (Nonagon) -->
                     <div
-                        class="bg-white dark:bg-neutral-950 p-8 border border-warm-border dark:border-neutral-800 rounded-md shadow-xs">
+                        class="bg-white dark:bg-[#171412] p-8 border border-warm-border dark:border-[#25211e] rounded-md shadow-xs">
                         <h3 class="text-center font-display text-lg font-bold text-primary-ink dark:text-neutral-100 mb-4">
                             Managerial Potency Mapping (Rating)
                         </h3>
@@ -111,32 +111,32 @@
                         <div class="flex justify-center text-sm gap-2 mb-8" id="kompetensi-legend-{{ $kompetensiChartId }}">
                             @if ($participant)
                                 <span class="legend-item flex items-center gap-2 cursor-pointer select-none 
-                                    hover:bg-warm-ivory dark:hover:bg-neutral-900 px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-neutral-800 shadow-xs bg-white dark:bg-neutral-950 text-xs font-semibold text-primary-ink dark:text-neutral-200"
+                                    hover:bg-warm-ivory dark:hover:bg-neutral-900 px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-[#25211e] shadow-xs bg-white dark:bg-[#171412] text-xs font-semibold text-primary-ink dark:text-neutral-200"
                                     data-chart="kompetensi" data-dataset="0">
                                     <span class="inline-block w-3 h-3 rounded-full" style="background-color: #5db010;"></span>
                                     <span>{{ $participant->name }}</span>
                                 </span>
                                 <span class="legend-item flex items-center gap-2 cursor-pointer select-none 
-                                    hover:bg-warm-ivory dark:hover:bg-neutral-900 px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-neutral-800 shadow-xs bg-white dark:bg-neutral-950 text-xs font-semibold text-primary-ink dark:text-neutral-200"
+                                    hover:bg-warm-ivory dark:hover:bg-neutral-900 px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-[#25211e] shadow-xs bg-white dark:bg-[#171412] text-xs font-semibold text-primary-ink dark:text-neutral-200"
                                     data-chart="kompetensi" data-dataset="1">
                                     <span class="inline-block w-3 h-3 rounded-full" style="background-color: #b50505;"></span>
                                     <span>Standard</span>
                                 </span>
                                 <span class="legend-item flex items-center gap-2 cursor-pointer select-none 
-                                    hover:bg-warm-ivory dark:hover:bg-neutral-900 px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-neutral-800 shadow-xs bg-white dark:bg-neutral-950 text-xs font-semibold text-primary-ink dark:text-neutral-200"
+                                    hover:bg-warm-ivory dark:hover:bg-neutral-900 px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-[#25211e] shadow-xs bg-white dark:bg-[#171412] text-xs font-semibold text-primary-ink dark:text-neutral-200"
                                     data-chart="kompetensi" data-dataset="2">
                                     <span class="inline-block w-3 h-3 rounded-full" style="background-color: #fafa05;"></span>
                                     <span>Tolerance {{ $tolerancePercentage }}%</span>
                                 </span>
                             @else
                                 <span class="legend-item flex items-center gap-2 cursor-pointer select-none 
-                                    hover:bg-warm-ivory dark:hover:bg-neutral-900 px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-neutral-800 shadow-xs bg-white dark:bg-neutral-950 text-xs font-semibold text-primary-ink dark:text-neutral-200"
+                                    hover:bg-warm-ivory dark:hover:bg-neutral-900 px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-[#25211e] shadow-xs bg-white dark:bg-[#171412] text-xs font-semibold text-primary-ink dark:text-neutral-200"
                                     data-chart="kompetensi" data-dataset="0">
                                     <span class="inline-block w-3 h-3 rounded-full" style="background-color: #5db010;"></span>
                                     <span>Standard</span>
                                 </span>
                                 <span class="legend-item flex items-center gap-2 cursor-pointer select-none 
-                                    hover:bg-warm-ivory dark:hover:bg-neutral-900 px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-neutral-800 shadow-xs bg-white dark:bg-neutral-950 text-xs font-semibold text-primary-ink dark:text-neutral-200"
+                                    hover:bg-warm-ivory dark:hover:bg-neutral-900 px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-[#25211e] shadow-xs bg-white dark:bg-[#171412] text-xs font-semibold text-primary-ink dark:text-neutral-200"
                                     data-chart="kompetensi" data-dataset="1">
                                     <span class="inline-block w-3 h-3 rounded-full" style="background-color: #fafa05;"></span>
                                     <span>Tolerance {{ $tolerancePercentage }}%</span>
@@ -151,7 +151,7 @@
 
                     <!-- Chart General (Tetradecagon) -->
                     <div
-                        class="bg-white dark:bg-neutral-950 p-8 border border-warm-border dark:border-neutral-800 rounded-md shadow-xs">
+                        class="bg-white dark:bg-[#171412] p-8 border border-warm-border dark:border-[#25211e] rounded-md shadow-xs">
                         <h3 class="text-center font-display text-lg font-bold text-primary-ink dark:text-neutral-100 mb-4">
                             General Mapping (Rating)
                         </h3>
@@ -160,32 +160,32 @@
                         <div class="flex justify-center text-sm gap-2 mb-8" id="general-legend-{{ $generalChartId }}">
                             @if ($participant)
                                 <span class="legend-item flex items-center gap-2 cursor-pointer select-none 
-                                    hover:bg-warm-ivory dark:hover:bg-neutral-900 px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-neutral-800 shadow-xs bg-white dark:bg-neutral-950 text-xs font-semibold text-primary-ink dark:text-neutral-200"
+                                    hover:bg-warm-ivory dark:hover:bg-neutral-900 px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-[#25211e] shadow-xs bg-white dark:bg-[#171412] text-xs font-semibold text-primary-ink dark:text-neutral-200"
                                     data-chart="general" data-dataset="0">
                                     <span class="inline-block w-3 h-3 rounded-full" style="background-color: #5db010;"></span>
                                     <span>{{ $participant->name }}</span>
                                 </span>
                                 <span class="legend-item flex items-center gap-2 cursor-pointer select-none 
-                                    hover:bg-warm-ivory dark:hover:bg-neutral-900 px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-neutral-800 shadow-xs bg-white dark:bg-neutral-950 text-xs font-semibold text-primary-ink dark:text-neutral-200"
+                                    hover:bg-warm-ivory dark:hover:bg-neutral-900 px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-[#25211e] shadow-xs bg-white dark:bg-[#171412] text-xs font-semibold text-primary-ink dark:text-neutral-200"
                                     data-chart="general" data-dataset="1">
                                     <span class="inline-block w-3 h-3 rounded-full" style="background-color: #b50505;"></span>
                                     <span>Standard</span>
                                 </span>
                                 <span class="legend-item flex items-center gap-2 cursor-pointer select-none 
-                                    hover:bg-warm-ivory dark:hover:bg-neutral-900 px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-neutral-800 shadow-xs bg-white dark:bg-neutral-950 text-xs font-semibold text-primary-ink dark:text-neutral-200"
+                                    hover:bg-warm-ivory dark:hover:bg-neutral-900 px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-[#25211e] shadow-xs bg-white dark:bg-[#171412] text-xs font-semibold text-primary-ink dark:text-neutral-200"
                                     data-chart="general" data-dataset="2">
                                     <span class="inline-block w-3 h-3 rounded-full" style="background-color: #fafa05;"></span>
                                     <span>Tolerance {{ $tolerancePercentage }}%</span>
                                 </span>
                             @else
                                 <span class="legend-item flex items-center gap-2 cursor-pointer select-none 
-                                    hover:bg-warm-ivory dark:hover:bg-neutral-900 px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-neutral-800 shadow-xs bg-white dark:bg-neutral-950 text-xs font-semibold text-primary-ink dark:text-neutral-200"
+                                    hover:bg-warm-ivory dark:hover:bg-neutral-900 px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-[#25211e] shadow-xs bg-white dark:bg-[#171412] text-xs font-semibold text-primary-ink dark:text-neutral-200"
                                     data-chart="general" data-dataset="0">
                                     <span class="inline-block w-3 h-3 rounded-full" style="background-color: #5db010;"></span>
                                     <span>Standard</span>
                                 </span>
                                 <span class="legend-item flex items-center gap-2 cursor-pointer select-none 
-                                    hover:bg-warm-ivory dark:hover:bg-neutral-900 px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-neutral-800 shadow-xs bg-white dark:bg-neutral-950 text-xs font-semibold text-primary-ink dark:text-neutral-200"
+                                    hover:bg-warm-ivory dark:hover:bg-neutral-900 px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-[#25211e] shadow-xs bg-white dark:bg-[#171412] text-xs font-semibold text-primary-ink dark:text-neutral-200"
                                     data-chart="general" data-dataset="1">
                                     <span class="inline-block w-3 h-3 rounded-full" style="background-color: #fafa05;"></span>
                                     <span>Tolerance {{ $tolerancePercentage }}%</span>
@@ -200,8 +200,8 @@
                 </div>
             </div>
         @else
-            <div class="p-12 bg-white dark:bg-neutral-950 text-center">
-                <div class="max-w-md mx-auto p-6 bg-warm-ivory dark:bg-neutral-900/50 border border-warm-border dark:border-neutral-800 rounded-md">
+            <div class="p-12 bg-white dark:bg-[#171412] text-center">
+                <div class="max-w-md mx-auto p-6 bg-warm-ivory dark:bg-[#1f1b18]/50 border border-warm-border dark:border-[#25211e] rounded-md">
                     <i class="fa-solid fa-folder-open text-accent-amber text-2xl mb-3"></i>
                     <p class="font-display font-bold text-primary-ink dark:text-neutral-100 text-lg">Silakan pilih Event dan Jabatan</p>
                     <p class="text-sm text-primary-ink/70 dark:text-neutral-400 mt-2">

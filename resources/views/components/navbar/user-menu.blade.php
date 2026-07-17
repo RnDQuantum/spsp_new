@@ -1,7 +1,7 @@
 <div x-data="{ userDropdownIsOpen: false }" class="relative" x-on:keydown.esc.window="userDropdownIsOpen = false">
     <button type="button"
-        class="group flex items-center gap-2 rounded-lg p-1.5 text-left text-neutral-600 hover:text-accent-amber hover:bg-warm-ivory focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-amber transition-[color,background-color,ring-color] duration-200 dark:text-neutral-400 dark:hover:text-amber-500 dark:hover:bg-neutral-900 dark:focus-visible:outline-amber-500 cursor-pointer"
-        x-bind:class="userDropdownIsOpen ? 'bg-warm-ivory text-accent-amber dark:bg-neutral-900 dark:text-amber-500' : ''"
+        class="group flex items-center gap-2 rounded-lg p-1.5 text-left text-neutral-600 hover:text-accent-amber hover:bg-warm-ivory focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-amber transition-[color,background-color,ring-color] duration-200 dark:text-neutral-400 dark:hover:text-amber-500 dark:hover:bg-[#1f1b18] dark:focus-visible:outline-amber-500 cursor-pointer"
+        x-bind:class="userDropdownIsOpen ? 'bg-warm-ivory text-accent-amber dark:bg-[#1f1b18] dark:text-amber-500' : ''"
         aria-haspopup="true" x-on:click="userDropdownIsOpen = ! userDropdownIsOpen"
         x-bind:aria-expanded="userDropdownIsOpen">
         <div class="relative">
@@ -24,9 +24,8 @@
             x-bind:class="userDropdownIsOpen ? 'rotate-180' : ''"></i>
     </button>
 
-    <!-- User Dropdown Menu -->
     <div x-cloak x-show="userDropdownIsOpen"
-        class="absolute top-12 right-0 z-50 w-56 rounded-xl border border-warm-border bg-white shadow-md divide-y divide-neutral-100 dark:border-neutral-900 dark:bg-neutral-950 dark:divide-neutral-800"
+        class="absolute top-12 right-0 z-50 w-56 rounded-xl border border-warm-border bg-white shadow-md divide-y divide-neutral-100 dark:border-[#25211e] dark:bg-[#171412] dark:divide-neutral-800"
         role="menu" x-on:click.outside="userDropdownIsOpen = false" 
         x-transition:enter="transition motion-safe:ease-[cubic-bezier(0.16,1,0.3,1)] ease-out duration-200"
         x-transition:enter-start="opacity-0 motion-safe:transform motion-safe:scale-95" x-transition:enter-end="opacity-100 motion-safe:transform motion-safe:scale-100"
