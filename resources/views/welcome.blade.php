@@ -19,7 +19,7 @@
             <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
                 <!-- Brand Logo & Name -->
                 <a href="{{ url('/') }}" class="flex items-center gap-3 group">
-                    <img src="{{ asset('images/logo-qhrmi.webp') }}" alt="Logo QHRMI" class="h-10 w-auto object-contain transition-transform duration-300 group-hover:scale-[1.02]" />
+                    <img src="{{ asset('images/thumb-qhrmi.webp') }}" alt="Logo QHRMI" class="h-10 w-10 object-contain rounded-md transition-transform duration-300 group-hover:scale-[1.02]" />
                     <div class="hidden sm:flex flex-col border-l border-warm-border pl-3">
                         <span class="text-sm font-bold tracking-tight text-primary-ink uppercase">Quantum HRM</span>
                         <span class="text-[10px] font-medium text-primary-ink/70 tracking-wider uppercase -mt-0.5">Internasional</span>
@@ -187,7 +187,7 @@
                 <!-- Column 1: Branding -->
                 <div class="md:col-span-4 flex flex-col gap-3">
                     <div class="flex items-center gap-3">
-                        <img src="{{ asset('images/logo-qhrmi.webp') }}" alt="Logo QHRMI" class="h-8 w-auto object-contain brightness-0 invert opacity-50" />
+                        <img src="{{ asset('images/thumb-qhrmi.webp') }}" alt="Logo QHRMI" class="h-8 w-8 object-contain rounded-md" />
                         <span class="text-xs tracking-wider uppercase font-semibold text-warm-ivory/60">SPSP System</span>
                     </div>
                     <p class="text-xs text-warm-ivory/65 leading-relaxed max-w-sm mt-2">
