@@ -154,7 +154,7 @@
                                     </g>
 
                                     <!-- Grid Ring Scale Labels -->
-                                    <g fill="var(--color-primary-ink)" fill-opacity="0.3" font-size="10" font-family="IBM Plex Mono, monospace" font-weight="bold">
+                                    <g fill="var(--color-primary-ink)" fill-opacity="0.35" font-size="12" font-family="IBM Plex Mono, monospace" font-weight="bold">
                                         <text x="400" y="194">4.0</text>
                                         <text x="400" y="241.5">3.0</text>
                                         <text x="400" y="289">2.0</text>
@@ -169,9 +169,9 @@
                                     <polygon points="390,237.5 473.8,264.7 525.5,336.0 525.5,424.0 473.8,495.3 390,522.5 306.2,495.3 254.5,424.0 254.5,336.0 306.2,264.7"
                                         fill="none" stroke="var(--color-primary-ink)" stroke-width="2"/>
 
-                                    <!-- Individu (Actual Score Line - Animated Rust Red) -->
+                                    <!-- Individu (Actual Score Line - Animated Rust Red Dashed) -->
                                     <polygon id="individual-polygon" points="390,228.0 468.2,272.4 548.1,328.6 507.5,418.2 473.8,495.3 390,494.0 309.0,491.4 240.9,428.4 268.0,340.4 303.4,260.9"
-                                        fill="var(--color-rust-red)" fill-opacity="0.08" stroke="var(--color-rust-red)" stroke-width="3"/>
+                                        fill="var(--color-rust-red)" fill-opacity="0.08" stroke="var(--color-rust-red)" stroke-width="3" stroke-dasharray="6,4"/>
 
                                     <!-- Individu vertex markers -->
                                     <g fill="var(--color-rust-red)">
@@ -188,7 +188,7 @@
                                     </g>
 
                                     <!-- Individu value labels (Enlarged Monospace values) -->
-                                    <g fill="var(--color-rust-red)" font-size="12" font-weight="bold" font-family="IBM Plex Mono, monospace">
+                                    <g fill="var(--color-rust-red)" font-size="15" font-weight="bold" font-family="IBM Plex Mono, monospace">
                                         <text id="value-0" x="390" y="210" text-anchor="middle">3.2</text>
                                         <text id="value-1" x="480.4" y="261.1" text-anchor="start">2.8</text>
                                         <text id="value-2" x="563.4" y="324.3" text-anchor="start">3.5</text>
@@ -202,7 +202,7 @@
                                     </g>
 
                                     <!-- Indonesian Category Labels -->
-                                    <g fill="var(--color-primary-ink)" fill-opacity="0.9" font-size="14" font-weight="bold" font-family="IBM Plex Sans, sans-serif">
+                                    <g fill="var(--color-primary-ink)" fill-opacity="0.9" font-size="18" font-weight="bold" font-family="IBM Plex Sans, sans-serif">
                                         <text x="390" y="112" text-anchor="middle">Kemampuan Umum</text>
                                         <text x="528.2" y="189.9" text-anchor="start">Inisiatif Kerja</text>
                                         <text x="613.5" y="307.4" text-anchor="start">Kepemimpinan Kreatif</text>
@@ -219,16 +219,22 @@
 
                             <!-- Legend -->
                             <div class="px-4 pb-4 pt-2 border-b border-warm-border grid grid-cols-3 gap-3 text-center text-[10px] font-bold uppercase font-mono-data text-primary-ink/75">
-                                <div class="flex items-center justify-center gap-1.5 bg-warm-ivory border border-warm-border py-1.5 rounded">
-                                    <span class="w-3 h-0.5 bg-primary-ink block"></span>
+                                <div class="flex items-center justify-center gap-2 bg-warm-ivory border border-warm-border py-1.5 rounded">
+                                    <svg class="w-5 h-1 shrink-0" viewBox="0 0 20 4" xmlns="http://www.w3.org/2000/svg">
+                                        <line x1="0" y1="2" x2="20" y2="2" stroke="var(--color-primary-ink)" stroke-width="3" />
+                                    </svg>
                                     <span>Standar (3.0)</span>
                                 </div>
-                                <div class="flex items-center justify-center gap-1.5 bg-warm-ivory border border-warm-border py-1.5 rounded">
-                                    <span class="w-3 h-0.5 bg-primary-ink border-dashed block opacity-70"></span>
+                                <div class="flex items-center justify-center gap-2 bg-warm-ivory border border-warm-border py-1.5 rounded">
+                                    <svg class="w-5 h-1 shrink-0" viewBox="0 0 20 4" xmlns="http://www.w3.org/2000/svg">
+                                        <line x1="0" y1="2" x2="20" y2="2" stroke="var(--color-primary-ink)" stroke-opacity="0.8" stroke-width="3" stroke-dasharray="2,3" />
+                                    </svg>
                                     <span>Toleransi (2.5)</span>
                                 </div>
-                                <div class="flex items-center justify-center gap-1.5 bg-warm-ivory border border-warm-border py-1.5 rounded">
-                                    <span class="w-3 h-0.5 bg-rust-red block"></span>
+                                <div class="flex items-center justify-center gap-2 bg-warm-ivory border border-warm-border py-1.5 rounded">
+                                    <svg class="w-5 h-1 shrink-0" viewBox="0 0 20 4" xmlns="http://www.w3.org/2000/svg">
+                                        <line x1="0" y1="2" x2="20" y2="2" stroke="var(--color-rust-red)" stroke-width="3" stroke-dasharray="5,2" />
+                                    </svg>
                                     <span>Individu</span>
                                 </div>
                             </div>
@@ -553,7 +559,7 @@
                     
                     const label = document.getElementById(`value-${i}`);
                     if (label) {
-                        const labelR = R + 18;
+                        const labelR = R + 20;
                         const labelX = (Cx + labelR * Math.sin(rad)).toFixed(1);
                         const labelY = (Cy - labelR * Math.cos(rad)).toFixed(1);
                         label.setAttribute('x', labelX);
