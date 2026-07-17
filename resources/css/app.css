@@ -115,3 +115,12 @@
 .fa-bounce {
     animation: none !important;
 }
+
+/* Sidebar transition helper classes */
+.sidebar-text-transition {
+    transition-property: max-width, opacity, margin-left, margin-right;
+    transition-duration: 250ms;
+    transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+    display: inline-block;
+    vertical-align: middle;
+}

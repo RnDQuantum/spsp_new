@@ -59,7 +59,7 @@
         @endpersist
 
         <!-- Main Content Area with Navbar -->
-        <div id="main-content" class="h-full w-full bg-white/80 motion-safe:transition-[margin] motion-safe:duration-250 ease-[cubic-bezier(0.16,1,0.3,1)] ease-out will-change-[margin] dark:bg-neutral-950/80 overflow-y-auto"
+        <div id="main-content" class="h-full w-full bg-white/80 motion-safe:transition-[margin] motion-safe:duration-250 ease-[cubic-bezier(0.16,1,0.3,1)] will-change-[margin] dark:bg-neutral-950/80 overflow-y-auto"
             x-bind:class="[getContentMarginClass().margin]">
             <x-navbar.index :title="$title ?? 'Dashboard'">
                 {{ $slot }}
