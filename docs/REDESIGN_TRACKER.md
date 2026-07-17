@@ -37,8 +37,8 @@ Menampilkan analisis mendalam dan visualisasi radar kompetensi untuk masing-masi
 | **Spider Plot Analysis** | `individual-report/spider-plot.blade.php` | Container `bg-white`, header hitam/abu-abu pekat, legenda balok tebal, chart font belum disesuaikan. | **Selesai** |
 | **Final Report Summary** | `individual-report/final-report.blade.php` | Desain layout lama dengan borders hitam dan padding lebar. | **Selesai** |
 | **General Matching** | `individual-report/general-matching.blade.php` | Tabel gap dan ringkasan nilai masih memakai gaya borders hitam kaku. | **Selesai** |
-| **Managerial Competency** | `individual-report/general-mc-mapping.blade.php` | Tabel kompetensi manajerial sangat panjang, memerlukan padding py-2 dan hierarchy tebal-tipis teks. | [ ] Pending |
-| **Psychology Mapping** | `individual-report/general-psy-mapping.blade.php` | Tabel potensi psikologis, memerlukan border beige lembut dan text-sm. | [ ] Pending |
+| **Managerial Competency** | `individual-report/general-mc-mapping.blade.php` | Tabel kompetensi manajerial sangat panjang, memerlukan padding py-2 dan hierarchy tebal-tipis teks. | **Selesai** |
+| **Psychology Mapping** | `individual-report/general-psy-mapping.blade.php` | Tabel potensi psikologis, memerlukan border beige lembut dan text-sm. | **Selesai** |
 | **Ringkasan Assessment** | `individual-report/ringkasan-assessment.blade.php` | Latar belakang tabel, kartu profil, dan teks deskripsi masih menggunakan tema digital gray standar. | [ ] Pending |
 | **Ringkasan MC Mapping** | `individual-report/ringkasan-mc-mapping.blade.php` | Visualisasi tabel kompetensi ringkas perlu disesuaikan dengan border beige. | [ ] Pending |
 | **Interpretation Section** | `individual-report/interpretation-section.blade.php` | Area teks interpretasi naratif memerlukan font display serif Lora dan spasi yang elegan. | [ ] Pending |

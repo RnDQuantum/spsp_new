@@ -1,29 +1,17 @@
 <div>
-    <div class="mx-auto my-8 shadow overflow-hidden" style="max-width: 1400px;" class="bg-white dark:bg-gray-800">
+    <div class="mx-auto my-8 border border-warm-border dark:border-[#25211e] bg-white dark:bg-[#171412] overflow-hidden shadow-xs rounded-lg" style="max-width: 1400px;">
 
         @if ($showHeader)
             <!-- Header - DARK MODE READY -->
-            <div class="border-b-4 border-black py-3 bg-gray-300 dark:bg-gray-600">
-                <h1
-                    class="text-center text-lg font-bold uppercase tracking-wide
-                           text-gray-900 dark:text-white italic">
-                    GENERAL PSYCHOLOGY MAPPING
+                        <div class="px-8 py-6 bg-white dark:bg-[#171412] border-b border-warm-border dark:border-[#25211e]">
+                <h1 class="font-display text-2xl font-bold tracking-tight text-primary-ink dark:text-neutral-100 uppercase">
+                    General Psychology Mapping
                 </h1>
-                <p
-                    class="text-center text-sm font-semibold
-                         text-gray-700 dark:text-gray-200 mt-1">
-                    {{ $participant->name }}
-                </p>
-                <p
-                    class="text-center text-sm font-semibold
-                         text-gray-700 dark:text-gray-200 mt-1">
-                    {{ $participant->event->name }}
-                </p>
-                <p
-                    class="text-center text-sm font-semibold
-                         text-gray-700 dark:text-gray-200 mt-1">
-                    {{ $participant->positionFormation->name }} - {{ $participant->positionFormation->template->name }}
-                </p>
+                <div class="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-xs font-semibold text-primary-ink/75 dark:text-neutral-400">
+                    <span class="flex items-center gap-1.5"><i class="fa-regular fa-user text-accent-amber"></i> {{ $participant->name }}</span>
+                    <span class="flex items-center gap-1.5"><i class="fa-regular fa-calendar text-accent-amber"></i> {{ $participant->event->name }}</span>
+                    <span class="flex items-center gap-1.5"><i class="fa-regular fa-address-card text-accent-amber"></i> {{ $participant->positionFormation->name }} - {{ $participant->positionFormation->template->name }}</span>
+                </div>
             </div>
         @endif
 
@@ -38,121 +26,121 @@
             ])
 
             {{-- Adjustment Indicator --}}
-            <div class="px-4 py-2 bg-gray-50 dark:bg-gray-700 border-b border-gray-300 dark:border-gray-600">
+            <div class="px-6 py-3 bg-warm-ivory dark:bg-[#1f1b18] border-b border-warm-border dark:border-[#25211e]">
                 <x-adjustment-indicator :template-id="$participant->positionFormation->template_id" category-code="potensi" size="sm" />
             </div>
         @endif
 
         @if ($showTable)
             <!-- Table Section - DARK MODE READY -->
-            <div class="p-4 overflow-x-auto bg-white dark:bg-gray-800">
-                <table class="min-w-full border border-black text-xs">
+            <div class="p-6 overflow-x-auto bg-white dark:bg-[#171412]">
+                <table class="min-w-full border border-warm-border dark:border-[#25211e] text-sm">
                     <thead>
-                        <tr class="bg-sky-200 dark:bg-gray-700 text-gray-900 dark:text-white">
-                            <th class="border border-black px-3 py-2 font-semibold 
-                                   bg-gray-300 dark:bg-gray-600"
+                        <tr class="bg-warm-ivory dark:bg-[#1f1b18] text-primary-ink dark:text-neutral-200 text-primary-ink dark:text-neutral-200">
+                            <th class="border border-warm-border dark:border-[#25211e] px-3 py-2 font-semibold 
+                                   bg-warm-ivory dark:bg-[#1f1b18] text-primary-ink dark:text-neutral-200"
                                 rowspan="2">
                                 No</th>
-                            <th class="border border-black px-3 py-2 font-semibold 
-                                   bg-gray-300 dark:bg-gray-600"
+                            <th class="border border-warm-border dark:border-[#25211e] px-3 py-2 font-semibold 
+                                   bg-warm-ivory dark:bg-[#1f1b18] text-primary-ink dark:text-neutral-200"
                                 rowspan="2">
                                 Atribut</th>
-                            <th class="border border-black px-3 py-2 font-semibold 
-                                   bg-gray-300 dark:bg-gray-600"
+                            <th class="border border-warm-border dark:border-[#25211e] px-3 py-2 font-semibold 
+                                   bg-warm-ivory dark:bg-[#1f1b18] text-primary-ink dark:text-neutral-200"
                                 rowspan="2">
                                 Bobot %<br>100</th>
-                            <th class="border border-black px-3 py-2 font-semibold 
-                                   bg-gray-300 dark:bg-gray-600"
+                            <th class="border border-warm-border dark:border-[#25211e] px-3 py-2 font-semibold 
+                                   bg-warm-ivory dark:bg-[#1f1b18] text-primary-ink dark:text-neutral-200"
                                 colspan="2">
                                 <span x-data
                                     x-text="$wire.tolerancePercentage > 0 ? 'Standar (-' + $wire.tolerancePercentage + '%)' : 'Standar'"
-                                    class="text-gray-900 dark:text-white"></span>
+                                    class="text-primary-ink dark:text-neutral-200"></span>
                             </th>
-                            <th class="border border-black px-3 py-2 font-semibold 
-                                   bg-gray-300 dark:bg-gray-600"
+                            <th class="border border-warm-border dark:border-[#25211e] px-3 py-2 font-semibold 
+                                   bg-warm-ivory dark:bg-[#1f1b18] text-primary-ink dark:text-neutral-200"
                                 colspan="2">Individu</th>
-                            <th class="border border-black px-3 py-2 font-semibold 
-                                   bg-gray-300 dark:bg-gray-600"
+                            <th class="border border-warm-border dark:border-[#25211e] px-3 py-2 font-semibold 
+                                   bg-warm-ivory dark:bg-[#1f1b18] text-primary-ink dark:text-neutral-200"
                                 colspan="2">Gap</th>
-                            <th class="border border-black px-3 py-2 font-semibold 
-                                   bg-gray-300 dark:bg-gray-600"
+                            <th class="border border-warm-border dark:border-[#25211e] px-3 py-2 font-semibold 
+                                   bg-warm-ivory dark:bg-[#1f1b18] text-primary-ink dark:text-neutral-200"
                                 rowspan="2">
                                 Persentase<br>Kesesuaian</th>
-                            <th class="border border-black px-3 py-2 font-semibold 
-                                   bg-gray-300 dark:bg-gray-600"
+                            <th class="border border-warm-border dark:border-[#25211e] px-3 py-2 font-semibold 
+                                   bg-warm-ivory dark:bg-[#1f1b18] text-primary-ink dark:text-neutral-200"
                                 rowspan="2">
                                 Kesimpulan</th>
                         </tr>
-                        <tr class="bg-sky-200 dark:bg-gray-700 text-gray-900 dark:text-white">
+                        <tr class="bg-warm-ivory dark:bg-[#1f1b18] text-primary-ink dark:text-neutral-200 text-primary-ink dark:text-neutral-200">
                             <th
-                                class="border border-black px-3 py-1 font-semibold 
-                                   bg-gray-300 dark:bg-gray-600">
+                                class="border border-warm-border dark:border-[#25211e] px-3 py-1 font-semibold 
+                                   bg-warm-ivory dark:bg-[#1f1b18] text-primary-ink dark:text-neutral-200">
                                 Rating</th>
                             <th
-                                class="border border-black px-3 py-1 font-semibold 
-                                   bg-gray-300 dark:bg-gray-600">
+                                class="border border-warm-border dark:border-[#25211e] px-3 py-1 font-semibold 
+                                   bg-warm-ivory dark:bg-[#1f1b18] text-primary-ink dark:text-neutral-200">
                                 Skor</th>
                             <th
-                                class="border border-black px-3 py-1 font-semibold 
-                                   bg-gray-300 dark:bg-gray-600">
+                                class="border border-warm-border dark:border-[#25211e] px-3 py-1 font-semibold 
+                                   bg-warm-ivory dark:bg-[#1f1b18] text-primary-ink dark:text-neutral-200">
                                 Rating</th>
                             <th
-                                class="border border-black px-3 py-1 font-semibold 
-                                   bg-gray-300 dark:bg-gray-600">
+                                class="border border-warm-border dark:border-[#25211e] px-3 py-1 font-semibold 
+                                   bg-warm-ivory dark:bg-[#1f1b18] text-primary-ink dark:text-neutral-200">
                                 Skor</th>
                             <th
-                                class="border border-black px-3 py-1 font-semibold 
-                                   bg-gray-300 dark:bg-gray-600">
+                                class="border border-warm-border dark:border-[#25211e] px-3 py-1 font-semibold 
+                                   bg-warm-ivory dark:bg-[#1f1b18] text-primary-ink dark:text-neutral-200">
                                 Rating</th>
                             <th
-                                class="border border-black px-3 py-0 font-semibold 
-                                   bg-gray-300 dark:bg-gray-600">
+                                class="border border-warm-border dark:border-[#25211e] px-3 py-0 font-semibold 
+                                   bg-warm-ivory dark:bg-[#1f1b18] text-primary-ink dark:text-neutral-200">
                                 Skor</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach ($aspectsData as $index => $aspect)
-                            <tr class="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700">
+                            <tr class="bg-white dark:bg-[#171412] hover:bg-warm-ivory/50 dark:hover:bg-[#1f1b18]/50 transition-colors duration-150 text-primary-ink dark:text-neutral-200">
                                 <td
-                                    class="border border-black px-3 py-2 text-center 
-                                       text-gray-900 dark:text-white">
+                                    class="border border-warm-border dark:border-[#25211e] px-3 py-2 text-center 
+                                       text-primary-ink dark:text-neutral-200">
                                     {{ ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII', 'XIII', 'XIV', 'XV', 'XVI', 'XVII', 'XVIII', 'XIX', 'XX'][$index] }}
                                 </td>
                                 <td
-                                    class="border border-black px-3 py-2 
-                                       text-gray-900 dark:text-white">
+                                    class="border border-warm-border dark:border-[#25211e] px-3 py-2 
+                                       text-primary-ink dark:text-neutral-200">
                                     {{ $aspect['name'] }}</td>
                                 <td
-                                    class="border border-black px-3 py-2 text-center 
-                                       text-gray-900 dark:text-white">
+                                    class="border border-warm-border dark:border-[#25211e] px-3 py-2 text-center 
+                                       text-primary-ink dark:text-neutral-200">
                                     {{ $aspect['weight_percentage'] }}</td>
                                 <td
-                                    class="border border-black px-3 py-2 text-center 
-                                       text-gray-900 dark:text-white">
+                                    class="border border-warm-border dark:border-[#25211e] px-3 py-2 text-center 
+                                       text-primary-ink dark:text-neutral-200">
                                     {{ number_format($aspect['standard_rating'], 2) }}</td>
                                 <td
-                                    class="border border-black px-3 py-2 text-center 
-                                       text-gray-900 dark:text-white">
+                                    class="border border-warm-border dark:border-[#25211e] px-3 py-2 text-center 
+                                       text-primary-ink dark:text-neutral-200">
                                     {{ number_format($aspect['standard_score'], 2) }}</td>
                                 <td
-                                    class="border border-black px-3 py-2 text-center 
-                                       text-gray-900 dark:text-white">
+                                    class="border border-warm-border dark:border-[#25211e] px-3 py-2 text-center 
+                                       text-primary-ink dark:text-neutral-200">
                                     {{ number_format($aspect['individual_rating'], 2) }}</td>
                                 <td
-                                    class="border border-black px-3 py-2 text-center 
-                                       text-gray-900 dark:text-white">
+                                    class="border border-warm-border dark:border-[#25211e] px-3 py-2 text-center 
+                                       text-primary-ink dark:text-neutral-200">
                                     {{ number_format($aspect['individual_score'], 2) }}</td>
                                 <td
-                                    class="border border-black px-3 py-2 text-center 
-                                       text-gray-900 dark:text-white">
+                                    class="border border-warm-border dark:border-[#25211e] px-3 py-2 text-center 
+                                       text-primary-ink dark:text-neutral-200">
                                     {{ number_format($aspect['gap_rating'], 2) }}</td>
                                 <td
-                                    class="border border-black px-3 py-2 text-center 
-                                       text-gray-900 dark:text-white">
+                                    class="border border-warm-border dark:border-[#25211e] px-3 py-2 text-center 
+                                       text-primary-ink dark:text-neutral-200">
                                     {{ number_format($aspect['gap_score'], 2) }}</td>
                                 <td
-                                    class="border border-black px-3 py-2 text-center 
-                                       text-gray-900 dark:text-white">
+                                    class="border border-warm-border dark:border-[#25211e] px-3 py-2 text-center 
+                                       text-primary-ink dark:text-neutral-200">
                                     @php
                                         $percentage =
                                             $aspect['standard_score'] > 0
@@ -162,61 +150,61 @@
                                     {{ $percentage }}%
                                 </td>
                                 <td
-                                    class="border border-black px-3 py-2 text-center font-bold {{ $conclusionConfig[$aspect['conclusion_text']]['tailwindClass'] ?? 'bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-white' }}">
+                                    class="border border-warm-border dark:border-[#25211e] px-3 py-2 text-center font-bold {{ $conclusionConfig[$aspect['conclusion_text']]['tailwindClass'] ?? 'bg-gray-200 dark:bg-gray-600 text-primary-ink dark:text-neutral-200' }}">
                                     {{ $aspect['conclusion_text'] }}
                                 </td>
                             </tr>
                         @endforeach
 
                         <!-- Total Rating Row -->
-                        <tr class="font-bold bg-gray-300 dark:bg-gray-600">
-                            <td class="border border-black px-3 py-2 text-center 
-                                   text-gray-900 dark:text-white"
+                        <tr class="font-bold bg-warm-ivory dark:bg-[#1f1b18] text-primary-ink dark:text-neutral-200">
+                            <td class="border border-warm-border dark:border-[#25211e] px-3 py-2 text-center 
+                                   text-primary-ink dark:text-neutral-200"
                                 colspan="3">Total Rating</td>
                             <td
-                                class="border border-black px-3 py-2 text-center 
-                                   text-gray-900 dark:text-white">
+                                class="border border-warm-border dark:border-[#25211e] px-3 py-2 text-center 
+                                   text-primary-ink dark:text-neutral-200">
                                 {{ number_format($totalStandardRating, 2) }}
                             </td>
-                            <td class="border border-black px-3 py-2 bg-black"></td>
+                            <td class="border border-warm-border dark:border-[#25211e]/40 px-3 py-2 bg-warm-border/40 dark:bg-[#25211e]/40"></td>
                             <td
-                                class="border border-black px-3 py-2 text-center 
-                                   text-gray-900 dark:text-white">
+                                class="border border-warm-border dark:border-[#25211e] px-3 py-2 text-center 
+                                   text-primary-ink dark:text-neutral-200">
                                 {{ number_format($totalIndividualRating, 2) }}</td>
-                            <td class="border border-black px-3 py-2 bg-black"></td>
+                            <td class="border border-warm-border dark:border-[#25211e]/40 px-3 py-2 bg-warm-border/40 dark:bg-[#25211e]/40"></td>
                             <td
-                                class="border border-black px-3 py-2 text-center
-                                   text-gray-900 dark:text-white">
+                                class="border border-warm-border dark:border-[#25211e] px-3 py-2 text-center
+                                   text-primary-ink dark:text-neutral-200">
                                 {{ number_format($totalGapRating, 2) }}</td>
-                            <td class="border border-black px-3 py-2 bg-black"></td>
-                            <td class="border border-black px-3 py-2 text-center font-bold {{ $conclusionConfig[$overallConclusion]['tailwindClass'] ?? 'bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-white' }}"
+                            <td class="border border-warm-border dark:border-[#25211e]/40 px-3 py-2 bg-warm-border/40 dark:bg-[#25211e]/40"></td>
+                            <td class="border border-warm-border dark:border-[#25211e] px-3 py-2 text-center font-bold {{ $conclusionConfig[$overallConclusion]['tailwindClass'] ?? 'bg-gray-200 dark:bg-gray-600 text-primary-ink dark:text-neutral-200' }}"
                                 colspan="2">
                                 {{ $overallConclusion }}
                             </td>
                         </tr>
 
                         <!-- Total Score Row -->
-                        <tr class="font-bold bg-gray-300 dark:bg-gray-600">
-                            <td class="border border-black px-3 py-2 text-center 
-                                   text-gray-900 dark:text-white"
+                        <tr class="font-bold bg-warm-ivory dark:bg-[#1f1b18] text-primary-ink dark:text-neutral-200">
+                            <td class="border border-warm-border dark:border-[#25211e] px-3 py-2 text-center 
+                                   text-primary-ink dark:text-neutral-200"
                                 colspan="3">Total Skor</td>
-                            <td class="border border-black px-3 py-2 bg-black"></td>
+                            <td class="border border-warm-border dark:border-[#25211e]/40 px-3 py-2 bg-warm-border/40 dark:bg-[#25211e]/40"></td>
                             <td
-                                class="border border-black px-3 py-2 text-center 
-                                   text-gray-900 dark:text-white">
+                                class="border border-warm-border dark:border-[#25211e] px-3 py-2 text-center 
+                                   text-primary-ink dark:text-neutral-200">
                                 {{ number_format($totalStandardScore, 2) }}
                             </td>
-                            <td class="border border-black px-3 py-2 bg-black"></td>
+                            <td class="border border-warm-border dark:border-[#25211e]/40 px-3 py-2 bg-warm-border/40 dark:bg-[#25211e]/40"></td>
                             <td
-                                class="border border-black px-3 py-2 text-center 
-                                   text-gray-900 dark:text-white">
+                                class="border border-warm-border dark:border-[#25211e] px-3 py-2 text-center 
+                                   text-primary-ink dark:text-neutral-200">
                                 {{ number_format($totalIndividualScore, 2) }}</td>
-                            <td class="border border-black px-3 py-2 bg-black"></td>
+                            <td class="border border-warm-border dark:border-[#25211e]/40 px-3 py-2 bg-warm-border/40 dark:bg-[#25211e]/40"></td>
                             <td
-                                class="border border-black px-3 py-2 text-center
-                                   text-gray-900 dark:text-white">
+                                class="border border-warm-border dark:border-[#25211e] px-3 py-2 text-center
+                                   text-primary-ink dark:text-neutral-200">
                                 {{ number_format($totalGapScore, 2) }}</td>
-                            <td class="border border-black px-3 py-2 text-center font-bold {{ $conclusionConfig[$overallConclusion]['tailwindClass'] ?? 'bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-white' }}"
+                            <td class="border border-warm-border dark:border-[#25211e] px-3 py-2 text-center font-bold {{ $conclusionConfig[$overallConclusion]['tailwindClass'] ?? 'bg-gray-200 dark:bg-gray-600 text-primary-ink dark:text-neutral-200' }}"
                                 colspan="2">
                                 {{ $overallConclusion }}
                             </td>
@@ -233,7 +221,7 @@
             @endphp
 
             @if ($rankingInfo)
-                <div class="px-6 py-4 bg-gray-300 dark:bg-gray-600 border-t-2 border-black dark:border-gray-600">
+                <div class="px-6 py-4 bg-warm-ivory dark:bg-[#1f1b18] text-primary-ink dark:text-neutral-200 border-t-2 border-warm-border dark:border-[#25211e] dark:border-gray-600">
                     <div class="max-w-4xl mx-auto">
                         <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
                             <i class="fa-solid fa-circle-check"></i>
@@ -243,18 +231,18 @@
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <!-- Ranking Card -->
                             <div
-                                class="bg-white dark:bg-gray-800 border-2 border-blue-300 dark:border-blue-600 rounded-lg p-4 text-center">
-                                <div class="text-sm text-gray-500 dark:text-gray-400 mb-2">Ranking</div>
-                                <div class="text-4xl font-bold text-blue-600 dark:text-blue-400">
+                                class="bg-white dark:bg-[#171412] border border-warm-border dark:border-[#25211e] rounded-md p-4 text-center">
+                                <div class="text-sm text-primary-ink/70 dark:text-neutral-400 mb-2">Ranking</div>
+                                <div class="text-4xl font-bold text-accent-amber dark:text-amber-500">
                                     #{{ $rankingInfo['rank'] }}
                                 </div>
                             </div>
 
                             <!-- Total Participants Card -->
                             <div
-                                class="bg-white dark:bg-gray-800 border-2 border-blue-300 dark:border-blue-600 rounded-lg p-4 text-center">
-                                <div class="text-sm text-gray-500 dark:text-gray-400 mb-2">Total Peserta</div>
-                                <div class="text-4xl font-bold text-blue-600 dark:text-blue-400">
+                                class="bg-white dark:bg-[#171412] border border-warm-border dark:border-[#25211e] rounded-md p-4 text-center">
+                                <div class="text-sm text-primary-ink/70 dark:text-neutral-400 mb-2">Total Peserta</div>
+                                <div class="text-4xl font-bold text-accent-amber dark:text-amber-500">
                                     {{ $rankingInfo['total'] }}
                                 </div>
                                 <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
@@ -273,17 +261,17 @@
                                 };
                             @endphp
                             <div
-                                class="bg-white dark:bg-gray-800 border-2 rounded-lg p-4 text-center {{ $borderClass }}">
-                                <div class="text-sm text-gray-500 dark:text-gray-400 mb-2">Status</div>
+                                class="bg-white dark:bg-[#171412] border rounded-md p-4 text-center {{ $borderClass }}">
+                                <div class="text-sm text-primary-ink/70 dark:text-neutral-400 mb-2">Status</div>
                                 <div
-                                    class="text-lg font-bold px-4 py-2 rounded-lg {{ $conclusionConfig[$conclusionText]['tailwindClass'] ?? 'bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-white' }}">
+                                    class="text-lg font-bold px-4 py-2 rounded-lg {{ $conclusionConfig[$conclusionText]['tailwindClass'] ?? 'bg-gray-200 dark:bg-gray-600 text-primary-ink dark:text-neutral-200' }}">
                                     {{ $rankingInfo['conclusion'] }}
                                 </div>
                             </div>
                         </div>
 
                         <!-- Additional Info -->
-                        <div class="mt-4 bg-gray-300 dark:bg-gray-600 rounded-lg p-1">
+                        <div class="mt-4 bg-warm-ivory dark:bg-[#1f1b18] text-primary-ink dark:text-neutral-200 rounded-lg p-1">
                             <div class="text-sm text-gray-800 dark:text-gray-200">
                                 <strong>Keterangan:</strong> Ranking berdasarkan total Individual Score dari semua aspek
                                 dalam
@@ -299,10 +287,10 @@
 
         @if ($showRatingChart)
             <!-- Chart Section Rating - DARK MODE READY -->
-            <div class="p-6 border-t-2 border-black bg-white dark:bg-gray-800" wire:ignore
+            <div class="p-6 border-t-2 border-warm-border dark:border-[#25211e] bg-white dark:bg-gray-800" wire:ignore
                 id="chart-rating-{{ $chartId }}">
                 <div class="text-center text-base font-bold mb-6 
-                       text-gray-900 dark:text-white">
+                       text-primary-ink dark:text-neutral-200">
                     Profil Potensi <i>Spider Plot Chart (Rating)</i></div>
                 <div class="flex justify-center text-sm gap-8 mb-8" id="rating-legend-{{ $chartId }}">
                     <!-- Dataset 0: Peserta - HIJAU -->
@@ -312,7 +300,7 @@
                px-3 py-2 rounded-lg transition-all duration-200 
                border border-gray-300 dark:border-gray-600 
                shadow-sm bg-white dark:bg-gray-700 
-               text-gray-900 dark:text-white"
+               text-primary-ink dark:text-neutral-200"
                         data-chart="rating" data-dataset="0">
                         <span class="inline-block w-12 h-3 rounded-sm" style="background-color: #5db010;"></span>
                         <span class="font-semibold" style="color: #5db010;">{{ $participant->name }}</span>
@@ -325,7 +313,7 @@
                px-3 py-2 rounded-lg transition-all duration-200 
                border border-gray-300 dark:border-gray-600 
                shadow-sm bg-white dark:bg-gray-700 
-               text-gray-900 dark:text-white"
+               text-primary-ink dark:text-neutral-200"
                         data-chart="rating" data-dataset="1">
                         <span class="inline-block w-12 h-3 rounded-sm" style="background-color: #b50505;"></span>
                         <span class="font-semibold">Standard</span>
@@ -338,7 +326,7 @@
                px-3 py-2 rounded-lg transition-all duration-200 
                border border-gray-300 dark:border-gray-600 
                shadow-sm bg-white dark:bg-gray-700 
-               text-gray-900 dark:text-white"
+               text-primary-ink dark:text-neutral-200"
                         data-chart="rating" data-dataset="2">
                         <span class="inline-block w-12 h-3 rounded-sm" style="background-color: #fafa05;"></span>
                         <span class="font-semibold" x-data
@@ -358,11 +346,11 @@
 
         @if ($showScoreChart)
             <!-- Chart Section Score - DARK MODE READY -->
-            <div class="p-6 border-t-2 border-black bg-white dark:bg-gray-800" wire:ignore
+            <div class="p-6 border-t-2 border-warm-border dark:border-[#25211e] bg-white dark:bg-gray-800" wire:ignore
                 id="chart-score-{{ $chartId }}">
                 <div
                     class="text-center text-base font-bold mb-6 
-                       text-gray-900 dark:text-white">
+                       text-primary-ink dark:text-neutral-200">
                     Profil Potensi <i>Spider Plot Chart (Score)</i></div>
 
 
@@ -376,7 +364,7 @@
            px-3 py-2 rounded-lg transition-all duration-200 
            border border-gray-300 dark:border-gray-600 
            shadow-sm bg-white dark:bg-gray-700 
-           text-gray-900 dark:text-white"
+           text-primary-ink dark:text-neutral-200"
                         data-chart="score" data-dataset="0">
                         <span class="inline-block w-12 h-3 rounded-sm" style="background-color: #5db010;"></span>
                         <span class="font-semibold" style="color: #5db010;">{{ $participant->name }}</span>
@@ -389,7 +377,7 @@
            px-3 py-2 rounded-lg transition-all duration-200 
            border border-gray-300 dark:border-gray-600 
            shadow-sm bg-white dark:bg-gray-700 
-           text-gray-900 dark:text-white"
+           text-primary-ink dark:text-neutral-200"
                         data-chart="score" data-dataset="1">
                         <span class="inline-block w-12 h-3 rounded-sm" style="background-color: #b50505;"></span>
                         <span class="font-semibold">Standard</span>
@@ -402,7 +390,7 @@
            px-3 py-2 rounded-lg transition-all duration-200 
            border border-gray-300 dark:border-gray-600 
            shadow-sm bg-white dark:bg-gray-700 
-           text-gray-900 dark:text-white"
+           text-primary-ink dark:text-neutral-200"
                         data-chart="score" data-dataset="2">
                         <span class="inline-block w-12 h-3 rounded-sm" style="background-color: #fafa05;"></span>
                         <span class="font-semibold" x-data
@@ -625,7 +613,8 @@
                                             stepSize: 1,
                                             color: colors.ticks,
                                             font: {
-                                                size: 16
+                                                size: 16,
+                                                family: "'Instrument Sans', sans-serif"
                                             },
                                             backdropColor: colors.tickBg,
                                             showLabelBackdrop: false,
@@ -633,7 +622,8 @@
                                         },
                                         pointLabels: {
                                             font: {
-                                                size: 16
+                                                size: 16,
+                                                family: "'Instrument Sans', sans-serif"
                                             },
                                             color: colors.labels,
                                             z: 3
@@ -662,7 +652,7 @@
                                     const xCenter = scale.xCenter;
 
                                     ctx.save();
-                                    ctx.font = scale.options.ticks.font.size + 'px sans-serif';
+                                    ctx.font = scale.options.ticks.font.size + "px 'Instrument Sans', sans-serif";
                                     ctx.fillStyle = scale.options.ticks.color || '#000';
                                     ctx.textAlign = 'center';
                                     ctx.textBaseline = 'middle';
@@ -822,7 +812,8 @@
                                             stepSize: 20,
                                             color: colors.ticks,
                                             font: {
-                                                size: 16
+                                                size: 16,
+                                                family: "'Instrument Sans', sans-serif"
                                             },
                                             backdropColor: colors.tickBg,
                                             showLabelBackdrop: false,
@@ -830,7 +821,8 @@
                                         },
                                         pointLabels: {
                                             font: {
-                                                size: 16
+                                                size: 16,
+                                                family: "'Instrument Sans', sans-serif"
                                             },
                                             color: colors.labels,
                                             z: 3
@@ -859,7 +851,7 @@
                                     const xCenter = scale.xCenter;
 
                                     ctx.save();
-                                    ctx.font = scale.options.ticks.font.size + 'px sans-serif';
+                                    ctx.font = scale.options.ticks.font.size + "px 'Instrument Sans', sans-serif";
                                     ctx.fillStyle = scale.options.ticks.color || '#000';
                                     ctx.textAlign = 'center';
                                     ctx.textBaseline = 'middle';
