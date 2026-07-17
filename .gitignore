@@ -25,3 +25,17 @@ yarn-error.log
 # MCP Toolbox Database Configurations
 /tools.yaml
 
+# Impeccable local state and caches
+.impeccable/config.local.json
+.impeccable/live/server.json
+.impeccable/live/sessions/
+.impeccable/live/previews/
+.impeccable/live/annotations/
+.impeccable/live/cache/
+.impeccable/live/manual-edit-apply-transaction.json
+.impeccable/live/manual-edit-events.jsonl
+.impeccable/live/manual-edit-evidence/
+.impeccable/live/pending-manual-edits.json
+.impeccable-live.json
+.impeccable-live/
+node_modules/.impeccable-live/
