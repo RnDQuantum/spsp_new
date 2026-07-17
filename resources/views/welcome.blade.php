@@ -241,7 +241,7 @@
 
                             <!-- Interactive Simulator Controls -->
                             <div class="p-4 bg-warm-ivory flex flex-col gap-3">
-                                <div class="text-[10px] font-bold text-primary-ink/65 uppercase tracking-wider font-mono-data">
+                                <div class="text-[10px] font-bold text-primary-ink/65 uppercase tracking-wider">
                                     Simulasi Profil Asesi:
                                 </div>
                                 <div class="grid grid-cols-3 gap-2">
