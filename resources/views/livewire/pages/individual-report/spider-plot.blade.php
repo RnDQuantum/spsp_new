@@ -1,20 +1,16 @@
 <div>
-    <div class="mx-auto my-8 shadow overflow-hidden max-w-6xl bg-white dark:bg-gray-800" style="max-width: 1400px;">
+    <div class="mx-auto my-8 border border-warm-border dark:border-[#25211e] bg-white dark:bg-[#171412] overflow-hidden shadow-xs" style="max-width: 1400px;">
 
         <!-- Header - DARK MODE READY -->
-        <div class="border-b-4 border-black py-3 bg-gray-300 dark:bg-gray-600">
-            <h1 class="text-center text-lg font-bold uppercase tracking-wide text-gray-900 dark:text-white">
-                ANALISA <i>SPIDER PLOT</i>
+        <div class="px-8 py-6 bg-white dark:bg-[#171412] border-b border-warm-border dark:border-[#25211e]">
+            <h1 class="font-display text-2xl font-bold tracking-tight text-primary-ink dark:text-neutral-100 uppercase">
+                Analisa Spider Plot
             </h1>
-            <p class="text-center text-sm font-semibold text-gray-700 dark:text-gray-300 mt-1">
-                {{ $participant->name }}
-            </p>
-            <p class="text-center text-sm font-semibold text-gray-700 dark:text-gray-300 mt-1">
-                {{ $participant->event->name }}
-            </p>
-            <p class="text-center text-sm font-semibold text-gray-700 dark:text-gray-300 mt-1">
-                {{ $participant->positionFormation->name }} - {{ $participant->positionFormation->template->name }}
-            </p>
+            <div class="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-xs font-semibold text-primary-ink/75 dark:text-neutral-400">
+                <span class="flex items-center gap-1.5"><i class="fa-regular fa-user text-accent-amber"></i> {{ $participant->name }}</span>
+                <span class="flex items-center gap-1.5"><i class="fa-regular fa-calendar text-accent-amber"></i> {{ $participant->event->name }}</span>
+                <span class="flex items-center gap-1.5"><i class="fa-regular fa-address-card text-accent-amber"></i> {{ $participant->positionFormation->name }} - {{ $participant->positionFormation->template->name }}</span>
+            </div>
         </div>
 
         <!-- Tolerance Selector Component -->
@@ -28,7 +24,7 @@
 
         {{-- Adjustment Indicators --}}
         <div
-            class="px-4 py-2 bg-gray-50 dark:bg-gray-700 border-b border-gray-300 dark:border-gray-600 flex flex-wrap gap-2">
+            class="px-6 py-3 bg-warm-ivory dark:bg-[#1f1b18] border-b border-warm-border dark:border-[#25211e] flex flex-wrap gap-2">
             <x-adjustment-indicator :template-id="$participant->positionFormation->template_id" category-code="potensi" size="sm"
                 custom-label="Standar Potensi Disesuaikan" />
             <x-adjustment-indicator :template-id="$participant->positionFormation->template_id" category-code="kompetensi" size="sm"
@@ -36,38 +32,33 @@
         </div>
 
         <!-- Charts Grid - DARK MODE READY -->
-        <div class="p-6 bg-white dark:bg-gray-800">
-            <h1 class="text-3xl text-center font-bold text-gray-800 dark:text-white mb-8">Static Pribadi Spider Plot
-                (SPSP)</h1>
+        <div class="p-8 bg-white dark:bg-[#171412]">
+            <h2 class="text-center font-display text-xl font-bold text-primary-ink dark:text-neutral-100 mb-8">Static Pribadi Spider Plot (SPSP)</h2>
 
             <!-- Charts - Vertical Layout -->
             <div class="space-y-6 mt-8">
                 <!-- Chart Potensi (Pentagon) -->
-                <div class="bg-white dark:bg-gray-700 p-6 rounded-lg shadow border border-gray-200 dark:border-gray-600"
+                <div class="bg-white dark:bg-[#171412] p-8 border border-warm-border dark:border-[#25211e] rounded-md shadow-xs"
                     wire:ignore>
-                    <h3 class="text-lg text-center font-semibold text-gray-800 dark:text-white mb-4">Potential Mapping
-                        (Rating)</h3>
+                    <h3 class="text-center font-display text-lg font-bold text-primary-ink dark:text-neutral-100 mb-4">Potential Mapping (Rating)</h3>
                     <div class="relative" style="height: 600px;">
                         <canvas id="potensiChart-{{ $potensiChartId }}"></canvas>
                     </div>
                 </div>
 
                 <!-- Chart Kompetensi (Nonagon) -->
-                <div class="bg-white dark:bg-gray-700 p-6 rounded-lg shadow border border-gray-200 dark:border-gray-600"
+                <div class="bg-white dark:bg-[#171412] p-8 border border-warm-border dark:border-[#25211e] rounded-md shadow-xs"
                     wire:ignore>
-                    <h3 class="text-lg text-center font-semibold text-gray-800 dark:text-white mb-4">Managerial
-                        Competency
-                        Mapping (Rating)</h3>
+                    <h3 class="text-center font-display text-lg font-bold text-primary-ink dark:text-neutral-100 mb-4">Managerial Competency Mapping (Rating)</h3>
                     <div class="relative" style="height: 600px;">
                         <canvas id="kompetensiChart-{{ $kompetensiChartId }}"></canvas>
                     </div>
                 </div>
 
                 <!-- Chart General (Tetradecagon) -->
-                <div class="bg-white dark:bg-gray-700 p-6 rounded-lg shadow border border-gray-200 dark:border-gray-600"
+                <div class="bg-white dark:bg-[#171412] p-8 border border-warm-border dark:border-[#25211e] rounded-md shadow-xs"
                     wire:ignore>
-                    <h3 class="text-lg text-center font-semibold text-gray-800 dark:text-white mb-4">General Mapping
-                        (Rating)</h3>
+                    <h3 class="text-center font-display text-lg font-bold text-primary-ink dark:text-neutral-100 mb-4">General Mapping (Rating)</h3>
                     <div class="relative" style="height: 600px;">
                         <canvas id="generalChart-{{ $generalChartId }}"></canvas>
                     </div>
@@ -268,7 +259,8 @@
                                     stepSize: 1,
                                     color: colors.ticks,
                                     font: {
-                                        size: 16
+                                        size: 16,
+                                        family: "'Instrument Sans', sans-serif"
                                     },
                                     backdropColor: 'transparent',
                                     showLabelBackdrop: false,
@@ -277,7 +269,8 @@
                                 pointLabels: {
                                     color: colors.pointLabels,
                                     font: {
-                                        size: 16
+                                        size: 16,
+                                        family: "'Instrument Sans', sans-serif"
                                     },
                                     z: 3
                                 },
@@ -305,7 +298,7 @@
                             const xCenter = scale.xCenter;
 
                             ctx.save();
-                            ctx.font = scale.options.ticks.font.size + 'px sans-serif';
+                            ctx.font = scale.options.ticks.font.size + "px 'Instrument Sans', sans-serif";
                             ctx.fillStyle = scale.options.ticks.color || '#000';
                             ctx.textAlign = 'center';
                             ctx.textBaseline = 'middle';
@@ -454,7 +447,8 @@
                                     stepSize: 1,
                                     color: colors.ticks,
                                     font: {
-                                        size: 16
+                                        size: 16,
+                                        family: "'Instrument Sans', sans-serif"
                                     },
                                     backdropColor: 'transparent',
                                     showLabelBackdrop: false,
@@ -463,7 +457,8 @@
                                 pointLabels: {
                                     color: colors.pointLabels,
                                     font: {
-                                        size: 16
+                                        size: 16,
+                                        family: "'Instrument Sans', sans-serif"
                                     },
                                     z: 3
                                 },
@@ -491,7 +486,7 @@
                             const xCenter = scale.xCenter;
 
                             ctx.save();
-                            ctx.font = scale.options.ticks.font.size + 'px sans-serif';
+                            ctx.font = scale.options.ticks.font.size + "px 'Instrument Sans', sans-serif";
                             ctx.fillStyle = scale.options.ticks.color || '#000';
                             ctx.textAlign = 'center';
                             ctx.textBaseline = 'middle';
@@ -639,7 +634,8 @@
                                     stepSize: 1,
                                     color: colors.ticks,
                                     font: {
-                                        size: 16
+                                        size: 16,
+                                        family: "'Instrument Sans', sans-serif"
                                     },
                                     backdropColor: 'transparent',
                                     showLabelBackdrop: false,
@@ -648,7 +644,8 @@
                                 pointLabels: {
                                     color: colors.pointLabels,
                                     font: {
-                                        size: 16
+                                        size: 16,
+                                        family: "'Instrument Sans', sans-serif"
                                     },
                                     z: 3
                                 },
@@ -676,7 +673,7 @@
                             const xCenter = scale.xCenter;
 
                             ctx.save();
-                            ctx.font = scale.options.ticks.font.size + 'px sans-serif';
+                            ctx.font = scale.options.ticks.font.size + "px 'Instrument Sans', sans-serif";
                             ctx.fillStyle = scale.options.ticks.color || '#000';
                             ctx.textAlign = 'center';
                             ctx.textBaseline = 'middle';
