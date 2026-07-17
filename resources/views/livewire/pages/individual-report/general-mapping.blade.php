@@ -37,17 +37,17 @@
             <table class="min-w-full border-collapse border border-warm-border dark:border-neutral-800 text-sm text-primary-ink dark:text-neutral-100 font-medium">
                 <thead>
                     <tr class="bg-warm-ivory dark:bg-neutral-900 text-primary-ink dark:text-neutral-100 font-bold">
-                        <th class="border border-warm-border dark:border-neutral-800 px-4 py-3 font-semibold text-center" rowspan="2">No</th>
-                        <th class="border border-warm-border dark:border-neutral-800 px-4 py-3 font-semibold text-left" rowspan="2">Atribut</th>
-                        <th class="border border-warm-border dark:border-neutral-800 px-4 py-3 font-semibold text-center" rowspan="2">Bobot %</th>
-                        <th class="border border-warm-border dark:border-neutral-800 px-4 py-3 font-semibold text-center" colspan="2">
+                        <th class="border border-warm-border dark:border-neutral-800 px-4 py-2 font-semibold text-center" rowspan="2">No</th>
+                        <th class="border border-warm-border dark:border-neutral-800 px-4 py-2 font-semibold text-left" rowspan="2">Atribut</th>
+                        <th class="border border-warm-border dark:border-neutral-800 px-4 py-2 font-semibold text-center" rowspan="2">Bobot %</th>
+                        <th class="border border-warm-border dark:border-neutral-800 px-4 py-2 font-semibold text-center" colspan="2">
                             <span x-data
                                 x-text="$wire.tolerancePercentage > 0 ? 'Standar (-' + $wire.tolerancePercentage + '%)' : 'Standar'"></span>
                         </th>
-                        <th class="border border-warm-border dark:border-neutral-800 px-4 py-3 font-semibold text-center" colspan="2">Individu</th>
-                        <th class="border border-warm-border dark:border-neutral-800 px-4 py-3 font-semibold text-center" colspan="2">Gap</th>
-                        <th class="border border-warm-border dark:border-neutral-800 px-4 py-3 font-semibold text-center" rowspan="2">Persentase<br>Kesesuaian</th>
-                        <th class="border border-warm-border dark:border-neutral-800 px-4 py-3 font-semibold text-center" rowspan="2">Kesimpulan</th>
+                        <th class="border border-warm-border dark:border-neutral-800 px-4 py-2 font-semibold text-center" colspan="2">Individu</th>
+                        <th class="border border-warm-border dark:border-neutral-800 px-4 py-2 font-semibold text-center" colspan="2">Gap</th>
+                        <th class="border border-warm-border dark:border-neutral-800 px-4 py-2 font-semibold text-center" rowspan="2">Persentase<br>Kesesuaian</th>
+                        <th class="border border-warm-border dark:border-neutral-800 px-4 py-2 font-semibold text-center" rowspan="2">Kesimpulan</th>
                     </tr>
                     <tr class="bg-warm-ivory dark:bg-neutral-900 text-primary-ink dark:text-neutral-100 font-bold">
                         <th class="border border-warm-border dark:border-neutral-800 px-4 py-2 font-semibold text-center">Rating</th>
@@ -61,24 +61,24 @@
                 <tbody>
                                         @foreach ($aspectsData as $aspect)
                     <tr class="hover:bg-warm-ivory/50 dark:hover:bg-neutral-900/50 transition-colors duration-150 text-sm text-primary-ink dark:text-neutral-200">
-                        <td class="border border-warm-border dark:border-neutral-800 px-4 py-3 text-center font-normal">
+                        <td class="border border-warm-border dark:border-neutral-800 px-4 py-2 text-center font-normal">
                             {{ $loop->iteration }}</td>
-                        <td class="border border-warm-border dark:border-neutral-800 px-4 py-3 font-semibold text-primary-ink dark:text-neutral-100">{{ $aspect['name'] }}</td>
-                        <td class="border border-warm-border dark:border-neutral-800 px-4 py-3 text-center font-mono-data font-normal">
+                        <td class="border border-warm-border dark:border-neutral-800 px-4 py-2 font-semibold text-primary-ink dark:text-neutral-100">{{ $aspect['name'] }}</td>
+                        <td class="border border-warm-border dark:border-neutral-800 px-4 py-2 text-center font-mono-data font-normal">
                             {{ $aspect['weight_percentage'] }}</td>
-                        <td class="border border-warm-border dark:border-neutral-800 px-4 py-3 text-center font-mono-data font-normal">
+                        <td class="border border-warm-border dark:border-neutral-800 px-4 py-2 text-center font-mono-data font-normal">
                             {{ number_format($aspect['standard_rating'], 2) }}</td>
-                        <td class="border border-warm-border dark:border-neutral-800 px-4 py-3 text-center font-mono-data font-normal">
+                        <td class="border border-warm-border dark:border-neutral-800 px-4 py-2 text-center font-mono-data font-normal">
                             {{ number_format($aspect['standard_score'], 2) }}</td>
-                        <td class="border border-warm-border dark:border-neutral-800 px-4 py-3 text-center font-mono-data font-normal">
+                        <td class="border border-warm-border dark:border-neutral-800 px-4 py-2 text-center font-mono-data font-normal">
                             {{ number_format($aspect['individual_rating'], 2) }}</td>
-                        <td class="border border-warm-border dark:border-neutral-800 px-4 py-3 text-center font-mono-data font-normal">
+                        <td class="border border-warm-border dark:border-neutral-800 px-4 py-2 text-center font-mono-data font-normal">
                             {{ number_format($aspect['individual_score'], 2) }}</td>
-                        <td class="border border-warm-border dark:border-neutral-800 px-4 py-3 text-center font-mono-data font-normal">
+                        <td class="border border-warm-border dark:border-neutral-800 px-4 py-2 text-center font-mono-data font-normal">
                             {{ number_format($aspect['gap_rating'], 2) }}</td>
-                        <td class="border border-warm-border dark:border-neutral-800 px-4 py-3 text-center font-mono-data font-normal">
+                        <td class="border border-warm-border dark:border-neutral-800 px-4 py-2 text-center font-mono-data font-normal">
                             {{ number_format($aspect['gap_score'], 2) }}</td>
-                        <td class="border border-warm-border dark:border-neutral-800 px-4 py-3 text-center font-mono-data font-semibold text-primary-ink dark:text-neutral-100">
+                        <td class="border border-warm-border dark:border-neutral-800 px-4 py-2 text-center font-mono-data font-semibold text-primary-ink dark:text-neutral-100">
                             @php
                             $percentage =
                             $aspect['standard_score'] > 0
@@ -88,7 +88,7 @@
                             {{ $percentage }}%
                         </td>
                         <td
-                            class="border border-warm-border dark:border-neutral-800 px-4 py-3 text-center font-semibold text-[10px] uppercase tracking-wider">
+                            class="border border-warm-border dark:border-neutral-800 px-4 py-2 text-center font-semibold text-[10px] uppercase tracking-wider">
                             <span class="inline-block px-2.5 py-1 rounded {{ $conclusionConfig[$aspect['conclusion_text']]['tailwindClass'] ?? 'bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-white' }}">
                                 {{ $aspect['conclusion_text'] }}
                             </span>
@@ -98,17 +98,17 @@
 
                                         <!-- Total Rating Row -->
                     <tr class="font-bold bg-warm-ivory dark:bg-neutral-900 text-primary-ink dark:text-neutral-100 text-sm">
-                        <td class="border border-warm-border dark:border-neutral-800 px-4 py-3 text-center" colspan="3">Total Rating</td>
-                        <td class="border border-warm-border dark:border-neutral-800 px-4 py-3 text-center font-mono-data">
+                        <td class="border border-warm-border dark:border-neutral-800 px-4 py-2 text-center" colspan="3">Total Rating</td>
+                        <td class="border border-warm-border dark:border-neutral-800 px-4 py-2 text-center font-mono-data">
                             {{ number_format($totalStandardRating, 2) }}</td>
-                        <td class="border border-warm-border dark:border-neutral-800 px-4 py-3 bg-warm-border/40 dark:bg-neutral-800/40"></td>
-                        <td class="border border-warm-border dark:border-neutral-800 px-4 py-3 text-center font-mono-data">
+                        <td class="border border-warm-border dark:border-neutral-800 px-4 py-2 bg-warm-border/40 dark:bg-neutral-800/40"></td>
+                        <td class="border border-warm-border dark:border-neutral-800 px-4 py-2 text-center font-mono-data">
                             {{ number_format($totalIndividualRating, 2) }}</td>
-                        <td class="border border-warm-border dark:border-neutral-800 px-4 py-3 bg-warm-border/40 dark:bg-neutral-800/40"></td>
-                        <td class="border border-warm-border dark:border-neutral-800 px-4 py-3 text-center font-mono-data">
+                        <td class="border border-warm-border dark:border-neutral-800 px-4 py-2 bg-warm-border/40 dark:bg-neutral-800/40"></td>
+                        <td class="border border-warm-border dark:border-neutral-800 px-4 py-2 text-center font-mono-data">
                             {{ number_format($totalGapRating, 2) }}</td>
-                        <td class="border border-warm-border dark:border-neutral-800 px-4 py-3 bg-warm-border/40 dark:bg-neutral-800/40"></td>
-                        <td class="border border-warm-border dark:border-neutral-800 px-4 py-3 text-center font-semibold text-[10px] uppercase tracking-wider"
+                        <td class="border border-warm-border dark:border-neutral-800 px-4 py-2 bg-warm-border/40 dark:bg-neutral-800/40"></td>
+                        <td class="border border-warm-border dark:border-neutral-800 px-4 py-2 text-center font-semibold text-[10px] uppercase tracking-wider"
                             colspan="2">
                             <span class="inline-block px-2.5 py-1 rounded {{ $conclusionConfig[$overallConclusion]['tailwindClass'] ?? 'bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-white' }}">
                                 {{ $overallConclusion }}
@@ -118,17 +118,17 @@
 
                     <!-- Total Score Row -->
                     <tr class="font-bold bg-warm-ivory dark:bg-neutral-900 text-primary-ink dark:text-neutral-100 text-sm">
-                        <td class="border border-warm-border dark:border-neutral-800 px-4 py-3 text-center" colspan="3">Total Skor</td>
-                        <td class="border border-warm-border dark:border-neutral-800 px-4 py-3 bg-warm-border/40 dark:bg-neutral-800/40"></td>
-                        <td class="border border-warm-border dark:border-neutral-800 px-4 py-3 text-center font-mono-data">
+                        <td class="border border-warm-border dark:border-neutral-800 px-4 py-2 text-center" colspan="3">Total Skor</td>
+                        <td class="border border-warm-border dark:border-neutral-800 px-4 py-2 bg-warm-border/40 dark:bg-neutral-800/40"></td>
+                        <td class="border border-warm-border dark:border-neutral-800 px-4 py-2 text-center font-mono-data">
                             {{ number_format($totalStandardScore, 2) }}</td>
-                        <td class="border border-warm-border dark:border-neutral-800 px-4 py-3 bg-warm-border/40 dark:bg-neutral-800/40"></td>
-                        <td class="border border-warm-border dark:border-neutral-800 px-4 py-3 text-center font-mono-data">
+                        <td class="border border-warm-border dark:border-neutral-800 px-4 py-2 bg-warm-border/40 dark:bg-neutral-800/40"></td>
+                        <td class="border border-warm-border dark:border-neutral-800 px-4 py-2 text-center font-mono-data">
                             {{ number_format($totalIndividualScore, 2) }}</td>
-                        <td class="border border-warm-border dark:border-neutral-800 px-4 py-3 bg-warm-border/40 dark:bg-neutral-800/40"></td>
-                        <td class="border border-warm-border dark:border-neutral-800 px-4 py-3 text-center font-mono-data">
+                        <td class="border border-warm-border dark:border-neutral-800 px-4 py-2 bg-warm-border/40 dark:bg-neutral-800/40"></td>
+                        <td class="border border-warm-border dark:border-neutral-800 px-4 py-2 text-center font-mono-data">
                             {{ number_format($totalGapScore, 2) }}</td>
-                        <td class="border border-warm-border dark:border-neutral-800 px-4 py-3 text-center font-semibold text-[10px] uppercase tracking-wider"
+                        <td class="border border-warm-border dark:border-neutral-800 px-4 py-2 text-center font-semibold text-[10px] uppercase tracking-wider"
                             colspan="2">
                             <span class="inline-block px-2.5 py-1 rounded {{ $conclusionConfig[$overallConclusion]['tailwindClass'] ?? 'bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-white' }}">
                                 {{ $overallConclusion }}
