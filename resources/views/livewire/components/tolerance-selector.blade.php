@@ -3,13 +3,16 @@
     <!-- 1. Kapsul Melayang (Collapsed State) -->
     <button x-show="!isOpen" 
             @click="isOpen = true" 
-            x-transition:enter="transition ease-out duration-200"
-            x-transition:enter-start="opacity-0 scale-95 translate-y-2"
-            x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+            x-transition:enter="transition motion-safe:ease-[cubic-bezier(0.16,1,0.3,1)] ease-out duration-200"
+            x-transition:enter-start="opacity-0 motion-safe:scale-95 motion-safe:translate-y-2"
+            x-transition:enter-end="opacity-100 motion-safe:scale-100 motion-safe:translate-y-0"
+            x-transition:leave="transition motion-safe:ease-[cubic-bezier(0.3,0,0.66,1)] ease-in duration-150"
+            x-transition:leave-start="opacity-100 motion-safe:scale-100 motion-safe:translate-y-0"
+            x-transition:leave-end="opacity-0 motion-safe:scale-95 motion-safe:translate-y-2"
             class="absolute bottom-0 right-0 flex items-center gap-3 px-4 py-2.5 
                    bg-white/90 dark:bg-neutral-900/90 backdrop-blur-md 
                    border border-neutral-200 dark:border-neutral-800 
-                   rounded-full shadow-lg hover:shadow-xl transition-all duration-200 
+                   rounded-full shadow-lg hover:shadow-xl transition-[background-color,border-color,text-color,box-shadow] duration-200 
                    group text-sm text-neutral-800 dark:text-neutral-200 whitespace-nowrap">
         
         <!-- Ikon Slider dengan Aksen Amber Gold / Spinner saat Loading -->
@@ -41,12 +44,12 @@
     <!-- 2. Kartu Kontrol (Expanded State) -->
     <div x-show="isOpen" 
          @click.outside="isOpen = false" 
-         x-transition:enter="transition ease-out duration-200"
-         x-transition:enter-start="opacity-0 scale-95 translate-y-2"
-         x-transition:enter-end="opacity-100 scale-100 translate-y-0"
-         x-transition:leave="transition ease-in duration-150"
-         x-transition:leave-start="opacity-100 scale-100 translate-y-0"
-         x-transition:leave-end="opacity-0 scale-95 translate-y-2"
+         x-transition:enter="transition motion-safe:ease-[cubic-bezier(0.16,1,0.3,1)] ease-out duration-200"
+         x-transition:enter-start="opacity-0 motion-safe:scale-95 motion-safe:translate-y-2"
+         x-transition:enter-end="opacity-100 motion-safe:scale-100 motion-safe:translate-y-0"
+         x-transition:leave="transition motion-safe:ease-[cubic-bezier(0.3,0,0.66,1)] ease-in duration-150"
+         x-transition:leave-start="opacity-100 motion-safe:scale-100 motion-safe:translate-y-0"
+         x-transition:leave-end="opacity-0 motion-safe:scale-95 motion-safe:translate-y-2"
          class="absolute bottom-0 right-0 w-80 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-md 
                 border border-neutral-200 dark:border-neutral-800 
                 rounded-2xl shadow-2xl p-4 flex flex-col gap-3"
