@@ -9,7 +9,7 @@
 ])
 
 @php
-$baseClasses = 'group flex items-center rounded-xl gap-3 px-3 py-2.5 text-sm font-medium transition-all duration-200 relative overflow-hidden shrink-0';
+$baseClasses = 'group flex items-center rounded-xl gap-3 px-3 py-2.5 text-sm font-medium transition-[color,background-color] duration-200 relative overflow-hidden shrink-0';
 @endphp
 
 @if ($disabled)
@@ -40,7 +40,7 @@ $baseClasses = 'group flex items-center rounded-xl gap-3 px-3 py-2.5 text-sm fon
 
         @if($icon)
         <div class="shrink-0 w-5 h-5 flex items-center justify-center">
-            <i class="{{ $icon }} text-base group-hover:scale-110 transition-transform duration-200"></i>
+            <i class="{{ $icon }} text-base motion-safe:group-hover:scale-110 motion-safe:transition-transform duration-200"></i>
         </div>
         @endif
 
@@ -53,8 +53,8 @@ $baseClasses = 'group flex items-center rounded-xl gap-3 px-3 py-2.5 text-sm fon
             @endif
         </span>
 
-        <div class="absolute inset-x-0 bottom-0 h-0.5 bg-linear-to-r from-red-500 to-orange-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"
-            x-bind:class="isActive('{{ $href }}') ? 'scale-x-100' : ''">
+        <div class="absolute inset-x-0 bottom-0 h-0.5 bg-linear-to-r from-red-500 to-orange-600 transform motion-safe:scale-x-0 motion-safe:group-hover:scale-x-100 motion-safe:transition-transform duration-300"
+            x-bind:class="isActive('{{ $href }}') ? 'motion-safe:scale-x-100 scale-x-100' : ''">
         </div>
     </a>
 @endif

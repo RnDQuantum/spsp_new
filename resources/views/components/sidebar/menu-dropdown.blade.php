@@ -41,7 +41,7 @@
 }" x-on:close-all-dropdowns.window="isExpanded = false" class="flex flex-col shrink-0">
     <button type="button" x-on:click="isExpanded = !isExpanded" id="{{ Str::slug($title) }}-btn"
         aria-controls="{{ Str::slug($title) }}" x-bind:aria-expanded="isExpanded ? 'true' : 'false'"
-        class="group flex items-center justify-between rounded-xl gap-3 px-3 py-2.5 text-sm font-medium transition-all duration-200 relative overflow-hidden"
+        class="group flex items-center justify-between rounded-xl gap-3 px-3 py-2.5 text-sm font-medium transition-[color,background-color] duration-200 relative overflow-hidden"
         x-bind:class="{
             'justify-center px-2.5 py-3': sidebarIsMini,
             'text-red-600 bg-red-50/70 dark:text-red-400 dark:bg-red-950/50': isActiveDropdown(),
@@ -53,7 +53,7 @@
         <div class="flex items-center gap-3">
             @if ($icon)
                 <div class="shrink-0 w-5 h-5 flex items-center justify-center">
-                    <i class="{{ $icon }} text-base group-hover:scale-110 transition-transform duration-200"></i>
+                    <i class="{{ $icon }} text-base motion-safe:group-hover:scale-110 motion-safe:transition-transform duration-200"></i>
                 </div>
             @endif
 
@@ -63,7 +63,7 @@
         </div>
 
         <svg x-show="!sidebarIsMini" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
-            class="w-4 h-4 text-neutral-400 group-hover:text-red-600 transition-all duration-200 shrink-0"
+            class="w-4 h-4 text-neutral-400 group-hover:text-red-600 transition-[transform,color] duration-200 shrink-0"
             x-bind:class="isExpanded ? 'rotate-180 text-red-600 dark:text-red-400' : 'rotate-0'" aria-hidden="true">
             <path fill-rule="evenodd"
                 d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z"
@@ -71,7 +71,7 @@
         </svg>
 
         <div
-            class="absolute inset-x-0 bottom-0 h-0.5 bg-linear-to-r from-red-500 to-orange-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300">
+            class="absolute inset-x-0 bottom-0 h-0.5 bg-linear-to-r from-red-500 to-orange-600 transform motion-safe:scale-x-0 motion-safe:group-hover:scale-x-100 motion-safe:transition-transform duration-300">
         </div>
     </button>
 
