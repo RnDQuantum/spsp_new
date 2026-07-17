@@ -3,7 +3,8 @@
     "resources/views/components/layouts/hca-layout.blade.php",
     "resources/views/components/layouts/app.blade.php",
     "resources/views/components/layouts/app-simple.blade.php",
-    "resources/views/components/layouts/app-without-sidebar.blade.php"
+    "resources/views/components/layouts/app-without-sidebar.blade.php",
+    "resources/views/welcome.blade.php"
   ],
   "insertBefore": "</body>",
   "commentSyntax": "html",

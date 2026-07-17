@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- impeccable-disable bounce-easing, overused-font -->
 <html lang="id">
 
     <head>
@@ -18,7 +19,7 @@
             <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
                 <!-- Brand Logo & Name -->
                 <a href="{{ url('/') }}" class="flex items-center gap-3 group">
-                    <img src="{{ asset('images/thumb-qhrmi.webp') }}" alt="Logo QHRMI" class="h-10 w-10 object-contain rounded-md transition-transform duration-300 group-hover:scale-[1.02]" />
+                    <img src="{{ asset('images/thumb-qhrmi.webp') }}" alt="Logo QHRMI" class="h-10 w-10 object-contain rounded-md" />
                     <div class="hidden sm:flex flex-col border-l border-warm-border pl-3">
                         <span class="text-sm font-bold tracking-tight text-primary-ink uppercase">Quantum HRM</span>
                         <span class="text-[10px] font-medium text-primary-ink/70 tracking-wider uppercase -mt-0.5">Internasional</span>
@@ -49,9 +50,8 @@
                     <!-- Left Column: Context & Headline -->
                     <div class="lg:col-span-6 text-left flex flex-col justify-center">
                         <!-- Eyebrow Badge -->
-                        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold bg-rust-red/5 text-rust-red border border-rust-red/20 mb-6 w-fit shadow-xs">
-                            <span class="w-1.5 h-1.5 rounded-full bg-rust-red animate-pulse"></span>
-                            METODE PEMETAAN POTENSI & KOMPETENSI INDIVIDU
+                        <div class="font-display text-xs font-bold tracking-widest text-rust-red uppercase mb-6">
+                            Metode Pemetaan Potensi &amp; Kompetensi Individu
                         </div>
 
                         <!-- Main Heading -->
@@ -64,7 +64,7 @@
                         </h1>
 
                         <!-- Slogan -->
-                        <div class="mt-6 border-l-4 border-rust-red pl-4 py-1.5 italic text-primary-ink/80 font-semibold bg-white/60 backdrop-blur-sm rounded-r-xl border-y border-r border-warm-border shadow-xs max-w-xl">
+                        <div class="mt-6 border-l border-rust-red pl-4 pr-4 py-2 font-display italic text-primary-ink/80 font-semibold bg-white/60 backdrop-blur-sm rounded-r-xl border-y border-r border-warm-border shadow-xs max-w-xl">
                             "The Right Man, On The Right Place, With The Right Character"
                         </div>
 
@@ -232,10 +232,10 @@
                         
                         <!-- Feature 1 -->
                         <div class="bg-warm-ivory/40 hover:bg-warm-ivory/80 border border-warm-border/50 hover:border-warm-border p-8 rounded-xl transition-all duration-300 group shadow-xs">
-                            <div class="w-12 h-12 rounded-lg bg-rust-red/10 flex items-center justify-center text-rust-red mb-6 group-hover:scale-110 transition-transform duration-300">
-                                <i class="fa-solid fa-sliders text-xl"></i>
+                            <div class="text-rust-red mb-6 text-2xl">
+                                <i class="fa-solid fa-sliders"></i>
                             </div>
-                            <h3 class="text-lg font-bold text-primary-ink mb-3">Kriteria Standar Jabatan</h3>
+                            <h3 class="font-display text-lg font-bold text-primary-ink mb-3">Kriteria Standar Jabatan</h3>
                             <p class="text-primary-ink/75 text-sm leading-relaxed">
                                 Menentukan nilai acuan (standard baseline) yang diperlukan bagi suatu peran kerja untuk menjamin kontribusi optimal bagi sasaran organisasi.
                             </p>
@@ -243,10 +243,10 @@
 
                         <!-- Feature 2 -->
                         <div class="bg-warm-ivory/40 hover:bg-warm-ivory/80 border border-warm-border/50 hover:border-warm-border p-8 rounded-xl transition-all duration-300 group shadow-xs">
-                            <div class="w-12 h-12 rounded-lg bg-rust-red/10 flex items-center justify-center text-rust-red mb-6 group-hover:scale-110 transition-transform duration-300">
-                                <i class="fa-solid fa-user-gear text-xl"></i>
+                            <div class="text-rust-red mb-6 text-2xl">
+                                <i class="fa-solid fa-user-gear"></i>
                             </div>
-                            <h3 class="text-lg font-bold text-primary-ink mb-3">Kesesuaian Kompetensi</h3>
+                            <h3 class="font-display text-lg font-bold text-primary-ink mb-3">Kesesuaian Kompetensi</h3>
                             <p class="text-primary-ink/75 text-sm leading-relaxed">
                                 Memetakan profil aktual individu meliputi aspek kemampuan umum, kepribadian, gaya kerja, hubungan manusia, hingga kecerdasan emosional (EQ).
                             </p>
@@ -254,10 +254,10 @@
 
                         <!-- Feature 3 -->
                         <div class="bg-warm-ivory/40 hover:bg-warm-ivory/80 border border-warm-border/50 hover:border-warm-border p-8 rounded-xl transition-all duration-300 group shadow-xs">
-                            <div class="w-12 h-12 rounded-lg bg-rust-red/10 flex items-center justify-center text-rust-red mb-6 group-hover:scale-110 transition-transform duration-300">
-                                <i class="fa-solid fa-chart-line text-xl"></i>
+                            <div class="text-rust-red mb-6 text-2xl">
+                                <i class="fa-solid fa-chart-line"></i>
                             </div>
-                            <h3 class="text-lg font-bold text-slate-900 mb-3">Batas Toleransi Deviasi</h3>
+                            <h3 class="font-display text-lg font-bold text-primary-ink mb-3">Batas Toleransi Deviasi</h3>
                             <p class="text-primary-ink/75 text-sm leading-relaxed">
                                 Mengidentifikasi tingkat deviasi antara profil individu dan standar jabatan untuk mengevaluasi kelayakan penempatan secara rasional dan adil.
                             </p>
