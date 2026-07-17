@@ -1,47 +1,46 @@
 <div>
-    <div class="mx-auto my-8 shadow overflow-hidden max-w-6xl bg-white dark:bg-gray-800">
+    <div class="mx-auto my-8 border border-warm-border dark:border-[#25211e] bg-white dark:bg-[#171412] overflow-hidden shadow-xs rounded-lg max-w-6xl">
 
-        <!-- Header - DARK MODE READY -->
-        <div class="border-b-4 border-black py-4 bg-gray-300 dark:bg-gray-600">
-            <h1 class="text-center text-2xl font-bold uppercase tracking-wide text-black dark:text-white">
-                RINGKASAN KOMPETENSI MANAJERIAL
+        <div class="px-8 py-6 bg-white dark:bg-[#171412] border-b border-warm-border dark:border-[#25211e]">
+            <h1 class="font-display text-2xl font-bold tracking-tight text-primary-ink dark:text-neutral-100 uppercase text-center">
+                Ringkasan Kompetensi Manajerial
             </h1>
         </div>
 
         <!-- Info Section - DARK MODE READY -->
-        <div class="p-6 bg-white dark:bg-gray-800">
+        <div class="p-6 bg-warm-ivory dark:bg-[#1f1b18] border-b border-warm-border dark:border-[#25211e]">
             <table class="w-full text-sm">
                 <tr class="dark:text-gray-200">
-                    <td class="py-1 font-semibold text-black dark:text-gray-200 w-36">Nomor Tes</td>
-                    <td class="py-1 text-black dark:text-gray-200 w-4">:</td>
-                    <td class="py-1 text-black dark:text-gray-200">{{ $participant->test_number }}</td>
+                    <td class="py-1 font-semibold text-primary-ink dark:text-neutral-200 w-36">Nomor Tes</td>
+                    <td class="py-1 text-primary-ink dark:text-neutral-200 w-4">:</td>
+                    <td class="py-1 text-primary-ink dark:text-neutral-200">{{ $participant->test_number }}</td>
                 </tr>
                 <tr class="dark:text-gray-200">
-                    <td class="py-1 font-semibold text-black dark:text-gray-200">NIP</td>
-                    <td class="py-1 text-black dark:text-gray-200">:</td>
-                    <td class="py-1 text-black dark:text-gray-200">{{ $participant->skb_number ?? '-' }}</td>
+                    <td class="py-1 font-semibold text-primary-ink dark:text-neutral-200">NIP</td>
+                    <td class="py-1 text-primary-ink dark:text-neutral-200">:</td>
+                    <td class="py-1 text-primary-ink dark:text-neutral-200">{{ $participant->skb_number ?? '-' }}</td>
                 </tr>
                 <tr class="dark:text-gray-200">
-                    <td class="py-1 font-semibold text-black dark:text-gray-200">Nama</td>
-                    <td class="py-1 text-black dark:text-gray-200">:</td>
-                    <td class="py-1 text-black dark:text-gray-200">{{ $participant->name }}</td>
+                    <td class="py-1 font-semibold text-primary-ink dark:text-neutral-200">Nama</td>
+                    <td class="py-1 text-primary-ink dark:text-neutral-200">:</td>
+                    <td class="py-1 text-primary-ink dark:text-neutral-200">{{ $participant->name }}</td>
                 </tr>
                 <tr class="dark:text-gray-200">
-                    <td class="py-1 font-semibold text-black dark:text-gray-200">Jabatan Saat Ini</td>
-                    <td class="py-1 text-black dark:text-gray-200">:</td>
-                    <td class="py-1 text-black dark:text-gray-200">{{ $participant->positionFormation->name ?? '-' }}
+                    <td class="py-1 font-semibold text-primary-ink dark:text-neutral-200">Jabatan Saat Ini</td>
+                    <td class="py-1 text-primary-ink dark:text-neutral-200">:</td>
+                    <td class="py-1 text-primary-ink dark:text-neutral-200">{{ $participant->positionFormation->name ?? '-' }}
                     </td>
                 </tr>
                 <tr class="dark:text-gray-200">
-                    <td class="py-1 font-semibold text-black dark:text-gray-200">Standar Penilaian</td>
-                    <td class="py-1 text-black dark:text-gray-200">:</td>
-                    <td class="py-1 text-black dark:text-gray-200">
+                    <td class="py-1 font-semibold text-primary-ink dark:text-neutral-200">Standar Penilaian</td>
+                    <td class="py-1 text-primary-ink dark:text-neutral-200">:</td>
+                    <td class="py-1 text-primary-ink dark:text-neutral-200">
                         {{ $participant->positionFormation->template->name ?? '-' }}</td>
                 </tr>
                 <tr class="dark:text-gray-200">
-                    <td class="py-1 font-semibold text-black dark:text-gray-200">Tanggal Tes</td>
-                    <td class="py-1 text-black dark:text-gray-200">:</td>
-                    <td class="py-1 text-black dark:text-gray-200">
+                    <td class="py-1 font-semibold text-primary-ink dark:text-neutral-200">Tanggal Tes</td>
+                    <td class="py-1 text-primary-ink dark:text-neutral-200">:</td>
+                    <td class="py-1 text-primary-ink dark:text-neutral-200">
                         {{ \Carbon\Carbon::parse($participant->assessment_date)->translatedFormat('d F Y') ?? ($participant->assessmentEvent->start_date?->format('d F Y') ?? '-') }}
                     </td>
                 </tr>
@@ -58,41 +57,41 @@
         </div>
 
         <!-- Table Section - DARK MODE READY -->
-        <div class="px-6 pb-6 bg-white dark:bg-gray-800">
-            <table class="min-w-full border-2 border-black text-sm">
+        <div class="p-6 bg-white dark:bg-[#171412] overflow-x-auto">
+            <table class="min-w-full border border-warm-border dark:border-[#25211e] text-sm">
                 <thead>
-                    <tr class="bg-gray-300 dark:bg-gray-600">
-                        <th class="border-2 border-black px-3 py-3 font-bold text-center text-black dark:text-white w-10"
+                    <tr class="bg-warm-ivory dark:bg-[#1f1b18] text-primary-ink dark:text-neutral-200">
+                        <th class="border border-warm-border dark:border-[#25211e]/40 px-3 py-3 font-bold text-center text-black dark:text-white w-10"
                             rowspan="2">
                             NO</th>
-                        <th class="border-2 border-black px-3 py-3 font-bold text-center text-black dark:text-white w-48"
+                        <th class="border border-warm-border dark:border-[#25211e]/40 px-3 py-3 font-bold text-center text-black dark:text-white w-48"
                             rowspan="2">
                             AKTIFITAS/KOMPETENSI</th>
-                        <th class="border-2 border-black px-3 py-3 font-bold text-center text-black dark:text-white"
+                        <th class="border border-warm-border dark:border-[#25211e]/40 px-3 py-3 font-bold text-center text-black dark:text-white"
                             colspan="5" style="width: 250px;">RATING</th>
-                        <th class="border-2 border-black px-3 py-3 font-bold text-center text-black dark:text-white"
+                        <th class="border border-warm-border dark:border-[#25211e]/40 px-3 py-3 font-bold text-center text-black dark:text-white"
                             rowspan="2">
                             Kesimpulan</th>
                     </tr>
-                    <tr class="bg-gray-300 dark:bg-gray-600">
+                    <tr class="bg-warm-ivory dark:bg-[#1f1b18] text-primary-ink dark:text-neutral-200">
                         <th
-                            class="border-2 border-black px-3 py-2 font-bold text-center text-black dark:text-white w-12">
+                            class="border border-warm-border dark:border-[#25211e]/40 px-3 py-2 font-bold text-center text-black dark:text-white w-12">
                             1</th>
                         <th
-                            class="border-2 border-black px-3 py-2 font-bold text-center text-black dark:text-white w-12">
+                            class="border border-warm-border dark:border-[#25211e]/40 px-3 py-2 font-bold text-center text-black dark:text-white w-12">
                             2</th>
                         <th
-                            class="border-2 border-black px-3 py-2 font-bold text-center text-black dark:text-white w-12">
+                            class="border border-warm-border dark:border-[#25211e]/40 px-3 py-2 font-bold text-center text-black dark:text-white w-12">
                             3</th>
                         <th
-                            class="border-2 border-black px-3 py-2 font-bold text-center text-black dark:text-white w-12">
+                            class="border border-warm-border dark:border-[#25211e]/40 px-3 py-2 font-bold text-center text-black dark:text-white w-12">
                             4</th>
                         <th
-                            class="border-2 border-black px-3 py-2 font-bold text-center text-black dark:text-white w-12">
+                            class="border border-warm-border dark:border-[#25211e]/40 px-3 py-2 font-bold text-center text-black dark:text-white w-12">
                             5</th>
                     </tr>
                     <tr>
-                        <td class="border-2 border-black px-3 py-2 font-bold bg-gray-100 dark:bg-gray-600 text-black dark:text-white"
+                        <td class="border border-warm-border dark:border-[#25211e]/40 px-3 py-2 font-bold bg-warm-ivory dark:bg-[#1f1b18] text-primary-ink dark:text-neutral-200 text-black dark:text-white"
                             colspan="8">
                             Aspek Kompetensi
                         </td>
@@ -100,10 +99,10 @@
                 </thead>
                 <tbody>
                     @foreach ($aspectsData as $aspect)
-                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
-                            <td class="border-2 border-black px-3 py-3 text-center text-black dark:text-white">
+                        <tr class="hover:bg-warm-ivory/50 dark:hover:bg-[#1f1b18]/50 transition-colors duration-150 text-sm text-primary-ink dark:text-neutral-200">
+                            <td class="border border-warm-border dark:border-[#25211e]/40 px-3 py-3 text-center text-black dark:text-white">
                                 {{ $aspect['number'] }}</td>
-                            <td class="border-2 border-black px-3 py-3 text-black dark:text-white">{{ $aspect['name'] }}
+                            <td class="border border-warm-border dark:border-[#25211e]/40 px-3 py-3 text-black dark:text-white">{{ $aspect['name'] }}
                             </td>
                             @php
                                 $roundedIndividualRating = round($aspect['individual_rating']);
@@ -115,7 +114,7 @@
                                     $isIndividual = $i == $roundedIndividualRating;
                                 @endphp
                                 <td
-                                    class="border-2 border-black px-3 py-3 text-center relative
+                                    class="border border-warm-border dark:border-[#25211e]/40 px-3 py-3 text-center relative
                                     @if ($isIndividual) @if ($i == 1) bg-red-500 text-white font-bold text-lg
                                         @elseif($i == 2) bg-orange-500 text-white font-bold text-lg
                                         @elseif($i == 3) bg-amber-500 text-white font-bold text-lg
@@ -129,7 +128,7 @@ bg-gray-500 dark:bg-gray-500 font-bold text-white
                                     @endif
                                 </td>
                             @endfor
-                            <td class="border-2 border-black px-3 py-3 text-xs text-black dark:text-gray-200">
+                            <td class="border border-warm-border dark:border-[#25211e]/40 px-3 py-3 text-xs text-primary-ink dark:text-neutral-200">
                                 <strong>{{ $aspect['conclusion']['title'] }}</strong><br>
                                 {{ $aspect['conclusion']['description'] }}
                             </td>
@@ -140,42 +139,42 @@ bg-gray-500 dark:bg-gray-500 font-bold text-white
         </div>
 
         <!-- Legend - DARK MODE READY -->
-        <div class="px-6 pb-6 bg-white dark:bg-gray-800">
+        <div class="px-6 pb-6 bg-white dark:bg-[#171412]">
             <div class="text-sm font-bold mb-2 text-black dark:text-white">Catatan :</div>
-            <div class="grid grid-cols-1 gap-2 text-sm text-black dark:text-gray-200">
+            <div class="grid grid-cols-1 gap-2 text-sm text-primary-ink dark:text-neutral-200">
                 <div class="flex items-center gap-3">
                     <div
-                        class="w-8 h-6 bg-gray-500 border-2 border-black flex items-center justify-center font-bold text-gray-100">
+                        class="w-8 h-6 bg-gray-500 border border-warm-border dark:border-[#25211e]/40 flex items-center justify-center font-bold text-gray-100">
                     </div>
                     <span><em>Standar</em></span>
                 </div>
                 <div class="flex items-center gap-3">
                     <div
-                        class="w-8 h-6 bg-red-500 border-2 border-black flex items-center justify-center font-bold text-white">
+                        class="w-8 h-6 bg-red-500 border border-warm-border dark:border-[#25211e]/40 flex items-center justify-center font-bold text-white">
                         √</div>
                     <span><em>Rating 1 - Rendah</em></span>
                 </div>
                 <div class="flex items-center gap-3">
                     <div
-                        class="w-8 h-6 bg-orange-500 border-2 border-black flex items-center justify-center font-bold text-white">
+                        class="w-8 h-6 bg-orange-500 border border-warm-border dark:border-[#25211e]/40 flex items-center justify-center font-bold text-white">
                         √</div>
                     <span><em>Rating 2 - Kurang</em></span>
                 </div>
                 <div class="flex items-center gap-3">
                     <div
-                        class="w-8 h-6 bg-amber-500 border-2 border-black flex items-center justify-center font-bold text-white">
+                        class="w-8 h-6 bg-amber-500 border border-warm-border dark:border-[#25211e]/40 flex items-center justify-center font-bold text-white">
                         √</div>
                     <span><em>Rating 3 - Cukup</em></span>
                 </div>
                 <div class="flex items-center gap-3">
                     <div
-                        class="w-8 h-6 bg-green-500 border-2 border-black flex items-center justify-center font-bold text-white">
+                        class="w-8 h-6 bg-green-500 border border-warm-border dark:border-[#25211e]/40 flex items-center justify-center font-bold text-white">
                         √</div>
                     <span><em>Rating 4 - Baik</em></span>
                 </div>
                 <div class="flex items-center gap-3">
                     <div
-                        class="w-8 h-6 bg-green-700 border-2 border-black flex items-center justify-center font-bold text-white">
+                        class="w-8 h-6 bg-green-700 border border-warm-border dark:border-[#25211e]/40 flex items-center justify-center font-bold text-white">
                         √</div>
                     <span><em>Rating 5 - Baik Sekali</em></span>
                 </div>
