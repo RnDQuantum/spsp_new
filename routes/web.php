@@ -13,6 +13,10 @@ Route::get('/', function () {
     return view('welcome');
 })->name('welcome');
 
+Route::get('/kebijakan-privasi', function () {
+    return view('privacy');
+})->name('privacy');
+
 Route::get('/hca-report-demo', App\Livewire\Pages\HCA\HcaReportPage::class)->name('hca-report-demo');
 
 Route::middleware(['guest'])->group(function () {
