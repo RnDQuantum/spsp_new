@@ -1,28 +1,28 @@
-<div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden" wire:init="loadParticipants">
+<div class="border border-warm-border dark:border-[#25211e] bg-white dark:bg-[#171412] rounded-md shadow-xs overflow-hidden" wire:init="loadParticipants">
     <!-- Header Table -->
-    <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+    <div class="px-6 py-4 bg-warm-ivory dark:bg-[#1f1b18] border-b border-warm-border dark:border-[#25211e]">
         <div class="flex flex-col gap-4">
             <!-- Header Title -->
-            <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100">Data Peserta Asesmen</h2>
+            <h2 class="font-display text-xl font-bold tracking-tight text-primary-ink dark:text-neutral-100">Data Peserta Asesmen</h2>
 
             <!-- Filter Controls - Simple Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
                 <!-- Filter Proyek - 5 columns -->
                 <div class="md:col-span-5">
                     <x-mary-choices label="Filter Proyek" wire:model.live="selectedEventId" :options="$assessmentEventsSearchable" single
                         searchable search-function="searchEvents" debounce="300ms" min-chars="0"
-                        no-result-text="Tidak ada proyek ditemukan..." hint="Ketik untuk mencari proyek" />
+                        no-result-text="Tidak ada proyek ditemukan..." />
                 </div>
 
                 <!-- Search - 5 columns -->
                 <div class="md:col-span-5">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                    <label class="block text-xs font-semibold text-primary-ink/75 dark:text-neutral-400 mb-1.5">
                         Pencarian
                     </label>
                     <div class="relative">
                         <input type="text" wire:model.live.debounce.400ms="search"
                             placeholder="Cari nama atau NIP..."
-                            class="w-full rounded-lg border border-gray-300 dark:border-gray-600 pl-10 pr-10 py-2.5 text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                            class="w-full rounded-md border border-warm-border dark:border-[#25211e] pl-10 pr-10 py-2 text-xs font-medium text-primary-ink dark:text-neutral-100 bg-white dark:bg-[#171412] focus:outline-none focus:border-accent-amber transition-all">
                         <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                             <svg class="h-5 w-5 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor"
                                 viewBox="0 0 24 24">
@@ -48,11 +48,11 @@
                 <div class="md:col-span-2 flex gap-2">
                     <!-- Per Page Dropdown -->
                     <div class="w-16">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                        <label class="block text-xs font-semibold text-primary-ink/75 dark:text-neutral-400 mb-1.5">
                             Tampilkan
                         </label>
                         <select wire:model.live="perPage"
-                            class="w-full rounded-lg border text-center border-gray-300 dark:border-gray-600 mt-1.5 px-3 py-2.5 text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all appearance-none cursor-pointer">
+                            class="w-full rounded-md border text-center border-warm-border dark:border-[#25211e] mt-1 px-3 py-2 text-xs font-medium text-primary-ink dark:text-neutral-100 bg-white dark:bg-[#171412] focus:outline-none focus:border-accent-amber transition-all appearance-none cursor-pointer">
                             <option value="10">10</option>
                             <option value="25">25</option>
                             <option value="50">50</option>
@@ -63,11 +63,11 @@
 
                     <!-- Clear Button -->
                     @if ($selectedEventId || $search || $perPage != 10 || $sortField != 'name' || $sortDirection != 'asc')
-                        <div class="self-end">
+                        <div class="flex items-end">
                             <button wire:click="clearFilters"
-                                class="inline-flex items-center justify-center mb-6 px-3 py-2.5 text-sm font-medium text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all"
-                                title="Clear Filters">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                class="inline-flex items-center justify-center h-[34px] w-[34px] text-xs font-semibold text-primary-ink dark:text-neutral-200 bg-warm-ivory dark:bg-[#1f1b18] border border-warm-border dark:border-[#25211e] rounded-md hover:bg-red-50 hover:text-red-600 hover:border-red-200 dark:hover:bg-red-950/40 dark:hover:text-red-400 dark:hover:border-red-800/50 transition-colors shadow-xs"
+                                title="Reset Filter">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M6 18L18 6M6 6l12 12"></path>
                                 </svg>
@@ -81,16 +81,16 @@
 
     <!-- Filter Summary -->
     @if ($selectedEventId || $search || $sortField != 'name' || $sortDirection != 'asc')
-        <div class="px-6 py-3 bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
+        <div class="px-6 py-3 bg-warm-ivory/80 dark:bg-[#1f1b18] border-b border-warm-border dark:border-[#25211e]">
             <div class="flex flex-wrap items-center gap-2">
-                <span class="text-sm text-gray-600 dark:text-gray-300 font-medium">Filter aktif:</span>
+                <span class="text-xs text-primary-ink/75 dark:text-neutral-400 font-semibold">Filter aktif:</span>
                 @if ($selectedEventId)
                     @php
                         $selectedEvent = collect($assessmentEventsSearchable)->firstWhere('id', $selectedEventId);
                     @endphp
                     @if ($selectedEvent)
                         <span
-                            class="inline-flex items-center px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-sm font-medium rounded-full">
+                            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-warm-ivory dark:bg-[#25211e] border border-warm-border dark:border-[#25211e] text-primary-ink dark:text-neutral-200">
                             <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4">
@@ -102,7 +102,7 @@
                 @endif
                 @if ($search)
                     <span
-                        class="inline-flex items-center px-3 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-sm font-medium rounded-full">
+                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-warm-ivory dark:bg-[#25211e] border border-warm-border dark:border-[#25211e] text-primary-ink dark:text-neutral-200">
                         <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
@@ -112,7 +112,7 @@
                 @endif
                 @if ($sortField != 'name' || $sortDirection != 'asc')
                     <span
-                        class="inline-flex items-center px-3 py-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 text-sm font-medium rounded-full">
+                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-warm-ivory dark:bg-[#25211e] border border-warm-border dark:border-[#25211e] text-primary-ink dark:text-neutral-200">
                         <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"></path>
@@ -131,7 +131,7 @@
         @if (!$readyToLoad)
             <div class="overflow-x-auto">
                 <table class="w-full">
-                    <thead class="bg-gray-300 dark:bg-gray-600">
+                    <thead class="bg-warm-ivory dark:bg-[#1f1b18] border-b border-warm-border dark:border-[#25211e] text-primary-ink dark:text-neutral-200">
                         <tr>
                             <th
                                 class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
@@ -168,40 +168,40 @@
                                 No. Test</th>
                         </tr>
                     </thead>
-                    <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                    <tbody class="bg-white dark:bg-[#171412] divide-y divide-warm-border dark:divide-[#25211e]/40 text-sm">
                         @for ($i = 0; $i < 10; $i++)
                             <tr class="animate-pulse">
-                                <td class="px-6 py-4 whitespace-nowrap">
+                                <td class="px-4 py-2.5 whitespace-nowrap">
                                     <div class="h-4 bg-gray-200 dark:bg-gray-600 rounded w-20"></div>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
+                                <td class="px-4 py-2.5 whitespace-nowrap">
                                     <div class="h-4 bg-gray-200 dark:bg-gray-600 rounded w-24"></div>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
+                                <td class="px-4 py-2.5 whitespace-nowrap">
                                     <div class="h-4 bg-gray-200 dark:bg-gray-600 rounded w-32"></div>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
+                                <td class="px-4 py-2.5 whitespace-nowrap">
                                     <div class="h-4 bg-gray-200 dark:bg-gray-600 rounded w-36"></div>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
+                                <td class="px-4 py-2.5 whitespace-nowrap">
                                     <div class="h-4 bg-gray-200 dark:bg-gray-600 rounded w-28"></div>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
+                                <td class="px-4 py-2.5 whitespace-nowrap">
                                     <div class="h-4 bg-gray-200 dark:bg-gray-600 rounded w-20"></div>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
+                                <td class="px-4 py-2.5 whitespace-nowrap">
                                     <div class="h-6 bg-gray-200 dark:bg-gray-600 rounded w-16"></div>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
+                                <td class="px-4 py-2.5 whitespace-nowrap">
                                     <div class="h-4 bg-gray-200 dark:bg-gray-600 rounded w-24"></div>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
+                                <td class="px-4 py-2.5 whitespace-nowrap">
                                     <div class="h-4 bg-gray-200 dark:bg-gray-600 rounded w-32"></div>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
+                                <td class="px-4 py-2.5 whitespace-nowrap">
                                     <div class="h-4 bg-gray-200 dark:bg-gray-600 rounded w-24"></div>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
+                                <td class="px-4 py-2.5 whitespace-nowrap">
                                     <div class="h-4 bg-gray-200 dark:bg-gray-600 rounded w-20"></div>
                                 </td>
                             </tr>
@@ -213,7 +213,7 @@
             <!-- Actual Table Content -->
             <div class="overflow-x-auto">
                 <table class="w-full">
-                    <thead class="bg-gray-300 dark:bg-gray-600">
+                    <thead class="bg-warm-ivory dark:bg-[#1f1b18] border-b border-warm-border dark:border-[#25211e] text-primary-ink dark:text-neutral-200">
                         <tr>
                             <th
                                 class="px-6 py-3 text-left text-xs font-medium text-gray-800 dark:text-gray-200 uppercase tracking-wider">
@@ -222,7 +222,7 @@
 
                             <!-- Sortable Headers -->
                             <th wire:click="sort('skb_number')"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-800 dark:text-gray-200 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-800 dark:text-gray-200 uppercase tracking-wider cursor-pointer hover:bg-warm-border/50 dark:hover:bg-[#25211e]/50 transition-colors">
                                 <div class="flex items-center space-x-1 select-none">
                                     <span>NIP</span>
                                     <span class="text-gray-400">
@@ -252,7 +252,7 @@
                             </th>
 
                             <th wire:click="sort('name')"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-800 dark:text-gray-200 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-800 dark:text-gray-200 uppercase tracking-wider cursor-pointer hover:bg-warm-border/50 dark:hover:bg-[#25211e]/50 transition-colors">
                                 <div class="flex items-center space-x-1 select-none">
                                     <span>Nama</span>
                                     <span class="text-gray-400">
@@ -282,7 +282,7 @@
                             </th>
 
                             <th wire:click="sort('email')"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-800 dark:text-gray-200 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-800 dark:text-gray-200 uppercase tracking-wider cursor-pointer hover:bg-warm-border/50 dark:hover:bg-[#25211e]/50 transition-colors">
                                 <div class="flex items-center space-x-1 select-none">
                                     <span>Email</span>
                                     <span class="text-gray-400">
@@ -312,7 +312,7 @@
                             </th>
 
                             <th wire:click="sort('phone')"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-800 dark:text-gray-200 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-800 dark:text-gray-200 uppercase tracking-wider cursor-pointer hover:bg-warm-border/50 dark:hover:bg-[#25211e]/50 transition-colors">
                                 <div class="flex items-center space-x-1 select-none">
                                     <span>Telepon</span>
                                     <span class="text-gray-400">
@@ -342,7 +342,7 @@
                             </th>
 
                             <th wire:click="sort('gender')"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-800 dark:text-gray-200 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-800 dark:text-gray-200 uppercase tracking-wider cursor-pointer hover:bg-warm-border/50 dark:hover:bg-[#25211e]/50 transition-colors">
                                 <div class="flex items-center space-x-1 select-none">
                                     <span>Jenis Kelamin</span>
                                     <span class="text-gray-400">
@@ -372,7 +372,7 @@
                             </th>
 
                             <th wire:click="sort('event_code')"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-800 dark:text-gray-200 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-800 dark:text-gray-200 uppercase tracking-wider cursor-pointer hover:bg-warm-border/50 dark:hover:bg-[#25211e]/50 transition-colors">
                                 <div class="flex items-center space-x-1 select-none">
                                     <span>Kode Proyek</span>
                                     <span class="text-gray-400">
@@ -402,7 +402,7 @@
                             </th>
 
                             <th wire:click="sort('batch_name')"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-800 dark:text-gray-200 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-800 dark:text-gray-200 uppercase tracking-wider cursor-pointer hover:bg-warm-border/50 dark:hover:bg-[#25211e]/50 transition-colors">
                                 <div class="flex items-center space-x-1 select-none">
                                     <span>Batch</span>
                                     <span class="text-gray-400">
@@ -432,7 +432,7 @@
                             </th>
 
                             <th wire:click="sort('position_name')"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-800 dark:text-gray-200 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-800 dark:text-gray-200 uppercase tracking-wider cursor-pointer hover:bg-warm-border/50 dark:hover:bg-[#25211e]/50 transition-colors">
                                 <div class="flex items-center space-x-1 select-none">
                                     <span>Posisi</span>
                                     <span class="text-gray-400">
@@ -462,7 +462,7 @@
                             </th>
 
                             <th wire:click="sort('assessment_date')"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-800 dark:text-gray-200 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-800 dark:text-gray-200 uppercase tracking-wider cursor-pointer hover:bg-warm-border/50 dark:hover:bg-[#25211e]/50 transition-colors">
                                 <div class="flex items-center space-x-1 select-none">
                                     <span>Tgl Assessment</span>
                                     <span class="text-gray-400">
@@ -492,7 +492,7 @@
                             </th>
 
                             <th wire:click="sort('test_number')"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-800 dark:text-gray-200 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-800 dark:text-gray-200 uppercase tracking-wider cursor-pointer hover:bg-warm-border/50 dark:hover:bg-[#25211e]/50 transition-colors">
                                 <div class="flex items-center space-x-1 select-none">
                                     <span>No. Test</span>
                                     <span class="text-gray-400">
@@ -522,17 +522,17 @@
                             </th>
                         </tr>
                     </thead>
-                    <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                    <tbody class="bg-white dark:bg-[#171412] divide-y divide-warm-border dark:divide-[#25211e]/40 text-sm">
                         @forelse($this->participants as $index => $participant)
-                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150"
+                            <tr class="hover:bg-warm-ivory/50 dark:hover:bg-[#1f1b18]/50 transition-colors duration-150"
                                 wire:key="participant-{{ $participant->id }}">
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                                <td class="px-4 py-2.5 whitespace-nowrap text-sm text-primary-ink dark:text-neutral-100">
                                     <div class="flex items-center gap-2">
                                         <span
                                             class="font-medium">{{ $this->participants->firstItem() + $index }}</span>
                                         <button wire:click="handleDetail({{ $participant->id }})"
-                                            class="inline-flex items-center px-2.5 py-1.5 text-xs font-medium text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-900 border border-blue-200 dark:border-blue-700 rounded-md hover:bg-blue-100 dark:hover:bg-blue-800 hover:border-blue-300 dark:hover:border-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-blue-500 transition-all">
-                                            <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor"
+                                            class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-primary-ink dark:text-neutral-200 bg-warm-ivory dark:bg-[#1f1b18] border border-warm-border dark:border-[#25211e] rounded-md hover:bg-primary-ink hover:text-warm-ivory dark:hover:bg-amber-600 dark:hover:text-white transition-colors shadow-xs">
+                                            <svg class="w-3.5 h-3.5 text-accent-amber" fill="none" stroke="currentColor"
                                                 viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                     d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
@@ -544,32 +544,32 @@
                                         </button>
                                     </div>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                                <td class="px-4 py-2.5 whitespace-nowrap text-sm text-primary-ink dark:text-neutral-100">
                                     {{ $participant->skb_number ?? '-' }}
                                 </td>
                                 <td
-                                    class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
+                                    class="px-4 py-2.5 whitespace-nowrap text-sm font-medium text-primary-ink dark:text-neutral-100">
                                     {{ $participant->name }}
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                                <td class="px-4 py-2.5 whitespace-nowrap text-sm text-primary-ink dark:text-neutral-100">
                                     {{ $participant->email ?? '-' }}
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                                <td class="px-4 py-2.5 whitespace-nowrap text-sm text-primary-ink dark:text-neutral-100">
                                     {{ $participant->phone ?? '-' }}
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                                <td class="px-4 py-2.5 whitespace-nowrap text-sm text-primary-ink dark:text-neutral-100">
                                     {{ $participant->gender ?? '-' }}
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                                <td class="px-4 py-2.5 whitespace-nowrap text-sm text-primary-ink dark:text-neutral-100">
                                     <span
-                                        class="inline-flex items-center px-2.5 py-1 text-xs font-semibold bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full">
+                                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-warm-ivory dark:bg-[#25211e] border border-warm-border dark:border-[#25211e] text-primary-ink dark:text-neutral-200">
                                         {{ $participant->assessmentEvent->code ?? '-' }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                                <td class="px-4 py-2.5 whitespace-nowrap text-sm text-primary-ink dark:text-neutral-100">
                                     {{ $participant->batch->name ?? '-' }}
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                                <td class="px-4 py-2.5 whitespace-nowrap text-sm text-primary-ink dark:text-neutral-100">
                                     <div>
                                         {{ $participant->positionFormation->name ?? '-' }}
                                         @if ($participant->positionFormation?->code)
@@ -578,10 +578,10 @@
                                         @endif
                                     </div>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                                <td class="px-4 py-2.5 whitespace-nowrap text-sm text-primary-ink dark:text-neutral-100">
                                     {{ $participant->assessment_date?->format('d M Y') ?? '-' }}
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                                <td class="px-4 py-2.5 whitespace-nowrap text-sm text-primary-ink dark:text-neutral-100">
                                     {{ $participant->test_number ?? '-' }}
                                 </td>
                             </tr>
@@ -612,7 +612,7 @@
 
             <!-- Pagination -->
             @if ($this->participants->hasPages())
-                <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700">
+                <div class="px-6 py-4 border-t border-warm-border dark:border-[#25211e] bg-warm-ivory dark:bg-[#1f1b18]">
                     {{ $this->participants->links() }}
                 </div>
             @endif
