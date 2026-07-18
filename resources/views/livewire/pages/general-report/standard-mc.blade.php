@@ -1,7 +1,7 @@
 <div class="max-w-7xl mx-auto">
-    <div class="bg-white dark:bg-gray-800 p-6 rounded shadow text-gray-900 dark:text-gray-100">
+    <div class="bg-white dark:bg-[#171412] p-6 rounded-md border border-warm-border dark:border-[#25211e] shadow-xs text-primary-ink dark:text-neutral-100">
         {{-- Filter Section --}}
-        <div class="mb-6 bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-300 dark:border-gray-600">
+        <div class="mb-6 bg-warm-ivory/60 dark:bg-[#1f1b18] p-4 rounded-md border border-warm-border dark:border-[#25211e]">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {{-- Event Filter --}}
                 <div>
@@ -39,7 +39,7 @@
                             </label>
                             <select id="customStandardSelect" wire:model.live="selectedCustomStandardId"
                                 wire:change="selectCustomStandard($event.target.value)"
-                                class="w-full md:w-96 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                class="w-full md:w-96 px-3 py-2 border border-warm-border dark:border-[#25211e] rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                                 <option value="">Quantum (Default)</option>
                                 @foreach ($availableCustomStandards as $standard)
                                     <option value="{{ $standard['id'] }}">
@@ -94,7 +94,7 @@
 
         {{-- Header Title --}}
         <div
-            class="text-center font-bold uppercase mb-4 text-sm bg-gray-300 dark:bg-gray-600 py-2 border border-black dark:border-gray-600">
+            class="text-center font-bold uppercase mb-4 text-sm bg-warm-ivory dark:bg-[#1f1b18] text-primary-ink dark:text-neutral-100 py-2 border border-black dark:border-gray-600">
             STANDAR PEMETAAN KOMPETENSI INDIVIDU "STATIC PRIBADI SPIDER PLOT"
         </div>
 
@@ -109,22 +109,22 @@
             <table class="w-full border border-black dark:border-gray-600 text-xs mb-4">
                 <tr>
                     <td
-                        class="border border-black dark:border-gray-600 px-2 py-1 bg-gray-300 dark:bg-gray-600 font-semibold w-1/5">
+                        class="border border-black dark:border-gray-600 px-2 py-1 bg-warm-ivory dark:bg-[#1f1b18] text-primary-ink dark:text-neutral-100 font-semibold w-1/5">
                         Perusahaan/Lembaga</td>
                     <td class="border border-black dark:border-gray-600 px-2 py-1 w-2/5">
                         {{ strtoupper($selectedEvent->institution->name ?? 'N/A') }}</td>
                     <td
-                        class="border border-black dark:border-gray-600 px-2 py-1 bg-gray-300 dark:bg-gray-600 font-semibold w-1/6">
+                        class="border border-black dark:border-gray-600 px-2 py-1 bg-warm-ivory dark:bg-[#1f1b18] text-primary-ink dark:text-neutral-100 font-semibold w-1/6">
                     </td>
                     <td class="border border-black dark:border-gray-600 px-2 py-1 w-1/6"></td>
                 </tr>
                 <tr>
                     <td
-                        class="border border-black dark:border-gray-600 px-2 py-1 bg-gray-300 dark:bg-gray-600 font-semibold">
+                        class="border border-black dark:border-gray-600 px-2 py-1 bg-warm-ivory dark:bg-[#1f1b18] text-primary-ink dark:text-neutral-100 font-semibold">
                         Standard Penilaian</td>
                     <td class="border border-black dark:border-gray-600 px-2 py-1">{{ $selectedTemplate->name }}</td>
                     <td
-                        class="border border-black dark:border-gray-600 px-2 py-1 bg-gray-300 dark:bg-gray-600 font-semibold">
+                        class="border border-black dark:border-gray-600 px-2 py-1 bg-warm-ivory dark:bg-[#1f1b18] text-primary-ink dark:text-neutral-100 font-semibold">
                         Kode:</td>
                     <td class="border border-black dark:border-gray-600 px-2 py-1 text-center">
                         {{ $selectedTemplate->code }}</td>
@@ -137,7 +137,7 @@
             <div class="mt-4 mb-4">
                 <table class="w-full border border-black dark:border-gray-600 text-xs">
                     <thead>
-                        <tr class="bg-gray-300 dark:bg-gray-600">
+                        <tr class="bg-warm-ivory dark:bg-[#1f1b18] text-primary-ink dark:text-neutral-100">
                             <th class="border border-black dark:border-gray-600 px-2 py-2 w-12">No.</th>
                             <th class="border border-black dark:border-gray-600 px-2 py-2">ATRIBUT</th>
                             <th class="border border-black dark:border-gray-600 px-2 py-2 w-24">NILAI STANDAR</th>
@@ -190,7 +190,7 @@
                         @endforeach
 
                         {{-- TOTAL --}}
-                        <tr class="bg-gray-300 dark:bg-gray-600 font-bold">
+                        <tr class="bg-warm-ivory dark:bg-[#1f1b18] text-primary-ink dark:text-neutral-100 font-bold">
                             <td class="border border-black dark:border-gray-600 px-2 py-2 text-center" colspan="2">
                                 JUMLAH</td>
                             <td class="border border-black dark:border-gray-600 px-2 py-2 text-center">
@@ -223,12 +223,12 @@
 
             {{-- Tabel Mapping Summary --}}
             <div
-                class="mb-2 mt-6 font-bold text-xs bg-gray-300 dark:bg-gray-600 border border-black dark:border-gray-600 px-2 py-2 text-center">
+                class="mb-2 mt-6 font-bold text-xs bg-warm-ivory dark:bg-[#1f1b18] text-primary-ink dark:text-neutral-100 border border-black dark:border-gray-600 px-2 py-2 text-center">
                 ATRIBUT MANAGERIAL KOMPETENSI MAPPING
             </div>
             <table class="w-full border border-black dark:border-gray-600 text-xs mb-4">
                 <thead>
-                    <tr class="bg-gray-300 dark:bg-gray-600">
+                    <tr class="bg-warm-ivory dark:bg-[#1f1b18] text-primary-ink dark:text-neutral-100">
                         <th class="border border-black dark:border-gray-600 px-2 py-2 w-12">No.</th>
                         <th class="border border-black dark:border-gray-600 px-2 py-2">ATRIBUT</th>
                         <th class="border border-black dark:border-gray-600 px-2 py-2 w-24">JUMLAH ATRIBUT</th>
@@ -258,7 +258,7 @@
                     @endforeach
                 </tbody>
                 <tfoot>
-                    <tr class="font-bold bg-gray-300 dark:bg-gray-600">
+                    <tr class="font-bold bg-warm-ivory dark:bg-[#1f1b18] text-primary-ink dark:text-neutral-100">
                         <td class="border border-black dark:border-gray-600 px-2 py-2 text-center" colspan="2">
                             Jumlah
                         </td>

@@ -1,7 +1,7 @@
-<div class="bg-white dark:bg-gray-900 mx-auto my-8 shadow overflow-hidden" style="max-width: 1300px;">
+<div class="bg-white dark:bg-[#171412] mx-auto my-8 border border-warm-border dark:border-[#25211e] rounded-md shadow-xs overflow-hidden" style="max-width: 1300px;">
     <!-- Header Section -->
-    <div class="border-b-4 border-black dark:border-gray-600 py-4 bg-white dark:bg-gray-800">
-        <h1 class="text-center text-2xl font-bold uppercase tracking-wide text-black dark:text-white">
+    <div class="border-b border-warm-border dark:border-[#25211e] py-6 bg-warm-ivory dark:bg-[#1f1b18]">
+        <h1 class="font-display text-center text-2xl font-bold tracking-tight text-primary-ink dark:text-neutral-100">
             REKAP PERINGKAT SKOR PENILAIAN AKHIR ASESMEN
         </h1>
 
@@ -52,7 +52,7 @@
     @endif
 
     <!-- Enhanced Table Section -->
-    <div class="px-6 pb-6 bg-white dark:bg-gray-900 overflow-x-auto">
+    <div class="px-6 pb-6 bg-white dark:bg-[#171412] overflow-x-auto">
         <!-- Per Page Selector -->
         <div class="flex justify-between items-center mb-4 mt-6">
             <div class="flex items-center gap-3">
@@ -89,37 +89,37 @@
             @endif
         </div>
 
-        <table class="min-w-full border-2 border-black dark:border-gray-600 text-sm text-gray-900 dark:text-gray-100">
+        <table class="min-w-full border border-warm-border dark:border-[#25211e] text-sm text-primary-ink dark:text-neutral-100">
             <thead>
-                <tr class="bg-gray-300 dark:bg-gray-600">
-                    <th class="border-2 border-black dark:border-gray-500 px-2 py-2 text-center align-middle"
+                <tr class="bg-warm-ivory dark:bg-[#1f1b18] text-primary-ink dark:text-neutral-100">
+                    <th class="border border-warm-border dark:border-[#25211e] px-2 py-2 text-center align-middle"
                         rowspan="2">NO</th>
-                    <th class="border-2 border-black dark:border-gray-500 px-2 py-2 text-center align-middle"
+                    <th class="border border-warm-border dark:border-[#25211e] px-2 py-2 text-center align-middle"
                         rowspan="2">NAMA</th>
-                    <th class="border-2 border-black dark:border-gray-500 px-2 py-2 text-center" colspan="2">SKOR
+                    <th class="border border-warm-border dark:border-[#25211e] px-2 py-2 text-center" colspan="2">SKOR
                         INDIVIDU</th>
-                    <th class="border-2 border-black dark:border-gray-500 px-2 py-2 text-center align-middle"
+                    <th class="border border-warm-border dark:border-[#25211e] px-2 py-2 text-center align-middle"
                         rowspan="2">TOTAL SKOR
                     </th>
-                    <th class="border-2 border-black dark:border-gray-500 px-2 py-2 text-center" colspan="2">SKOR
+                    <th class="border border-warm-border dark:border-[#25211e] px-2 py-2 text-center" colspan="2">SKOR
                         PENILAIAN AKHIR</th>
-                    <th class="border-2 border-black dark:border-gray-500 px-2 py-2 text-center align-middle"
+                    <th class="border border-warm-border dark:border-[#25211e] px-2 py-2 text-center align-middle"
                         rowspan="2">TOTAL SKOR
                     </th>
-                    <th class="border-2 border-black dark:border-gray-500 px-2 py-2 text-center align-middle"
+                    <th class="border border-warm-border dark:border-[#25211e] px-2 py-2 text-center align-middle"
                         rowspan="2">GAP</th>
-                    <th class="border-2 border-black dark:border-gray-500 px-2 py-2 text-center align-middle"
+                    <th class="border border-warm-border dark:border-[#25211e] px-2 py-2 text-center align-middle"
                         rowspan="2">KESIMPULAN
                     </th>
                 </tr>
-                <tr class="bg-gray-300 dark:bg-gray-600">
-                    <th class="border-2 border-black dark:border-gray-500 px-2 py-2 text-center italic">PSYCHOLOGY</th>
-                    <th class="border-2 border-black dark:border-gray-500 px-2 py-2 text-center italic">COMPETENCY
+                <tr class="bg-warm-ivory dark:bg-[#1f1b18] text-primary-ink dark:text-neutral-100">
+                    <th class="border border-warm-border dark:border-[#25211e] px-2 py-2 text-center italic">PSYCHOLOGY</th>
+                    <th class="border border-warm-border dark:border-[#25211e] px-2 py-2 text-center italic">COMPETENCY
                         MANAGERIAL
                     </th>
-                    <th class="border-2 border-black dark:border-gray-500 px-2 py-2 text-center italic">PSYCHOLOGY
+                    <th class="border border-warm-border dark:border-[#25211e] px-2 py-2 text-center italic">PSYCHOLOGY
                         {{ $potensiWeight }}%</th>
-                    <th class="border-2 border-black dark:border-gray-500 px-2 py-2 text-center italic">COMPETENCY
+                    <th class="border border-warm-border dark:border-[#25211e] px-2 py-2 text-center italic">COMPETENCY
                         MANAGERIAL
                         {{ $kompetensiWeight }}%</th>
                 </tr>
@@ -127,26 +127,26 @@
             <tbody>
                 @if (isset($rows) && $rows)
                     @foreach ($rows as $row)
-                        <tr class="bg-white dark:bg-gray-800">
-                            <td class="border-2 border-black dark:border-gray-600 px-2 py-2 text-center">
+                        <tr class="bg-white dark:bg-[#171412] hover:bg-warm-ivory/50 dark:hover:bg-[#1f1b18]/50 transition-colors">
+                            <td class="border border-warm-border dark:border-[#25211e] px-2 py-2 text-center">
                                 {{ $row['rank'] }}</td>
-                            <td class="border-2 border-black dark:border-gray-600 px-2 py-2">{{ $row['name'] }}</td>
-                            <td class="border-2 border-black dark:border-gray-600 px-2 py-2 text-center">
+                            <td class="border border-warm-border dark:border-[#25211e] px-2 py-2">{{ $row['name'] }}</td>
+                            <td class="border border-warm-border dark:border-[#25211e] px-2 py-2 text-center">
                                 {{ number_format($row['psy_individual'], 2) }}</td>
-                            <td class="border-2 border-black dark:border-gray-600 px-2 py-2 text-center">
+                            <td class="border border-warm-border dark:border-[#25211e] px-2 py-2 text-center">
                                 {{ number_format($row['mc_individual'], 2) }}</td>
-                            <td class="border-2 border-black dark:border-gray-600 px-2 py-2 text-center">
+                            <td class="border border-warm-border dark:border-[#25211e] px-2 py-2 text-center">
                                 {{ number_format($row['total_individual'], 2) }}</td>
-                            <td class="border-2 border-black dark:border-gray-600 px-2 py-2 text-center">
+                            <td class="border border-warm-border dark:border-[#25211e] px-2 py-2 text-center">
                                 {{ number_format($row['psy_weighted'], 2) }}</td>
-                            <td class="border-2 border-black dark:border-gray-600 px-2 py-2 text-center">
+                            <td class="border border-warm-border dark:border-[#25211e] px-2 py-2 text-center">
                                 {{ number_format($row['mc_weighted'], 2) }}</td>
-                            <td class="border-2 border-black dark:border-gray-600 px-2 py-2 text-center">
+                            <td class="border border-warm-border dark:border-[#25211e] px-2 py-2 text-center">
                                 {{ number_format($row['total_weighted_individual'], 2) }}</td>
-                            <td class="border-2 border-black dark:border-gray-600 px-2 py-2 text-center">
+                            <td class="border border-warm-border dark:border-[#25211e] px-2 py-2 text-center">
                                 {{ number_format($row['gap'], 2) }}</td>
                             <td
-                                class="border-2 border-black dark:border-gray-600 px-2 py-2 text-center font-bold {{ $conclusionConfig[$row['conclusion']]['tailwindClass'] ?? 'bg-gray-600 text-white' }}">
+                                class="border border-warm-border dark:border-[#25211e] px-2 py-2 text-center font-bold {{ $conclusionConfig[$row['conclusion']]['tailwindClass'] ?? 'bg-gray-600 text-white' }}">
                                 {{ $row['conclusion'] }}
                             </td>
                         </tr>
@@ -163,7 +163,7 @@
 
     <!-- Standard & Threshold Info Box -->
     {{-- @if ($standardInfo)
-        <div class="px-6 pb-6 bg-white dark:bg-gray-900">
+        <div class="px-6 pb-6 bg-white dark:bg-[#171412]">
             <div class="bg-white dark:bg-gray-800 rounded-lg p-3">
                 <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2">
                     <svg class="w-5 h-5 text-gray-900 dark:text-gray-100" fill="none" stroke="currentColor"
@@ -275,7 +275,7 @@
     @endif --}}
 
     @if ($standardInfo)
-        <div class="px-6 pb-6 bg-white dark:bg-gray-900">
+        <div class="px-6 pb-6 bg-white dark:bg-[#171412]">
             <div class="bg-white dark:bg-gray-800 rounded-lg p-3">
                 <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2">
                     <svg class="w-5 h-5 text-gray-900 dark:text-gray-100" fill="none" stroke="currentColor"
@@ -412,7 +412,7 @@
                 $passingPercentage = $totalParticipants > 0 ? round(($passingCount / $totalParticipants) * 100, 1) : 0;
             @endphp
 
-            <div class="bg-white dark:bg-gray-800 border-2 border-black dark:border-gray-600 rounded-lg p-4">
+            <div class="bg-white dark:bg-gray-800 border border-warm-border dark:border-[#25211e] rounded-lg p-4">
                 <div class="grid grid-cols-3 gap-4 text-center">
                     <div>
                         <div class="text-lg font-bold text-gray-900 dark:text-gray-100">{{ $totalParticipants }}</div>
@@ -453,7 +453,7 @@
 
     <!-- Pie Chart Section -->
     @if (!empty($conclusionSummary))
-        <div class="mt-8 border-t-2 border-black dark:border-gray-600 pt-6 bg-white dark:bg-gray-900">
+        <div class="mt-8 border-t-2 border-black dark:border-gray-600 pt-6 bg-white dark:bg-[#171412]">
             <div class="px-6 pb-6">
                 <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100 mb-6 text-center">Capacity Building Rekap
                     Assessment</h3>
@@ -496,7 +496,7 @@
                                     </th>
                                 </tr>
                             </thead>
-                            <tbody class="bg-white dark:bg-gray-800">
+                            <tbody class="bg-white dark:bg-[#171412] hover:bg-warm-ivory/50 dark:hover:bg-[#1f1b18]/50 transition-colors">
                                 @foreach ($conclusionSummary as $conclusion => $count)
                                     @php
                                         $percentage =

@@ -63,12 +63,12 @@ Menampilkan data kompilasi seluruh peserta dalam satu event/posisi.
 
 | Halaman / Fitur | Berkas View (`resources/views/livewire/pages/`) | Pola Legacy / Masalah Desain | Status |
 | :--- | :--- | :--- | :--- |
-| **Rekap Ranking Assessment**| `general-report/rekap-ranking-assessment.blade.php`| Tabel besar berisi rekap nilai gabungan semua peserta. Perlu diubah ke text-sm, py-2, dan high contrast. | [ ] Pending |
-| **Standard Psikometrik** | `general-report/standard-psikometrik.blade.php` | Rekapitulasi nilai psikogram agregat. Perlu border warm beige lembut. | [ ] Pending |
-| **Standard MC** | `general-report/standard-mc.blade.php` | Rekapitulasi nilai kompetensi manajerial agregat. | [ ] Pending |
-| **Standard MC Copy** | `general-report/standard-mc-copy.blade.php` | Salinan/variasi rekapitulasi MC. | [ ] Pending |
-| **MMPI Report** | `general-report/mmpi.blade.php` | Rekap hasil tes kepribadian klinis MMPI. | [ ] Pending |
-| **Event Statistics** | `general-report/statistic.blade.php` | Statistik distribusi nilai, membutuhkan kartu metrik minimalis. | [ ] Pending |
+| **Rekap Ranking Assessment**| `general-report/rekap-ranking-assessment.blade.php`| Tabel besar berisi rekap nilai gabungan semua peserta. Perlu diubah ke text-sm, py-2, dan high contrast. | **Selesai** |
+| **Standard Psikometrik** | `general-report/standard-psikometrik.blade.php` | Rekapitulasi nilai psikogram agregat. Perlu border warm beige lembut. | **Selesai** |
+| **Standard MC** | `general-report/standard-mc.blade.php` | Rekapitulasi nilai kompetensi manajerial agregat. | **Selesai** |
+| **Standard MC Copy** | `general-report/standard-mc-copy.blade.php` | Salinan/variasi rekapitulasi MC. | **Selesai** |
+| **MMPI Report** | `general-report/mmpi.blade.php` | Rekap hasil tes kepribadian klinis MMPI. | **Selesai** |
+| **Event Statistics** | `general-report/statistic.blade.php` | Statistik distribusi nilai, membutuhkan kartu metrik minimalis. | **Selesai** |
 
 ---
 

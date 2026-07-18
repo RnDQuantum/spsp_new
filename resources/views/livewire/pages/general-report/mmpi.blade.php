@@ -1,4 +1,4 @@
-<div class="max-w-full mx-auto bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+<div class="max-w-full mx-auto bg-white dark:bg-[#171412] p-6 rounded-lg shadow-md">
     <!-- Header -->
     <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
         <h1 class="text-2xl font-bold text-gray-800 dark:text-white uppercase tracking-wider">
@@ -80,7 +80,7 @@
     <div class="overflow-hidden shadow rounded-lg mb-8 border border-gray-200 dark:border-gray-700">
         <div class="overflow-x-auto">
             <table class="w-full divide-y divide-gray-200 dark:divide-gray-700 border-collapse">
-                <thead class="bg-gray-300 dark:bg-gray-600">
+                <thead class="bg-warm-ivory dark:bg-[#1f1b18] text-primary-ink dark:text-neutral-100">
                     <tr>
                         <th
                             class="py-3 px-4 text-center text-sm font-semibold text-gray-900 dark:text-white  border border-gray-200 dark:border-gray-500 w-16">
@@ -244,7 +244,7 @@
                         </th> --}}
                     </tr>
                 </thead>
-                <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                <tbody class="bg-white dark:bg-[#171412] divide-y divide-gray-200 dark:divide-gray-700">
                     @if ($mmpiResults->count() > 0)
                         @foreach ($mmpiResults as $result)
                             <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">

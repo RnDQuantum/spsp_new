@@ -1,4 +1,4 @@
-<div class="max-w-6xl mx-auto mt-10 bg-white dark:bg-gray-900 p-8 rounded shadow text-gray-900 dark:text-gray-100">
+<div class="max-w-6xl mx-auto mt-10 bg-white dark:bg-[#171412] p-8 rounded shadow text-gray-900 dark:text-gray-100">
 
     <!-- Dropdown Event, Position & Aspek -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
@@ -53,23 +53,23 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr class="bg-white dark:bg-gray-800">
+                    <tr class="bg-white dark:bg-[#171412]">
                         <td class="border border-black dark:border-gray-600 px-3 py-2">I (Rendah)</td>
                         <td class="border border-black dark:border-gray-600 px-3 py-2 text-center">1.00 - 1.80</td>
                     </tr>
-                    <tr class="bg-white dark:bg-gray-800">
+                    <tr class="bg-white dark:bg-[#171412]">
                         <td class="border border-black dark:border-gray-600 px-3 py-2">II (Kurang)</td>
                         <td class="border border-black dark:border-gray-600 px-3 py-2 text-center">1.80 - 2.60</td>
                     </tr>
-                    <tr class="bg-white dark:bg-gray-800">
+                    <tr class="bg-white dark:bg-[#171412]">
                         <td class="border border-black dark:border-gray-600 px-3 py-2">III (Cukup)</td>
                         <td class="border border-black dark:border-gray-600 px-3 py-2 text-center">2.60 - 3.40</td>
                     </tr>
-                    <tr class="bg-white dark:bg-gray-800">
+                    <tr class="bg-white dark:bg-[#171412]">
                         <td class="border border-black dark:border-gray-600 px-3 py-2">IV (Baik )</td>
                         <td class="border border-black dark:border-gray-600 px-3 py-2 text-center">3.40 - 4.20</td>
                     </tr>
-                    <tr class="bg-white dark:bg-gray-800">
+                    <tr class="bg-white dark:bg-[#171412]">
                         <td class="border border-black dark:border-gray-600 px-3 py-2">V (Baik Sekali)</td>
                         <td class="border border-black dark:border-gray-600 px-3 py-2 text-center">4.20 - 5.00</td>
                     </tr>
