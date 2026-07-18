@@ -77,12 +77,12 @@ Fitur spesifik untuk membantu penentuan prioritas pengembangan kapasitas.
 
 | Halaman / Fitur | Berkas View (`resources/views/livewire/pages/`) | Pola Legacy / Masalah Desain | Status |
 | :--- | :--- | :--- | :--- |
-| **Ranking MC Mapping** | `general-report/ranking/ranking-mc-mapping.blade.php`| Daftar ranking berdasarkan skor kompetensi. | [ ] Pending |
-| **Ranking Psy Mapping** | `general-report/ranking/ranking-psy-mapping.blade.php`| Daftar ranking berdasarkan skor potensi psikologi. | [ ] Pending |
-| **Capacity Building MC** | `general-report/ranking/capacitybuilding-mc.blade.php`| Tabel analisis kebutuhan pengembangan kompetensi. | [ ] Pending |
-| **Capacity Building Psy** | `general-report/ranking/capacitybuilding-psy.blade.php`| Tabel analisis kebutuhan pengembangan potensi. | [ ] Pending |
-| **Training Recommendation** | `general-report/training/training-recommendation.blade.php`| Rekomendasi program pelatihan bagi peserta yang di bawah standar. | [ ] Pending |
-| **Training Recommendation Alt**| `general-report/training/training-recomendation.blade.php` | Versi alternatif atau cadangan rekomendasi pelatihan. | [ ] Pending |
+| **Ranking MC Mapping** | `general-report/ranking/ranking-mc-mapping.blade.php`| Daftar ranking berdasarkan skor kompetensi. | **Selesai** |
+| **Ranking Psy Mapping** | `general-report/ranking/ranking-psy-mapping.blade.php`| Daftar ranking berdasarkan skor potensi psikologi. | **Selesai** |
+| **Capacity Building MC** | `general-report/ranking/capacitybuilding-mc.blade.php`| Tabel analisis kebutuhan pengembangan kompetensi. | **Selesai** |
+| **Capacity Building Psy** | `general-report/ranking/capacitybuilding-psy.blade.php`| Tabel analisis kebutuhan pengembangan potensi. | **Selesai** |
+| **Training Recommendation** | `general-report/training/training-recommendation.blade.php`| Rekomendasi program pelatihan bagi peserta yang di bawah standar. | **Selesai** |
+| **Training Recommendation Alt**| `general-report/training/training-recomendation.blade.php` | Versi alternatif atau cadangan rekomendasi pelatihan. | **Selesai** |
 | **Prioritas Perbaikan Atribut**| `general-report/training/prioritas-perbaikan-atribut.blade.php` | Analisis prioritas perbaikan kompetensi. | [ ] Pending |
 | **Training Participant Modal**| `general-report/training/attribute-participant-list-modal.blade.php`| Modal popup daftar peserta pelatihan per atribut. | [ ] Pending |
 

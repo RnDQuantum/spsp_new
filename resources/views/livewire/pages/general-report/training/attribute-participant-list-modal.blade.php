@@ -61,7 +61,7 @@
             </div>
 
             {{-- Dialog Body / Table --}}
-            <div class="max-h-96 overflow-x-auto bg-white dark:bg-gray-800 relative">
+            <div class="max-h-96 overflow-x-auto bg-white dark:bg-[#171412] relative">
                 {{-- Loading Overlay --}}
                 <div wire:loading wire:target="search,sortBy,nextPage,previousPage,gotoPage"
                     class="absolute inset-0 bg-white/80 dark:bg-gray-800/80 z-20 flex items-center justify-center">

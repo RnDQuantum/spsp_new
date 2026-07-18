@@ -1,4 +1,4 @@
-<div class="max-w-7xl mx-auto mt-10 bg-white dark:bg-gray-900 p-6 rounded-lg shadow-lg text-gray-900 dark:text-gray-100">
+<div class="max-w-7xl mx-auto mt-10 bg-white dark:bg-[#171412] p-6 rounded-lg shadow-lg text-gray-900 dark:text-gray-100">
 
     <!-- Tolerance Selector Component -->
     @if ($selectedEvent && $selectedAspect)
@@ -47,7 +47,7 @@
         <!-- SECTION 1: Summary -->
         <table class="w-full border border-black dark:border-gray-600 text-gray-900 dark:text-gray-100 text-sm">
             <tr>
-                <td class="border border-black dark:border-gray-600 font-semibold px-4 py-2 bg-white dark:bg-gray-800 w-1/2"
+                <td class="border border-black dark:border-gray-600 font-semibold px-4 py-2 bg-white dark:bg-[#171412] w-1/2"
                     colspan="3">
                     {{ $selectedEvent->name }}
                 </td>
@@ -70,7 +70,7 @@
                 <td
                     class="border border-black dark:border-gray-600 px-4 py-2 bg-red-50 dark:bg-red-900 text-center w-24 font-bold text-red-900 dark:text-red-400">
                     {{ number_format($this->recommendedPercentage, 2, ',', '.') }}%</td>
-                <td class="border border-black dark:border-gray-600 px-4 py-2 bg-white dark:bg-gray-800" rowspan="2">
+                <td class="border border-black dark:border-gray-600 px-4 py-2 bg-white dark:bg-[#171412]" rowspan="2">
                     {{-- Adjustment Indicators --}}
                     @if ($selectedTemplate)
                         <x-adjustment-indicator :template-id="$selectedTemplate->id" category-code="potensi" size="sm"
@@ -98,7 +98,7 @@
         <!-- SECTION 2: Selected Aspect Info -->
         <table class="w-full border border-black dark:border-gray-600 text-gray-900 dark:text-gray-100 text-sm mt-4">
             <tr>
-                <td class="border border-black dark:border-gray-600 font-normal px-4 py-2 align-middle bg-white dark:bg-gray-800"
+                <td class="border border-black dark:border-gray-600 font-normal px-4 py-2 align-middle bg-white dark:bg-[#171412]"
                     colspan="2">
                     Training recommended : <span class="font-bold underline ml-2">{{ $selectedAspect->name }}</span>
                 </td>
@@ -138,9 +138,9 @@
         <div class="overflow-x-auto mt-4 relative">
             <!-- Loading Indicator - Inside Container -->
             <div wire:loading wire:target="eventCode,aspectId,handleToleranceUpdate"
-                class="absolute inset-0 bg-white dark:bg-gray-900 bg-opacity-75 flex items-center justify-center z-10 rounded-lg">
+                class="absolute inset-0 bg-white dark:bg-[#171412] bg-opacity-75 flex items-center justify-center z-10 rounded-lg">
                 <div
-                    class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-lg border border-gray-200 dark:border-gray-600">
+                    class="bg-white dark:bg-[#171412] rounded-lg p-4 shadow-lg border border-gray-200 dark:border-gray-600">
                     <div class="flex items-center space-x-3">
                         <svg class="animate-spin h-6 w-6 text-blue-600" xmlns="http://www.w3.org/2000/svg"
                             fill="none" viewBox="0 0 24 24">
@@ -157,7 +157,7 @@
             </div>
 
             <table
-                class="w-full border border-black dark:border-gray-600 text-sm text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800">
+                class="w-full border border-black dark:border-gray-600 text-sm text-gray-900 dark:text-gray-100 bg-white dark:bg-[#171412]">
                 <thead>
                     <tr class="bg-gray-300 dark:bg-gray-700">
                         <th class="border border-black dark:border-gray-600 px-3 py-2 text-center">Priority</th>
@@ -171,7 +171,7 @@
                 <tbody>
                     @if ($participants && count($participants) > 0)
                         @foreach ($participants as $participant)
-                            <tr class="bg-white dark:bg-gray-800">
+                            <tr class="bg-white dark:bg-[#171412]">
                                 <td class="border border-black dark:border-gray-600 px-3 py-2 text-center">
                                     {{ $participant['priority'] }}
                                 </td>
@@ -242,7 +242,7 @@
     @endif
 
     @if ($selectedEvent && $aspectPriorities && $aspectPriorities->isNotEmpty())
-        <div class="max-w-7xl mx-auto mt-10 bg-white dark:bg-gray-900 p-6 rounded-lg shadow-lg">
+        <div class="max-w-7xl mx-auto mt-10 bg-white dark:bg-[#171412] p-6 rounded-lg shadow-lg">
             <!-- Header Section -->
             <div class="border-b-4 border-gray-800 dark:border-gray-600 pb-3 mb-6">
                 <h1 class="text-xl font-bold text-gray-900 dark:text-gray-100 uppercase">
@@ -272,9 +272,9 @@
                                 TINDAK LANJUT</th>
                         </tr>
                     </thead>
-                    <tbody class="bg-white dark:bg-gray-800">
+                    <tbody class="bg-white dark:bg-[#171412]">
                         @foreach ($aspectPriorities as $priority)
-                            <tr class="bg-white dark:bg-gray-800">
+                            <tr class="bg-white dark:bg-[#171412]">
                                 <td
                                     class="border-2 border-gray-900 dark:border-gray-600 px-4 py-2 text-center font-semibold">
                                     {{ $priority['priority'] }}

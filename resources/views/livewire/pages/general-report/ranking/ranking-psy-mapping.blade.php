@@ -1,7 +1,7 @@
-<div class="bg-white dark:bg-gray-900 mx-auto my-8 shadow overflow-hidden" style="max-width: 1200px;">
+<div class="bg-white dark:bg-[#171412] mx-auto my-8 border border-warm-border dark:border-[#25211e] rounded-md shadow-xs overflow-hidden" style="max-width: 1200px;">
     <!-- Header Section -->
-    <div class="border-b-4 border-black dark:border-gray-600 py-4 bg-white dark:bg-gray-800">
-        <h1 class="text-center text-2xl font-bold uppercase tracking-wide text-black dark:text-white">
+    <div class="border-b border-warm-border dark:border-[#25211e] py-6 bg-warm-ivory dark:bg-[#1f1b18]">
+        <h1 class="font-display text-center text-2xl font-bold tracking-tight text-primary-ink dark:text-neutral-100">
             PERINGKAT SKOR <i> PSYCHOLOGY MAPPING</i>
         </h1>
         <div class="flex justify-center items-center gap-4 mt-3 px-6">
@@ -29,20 +29,20 @@
         $templateId = $eventData['position']->template_id ?? null;
     @endphp
     @if ($templateId)
-        <div class="px-6 py-2 bg-gray-50 dark:bg-gray-700 border-b border-gray-300 dark:border-gray-600">
+        <div class="px-6 py-2 bg-gray-50 dark:bg-gray-700 border-b border-warm-border dark:border-[#25211e]">
             <x-adjustment-indicator :template-id="$templateId" category-code="potensi" size="sm" />
         </div>
     @endif
 
     <!-- Per Page Selector -->
-    <div class="px-6 pt-4 bg-white dark:bg-gray-900">
+    <div class="px-6 pt-4 bg-white dark:bg-[#171412]">
         <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
                 <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
                     Lihat Data:
                 </label>
                 <select wire:model.live="perPage"
-                    class="border-2 border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    class="border-2 border-warm-border dark:border-[#25211e] rounded-lg px-3 py-2 text-sm bg-white dark:bg-[#171412] text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                     <option value="10">10</option>
                     <option value="25">25</option>
                     <option value="50">50</option>
@@ -72,81 +72,81 @@
     </div>
 
     <!-- Table Section -->
-    <div class="px-6 pb-6 bg-white dark:bg-gray-900 overflow-x-auto">
+    <div class="px-6 pb-6 bg-white dark:bg-[#171412] overflow-x-auto">
         <table
-            class="min-w-full border-2 border-black dark:border-gray-600 text-sm text-gray-900 dark:text-gray-100 mt-6">
+            class="min-w-full border border-warm-border dark:border-[#25211e] text-sm text-gray-900 dark:text-gray-100 mt-6">
             <thead>
                 <tr class="bg-gray-200 dark:bg-gray-700">
-                    <th class="border-2 border-black dark:border-gray-600 px-3 py-3 text-center" rowspan="2">
+                    <th class="border border-warm-border dark:border-[#25211e] px-3 py-3 text-center" rowspan="2">
                         Peringkat
                     </th>
-                    <th class="border-2 border-black dark:border-gray-600 px-3 py-3 text-center" rowspan="2">NIP</th>
-                    <th class="border-2 border-black dark:border-gray-600 px-3 py-3 text-center" rowspan="2">Nama
+                    <th class="border border-warm-border dark:border-[#25211e] px-3 py-3 text-center" rowspan="2">NIP</th>
+                    <th class="border border-warm-border dark:border-[#25211e] px-3 py-3 text-center" rowspan="2">Nama
                     </th>
-                    <th class="border-2 border-black dark:border-gray-600 px-3 py-3 text-center" rowspan="2">Jabatan
+                    <th class="border border-warm-border dark:border-[#25211e] px-3 py-3 text-center" rowspan="2">Jabatan
                     </th>
-                    <th class="border-2 border-black dark:border-gray-600 px-3 py-3 text-center" colspan="2">
+                    <th class="border border-warm-border dark:border-[#25211e] px-3 py-3 text-center" colspan="2">
                         <span x-data
                             x-text="$wire.tolerancePercentage > 0 ? 'Standar (-' + $wire.tolerancePercentage + '%)' : 'Standar'"></span>
                     </th>
-                    <th class="border-2 border-black dark:border-gray-600 px-3 py-3 text-center" colspan="2">
+                    <th class="border border-warm-border dark:border-[#25211e] px-3 py-3 text-center" colspan="2">
                         Individu
                     </th>
-                    <th class="border-2 border-black dark:border-gray-600 px-3 py-3 text-center" colspan="2">Gap
+                    <th class="border border-warm-border dark:border-[#25211e] px-3 py-3 text-center" colspan="2">Gap
                     </th>
-                    <th class="border-2 border-black dark:border-gray-600 px-3 py-3 text-center" rowspan="2">
+                    <th class="border border-warm-border dark:border-[#25211e] px-3 py-3 text-center" rowspan="2">
                         Persentase<br>Kesesuaian</th>
-                    <th class="border-2 border-black dark:border-gray-600 px-3 py-3 text-center" rowspan="2">
+                    <th class="border border-warm-border dark:border-[#25211e] px-3 py-3 text-center" rowspan="2">
                         Kesimpulan
                     </th>
                 </tr>
                 <tr class="bg-gray-200 dark:bg-gray-700">
-                    <th class="border-2 border-black dark:border-gray-600 px-3 py-1 font-semibold italic">Rating
+                    <th class="border border-warm-border dark:border-[#25211e] px-3 py-1 font-semibold italic">Rating
                     </th>
-                    <th class="border-2 border-black dark:border-gray-600 px-3 py-1 font-semibold">Skor</th>
-                    <th class="border-2 border-black dark:border-gray-600 px-3 py-1 font-semibold italic">Rating
+                    <th class="border border-warm-border dark:border-[#25211e] px-3 py-1 font-semibold">Skor</th>
+                    <th class="border border-warm-border dark:border-[#25211e] px-3 py-1 font-semibold italic">Rating
                     </th>
-                    <th class="border-2 border-black dark:border-gray-600 px-3 py-1 font-semibold">Skor</th>
-                    <th class="border-2 border-black dark:border-gray-600 px-3 py-1 font-semibold italic">Rating
+                    <th class="border border-warm-border dark:border-[#25211e] px-3 py-1 font-semibold">Skor</th>
+                    <th class="border border-warm-border dark:border-[#25211e] px-3 py-1 font-semibold italic">Rating
                     </th>
-                    <th class="border-2 border-black dark:border-gray-600 px-3 py-1 font-semibold">Skor</th>
+                    <th class="border border-warm-border dark:border-[#25211e] px-3 py-1 font-semibold">Skor</th>
                 </tr>
             </thead>
             <tbody>
                 @if ($rankings && $rankings->count() > 0)
                     @foreach ($rankings as $row)
-                        <tr class="bg-white dark:bg-gray-800">
-                            <td class="border-2 border-black dark:border-gray-600 px-3 py-2 text-center">
+                        <tr class="bg-white dark:bg-[#171412]">
+                            <td class="border border-warm-border dark:border-[#25211e] px-3 py-2 text-center">
                                 {{ $row['rank'] }}</td>
-                            <td class="border-2 border-black dark:border-gray-600 px-3 py-2 text-center">
+                            <td class="border border-warm-border dark:border-[#25211e] px-3 py-2 text-center">
                                 {{ $row['nip'] }}</td>
-                            <td class="border-2 border-black dark:border-gray-600 px-3 py-2">{{ $row['name'] }}</td>
-                            <td class="border-2 border-black dark:border-gray-600 px-3 py-2">{{ $row['position'] }}
+                            <td class="border border-warm-border dark:border-[#25211e] px-3 py-2">{{ $row['name'] }}</td>
+                            <td class="border border-warm-border dark:border-[#25211e] px-3 py-2">{{ $row['position'] }}
                             </td>
-                            <td class="border-2 border-black dark:border-gray-600 px-3 py-2 text-center">
+                            <td class="border border-warm-border dark:border-[#25211e] px-3 py-2 text-center">
                                 {{ number_format($row['standard_rating'], 2) }}</td>
-                            <td class="border-2 border-black dark:border-gray-600 px-3 py-2 text-center">
+                            <td class="border border-warm-border dark:border-[#25211e] px-3 py-2 text-center">
                                 {{ number_format($row['standard_score'], 2) }}</td>
-                            <td class="border-2 border-black dark:border-gray-600 px-3 py-2 text-center">
+                            <td class="border border-warm-border dark:border-[#25211e] px-3 py-2 text-center">
                                 {{ number_format($row['individual_rating'], 2) }}</td>
-                            <td class="border-2 border-black dark:border-gray-600 px-3 py-2 text-center">
+                            <td class="border border-warm-border dark:border-[#25211e] px-3 py-2 text-center">
                                 {{ number_format($row['individual_score'], 2) }}</td>
-                            <td class="border-2 border-black dark:border-gray-600 px-3 py-2 text-center">
+                            <td class="border border-warm-border dark:border-[#25211e] px-3 py-2 text-center">
                                 {{ number_format($row['gap_rating'], 2) }}</td>
-                            <td class="border-2 border-black dark:border-gray-600 px-3 py-2 text-center">
+                            <td class="border border-warm-border dark:border-[#25211e] px-3 py-2 text-center">
                                 {{ number_format($row['gap_score'], 2) }}</td>
-                            <td class="border-2 border-black dark:border-gray-600 px-3 py-2 text-center">
+                            <td class="border border-warm-border dark:border-[#25211e] px-3 py-2 text-center">
                                 {{ number_format($row['percentage_score'], 2) }}%</td>
                             <td
-                                class="border-2 border-black dark:border-gray-600 px-3 py-2 text-center font-bold {{ $conclusionConfig[$row['conclusion']]['tailwindClass'] ?? 'bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-white' }}">
+                                class="border border-warm-border dark:border-[#25211e] px-3 py-2 text-center font-bold {{ $conclusionConfig[$row['conclusion']]['tailwindClass'] ?? 'bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-white' }}">
                                 {{ $row['conclusion'] }}
                             </td>
                         </tr>
                     @endforeach
                 @else
-                    <tr class="bg-white dark:bg-gray-800">
+                    <tr class="bg-white dark:bg-[#171412]">
                         <td colspan="12"
-                            class="border-2 border-black dark:border-gray-600 px-3 py-4 text-center text-gray-500 dark:text-gray-400">
+                            class="border border-warm-border dark:border-[#25211e] px-3 py-4 text-center text-gray-500 dark:text-gray-400">
                             Tidak ada data untuk ditampilkan. Silakan pilih event dan jabatan.
                         </td>
                     </tr>
@@ -162,7 +162,7 @@
 
     <!-- Standard & Threshold Info Box -->
     @if ($standardInfo)
-        <div class="px-6 pb-6 bg-white dark:bg-gray-900">
+        <div class="px-6 pb-6 bg-white dark:bg-[#171412]">
             <div class="rounded-lg p-4 shadow-sm">
                 <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2">
                     <svg class="w-5 h-5 text-black dark:text-gray-200" fill="none" stroke="currentColor"
@@ -177,7 +177,7 @@
                 <div x-data="{ tolerance: $wire.entangle('tolerancePercentage') }" class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
                     <!-- Original Standard -->
-                    <div class="bg-white dark:bg-gray-800 border-1 border-gray-400 dark:border-gray-300 rounded-lg p-3">
+                    <div class="bg-white dark:bg-[#171412] border-1 border-gray-400 dark:border-gray-300 rounded-lg p-3">
                         <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Standar</div>
                         <div class="text-2xl font-bold text-gray-900 dark:text-gray-100">
                             {{ number_format($standardInfo['original_standard'], 2) }}</div>
@@ -190,7 +190,7 @@
                         x-transition:leave="transition ease-in duration-200"
                         x-transition:leave-start="opacity-100 transform scale-100"
                         x-transition:leave-end="opacity-0 transform scale-95"
-                        class="bg-white dark:bg-gray-800 border-1 border-gray-400 dark:border-gray-300 rounded-lg p-3">
+                        class="bg-white dark:bg-[#171412] border-1 border-gray-400 dark:border-gray-300 rounded-lg p-3">
                         <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Standar yang diberi toleransi
                             <span x-text="tolerance > 0 ? '(' + tolerance + '%)' : ''"></span>
                         </div>
@@ -236,7 +236,7 @@
                 $passingPercentage = $totalParticipants > 0 ? round(($passingCount / $totalParticipants) * 100, 1) : 0;
             @endphp
 
-            <div class="bg-white dark:bg-gray-800 border-2 border-black dark:border-gray-600 rounded-lg p-4">
+            <div class="bg-white dark:bg-[#171412] border border-warm-border dark:border-[#25211e] rounded-lg p-4">
                 <div class="grid grid-cols-3 gap-4 text-center">
                     <div>
                         <div class="text-lg font-bold text-gray-900 dark:text-gray-100">{{ $totalParticipants }}</div>
@@ -277,7 +277,7 @@
 
     <!-- Pie Chart Section -->
     @if (!empty($conclusionSummary))
-        <div class="mt-8 border-t-2 border-black dark:border-gray-600 pt-6 bg-white dark:bg-gray-900"
+        <div class="mt-8 border-t-2 border-black dark:border-gray-600 pt-6 bg-white dark:bg-[#171412]"
             x-data="{
                 refreshChart() {
                     const labels = @js($chartLabels);
@@ -297,7 +297,7 @@
                 <!-- Content Grid -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
                     <!-- Chart Section -->
-                    <div class="border border-gray-300 dark:border-gray-600 p-2 rounded-lg bg-gray-50 dark:bg-gray-800 transition-shadow duration-300 hover:shadow-xl"
+                    <div class="border border-warm-border dark:border-[#25211e] p-2 rounded-lg bg-gray-50 dark:bg-gray-800 transition-shadow duration-300 hover:shadow-xl"
                         wire:ignore>
                         <canvas id="conclusionPieChart" class="w-full h-full"></canvas>
                     </div>
@@ -308,20 +308,20 @@
                             <thead>
                                 <tr class="bg-gray-200 dark:bg-gray-700">
                                     <th
-                                        class="border-2 border-gray-400 dark:border-gray-500 px-4 py-3 text-center font-bold">
+                                        class="border-2 border-warm-border dark:border-[#25211e] px-4 py-3 text-center font-bold">
                                         KETERANGAN
                                     </th>
                                     <th
-                                        class="border-2 border-gray-400 dark:border-gray-500 px-4 py-3 text-center font-bold">
+                                        class="border-2 border-warm-border dark:border-[#25211e] px-4 py-3 text-center font-bold">
                                         JUMLAH
                                     </th>
                                     <th
-                                        class="border-2 border-gray-400 dark:border-gray-500 px-4 py-3 text-center font-bold">
+                                        class="border-2 border-warm-border dark:border-[#25211e] px-4 py-3 text-center font-bold">
                                         PERSENTASE
                                     </th>
                                 </tr>
                             </thead>
-                            <tbody class="bg-white dark:bg-gray-800">
+                            <tbody class="bg-white dark:bg-[#171412]">
                                 @foreach ($conclusionSummary as $conclusion => $count)
                                     @php
                                         $percentage =
@@ -333,26 +333,26 @@
                                     @endphp
                                     <tr>
                                         <td
-                                            class="border-2 border-gray-400 dark:border-gray-500 px-4 py-3 font-bold {{ $tailwindClass }}">
+                                            class="border-2 border-warm-border dark:border-[#25211e] px-4 py-3 font-bold {{ $tailwindClass }}">
                                             {{ $conclusion }}
                                         </td>
                                         <td
-                                            class="border-2 border-gray-400 dark:border-gray-500 px-4 py-3 text-center">
+                                            class="border-2 border-warm-border dark:border-[#25211e] px-4 py-3 text-center">
                                             {{ $count }}
                                             orang
                                         </td>
                                         <td
-                                            class="border-2 border-gray-400 dark:border-gray-500 px-4 py-3 text-center">
+                                            class="border-2 border-warm-border dark:border-[#25211e] px-4 py-3 text-center">
                                             {{ $percentage }}%
                                         </td>
                                     </tr>
                                 @endforeach
-                                <tr class="bg-gray-100 dark:bg-gray-700 font-semibold">
-                                    <td class="border-2 border-gray-400 dark:border-gray-500 px-4 py-3">Jumlah
+                                <tr class="bg-warm-ivory/50 dark:bg-[#1f1b18]/60 text-primary-ink dark:text-neutral-100 font-semibold">
+                                    <td class="border-2 border-warm-border dark:border-[#25211e] px-4 py-3">Jumlah
                                         Responden</td>
-                                    <td class="border-2 border-gray-400 dark:border-gray-500 px-4 py-3 text-center">
+                                    <td class="border-2 border-warm-border dark:border-[#25211e] px-4 py-3 text-center">
                                         {{ $totalParticipants }} orang</td>
-                                    <td class="border-2 border-gray-400 dark:border-gray-500 px-4 py-3 text-center">
+                                    <td class="border-2 border-warm-border dark:border-[#25211e] px-4 py-3 text-center">
                                         100.00%</td>
                                 </tr>
                             </tbody>
