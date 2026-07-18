@@ -2,7 +2,7 @@
     {{-- Include Participant List Modal --}}
     <livewire:pages.talent-pool.participant-list-modal />
 
-    <div class="max-w-6xl mx-auto p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md mt-10 relative">
+    <div class="max-w-6xl mx-auto p-6 border border-warm-border dark:border-[#25211e] bg-white dark:bg-[#171412] rounded-md shadow-xs mt-10 relative">
 
         {{-- Loading overlay untuk dynamic updates (live update, no reload) --}}
         <div wire:loading wire:target="handleStandardUpdate, handleEventSelected, handlePositionSelected"
@@ -13,8 +13,7 @@
             </div>
         </div>
 
-        <h1 class="text-center text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2">Matriks 9-Kotak Kinerja dan
-            Potensi</h1>
+        <h1 class="font-display text-center text-2xl font-bold tracking-tight text-primary-ink dark:text-neutral-100 mb-2">Matriks 9-Kotak Kinerja dan Potensi</h1>
         <div class="text-center text-gray-600 dark:text-gray-400 mb-8 text-sm">9-Box Performance Matrix: Kinerja dan
             Potensi Karyawan</div>
 
@@ -58,12 +57,12 @@
         @endif
 
         <div>
-            <h2 class="text-base font-bold mb-3 text-gray-800 dark:text-gray-100">Keterangan Kotak</h2>
+            <h2 class="font-display text-base font-bold mb-3 text-primary-ink dark:text-neutral-100">Keterangan Kotak</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"
                 style="grid-auto-flow: column; grid-template-rows: repeat(3, auto);">
                 @foreach ([1, 2, 3, 4, 5, 6, 7, 8, 9] as $boxNumber)
                     <div
-                        class="flex items-center gap-3 p-2 rounded-lg bg-gray-50 dark:bg-gray-800 hover:shadow-md transition-shadow duration-200">
+                        class="flex items-center gap-3 p-2 rounded-lg bg-warm-ivory/50 dark:bg-[#1f1b18]/60 border border-warm-border dark:border-[#25211e] transition-shadow duration-200">
                         <div class="w-6 h-6 rounded-full flex-shrink-0 shadow-sm"
                             style="background:{{ $this->boxConfig[$boxNumber]['color'] }}"></div>
                         <div class="flex-1">
@@ -80,50 +79,50 @@
         {{-- Tabel Statistik --}}
         @if ($this->boxBoundaries)
             <div class="mt-6">
-                <h2 class="text-sm font-semibold mb-2">Statistik Distribusi</h2>
-                <table class="min-w-full border-collapse border border-gray-300 dark:border-gray-600">
+                <h2 class="font-display text-sm font-bold mb-2 text-primary-ink dark:text-neutral-100">Statistik Distribusi</h2>
+                <table class="min-w-full border-collapse border border-warm-border dark:border-[#25211e]">
                     <thead>
-                        <tr class="bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                        <tr class="bg-warm-ivory dark:bg-[#1f1b18] text-primary-ink dark:text-neutral-100">
                             <th
-                                class="border border-gray-300 dark:border-gray-600 px-4 py-2 text-center font-bold text-sm">
+                                class="border border-warm-border dark:border-[#25211e] px-4 py-2 text-center font-bold text-sm">
                                 Kategori</th>
                             <th
-                                class="border border-gray-300 dark:border-gray-600 px-4 py-2 text-center font-bold text-sm">
+                                class="border border-warm-border dark:border-[#25211e] px-4 py-2 text-center font-bold text-sm">
                                 Rata-rata (μ)</th>
                             <th
-                                class="border border-gray-300 dark:border-gray-600 px-4 py-2 text-center font-bold text-sm">
+                                class="border border-warm-border dark:border-[#25211e] px-4 py-2 text-center font-bold text-sm">
                                 Standar Deviasi (σ)</th>
                             <th
-                                class="border border-gray-300 dark:border-gray-600 px-4 py-2 text-center font-bold text-sm">
+                                class="border border-warm-border dark:border-[#25211e] px-4 py-2 text-center font-bold text-sm">
                                 Batas Bawah (μ - σ)</th>
                             <th
-                                class="border border-gray-300 dark:border-gray-600 px-4 py-2 text-center font-bold text-sm">
+                                class="border border-warm-border dark:border-[#25211e] px-4 py-2 text-center font-bold text-sm">
                                 Batas Atas (μ + σ)</th>
                         </tr>
                     </thead>
-                    <tbody class="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
+                    <tbody class="bg-white dark:bg-[#171412] text-primary-ink dark:text-neutral-100">
                         <tr>
-                            <td class="border border-gray-300 dark:border-gray-600 px-4 py-2 font-semibold text-sm">
+                            <td class="border border-warm-border dark:border-[#25211e] px-4 py-2 font-semibold text-sm">
                                 Potensi</td>
-                            <td class="border border-gray-300 dark:border-gray-600 px-4 py-2 text-center text-sm">
+                            <td class="border border-warm-border dark:border-[#25211e] px-4 py-2 text-center text-sm">
                                 {{ number_format($this->boxBoundaries['potensi']['avg'], 2) }}</td>
-                            <td class="border border-gray-300 dark:border-gray-600 px-4 py-2 text-center text-sm">
+                            <td class="border border-warm-border dark:border-[#25211e] px-4 py-2 text-center text-sm">
                                 {{ number_format($this->boxBoundaries['potensi']['std_dev'], 2) }}</td>
-                            <td class="border border-gray-300 dark:border-gray-600 px-4 py-2 text-center text-sm">
+                            <td class="border border-warm-border dark:border-[#25211e] px-4 py-2 text-center text-sm">
                                 {{ number_format($this->boxBoundaries['potensi']['lower_bound'], 2) }}</td>
-                            <td class="border border-gray-300 dark:border-gray-600 px-4 py-2 text-center text-sm">
+                            <td class="border border-warm-border dark:border-[#25211e] px-4 py-2 text-center text-sm">
                                 {{ number_format($this->boxBoundaries['potensi']['upper_bound'], 2) }}</td>
                         </tr>
-                        <tr class="bg-gray-50 dark:bg-gray-900">
-                            <td class="border border-gray-300 dark:border-gray-600 px-4 py-2 font-semibold text-sm">
+                        <tr class="bg-warm-ivory/30 dark:bg-[#1f1b18]/40">
+                            <td class="border border-warm-border dark:border-[#25211e] px-4 py-2 font-semibold text-sm">
                                 Kompetensi</td>
-                            <td class="border border-gray-300 dark:border-gray-600 px-4 py-2 text-center text-sm">
+                            <td class="border border-warm-border dark:border-[#25211e] px-4 py-2 text-center text-sm">
                                 {{ number_format($this->boxBoundaries['kinerja']['avg'], 2) }}</td>
-                            <td class="border border-gray-300 dark:border-gray-600 px-4 py-2 text-center text-sm">
+                            <td class="border border-warm-border dark:border-[#25211e] px-4 py-2 text-center text-sm">
                                 {{ number_format($this->boxBoundaries['kinerja']['std_dev'], 2) }}</td>
-                            <td class="border border-gray-300 dark:border-gray-600 px-4 py-2 text-center text-sm">
+                            <td class="border border-warm-border dark:border-[#25211e] px-4 py-2 text-center text-sm">
                                 {{ number_format($this->boxBoundaries['kinerja']['lower_bound'], 2) }}</td>
-                            <td class="border border-gray-300 dark:border-gray-600 px-4 py-2 text-center text-sm">
+                            <td class="border border-warm-border dark:border-[#25211e] px-4 py-2 text-center text-sm">
                                 {{ number_format($this->boxBoundaries['kinerja']['upper_bound'], 2) }}</td>
                         </tr>
                     </tbody>
@@ -132,17 +131,15 @@
         @endif
 
 
-        <hr class="mt-6 mb-4 border-t border-2 border-gray-400 dark:border-gray-600">
+        <hr class="mt-6 mb-4 border-t border-warm-border dark:border-[#25211e]">
 
-        <div class="mt-8 border-t-2 border-gray-400 dark:border-gray-600 pt-6">
-            <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100 mb-6 text-center italic">Distribusi Talent
-                Pool
-                9-Box Matrix</h3>
+        <div class="mt-8 border-t border-warm-border dark:border-[#25211e] pt-6">
+            <h3 class="font-display text-lg font-bold text-primary-ink dark:text-neutral-100 mb-6 text-center">Distribusi Talent Pool 9-Box Matrix</h3>
 
             <!-- Content Grid -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
                 <!-- Chart Section -->
-                <div class="border border-gray-300 dark:border-gray-600 p-4 rounded-lg bg-gray-50 dark:bg-gray-800 transition-shadow duration-300 hover:shadow-xl"
+                <div class="border border-warm-border dark:border-[#25211e] p-4 rounded-lg bg-gray-50 dark:bg-gray-800 transition-shadow duration-300 hover:shadow-xl"
                     wire:ignore style="min-height: 400px;">
                     <div class="text-center text-xs text-gray-500 dark:text-gray-400 mb-2 italic">
                         💡 Klik pada chart untuk melihat detail peserta
@@ -154,25 +151,25 @@
                 <div class="rounded-md overflow-hidden" wire:ignore>
                     <table class="w-full text-sm text-gray-900 dark:text-gray-100">
                         <thead>
-                            <tr class="bg-gray-200 dark:bg-gray-700">
+                            <tr class="bg-warm-ivory dark:bg-[#1f1b18] text-primary-ink dark:text-neutral-100 border-b border-warm-border dark:border-[#25211e]">
                                 <th
-                                    class="border-2 border-gray-400 dark:border-gray-500 px-4 py-3 text-center font-bold">
+                                    class="border border-warm-border dark:border-[#25211e] px-4 py-3 text-center font-bold">
                                     KOTAK</th>
                                 <th
-                                    class="border-2 border-gray-400 dark:border-gray-500 px-4 py-3 text-center font-bold">
+                                    class="border border-warm-border dark:border-[#25211e] px-4 py-3 text-center font-bold">
                                     KATEGORI</th>
                                 <th
-                                    class="border-2 border-gray-400 dark:border-gray-500 px-4 py-3 text-center font-bold">
+                                    class="border border-warm-border dark:border-[#25211e] px-4 py-3 text-center font-bold">
                                     JUMLAH</th>
                                 <th
-                                    class="border-2 border-gray-400 dark:border-gray-500 px-4 py-3 text-center font-bold">
+                                    class="border border-warm-border dark:border-[#25211e] px-4 py-3 text-center font-bold">
                                     PERSENTASE</th>
                                 <th
-                                    class="border-2 border-gray-400 dark:border-gray-500 px-4 py-3 text-center font-bold">
+                                    class="border border-warm-border dark:border-[#25211e] px-4 py-3 text-center font-bold">
                                     AKSI</th>
                             </tr>
                         </thead>
-                        <tbody id="boxSummaryBody" class="bg-white dark:bg-gray-800">
+                        <tbody id="boxSummaryBody" class="bg-white dark:bg-[#171412] text-primary-ink dark:text-neutral-100 divide-y divide-warm-border dark:divide-[#25211e]/40 text-sm">
                             <!-- Diisi via JS -->
                         </tbody>
                     </table>
@@ -753,35 +750,35 @@
 
                         const tdBox = document.createElement('td');
                         tdBox.className =
-                            'border-2 border-gray-400 dark:border-gray-500 px-4 py-3 text-center font-bold';
+                            'border border-warm-border dark:border-[#25211e] px-4 py-3 text-center font-bold';
                         const bgColor = config?.color || '#9E9E9E';
                         tdBox.style.backgroundColor = bgColor;
                         tdBox.style.color = getContrastColor(bgColor);
                         tdBox.textContent = config?.code || 'K-' + box;
 
                         const tdLabel = document.createElement('td');
-                        tdLabel.className = 'border-2 border-gray-400 dark:border-gray-500 px-4 py-3';
+                        tdLabel.className = 'border border-warm-border dark:border-[#25211e] px-4 py-3';
                         tdLabel.textContent = config?.label || 'Unknown';
 
                         const tdCount = document.createElement('td');
-                        tdCount.className = 'border-2 border-gray-400 dark:border-gray-500 px-4 py-3 text-center';
+                        tdCount.className = 'border border-warm-border dark:border-[#25211e] px-4 py-3 text-center';
                         tdCount.textContent = boxStatistics[box].count + ' orang';
 
                         const tdPercent = document.createElement('td');
-                        tdPercent.className = 'border-2 border-gray-400 dark:border-gray-500 px-4 py-3 text-center';
+                        tdPercent.className = 'border border-warm-border dark:border-[#25211e] px-4 py-3 text-center';
                         tdPercent.textContent = boxStatistics[box].percentage + '%';
 
                         // Add Action column with button
                         const tdAction = document.createElement('td');
-                        tdAction.className = 'border-2 border-gray-400 dark:border-gray-500 px-4 py-3 text-center';
+                        tdAction.className = 'border border-warm-border dark:border-[#25211e] px-4 py-3 text-center';
 
                         const button = document.createElement('button');
                         button.className =
-                            'inline-flex items-center gap-1 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed';
+                            'inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-primary-ink dark:text-neutral-200 bg-warm-ivory dark:bg-[#1f1b18] border border-warm-border dark:border-[#25211e] rounded-md hover:bg-primary-ink hover:text-warm-ivory dark:hover:bg-amber-600 dark:hover:text-white transition-colors shadow-xs disabled:opacity-50 disabled:cursor-not-allowed';
                         button.onclick = () => openParticipantModal(box);
                         button.disabled = boxStatistics[box].count === 0;
                         button.innerHTML = `
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-3.5 h-3.5 text-accent-amber" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                     </svg>
@@ -800,23 +797,23 @@
 
                 // Add total row
                 const totalRow = document.createElement('tr');
-                totalRow.className = 'bg-gray-100 dark:bg-gray-700 font-semibold';
+                totalRow.className = 'bg-warm-ivory dark:bg-[#1f1b18] font-semibold text-primary-ink dark:text-neutral-100';
 
                 const tdTotalLabel = document.createElement('td');
-                tdTotalLabel.className = 'border-2 border-gray-400 dark:border-gray-500 px-4 py-3';
+                tdTotalLabel.className = 'border border-warm-border dark:border-[#25211e] px-4 py-3';
                 tdTotalLabel.colSpan = 2;
                 tdTotalLabel.textContent = 'Total Peserta';
 
                 const tdTotalCount = document.createElement('td');
-                tdTotalCount.className = 'border-2 border-gray-400 dark:border-gray-500 px-4 py-3 text-center';
+                tdTotalCount.className = 'border border-warm-border dark:border-[#25211e] px-4 py-3 text-center';
                 tdTotalCount.textContent = totalCount + ' orang';
 
                 const tdTotalPercent = document.createElement('td');
-                tdTotalPercent.className = 'border-2 border-gray-400 dark:border-gray-500 px-4 py-3 text-center';
+                tdTotalPercent.className = 'border border-warm-border dark:border-[#25211e] px-4 py-3 text-center';
                 tdTotalPercent.textContent = '100.00%';
 
                 const tdTotalAction = document.createElement('td');
-                tdTotalAction.className = 'border-2 border-gray-400 dark:border-gray-500 px-4 py-3 text-center';
+                tdTotalAction.className = 'border border-warm-border dark:border-[#25211e] px-4 py-3 text-center';
                 tdTotalAction.textContent = '';
 
                 totalRow.appendChild(tdTotalLabel);
