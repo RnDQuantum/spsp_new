@@ -81,7 +81,7 @@ Fitur spesifik untuk membantu penentuan prioritas pengembangan kapasitas.
 
 | Halaman / Fitur | Berkas View (`resources/views/livewire/pages/`) | Pola Legacy / Masalah Desain | Status |
 | :--- | :--- | :--- | :--- |
-| **Ranking MC Mapping** | `general-report/ranking/ranking-mc-mapping.blade.php`| Daftar ranking berdasarkan skor kompetensi. | **Selesai** |
+| **Ranking MC Mapping** | `general-report/ranking/ranking-mc-mapping.blade.php`| Daftar ranking berdasarkan skor kompetensi. | **Selesai** (Standar Benchmark 100%) |
 | **Ranking Psy Mapping** | `general-report/ranking/ranking-psy-mapping.blade.php`| Daftar ranking berdasarkan skor potensi psikologi. | **Selesai** (Standar Benchmark 100%) |
 | **Capacity Building MC** | `general-report/ranking/capacitybuilding-mc.blade.php`| Tabel analisis kebutuhan pengembangan kompetensi. | **Selesai** |
 | **Capacity Building Psy** | `general-report/ranking/capacitybuilding-psy.blade.php`| Tabel analisis kebutuhan pengembangan potensi. | **Selesai** |
