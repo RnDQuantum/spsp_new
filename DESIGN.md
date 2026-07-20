@@ -153,11 +153,16 @@ SPSP reports display dense multidimensional metrics. The table design balances h
 - **Cell Padding**: Vertical padding must be **`py-2` (8px)**, and horizontal padding **`px-4` (16px)** to stay compact yet breathable.
 - **Headers & Totals**: Lighter warm-ivory background (`bg-warm-ivory` / `dark:bg-[#1f1b18]`) with bold text and solid high contrast.
 - **Empty Total Cells**: Fill with subtle neutral tint (`bg-warm-border/40 dark:bg-[#25211e]/40`).
-- **Font-Weights**:
-  - Aspect names: `font-semibold text-primary-ink dark:text-neutral-100`.
-  - Values & numbers: `font-normal text-primary-ink dark:text-neutral-200` to prevent visual clutter.
-  - Text sizes: set to **`text-sm` (14px)** for table body, **`text-xs` (12px)** for conclusion badges.
-  - Fallback badge style: `bg-warm-border/60 dark:bg-[#25211e] text-primary-ink dark:text-neutral-200`.
+- **Row Numbering**: Always use Arab numerals (`1, 2, 3...`) instead of Roman numerals (`I, II, III...`) to ensure layout stability and instant legibility across narrow `NO.` columns.
+- **Font-Weight Hierarchy**:
+  - Column Headers (`<thead>`): `font-bold text-xs uppercase tracking-wider text-primary-ink dark:text-neutral-100`.
+  - Main Aspect Category Headers: `font-bold text-sm text-primary-ink dark:text-neutral-100`.
+  - Sub-Aspect Names: `font-medium text-xs text-primary-ink dark:text-neutral-200`.
+  - Row Numbers (`NO.`): `font-medium text-xs font-mono-data text-primary-ink/70 dark:text-neutral-400`.
+  - Data Values & Scores: `font-medium text-xs font-mono-data text-primary-ink dark:text-neutral-200` to prevent visual clutter while maintaining alignment.
+  - Totals / Summary Rows: `font-bold text-sm font-mono-data text-primary-ink dark:text-neutral-100`.
+  - Conclusion Badges: `font-bold text-xs uppercase tracking-wider px-2.5 py-1 rounded`.
+  - Fallback Badge Style: `bg-warm-border/60 dark:bg-[#25211e] text-primary-ink dark:text-neutral-200`.
   - **Standard Rating Cell**: Medium neutral gray (`#797979` in light mode, `#6b7280` in dark mode) to ensure target standard cells remain distinct and visible across both light and dark modes.
 
 ### Spider Plot Charts (SPSP)
