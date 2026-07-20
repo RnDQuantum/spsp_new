@@ -455,7 +455,8 @@
                                             showLabelBackdrop: false,
                                             display: false, // SEMBUNYIKAN TICKS DEFAULT
                                             font: {
-                                                size: 16,
+                                                size: 15,
+                                                weight: '600',
                                                 family: "'Instrument Sans', sans-serif"
                                             },
                                             z: 2
@@ -493,8 +494,8 @@
                                     const xCenter = scale.xCenter;
 
                                     ctx.save();
-                                    ctx.font = scale.options.ticks.font.size + "px 'Instrument Sans', sans-serif";
-                                    ctx.fillStyle = scale.options.ticks.color || '#000';
+                                    ctx.font = "600 " + (scale.options.ticks.font.size || 15) + "px 'Instrument Sans', sans-serif";
+                                    ctx.fillStyle = scale.options.ticks.color || '#171412';
                                     ctx.textAlign = 'center';
                                     ctx.textBaseline = 'middle';
 
@@ -803,7 +804,8 @@
                                             showLabelBackdrop: false,
                                             display: false, // SEMBUNYIKAN TICKS DEFAULT
                                             font: {
-                                                size: 16,
+                                                size: 15,
+                                                weight: '600',
                                                 family: "'Instrument Sans', sans-serif"
                                             },
                                             z: 2
@@ -841,8 +843,8 @@
                                     const xCenter = scale.xCenter;
 
                                     ctx.save();
-                                    ctx.font = scale.options.ticks.font.size + "px 'Instrument Sans', sans-serif";
-                                    ctx.fillStyle = scale.options.ticks.color || '#000';
+                                    ctx.font = "600 " + (scale.options.ticks.font.size || 15) + "px 'Instrument Sans', sans-serif";
+                                    ctx.fillStyle = scale.options.ticks.color || '#171412';
                                     ctx.textAlign = 'center';
                                     ctx.textBaseline = 'middle';
 
