@@ -72,7 +72,7 @@ Menampilkan data kompilasi seluruh peserta dalam satu event/posisi.
 | **Standard MC** | `general-report/standard-mc.blade.php` | Rekapitulasi nilai kompetensi manajerial agregat. | **Selesai** |
 | **Standard MC Copy** | `general-report/standard-mc-copy.blade.php` | Salinan/variasi rekapitulasi MC. | **Selesai** |
 | **MMPI Report** | `general-report/mmpi.blade.php` | Rekap hasil tes kepribadian klinis MMPI. | **Selesai** |
-| **Event Statistics** | `general-report/statistic.blade.php` | Statistik distribusi nilai, membutuhkan kartu metrik minimalis. | **Selesai** |
+| **Event Statistics** | `general-report/statistic.blade.php` | Statistik distribusi nilai, membutuhkan kartu metrik minimalis. | **Selesai** (Standar Benchmark 100%) |
 
 ---
 

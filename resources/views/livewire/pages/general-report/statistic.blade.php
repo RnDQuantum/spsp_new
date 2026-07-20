@@ -1,27 +1,31 @@
-<div class="max-w-6xl mx-auto mt-10 bg-white dark:bg-[#171412] p-8 rounded shadow text-gray-900 dark:text-gray-100">
-
-    <!-- Dropdown Event, Position & Aspek -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-        <!-- Event Filter -->
-        <div>
-            @livewire('components.event-selector', ['showLabel' => true])
+<div class="bg-white dark:bg-[#171412] mx-auto my-8 border border-warm-border dark:border-[#25211e] rounded-lg shadow-xs overflow-hidden max-w-[1300px] font-sans">
+    <!-- Header Section -->
+    <div class="border-b border-warm-border dark:border-[#25211e] py-6 bg-warm-ivory dark:bg-[#1f1b18]">
+        <h1 class="font-display text-center text-2xl font-bold tracking-tight text-primary-ink dark:text-neutral-100 uppercase">
+            Kurva Distribusi Frekuensi
+        </h1>
+        <div class="mt-1 text-center text-lg font-semibold text-accent-amber font-sans">
+            {{ $aspectName ?: '—' }}
         </div>
 
-        <!-- Position Filter -->
-        <div>
-            @livewire('components.position-selector', ['showLabel' => true])
-        </div>
-
-        <!-- Aspect Filter -->
-        <div>
-            @livewire('components.aspect-selector', ['showLabel' => true])
+        <!-- Dropdown Filters Stacked Centered -->
+        <div class="flex flex-col items-center justify-center gap-3 mt-5 px-6 max-w-lg mx-auto">
+            <div class="w-full">
+                @livewire('components.event-selector', ['showLabel' => true])
+            </div>
+            <div class="w-full">
+                @livewire('components.position-selector', ['showLabel' => true])
+            </div>
+            <div class="w-full">
+                @livewire('components.aspect-selector', ['showLabel' => true])
+            </div>
         </div>
     </div>
 
     {{-- Adjustment Indicators --}}
     @if ($selectedTemplate)
         <div
-            class="px-4 mb-4 bg-gray-50 dark:bg-gray-700 border-b border-gray-500 dark:border-gray-600 flex flex-wrap gap-2">
+            class="px-6 py-2.5 bg-warm-ivory/60 dark:bg-[#1f1b18]/60 border-b border-warm-border dark:border-[#25211e] flex flex-wrap justify-center gap-2">
             <x-adjustment-indicator :template-id="$selectedTemplate->id" category-code="potensi" size="sm"
                 custom-label="Standar Potensi Disesuaikan" />
             <x-adjustment-indicator :template-id="$selectedTemplate->id" category-code="kompetensi" size="sm"
@@ -29,66 +33,65 @@
         </div>
     @endif
 
-    <!-- Judul Kurva -->
-    <div class="mb-2 text-center font-bold text-2xl uppercase text-gray-900 dark:text-gray-100">KURVA DISTRIBUSI
-        FREKUENSI</div>
-    <div class="mb-4 text-center text-lg font-semibold text-red-800 dark:text-red-400">
-        {{ $aspectName ?: '—' }}
-    </div>
-
-    <!-- Chart dan Tabel Layout -->
-    <div class="flex gap-6">
-        <!-- Area Chart -->
-        <div class="flex-1 px-6 pb-2" wire:ignore id="distribution-chart-{{ $chartId }}">
-            <canvas id="frekuensiChart-{{ $chartId }}" style="max-height: 400px;"></canvas>
+    <!-- Content Section -->
+    <div class="p-6 bg-white dark:bg-[#171412]">
+        <!-- Full Width Line Chart Area -->
+        <div class="w-full h-[480px] p-5 border border-warm-border dark:border-[#25211e] rounded-lg bg-warm-ivory/30 dark:bg-[#1f1b18]/40 mb-8 relative" wire:ignore id="distribution-chart-{{ $chartId }}">
+            <canvas id="frekuensiChart-{{ $chartId }}" class="w-full h-full"></canvas>
         </div>
 
-        <!-- Tabel Kelas dan Rentang Nilai - di sebelah kanan chart -->
-        <div class="flex-shrink-0 text-sm self-center">
-            <table class="border border-black dark:border-gray-600 text-gray-900 dark:text-gray-100">
-                <thead>
-                    <tr class="dark:bg-gray-700">
-                        <th class="border border-black dark:border-gray-600 px-3 py-2 font-semibold">Kelas</th>
-                        <th class="border border-black dark:border-gray-600 px-3 py-2 font-semibold">Rentang Nilai</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr class="bg-white dark:bg-[#171412]">
-                        <td class="border border-black dark:border-gray-600 px-3 py-2">I (Rendah)</td>
-                        <td class="border border-black dark:border-gray-600 px-3 py-2 text-center">1.00 - 1.80</td>
-                    </tr>
-                    <tr class="bg-white dark:bg-[#171412]">
-                        <td class="border border-black dark:border-gray-600 px-3 py-2">II (Kurang)</td>
-                        <td class="border border-black dark:border-gray-600 px-3 py-2 text-center">1.80 - 2.60</td>
-                    </tr>
-                    <tr class="bg-white dark:bg-[#171412]">
-                        <td class="border border-black dark:border-gray-600 px-3 py-2">III (Cukup)</td>
-                        <td class="border border-black dark:border-gray-600 px-3 py-2 text-center">2.60 - 3.40</td>
-                    </tr>
-                    <tr class="bg-white dark:bg-[#171412]">
-                        <td class="border border-black dark:border-gray-600 px-3 py-2">IV (Baik )</td>
-                        <td class="border border-black dark:border-gray-600 px-3 py-2 text-center">3.40 - 4.20</td>
-                    </tr>
-                    <tr class="bg-white dark:bg-[#171412]">
-                        <td class="border border-black dark:border-gray-600 px-3 py-2">V (Baik Sekali)</td>
-                        <td class="border border-black dark:border-gray-600 px-3 py-2 text-center">4.20 - 5.00</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- Area Standar & Rata-rata Rating - tepat di bawah chart -->
-    <div class="flex justify-center gap-6 mt-6 px-6">
-        <div class="bg-cyan-200 dark:bg-cyan-700 p-6 rounded-lg text-center min-w-[160px]">
-            <div class="text-sm font-semibold text-gray-900 dark:text-gray-100">Standar Rating</div>
-            <div class="text-3xl font-bold text-orange-900 dark:text-orange-400 mt-3">
-                {{ number_format($standardRating, 2) }}
+        <!-- Bottom Grid: Tabel Kelas (Kiri) & Metric Cards (Kanan) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center max-w-4xl mx-auto">
+            <!-- Tabel Kelas dan Rentang Nilai -->
+            <div class="w-full">
+                <div class="rounded-lg overflow-hidden border border-warm-border dark:border-[#25211e]">
+                    <table class="w-full border-collapse text-sm text-primary-ink dark:text-neutral-200">
+                        <thead>
+                            <tr class="bg-warm-ivory dark:bg-[#1f1b18] text-primary-ink dark:text-neutral-100 font-bold">
+                                <th class="border border-warm-border dark:border-[#25211e] px-4 py-2.5 text-left font-bold">Kelas</th>
+                                <th class="border border-warm-border dark:border-[#25211e] px-4 py-2.5 text-center font-bold">Rentang Nilai</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white dark:bg-[#171412]">
+                            <tr class="hover:bg-warm-ivory/50 dark:hover:bg-[#1f1b18]/50 transition-colors duration-150">
+                                <td class="border border-warm-border dark:border-[#25211e] px-4 py-2 font-semibold text-primary-ink dark:text-neutral-100">I (Rendah)</td>
+                                <td class="border border-warm-border dark:border-[#25211e] px-4 py-2 text-center font-mono-data">1.00 - 1.80</td>
+                            </tr>
+                            <tr class="hover:bg-warm-ivory/50 dark:hover:bg-[#1f1b18]/50 transition-colors duration-150">
+                                <td class="border border-warm-border dark:border-[#25211e] px-4 py-2 font-semibold text-primary-ink dark:text-neutral-100">II (Kurang)</td>
+                                <td class="border border-warm-border dark:border-[#25211e] px-4 py-2 text-center font-mono-data">1.80 - 2.60</td>
+                            </tr>
+                            <tr class="hover:bg-warm-ivory/50 dark:hover:bg-[#1f1b18]/50 transition-colors duration-150">
+                                <td class="border border-warm-border dark:border-[#25211e] px-4 py-2 font-semibold text-primary-ink dark:text-neutral-100">III (Cukup)</td>
+                                <td class="border border-warm-border dark:border-[#25211e] px-4 py-2 text-center font-mono-data">2.60 - 3.40</td>
+                            </tr>
+                            <tr class="hover:bg-warm-ivory/50 dark:hover:bg-[#1f1b18]/50 transition-colors duration-150">
+                                <td class="border border-warm-border dark:border-[#25211e] px-4 py-2 font-semibold text-primary-ink dark:text-neutral-100">IV (Baik)</td>
+                                <td class="border border-warm-border dark:border-[#25211e] px-4 py-2 text-center font-mono-data">3.40 - 4.20</td>
+                            </tr>
+                            <tr class="hover:bg-warm-ivory/50 dark:hover:bg-[#1f1b18]/50 transition-colors duration-150">
+                                <td class="border border-warm-border dark:border-[#25211e] px-4 py-2 font-semibold text-primary-ink dark:text-neutral-100">V (Baik Sekali)</td>
+                                <td class="border border-warm-border dark:border-[#25211e] px-4 py-2 text-center font-mono-data">4.20 - 5.00</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
-        </div>
-        <div class="bg-orange-200 dark:bg-orange-700 p-6 rounded-lg text-center min-w-[160px]">
-            <div class="text-sm font-semibold text-gray-900 dark:text-gray-100">Rata-rata Rating</div>
-            <div class="text-3xl font-bold text-cyan-900 dark:text-cyan-400 mt-3">{{ number_format($averageRating, 2) }}
+
+            <!-- Area Standar & Rata-rata Rating -->
+            <div class="flex flex-col gap-4 w-full">
+                <div class="bg-warm-ivory dark:bg-[#1f1b18] border border-warm-border dark:border-[#25211e] p-5 rounded-lg text-center">
+                    <div class="text-xs font-bold uppercase tracking-wider text-primary-ink/70 dark:text-neutral-400">Standar Rating</div>
+                    <div class="text-3xl font-bold font-mono-data text-accent-amber mt-2">
+                        {{ number_format($standardRating, 2) }}
+                    </div>
+                </div>
+                <div class="bg-warm-ivory dark:bg-[#1f1b18] border border-warm-border dark:border-[#25211e] p-5 rounded-lg text-center">
+                    <div class="text-xs font-bold uppercase tracking-wider text-primary-ink/70 dark:text-neutral-400">Rata-rata Rating</div>
+                    <div class="text-3xl font-bold font-mono-data text-forest-green mt-2">
+                        {{ number_format($averageRating, 2) }}
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -101,6 +104,23 @@
         function coerceNumbers(arr) {
             return (arr || []).map(v => Number(v) || 0);
         }
+
+        function getIsDark() {
+            if (document.documentElement.classList.contains('dark')) return true;
+            if (document.documentElement.getAttribute('data-theme') === 'dark') return true;
+            if (localStorage.theme === 'light') return false;
+            if (localStorage.theme === 'dark') return true;
+            return false;
+        }
+
+        // 🌙 Dark mode observer
+        const observer = new MutationObserver(() => {
+            const chartId = `{{ $chartId }}`;
+            if (chartInstances[chartId]) {
+                chartInstances[chartId].update('none');
+            }
+        });
+        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class', 'data-theme'] });
 
         function renderChart(chartId, labels, data, label, standardRating, averageRating) {
             const canvas = document.getElementById(`frekuensiChart-${chartId}`);
@@ -123,15 +143,15 @@
                         datasets: [{
                             label: label,
                             data: coerced,
-                            borderColor: 'rgb(185, 28, 28)',
-                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                            tension: 0.4,
+                            borderColor: '#9a3412',
+                            backgroundColor: 'rgba(154, 52, 18, 0.15)',
+                            tension: 0.35,
                             fill: true,
                             pointRadius: 6,
                             pointHoverRadius: 8,
-                            pointBorderWidth: 3,
-                            pointBackgroundColor: 'rgb(185, 28, 28)',
-                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                            pointBackgroundColor: '#9a3412',
+                            pointBorderColor: '#ffffff',
                             borderWidth: 3,
                             datalabels: {
                                 align: 'top',
@@ -147,12 +167,13 @@
                     },
                     options: {
                         responsive: true,
+                        maintainAspectRatio: false,
                         layout: {
                             padding: {
-                                top: 60,
-                                right: 20,
+                                top: 50,
+                                right: 30,
                                 bottom: 20,
-                                left: 12
+                                left: 20
                             }
                         },
                         plugins: {
@@ -161,44 +182,64 @@
                             },
                             tooltip: {
                                 enabled: true,
+                                backgroundColor: 'rgba(23, 20, 18, 0.9)',
+                                padding: 12,
+                                cornerRadius: 8,
+                                titleFont: {
+                                    size: 14,
+                                    weight: 'bold',
+                                    family: "'Instrument Sans', sans-serif"
+                                },
+                                bodyFont: {
+                                    size: 13,
+                                    family: "'Instrument Sans', sans-serif"
+                                },
                                 callbacks: {
                                     label: function (context) {
                                         const value = context.parsed.y;
                                         const percentage = total === 0 ? '0,00' : (value / total * 100)
                                             .toFixed(2).replace('.', ',');
-                                        return `Jumlah: ${value} (${percentage}%)`;
+                                        return ` Jumlah: ${value} orang (${percentage}%)`;
                                     }
                                 }
                             },
                             datalabels: {
-                                backgroundColor: 'rgba(185, 28, 28, 0.9)',
+                                backgroundColor: '#9a3412',
                                 borderRadius: 5,
-                                color: 'white',
+                                color: '#ffffff',
                                 font: {
                                     weight: 'bold',
-                                    size: 13
+                                    size: 12,
+                                    family: "'Instrument Sans', sans-serif"
                                 },
-                                padding: 8
+                                padding: {
+                                    top: 4,
+                                    bottom: 4,
+                                    left: 7,
+                                    right: 7
+                                }
                             }
                         },
                         scales: {
                             x: {
                                 border: {
                                     display: true,
-                                    width: 2
+                                    color: () => getIsDark() ? 'rgba(255, 255, 255, 0.25)' : 'rgba(23, 20, 18, 0.2)',
+                                    width: 1.5
                                 },
                                 offset: true,
                                 grid: {
                                     offset: true,
                                     display: true,
-                                    color: 'rgba(0, 0, 0, 0.05)'
+                                    color: () => getIsDark() ? 'rgba(255, 255, 255, 0.18)' : 'rgba(23, 20, 18, 0.12)'
                                 },
                                 ticks: {
+                                    color: () => getIsDark() ? '#f5f5f5' : '#171412',
                                     font: {
-                                        size: 14,
-                                        weight: 'bold'
+                                        size: 13,
+                                        weight: '600',
+                                        family: "'Instrument Sans', sans-serif"
                                     },
-                                    // ========== TAMBAHKAN CALLBACK INI ==========
                                     callback: function (value, index) {
                                         const labels = ['I', 'II', 'III', 'IV', 'V'];
                                         const descriptions = ['Rendah', 'Kurang', 'Cukup',
@@ -210,19 +251,22 @@
                             },
                             y: {
                                 min: 0,
-                                suggestedMax: allZero ? 1 : undefined,
+                                suggestedMax: allZero ? 1 : Math.ceil(Math.max(...coerced) * 1.2),
                                 border: {
                                     display: true,
-                                    width: 2
+                                    color: () => getIsDark() ? 'rgba(255, 255, 255, 0.25)' : 'rgba(23, 20, 18, 0.2)',
+                                    width: 1.5
                                 },
                                 grid: {
                                     display: true,
-                                    color: 'rgba(0, 0, 0, 0.05)'
+                                    color: () => getIsDark() ? 'rgba(255, 255, 255, 0.18)' : 'rgba(23, 20, 18, 0.12)'
                                 },
                                 ticks: {
                                     stepSize: 1,
+                                    color: () => getIsDark() ? '#f5f5f5' : '#171412',
                                     font: {
-                                        size: 13
+                                        size: 12,
+                                        family: "'Instrument Sans', sans-serif"
                                     },
                                     callback: function (value) {
                                         return value;
@@ -234,11 +278,11 @@
                     plugins: [ChartDataLabels]
                 });
             } else {
-                // Update in-place like GeneralPsyMapping
                 const chart = chartInstances[chartId];
                 chart.data.labels = labels;
                 chart.data.datasets[0].label = label;
                 chart.data.datasets[0].data = coerced;
+                chart.options.scales.y.suggestedMax = allZero ? 1 : Math.ceil(Math.max(...coerced) * 1.2);
                 chart.update('active');
                 return;
             }
@@ -275,7 +319,7 @@
 
                 const chartId = payload.chartId;
                 if (!chartId || chartId !== `{{ $chartId }}`) {
-                    return; // ignore events for other instances
+                    return;
                 }
 
                 const labels = payload.labels || ['I', 'II', 'III', 'IV', 'V'];
@@ -290,21 +334,17 @@
             }
         }
 
-        // Initialize chart on page load
         waitForLivewire(function () {
             initialRenderFromServer();
             Livewire.on('chartDataUpdated', onDistributionUpdated);
         });
 
-        // Handle Livewire navigate events
         document.addEventListener('livewire:navigated', function () {
-            // Re-render chart after navigation
             waitForLivewire(function () {
                 initialRenderFromServer();
             });
         });
 
-        // Cleanup chart on navigate away
         document.addEventListener('livewire:navigating', function () {
             const chartId = `{{ $chartId }}`;
             if (chartInstances[chartId]) {
