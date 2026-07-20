@@ -43,6 +43,9 @@ class GeneralMcMapping extends Component
 
     public $overallConclusion = '';
 
+    // Conclusion configuration for styling
+    public array $conclusionConfig = [];
+
     // Tolerance percentage (loaded from session)
     public int $tolerancePercentage = 0;
 
@@ -114,6 +117,9 @@ class GeneralMcMapping extends Component
 
         // Generate unique chart ID
         $this->chartId = 'generalMcMapping'.uniqid();
+
+        // Load conclusion configuration
+        $this->conclusionConfig = ConclusionService::getGapConclusionConfig();
 
         // Load tolerance from session
         $this->tolerancePercentage = session('individual_report.tolerance', 0);
