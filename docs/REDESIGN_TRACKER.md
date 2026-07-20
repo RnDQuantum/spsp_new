@@ -85,10 +85,10 @@ Fitur spesifik untuk membantu penentuan prioritas pengembangan kapasitas.
 | **Ranking Psy Mapping** | `general-report/ranking/ranking-psy-mapping.blade.php`| Daftar ranking berdasarkan skor potensi psikologi. | **Selesai** (Standar Benchmark 100%) |
 | **Capacity Building MC** | `general-report/ranking/capacitybuilding-mc.blade.php`| Tabel analisis kebutuhan pengembangan kompetensi. | **Selesai** |
 | **Capacity Building Psy** | `general-report/ranking/capacitybuilding-psy.blade.php`| Tabel analisis kebutuhan pengembangan potensi. | **Selesai** |
-| **Training Recommendation** | `general-report/training/training-recommendation.blade.php`| Rekomendasi program pelatihan bagi peserta yang di bawah standar. | **Selesai** |
-| **Training Recommendation Alt**| `general-report/training/training-recomendation.blade.php` | Versi alternatif atau cadangan rekomendasi pelatihan. | **Selesai** |
-| **Prioritas Perbaikan Atribut**| `general-report/training/prioritas-perbaikan-atribut.blade.php` | Analisis prioritas perbaikan kompetensi. | [ ] Pending |
-| **Training Participant Modal**| `general-report/training/attribute-participant-list-modal.blade.php`| Modal popup daftar peserta pelatihan per atribut. | [ ] Pending |
+| **Training Recommendation** | `general-report/training/training-recommendation.blade.php`| Rekomendasi program pelatihan bagi peserta yang di bawah standar. | **Selesai** (Standar Benchmark 100%) |
+| **Training Recommendation Alt**| `general-report/training/training-recomendation.blade.php` | Versi alternatif atau cadangan rekomendasi pelatihan. | **Selesai** (Standar Benchmark 100%) |
+| **Prioritas Perbaikan Atribut**| `general-report/training/prioritas-perbaikan-atribut.blade.php` | Analisis prioritas perbaikan kompetensi. | **Selesai** (Standar Benchmark 100%) |
+| **Training Participant Modal**| `general-report/training/attribute-participant-list-modal.blade.php`| Modal popup daftar peserta pelatihan per atribut. | **Selesai** (Standar Benchmark 100%) |
 
 ---
 
