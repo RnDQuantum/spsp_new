@@ -151,17 +151,18 @@ The elevation philosophy is strictly **Flat & Layered**. We do not use heavy sha
 SPSP reports display dense multidimensional metrics. The table design balances high information density with elegant legibility:
 - **Table Container**: Pure White (`#ffffff`) background in light mode or Deep Charcoal (`#171412`) in dark mode, bounded by a 1px Warm Beige border (`#f0ebe4`).
 - **Cell Padding**: Vertical padding must be **`py-2` (8px)**, and horizontal padding **`px-4` (16px)** to stay compact yet breathable.
-- **Headers & Totals**: Lighter warm-ivory background (`bg-warm-ivory` / `dark:bg-[#1f1b18]`) with bold text and solid high contrast.
+- **Headers & Totals**: Lighter warm-ivory background (`bg-warm-ivory` / `dark:bg-[#1f1b18]`) with bold high contrast text. Header text uses Title Case formatting (`No`, `Atribut`, `Bobot %`, `Standar`, `Individu`, `Gap`, `Persentase Kesesuaian`, `Kesimpulan`) with `text-left` alignment on attribute column names and `text-center` on numerical scale/metrics columns.
 - **Empty Total Cells**: Fill with subtle neutral tint (`bg-warm-border/40 dark:bg-[#25211e]/40`).
-- **Row Numbering**: Always use Arab numerals (`1, 2, 3...`) instead of Roman numerals (`I, II, III...`) to ensure layout stability and instant legibility across narrow `NO.` columns.
+- **Row Numbering**: Always use Arab numerals (`1, 2, 3...`) instead of Roman numerals (`I, II, III...`) to ensure layout stability and instant legibility across narrow `NO.` columns (`px-4 py-2 text-center font-normal`).
 - **Font-Weight Hierarchy**:
-  - Column Headers (`<thead>`): `font-bold text-xs uppercase tracking-wider text-primary-ink dark:text-neutral-100`.
+  - Column Headers (`<thead>`): `font-semibold text-primary-ink dark:text-neutral-100`.
   - Main Aspect Category Headers: `font-bold text-sm text-primary-ink dark:text-neutral-100`.
-  - Sub-Aspect Names: `font-medium text-xs text-primary-ink dark:text-neutral-200`.
-  - Row Numbers (`NO.`): `font-medium text-xs font-mono-data text-primary-ink/70 dark:text-neutral-400`.
-  - Data Values & Scores: `font-medium text-xs font-mono-data text-primary-ink dark:text-neutral-200` to prevent visual clutter while maintaining alignment.
+  - Sub-Aspect Names: `font-semibold text-primary-ink dark:text-neutral-100 text-left`.
+  - Row Numbers (`No`): `font-normal text-center`.
+  - Data Values & Scores: `font-mono-data font-normal text-center text-primary-ink dark:text-neutral-200` to prevent visual clutter while maintaining alignment.
+  - Key Indicator Scores (e.g. Persentase Kesesuaian): `font-mono-data font-semibold text-center text-primary-ink dark:text-neutral-100`.
   - Totals / Summary Rows: `font-bold text-sm font-mono-data text-primary-ink dark:text-neutral-100`.
-  - Conclusion Badges: `font-bold text-xs uppercase tracking-wider px-2.5 py-1 rounded`.
+  - Conclusion Badges: `font-semibold text-xs uppercase tracking-wider px-2.5 py-1 rounded`.
   - Fallback Badge Style: `bg-warm-border/60 dark:bg-[#25211e] text-primary-ink dark:text-neutral-200`.
   - **Standard Rating Cell**: Medium neutral gray (`#797979` in light mode, `#6b7280` in dark mode) to ensure target standard cells remain distinct and visible across both light and dark modes.
 
