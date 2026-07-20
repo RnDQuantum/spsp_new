@@ -32,7 +32,7 @@
                         </div>
                         <div wire:loading wire:target="search"
                             class="absolute inset-y-0 right-0 flex items-center pr-3">
-                            <svg class="animate-spin h-4 w-4 text-blue-600" xmlns="http://www.w3.org/2000/svg"
+                            <svg class="animate-spin h-4 w-4 text-accent-amber dark:text-amber-500" xmlns="http://www.w3.org/2000/svg"
                                 fill="none" viewBox="0 0 24 24">
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
                                     stroke-width="4"></circle>
@@ -134,75 +134,75 @@
                     <thead class="bg-warm-ivory dark:bg-[#1f1b18] border-b border-warm-border dark:border-[#25211e] text-primary-ink dark:text-neutral-200">
                         <tr>
                             <th
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                class="px-6 py-3 text-left text-xs font-semibold text-primary-ink/75 dark:text-neutral-300 uppercase tracking-wider">
                                 No.</th>
                             <th
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                class="px-6 py-3 text-left text-xs font-semibold text-primary-ink/75 dark:text-neutral-300 uppercase tracking-wider">
                                 NIP</th>
                             <th
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                class="px-6 py-3 text-left text-xs font-semibold text-primary-ink/75 dark:text-neutral-300 uppercase tracking-wider">
                                 Nama</th>
                             <th
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                class="px-6 py-3 text-left text-xs font-semibold text-primary-ink/75 dark:text-neutral-300 uppercase tracking-wider">
                                 Email</th>
                             <th
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                class="px-6 py-3 text-left text-xs font-semibold text-primary-ink/75 dark:text-neutral-300 uppercase tracking-wider">
                                 Telepon</th>
                             <th
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                class="px-6 py-3 text-left text-xs font-semibold text-primary-ink/75 dark:text-neutral-300 uppercase tracking-wider">
                                 Jenis Kelamin</th>
                             <th
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                class="px-6 py-3 text-left text-xs font-semibold text-primary-ink/75 dark:text-neutral-300 uppercase tracking-wider">
                                 Kode Proyek</th>
                             <th
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                class="px-6 py-3 text-left text-xs font-semibold text-primary-ink/75 dark:text-neutral-300 uppercase tracking-wider">
                                 Batch</th>
                             <th
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                class="px-6 py-3 text-left text-xs font-semibold text-primary-ink/75 dark:text-neutral-300 uppercase tracking-wider">
                                 Posisi</th>
                             <th
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                class="px-6 py-3 text-left text-xs font-semibold text-primary-ink/75 dark:text-neutral-300 uppercase tracking-wider">
                                 Tgl Assessment</th>
                             <th
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                class="px-6 py-3 text-left text-xs font-semibold text-primary-ink/75 dark:text-neutral-300 uppercase tracking-wider">
                                 No. Test</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white dark:bg-[#171412] divide-y divide-warm-border dark:divide-[#25211e]/40 text-sm">
                         @for ($i = 0; $i < 10; $i++)
                             <tr class="animate-pulse">
-                                <td class="px-4 py-2.5 whitespace-nowrap">
-                                    <div class="h-4 bg-gray-200 dark:bg-gray-600 rounded w-20"></div>
+                                <td class="px-4 py-2 whitespace-nowrap">
+                                    <div class="h-4 bg-warm-border dark:bg-[#25211e] rounded w-20"></div>
                                 </td>
-                                <td class="px-4 py-2.5 whitespace-nowrap">
-                                    <div class="h-4 bg-gray-200 dark:bg-gray-600 rounded w-24"></div>
+                                <td class="px-4 py-2 whitespace-nowrap">
+                                    <div class="h-4 bg-warm-border dark:bg-[#25211e] rounded w-24"></div>
                                 </td>
-                                <td class="px-4 py-2.5 whitespace-nowrap">
-                                    <div class="h-4 bg-gray-200 dark:bg-gray-600 rounded w-32"></div>
+                                <td class="px-4 py-2 whitespace-nowrap">
+                                    <div class="h-4 bg-warm-border dark:bg-[#25211e] rounded w-32"></div>
                                 </td>
-                                <td class="px-4 py-2.5 whitespace-nowrap">
-                                    <div class="h-4 bg-gray-200 dark:bg-gray-600 rounded w-36"></div>
+                                <td class="px-4 py-2 whitespace-nowrap">
+                                    <div class="h-4 bg-warm-border dark:bg-[#25211e] rounded w-36"></div>
                                 </td>
-                                <td class="px-4 py-2.5 whitespace-nowrap">
-                                    <div class="h-4 bg-gray-200 dark:bg-gray-600 rounded w-28"></div>
+                                <td class="px-4 py-2 whitespace-nowrap">
+                                    <div class="h-4 bg-warm-border dark:bg-[#25211e] rounded w-28"></div>
                                 </td>
-                                <td class="px-4 py-2.5 whitespace-nowrap">
-                                    <div class="h-4 bg-gray-200 dark:bg-gray-600 rounded w-20"></div>
+                                <td class="px-4 py-2 whitespace-nowrap">
+                                    <div class="h-4 bg-warm-border dark:bg-[#25211e] rounded w-20"></div>
                                 </td>
-                                <td class="px-4 py-2.5 whitespace-nowrap">
-                                    <div class="h-6 bg-gray-200 dark:bg-gray-600 rounded w-16"></div>
+                                <td class="px-4 py-2 whitespace-nowrap">
+                                    <div class="h-6 bg-warm-border dark:bg-[#25211e] rounded w-16"></div>
                                 </td>
-                                <td class="px-4 py-2.5 whitespace-nowrap">
-                                    <div class="h-4 bg-gray-200 dark:bg-gray-600 rounded w-24"></div>
+                                <td class="px-4 py-2 whitespace-nowrap">
+                                    <div class="h-4 bg-warm-border dark:bg-[#25211e] rounded w-24"></div>
                                 </td>
-                                <td class="px-4 py-2.5 whitespace-nowrap">
-                                    <div class="h-4 bg-gray-200 dark:bg-gray-600 rounded w-32"></div>
+                                <td class="px-4 py-2 whitespace-nowrap">
+                                    <div class="h-4 bg-warm-border dark:bg-[#25211e] rounded w-32"></div>
                                 </td>
-                                <td class="px-4 py-2.5 whitespace-nowrap">
-                                    <div class="h-4 bg-gray-200 dark:bg-gray-600 rounded w-24"></div>
+                                <td class="px-4 py-2 whitespace-nowrap">
+                                    <div class="h-4 bg-warm-border dark:bg-[#25211e] rounded w-24"></div>
                                 </td>
-                                <td class="px-4 py-2.5 whitespace-nowrap">
-                                    <div class="h-4 bg-gray-200 dark:bg-gray-600 rounded w-20"></div>
+                                <td class="px-4 py-2 whitespace-nowrap">
+                                    <div class="h-4 bg-warm-border dark:bg-[#25211e] rounded w-20"></div>
                                 </td>
                             </tr>
                         @endfor
@@ -216,16 +216,16 @@
                     <thead class="bg-warm-ivory dark:bg-[#1f1b18] border-b border-warm-border dark:border-[#25211e] text-primary-ink dark:text-neutral-200">
                         <tr>
                             <th
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-800 dark:text-gray-200 uppercase tracking-wider">
+                                class="px-6 py-3 text-left text-xs font-semibold text-primary-ink dark:text-neutral-100 uppercase tracking-wider">
                                 No.
                             </th>
 
                             <!-- Sortable Headers -->
                             <th wire:click="sort('skb_number')"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-800 dark:text-gray-200 uppercase tracking-wider cursor-pointer hover:bg-warm-border/50 dark:hover:bg-[#25211e]/50 transition-colors">
+                                class="px-6 py-3 text-left text-xs font-semibold text-primary-ink dark:text-neutral-100 uppercase tracking-wider cursor-pointer hover:bg-warm-border/50 dark:hover:bg-[#25211e]/50 transition-colors">
                                 <div class="flex items-center space-x-1 select-none">
                                     <span>NIP</span>
-                                    <span class="text-gray-400">
+                                    <span class="text-primary-ink/50 dark:text-neutral-400">
                                         @if ($sortField === 'skb_number')
                                             @if ($sortDirection === 'asc')
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor"
@@ -252,10 +252,10 @@
                             </th>
 
                             <th wire:click="sort('name')"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-800 dark:text-gray-200 uppercase tracking-wider cursor-pointer hover:bg-warm-border/50 dark:hover:bg-[#25211e]/50 transition-colors">
+                                class="px-6 py-3 text-left text-xs font-semibold text-primary-ink dark:text-neutral-100 uppercase tracking-wider cursor-pointer hover:bg-warm-border/50 dark:hover:bg-[#25211e]/50 transition-colors">
                                 <div class="flex items-center space-x-1 select-none">
                                     <span>Nama</span>
-                                    <span class="text-gray-400">
+                                    <span class="text-primary-ink/50 dark:text-neutral-400">
                                         @if ($sortField === 'name')
                                             @if ($sortDirection === 'asc')
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor"
@@ -282,10 +282,10 @@
                             </th>
 
                             <th wire:click="sort('email')"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-800 dark:text-gray-200 uppercase tracking-wider cursor-pointer hover:bg-warm-border/50 dark:hover:bg-[#25211e]/50 transition-colors">
+                                class="px-6 py-3 text-left text-xs font-semibold text-primary-ink dark:text-neutral-100 uppercase tracking-wider cursor-pointer hover:bg-warm-border/50 dark:hover:bg-[#25211e]/50 transition-colors">
                                 <div class="flex items-center space-x-1 select-none">
                                     <span>Email</span>
-                                    <span class="text-gray-400">
+                                    <span class="text-primary-ink/50 dark:text-neutral-400">
                                         @if ($sortField === 'email')
                                             @if ($sortDirection === 'asc')
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor"
@@ -312,10 +312,10 @@
                             </th>
 
                             <th wire:click="sort('phone')"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-800 dark:text-gray-200 uppercase tracking-wider cursor-pointer hover:bg-warm-border/50 dark:hover:bg-[#25211e]/50 transition-colors">
+                                class="px-6 py-3 text-left text-xs font-semibold text-primary-ink dark:text-neutral-100 uppercase tracking-wider cursor-pointer hover:bg-warm-border/50 dark:hover:bg-[#25211e]/50 transition-colors">
                                 <div class="flex items-center space-x-1 select-none">
                                     <span>Telepon</span>
-                                    <span class="text-gray-400">
+                                    <span class="text-primary-ink/50 dark:text-neutral-400">
                                         @if ($sortField === 'phone')
                                             @if ($sortDirection === 'asc')
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor"
@@ -342,10 +342,10 @@
                             </th>
 
                             <th wire:click="sort('gender')"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-800 dark:text-gray-200 uppercase tracking-wider cursor-pointer hover:bg-warm-border/50 dark:hover:bg-[#25211e]/50 transition-colors">
+                                class="px-6 py-3 text-left text-xs font-semibold text-primary-ink dark:text-neutral-100 uppercase tracking-wider cursor-pointer hover:bg-warm-border/50 dark:hover:bg-[#25211e]/50 transition-colors">
                                 <div class="flex items-center space-x-1 select-none">
                                     <span>Jenis Kelamin</span>
-                                    <span class="text-gray-400">
+                                    <span class="text-primary-ink/50 dark:text-neutral-400">
                                         @if ($sortField === 'gender')
                                             @if ($sortDirection === 'asc')
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor"
@@ -372,10 +372,10 @@
                             </th>
 
                             <th wire:click="sort('event_code')"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-800 dark:text-gray-200 uppercase tracking-wider cursor-pointer hover:bg-warm-border/50 dark:hover:bg-[#25211e]/50 transition-colors">
+                                class="px-6 py-3 text-left text-xs font-semibold text-primary-ink dark:text-neutral-100 uppercase tracking-wider cursor-pointer hover:bg-warm-border/50 dark:hover:bg-[#25211e]/50 transition-colors">
                                 <div class="flex items-center space-x-1 select-none">
                                     <span>Kode Proyek</span>
-                                    <span class="text-gray-400">
+                                    <span class="text-primary-ink/50 dark:text-neutral-400">
                                         @if ($sortField === 'event_code')
                                             @if ($sortDirection === 'asc')
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor"
@@ -402,10 +402,10 @@
                             </th>
 
                             <th wire:click="sort('batch_name')"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-800 dark:text-gray-200 uppercase tracking-wider cursor-pointer hover:bg-warm-border/50 dark:hover:bg-[#25211e]/50 transition-colors">
+                                class="px-6 py-3 text-left text-xs font-semibold text-primary-ink dark:text-neutral-100 uppercase tracking-wider cursor-pointer hover:bg-warm-border/50 dark:hover:bg-[#25211e]/50 transition-colors">
                                 <div class="flex items-center space-x-1 select-none">
                                     <span>Batch</span>
-                                    <span class="text-gray-400">
+                                    <span class="text-primary-ink/50 dark:text-neutral-400">
                                         @if ($sortField === 'batch_name')
                                             @if ($sortDirection === 'asc')
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor"
@@ -432,10 +432,10 @@
                             </th>
 
                             <th wire:click="sort('position_name')"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-800 dark:text-gray-200 uppercase tracking-wider cursor-pointer hover:bg-warm-border/50 dark:hover:bg-[#25211e]/50 transition-colors">
+                                class="px-6 py-3 text-left text-xs font-semibold text-primary-ink dark:text-neutral-100 uppercase tracking-wider cursor-pointer hover:bg-warm-border/50 dark:hover:bg-[#25211e]/50 transition-colors">
                                 <div class="flex items-center space-x-1 select-none">
                                     <span>Posisi</span>
-                                    <span class="text-gray-400">
+                                    <span class="text-primary-ink/50 dark:text-neutral-400">
                                         @if ($sortField === 'position_name')
                                             @if ($sortDirection === 'asc')
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor"
@@ -462,10 +462,10 @@
                             </th>
 
                             <th wire:click="sort('assessment_date')"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-800 dark:text-gray-200 uppercase tracking-wider cursor-pointer hover:bg-warm-border/50 dark:hover:bg-[#25211e]/50 transition-colors">
+                                class="px-6 py-3 text-left text-xs font-semibold text-primary-ink dark:text-neutral-100 uppercase tracking-wider cursor-pointer hover:bg-warm-border/50 dark:hover:bg-[#25211e]/50 transition-colors">
                                 <div class="flex items-center space-x-1 select-none">
                                     <span>Tgl Assessment</span>
-                                    <span class="text-gray-400">
+                                    <span class="text-primary-ink/50 dark:text-neutral-400">
                                         @if ($sortField === 'assessment_date')
                                             @if ($sortDirection === 'asc')
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor"
@@ -492,10 +492,10 @@
                             </th>
 
                             <th wire:click="sort('test_number')"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-800 dark:text-gray-200 uppercase tracking-wider cursor-pointer hover:bg-warm-border/50 dark:hover:bg-[#25211e]/50 transition-colors">
+                                class="px-6 py-3 text-left text-xs font-semibold text-primary-ink dark:text-neutral-100 uppercase tracking-wider cursor-pointer hover:bg-warm-border/50 dark:hover:bg-[#25211e]/50 transition-colors">
                                 <div class="flex items-center space-x-1 select-none">
                                     <span>No. Test</span>
-                                    <span class="text-gray-400">
+                                    <span class="text-primary-ink/50 dark:text-neutral-400">
                                         @if ($sortField === 'test_number')
                                             @if ($sortDirection === 'asc')
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor"
@@ -526,7 +526,7 @@
                         @forelse($this->participants as $index => $participant)
                             <tr class="hover:bg-warm-ivory/50 dark:hover:bg-[#1f1b18]/50 transition-colors duration-150"
                                 wire:key="participant-{{ $participant->id }}">
-                                <td class="px-4 py-2.5 whitespace-nowrap text-sm text-primary-ink dark:text-neutral-100">
+                                <td class="px-4 py-2 whitespace-nowrap text-sm text-primary-ink dark:text-neutral-100">
                                     <div class="flex items-center gap-2">
                                         <span
                                             class="font-medium">{{ $this->participants->firstItem() + $index }}</span>
@@ -544,44 +544,44 @@
                                         </button>
                                     </div>
                                 </td>
-                                <td class="px-4 py-2.5 whitespace-nowrap text-sm text-primary-ink dark:text-neutral-100">
+                                <td class="px-4 py-2 whitespace-nowrap text-sm text-primary-ink dark:text-neutral-100">
                                     {{ $participant->skb_number ?? '-' }}
                                 </td>
                                 <td
-                                    class="px-4 py-2.5 whitespace-nowrap text-sm font-medium text-primary-ink dark:text-neutral-100">
+                                    class="px-4 py-2 whitespace-nowrap text-sm font-medium text-primary-ink dark:text-neutral-100">
                                     {{ $participant->name }}
                                 </td>
-                                <td class="px-4 py-2.5 whitespace-nowrap text-sm text-primary-ink dark:text-neutral-100">
+                                <td class="px-4 py-2 whitespace-nowrap text-sm text-primary-ink dark:text-neutral-100">
                                     {{ $participant->email ?? '-' }}
                                 </td>
-                                <td class="px-4 py-2.5 whitespace-nowrap text-sm text-primary-ink dark:text-neutral-100">
+                                <td class="px-4 py-2 whitespace-nowrap text-sm text-primary-ink dark:text-neutral-100">
                                     {{ $participant->phone ?? '-' }}
                                 </td>
-                                <td class="px-4 py-2.5 whitespace-nowrap text-sm text-primary-ink dark:text-neutral-100">
+                                <td class="px-4 py-2 whitespace-nowrap text-sm text-primary-ink dark:text-neutral-100">
                                     {{ $participant->gender ?? '-' }}
                                 </td>
-                                <td class="px-4 py-2.5 whitespace-nowrap text-sm text-primary-ink dark:text-neutral-100">
+                                <td class="px-4 py-2 whitespace-nowrap text-sm text-primary-ink dark:text-neutral-100">
                                     <span
                                         class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-warm-ivory dark:bg-[#25211e] border border-warm-border dark:border-[#25211e] text-primary-ink dark:text-neutral-200">
                                         {{ $participant->assessmentEvent->code ?? '-' }}
                                     </span>
                                 </td>
-                                <td class="px-4 py-2.5 whitespace-nowrap text-sm text-primary-ink dark:text-neutral-100">
+                                <td class="px-4 py-2 whitespace-nowrap text-sm text-primary-ink dark:text-neutral-100">
                                     {{ $participant->batch->name ?? '-' }}
                                 </td>
-                                <td class="px-4 py-2.5 whitespace-nowrap text-sm text-primary-ink dark:text-neutral-100">
+                                <td class="px-4 py-2 whitespace-nowrap text-sm text-primary-ink dark:text-neutral-100">
                                     <div>
                                         {{ $participant->positionFormation->name ?? '-' }}
                                         @if ($participant->positionFormation?->code)
-                                            <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                            <div class="text-xs text-primary-ink/60 dark:text-neutral-400 mt-0.5">
                                                 {{ $participant->positionFormation->code }}</div>
                                         @endif
                                     </div>
                                 </td>
-                                <td class="px-4 py-2.5 whitespace-nowrap text-sm text-primary-ink dark:text-neutral-100">
+                                <td class="px-4 py-2 whitespace-nowrap text-sm text-primary-ink dark:text-neutral-100">
                                     {{ $participant->assessment_date?->format('d M Y') ?? '-' }}
                                 </td>
-                                <td class="px-4 py-2.5 whitespace-nowrap text-sm text-primary-ink dark:text-neutral-100">
+                                <td class="px-4 py-2 whitespace-nowrap text-sm text-primary-ink dark:text-neutral-100">
                                     {{ $participant->test_number ?? '-' }}
                                 </td>
                             </tr>
@@ -589,17 +589,17 @@
                             <tr>
                                 <td colspan="11" class="px-6 py-16 text-center">
                                     <div class="flex flex-col items-center">
-                                        <svg class="h-16 w-16 text-gray-300 dark:text-gray-600 mb-4" fill="none"
+                                        <svg class="h-16 w-16 text-accent-amber mb-4" fill="none"
                                             stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                                                 d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4">
                                             </path>
                                         </svg>
-                                        <p class="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-1">Tidak
+                                        <p class="text-lg font-semibold text-primary-ink dark:text-neutral-100 mb-1">Tidak
                                             ada peserta
                                             ditemukan
                                         </p>
-                                        <p class="text-sm text-gray-500 dark:text-gray-400">Coba ubah filter atau kata
+                                        <p class="text-sm text-primary-ink/75 dark:text-neutral-400">Coba ubah filter atau kata
                                             kunci
                                             pencarian</p>
                                     </div>
@@ -620,9 +620,9 @@
 
         <!-- Loading Overlay (for subsequent loads) -->
         <div wire:loading.delay.long wire:target="selectedEventId,search,perPage,gotoPage,previousPage,nextPage,sort"
-            class="absolute inset-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm flex items-center justify-center z-10 transition-opacity duration-200">
+            class="absolute inset-0 bg-white/80 dark:bg-[#171412]/80 backdrop-blur-xs flex items-center justify-center z-10 transition-opacity duration-200">
             <div class="flex flex-col items-center space-y-3">
-                <svg class="animate-spin h-10 w-10 text-blue-600 dark:text-blue-400"
+                <svg class="animate-spin h-10 w-10 text-accent-amber dark:text-amber-500"
                     xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
                         stroke-width="4"></circle>
@@ -630,7 +630,7 @@
                         d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
                     </path>
                 </svg>
-                <p class="text-sm font-medium text-gray-700 dark:text-gray-300">Memuat data...</p>
+                <p class="text-sm font-semibold text-primary-ink dark:text-neutral-200">Memuat data...</p>
             </div>
         </div>
     </div>
