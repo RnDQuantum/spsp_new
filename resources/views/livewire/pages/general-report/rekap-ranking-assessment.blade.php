@@ -1,8 +1,8 @@
-<div class="bg-white dark:bg-[#171412] mx-auto my-8 border border-warm-border dark:border-[#25211e] rounded-md shadow-xs overflow-hidden" style="max-width: 1300px;">
+<div class="bg-white dark:bg-[#171412] mx-auto my-8 border border-warm-border dark:border-[#25211e] rounded-lg shadow-xs overflow-hidden max-w-[1400px] font-sans">
     <!-- Header Section -->
     <div class="border-b border-warm-border dark:border-[#25211e] py-6 bg-warm-ivory dark:bg-[#1f1b18]">
-        <h1 class="font-display text-center text-2xl font-bold tracking-tight text-primary-ink dark:text-neutral-100">
-            REKAP PERINGKAT SKOR PENILAIAN AKHIR ASESMEN
+        <h1 class="font-display text-center text-2xl font-bold tracking-tight text-primary-ink dark:text-neutral-100 uppercase">
+            Rekap Peringkat Skor Penilaian Akhir Asesmen
         </h1>
 
         <!-- Event Filter -->
@@ -32,6 +32,7 @@
             </div>
         @endif
     </div>
+
     <!-- Toleransi Section -->
     @php $summary = $this->getPassingSummary(); @endphp
     @livewire('components.tolerance-selector', [
@@ -43,7 +44,7 @@
     {{-- Adjustment Indicators --}}
     @if ($this->selectedTemplate)
         <div
-            class="px-6 py-2 bg-gray-50 dark:bg-gray-700 border-b border-gray-300 dark:border-gray-600 flex flex-wrap gap-2">
+            class="px-6 py-2.5 bg-warm-ivory/60 dark:bg-[#1f1b18]/60 border-b border-warm-border dark:border-[#25211e] flex flex-wrap gap-2">
             <x-adjustment-indicator :template-id="$this->selectedTemplate->id" category-code="potensi" size="sm"
                 custom-label="Standar Potensi Disesuaikan" />
             <x-adjustment-indicator :template-id="$this->selectedTemplate->id" category-code="kompetensi" size="sm"
@@ -52,105 +53,123 @@
     @endif
 
     <!-- Enhanced Table Section -->
-    <div class="px-6 pb-6 bg-white dark:bg-[#171412] overflow-x-auto">
+    <div class="p-6 bg-white dark:bg-[#171412] overflow-x-auto">
         <!-- Per Page Selector -->
-        <div class="flex justify-between items-center mb-4 mt-6">
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mb-4">
             <div class="flex items-center gap-3">
-                <label for="perPage" class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label for="perPage" class="text-xs font-bold uppercase tracking-wider text-primary-ink/70 dark:text-neutral-400">
                     Tampilkan:
                 </label>
                 <select wire:model.live="perPage" id="perPage"
-                    class="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    class="border border-warm-border dark:border-[#25211e] rounded-md px-3 py-1.5 text-sm bg-white dark:bg-[#171412] text-primary-ink dark:text-neutral-100 focus:ring-1 focus:ring-accent-amber font-sans">
                     <option value="10">10</option>
                     <option value="25">25</option>
                     <option value="50">50</option>
                     <option value="100">100</option>
                     <option value="all">Semua</option>
                 </select>
-                <span class="text-sm text-gray-600 dark:text-gray-400">Data</span>
+                <span class="text-xs text-primary-ink/70 dark:text-neutral-400 font-medium">Data</span>
             </div>
 
             @if (isset($rows) && $rows)
-                <div class="text-sm text-gray-600 dark:text-gray-400">
+                <div class="text-xs text-primary-ink/75 dark:text-neutral-400">
                     Menampilkan
-                    <span class="font-semibold text-gray-900 dark:text-gray-100">
+                    <span class="font-mono-data font-bold text-primary-ink dark:text-neutral-200">
                         {{ $rows->firstItem() ?? 0 }}
                     </span>
-                    -
-                    <span class="font-semibold text-gray-900 dark:text-gray-100">
+                    ke
+                    <span class="font-mono-data font-bold text-primary-ink dark:text-neutral-200">
                         {{ $rows->lastItem() ?? 0 }}
                     </span>
                     dari
-                    <span class="font-semibold text-gray-900 dark:text-gray-100">
+                    <span class="font-mono-data font-bold text-primary-ink dark:text-neutral-200">
                         {{ $rows->total() }}
                     </span>
-                    data
+                    Data
                 </div>
             @endif
         </div>
 
-        <table class="min-w-full border border-warm-border dark:border-[#25211e] text-sm text-primary-ink dark:text-neutral-100">
+        <table class="min-w-full border border-warm-border dark:border-[#25211e] text-sm text-primary-ink dark:text-neutral-200">
             <thead>
-                <tr class="bg-warm-ivory dark:bg-[#1f1b18] text-primary-ink dark:text-neutral-100">
-                    <th class="border border-warm-border dark:border-[#25211e] px-2 py-2 text-center align-middle"
-                        rowspan="2">NO</th>
-                    <th class="border border-warm-border dark:border-[#25211e] px-2 py-2 text-center align-middle"
-                        rowspan="2">NAMA</th>
-                    <th class="border border-warm-border dark:border-[#25211e] px-2 py-2 text-center" colspan="2">SKOR
-                        INDIVIDU</th>
-                    <th class="border border-warm-border dark:border-[#25211e] px-2 py-2 text-center align-middle"
-                        rowspan="2">TOTAL SKOR
+                <tr class="bg-warm-ivory dark:bg-[#1f1b18] text-primary-ink dark:text-neutral-100 font-bold">
+                    <th class="border border-warm-border dark:border-[#25211e] px-3 py-2 text-center align-middle w-14"
+                        rowspan="2">Peringkat</th>
+                    <th class="border border-warm-border dark:border-[#25211e] px-4 py-2 text-left align-middle w-52"
+                        rowspan="2">Nama</th>
+                    <th class="border border-warm-border dark:border-[#25211e] px-2 py-2 text-center font-bold" colspan="2">Skor Individu</th>
+                    <th class="border border-warm-border dark:border-[#25211e] px-2 py-2 text-center align-middle font-bold w-24"
+                        rowspan="2">Total Skor
                     </th>
-                    <th class="border border-warm-border dark:border-[#25211e] px-2 py-2 text-center" colspan="2">SKOR
-                        PENILAIAN AKHIR</th>
-                    <th class="border border-warm-border dark:border-[#25211e] px-2 py-2 text-center align-middle"
-                        rowspan="2">TOTAL SKOR
+                    <th class="border border-warm-border dark:border-[#25211e] px-2 py-2 text-center font-bold" colspan="2">Skor Penilaian Akhir</th>
+                    <th class="border border-warm-border dark:border-[#25211e] px-2 py-2 text-center align-middle font-bold w-24"
+                        rowspan="2">Total Skor
                     </th>
-                    <th class="border border-warm-border dark:border-[#25211e] px-2 py-2 text-center align-middle"
-                        rowspan="2">GAP</th>
-                    <th class="border border-warm-border dark:border-[#25211e] px-2 py-2 text-center align-middle"
-                        rowspan="2">KESIMPULAN
+                    <th class="border border-warm-border dark:border-[#25211e] px-2 py-2 text-center align-middle font-bold w-20"
+                        rowspan="2">Gap</th>
+                    <th class="border border-warm-border dark:border-[#25211e] px-4 py-2 text-center align-middle font-bold w-40"
+                        rowspan="2">Kesimpulan
                     </th>
                 </tr>
-                <tr class="bg-warm-ivory dark:bg-[#1f1b18] text-primary-ink dark:text-neutral-100">
-                    <th class="border border-warm-border dark:border-[#25211e] px-2 py-2 text-center italic">PSYCHOLOGY</th>
-                    <th class="border border-warm-border dark:border-[#25211e] px-2 py-2 text-center italic">COMPETENCY
-                        MANAGERIAL
-                    </th>
-                    <th class="border border-warm-border dark:border-[#25211e] px-2 py-2 text-center italic">PSYCHOLOGY
-                        {{ $potensiWeight }}%</th>
-                    <th class="border border-warm-border dark:border-[#25211e] px-2 py-2 text-center italic">COMPETENCY
-                        MANAGERIAL
-                        {{ $kompetensiWeight }}%</th>
+                <tr class="bg-warm-ivory dark:bg-[#1f1b18] text-primary-ink dark:text-neutral-100 font-bold">
+                    <th class="border border-warm-border dark:border-[#25211e] px-2 py-2 text-center font-semibold text-xs">Psychology</th>
+                    <th class="border border-warm-border dark:border-[#25211e] px-2 py-2 text-center font-semibold text-xs">Competency Managerial</th>
+                    <th class="border border-warm-border dark:border-[#25211e] px-2 py-2 text-center font-semibold text-xs">Psychology {{ $potensiWeight }}%</th>
+                    <th class="border border-warm-border dark:border-[#25211e] px-2 py-2 text-center font-semibold text-xs">Competency Managerial {{ $kompetensiWeight }}%</th>
                 </tr>
             </thead>
             <tbody>
                 @if (isset($rows) && $rows)
                     @foreach ($rows as $row)
-                        <tr class="bg-white dark:bg-[#171412] hover:bg-warm-ivory/50 dark:hover:bg-[#1f1b18]/50 transition-colors">
-                            <td class="border border-warm-border dark:border-[#25211e] px-2 py-2 text-center">
-                                {{ $row['rank'] }}</td>
-                            <td class="border border-warm-border dark:border-[#25211e] px-2 py-2">{{ $row['name'] }}</td>
-                            <td class="border border-warm-border dark:border-[#25211e] px-2 py-2 text-center">
-                                {{ number_format($row['psy_individual'], 2) }}</td>
-                            <td class="border border-warm-border dark:border-[#25211e] px-2 py-2 text-center">
-                                {{ number_format($row['mc_individual'], 2) }}</td>
-                            <td class="border border-warm-border dark:border-[#25211e] px-2 py-2 text-center">
-                                {{ number_format($row['total_individual'], 2) }}</td>
-                            <td class="border border-warm-border dark:border-[#25211e] px-2 py-2 text-center">
-                                {{ number_format($row['psy_weighted'], 2) }}</td>
-                            <td class="border border-warm-border dark:border-[#25211e] px-2 py-2 text-center">
-                                {{ number_format($row['mc_weighted'], 2) }}</td>
-                            <td class="border border-warm-border dark:border-[#25211e] px-2 py-2 text-center">
-                                {{ number_format($row['total_weighted_individual'], 2) }}</td>
-                            <td class="border border-warm-border dark:border-[#25211e] px-2 py-2 text-center">
-                                {{ number_format($row['gap'], 2) }}</td>
-                            <td
-                                class="border border-warm-border dark:border-[#25211e] px-2 py-2 text-center font-bold {{ $conclusionConfig[$row['conclusion']]['tailwindClass'] ?? 'bg-gray-600 text-white' }}">
-                                {{ $row['conclusion'] }}
+                        <tr class="hover:bg-warm-ivory/50 dark:hover:bg-[#1f1b18]/50 transition-colors duration-150 text-sm text-primary-ink dark:text-neutral-200">
+                            <td class="border border-warm-border dark:border-[#25211e] px-3 py-2 text-center font-mono-data font-bold text-accent-amber">
+                                #{{ $row['rank'] }}
+                            </td>
+                            <td class="border border-warm-border dark:border-[#25211e] px-4 py-2 text-left font-semibold text-primary-ink dark:text-neutral-100">
+                                {{ $row['name'] }}
+                            </td>
+                            <td class="border border-warm-border dark:border-[#25211e] px-2 py-2 text-center font-mono-data">
+                                {{ number_format($row['psy_individual'], 2) }}
+                            </td>
+                            <td class="border border-warm-border dark:border-[#25211e] px-2 py-2 text-center font-mono-data">
+                                {{ number_format($row['mc_individual'], 2) }}
+                            </td>
+                            <td class="border border-warm-border dark:border-[#25211e] px-2 py-2 text-center font-mono-data font-semibold">
+                                {{ number_format($row['total_individual'], 2) }}
+                            </td>
+                            <td class="border border-warm-border dark:border-[#25211e] px-2 py-2 text-center font-mono-data">
+                                {{ number_format($row['psy_weighted'], 2) }}
+                            </td>
+                            <td class="border border-warm-border dark:border-[#25211e] px-2 py-2 text-center font-mono-data">
+                                {{ number_format($row['mc_weighted'], 2) }}
+                            </td>
+                            <td class="border border-warm-border dark:border-[#25211e] px-2 py-2 text-center font-mono-data font-semibold text-primary-ink dark:text-neutral-100">
+                                {{ number_format($row['total_weighted_individual'], 2) }}
+                            </td>
+                            <td class="border border-warm-border dark:border-[#25211e] px-2 py-2 text-center font-mono-data">
+                                {{ number_format($row['gap'], 2) }}
+                            </td>
+                            <td class="border border-warm-border dark:border-[#25211e] px-4 py-2 text-center font-semibold text-xs uppercase tracking-wider">
+                                @php
+                                    $cText = $row['conclusion'] ?? '';
+                                    $cKey = ucwords(strtolower(trim($cText)));
+                                    $badgeStyle = $conclusionConfig[$cText]['tailwindClass']
+                                        ?? ($conclusionConfig[$cKey]['tailwindClass']
+                                        ?? 'bg-warm-border/60 dark:bg-[#25211e] text-primary-ink dark:text-neutral-200');
+                                @endphp
+                                <span class="inline-block px-2.5 py-1 rounded {{ $badgeStyle }}">
+                                    {{ $row['conclusion'] }}
+                                </span>
                             </td>
                         </tr>
                     @endforeach
+                @else
+                    <tr>
+                        <td colspan="10"
+                            class="border border-warm-border dark:border-[#25211e] px-4 py-6 text-center text-primary-ink/60 dark:text-neutral-400">
+                            Tidak ada data untuk ditampilkan. Silakan pilih event dan jabatan.
+                        </td>
+                    </tr>
                 @endif
             </tbody>
         </table>
@@ -161,110 +180,86 @@
         @endif
     </div>
 
-    <!-- Standard & Threshold Info Box -->
-    {{-- @if ($standardInfo)
+    <!-- Standard Info Box -->
+    @if ($standardInfo)
         <div class="px-6 pb-6 bg-white dark:bg-[#171412]">
-            <div class="bg-white dark:bg-gray-800 rounded-lg p-3">
-                <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2">
-                    <svg class="w-5 h-5 text-gray-900 dark:text-gray-100" fill="none" stroke="currentColor"
-                        viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z">
-                        </path>
-                    </svg>
+            <div class="bg-warm-ivory dark:bg-[#1f1b18] border border-warm-border dark:border-[#25211e] rounded-lg p-5">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-primary-ink/70 dark:text-neutral-400 mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-calculator text-accent-amber"></i>
                     Informasi Standar
                 </h3>
 
-                <div x-data="{ tolerance: $wire.entangle('tolerancePercentage') }" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-                    <!-- Left Column: STANDAR -->
+                    <!-- Nilai Asli -->
                     <div class="space-y-3">
-                        <h4 class="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wide mb-3">
-                            Standar
+                        <h4 class="text-xs font-bold text-primary-ink/80 dark:text-neutral-300 uppercase tracking-wider">
+                            Nilai Asli
                         </h4>
 
-                        <!-- Psychology Standard -->
-                        <div
-                            class="bg-white dark:bg-gray-800 border-1 border-gray-400 dark:border-gray-300 rounded-lg p-3">
-                            <div class="text-xs text-gray-500 dark:text-gray-400 mb-1 italic">Psychology</div>
-                            <div class="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                        <div class="bg-white dark:bg-[#171412] border border-warm-border dark:border-[#25211e] rounded-lg p-4">
+                            <div class="text-xs text-primary-ink/60 dark:text-neutral-400 mb-1">Psychology</div>
+                            <div class="text-2xl font-bold font-mono-data text-accent-amber">
                                 {{ number_format($standardInfo['psy_original_standard'], 2) }}
                             </div>
-                            <div class="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                            <div class="text-xs text-primary-ink/60 dark:text-neutral-400 mt-2 font-mono-data">
                                 Bobot {{ $potensiWeight }}% = <span
-                                    class="font-semibold text-gray-900 dark:text-gray-100">{{ number_format(($standardInfo['psy_original_standard'] * $potensiWeight) / 100, 2) }}</span>
+                                    class="font-semibold text-primary-ink dark:text-neutral-200">{{ number_format(($standardInfo['psy_original_standard'] * $potensiWeight) / 100, 2) }}</span>
                             </div>
                         </div>
 
-                        <!-- Kompetensi Standard -->
-                        <div
-                            class="bg-white dark:bg-gray-800 border-1 border-gray-400 dark:border-gray-300 rounded-lg p-3">
-                            <div class="text-xs text-gray-500 dark:text-gray-400 mb-1 italic">Competency</div>
-                            <div class="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                        <div class="bg-white dark:bg-[#171412] border border-warm-border dark:border-[#25211e] rounded-lg p-4">
+                            <div class="text-xs text-primary-ink/60 dark:text-neutral-400 mb-1">Competency</div>
+                            <div class="text-2xl font-bold font-mono-data text-accent-amber">
                                 {{ number_format($standardInfo['mc_original_standard'], 2) }}
                             </div>
-                            <div class="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                            <div class="text-xs text-primary-ink/60 dark:text-neutral-400 mt-2 font-mono-data">
                                 Bobot {{ $kompetensiWeight }}% = <span
-                                    class="font-semibold text-gray-900 dark:text-gray-100">{{ number_format(($standardInfo['mc_original_standard'] * $kompetensiWeight) / 100, 2) }}</span>
+                                    class="font-semibold text-primary-ink dark:text-neutral-200">{{ number_format(($standardInfo['mc_original_standard'] * $kompetensiWeight) / 100, 2) }}</span>
                             </div>
                         </div>
 
-                        <!-- Total Standard -->
-                        <div
-                            class="bg-white dark:bg-gray-800 border-1 border-gray-400 dark:border-gray-300 rounded-lg p-3">
-                            <div class="text-xs text-gray-600 dark:text-gray-300 mb-1 font-semibold">TOTAL STANDAR
-                            </div>
-                            <div class="text-3xl font-bold text-gray-900 dark:text-gray-100">
+                        <div class="bg-white dark:bg-[#171412] border border-warm-border dark:border-[#25211e] rounded-lg p-4">
+                            <div class="text-xs text-primary-ink/60 dark:text-neutral-400 mb-1 font-bold uppercase">Total Standar</div>
+                            <div class="text-3xl font-bold font-mono-data text-accent-amber">
                                 {{ number_format($standardInfo['total_original_standard'], 2) }}
                             </div>
                         </div>
                     </div>
 
-                    <!-- Right Column: STANDAR ADJUSTED - Only show if tolerance > 0 -->
-                    <div x-show="tolerance > 0" x-transition:enter="transition ease-out duration-300"
-                        x-transition:enter-start="opacity-0 transform scale-95"
-                        x-transition:enter-end="opacity-100 transform scale-100"
-                        x-transition:leave="transition ease-in duration-200"
-                        x-transition:leave-start="opacity-100 transform scale-100"
-                        x-transition:leave-end="opacity-0 transform scale-95" class="space-y-3">
-                        <h4 class="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wide mb-3">
-                            Standar yang diberi toleransi
+                    <!-- Nilai Diberi Toleransi -->
+                    <div x-data="{ tolerance: $wire.entangle('tolerancePercentage') }" x-show="tolerance > 0" x-transition class="space-y-3">
+                        <h4 class="text-xs font-bold text-primary-ink/80 dark:text-neutral-300 uppercase tracking-wider">
+                            Nilai Diberi Toleransi
                             <span x-text="tolerance > 0 ? '(' + tolerance + '%)' : ''"
-                                class="text-gray-900 dark:text-gray-100"></span>
+                                class="text-primary-ink dark:text-neutral-200"></span>
                         </h4>
 
-                        <!-- Psychology Adjusted -->
-                        <div
-                            class="bg-white dark:bg-gray-800 border-1 border-gray-400 dark:border-gray-300 rounded-lg p-3">
-                            <div class="text-xs text-gray-500 dark:text-gray-400 mb-1 italic">Psychology</div>
-                            <div class="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                        <div class="bg-white dark:bg-[#171412] border border-warm-border dark:border-[#25211e] rounded-lg p-4">
+                            <div class="text-xs text-primary-ink/60 dark:text-neutral-400 mb-1">Psychology</div>
+                            <div class="text-2xl font-bold font-mono-data text-accent-amber">
                                 {{ number_format($standardInfo['psy_adjusted_standard'], 2) }}
                             </div>
-                            <div class="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                            <div class="text-xs text-primary-ink/60 dark:text-neutral-400 mt-2 font-mono-data">
                                 Bobot {{ $potensiWeight }}% = <span
-                                    class="font-semibold text-gray-900 dark:text-gray-100">{{ number_format($standardInfo['psy_standard'], 2) }}</span>
+                                    class="font-semibold text-primary-ink dark:text-neutral-200">{{ number_format($standardInfo['psy_standard'], 2) }}</span>
                             </div>
                         </div>
 
-                        <!-- Kompetensi Adjusted -->
-                        <div
-                            class="bg-white dark:bg-gray-800 border-1 border-gray-400 dark:border-gray-300 rounded-lg p-3">
-                            <div class="text-xs text-gray-500 dark:text-gray-400 mb-1 italic">Competency</div>
-                            <div class="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                        <div class="bg-white dark:bg-[#171412] border border-warm-border dark:border-[#25211e] rounded-lg p-4">
+                            <div class="text-xs text-primary-ink/60 dark:text-neutral-400 mb-1">Competency</div>
+                            <div class="text-2xl font-bold font-mono-data text-accent-amber">
                                 {{ number_format($standardInfo['mc_adjusted_standard'], 2) }}
                             </div>
-                            <div class="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                            <div class="text-xs text-primary-ink/60 dark:text-neutral-400 mt-2 font-mono-data">
                                 Bobot {{ $kompetensiWeight }}% = <span
-                                    class="font-semibold text-gray-900 dark:text-gray-100">{{ number_format($standardInfo['mc_standard'], 2) }}</span>
+                                    class="font-semibold text-primary-ink dark:text-neutral-200">{{ number_format($standardInfo['mc_standard'], 2) }}</span>
                             </div>
                         </div>
 
-                        <!-- Total Adjusted -->
-                        <div
-                            class="bg-white dark:bg-gray-800 border-1 border-gray-400 dark:border-gray-300 rounded-lg p-3">
-                            <div class="text-xs text-gray-600 dark:text-gray-300 mb-1 font-semibold">TOTAL STANDAR
-                                YANG DIBERI TOLERANSI</div>
-                            <div class="text-3xl font-bold text-gray-900 dark:text-gray-100">
+                        <div class="bg-white dark:bg-[#171412] border border-warm-border dark:border-[#25211e] rounded-lg p-4">
+                            <div class="text-xs text-primary-ink/60 dark:text-neutral-400 mb-1 font-bold uppercase">Total Standar Toleransi</div>
+                            <div class="text-3xl font-bold font-mono-data text-accent-amber">
                                 {{ number_format($standardInfo['total_standard'], 2) }}
                             </div>
                         </div>
@@ -272,133 +267,34 @@
                 </div>
             </div>
         </div>
-    @endif --}}
-
-    @if ($standardInfo)
-        <div class="px-6 pb-6 bg-white dark:bg-[#171412]">
-            <div class="bg-white dark:bg-gray-800 rounded-lg p-3">
-                <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2">
-                    <svg class="w-5 h-5 text-gray-900 dark:text-gray-100" fill="none" stroke="currentColor"
-                        viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z">
-                        </path>
-                    </svg>
-                    Informasi Standar
-                </h3>
-
-                <div class="grid grid-cols-2 gap-6">
-
-                    <!-- Judul kolom kiri: Nilai Asli -->
-                    <div>
-                        <h4 class="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wide mb-3">
-                            Nilai Asli
-                        </h4>
-
-                        <!-- Kartu nilai asli -->
-                        <div class="space-y-3">
-                            <div
-                                class="bg-white dark:bg-gray-800 border border-gray-400 dark:border-gray-300 rounded-lg p-3">
-                                <div class="text-xs text-gray-500 dark:text-gray-400 mb-1 italic">Psychology</div>
-                                <div class="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                                    {{ number_format($standardInfo['psy_original_standard'], 2) }}
-                                </div>
-                                <div class="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                                    Bobot {{ $potensiWeight }}% = <span
-                                        class="font-semibold text-gray-900 dark:text-gray-100">{{ number_format(($standardInfo['psy_original_standard'] * $potensiWeight) / 100, 2) }}</span>
-                                </div>
-                            </div>
-
-                            <div
-                                class="bg-white dark:bg-gray-800 border border-gray-400 dark:border-gray-300 rounded-lg p-3">
-                                <div class="text-xs text-gray-500 dark:text-gray-400 mb-1 italic">Competency</div>
-                                <div class="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                                    {{ number_format($standardInfo['mc_original_standard'], 2) }}
-                                </div>
-                                <div class="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                                    Bobot {{ $kompetensiWeight }}% = <span
-                                        class="font-semibold text-gray-900 dark:text-gray-100">{{ number_format(($standardInfo['mc_original_standard'] * $kompetensiWeight) / 100, 2) }}</span>
-                                </div>
-                            </div>
-
-                            <div
-                                class="bg-white dark:bg-gray-800 border border-gray-400 dark:border-gray-300 rounded-lg p-3">
-                                <div class="text-xs text-gray-600 dark:text-gray-300 mb-1 font-semibold">TOTAL STANDAR
-                                </div>
-                                <div class="text-3xl font-bold text-gray-900 dark:text-gray-100">
-                                    {{ number_format($standardInfo['total_original_standard'], 2) }}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Judul kolom kanan: Nilai Di Beri Toleransi -->
-                    <div x-data="{ tolerance: $wire.entangle('tolerancePercentage') }" x-show="tolerance > 0" x-transition class="space-y-3">
-                        <h4 class="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wide mb-3">
-                            Nilai Di Beri Toleransi
-                            <span x-text="tolerance > 0 ? '(' + tolerance + '%)' : ''"
-                                class="text-gray-900 dark:text-gray-100"></span>
-                        </h4>
-
-                        <!-- Kartu nilai dengan toleransi -->
-                        <div
-                            class="bg-white dark:bg-gray-800 border border-gray-400 dark:border-gray-300 rounded-lg p-3">
-                            <div class="text-xs text-gray-500 dark:text-gray-400 mb-1 italic">Psychology</div>
-                            <div class="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                                {{ number_format($standardInfo['psy_adjusted_standard'], 2) }}</div>
-                            <div class="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                                Bobot {{ $potensiWeight }}% = <span
-                                    class="font-semibold text-gray-900 dark:text-gray-100">{{ number_format($standardInfo['psy_standard'], 2) }}</span>
-                            </div>
-                        </div>
-
-                        <div
-                            class="bg-white dark:bg-gray-800 border border-gray-400 dark:border-gray-300 rounded-lg p-3">
-                            <div class="text-xs text-gray-500 dark:text-gray-400 mb-1 italic">Competency</div>
-                            <div class="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                                {{ number_format($standardInfo['mc_adjusted_standard'], 2) }}</div>
-                            <div class="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                                Bobot {{ $kompetensiWeight }}% = <span
-                                    class="font-semibold text-gray-900 dark:text-gray-100">{{ number_format($standardInfo['mc_standard'], 2) }}</span>
-                            </div>
-                        </div>
-
-                        <div
-                            class="bg-white dark:bg-gray-800 border border-gray-400 dark:border-gray-300 rounded-lg p-3">
-                            <div class="text-xs text-gray-600 dark:text-gray-300 mb-1 font-semibold">TOTAL STANDAR YANG
-                                DIBERI TOLERANSI</div>
-                            <div class="text-3xl font-bold text-gray-900 dark:text-gray-100">
-                                {{ number_format($standardInfo['total_standard'], 2) }}</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
     @endif
-
-
 
     <!-- Summary Statistics Section -->
     @if (!empty($conclusionSummary))
-        <div class="px-6 pb-6 bg-gray-50 dark:bg-gray-800 border-t-2 border-black dark:border-gray-600">
-            <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4 mt-4">Ringkasan Kesimpulan</h3>
+        <div class="p-6 bg-white dark:bg-[#171412] border-t border-warm-border dark:border-[#25211e]">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-primary-ink/70 dark:text-neutral-400 mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-chart-pie text-accent-amber"></i>
+                Ringkasan Kesimpulan
+            </h3>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                 @foreach ($conclusionSummary as $conclusion => $count)
                     @php
                         $totalParticipants = array_sum($conclusionSummary);
                         $percentage = $totalParticipants > 0 ? round(($count / $totalParticipants) * 100, 1) : 0;
-                        $tailwindClass =
-                            $conclusionConfig[$conclusion]['tailwindClass'] ??
-                            'bg-gray-100 border-gray-300
-            text-gray-800';
+                        $cKey = ucwords(strtolower(trim($conclusion)));
+                        $badgeStyle = $conclusionConfig[$conclusion]['tailwindClass']
+                            ?? ($conclusionConfig[$cKey]['tailwindClass']
+                            ?? 'bg-warm-border/60 dark:bg-[#25211e] text-primary-ink dark:text-neutral-200');
                     @endphp
 
-                    <div class="border-2 border-none rounded-lg p-4 text-center {{ $tailwindClass }}">
-                        <div class="text-3xl font-bold">{{ $count }}</div>
-                        <div class="text-sm mb-2">{{ $percentage }}%</div>
-                        <div class="text-sm font-semibold leading-tight mb-2">
-                            {{ $conclusion }}
+                    <div class="bg-warm-ivory dark:bg-[#1f1b18] border border-warm-border dark:border-[#25211e] rounded-lg p-5 text-center">
+                        <div class="text-3xl font-bold font-mono-data text-accent-amber mb-1">{{ $count }}</div>
+                        <div class="text-xs font-mono-data font-bold text-primary-ink/75 dark:text-neutral-400 mb-3">{{ $percentage }}%</div>
+                        <div>
+                            <span class="inline-block px-3 py-1 text-xs uppercase tracking-wider font-bold rounded {{ $badgeStyle }}">
+                                {{ $conclusion }}
+                            </span>
                         </div>
                     </div>
                 @endforeach
@@ -412,39 +308,30 @@
                 $passingPercentage = $totalParticipants > 0 ? round(($passingCount / $totalParticipants) * 100, 1) : 0;
             @endphp
 
-            <div class="bg-white dark:bg-gray-800 border border-warm-border dark:border-[#25211e] rounded-lg p-4">
-                <div class="grid grid-cols-3 gap-4 text-center">
+            <div class="bg-warm-ivory dark:bg-[#1f1b18] border border-warm-border dark:border-[#25211e] rounded-lg p-5">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
                     <div>
-                        <div class="text-lg font-bold text-gray-900 dark:text-gray-100">{{ $totalParticipants }}</div>
-                        <div class="text-sm text-gray-600 dark:text-gray-400">Total Peserta</div>
+                        <div class="text-2xl font-bold font-mono-data text-primary-ink dark:text-neutral-100">{{ $totalParticipants }}</div>
+                        <div class="text-xs uppercase tracking-wider font-bold text-primary-ink/60 dark:text-neutral-400 mt-1">Total Peserta</div>
                     </div>
                     <div>
-                        <div class="text-lg font-bold text-gray-900 dark:text-gray-100">{{ $passingCount }}</div>
-                        <div class="text-sm text-gray-600 dark:text-gray-400">Lulus</div>
+                        <div class="text-2xl font-bold font-mono-data text-forest-green">{{ $passingCount }}</div>
+                        <div class="text-xs uppercase tracking-wider font-bold text-primary-ink/60 dark:text-neutral-400 mt-1">Lulus</div>
                     </div>
                     <div>
-                        <div class="text-lg font-bold text-gray-900 dark:text-gray-100">{{ $passingPercentage }}%
-                        </div>
-                        <div class="text-sm text-gray-600 dark:text-gray-400">Tingkat Kelulusan</div>
+                        <div class="text-2xl font-bold font-mono-data text-accent-amber">{{ $passingPercentage }}%</div>
+                        <div class="text-xs uppercase tracking-wider font-bold text-primary-ink/60 dark:text-neutral-400 mt-1">Tingkat Kelulusan</div>
                     </div>
                 </div>
             </div>
 
             <!-- Keterangan Rentang Nilai -->
-            <div class="mt-4 bg-gray-200 border dark:bg-gray-700 dark:border-gray-400 border-gray-600 rounded-lg p-3">
-                <div class="text-sm text-black dark:text-white ">
-                    {{-- <strong>Keterangan:</strong> Kesimpulan berdasarkan Gap (Individual Score - Standard)
-                <span x-data
-                    x-text="$wire.tolerancePercentage > 0 ? 'dengan toleransi ' + $wire.tolerancePercentage + '%' : 'tanpa toleransi'"></span>.
-                <br> --}}
-                    <ul class="list-disc ml-6 mt-1 space-y-2">
-                        <li><strong class="bg-green-600 text-white px-2 py-0.5 rounded">Di Atas Standar</strong> : Skor
-                            Individu ≥ Skor Standar</li>
-                        <li><strong class="bg-yellow-400 text-gray-900 px-2 py-0.5 rounded">Memenuhi Standar</strong> :
-                            Skor
-                            Individu ≥ Skor Standar yang telah diberi toleransi</li>
-                        <li><strong class="bg-red-600 text-white px-2 py-0.5 rounded">Di Bawah Standar</strong> : Skor
-                            Individu < Skor Standar maupun Skor Standar yang telah diberi toleransi</li>
+            <div class="mt-4 bg-warm-ivory dark:bg-[#1f1b18] border border-warm-border dark:border-[#25211e] rounded-lg p-4">
+                <div class="text-xs text-primary-ink dark:text-neutral-200">
+                    <ul class="list-disc ml-5 space-y-2">
+                        <li><strong class="inline-block px-2 py-0.5 rounded bg-green-600 text-white text-xs">Di Atas Standar</strong> : Skor Individu ≥ Skor Standar</li>
+                        <li><strong class="inline-block px-2 py-0.5 rounded bg-yellow-400 text-gray-900 text-xs">Memenuhi Standar</strong> : Skor Individu ≥ Skor Standar yang telah diberi toleransi</li>
+                        <li><strong class="inline-block px-2 py-0.5 rounded bg-red-600 text-white text-xs">Di Bawah Standar</strong> : Skor Individu < Skor Standar maupun Skor Standar yang telah diberi toleransi</li>
                     </ul>
                 </div>
             </div>
@@ -453,86 +340,82 @@
 
     <!-- Pie Chart Section -->
     @if (!empty($conclusionSummary))
-        <div class="mt-8 border-t-2 border-black dark:border-gray-600 pt-6 bg-white dark:bg-[#171412]">
-            <div class="px-6 pb-6">
-                <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100 mb-6 text-center">Capacity Building Rekap
-                    Assessment</h3>
+        <div class="p-6 border-t border-warm-border dark:border-[#25211e] bg-white dark:bg-[#171412]"
+            x-data="{
+                refreshChart() {
+                    const labels = @js($chartLabels);
+                    const data = @js($chartData);
+                    const colors = @js($chartColors);
+                    if (labels.length > 0 && data.length > 0) {
+                        createConclusionChart(labels, data, colors);
+                    }
+                }
+            }" x-init="$nextTick(() => refreshChart())">
+            <h3 class="text-lg font-bold font-display text-primary-ink dark:text-neutral-100 mb-6 text-center">
+                Capacity Building Rekap Assessment
+            </h3>
 
-                <!-- Content Grid -->
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-                    <!-- Chart Section -->
-                    <div x-data="{
-                        refreshChart() {
-                            const labels = @js($chartLabels);
-                            const data = @js($chartData);
-                            const colors = @js($chartColors);
-                            if (labels.length > 0 && data.length > 0) {
-                                createConclusionChart(labels, data, colors);
-                            }
-                        }
-                    }" x-init="$nextTick(() => refreshChart())"
-                        class="border border-gray-300 dark:border-gray-600 p-2 rounded-lg bg-gray-50 dark:bg-gray-800 transition-shadow duration-300 hover:shadow-xl">
-                        <div wire:ignore>
-                            <canvas id="conclusionPieChart" class="w-full h-full"></canvas>
-                        </div>
-                    </div>
+            <!-- Content Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
+                <!-- Chart Section -->
+                <div class="border border-warm-border dark:border-[#25211e] p-4 rounded-lg bg-warm-ivory dark:bg-[#1f1b18] flex items-center justify-center min-h-[350px]"
+                    wire:ignore>
+                    <canvas id="conclusionPieChart" class="w-full max-w-[450px]"></canvas>
+                </div>
 
-                    <!-- Table Section -->
-                    <div class="rounded-md overflow-hidden">
-                        <table class="w-full text-sm text-gray-900 dark:text-gray-100">
-                            <thead>
-                                <tr class="bg-gray-200 dark:bg-gray-700">
-                                    <th
-                                        class="border-2 border-gray-400 dark:border-gray-500 px-4 py-3 text-center font-bold">
-                                        KETERANGAN
-                                    </th>
-                                    <th
-                                        class="border-2 border-gray-400 dark:border-gray-500 px-4 py-3 text-center font-bold">
-                                        JUMLAH
-                                    </th>
-                                    <th
-                                        class="border-2 border-gray-400 dark:border-gray-500 px-4 py-3 text-center font-bold">
-                                        PERSENTASE
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white dark:bg-[#171412] hover:bg-warm-ivory/50 dark:hover:bg-[#1f1b18]/50 transition-colors">
-                                @foreach ($conclusionSummary as $conclusion => $count)
-                                    @php
-                                        $percentage =
-                                            $totalParticipants > 0 ? round(($count / $totalParticipants) * 100, 2) : 0;
-                                        $tailwindClass =
-                                            $conclusionConfig[$conclusion]['tailwindClass'] ??
-                                            'bg-gray-100
-                            text-gray-800';
-                                    @endphp
-                                    <tr>
-                                        <td
-                                            class="border-2 border-gray-400 dark:border-gray-500 px-4 py-3 font-bold {{ $tailwindClass }}">
+                <!-- Table Section -->
+                <div class="rounded-lg overflow-hidden border border-warm-border dark:border-[#25211e]">
+                    <table class="w-full text-sm text-primary-ink dark:text-neutral-200">
+                        <thead>
+                            <tr class="bg-warm-ivory dark:bg-[#1f1b18] text-primary-ink dark:text-neutral-100 font-bold">
+                                <th class="border border-warm-border dark:border-[#25211e] px-4 py-2 text-left font-bold">
+                                    Keterangan
+                                </th>
+                                <th class="border border-warm-border dark:border-[#25211e] px-4 py-2 text-center font-bold">
+                                    Jumlah
+                                </th>
+                                <th class="border border-warm-border dark:border-[#25211e] px-4 py-2 text-center font-bold">
+                                    Persentase
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white dark:bg-[#171412]">
+                            @foreach ($conclusionSummary as $conclusion => $count)
+                                @php
+                                    $percentage =
+                                        $totalParticipants > 0 ? round(($count / $totalParticipants) * 100, 2) : 0;
+                                    $cKey = ucwords(strtolower(trim($conclusion)));
+                                    $badgeStyle = $conclusionConfig[$conclusion]['tailwindClass']
+                                        ?? ($conclusionConfig[$cKey]['tailwindClass']
+                                        ?? 'bg-warm-border/60 dark:bg-[#25211e] text-primary-ink dark:text-neutral-200');
+                                @endphp
+                                <tr class="hover:bg-warm-ivory/50 dark:hover:bg-[#1f1b18]/50 transition-colors duration-150">
+                                    <td class="border border-warm-border dark:border-[#25211e] px-4 py-2 font-semibold">
+                                        <span class="inline-block px-2.5 py-0.5 rounded text-xs {{ $badgeStyle }}">
                                             {{ $conclusion }}
-                                        </td>
-                                        <td
-                                            class="border-2 border-gray-400 dark:border-gray-500 px-4 py-3 text-center">
-                                            {{ $count }}
-                                            orang
-                                        </td>
-                                        <td
-                                            class="border-2 border-gray-400 dark:border-gray-500 px-4 py-3 text-center">
-                                            {{ $percentage }}%
-                                        </td>
-                                    </tr>
-                                @endforeach
-                                <tr class="bg-gray-100 dark:bg-gray-700 font-semibold">
-                                    <td class="border-2 border-gray-400 dark:border-gray-500 px-4 py-3">Jumlah
-                                        Responden</td>
-                                    <td class="border-2 border-gray-400 dark:border-gray-500 px-4 py-3 text-center">
-                                        {{ $totalParticipants }} orang</td>
-                                    <td class="border-2 border-gray-400 dark:border-gray-500 px-4 py-3 text-center">
-                                        100.00%</td>
+                                        </span>
+                                    </td>
+                                    <td class="border border-warm-border dark:border-[#25211e] px-4 py-2 text-center font-mono-data">
+                                        {{ $count }} orang
+                                    </td>
+                                    <td class="border border-warm-border dark:border-[#25211e] px-4 py-2 text-center font-mono-data">
+                                        {{ $percentage }}%
+                                    </td>
                                 </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                            @endforeach
+                            <tr class="bg-warm-ivory dark:bg-[#1f1b18] text-primary-ink dark:text-neutral-100 font-bold">
+                                <td class="border border-warm-border dark:border-[#25211e] px-4 py-2">
+                                    Jumlah Responden
+                                </td>
+                                <td class="border border-warm-border dark:border-[#25211e] px-4 py-2 text-center font-mono-data">
+                                    {{ $totalParticipants }} orang
+                                </td>
+                                <td class="border border-warm-border dark:border-[#25211e] px-4 py-2 text-center font-mono-data">
+                                    100.00%
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -546,17 +429,13 @@
         const canvas = document.getElementById('conclusionPieChart');
         if (!canvas) return;
 
-        // Destroy existing chart if exists to prevent cropping issues
         if (conclusionPieChart) {
             conclusionPieChart.destroy();
             conclusionPieChart = null;
         }
 
-        // Reset canvas dimensions to ensure proper sizing
         canvas.style.width = '';
         canvas.style.height = '';
-        canvas.width = canvas.offsetWidth;
-        canvas.height = canvas.offsetHeight;
 
         const chartData = {
             labels: labels,
@@ -568,14 +447,10 @@
                 datalabels: {
                     display: false
                 },
-                // Hover effects
-                hoverBackgroundColor: colors.map(color => {
-                    // Lighten color on hover
-                    return color + 'dd'; // Add transparency
-                }),
+                hoverBackgroundColor: colors.map(color => color + 'dd'),
                 hoverBorderColor: '#333',
                 hoverBorderWidth: 3,
-                hoverOffset: 25 // Push slice out on hover
+                hoverOffset: 15
             }]
         };
 
@@ -585,119 +460,43 @@
             options: {
                 responsive: true,
                 maintainAspectRatio: true,
-                // Add padding to prevent label clipping
                 layout: {
-                    padding: {
-                        top: 50,
-                        bottom: 50,
-                        left: 100,
-                        right: 100
-                    }
+                    padding: 20
                 },
-                // Smooth animations
                 animation: {
                     animateRotate: true,
                     animateScale: true,
                     duration: 800,
                     easing: 'easeInOutQuart'
                 },
-                // Hover mode settings
-                hover: {
-                    mode: 'nearest',
-                    intersect: true,
-                    animationDuration: 400
-                },
-                // Cursor pointer on hover
-                onHover: (event, activeElements) => {
-                    event.native.target.style.cursor = activeElements.length > 0 ? 'pointer' : 'default';
-                },
                 plugins: {
                     legend: {
-                        display: false,
-
+                        display: false
                     },
                     tooltip: {
                         enabled: true,
-                        backgroundColor: 'rgba(0, 0, 0, 0.85)',
-                        padding: 14,
+                        backgroundColor: 'rgba(23, 20, 18, 0.9)',
+                        padding: 12,
                         cornerRadius: 8,
                         titleFont: {
-                            size: 15,
-                            weight: 'bold'
+                            size: 14,
+                            weight: 'bold',
+                            family: "'Instrument Sans', sans-serif"
                         },
                         bodyFont: {
-                            size: 14
+                            size: 13,
+                            family: "'Instrument Sans', sans-serif"
                         },
-                        displayColors: true,
-                        boxWidth: 20,
-                        boxHeight: 20,
-                        boxPadding: 8,
-                        caretSize: 8,
                         callbacks: {
                             label: function(context) {
                                 const label = context.label || '';
                                 const value = context.parsed;
                                 const total = context.dataset.data.reduce((a, b) => a + b, 0);
                                 const percentage = total > 0 ? ((value / total) * 100).toFixed(2) : 0;
-                                return `${label}: ${value} orang (${percentage}%)`;
+                                return ` ${label}: ${value} orang (${percentage}%)`;
                             }
                         }
-                    },
-                    // Menggunakan chartjs-plugin-datalabels untuk label yang lebih jelas
-                    // datalabels: {
-                    //     // Posisikan label di luar chart
-                    //     anchor: 'end',
-                    //     align: 'end',
-                    //     offset: 10,
-
-                    //     // Style untuk background label
-                    //     backgroundColor: function(context) {
-                    //         return 'rgba(255, 255, 255, 0.95)';
-                    //     },
-                    //     borderColor: function(context) {
-                    //         return context.dataset.backgroundColor[context.dataIndex];
-                    //     },
-                    //     borderWidth: 2,
-                    //     borderRadius: 4,
-
-                    //     // Style text
-                    //     color: '#000',
-                    //     font: {
-                    //         weight: 'bold',
-                    //         size: 13
-                    //     },
-
-                    //     // Padding di dalam box label
-                    //     padding: 6,
-
-                    //     // Formatter untuk menampilkan nilai dan persentase
-                    //     formatter: function(value, context) {
-                    //         const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                    //         const percentage = total > 0 ? ((value / total) * 100).toFixed(2) : '0.00';
-
-                    //         // Skip label jika value = 0 (kecuali index pertama)
-                    //         if (value === 0 && context.dataIndex !== 0) {
-                    //             return '';
-                    //         }
-
-                    //         return `${value} orang\n${percentage}%`;
-                    //     },
-
-                    //     // Tampilkan hanya jika value > 0 atau index pertama
-                    //     display: function(context) {
-                    //         return context.dataset.data[context.dataIndex] > 0 || context.dataIndex === 0;
-                    //     },
-
-                    //     // Style text alignment
-                    //     textAlign: 'center',
-
-                    //     // Tambahkan line connector dari chart ke label
-                    //     listeners: {
-                    //         enter: function(context) {
-                    //             // Optional: bisa tambahkan interaktivitas
-                    //         }
-                    //     }
-                    // }
+                    }
                 }
             }
         };
@@ -705,16 +504,12 @@
         conclusionPieChart = new Chart(canvas, config);
     }
 
-    // Listen for Livewire events to recreate chart
-    // This listener is set up once and will work for all updates
     document.addEventListener('DOMContentLoaded', function() {
         Livewire.on('pieChartDataUpdated', function(data) {
             let chartData = Array.isArray(data) && data.length > 0 ? data[0] : data;
 
-            // Only recreate chart if we have valid data (not empty)
             if (chartData && chartData.labels && chartData.data &&
                 chartData.labels.length > 0 && chartData.data.length > 0) {
-                // Recreate chart completely to avoid cropping issues
                 createConclusionChart(chartData.labels, chartData.data, chartData.colors);
             }
         });
