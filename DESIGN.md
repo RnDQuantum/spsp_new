@@ -115,6 +115,7 @@ To ensure cohesive harmony with the Deep Espresso Charcoal (`#171412`) sidebar, 
 - **Cards, Tables, & Panels**: `#171412` (Deep Espresso - matches the sidebar color, ensuring layout integration).
 - **Layout Borders & Dividers**: `#25211e` (Warm Dark Border - replacing cool neutral borders).
 - **Hover & Selected Surfaces**: `#1f1b18` (Warm Dark Surface - used for active toggle backgrounds and table row hovers).
+- **JavaScript Component Toggles & Legends**: Always use Warm Dark classes (`bg-white dark:bg-[#171412]` for active state, `bg-warm-ivory/80 dark:bg-[#1f1b18]` for hidden/disabled state). Never revert to cold generic Tailwind grays (`bg-gray-50`, `dark:bg-gray-600/800`).
 
 ---
 
@@ -130,7 +131,7 @@ The system pairs Lora (an elegant, editorial serif) for Display and Headline sty
 - **Headline** (Semi-Bold (600), 1.75rem, 1.3): Used for section titles.
 - **Title** (Semi-Bold (600), 1.25rem, 1.4): Used for card titles and subheadings.
 - **Body** (Regular (400), 1rem, 1.6, max line length 75ch): Used for paragraphs, explanations, and descriptions.
-- **Label** (Medium (500), 0.875rem, 1.5, letter-spacing 0.05em): Used for badges, tables, chart labels, and micro-copy.
+- **Label & Badges** (Medium/Semi-Bold (500-600), 0.75rem-0.875rem (12px-14px), 1.5, letter-spacing 0.05em): Minimum font size floor is **`text-xs` (12px)**. Never use sub-12px text (e.g. `text-[10px]`) to maintain WCAG AA readability.
 
 ---
 
@@ -148,17 +149,25 @@ The elevation philosophy is strictly **Flat & Layered**. We do not use heavy sha
 
 ### SPSP Data Tables
 SPSP reports display dense multidimensional metrics. The table design balances high information density with elegant legibility:
-- **Table Container**: Pure White (`#ffffff`) background in light mode or Deep Charcoal (`#171717`) in dark mode, bounded by a 1px Warm Beige border (`#f0ebe4`).
+- **Table Container**: Pure White (`#ffffff`) background in light mode or Deep Charcoal (`#171412`) in dark mode, bounded by a 1px Warm Beige border (`#f0ebe4`).
 - **Cell Padding**: Vertical padding must be **`py-2` (8px)**, and horizontal padding **`px-4` (16px)** to stay compact yet breathable.
-- **Headers & Totals**: Lighter warm-ivory background (`bg-warm-ivory` / `dark:bg-neutral-900`) with bold text and solid high contrast.
+- **Headers & Totals**: Lighter warm-ivory background (`bg-warm-ivory` / `dark:bg-[#1f1b18]`) with bold text and solid high contrast.
+- **Empty Total Cells**: Fill with subtle neutral tint (`bg-warm-border/40 dark:bg-[#25211e]/40`).
 - **Font-Weights**:
   - Aspect names: `font-semibold text-primary-ink dark:text-neutral-100`.
   - Values & numbers: `font-normal text-primary-ink dark:text-neutral-200` to prevent visual clutter.
-  - Text sizes: set to **`text-sm` (14px)** for readability on both standard screens and print/PDF exports.
+  - Text sizes: set to **`text-sm` (14px)** for table body, **`text-xs` (12px)** for conclusion badges.
+  - Fallback badge style: `bg-warm-border/60 dark:bg-[#25211e] text-primary-ink dark:text-neutral-200`.
 
 ### Spider Plot Charts (SPSP)
-- **Point Labels & Ticks Font**: Family must be set explicitly to `"'Instrument Sans', sans-serif"` with size `14px` or `16px`.
-- **Legend Bullet Styles**: Small circular dots (using Tailwind `rounded-full w-3 h-3`) displaying matching solid colors rather than legacy thick line rectangles.
+- **Point Labels (Aspect Names around radar)**: Family set to `"'Instrument Sans', sans-serif"`, size **`14px`**, weight **`600` (semi-bold)**, color Deep Espresso `#171412` (light) / `#e5e5e5` (dark).
+- **Axis Ticks (Radial Scale Numbers 1..5)**: Family set to `"'Instrument Sans', sans-serif"`, size **`15px`**, weight **`600` (semi-bold)**, color Deep Espresso `#171412` (light) / `#e5e5e5` (dark).
+- **Legend Bullet Styles**: Small circular dots (using Tailwind `rounded-full w-3 h-3`) displaying matching solid colors rather than legacy thick line rectangles, styled with warm cards (`bg-white dark:bg-[#171412] border border-warm-border dark:border-[#25211e] text-xs font-semibold`).
+
+### Metric & Ranking Cards
+- **Section Layout**: Full width (`w-full`), stretching smoothly across the container to align with tables and charts.
+- **Card Styling**: `bg-warm-ivory dark:bg-[#1f1b18] border border-warm-border dark:border-[#25211e] rounded-lg p-5`.
+- **Card Labels**: `text-xs font-bold uppercase tracking-wider text-primary-ink/60 dark:text-neutral-400`.
 
 ---
 
@@ -169,8 +178,11 @@ SPSP reports display dense multidimensional metrics. The table design balances h
 - **Do** maintain a high contrast ratio (4.5:1) for all text against backgrounds.
 - **Do** use solid, clean borders instead of drop shadows.
 - **Do** keep the `py-2` compact padding on SPSP reports for consistent data density.
+- **Do** maintain a minimum `text-xs` (12px) font size floor for all microcopy, badges, and card labels.
 
 ### Don't:
 - **Don't** use neon or high-saturation colors for core UI containers.
 - **Don't** apply overall bold weights to entire table bodies.
 - **Don't** use opacity or muted values (e.g. `text-gray-400`) on small body fonts or numbers.
+- **Don't** use sub-12px font sizes (`text-[10px]`) for UI labels.
+- **Don't** revert to cold gray classes (`bg-gray-50`, `dark:bg-gray-600/800`) in JavaScript interaction handlers.

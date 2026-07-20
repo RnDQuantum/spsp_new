@@ -7,20 +7,24 @@ Dokumen ini melacak kemajuan pengerjaan redesain antarmuka (UI) seluruh sistem S
 ## 1. Standar Desain "Executive Journal" SPSP
 
 Setiap halaman yang diredesain wajib mengikuti daftar periksa berikut:
-- [ ] **Wadah Utama:** Menggunakan warna latar `bg-warm-ivory` / `dark:bg-neutral-900` dengan pembatas halus `border-warm-border` / `dark:border-neutral-800` dan bayangan minimalis.
+- [ ] **Wadah Utama:** Menggunakan warna latar `bg-warm-ivory` / `dark:bg-[#1f1b18]` dengan pembatas halus `border-warm-border` / `dark:border-[#25211e]` dan bayangan minimalis.
 - [ ] **Header Editorial:** Rata kiri, judul menggunakan font serif **Lora** (`font-display`), dan metadata terstruktur dengan warna `text-primary-ink/75` / `dark:text-neutral-400`.
 - [ ] **Kepadatan & Kontras Tabel:** 
   - Ukuran teks tabel diset ke **`text-sm` (14px)**.
-  - Padding vertikal baris tabel diset ke **`py-2` (8px)**.
+  - Padding vertikal baris tabel diset ke **`py-2` (8px)**, horizontal **`px-4` (16px)**.
   - Ketebalan font diatur berhierarki (nama aspek: `font-semibold`, data angka/nomor: `font-normal`).
-  - Menghapus border hitam tebal, diganti dengan `border-warm-border` (`#f0ebe4`).
-  - Latar belakang header kolom dan total menggunakan `bg-warm-ivory` / `dark:bg-neutral-900`.
-  - Sel kosong baris total menggunakan abu-abu netral lembut (`bg-warm-border/40`).
+  - Menghapus border hitam tebal, diganti dengan `border-warm-border` (`#f0ebe4`) / `dark:border-[#25211e]`.
+  - Latar belakang header kolom dan total menggunakan `bg-warm-ivory` / `dark:bg-[#1f1b18]`.
+  - Sel kosong baris total menggunakan netral lembut (`bg-warm-border/40` / `dark:bg-[#25211e]/40`).
 - [ ] **Grafik Radar (Spider Plot):** 
   - Memakai skema warna solid asli (Hijau `#5db010`, Merah `#b50505`, Kuning `#fafa05`).
-  - Legenda berupa dot lingkaran kecil (`rounded-full w-3 h-3`) alih-alih balok persegi panjang tebal.
-  - Mengatur *font family* ticks dan point labels ke `"'Instrument Sans', sans-serif"`.
-- [ ] **Kartu Metrik & Badge:** Menggunakan warna ivory dengan border beige, aksen angka menggunakan warna Charcoal atau Amber Gold, status kesimpulan dikemas dalam badge kecil bersudut tumpul (`rounded`).
+  - Legenda berupa dot lingkaran kecil (`rounded-full w-3 h-3`) dengan kartu hangat (`bg-white dark:bg-[#171412]`).
+  - Mengatur *font family* ticks (15px semi-bold) dan pointLabels (14px semi-bold) ke `"'Instrument Sans', sans-serif"`, dengan warna Deep Espresso (`#171412`) / Warm Light (`#e5e5e5`).
+  - Toggles JS legenda menggunakan warna warm dark (`dark:bg-[#1f1b18]` & `dark:bg-[#171412]`), bukan abu-abu cold gray (`gray-600`/`gray-800`).
+- [ ] **Kartu Metrik & Badge:**
+  - Layout section membentang *full width* (`w-full`).
+  - Menggunakan warna ivory dengan border beige, aksen angka menggunakan warna Charcoal atau Amber Gold.
+  - Batas ukuran font mikrocopy/badge diset ke **`text-xs` (12px)** (tidak diperkenankan menggunakan font sub-12px seperti `text-[10px]`).
 
 ---
 
@@ -33,7 +37,7 @@ Menampilkan analisis mendalam dan visualisasi radar kompetensi untuk masing-masi
 
 | Halaman / Fitur | Berkas View (`resources/views/livewire/pages/`) | Pola Legacy / Masalah Desain | Status |
 | :--- | :--- | :--- | :--- |
-| **General Mapping** | `individual-report/general-mapping.blade.php` | Menggunakan border hitam kaku, header abu-abu tebal, tabel terlalu renggang. | **Selesai** (Standar Awal) |
+| **General Mapping** | `individual-report/general-mapping.blade.php` | Menggunakan border hitam kaku, header abu-abu tebal, tabel terlalu renggang. | **Selesai** (Master Benchmark 100%) |
 | **Spider Plot Analysis** | `individual-report/spider-plot.blade.php` | Container `bg-white`, header hitam/abu-abu pekat, legenda balok tebal, chart font belum disesuaikan. | **Selesai** |
 | **Final Report Summary** | `individual-report/final-report.blade.php` | Desain layout lama dengan borders hitam dan padding lebar. | **Selesai** |
 | **General Matching** | `individual-report/general-matching.blade.php` | Tabel gap dan ringkasan nilai masih memakai gaya borders hitam kaku. | **Selesai** |
