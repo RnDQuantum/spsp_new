@@ -159,74 +159,54 @@
 
     <!-- Info Section - DARK MODE READY -->
     @if ($showInfoSection)
-        <div class="grid grid-cols-2 border-b border-warm-border dark:border-[#25211e] bg-warm-ivory dark:bg-[#1f1b18]">
-            <!-- Left Column -->
-            <div class="border-r border-warm-border dark:border-[#25211e]/40">
-                <div class="grid grid-cols-3 border-b border-warm-border dark:border-[#25211e]/40">
-                    <div class="px-4 py-2 text-sm text-primary-ink dark:text-neutral-200">Nomor Tes</div>
-                    <div class="px-4 py-2 text-sm col-span-2 text-primary-ink dark:text-neutral-200">:
-                        {{ $participant->test_number }}
-                    </div>
-                </div>
-                <div class="grid grid-cols-3 border-b border-warm-border dark:border-[#25211e]/40">
-                    <div class="px-4 py-2 text-sm text-primary-ink dark:text-neutral-200">Nomor SKB</div>
-                    <div class="px-4 py-2 text-sm col-span-2 text-primary-ink dark:text-neutral-200">:
-                        {{ $participant->skb_number }}
-                    </div>
-                </div>
-                <div class="grid grid-cols-3 border-b border-warm-border dark:border-[#25211e]/40">
-                    <div class="px-4 py-2 text-sm text-primary-ink dark:text-neutral-200">Nama</div>
-                    <div class="px-4 py-2 text-sm col-span-2 text-primary-ink dark:text-neutral-200">: {{ $participant->name }}
-                    </div>
-                </div>
-                <div class="grid grid-cols-3 border-b border-warm-border dark:border-[#25211e]/40">
-                    <div class="px-4 py-2 text-sm text-primary-ink dark:text-neutral-200">Formasi Jabatan</div>
-                    <div class="px-4 py-2 text-sm col-span-2 text-primary-ink dark:text-neutral-200">:
-                        {{ $participant->positionFormation->name }}
-                    </div>
-                </div>
-                <div class="grid grid-cols-3">
-                    <div class="px-4 py-2 text-sm text-primary-ink dark:text-neutral-200">Tanggal Tes</div>
-                    <div class="px-4 py-2 text-sm col-span-2 text-primary-ink dark:text-neutral-200">:
-                        {{ \Carbon\Carbon::parse($participant->assessment_date)->translatedFormat('d F Y') }}
-                    </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 border-b border-warm-border dark:border-[#25211e] bg-warm-ivory dark:bg-[#1f1b18]">
+            <!-- Left Column: Participant Meta -->
+            <div class="p-4 border-b md:border-b-0 md:border-r border-warm-border dark:border-[#2a2420] flex flex-col justify-between">
+                <div class="grid grid-cols-3 gap-y-2 text-xs">
+                    <div class="font-semibold text-primary-ink/60 dark:text-neutral-400">Nomor Tes</div>
+                    <div class="col-span-2 font-medium text-primary-ink dark:text-neutral-200">: {{ $participant->test_number }}</div>
+
+                    <div class="font-semibold text-primary-ink/60 dark:text-neutral-400">Nomor SKB</div>
+                    <div class="col-span-2 font-medium text-primary-ink dark:text-neutral-200">: {{ $participant->skb_number }}</div>
+
+                    <div class="font-semibold text-primary-ink/60 dark:text-neutral-400">Nama</div>
+                    <div class="col-span-2 font-semibold text-primary-ink dark:text-neutral-100">: {{ $participant->name }}</div>
+
+                    <div class="font-semibold text-primary-ink/60 dark:text-neutral-400">Formasi Jabatan</div>
+                    <div class="col-span-2 font-medium text-primary-ink dark:text-neutral-200">: {{ $participant->positionFormation->name }}</div>
+
+                    <div class="font-semibold text-primary-ink/60 dark:text-neutral-400">Tanggal Tes</div>
+                    <div class="col-span-2 font-medium text-primary-ink dark:text-neutral-200">: {{ \Carbon\Carbon::parse($participant->assessment_date)->translatedFormat('d F Y') }}</div>
                 </div>
             </div>
 
             <!-- Right Column - JOB PERSON MATCH -->
-            <div class="flex flex-col">
-                <div class="grid grid-cols-2 border-b border-warm-border dark:border-[#25211e]/40">
-                    <div class="px-4 py-2 text-sm text-primary-ink dark:text-neutral-200">Standar Penilaian</div>
-                    <div class="px-4 py-2 text-sm text-primary-ink dark:text-neutral-200">
-                        : {{ $participant->positionFormation->template->name }}
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 border-b border-warm-border dark:border-[#25211e]/40">
-                    <div class="px-4 py-2 text-sm text-primary-ink dark:text-neutral-200">Kegiatan</div>
-                    <div class="px-4 py-2 text-sm text-primary-ink dark:text-neutral-200">:
-                        {{ $participant->assessmentEvent->name }}
-                    </div>
+            <div class="flex flex-col justify-between">
+                <div class="p-4 grid grid-cols-3 gap-y-2 text-xs border-b border-warm-border dark:border-[#2a2420]">
+                    <div class="font-semibold text-primary-ink/60 dark:text-neutral-400">Standar Penilaian</div>
+                    <div class="col-span-2 font-medium text-primary-ink dark:text-neutral-200">: {{ $participant->positionFormation->template->name }}</div>
+
+                    <div class="font-semibold text-primary-ink/60 dark:text-neutral-400">Kegiatan</div>
+                    <div class="col-span-2 font-medium text-primary-ink dark:text-neutral-200">: {{ $participant->assessmentEvent->name }}</div>
                 </div>
 
                 {{-- Adjustment Indicators --}}
-                <div class="px-4 py-2 border-b border-warm-border dark:border-[#25211e]/40 flex flex-wrap gap-2">
+                <div class="px-4 py-2 border-b border-warm-border dark:border-[#2a2420] flex flex-wrap gap-2">
                     <x-adjustment-indicator :template-id="$participant->positionFormation->template_id"
                         category-code="potensi" size="sm" custom-label="Standar Potensi Disesuaikan" />
                     <x-adjustment-indicator :template-id="$participant->positionFormation->template_id"
                         category-code="kompetensi" size="sm" custom-label="Standar Kompetensi Disesuaikan" />
                 </div>
 
-                <div
-                    class="px-4 py-2 text-center font-bold text-sm border-b border-warm-border dark:border-[#25211e]/40 text-primary-ink dark:text-neutral-100">
-                    JOB PERSON MATCH
-                </div>
-                <div class="flex-grow flex items-center px-4 py-2">
-                    <div class="w-full h-8 relative bg-warm-border/60 dark:bg-[#25211e] rounded overflow-hidden">
-                        <div class="h-full rounded {{ $jobMatchPercentage <= 40 ? 'gradient-bar-low' : ($jobMatchPercentage <= 70 ? 'gradient-bar-medium' : 'gradient-bar-high') }}"
+                <!-- Job Person Match Card -->
+                <div class="px-4 py-3 flex flex-col justify-center flex-grow bg-white/40 dark:bg-[#171412]/40">
+                    <div class="flex items-center justify-between mb-1.5">
+                        <span class="text-xs font-semibold text-primary-ink/75 dark:text-neutral-300 uppercase tracking-wider">JOB PERSON MATCH</span>
+                        <span class="text-sm font-bold text-primary-ink dark:text-neutral-100">{{ $jobMatchPercentage }}%</span>
+                    </div>
+                    <div class="w-full h-3.5 relative bg-warm-border/60 dark:bg-[#25211e] rounded-full overflow-hidden shadow-inner">
+                        <div class="h-full rounded-full transition-all duration-500 ease-out {{ $jobMatchPercentage <= 40 ? 'gradient-bar-low' : ($jobMatchPercentage <= 70 ? 'gradient-bar-medium' : 'gradient-bar-high') }}"
                             style="width: {{ $jobMatchPercentage }}%;"></div>
-                        <div class="absolute right-0 top-0 bottom-0 flex items-center pr-2">
-                            <span class="text-sm font-bold text-primary-ink dark:text-neutral-100">{{ $jobMatchPercentage }}%</span>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -287,7 +267,7 @@
                 <!-- ASPEK PSIKOLOGI (POTENSI) -->
                 @if ($showPotensi && $potensiCategory && count($potensiAspects) > 0)
                     <tr class="bg-warm-ivory dark:bg-[#1f1b18] text-primary-ink dark:text-neutral-200">
-                        <td class="border border-warm-border dark:border-[#25211e]/40 px-4 py-2 font-bold text-sm text-primary-ink dark:text-neutral-100 uppercase"
+                        <td class="border border-warm-border dark:border-[#2a2420] px-4 py-2 font-bold text-sm text-primary-ink dark:text-neutral-100 uppercase"
                             colspan="8">
                             {{ $potensiCategory->name }}
                         </td>
@@ -297,25 +277,23 @@
                         <!-- Aspect Header with Progress Bar -->
                         <tr class="bg-warm-ivory dark:bg-[#1f1b18] text-primary-ink dark:text-neutral-200">
                             <td
-                                class="border border-warm-border dark:border-[#25211e]/40 px-4 py-2 text-sm font-bold text-primary-ink dark:text-neutral-100 text-center">
+                                class="border border-warm-border dark:border-[#2a2420] px-4 py-2 text-sm font-bold text-primary-ink dark:text-neutral-100 text-center">
                                 {{ $loop->iteration }}.
                             </td>
                             <td
-                                class="border border-warm-border dark:border-[#25211e]/40 px-4 py-2 text-sm font-bold text-primary-ink dark:text-neutral-100">
+                                class="border border-warm-border dark:border-[#2a2420] px-4 py-2 text-sm font-bold text-primary-ink dark:text-neutral-100">
                                 {{ $aspect['name'] }}
                             </td>
                             <td
-                                class="border border-warm-border dark:border-[#25211e]/40 px-2 py-2 text-sm font-bold text-primary-ink dark:text-neutral-100 text-center">
+                                class="border border-warm-border dark:border-[#2a2420] px-2 py-2 text-sm font-bold text-primary-ink dark:text-neutral-100 text-center">
                                 {{ number_format($aspect['standard_rating'], 2, ',', '.') }}
                             </td>
-                            <td class="border border-warm-border dark:border-[#25211e]/40 range-scale" colspan="5">
-                                <div class="progress-container">
-                                    <div class="h-full rounded {{ $aspect['percentage'] <= 40 ? 'gradient-bar-low' : ($aspect['percentage'] <= 70 ? 'gradient-bar-medium' : 'gradient-bar-high') }}"
+                            <td class="border border-warm-border dark:border-[#2a2420] range-scale px-2 py-1.5" colspan="5">
+                                <div class="w-full h-4 relative bg-warm-border/60 dark:bg-[#25211e] rounded-full overflow-hidden shadow-inner">
+                                    <div class="h-full rounded-full transition-all duration-500 ease-out {{ $aspect['percentage'] <= 40 ? 'gradient-bar-low' : ($aspect['percentage'] <= 70 ? 'gradient-bar-medium' : 'gradient-bar-high') }}"
                                         style="width: {{ $aspect['percentage'] }}%;"></div>
-                                    <div class="absolute right-0 top-0 bottom-0 flex items-center pr-2">
-                                        <div class="rating-display text-right">
-                                            <div class="percentage">{{ $aspect['percentage'] }}%</div>
-                                        </div>
+                                    <div class="absolute inset-y-0 right-0 flex items-center pr-2">
+                                        <span class="text-[11px] font-bold text-primary-ink dark:text-neutral-100 drop-shadow-xs">{{ $aspect['percentage'] }}%</span>
                                     </div>
                                 </div>
                             </td>
@@ -325,15 +303,15 @@
                         @foreach ($aspect['sub_aspects'] as $subIndex => $subAspect)
                             <tr class="bg-warm-ivory dark:bg-[#1f1b18]">
                                 <td
-                                    class="border border-warm-border dark:border-[#25211e]/40 px-4 py-1 text-xs text-primary-ink dark:text-neutral-200 col-number text-center">
+                                    class="border border-warm-border dark:border-[#2a2420] px-4 py-1 text-xs text-primary-ink dark:text-neutral-200 col-number text-center">
                                     {{ $subIndex + 1 }}.
                                 </td>
                                 <td
-                                    class="border border-warm-border dark:border-[#25211e]/40 px-4 py-1 text-xs text-primary-ink dark:text-neutral-200">
+                                    class="border border-warm-border dark:border-[#2a2420] px-4 py-1 text-xs text-primary-ink dark:text-neutral-200">
                                     {{ $subAspect['name'] }}
                                 </td>
                                 <td
-                                    class="border border-warm-border dark:border-[#25211e]/40 px-2 py-1 text-xs text-primary-ink dark:text-neutral-200 text-center">
+                                    class="border border-warm-border dark:border-[#2a2420] px-2 py-1 text-xs text-primary-ink dark:text-neutral-200 text-center">
                                     {{ $subAspect['standard_rating'] }}
                                 </td>
                                 @for ($i = 1; $i <= 5; $i++)
@@ -351,9 +329,17 @@
                                             $cellClass = 'rating-cell-empty text-primary-ink dark:text-neutral-200';
                                         }
                                     @endphp
-                                    <td class="border border-warm-border dark:border-[#25211e]/40 range-scale text-center {{ $cellClass }}">
+                                    <td class="border border-warm-border dark:border-[#2a2420] range-scale text-center {{ $cellClass }}">
                                         @if ($isIndividual)
-                                            {{ $isAboveStandard ? '✓' : '✗' }}
+                                            @if ($isAboveStandard)
+                                                <svg class="w-4 h-4 mx-auto text-white drop-shadow-xs" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                                                </svg>
+                                            @else
+                                                <svg class="w-4 h-4 mx-auto text-white drop-shadow-xs" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path>
+                                                </svg>
+                                            @endif
                                         @endif
                                     </td>
                                 @endfor
@@ -365,7 +351,7 @@
                 <!-- ASPEK KOMPETENSI -->
                 @if ($showKompetensi && $kompetensiCategory && count($kompetensiAspects) > 0)
                     <tr class="bg-warm-ivory dark:bg-[#1f1b18] text-primary-ink dark:text-neutral-200">
-                        <td class="border border-warm-border dark:border-[#25211e]/40 px-4 py-2 font-bold text-sm text-primary-ink dark:text-neutral-100 uppercase"
+                        <td class="border border-warm-border dark:border-[#2a2420] px-4 py-2 font-bold text-sm text-primary-ink dark:text-neutral-100 uppercase"
                             colspan="8">
                             {{ $kompetensiCategory->name }}
                         </td>
@@ -375,25 +361,23 @@
                         <!-- Aspect Header with Progress Bar -->
                         <tr class="bg-warm-ivory dark:bg-[#1f1b18] text-primary-ink dark:text-neutral-200">
                             <td
-                                class="border border-warm-border dark:border-[#25211e]/40 px-4 py-2 text-sm font-bold text-primary-ink dark:text-neutral-100 text-center">
+                                class="border border-warm-border dark:border-[#2a2420] px-4 py-2 text-sm font-bold text-primary-ink dark:text-neutral-100 text-center">
                                 {{ $loop->iteration }}.
                             </td>
                             <td
-                                class="border border-warm-border dark:border-[#25211e]/40 px-4 py-2 text-sm font-bold text-primary-ink dark:text-neutral-100">
+                                class="border border-warm-border dark:border-[#2a2420] px-4 py-2 text-sm font-bold text-primary-ink dark:text-neutral-100">
                                 {{ $aspect['name'] }}
                             </td>
                             <td
-                                class="border border-warm-border dark:border-[#25211e]/40 px-2 py-2 text-sm font-bold text-primary-ink dark:text-neutral-100 text-center">
+                                class="border border-warm-border dark:border-[#2a2420] px-2 py-2 text-sm font-bold text-primary-ink dark:text-neutral-100 text-center">
                                 {{ number_format($aspect['standard_rating'], 2, ',', '.') }}
                             </td>
-                            <td class="border border-warm-border dark:border-[#25211e]/40 range-scale" colspan="5">
-                                <div class="progress-container">
-                                    <div class="h-full rounded {{ $aspect['percentage'] <= 40 ? 'gradient-bar-low' : ($aspect['percentage'] <= 70 ? 'gradient-bar-medium' : 'gradient-bar-high') }}"
+                            <td class="border border-warm-border dark:border-[#2a2420] range-scale px-2 py-1.5" colspan="5">
+                                <div class="w-full h-4 relative bg-warm-border/60 dark:bg-[#25211e] rounded-full overflow-hidden shadow-inner">
+                                    <div class="h-full rounded-full transition-all duration-500 ease-out {{ $aspect['percentage'] <= 40 ? 'gradient-bar-low' : ($aspect['percentage'] <= 70 ? 'gradient-bar-medium' : 'gradient-bar-high') }}"
                                         style="width: {{ $aspect['percentage'] }}%;"></div>
-                                    <div class="absolute right-0 top-0 bottom-0 flex items-center pr-2">
-                                        <div class="rating-display text-right">
-                                            <div class="percentage">{{ $aspect['percentage'] }}%</div>
-                                        </div>
+                                    <div class="absolute inset-y-0 right-0 flex items-center pr-2">
+                                        <span class="text-[11px] font-bold text-primary-ink dark:text-neutral-100 drop-shadow-xs">{{ $aspect['percentage'] }}%</span>
                                     </div>
                                 </div>
                             </td>
@@ -403,14 +387,14 @@
                         @if (isset($aspect['description']) && $aspect['description'])
                             <tr class="bg-warm-ivory/50 dark:bg-[#1f1b18]">
                                 <td
-                                    class="border border-warm-border dark:border-[#25211e]/40 px-4 py-1 text-xs text-primary-ink dark:text-neutral-200 text-center">
+                                    class="border border-warm-border dark:border-[#2a2420] px-4 py-1 text-xs text-primary-ink dark:text-neutral-200 text-center">
                                     1.</td>
                                 <td
-                                    class="border border-warm-border dark:border-[#25211e]/40 px-4 py-1 text-xs text-primary-ink dark:text-neutral-200">
+                                    class="border border-warm-border dark:border-[#2a2420] px-4 py-1 text-xs text-primary-ink dark:text-neutral-200">
                                     {{ $aspect['description'] }}
                                 </td>
                                 <td
-                                    class="border border-warm-border dark:border-[#25211e]/40 px-2 py-1 text-xs text-primary-ink dark:text-neutral-200 text-center">
+                                    class="border border-warm-border dark:border-[#2a2420] px-2 py-1 text-xs text-primary-ink dark:text-neutral-200 text-center">
                                     {{ $aspect['standard_rating'] }}
                                 </td>
                                 @for ($i = 1; $i <= 5; $i++)
@@ -428,9 +412,17 @@
                                             $cellClass = 'rating-cell-empty text-primary-ink dark:text-neutral-200';
                                         }
                                     @endphp
-                                    <td class="border border-warm-border dark:border-[#25211e]/40 range-scale text-center {{ $cellClass }}">
+                                    <td class="border border-warm-border dark:border-[#2a2420] range-scale text-center {{ $cellClass }}">
                                         @if ($isIndividual)
-                                            {{ $isAboveStandard ? '✓' : '✗' }}
+                                            @if ($isAboveStandard)
+                                                <svg class="w-4 h-4 mx-auto text-white drop-shadow-xs" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                                                </svg>
+                                            @else
+                                                <svg class="w-4 h-4 mx-auto text-white drop-shadow-xs" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path>
+                                                </svg>
+                                            @endif
                                         @endif
                                     </td>
                                 @endfor
@@ -438,13 +430,13 @@
                         @else
                             <tr class="bg-warm-ivory/50 dark:bg-[#1f1b18]">
                                 <td
-                                    class="border border-warm-border dark:border-[#25211e]/40 px-4 py-1 text-xs text-primary-ink dark:text-neutral-200 text-center">
+                                    class="border border-warm-border dark:border-[#2a2420] px-4 py-1 text-xs text-primary-ink dark:text-neutral-200 text-center">
                                     1.</td>
                                 <td
-                                    class="border border-warm-border dark:border-[#25211e]/40 px-4 py-1 text-xs text-primary-ink dark:text-neutral-200">
+                                    class="border border-warm-border dark:border-[#2a2420] px-4 py-1 text-xs text-primary-ink dark:text-neutral-200">
                                     Rating Level</td>
                                 <td
-                                    class="border border-warm-border dark:border-[#25211e]/40 px-2 py-1 text-xs text-primary-ink dark:text-neutral-200 text-center">
+                                    class="border border-warm-border dark:border-[#2a2420] px-2 py-1 text-xs text-primary-ink dark:text-neutral-200 text-center">
                                     {{ $aspect['standard_rating'] }}
                                 </td>
                                 @for ($i = 1; $i <= 5; $i++)
@@ -462,9 +454,17 @@
                                             $cellClass = 'rating-cell-empty text-primary-ink dark:text-neutral-200';
                                         }
                                     @endphp
-                                    <td class="border border-warm-border dark:border-[#25211e]/40 range-scale text-center {{ $cellClass }}">
+                                    <td class="border border-warm-border dark:border-[#2a2420] range-scale text-center {{ $cellClass }}">
                                         @if ($isIndividual)
-                                            {{ $isAboveStandard ? '✓' : '✗' }}
+                                            @if ($isAboveStandard)
+                                                <svg class="w-4 h-4 mx-auto text-white drop-shadow-xs" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                                                </svg>
+                                            @else
+                                                <svg class="w-4 h-4 mx-auto text-white drop-shadow-xs" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path>
+                                                </svg>
+                                            @endif
                                         @endif
                                     </td>
                                 @endfor
@@ -480,27 +480,33 @@
 
     <!-- Legend/Keterangan -->
     <div class="mt-4 px-4 pb-4">
-        <div class="text-sm font-bold text-primary-ink dark:text-neutral-100 mb-2">Keterangan:</div>
+        <div class="text-xs font-bold text-primary-ink dark:text-neutral-100 uppercase tracking-wider mb-2">Keterangan:</div>
         <div class="flex flex-wrap gap-4">
             <!-- Abu-abu: Standar -->
             <div class="flex items-center gap-2">
-                <div class="w-8 h-6 rating-cell-standard border border-warm-border dark:border-[#25211e]/40 rounded"></div>
+                <div class="w-7 h-6 rating-cell-standard border border-warm-border dark:border-[#2a2420] rounded shadow-xs"></div>
                 <span class="text-xs text-primary-ink dark:text-neutral-200">Standar</span>
             </div>
 
             <!-- Hijau: Sesuai/Diatas Standar -->
             <div class="flex items-center gap-2">
                 <div
-                    class="w-8 h-6 rating-cell-individual above-standard border border-warm-border dark:border-[#25211e]/40 rounded flex items-center justify-center text-white font-bold">
-                    ✓</div>
+                    class="w-7 h-6 rating-cell-individual above-standard border border-warm-border dark:border-[#2a2420] rounded flex items-center justify-center text-white shadow-xs">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                </div>
                 <span class="text-xs text-primary-ink dark:text-neutral-200">Sesuai atau Diatas Standar</span>
             </div>
 
             <!-- Merah: Tidak Sesuai Standar -->
             <div class="flex items-center gap-2">
                 <div
-                    class="w-8 h-6 rating-cell-individual below-standard border border-warm-border dark:border-[#25211e]/40 rounded flex items-center justify-center text-white font-bold">
-                    ✗</div>
+                    class="w-7 h-6 rating-cell-individual below-standard border border-warm-border dark:border-[#2a2420] rounded flex items-center justify-center text-white shadow-xs">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </div>
                 <span class="text-xs text-primary-ink dark:text-neutral-200">Tidak Sesuai Standar</span>
             </div>
         </div>
