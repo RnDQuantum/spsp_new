@@ -223,19 +223,14 @@ class AttributeParticipantListModal extends Component
         // 🚀 PERFORMANCE: Load participants only when modal is shown
         if ($this->showModal) {
             $this->loadParticipants();
+
+            // Dispatch data to Alpine.js after load so it can handle
+            // search/sort/pagination client-side without server round-trips.
+            $this->dispatch('participants-loaded', participants: $this->participants);
         }
 
-        // 🚀 PERFORMANCE: Only compute pagination when modal is actually shown
-        $paginatedData = $this->showModal ? $this->paginatedParticipants : [
-            'data' => collect([]),
-            'total' => 0,
-            'per_page' => 15,
-            'current_page' => 1,
-            'last_page' => 1,
-        ];
-
         return view('livewire.pages.general-report.training.attribute-participant-list-modal', [
-            'paginatedData' => $paginatedData,
+            'selectedAttributeName' => $this->selectedAttributeName,
         ]);
     }
 }
