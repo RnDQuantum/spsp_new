@@ -158,6 +158,7 @@ SPSP reports display dense multidimensional metrics. The table design balances h
   - Values & numbers: `font-normal text-primary-ink dark:text-neutral-200` to prevent visual clutter.
   - Text sizes: set to **`text-sm` (14px)** for table body, **`text-xs` (12px)** for conclusion badges.
   - Fallback badge style: `bg-warm-border/60 dark:bg-[#25211e] text-primary-ink dark:text-neutral-200`.
+  - **Standard Rating Cell**: Medium neutral gray (`#797979` in light mode, `#6b7280` in dark mode) to ensure target standard cells remain distinct and visible across both light and dark modes.
 
 ### Spider Plot Charts (SPSP)
 - **Point Labels (Aspect Names around radar)**: Family set to `"'Instrument Sans', sans-serif"`, size **`14px`**, weight **`600` (semi-bold)**, color Deep Espresso `#171412` (light) / `#e5e5e5` (dark).
