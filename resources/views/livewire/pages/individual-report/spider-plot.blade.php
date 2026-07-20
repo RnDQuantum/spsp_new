@@ -70,16 +70,15 @@
     <!-- Chart Scripts - DARK MODE FIXED -->
     <script>
         (function() {
-            // 🌙 DARK MODE COLORS
+            // 🌙 DARK MODE COLORS - MASTER BENCHMARK
             const getColors = () => {
-                const dark = document.documentElement.classList.contains('dark');
+                const isDark = document.documentElement.classList.contains('dark');
                 return {
-                    grid: dark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.15)', // Lembut (0.5 -> 0.15)
-                    angleLines: dark ? 'rgba(255, 255, 255, 0.15)' :
-                    'rgba(0, 0, 0, 0.15)', // Lembut (0.5 -> 0.15)
-                    ticks: dark ? '#ffffff' : '#000000', // Warna solid
-                    pointLabels: dark ? '#d1d5db' : '#000000', // Warna solid (konsisten dengan dashboard)
-                    legend: dark ? '#ffffff' : '#000000' // Warna solid
+                    grid: isDark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(23, 20, 18, 0.15)',
+                    angleLines: isDark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(23, 20, 18, 0.15)',
+                    ticks: isDark ? '#e5e5e5' : '#171412',
+                    pointLabels: isDark ? '#e5e5e5' : '#171412',
+                    legend: isDark ? '#e5e5e5' : '#171412'
                 };
             };
 
@@ -151,7 +150,7 @@
                                 label: '{{ $participant->name }}',
                                 data: @js($potensiIndividualRatings),
                                 fill: true,
-                                backgroundColor: '#5db010', // ← UBAH dari rgba(..., 0.7) ke SOLID
+                                backgroundColor: '#5db010',
                                 borderColor: '#8fd006',
                                 pointBackgroundColor: '#8fd006',
                                 pointBorderColor: '#fff',
@@ -176,9 +175,9 @@
                             },
                             {
                                 // LAYER 2: STANDARD (MERAH) - Dataset 1
-                                label: 'Standard', // ← UBAH dari 'Tolerance {{ $tolerancePercentage }}%'
+                                label: 'Standard',
                                 data: @js($potensiStandardRatings),
-                                backgroundColor: '#b50505', // ← UBAH dari rgba(..., 0.7) ke SOLID
+                                backgroundColor: '#b50505',
                                 borderColor: '#b50505',
                                 borderWidth: 2,
                                 pointRadius: 3,
@@ -203,10 +202,10 @@
                             },
                             {
                                 // LAYER 3: TOLERANCE (KUNING) - Dataset 2
-                                label: 'Tolerance {{ $tolerancePercentage }}%', // ← UBAH dari 'Standard'
+                                label: 'Tolerance {{ $tolerancePercentage }}%',
                                 data: @js($potensiOriginalStandardRatings),
                                 fill: true,
-                                backgroundColor: '#fafa05', // ← UBAH dari rgba(..., 0.7) ke SOLID
+                                backgroundColor: '#fafa05',
                                 borderColor: '#e6d105',
                                 pointBackgroundColor: '#e6d105',
                                 pointBorderColor: '#fff',
@@ -240,8 +239,12 @@
                                 position: 'top',
                                 labels: {
                                     color: colors.legend,
+                                    usePointStyle: true,
+                                    pointStyle: 'circle',
                                     font: {
-                                        size: 16
+                                        size: 13,
+                                        weight: '600',
+                                        family: "'Instrument Sans', sans-serif"
                                     }
                                 }
                             },
@@ -259,7 +262,8 @@
                                     stepSize: 1,
                                     color: colors.ticks,
                                     font: {
-                                        size: 16,
+                                        size: 15,
+                                        weight: '600',
                                         family: "'Instrument Sans', sans-serif"
                                     },
                                     backdropColor: 'transparent',
@@ -269,7 +273,8 @@
                                 pointLabels: {
                                     color: colors.pointLabels,
                                     font: {
-                                        size: 16,
+                                        size: 14,
+                                        weight: '600',
                                         family: "'Instrument Sans', sans-serif"
                                     },
                                     z: 3
@@ -298,7 +303,7 @@
                             const xCenter = scale.xCenter;
 
                             ctx.save();
-                            ctx.font = scale.options.ticks.font.size + "px 'Instrument Sans', sans-serif";
+                            ctx.font = "600 15px 'Instrument Sans', sans-serif";
                             ctx.fillStyle = scale.options.ticks.color || '#000';
                             ctx.textAlign = 'center';
                             ctx.textBaseline = 'middle';
@@ -428,8 +433,12 @@
                                 position: 'top',
                                 labels: {
                                     color: colors.legend,
+                                    usePointStyle: true,
+                                    pointStyle: 'circle',
                                     font: {
-                                        size: 16
+                                        size: 13,
+                                        weight: '600',
+                                        family: "'Instrument Sans', sans-serif"
                                     }
                                 }
                             },
@@ -447,7 +456,8 @@
                                     stepSize: 1,
                                     color: colors.ticks,
                                     font: {
-                                        size: 16,
+                                        size: 15,
+                                        weight: '600',
                                         family: "'Instrument Sans', sans-serif"
                                     },
                                     backdropColor: 'transparent',
@@ -457,7 +467,8 @@
                                 pointLabels: {
                                     color: colors.pointLabels,
                                     font: {
-                                        size: 16,
+                                        size: 14,
+                                        weight: '600',
                                         family: "'Instrument Sans', sans-serif"
                                     },
                                     z: 3
@@ -486,7 +497,7 @@
                             const xCenter = scale.xCenter;
 
                             ctx.save();
-                            ctx.font = scale.options.ticks.font.size + "px 'Instrument Sans', sans-serif";
+                            ctx.font = "600 15px 'Instrument Sans', sans-serif";
                             ctx.fillStyle = scale.options.ticks.color || '#000';
                             ctx.textAlign = 'center';
                             ctx.textBaseline = 'middle';
@@ -529,7 +540,7 @@
                                 label: '{{ $participant->name }}',
                                 data: @js($generalIndividualRatings),
                                 fill: true,
-                                backgroundColor: '#5db010', // Semi-transparan (green)
+                                backgroundColor: '#5db010',
                                 borderColor: '#8fd006',
                                 pointBackgroundColor: '#8fd006',
                                 pointBorderColor: '#fff',
@@ -553,9 +564,9 @@
                                 }
                             },
                             {
-                                label: 'Standard', // ← UBAH
+                                label: 'Standard',
                                 data: @js($generalStandardRatings),
-                                backgroundColor: '#b50505', // Semi-transparan (red)
+                                backgroundColor: '#b50505',
                                 borderColor: '#b50505',
                                 borderWidth: 2,
                                 pointRadius: 3,
@@ -579,9 +590,9 @@
                                 }
                             },
                             {
-                                label: 'Tolerance {{ $tolerancePercentage }}%', // ← UBAH
+                                label: 'Tolerance {{ $tolerancePercentage }}%',
                                 data: @js($generalOriginalStandardRatings),
-                                backgroundColor: '#fafa05', // Semi-transparan (yellow)
+                                backgroundColor: '#fafa05',
                                 borderColor: '#e6d105',
                                 pointBackgroundColor: '#e6d105',
                                 pointBorderColor: '#fff',
@@ -615,8 +626,12 @@
                                 position: 'top',
                                 labels: {
                                     color: colors.legend,
+                                    usePointStyle: true,
+                                    pointStyle: 'circle',
                                     font: {
-                                        size: 16
+                                        size: 13,
+                                        weight: '600',
+                                        family: "'Instrument Sans', sans-serif"
                                     }
                                 }
                             },
@@ -634,7 +649,8 @@
                                     stepSize: 1,
                                     color: colors.ticks,
                                     font: {
-                                        size: 16,
+                                        size: 15,
+                                        weight: '600',
                                         family: "'Instrument Sans', sans-serif"
                                     },
                                     backdropColor: 'transparent',
@@ -644,7 +660,8 @@
                                 pointLabels: {
                                     color: colors.pointLabels,
                                     font: {
-                                        size: 16,
+                                        size: 14,
+                                        weight: '600',
                                         family: "'Instrument Sans', sans-serif"
                                     },
                                     z: 3
@@ -673,7 +690,7 @@
                             const xCenter = scale.xCenter;
 
                             ctx.save();
-                            ctx.font = scale.options.ticks.font.size + "px 'Instrument Sans', sans-serif";
+                            ctx.font = "600 15px 'Instrument Sans', sans-serif";
                             ctx.fillStyle = scale.options.ticks.color || '#000';
                             ctx.textAlign = 'center';
                             ctx.textBaseline = 'middle';

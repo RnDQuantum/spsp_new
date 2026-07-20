@@ -38,7 +38,7 @@ Menampilkan analisis mendalam dan visualisasi radar kompetensi untuk masing-masi
 | Halaman / Fitur | Berkas View (`resources/views/livewire/pages/`) | Pola Legacy / Masalah Desain | Status |
 | :--- | :--- | :--- | :--- |
 | **General Mapping** | `individual-report/general-mapping.blade.php` | Menggunakan border hitam kaku, header abu-abu tebal, tabel terlalu renggang. | **Selesai** (Master Benchmark 100%) |
-| **Spider Plot Analysis** | `individual-report/spider-plot.blade.php` | Container `bg-white`, header hitam/abu-abu pekat, legenda balok tebal, chart font belum disesuaikan. | **Selesai** |
+| **Spider Plot Analysis** | `individual-report/spider-plot.blade.php` | Container `bg-white`, header hitam/abu-abu pekat, legenda balok tebal, chart font belum disesuaikan. | **Selesai** (Standar Benchmark 100%) |
 | **Final Report Summary** | `individual-report/final-report.blade.php` | Desain layout lama dengan borders hitam dan padding lebar. | **Selesai** |
 | **General Matching** | `individual-report/general-matching.blade.php` | Tabel gap dan ringkasan nilai masih memakai gaya borders hitam kaku. | **Selesai** (Standar Benchmark 100%) |
 | **Managerial Competency** | `individual-report/general-mc-mapping.blade.php` | Tabel kompetensi manajerial sangat panjang, memerlukan padding py-2 dan hierarchy tebal-tipis teks. | **Selesai** (Standar Benchmark 100%) |
