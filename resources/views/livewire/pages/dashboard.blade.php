@@ -62,32 +62,32 @@
                         <div class="flex justify-center text-sm gap-2 mb-8" id="potensi-legend-{{ $potensiChartId }}">
                             @if ($participant)
                                 <span class="legend-item flex items-center gap-2 cursor-pointer select-none 
-                                    hover:bg-warm-ivory dark:hover:bg-neutral-900 px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-[#25211e] shadow-xs bg-white dark:bg-[#171412] text-xs font-semibold text-primary-ink dark:text-neutral-200"
+                                    hover:bg-warm-ivory dark:hover:bg-[#1f1b18] px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-[#25211e] shadow-xs bg-white dark:bg-[#171412] text-xs font-semibold text-primary-ink dark:text-neutral-200"
                                     data-chart="potensi" data-dataset="0">
                                     <span class="inline-block w-3 h-3 rounded-full" style="background-color: #5db010;"></span>
                                     <span>{{ $participant->name }}</span>
                                 </span>
                                 <span class="legend-item flex items-center gap-2 cursor-pointer select-none 
-                                    hover:bg-warm-ivory dark:hover:bg-neutral-900 px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-[#25211e] shadow-xs bg-white dark:bg-[#171412] text-xs font-semibold text-primary-ink dark:text-neutral-200"
+                                    hover:bg-warm-ivory dark:hover:bg-[#1f1b18] px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-[#25211e] shadow-xs bg-white dark:bg-[#171412] text-xs font-semibold text-primary-ink dark:text-neutral-200"
                                     data-chart="potensi" data-dataset="1">
                                     <span class="inline-block w-3 h-3 rounded-full" style="background-color: #b50505;"></span>
                                     <span>Standard</span>
                                 </span>
                                 <span class="legend-item flex items-center gap-2 cursor-pointer select-none 
-                                    hover:bg-warm-ivory dark:hover:bg-neutral-900 px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-[#25211e] shadow-xs bg-white dark:bg-[#171412] text-xs font-semibold text-primary-ink dark:text-neutral-200"
+                                    hover:bg-warm-ivory dark:hover:bg-[#1f1b18] px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-[#25211e] shadow-xs bg-white dark:bg-[#171412] text-xs font-semibold text-primary-ink dark:text-neutral-200"
                                     data-chart="potensi" data-dataset="2">
                                     <span class="inline-block w-3 h-3 rounded-full" style="background-color: #fafa05;"></span>
                                     <span>Tolerance {{ $tolerancePercentage }}%</span>
                                 </span>
                             @else
                                 <span class="legend-item flex items-center gap-2 cursor-pointer select-none 
-                                    hover:bg-warm-ivory dark:hover:bg-neutral-900 px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-[#25211e] shadow-xs bg-white dark:bg-[#171412] text-xs font-semibold text-primary-ink dark:text-neutral-200"
+                                    hover:bg-warm-ivory dark:hover:bg-[#1f1b18] px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-[#25211e] shadow-xs bg-white dark:bg-[#171412] text-xs font-semibold text-primary-ink dark:text-neutral-200"
                                     data-chart="potensi" data-dataset="0">
                                     <span class="inline-block w-3 h-3 rounded-full" style="background-color: #5db010;"></span>
                                     <span>Standard</span>
                                 </span>
                                 <span class="legend-item flex items-center gap-2 cursor-pointer select-none 
-                                    hover:bg-warm-ivory dark:hover:bg-neutral-900 px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-[#25211e] shadow-xs bg-white dark:bg-[#171412] text-xs font-semibold text-primary-ink dark:text-neutral-200"
+                                    hover:bg-warm-ivory dark:hover:bg-[#1f1b18] px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-[#25211e] shadow-xs bg-white dark:bg-[#171412] text-xs font-semibold text-primary-ink dark:text-neutral-200"
                                     data-chart="potensi" data-dataset="1">
                                     <span class="inline-block w-3 h-3 rounded-full" style="background-color: #fafa05;"></span>
                                     <span>Tolerance {{ $tolerancePercentage }}%</span>
@@ -111,32 +111,32 @@
                         <div class="flex justify-center text-sm gap-2 mb-8" id="kompetensi-legend-{{ $kompetensiChartId }}">
                             @if ($participant)
                                 <span class="legend-item flex items-center gap-2 cursor-pointer select-none 
-                                    hover:bg-warm-ivory dark:hover:bg-neutral-900 px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-[#25211e] shadow-xs bg-white dark:bg-[#171412] text-xs font-semibold text-primary-ink dark:text-neutral-200"
+                                    hover:bg-warm-ivory dark:hover:bg-[#1f1b18] px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-[#25211e] shadow-xs bg-white dark:bg-[#171412] text-xs font-semibold text-primary-ink dark:text-neutral-200"
                                     data-chart="kompetensi" data-dataset="0">
                                     <span class="inline-block w-3 h-3 rounded-full" style="background-color: #5db010;"></span>
                                     <span>{{ $participant->name }}</span>
                                 </span>
                                 <span class="legend-item flex items-center gap-2 cursor-pointer select-none 
-                                    hover:bg-warm-ivory dark:hover:bg-neutral-900 px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-[#25211e] shadow-xs bg-white dark:bg-[#171412] text-xs font-semibold text-primary-ink dark:text-neutral-200"
+                                    hover:bg-warm-ivory dark:hover:bg-[#1f1b18] px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-[#25211e] shadow-xs bg-white dark:bg-[#171412] text-xs font-semibold text-primary-ink dark:text-neutral-200"
                                     data-chart="kompetensi" data-dataset="1">
                                     <span class="inline-block w-3 h-3 rounded-full" style="background-color: #b50505;"></span>
                                     <span>Standard</span>
                                 </span>
                                 <span class="legend-item flex items-center gap-2 cursor-pointer select-none 
-                                    hover:bg-warm-ivory dark:hover:bg-neutral-900 px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-[#25211e] shadow-xs bg-white dark:bg-[#171412] text-xs font-semibold text-primary-ink dark:text-neutral-200"
+                                    hover:bg-warm-ivory dark:hover:bg-[#1f1b18] px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-[#25211e] shadow-xs bg-white dark:bg-[#171412] text-xs font-semibold text-primary-ink dark:text-neutral-200"
                                     data-chart="kompetensi" data-dataset="2">
                                     <span class="inline-block w-3 h-3 rounded-full" style="background-color: #fafa05;"></span>
                                     <span>Tolerance {{ $tolerancePercentage }}%</span>
                                 </span>
                             @else
                                 <span class="legend-item flex items-center gap-2 cursor-pointer select-none 
-                                    hover:bg-warm-ivory dark:hover:bg-neutral-900 px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-[#25211e] shadow-xs bg-white dark:bg-[#171412] text-xs font-semibold text-primary-ink dark:text-neutral-200"
+                                    hover:bg-warm-ivory dark:hover:bg-[#1f1b18] px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-[#25211e] shadow-xs bg-white dark:bg-[#171412] text-xs font-semibold text-primary-ink dark:text-neutral-200"
                                     data-chart="kompetensi" data-dataset="0">
                                     <span class="inline-block w-3 h-3 rounded-full" style="background-color: #5db010;"></span>
                                     <span>Standard</span>
                                 </span>
                                 <span class="legend-item flex items-center gap-2 cursor-pointer select-none 
-                                    hover:bg-warm-ivory dark:hover:bg-neutral-900 px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-[#25211e] shadow-xs bg-white dark:bg-[#171412] text-xs font-semibold text-primary-ink dark:text-neutral-200"
+                                    hover:bg-warm-ivory dark:hover:bg-[#1f1b18] px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-[#25211e] shadow-xs bg-white dark:bg-[#171412] text-xs font-semibold text-primary-ink dark:text-neutral-200"
                                     data-chart="kompetensi" data-dataset="1">
                                     <span class="inline-block w-3 h-3 rounded-full" style="background-color: #fafa05;"></span>
                                     <span>Tolerance {{ $tolerancePercentage }}%</span>
@@ -160,32 +160,32 @@
                         <div class="flex justify-center text-sm gap-2 mb-8" id="general-legend-{{ $generalChartId }}">
                             @if ($participant)
                                 <span class="legend-item flex items-center gap-2 cursor-pointer select-none 
-                                    hover:bg-warm-ivory dark:hover:bg-neutral-900 px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-[#25211e] shadow-xs bg-white dark:bg-[#171412] text-xs font-semibold text-primary-ink dark:text-neutral-200"
+                                    hover:bg-warm-ivory dark:hover:bg-[#1f1b18] px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-[#25211e] shadow-xs bg-white dark:bg-[#171412] text-xs font-semibold text-primary-ink dark:text-neutral-200"
                                     data-chart="general" data-dataset="0">
                                     <span class="inline-block w-3 h-3 rounded-full" style="background-color: #5db010;"></span>
                                     <span>{{ $participant->name }}</span>
                                 </span>
                                 <span class="legend-item flex items-center gap-2 cursor-pointer select-none 
-                                    hover:bg-warm-ivory dark:hover:bg-neutral-900 px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-[#25211e] shadow-xs bg-white dark:bg-[#171412] text-xs font-semibold text-primary-ink dark:text-neutral-200"
+                                    hover:bg-warm-ivory dark:hover:bg-[#1f1b18] px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-[#25211e] shadow-xs bg-white dark:bg-[#171412] text-xs font-semibold text-primary-ink dark:text-neutral-200"
                                     data-chart="general" data-dataset="1">
                                     <span class="inline-block w-3 h-3 rounded-full" style="background-color: #b50505;"></span>
                                     <span>Standard</span>
                                 </span>
                                 <span class="legend-item flex items-center gap-2 cursor-pointer select-none 
-                                    hover:bg-warm-ivory dark:hover:bg-neutral-900 px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-[#25211e] shadow-xs bg-white dark:bg-[#171412] text-xs font-semibold text-primary-ink dark:text-neutral-200"
+                                    hover:bg-warm-ivory dark:hover:bg-[#1f1b18] px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-[#25211e] shadow-xs bg-white dark:bg-[#171412] text-xs font-semibold text-primary-ink dark:text-neutral-200"
                                     data-chart="general" data-dataset="2">
                                     <span class="inline-block w-3 h-3 rounded-full" style="background-color: #fafa05;"></span>
                                     <span>Tolerance {{ $tolerancePercentage }}%</span>
                                 </span>
                             @else
                                 <span class="legend-item flex items-center gap-2 cursor-pointer select-none 
-                                    hover:bg-warm-ivory dark:hover:bg-neutral-900 px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-[#25211e] shadow-xs bg-white dark:bg-[#171412] text-xs font-semibold text-primary-ink dark:text-neutral-200"
+                                    hover:bg-warm-ivory dark:hover:bg-[#1f1b18] px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-[#25211e] shadow-xs bg-white dark:bg-[#171412] text-xs font-semibold text-primary-ink dark:text-neutral-200"
                                     data-chart="general" data-dataset="0">
                                     <span class="inline-block w-3 h-3 rounded-full" style="background-color: #5db010;"></span>
                                     <span>Standard</span>
                                 </span>
                                 <span class="legend-item flex items-center gap-2 cursor-pointer select-none 
-                                    hover:bg-warm-ivory dark:hover:bg-neutral-900 px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-[#25211e] shadow-xs bg-white dark:bg-[#171412] text-xs font-semibold text-primary-ink dark:text-neutral-200"
+                                    hover:bg-warm-ivory dark:hover:bg-[#1f1b18] px-3 py-2 rounded-md transition-all duration-150 border border-warm-border dark:border-[#25211e] shadow-xs bg-white dark:bg-[#171412] text-xs font-semibold text-primary-ink dark:text-neutral-200"
                                     data-chart="general" data-dataset="1">
                                     <span class="inline-block w-3 h-3 rounded-full" style="background-color: #fafa05;"></span>
                                     <span>Tolerance {{ $tolerancePercentage }}%</span>
@@ -224,20 +224,20 @@
 
                     // Dark mode colors
                     const darkModeColors = {
-                        background: '#1f2937', // gray-800
-                        text: '#ffffff', // gray-50
+                        background: '#171412', // Warm Espresso
+                        text: '#e5e5e5', // Warm Light
                         grid: 'rgba(255, 255, 255, 0.15)', // Lembut
-                        pointLabels: '#d1d5db', // gray-300
-                        legend: '#ffffff', // gray-50
+                        pointLabels: '#e5e5e5', // Warm Light
+                        legend: '#e5e5e5', // Warm Light
                     };
 
                     // Light mode colors (default)
                     const lightModeColors = {
                         background: '#ffffff',
-                        text: '#000000', // gray-900
-                        grid: 'rgba(0, 0, 0, 0.15)', // Lembut
-                        pointLabels: '#000000', // gray-900
-                        legend: '#000000', // gray-900
+                        text: '#171412', // Deep Espresso
+                        grid: 'rgba(23, 20, 18, 0.15)', // Lembut Warm
+                        pointLabels: '#171412', // Deep Espresso
+                        legend: '#171412', // Deep Espresso
                     };
 
                     // Get current theme
@@ -327,11 +327,11 @@
                             const meta = chart.getDatasetMeta(idx);
                             const isHidden = meta && meta.hidden !== null ? meta.hidden : (chart.data.datasets[idx]?.hidden || false);
                             if (isHidden) {
-                                item.classList.add('opacity-50', 'line-through', 'bg-gray-50', 'dark:bg-gray-600');
-                                item.classList.remove('bg-white', 'dark:bg-gray-700', 'shadow-sm');
+                                item.classList.add('opacity-50', 'line-through', 'bg-warm-ivory/80', 'dark:bg-[#1f1b18]');
+                                item.classList.remove('bg-white', 'dark:bg-[#171412]', 'shadow-xs');
                             } else {
-                                item.classList.remove('opacity-50', 'line-through', 'bg-gray-50', 'dark:bg-gray-600');
-                                item.classList.add('bg-white', 'dark:bg-gray-700', 'shadow-sm');
+                                item.classList.remove('opacity-50', 'line-through', 'bg-warm-ivory/80', 'dark:bg-[#1f1b18]');
+                                item.classList.add('bg-white', 'dark:bg-[#171412]', 'shadow-xs');
                             }
                         });
                     }
@@ -550,7 +550,8 @@
                                             stepSize: 1,
                                             color: colors.text,
                                             font: {
-                                                size: 16,
+                                                size: 15,
+                                                weight: '600',
                                                 family: "'Instrument Sans', sans-serif"
                                             },
                                             backdropColor: 'transparent',
@@ -564,7 +565,8 @@
                                         pointLabels: {
                                             color: colors.pointLabels,
                                             font: {
-                                                size: 16,
+                                                size: 14,
+                                                weight: '600',
                                                 family: "'Instrument Sans', sans-serif"
                                             },
                                             z: 3
@@ -600,8 +602,8 @@
                                     const xCenter = scale.xCenter;
 
                                     ctx.save();
-                                    ctx.font = scale.options.ticks.font.size + "px 'Instrument Sans', sans-serif";
-                                    ctx.fillStyle = scale.options.ticks.color || '#000';
+                                    ctx.font = "600 " + (scale.options.ticks.font.size || 15) + "px 'Instrument Sans', sans-serif";
+                                    ctx.fillStyle = scale.options.ticks.color || '#171412';
                                     ctx.textAlign = 'center';
                                     ctx.textBaseline = 'middle';
 
@@ -824,7 +826,8 @@
                                             stepSize: 1,
                                             color: colors.text,
                                             font: {
-                                                size: 16,
+                                                size: 15,
+                                                weight: '600',
                                                 family: "'Instrument Sans', sans-serif"
                                             },
                                             backdropColor: 'transparent',
@@ -838,7 +841,8 @@
                                         pointLabels: {
                                             color: colors.pointLabels,
                                             font: {
-                                                size: 16,
+                                                size: 14,
+                                                weight: '600',
                                                 family: "'Instrument Sans', sans-serif"
                                             },
                                             z: 3
@@ -874,8 +878,8 @@
                                     const xCenter = scale.xCenter;
 
                                     ctx.save();
-                                    ctx.font = scale.options.ticks.font.size + "px 'Instrument Sans', sans-serif";
-                                    ctx.fillStyle = scale.options.ticks.color || '#000';
+                                    ctx.font = "600 " + (scale.options.ticks.font.size || 15) + "px 'Instrument Sans', sans-serif";
+                                    ctx.fillStyle = scale.options.ticks.color || '#171412';
                                     ctx.textAlign = 'center';
                                     ctx.textBaseline = 'middle';
 
@@ -1097,7 +1101,8 @@
                                             stepSize: 1,
                                             color: colors.text,
                                             font: {
-                                                size: 16,
+                                                size: 15,
+                                                weight: '600',
                                                 family: "'Instrument Sans', sans-serif"
                                             },
                                             backdropColor: 'transparent',
@@ -1111,7 +1116,8 @@
                                         pointLabels: {
                                             color: colors.pointLabels,
                                             font: {
-                                                size: 16,
+                                                size: 14,
+                                                weight: '600',
                                                 family: "'Instrument Sans', sans-serif"
                                             },
                                             z: 3
@@ -1147,8 +1153,8 @@
                                     const xCenter = scale.xCenter;
 
                                     ctx.save();
-                                    ctx.font = scale.options.ticks.font.size + "px 'Instrument Sans', sans-serif";
-                                    ctx.fillStyle = scale.options.ticks.color || '#000';
+                                    ctx.font = "600 " + (scale.options.ticks.font.size || 15) + "px 'Instrument Sans', sans-serif";
+                                    ctx.fillStyle = scale.options.ticks.color || '#171412';
                                     ctx.textAlign = 'center';
                                     ctx.textBaseline = 'middle';
 
@@ -1279,10 +1285,11 @@
                                         max: 5,
                                         ticks: {
                                             display: false,
-                                            stepSize: 1, // ✅ FIX 1: Tambah stepSize
+                                            stepSize: 1,
                                             color: colors.text,
                                             font: {
-                                                size: 16,
+                                                size: 15,
+                                                weight: '600',
                                                 family: "'Instrument Sans', sans-serif"
                                             },
                                             backdropColor: 'transparent',
@@ -1292,12 +1299,12 @@
                                         grid: {
                                             color: colors.grid,
                                             z: 1
-                                            // ✅ FIX 2: HAPUS circular: true agar chart TEGAS
                                         },
                                         pointLabels: {
                                             color: colors.pointLabels,
                                             font: {
-                                                size: 16,
+                                                size: 14,
+                                                weight: '600',
                                                 family: "'Instrument Sans', sans-serif"
                                             },
                                             z: 3
@@ -1333,8 +1340,8 @@
                                     const xCenter = scale.xCenter;
 
                                     ctx.save();
-                                    ctx.font = scale.options.ticks.font.size + "px 'Instrument Sans', sans-serif";
-                                    ctx.fillStyle = scale.options.ticks.color || '#000';
+                                    ctx.font = "600 " + (scale.options.ticks.font.size || 15) + "px 'Instrument Sans', sans-serif";
+                                    ctx.fillStyle = scale.options.ticks.color || '#171412';
                                     ctx.textAlign = 'center';
                                     ctx.textBaseline = 'middle';
 
@@ -1458,10 +1465,11 @@
                                         max: 5,
                                         ticks: {
                                             display: false,
-                                            stepSize: 1, // ✅ FIX 1: Tambah stepSize
+                                            stepSize: 1,
                                             color: colors.text,
                                             font: {
-                                                size: 16,
+                                                size: 15,
+                                                weight: '600',
                                                 family: "'Instrument Sans', sans-serif"
                                             },
                                             backdropColor: 'transparent',
@@ -1471,12 +1479,12 @@
                                         grid: {
                                             color: colors.grid,
                                             z: 1
-                                            // ✅ FIX 2: HAPUS circular: true
                                         },
                                         pointLabels: {
                                             color: colors.pointLabels,
                                             font: {
-                                                size: 16,
+                                                size: 14,
+                                                weight: '600',
                                                 family: "'Instrument Sans', sans-serif"
                                             },
                                             z: 3
@@ -1508,8 +1516,8 @@
                                     } = chart;
                                     const scale = scales.r;
                                     ctx.save();
-                                    ctx.font = "16px 'Instrument Sans', sans-serif";
-                                    ctx.fillStyle = scale.options.ticks.color;
+                                    ctx.font = "600 " + (scale.options.ticks.font.size || 15) + "px 'Instrument Sans', sans-serif";
+                                    ctx.fillStyle = scale.options.ticks.color || '#171412';
                                     ctx.textAlign = 'center';
                                     ctx.textBaseline = 'middle';
 
@@ -1632,10 +1640,11 @@
                                         max: 5,
                                         ticks: {
                                             display: false,
-                                            stepSize: 1, // ✅ FIX 1: Tambah stepSize
+                                            stepSize: 1,
                                             color: colors.text,
                                             font: {
-                                                size: 16,
+                                                size: 15,
+                                                weight: '600',
                                                 family: "'Instrument Sans', sans-serif"
                                             },
                                             backdropColor: 'transparent',
@@ -1645,12 +1654,12 @@
                                         grid: {
                                             color: colors.grid,
                                             z: 1
-                                            // ✅ FIX 2: HAPUS circular: true
                                         },
                                         pointLabels: {
                                             color: colors.pointLabels,
                                             font: {
-                                                size: 16,
+                                                size: 14,
+                                                weight: '600',
                                                 family: "'Instrument Sans', sans-serif"
                                             },
                                             z: 3
@@ -1682,8 +1691,8 @@
                                     } = chart;
                                     const scale = scales.r;
                                     ctx.save();
-                                    ctx.font = "16px 'Instrument Sans', sans-serif";
-                                    ctx.fillStyle = scale.options.ticks.color;
+                                    ctx.font = "600 " + (scale.options.ticks.font.size || 15) + "px 'Instrument Sans', sans-serif";
+                                    ctx.fillStyle = scale.options.ticks.color || '#171412';
                                     ctx.textAlign = 'center';
                                     ctx.textBaseline = 'middle';
 

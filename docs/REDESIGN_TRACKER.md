@@ -54,7 +54,7 @@ Dasbor koordinasi utama bagi lembaga klien dan manajemen.
 
 | Halaman / Fitur | Berkas View (`resources/views/livewire/pages/`) | Pola Legacy / Masalah Desain | Status |
 | :--- | :--- | :--- | :--- |
-| **Main Spider Plot Dashboard** | `dashboard.blade.php` | Dasbor utama yang memuat filter event, posisi, dan radar chart. | **Selesai** |
+| **Main Spider Plot Dashboard** | `dashboard.blade.php` | Dasbor utama yang memuat filter event, posisi, dan radar chart. | **Selesai** (Standar Benchmark 100%) |
 | **Participant Detail** | `participant-detail.blade.php` | Detail profil peserta, riwayat asesmen, dan kartu identitas peserta masih menggunakan layout kaku. | **Selesai** |
 | **Talent Shortlist** | `shortlist.blade.php` | Tabel shortlist kandidat dengan kolom-kolom persentase kesesuaian. Memerlukan badge kecil dan border lembut. | **Selesai** |
 | **Talent Pool Grid** | `talent-pool/index.blade.php` | Grid matriks 9-box talent pool. Memerlukan penyesuaian warna box agar selaras dengan palet Executive Journal. | **Selesai** |
