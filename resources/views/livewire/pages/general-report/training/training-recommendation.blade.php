@@ -425,6 +425,6 @@
         @endif
     </div>
 
-    <!-- Attribute Participant List Modal -->
-    @livewire('pages.general-report.training.attribute-participant-list-modal')
+    <!-- Attribute Participant List Modal (Pure Alpine — no Livewire round-trip) -->
+    @include('livewire.pages.general-report.training.attribute-participant-list-modal')
 </div>

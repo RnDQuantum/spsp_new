@@ -1,7 +1,16 @@
-<div x-data="{ show: @entangle('showModal') }">
+{{--
+    Pure Alpine modal — NO Livewire round-trip on open.
+    Data is received via browser event 'open-attribute-modal' dispatched
+    by TrainingRecommendation::openAttributeModal() in a single server request.
+--}}
+<div
+    x-data="participantModal()"
+    x-on:open-attribute-modal.window="openModal($event.detail)"
+    x-on:keydown.esc.window="closeModal()">
+
     {{-- Modal Overlay --}}
     <div x-cloak x-show="show" x-transition.opacity.duration.200ms
-        x-on:keydown.esc.window="$wire.closeModal()" x-on:click.self="$wire.closeModal()"
+        x-on:click.self="closeModal()"
         class="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-4 pb-8 backdrop-blur-sm sm:items-center lg:p-8"
         role="dialog" aria-modal="true" aria-labelledby="modalTitle">
 
@@ -13,8 +22,7 @@
             x-transition:leave-start="opacity-100 translate-y-0 scale-100" x-transition:leave-end="opacity-0 translate-y-4 scale-95"
             class="flex w-full max-w-5xl flex-col overflow-hidden rounded-xl border border-warm-border dark:border-[#25211e] bg-white dark:bg-[#171412] text-primary-ink dark:text-neutral-100 shadow-2xl font-sans"
             style="max-height: 90vh;"
-            x-trap="show"
-            x-data="participantModal()">
+            x-trap="show">
 
             {{-- Dialog Header --}}
             <div class="flex shrink-0 items-center justify-between border-b border-warm-border dark:border-[#25211e] bg-warm-ivory dark:bg-[#1f1b18] px-6 py-4">
@@ -26,15 +34,15 @@
                         </svg>
                     </div>
                     <div>
-                        <h3 id="modalTitle" class="text-xl font-bold font-display tracking-tight text-primary-ink dark:text-neutral-100">
-                            Daftar Peserta: {{ $selectedAttributeName ?? 'Atribut' }}
-                        </h3>
+                        <h3 id="modalTitle" class="text-xl font-bold font-display tracking-tight text-primary-ink dark:text-neutral-100"
+                            x-text="'Daftar Peserta: ' + attributeName"></h3>
                         <p class="text-xs text-primary-ink/70 dark:text-neutral-400 font-mono-data">
                             <span x-text="filteredTotal"></span> peserta ditemukan
                         </p>
                     </div>
                 </div>
-                <button x-on:click="$wire.closeModal()" aria-label="close modal" class="text-primary-ink/70 dark:text-neutral-400 hover:text-accent-amber transition-colors p-1 rounded-lg hover:bg-black/5 dark:hover:bg-white/5">
+                <button x-on:click="closeModal()" aria-label="close modal"
+                    class="text-primary-ink/70 dark:text-neutral-400 hover:text-accent-amber transition-colors p-1 rounded-lg hover:bg-black/5 dark:hover:bg-white/5">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" stroke="currentColor"
                         fill="none" stroke-width="2" class="h-5 w-5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -50,8 +58,8 @@
                             x-on:input="currentPage = 1"
                             placeholder="Cari nama atau nomor tes..."
                             class="w-full rounded-lg border border-warm-border dark:border-[#25211e] bg-white dark:bg-[#1f1b18] px-4 py-2 pl-10 text-sm text-primary-ink dark:text-neutral-100 focus:outline-none focus:border-accent-amber transition-colors">
-                        <svg class="absolute left-3 top-2.5 h-4 w-4 text-primary-ink/50 dark:text-neutral-400 pointer-events-none" fill="none"
-                            stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="absolute left-3 top-2.5 h-4 w-4 text-primary-ink/50 dark:text-neutral-400 pointer-events-none"
+                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                         </svg>
@@ -75,15 +83,6 @@
 
             {{-- Dialog Body / Table --}}
             <div class="flex-1 overflow-auto bg-white dark:bg-[#171412] relative">
-                {{-- Livewire Loading Overlay (only for initial load) --}}
-                <div wire:loading.delay wire:target="openAttributeModal"
-                    class="absolute inset-0 bg-white/90 dark:bg-[#171412]/90 z-20 flex items-center justify-center backdrop-blur-xs">
-                    <div class="flex flex-col items-center gap-2">
-                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-accent-amber"></div>
-                        <div class="text-xs font-bold text-primary-ink dark:text-neutral-200">Memuat data...</div>
-                    </div>
-                </div>
-
                 <table class="w-full border-collapse text-sm text-primary-ink dark:text-neutral-200">
                     <thead class="sticky top-0 z-10 bg-warm-ivory dark:bg-[#1f1b18] border-b border-warm-border dark:border-[#25211e]">
                         <tr>
@@ -92,84 +91,67 @@
                                 x-on:click="toggleSort('priority')">
                                 <div class="flex items-center justify-center gap-1">
                                     Priority
-                                    <span x-show="sortKey === 'priority'" class="text-accent-amber">
-                                        <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
+                                    <template x-if="sortKey === 'priority'">
+                                        <svg class="h-3 w-3 text-accent-amber" fill="currentColor" viewBox="0 0 20 20">
                                             <path x-show="sortDir === 'asc'" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
                                             <path x-show="sortDir === 'desc'" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" />
                                         </svg>
-                                    </span>
-                                    <span x-show="sortKey !== 'priority'" class="text-primary-ink/20 dark:text-neutral-600">
-                                        <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20"><path d="M5 10a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1z"/></svg>
-                                    </span>
+                                    </template>
                                 </div>
                             </th>
                             <th class="border border-warm-border dark:border-[#25211e] px-3 py-2.5 text-center font-bold text-xs cursor-pointer hover:bg-warm-border/30 dark:hover:bg-[#25211e]/60 transition-colors select-none"
                                 x-on:click="toggleSort('test_number')">
                                 <div class="flex items-center justify-center gap-1">
                                     No. Tes
-                                    <span x-show="sortKey === 'test_number'" class="text-accent-amber">
-                                        <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
+                                    <template x-if="sortKey === 'test_number'">
+                                        <svg class="h-3 w-3 text-accent-amber" fill="currentColor" viewBox="0 0 20 20">
                                             <path x-show="sortDir === 'asc'" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
                                             <path x-show="sortDir === 'desc'" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" />
                                         </svg>
-                                    </span>
-                                    <span x-show="sortKey !== 'test_number'" class="text-primary-ink/20 dark:text-neutral-600">
-                                        <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20"><path d="M5 10a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1z"/></svg>
-                                    </span>
+                                    </template>
                                 </div>
                             </th>
                             <th class="border border-warm-border dark:border-[#25211e] px-4 py-2.5 text-left font-bold text-xs cursor-pointer hover:bg-warm-border/30 dark:hover:bg-[#25211e]/60 transition-colors select-none"
                                 x-on:click="toggleSort('name')">
                                 <div class="flex items-center gap-1">
                                     Nama
-                                    <span x-show="sortKey === 'name'" class="text-accent-amber">
-                                        <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
+                                    <template x-if="sortKey === 'name'">
+                                        <svg class="h-3 w-3 text-accent-amber" fill="currentColor" viewBox="0 0 20 20">
                                             <path x-show="sortDir === 'asc'" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
                                             <path x-show="sortDir === 'desc'" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" />
                                         </svg>
-                                    </span>
-                                    <span x-show="sortKey !== 'name'" class="text-primary-ink/20 dark:text-neutral-600">
-                                        <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20"><path d="M5 10a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1z"/></svg>
-                                    </span>
+                                    </template>
                                 </div>
                             </th>
                             <th class="border border-warm-border dark:border-[#25211e] px-4 py-2.5 text-left font-bold text-xs cursor-pointer hover:bg-warm-border/30 dark:hover:bg-[#25211e]/60 transition-colors select-none"
                                 x-on:click="toggleSort('position')">
                                 <div class="flex items-center gap-1">
                                     Jabatan
-                                    <span x-show="sortKey === 'position'" class="text-accent-amber">
-                                        <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
+                                    <template x-if="sortKey === 'position'">
+                                        <svg class="h-3 w-3 text-accent-amber" fill="currentColor" viewBox="0 0 20 20">
                                             <path x-show="sortDir === 'asc'" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
                                             <path x-show="sortDir === 'desc'" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" />
                                         </svg>
-                                    </span>
-                                    <span x-show="sortKey !== 'position'" class="text-primary-ink/20 dark:text-neutral-600">
-                                        <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20"><path d="M5 10a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1z"/></svg>
-                                    </span>
+                                    </template>
                                 </div>
                             </th>
                             <th class="border border-warm-border dark:border-[#25211e] px-3 py-2.5 text-center font-bold text-xs cursor-pointer hover:bg-warm-border/30 dark:hover:bg-[#25211e]/60 transition-colors select-none"
                                 x-on:click="toggleSort('rating')">
                                 <div class="flex items-center justify-center gap-1">
                                     Rating
-                                    <span x-show="sortKey === 'rating'" class="text-accent-amber">
-                                        <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
+                                    <template x-if="sortKey === 'rating'">
+                                        <svg class="h-3 w-3 text-accent-amber" fill="currentColor" viewBox="0 0 20 20">
                                             <path x-show="sortDir === 'asc'" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
                                             <path x-show="sortDir === 'desc'" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" />
                                         </svg>
-                                    </span>
-                                    <span x-show="sortKey !== 'rating'" class="text-primary-ink/20 dark:text-neutral-600">
-                                        <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20"><path d="M5 10a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1z"/></svg>
-                                    </span>
+                                    </template>
                                 </div>
                             </th>
                             <th class="border border-warm-border dark:border-[#25211e] px-3 py-2.5 text-center font-bold text-xs">Statement</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white dark:bg-[#171412]">
-
-
-                        <template x-for="(row, idx) in paginatedRows" :key="row.test_number + '_' + row.priority">
+                        <template x-for="(row, idx) in paginatedRows" :key="String(row.test_number) + '_' + row.priority">
                             <tr class="hover:bg-warm-ivory/50 dark:hover:bg-[#1f1b18]/50 transition-colors duration-100">
                                 <td class="border border-warm-border dark:border-[#25211e] px-3 py-2 text-center font-mono-data text-xs"
                                     x-text="(currentPage - 1) * perPage + idx + 1"></td>
@@ -241,7 +223,7 @@
 
             {{-- Dialog Footer --}}
             <div class="shrink-0 flex justify-end border-t border-warm-border dark:border-[#25211e] bg-warm-ivory dark:bg-[#1f1b18] px-6 py-3">
-                <button x-on:click="$wire.closeModal()" type="button"
+                <button x-on:click="closeModal()" type="button"
                     class="rounded-lg bg-accent-amber px-5 py-2 text-center text-xs font-bold uppercase tracking-wider text-white transition hover:bg-amber-700 active:scale-95 cursor-pointer">
                     Tutup
                 </button>
@@ -253,6 +235,8 @@
 <script>
 function participantModal() {
     return {
+        show: false,
+        attributeName: '',
         allData: [],
         search: '',
         sortKey: 'priority',
@@ -260,25 +244,23 @@ function participantModal() {
         currentPage: 1,
         perPage: 25,
 
-        init() {
-            // Listen for Livewire dispatch event — fired after each render
-            // when participants are loaded. This avoids race conditions.
-            window.addEventListener('participants-loaded', (e) => {
-                this.allData = e.detail.participants ?? [];
-                this.search = '';
-                this.currentPage = 1;
-                this.sortKey = 'priority';
-                this.sortDir = 'asc';
-            });
+        openModal(detail) {
+            this.attributeName = detail.attributeName ?? '';
+            this.allData = detail.participants ?? [];
+            this.search = '';
+            this.currentPage = 1;
+            this.sortKey = 'priority';
+            this.sortDir = 'asc';
+            this.show = true;
+        },
 
-            // Reset when modal closes
-            this.$watch('$wire.showModal', (val) => {
-                if (!val) {
-                    this.allData = [];
-                    this.search = '';
-                    this.currentPage = 1;
-                }
-            });
+        closeModal() {
+            this.show = false;
+            // Slight delay before clearing data (lets leave animation play)
+            setTimeout(() => {
+                this.allData = [];
+                this.attributeName = '';
+            }, 150);
         },
 
         toggleSort(key) {

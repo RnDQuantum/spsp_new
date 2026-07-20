@@ -4,6 +4,7 @@ namespace App\Livewire\Pages\GeneralReport\Training;
 
 use App\Models\Aspect;
 use App\Models\AssessmentEvent;
+use App\Models\PositionFormation;
 use App\Services\TrainingRecommendationService;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -417,7 +418,7 @@ class TrainingRecommendation extends Component
 
     /**
      * Open modal with participants for a specific aspect
-     * 🚀 PERFORMANCE: Dispatch only IDs, let modal lazy load the data
+     * Load participants and dispatch directly to browser — single round-trip.
      */
     public function openAttributeModal(int $aspectId): void
     {
@@ -435,14 +436,38 @@ class TrainingRecommendation extends Component
             $aspectName = $aspect['aspect_name'] ?? '';
         }
 
-        // Dispatch event to modal component with minimal data
-        $this->dispatch(
-            'openAttributeParticipantModal',
+        // Load participants directly here (avoids second Livewire round-trip)
+        $service = app(TrainingRecommendationService::class);
+        $participants = $service->getParticipantsRecommendation(
+            $this->selectedEvent->id,
+            $positionFormationId,
+            $aspectId,
+            $this->tolerancePercentage
+        );
+
+        // Filter only recommended participants
+        $participants = $participants->filter(fn ($p) => $p['is_recommended'] === true);
+
+        // Hydrate position names in bulk
+        $positionIds = $participants->pluck('position_formation_id')->unique()->filter()->all();
+        if (! empty($positionIds)) {
+            $positions = PositionFormation::whereIn('id', $positionIds)
+                ->select('id', 'name')
+                ->get()
+                ->keyBy('id');
+
+            $participants = $participants->map(function ($p) use ($positions) {
+                $p['position'] = $positions->get($p['position_formation_id'])->name ?? '-';
+                return $p;
+            });
+        }
+
+        $participantsArray = $participants->values()->toArray();
+
+        // Single dispatch to browser — modal receives data without a second server request
+        $this->dispatch('open-attribute-modal',
             attributeName: $aspectName,
-            eventId: $this->selectedEvent->id,
-            positionFormationId: $positionFormationId,
-            aspectId: $aspectId,
-            tolerancePercentage: $this->tolerancePercentage
+            participants: $participantsArray,
         );
     }
 
