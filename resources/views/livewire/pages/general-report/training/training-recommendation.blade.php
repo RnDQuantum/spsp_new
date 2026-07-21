@@ -63,7 +63,7 @@
                         Proporsi Rekomendasi Pelatihan
                     </h3>
                     <div class="w-full max-w-[260px] h-[220px] relative" wire:ignore id="container-{{ $chartId }}">
-                        <canvas id="{{ $chartId }}"></canvas>
+                        <canvas id="{{ $chartId }}" x-init="$nextTick(() => { if (typeof window.runTrainingChart_{{ $selectedEvent->id }}_{{ $selectedAspect->id }} === 'function') { window.runTrainingChart_{{ $selectedEvent->id }}_{{ $selectedAspect->id }}(); } })"></canvas>
                     </div>
                 </div>
 
@@ -129,9 +129,14 @@
             <!-- Chart Script - Standardized Green-600 (#16a34a) & Red-600 (#dc2626) -->
             <script>
                 (function() {
-                    function initTrainingChart() {
+                    function initTrainingChart(retries = 10) {
                         const canvas = document.getElementById('{{ $chartId }}');
-                        if (!canvas) return;
+                        if (!canvas) {
+                            if (retries > 0) {
+                                setTimeout(() => initTrainingChart(retries - 1), 50);
+                            }
+                            return;
+                        }
 
                         if (canvas.chartInstance) {
                             canvas.chartInstance.destroy();
@@ -196,14 +201,35 @@
                         });
                     }
 
-                    if (typeof Chart !== 'undefined') {
-                        setTimeout(initTrainingChart, 50);
-                    } else {
-                        document.addEventListener('DOMContentLoaded', initTrainingChart);
+                    function waitForChartJs(callback) {
+                        if (typeof Chart !== 'undefined' && typeof ChartDataLabels !== 'undefined') {
+                            callback();
+                        } else {
+                            setTimeout(() => waitForChartJs(callback), 50);
+                        }
                     }
-                    Livewire.hook('commit', ({ component, commit, respond, succeed, fail }) => {
-                        succeed(() => { setTimeout(initTrainingChart, 50); });
-                    });
+
+                    window.runTrainingChart_{{ $selectedEvent->id }}_{{ $selectedAspect->id }} = function() {
+                        waitForChartJs(() => initTrainingChart());
+                    };
+
+                    waitForChartJs(() => initTrainingChart());
+
+                    if (!window.trainingChartNavigatedSetup) {
+                        window.trainingChartNavigatedSetup = true;
+                        document.addEventListener('livewire:navigated', function() {
+                            const activeCanvas = document.querySelector('canvas[id^="training-rec-chart-"]');
+                            if (activeCanvas) {
+                                const idParts = activeCanvas.id.replace('training-rec-chart-', '').split('-');
+                                if (idParts.length === 2) {
+                                    const fnName = 'runTrainingChart_' + idParts[0] + '_' + idParts[1];
+                                    if (typeof window[fnName] === 'function') {
+                                        window[fnName]();
+                                    }
+                                }
+                            }
+                        });
+                    }
                 })();
             </script>
 
