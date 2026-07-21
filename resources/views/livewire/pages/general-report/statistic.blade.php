@@ -1,47 +1,56 @@
-<div class="bg-white dark:bg-[#171412] mx-auto my-8 border border-warm-border dark:border-[#25211e] rounded-lg shadow-xs overflow-hidden max-w-[1300px] font-sans">
-    <!-- Header Section -->
-    <div class="border-b border-warm-border dark:border-[#25211e] py-6 bg-warm-ivory dark:bg-[#1f1b18]">
-        <h1 class="font-display text-center text-2xl font-bold tracking-tight text-primary-ink dark:text-neutral-100 uppercase">
-            Kurva Distribusi Frekuensi
-        </h1>
-        <div class="mt-1 text-center text-lg font-semibold text-accent-amber font-sans">
-            {{ $aspectName ?: '—' }}
-        </div>
-
-        <!-- Dropdown Filters Stacked Centered -->
-        <div class="flex flex-col items-center justify-center gap-3 mt-5 px-6 max-w-lg mx-auto">
-            <div class="w-full">
-                @livewire('components.event-selector', ['showLabel' => true])
-            </div>
-            <div class="w-full">
-                @livewire('components.position-selector', ['showLabel' => true])
-            </div>
-            <div class="w-full">
-                @livewire('components.aspect-selector', ['showLabel' => true])
+<div class="max-w-[1300px] mx-auto p-3 md:p-4 font-sans text-primary-ink dark:text-neutral-100">
+    <div class="bg-white dark:bg-[#171412] p-4 md:p-5 rounded-xl border border-warm-border dark:border-[#25211e] shadow-xs">
+        
+        {{-- Header Editorial Executive Journal --}}
+        <div class="mb-4 pb-4 border-b border-warm-border dark:border-[#25211e]">
+            <span class="font-mono-data text-accent-amber font-bold uppercase tracking-widest text-xs block mb-1">
+                GENERAL REPORT / EVENT STATISTICS
+            </span>
+            <h1 class="font-display text-xl md:text-2xl font-bold tracking-tight text-primary-ink dark:text-neutral-100">
+                Kurva Distribusi Frekuensi
+            </h1>
+            <div class="mt-1 text-sm font-bold text-accent-amber font-mono-data">
+                Aspek: {{ $aspectName ?: '—' }}
             </div>
         </div>
-    </div>
 
-    {{-- Adjustment Indicators --}}
-    @if ($selectedTemplate)
-        <div
-            class="px-6 py-2.5 bg-warm-ivory/60 dark:bg-[#1f1b18]/60 border-b border-warm-border dark:border-[#25211e] flex flex-wrap justify-center gap-2">
-            <x-adjustment-indicator :template-id="$selectedTemplate->id" category-code="potensi" size="sm"
-                custom-label="Standar Potensi Disesuaikan" />
-            <x-adjustment-indicator :template-id="$selectedTemplate->id" category-code="kompetensi" size="sm"
-                custom-label="Standar Kompetensi Disesuaikan" />
+        {{-- Filter Section --}}
+        <div class="mb-6 bg-warm-ivory dark:bg-[#1f1b18] p-4 rounded-xl border border-warm-border dark:border-[#25211e]">
+            <div class="flex flex-col gap-3.5">
+                {{-- Event Filter --}}
+                <div class="p-2.5 bg-white dark:bg-[#171412] border border-warm-border dark:border-[#25211e] rounded-lg shadow-xs">
+                    @livewire('components.event-selector', ['showLabel' => true])
+                </div>
+
+                {{-- Position Filter --}}
+                <div class="p-2.5 bg-white dark:bg-[#171412] border border-warm-border dark:border-[#25211e] rounded-lg shadow-xs">
+                    @livewire('components.position-selector', ['showLabel' => true])
+                </div>
+
+                {{-- Aspect Filter --}}
+                <div class="p-2.5 bg-white dark:bg-[#171412] border border-warm-border dark:border-[#25211e] rounded-lg shadow-xs">
+                    @livewire('components.aspect-selector', ['showLabel' => true])
+                </div>
+            </div>
         </div>
-    @endif
 
-    <!-- Content Section -->
-    <div class="p-6 bg-white dark:bg-[#171412]">
+        {{-- Adjustment Indicators --}}
+        @if ($selectedTemplate)
+            <div class="mb-6 px-4 py-2.5 bg-warm-ivory/60 dark:bg-[#1f1b18]/60 border border-warm-border dark:border-[#25211e] rounded-lg flex flex-wrap justify-center gap-2">
+                <x-adjustment-indicator :template-id="$selectedTemplate->id" category-code="potensi" size="sm"
+                    custom-label="Standar Potensi Disesuaikan" />
+                <x-adjustment-indicator :template-id="$selectedTemplate->id" category-code="kompetensi" size="sm"
+                    custom-label="Standar Kompetensi Disesuaikan" />
+            </div>
+        @endif
+
         <!-- Full Width Line Chart Area -->
-        <div class="w-full h-[480px] p-5 border border-warm-border dark:border-[#25211e] rounded-lg bg-warm-ivory/30 dark:bg-[#1f1b18]/40 mb-8 relative" wire:ignore id="distribution-chart-{{ $chartId }}">
+        <div class="w-full h-[480px] p-4 border border-warm-border dark:border-[#25211e] rounded-lg bg-warm-ivory/30 dark:bg-[#1f1b18]/40 mb-6 relative" wire:ignore id="distribution-chart-{{ $chartId }}">
             <canvas id="frekuensiChart-{{ $chartId }}" class="w-full h-full"></canvas>
         </div>
 
         <!-- Bottom Grid: Tabel Kelas (Kiri) & Metric Cards (Kanan) -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center max-w-4xl mx-auto">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center max-w-4xl mx-auto mb-2">
             <!-- Tabel Kelas dan Rentang Nilai -->
             <div class="w-full">
                 <div class="rounded-lg overflow-hidden border border-warm-border dark:border-[#25211e]">
@@ -83,7 +92,7 @@
                 <div class="bg-warm-ivory dark:bg-[#1f1b18] border border-warm-border dark:border-[#25211e] p-5 rounded-lg text-center">
                     <div class="text-xs font-bold uppercase tracking-wider text-primary-ink/70 dark:text-neutral-400">Standar Rating</div>
                     <div class="text-3xl font-bold font-mono-data text-accent-amber mt-2">
-                        {{ number_format($standardRating, 2) }}
+                        {{ (int) $standardRating }}
                     </div>
                 </div>
                 <div class="bg-warm-ivory dark:bg-[#1f1b18] border border-warm-border dark:border-[#25211e] p-5 rounded-lg text-center">

@@ -53,6 +53,8 @@ Semua komponen dan halaman yang telah selesai wajib mematuhi aturan berikut:
 | **Standard Psikometrik** | `general-report/standard-psikometrik.blade.php` | **Selesai** (Standar Benchmark 100%) |
 | **Standard MC** | `general-report/standard-mc.blade.php` | **Selesai** (Standar Benchmark 100%) |
 | **Event Statistics** | `general-report/statistic.blade.php` | **Selesai** (Standar Benchmark 100%) |
+| **Ranking Psy Mapping** | `general-report/ranking/ranking-psy-mapping.blade.php` | **Selesai** (Standar Benchmark 100%) |
+| **Ranking MC Mapping** | `general-report/ranking/ranking-mc-mapping.blade.php` | **Selesai** (Standar Benchmark 100%) |
 | **Standard MC Copy** | `general-report/standard-mc-copy.blade.php` | Pending |
 | **MMPI Report** | `general-report/mmpi.blade.php` | Pending |
 | **Capacity Building MC** | `general-report/ranking/capacitybuilding-mc.blade.php` | Pending |

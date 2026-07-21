@@ -1,12 +1,36 @@
-<div class="bg-white dark:bg-[#171412] mx-auto my-8 border border-warm-border dark:border-[#25211e] rounded-lg shadow-xs overflow-hidden max-w-[1400px] font-sans">
-    <!-- Header Section -->
-    <div class="border-b border-warm-border dark:border-[#25211e] py-6 bg-warm-ivory dark:bg-[#1f1b18]">
-        <h1 class="font-display text-center text-2xl font-bold tracking-tight text-primary-ink dark:text-neutral-100 uppercase">
-            Rekomendasi Program Pelatihan
-        </h1>
-    </div>
+<div class="max-w-[1400px] mx-auto p-3 md:p-4 font-sans text-primary-ink dark:text-neutral-100">
+    <div class="bg-white dark:bg-[#171412] p-4 md:p-5 rounded-xl border border-warm-border dark:border-[#25211e] shadow-xs">
+        
+        {{-- Header Editorial Executive Journal --}}
+        <div class="mb-4 pb-4 border-b border-warm-border dark:border-[#25211e]">
+            <span class="font-mono-data text-accent-amber font-bold uppercase tracking-widest text-xs block mb-1">
+                GENERAL REPORT / REKOMENDASI PELATIHAN
+            </span>
+            <h1 class="font-display text-xl md:text-2xl font-bold tracking-tight text-primary-ink dark:text-neutral-100">
+                Rekomendasi Program Pelatihan
+            </h1>
+        </div>
 
-    <div class="p-6 bg-white dark:bg-[#171412]">
+        {{-- Filter Section --}}
+        <div class="mb-6 bg-warm-ivory dark:bg-[#1f1b18] p-4 rounded-xl border border-warm-border dark:border-[#25211e]">
+            <div class="flex flex-col gap-3.5">
+                {{-- Event Filter --}}
+                <div class="p-2.5 bg-white dark:bg-[#171412] border border-warm-border dark:border-[#25211e] rounded-lg shadow-xs">
+                    @livewire('components.event-selector', ['showLabel' => true])
+                </div>
+
+                {{-- Position Filter --}}
+                <div class="p-2.5 bg-white dark:bg-[#171412] border border-warm-border dark:border-[#25211e] rounded-lg shadow-xs">
+                    @livewire('components.position-selector', ['showLabel' => true])
+                </div>
+
+                {{-- Aspect Filter --}}
+                <div class="p-2.5 bg-white dark:bg-[#171412] border border-warm-border dark:border-[#25211e] rounded-lg shadow-xs">
+                    @livewire('components.aspect-selector', ['showLabel' => true])
+                </div>
+            </div>
+        </div>
+
         <!-- Tolerance Selector Component -->
         @if ($selectedEvent && $selectedAspect)
             @php
@@ -20,35 +44,6 @@
                 ])
             </div>
         @endif
-
-        <!-- Filter Dropdowns Section -->
-        <div class="mb-6 bg-warm-ivory/50 dark:bg-[#1f1b18]/50 p-5 rounded-lg border border-warm-border dark:border-[#25211e]">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-                <!-- Event Filter -->
-                <div>
-                    <label class="block text-xs font-bold uppercase tracking-wider text-primary-ink/80 dark:text-neutral-300 mb-2">
-                        📅 Pilih Event Assessment
-                    </label>
-                    @livewire('components.event-selector', ['showLabel' => false])
-                </div>
-
-                <!-- Position Filter -->
-                <div>
-                    <label class="block text-xs font-bold uppercase tracking-wider text-primary-ink/80 dark:text-neutral-300 mb-2">
-                        💼 Pilih Jabatan
-                    </label>
-                    @livewire('components.position-selector', ['showLabel' => false])
-                </div>
-
-                <!-- Aspect Filter -->
-                <div>
-                    <label class="block text-xs font-bold uppercase tracking-wider text-primary-ink/80 dark:text-neutral-300 mb-2">
-                        🎯 Pilih Aspek untuk Analisis Training
-                    </label>
-                    @livewire('components.aspect-selector', ['showLabel' => false])
-                </div>
-            </div>
-        </div>
 
         @if ($selectedEvent && $selectedAspect)
             @php

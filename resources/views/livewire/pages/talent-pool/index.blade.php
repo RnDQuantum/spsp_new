@@ -1,8 +1,8 @@
-<div>
+<div class="max-w-7xl mx-auto p-3 md:p-4 font-sans text-primary-ink dark:text-neutral-100">
     {{-- Include Participant List Modal --}}
     @include('livewire.pages.talent-pool.participant-list-modal')
 
-    <div class="max-w-7xl mx-auto p-6 md:p-8 border border-warm-border dark:border-[#25211e] bg-white dark:bg-[#171412] rounded-xl shadow-xs mt-6 relative">
+    <div class="bg-white dark:bg-[#171412] p-4 md:p-5 rounded-xl border border-warm-border dark:border-[#25211e] shadow-xs relative">
 
         {{-- Loading overlay untuk dynamic updates --}}
         <div wire:loading wire:target="handleStandardUpdate, handleEventSelected, handlePositionSelected"
@@ -14,21 +14,27 @@
         </div>
 
         {{-- Header Editorial Executive Journal --}}
-        <div class="text-center mb-8">
-            <span class="text-xs font-mono-data uppercase tracking-widest text-accent-amber font-bold block mb-1">Analisis Talent Management</span>
-            <h1 class="font-display text-2xl md:text-3xl font-bold tracking-tight text-primary-ink dark:text-neutral-100 mb-2">Matriks 9-Kotak Kinerja dan Potensi</h1>
-            <p class="text-sm text-primary-ink/75 dark:text-neutral-400 max-w-2xl mx-auto">
+        <div class="mb-4 pb-4 border-b border-warm-border dark:border-[#25211e]">
+            <span class="font-mono-data text-accent-amber font-bold uppercase tracking-widest text-xs block mb-1">
+                GENERAL REPORT / TALENT MANAGEMENT
+            </span>
+            <h1 class="font-display text-xl md:text-2xl font-bold tracking-tight text-primary-ink dark:text-neutral-100">
+                Matriks 9-Kotak Kinerja dan Potensi
+            </h1>
+            <p class="text-xs text-primary-ink/75 dark:text-neutral-400 mt-1">
                 Pemetaan distribusi kualifikasi peserta berdasarkan kombinasi penilaian potensi dan kompetensi manajerial.
             </p>
         </div>
 
-        <!-- Event and Position Selectors -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-            <div class="p-3 bg-warm-ivory/50 dark:bg-[#1f1b18]/60 border border-warm-border dark:border-[#25211e] rounded-lg">
-                <livewire:components.event-selector />
-            </div>
-            <div class="p-3 bg-warm-ivory/50 dark:bg-[#1f1b18]/60 border border-warm-border dark:border-[#25211e] rounded-lg">
-                <livewire:components.position-selector />
+        <!-- Event and Position Selectors (1 Kolom - 2 Baris Full Width) -->
+        <div class="mb-6 bg-warm-ivory dark:bg-[#1f1b18] p-4 rounded-xl border border-warm-border dark:border-[#25211e]">
+            <div class="flex flex-col gap-3.5">
+                <div class="p-2.5 bg-white dark:bg-[#171412] border border-warm-border dark:border-[#25211e] rounded-lg shadow-xs">
+                    <livewire:components.event-selector :showLabel="true" />
+                </div>
+                <div class="p-2.5 bg-white dark:bg-[#171412] border border-warm-border dark:border-[#25211e] rounded-lg shadow-xs">
+                    <livewire:components.position-selector :showLabel="true" />
+                </div>
             </div>
         </div>
 
