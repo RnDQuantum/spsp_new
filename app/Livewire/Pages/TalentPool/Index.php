@@ -369,6 +369,8 @@ class Index extends Component
             return;
         }
 
+        $boxConfig = $this->boxConfig[$boxNumber] ?? null;
+
         $participantsInBox = $matrix['participants']
             ->filter(fn($p) => (int)$p['box_number'] === $boxNumber)
             ->map(fn($p) => [
@@ -380,7 +382,13 @@ class Index extends Component
             ->values()
             ->toArray();
 
-        $this->dispatch('openParticipantModal', $boxNumber, $participantsInBox);
+        $this->dispatch('open-talent-box-modal',
+            boxNumber: $boxNumber,
+            boxCode: $boxConfig['code'] ?? ("K-{$boxNumber}"),
+            boxLabel: $boxConfig['label'] ?? 'Daftar Peserta',
+            boxColor: $boxConfig['color'] ?? '#9E9E9E',
+            participants: $participantsInBox,
+        );
     }
 
     public function render()
