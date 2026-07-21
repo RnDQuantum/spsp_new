@@ -126,7 +126,7 @@ class TalentPoolPerformanceTest extends TestCase
 
         $startTime = microtime(true);
 
-        $component = Livewire::test(\App\Livewire\Pages\TalentPool\Index::class)
+        $component = Livewire::test(\App\Livewire\Pages\GeneralReport\TalentPool\Index::class)
             ->set('selectedEvent', $this->event)
             ->set('selectedPositionId', $this->position->id);
 
@@ -158,7 +158,7 @@ class TalentPoolPerformanceTest extends TestCase
 
         Cache::flush();
 
-        $component = Livewire::test(\App\Livewire\Pages\TalentPool\Index::class)
+        $component = Livewire::test(\App\Livewire\Pages\GeneralReport\TalentPool\Index::class)
             ->set('selectedEvent', $this->event);
 
         // Test position change performance

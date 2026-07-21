@@ -3,6 +3,8 @@
 namespace Tests\Feature\Livewire;
 
 use App\Models\AssessmentEvent;
+use App\Models\AssessmentTemplate;
+use App\Models\CategoryType;
 use App\Models\Institution;
 use App\Models\Participant;
 use App\Models\PositionFormation;
@@ -22,6 +24,8 @@ class SessionSyncFromUrlTest extends TestCase
 
     private Participant $participant;
 
+    private AssessmentTemplate $template;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -39,8 +43,23 @@ class SessionSyncFromUrlTest extends TestCase
             'institution_id' => $institution->id,
         ]);
 
+        // Create template
+        $this->template = AssessmentTemplate::factory()->create();
+
+        // Create category types for the template
+        CategoryType::factory()->create([
+            'template_id' => $this->template->id,
+            'code' => 'potensi',
+        ]);
+        CategoryType::factory()->create([
+            'template_id' => $this->template->id,
+            'code' => 'kompetensi',
+        ]);
+
+        // Create position with template
         $this->position = PositionFormation::factory()->create([
             'event_id' => $this->event->id,
+            'template_id' => $this->template->id,
         ]);
 
         $this->participant = Participant::factory()->create([
@@ -147,17 +166,11 @@ class SessionSyncFromUrlTest extends TestCase
                 'testNumber' => $this->participant->test_number,
             ]));
 
-        // FinalReport might have additional requirements (like template, etc.)
-        // If it returns 404, it's still testing the session sync logic
-        // We only care that if it loads successfully, session is synced
-        if ($response->status() === 200) {
-            $this->assertEquals($this->event->code, session('filter.event_code'));
-            $this->assertEquals($this->position->id, session('filter.position_formation_id'));
-            $this->assertEquals($this->participant->id, session('filter.participant_id'));
-        } else {
-            // Skip this test if data setup is incomplete
-            $this->markTestSkipped('FinalReport requires additional data setup (template, etc.)');
-        }
+        $response->assertSuccessful();
+
+        $this->assertEquals($this->event->code, session('filter.event_code'));
+        $this->assertEquals($this->position->id, session('filter.position_formation_id'));
+        $this->assertEquals($this->participant->id, session('filter.participant_id'));
     }
 
     public function test_session_persists_across_navigation(): void

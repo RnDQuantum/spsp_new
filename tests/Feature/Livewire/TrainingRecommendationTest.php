@@ -600,13 +600,15 @@ class TrainingRecommendationTest extends TestCase
     #[Test]
     public function component_handles_no_event_gracefully()
     {
-        // Arrange
-        session()->forget('filter.event_code');
+        // Arrange - clear all session filters and ensure no events exist that could auto-load
+        session()->forget(['filter.event_code', 'filter.position_formation_id', 'filter.aspect_id']);
+        // Delete all events so ensureDefaultFilters() can't auto-populate
+        \App\Models\AssessmentEvent::query()->delete();
 
         // Act
         $component = Livewire::test(\App\Livewire\Pages\GeneralReport\Training\TrainingRecommendation::class);
 
-        // Assert
+        // Assert - no event found means data stays at zero defaults
         $component
             ->assertSet('selectedEvent', null)
             ->assertSet('totalParticipants', 0)
@@ -620,13 +622,14 @@ class TrainingRecommendationTest extends TestCase
     #[Test]
     public function component_handles_no_aspect_gracefully()
     {
-        // Arrange
-        session()->forget('filter.aspect_id');
+        // Arrange - ensure no aspect in session and no auto-populate by removing event too
+        session()->forget(['filter.aspect_id', 'filter.event_code', 'filter.position_formation_id']);
+        \App\Models\AssessmentEvent::query()->delete();
 
         // Act
         $component = Livewire::test(\App\Livewire\Pages\GeneralReport\Training\TrainingRecommendation::class);
 
-        // Assert
+        // Assert - without event, nothing auto-loads
         $component
             ->assertSet('aspectId', null)
             ->assertSet('selectedAspect', null)
@@ -724,8 +727,9 @@ class TrainingRecommendationTest extends TestCase
     #[Test]
     public function percentage_properties_handle_zero_participants()
     {
-        // Arrange
-        session()->forget('filter.aspect_id');
+        // Arrange - remove all filters so component loads with no data
+        session()->forget(['filter.aspect_id', 'filter.event_code', 'filter.position_formation_id']);
+        \App\Models\AssessmentEvent::query()->delete();
 
         $component = Livewire::test(\App\Livewire\Pages\GeneralReport\Training\TrainingRecommendation::class);
 
@@ -733,7 +737,7 @@ class TrainingRecommendationTest extends TestCase
         $recommendedPercentage = $component->get('recommendedPercentage');
         $notRecommendedPercentage = $component->get('notRecommendedPercentage');
 
-        // Assert
+        // Assert - when totalParticipants is 0, percentages must be 0 (no division by zero)
         $this->assertEquals(0, $recommendedPercentage);
         $this->assertEquals(0, $notRecommendedPercentage);
     }
@@ -785,8 +789,8 @@ class TrainingRecommendationTest extends TestCase
         // Act
         $component->call('openAttributeModal', $this->aspect->id);
 
-        // Assert - Modal event should be dispatched
-        $component->assertDispatched('openAttributeParticipantModal');
+        // Assert - Modal event should be dispatched with correct name
+        $component->assertDispatched('open-attribute-modal');
     }
 
     #[Test]
@@ -834,7 +838,7 @@ class TrainingRecommendationTest extends TestCase
         $component->call('openAttributeModal', $this->aspect->id);
 
         // Assert - Event should be dispatched
-        $component->assertDispatched('openAttributeParticipantModal');
+        $component->assertDispatched('open-attribute-modal');
     }
 
     #[Test]
