@@ -1,20 +1,30 @@
-<div class="bg-white dark:bg-[#171412] mx-auto my-8 border border-warm-border dark:border-[#25211e] rounded-lg shadow-xs overflow-hidden max-w-[1400px] font-sans">
-    <!-- Header Section -->
-    <div class="border-b border-warm-border dark:border-[#25211e] py-6 bg-warm-ivory dark:bg-[#1f1b18]">
-        <h1 class="font-display text-center text-2xl font-bold tracking-tight text-primary-ink dark:text-neutral-100 uppercase">
-            Peringkat Skor <i>Psychology Mapping</i>
-        </h1>
-        <div class="flex justify-center items-center gap-4 mt-3 px-6">
-            <div class="w-full max-w-md">
-                @livewire('components.event-selector', ['showLabel' => true])
+<div class="max-w-[1400px] mx-auto p-3 md:p-4 font-sans text-primary-ink dark:text-neutral-100">
+    <div class="bg-white dark:bg-[#171412] p-4 md:p-5 rounded-xl border border-warm-border dark:border-[#25211e] shadow-xs">
+        
+        {{-- Header Editorial Executive Journal --}}
+        <div class="mb-4 pb-4 border-b border-warm-border dark:border-[#25211e]">
+            <span class="font-mono-data text-accent-amber font-bold uppercase tracking-widest text-xs block mb-1">
+                GENERAL REPORT / RANKING MAPPING
+            </span>
+            <h1 class="font-display text-xl md:text-2xl font-bold tracking-tight text-primary-ink dark:text-neutral-100">
+                Peringkat Skor <i>Psychology Mapping</i>
+            </h1>
+        </div>
+
+        {{-- Filter Section --}}
+        <div class="mb-6 bg-warm-ivory dark:bg-[#1f1b18] p-4 rounded-xl border border-warm-border dark:border-[#25211e]">
+            <div class="flex flex-col gap-3.5">
+                {{-- Event Filter --}}
+                <div class="p-2.5 bg-white dark:bg-[#171412] border border-warm-border dark:border-[#25211e] rounded-lg shadow-xs">
+                    @livewire('components.event-selector', ['showLabel' => true])
+                </div>
+
+                {{-- Position Filter --}}
+                <div class="p-2.5 bg-white dark:bg-[#171412] border border-warm-border dark:border-[#25211e] rounded-lg shadow-xs">
+                    @livewire('components.position-selector', ['showLabel' => true])
+                </div>
             </div>
         </div>
-        <div class="flex justify-center items-center gap-4 mt-3 px-6">
-            <div class="w-full max-w-md">
-                @livewire('components.position-selector', ['showLabel' => true])
-            </div>
-        </div>
-    </div>
 
     @php $summary = $this->getPassingSummary(); @endphp
     @livewire('components.tolerance-selector', [
@@ -35,7 +45,7 @@
     @endif
 
     <!-- Per Page Selector -->
-    <div class="px-6 pt-5 bg-white dark:bg-[#171412]">
+    <div class="mb-4">
         <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div class="flex items-center gap-3">
                 <label class="text-xs font-bold uppercase tracking-wider text-primary-ink/70 dark:text-neutral-400">
@@ -72,7 +82,7 @@
     </div>
 
     <!-- Table Section -->
-    <div class="p-6 bg-white dark:bg-[#171412] overflow-x-auto">
+    <div class="overflow-x-auto mb-6">
         <table
             class="min-w-full border border-warm-border dark:border-[#25211e] text-sm text-primary-ink dark:text-neutral-200">
             <thead>
@@ -177,7 +187,7 @@
 
     <!-- Standard & Threshold Info Box -->
     @if ($standardInfo)
-        <div class="px-6 pb-6 bg-white dark:bg-[#171412]">
+        <div class="mb-6">
             <div class="bg-warm-ivory dark:bg-[#1f1b18] border border-warm-border dark:border-[#25211e] rounded-lg p-5">
                 <h3 class="text-xs font-bold uppercase tracking-wider text-primary-ink/70 dark:text-neutral-400 mb-4 flex items-center gap-2">
                     <i class="fa-solid fa-calculator text-accent-amber"></i>
@@ -217,7 +227,7 @@
 
     <!-- Summary Statistics Section -->
     @if (!empty($conclusionSummary))
-        <div class="p-6 bg-white dark:bg-[#171412] border-t border-warm-border dark:border-[#25211e]">
+        <div class="pt-6 border-t border-warm-border dark:border-[#25211e] mb-6">
             <h3 class="text-xs font-bold uppercase tracking-wider text-primary-ink/70 dark:text-neutral-400 mb-4 flex items-center gap-2">
                 <i class="fa-solid fa-chart-pie text-accent-amber"></i>
                 Ringkasan Kesimpulan
@@ -286,7 +296,7 @@
 
     <!-- Pie Chart Section -->
     @if (!empty($conclusionSummary))
-        <div class="p-6 border-t border-warm-border dark:border-[#25211e] bg-white dark:bg-[#171412]"
+        <div class="pt-6 border-t border-warm-border dark:border-[#25211e]"
             x-data="{
                 refreshChart() {
                     const labels = @js($chartLabels);
@@ -366,6 +376,7 @@
             </div>
         </div>
     @endif
+    </div>
 </div>
 
 <script>
