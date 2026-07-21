@@ -22,7 +22,7 @@
         <!-- Category Weight Editor -->
         @if ($this->selectedTemplate)
             <div class="flex justify-center items-center gap-4 mt-3 px-6">
-                <div class="w-full max-w-md">
+                <div class="w-full max-w-md text-center">
                     @livewire('components.category-weight-editor', [
                         'templateId' => $this->selectedTemplate->id,
                         'categoryCode1' => 'potensi',
