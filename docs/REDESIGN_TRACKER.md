@@ -69,7 +69,7 @@ Menampilkan data kompilasi seluruh peserta dalam satu event/posisi.
 | :--- | :--- | :--- | :--- |
 | **Rekap Ranking Assessment**| `general-report/rekap-ranking-assessment.blade.php`| Tabel besar berisi rekap nilai gabungan semua peserta. Perlu diubah ke text-sm, py-2, dan high contrast. | **Selesai** (Standar Benchmark 100%) |
 | **Standard Psikometrik** | `general-report/standard-psikometrik.blade.php` | Rekapitulasi nilai psikogram agregat. Perlu border warm beige lembut. | **Selesai** (Standar Benchmark 100%) |
-| **Standard MC** | `general-report/standard-mc.blade.php` | Rekapitulasi nilai kompetensi manajerial agregat. | **Selesai** |
+| **Standard MC** | `general-report/standard-mc.blade.php` | Rekapitulasi nilai kompetensi manajerial agregat. | **Selesai** (Standar Benchmark 100%) |
 | **Standard MC Copy** | `general-report/standard-mc-copy.blade.php` | Salinan/variasi rekapitulasi MC. | **Selesai** |
 | **MMPI Report** | `general-report/mmpi.blade.php` | Rekap hasil tes kepribadian klinis MMPI. | **Selesai** |
 | **Event Statistics** | `general-report/statistic.blade.php` | Statistik distribusi nilai, membutuhkan kartu metrik minimalis. | **Selesai** (Standar Benchmark 100%) |

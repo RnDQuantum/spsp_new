@@ -197,7 +197,7 @@
                                         </td>
                                         <td class="border-r border-warm-border dark:border-[#25211e] px-4 py-2.5 text-center font-mono-data font-bold text-sm {{ $aspect['is_weight_adjusted'] ?? false ? 'bg-amber-100 dark:bg-amber-900/40 text-amber-900 dark:text-amber-200' : '' }}"
                                             title="{{ $aspect['is_weight_adjusted'] ?? false ? 'Disesuaikan dari ' . $aspect['original_weight'] . '% - Edit via modal Pilih Aspek' : '' }}">
-                                            {{ $aspect['weight_percentage'] }}
+                                            {{ (int) $aspect['weight_percentage'] }}
                                         </td>
                                         <td class="border-r border-warm-border dark:border-[#25211e] px-4 py-2.5 text-center font-mono-data font-bold text-sm">
                                             {{ number_format($aspect['standard_rating'], 2) }}
@@ -221,7 +221,7 @@
                                                 class="border-r border-warm-border dark:border-[#25211e] px-4 py-2 text-center font-mono-data text-sm cursor-pointer hover:bg-accent-amber/15 dark:hover:bg-amber-900/30 transition-colors {{ $subAspect['is_adjusted'] ?? false ? 'bg-amber-100 dark:bg-amber-900/40 font-bold text-amber-900 dark:text-amber-200' : '' }}"
                                                 title="{{ $subAspect['is_adjusted'] ?? false ? 'Disesuaikan dari ' . $subAspect['original_rating'] . ' - Klik untuk edit' : 'Klik untuk edit rating' }}">
                                                 <span class="font-bold">
-                                                    {{ $subAspect['standard_rating'] }}
+                                                    {{ (int) $subAspect['standard_rating'] }}
                                                 </span>
                                             </td>
                                             <td class="border-r border-warm-border dark:border-[#25211e] px-4 py-2"></td>
@@ -240,11 +240,11 @@
                                             {{ $aspect['name'] }}
                                         </td>
                                         <td class="border-r border-warm-border dark:border-[#25211e] px-4 py-2 text-center font-mono-data font-bold text-sm">
-                                            {{ number_format($aspect['standard_rating'], 2) }}
+                                            {{ (int) $aspect['standard_rating'] }}
                                         </td>
                                         <td class="border-r border-warm-border dark:border-[#25211e] px-4 py-2"></td>
                                         <td class="border-r border-warm-border dark:border-[#25211e] px-4 py-2 text-center font-mono-data font-bold text-sm">
-                                            {{ $aspect['weight_percentage'] }}
+                                            {{ (int) $aspect['weight_percentage'] }}
                                         </td>
                                         <td class="border-r border-warm-border dark:border-[#25211e] px-4 py-2"></td>
                                         <td class="px-4 py-2"></td>
@@ -259,13 +259,13 @@
                                 JUMLAH
                             </td>
                             <td class="border-r border-warm-border dark:border-[#25211e] px-4 py-3 text-center font-mono-data text-sm">
-                                {{ number_format($totals['total_standard_rating_sum'], 2) }}
+                                {{ (int) $totals['total_standard_rating_sum'] }}
                             </td>
                             <td class="border-r border-warm-border dark:border-[#25211e] px-4 py-3 text-center font-mono-data text-sm">
                                 {{ $totals['total_aspects'] }}
                             </td>
                             <td class="border-r border-warm-border dark:border-[#25211e] px-4 py-3 text-center font-mono-data text-sm">
-                                {{ $totals['total_weight'] }}
+                                {{ (int) $totals['total_weight'] }}
                             </td>
                             <td class="border-r border-warm-border dark:border-[#25211e] px-4 py-3 text-center font-mono-data text-sm">
                                 {{ number_format($totals['total_rating_sum'], 2) }}
@@ -321,10 +321,10 @@
                                         {{ $aspect['sub_aspects_count'] }}
                                     </td>
                                     <td class="border-r border-warm-border dark:border-[#25211e] px-4 py-2.5 text-center font-mono-data font-bold text-sm">
-                                        {{ $aspect['weight_percentage'] }}
+                                        {{ (int) $aspect['weight_percentage'] }}
                                     </td>
                                     <td class="border-r border-warm-border dark:border-[#25211e] px-4 py-2.5 text-center font-mono-data font-bold text-sm">
-                                        {{ number_format($aspect['standard_rating'], 2) }}
+                                        {{ (int) $aspect['standard_rating'] }}
                                     </td>
                                     <td class="px-4 py-2.5 text-center font-mono-data font-bold text-sm">
                                         {{ number_format($aspect['score'], 2) }}
@@ -342,7 +342,7 @@
                                 {{ $totals['total_aspects'] }}
                             </td>
                             <td class="border-r border-warm-border dark:border-[#25211e] px-4 py-3 text-center font-mono-data text-sm">
-                                {{ $totals['total_weight'] }}
+                                {{ (int) $totals['total_weight'] }}
                             </td>
                             <td class="border-r border-warm-border dark:border-[#25211e] px-4 py-3 text-center font-mono-data text-sm">
                                 {{ number_format($totals['total_rating_sum'], 2) }}
