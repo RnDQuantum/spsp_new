@@ -42,6 +42,8 @@ class PositionSelector extends Component
         if ($value && ! $this->isValidPositionId($value)) {
             $this->positionFormationId = null;
             session()->forget('filter.position_formation_id');
+            // Always reset participant session when position is invalid
+            session()->forget('filter.participant_id');
             $this->dispatch('position-selected', positionFormationId: null);
 
             return;
@@ -53,6 +55,11 @@ class PositionSelector extends Component
         } else {
             session()->forget('filter.position_formation_id');
         }
+
+        // Always reset participant session when position changes
+        // This ensures the dashboard doesn't show stale participant data
+        // even when ParticipantSelector is not present on the current page
+        session()->forget('filter.participant_id');
 
         // Dispatch event to parent component
         $this->dispatch('position-selected', positionFormationId: $value);
@@ -66,6 +73,11 @@ class PositionSelector extends Component
         // Reset position when event changes
         $this->positionFormationId = null;
         session()->forget('filter.position_formation_id');
+
+        // Always reset participant session when event changes
+        // This ensures the dashboard doesn't show stale participant data
+        // even when ParticipantSelector is not present on the current page
+        session()->forget('filter.participant_id');
 
         // Reload available positions without dispatching intermediate event
         $this->loadAvailablePositions(shouldDispatch: false);
