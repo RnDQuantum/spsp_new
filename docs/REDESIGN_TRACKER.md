@@ -2,6 +2,8 @@
 
 Dokumen ini melacak kemajuan pengerjaan redesain antarmuka (UI) seluruh sistem SPSP agar selaras dengan tema **"Executive Journal"** yang elegan, profesional, dan berdaya baca tinggi, sesuai dengan yang didefinisikan dalam `DESIGN.md` dan `PRODUCT.md`.
 
+Dokumen Resume General Report: [docs/task-general-report.md](file:///c:/laragon/www/spsp_new/docs/task-general-report.md)
+
 ---
 
 ## 1. Standar Desain "Executive Journal" SPSP

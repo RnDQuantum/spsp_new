@@ -1,27 +1,28 @@
 <div class="w-full">
-    <div class="flex items-center gap-4">
+    <div class="flex items-center gap-3">
         @if ($showLabel)
-            <label class="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
+            <label class="text-sm font-bold font-mono-data uppercase tracking-wider text-primary-ink/80 dark:text-neutral-300 whitespace-nowrap">
                 Pilih Jabatan :
             </label>
         @endif
 
         <div class="flex-1">
             <x-mary-choices-offline wire:model.live="positionFormationId" :options="$availablePositions" option-value="id"
-                option-label="name" placeholder="Pilih jabatan..." single searchable>
+                option-label="name" placeholder="Pilih posisi/jabatan..." single searchable
+                class="border-warm-border dark:border-[#25211e] bg-white dark:bg-[#171412] text-primary-ink dark:text-neutral-100 text-sm">
                 {{-- Custom item slot untuk list dropdown --}}
                 @scope('item', $position)
                     <div
                         @click="if(window.showLoadingOverlay) window.showLoadingOverlay()"
-                        class="p-2 hover:bg-blue-50 dark:hover:bg-blue-900/30 cursor-pointer
-                        {{ $this->positionFormationId == $position->id ? 'bg-blue-100 dark:bg-blue-900/50 font-semibold text-blue-700 dark:text-blue-300' : 'text-gray-900 dark:text-gray-200' }}">
+                        class="p-2.5 font-mono-data text-sm hover:bg-warm-ivory dark:hover:bg-[#1f1b18] cursor-pointer transition-colors
+                        {{ $this->positionFormationId == $position->id ? 'bg-warm-ivory dark:bg-[#1f1b18] font-bold text-accent-amber border-l-2 border-accent-amber' : 'text-primary-ink dark:text-neutral-100' }}">
                         {{ $position->name }}
                     </div>
                 @endscope
 
-                {{-- Optional: Custom selection slot --}}
+                {{-- Custom selection slot --}}
                 @scope('selection', $position)
-                    <span class="font-medium text-gray-900 dark:text-gray-100">{{ $position->name }}</span>
+                    <span class="font-bold font-mono-data text-primary-ink dark:text-neutral-100 text-sm">{{ $position->name }}</span>
                 @endscope
             </x-mary-choices-offline>
         </div>
