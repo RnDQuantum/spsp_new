@@ -66,16 +66,59 @@ class TrainingRecommendation extends Component
         // Load tolerance from session
         $this->tolerancePercentage = session('training_recommendation.tolerance', 10);
 
-        // Load aspect from session
-        $this->aspectId = session('filter.aspect_id');
+        // Pre-populate default filters if session is empty (e.g. right after login)
+        $this->ensureDefaultFilters();
 
-        // Load eventCode from session
-        $this->eventCode = session('filter.event_code');
-        $positionFormationId = session('filter.position_formation_id');
-
-        if ($this->eventCode && $positionFormationId && $this->aspectId) {
+        if ($this->eventCode && $this->aspectId) {
             $this->loadEventAndAspect();
             $this->loadSummaryData();
+        }
+    }
+
+    /**
+     * Ensure default event, position, and aspect are loaded if session filters are empty
+     */
+    private function ensureDefaultFilters(): void
+    {
+        // 1. Load eventCode from session or fallback to first event
+        $this->eventCode = session('filter.event_code');
+        if (! $this->eventCode) {
+            $firstEvent = AssessmentEvent::query()->orderByDesc('start_date')->first();
+            if ($firstEvent) {
+                $this->eventCode = $firstEvent->code;
+                session(['filter.event_code' => $this->eventCode]);
+            }
+        }
+
+        // 2. Load positionFormationId from session or fallback to first position of event
+        $positionFormationId = session('filter.position_formation_id');
+        if (! $positionFormationId && $this->eventCode) {
+            $event = AssessmentEvent::where('code', $this->eventCode)->first();
+            if ($event) {
+                $firstPosition = PositionFormation::where('event_id', $event->id)->orderBy('name')->first();
+                if ($firstPosition) {
+                    $positionFormationId = $firstPosition->id;
+                    session(['filter.position_formation_id' => $positionFormationId]);
+                }
+            }
+        }
+
+        // 3. Load aspectId from session or fallback to first active aspect
+        $this->aspectId = session('filter.aspect_id');
+        if (! $this->aspectId && $this->eventCode && $positionFormationId) {
+            $position = PositionFormation::with('template')->find($positionFormationId);
+
+            if ($position?->template) {
+                $firstAspect = Aspect::query()
+                    ->where('template_id', $position->template_id)
+                    ->orderBy('order')
+                    ->first();
+
+                if ($firstAspect) {
+                    $this->aspectId = $firstAspect->id;
+                    session(['filter.aspect_id' => $this->aspectId]);
+                }
+            }
         }
     }
 

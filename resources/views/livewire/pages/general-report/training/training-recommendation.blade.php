@@ -138,6 +138,12 @@
                             return;
                         }
 
+                        // Wait for container layout reflow if dimensions are zero
+                        if ((canvas.offsetWidth === 0 || canvas.offsetHeight === 0) && retries > 0) {
+                            setTimeout(() => initTrainingChart(retries - 1), 50);
+                            return;
+                        }
+
                         if (canvas.chartInstance) {
                             canvas.chartInstance.destroy();
                         }
@@ -199,6 +205,12 @@
                             },
                             plugins: [ChartDataLabels]
                         });
+
+                        setTimeout(() => {
+                            if (canvas.chartInstance) {
+                                canvas.chartInstance.resize();
+                            }
+                        }, 60);
                     }
 
                     function waitForChartJs(callback) {
