@@ -103,9 +103,9 @@ Halaman admin untuk melakukan konfigurasi klien, event, dan template standar.
 | **Client List** | `admin/list-klien.blade.php` | Tabel daftar klien institusi. | **Selesai** (Standar Benchmark 100%) |
 | **Event List** | `events/index.blade.php` | Manajemen daftar event penilaian. | **Selesai** (Standar Benchmark 100%) |
 | **Event Show / Detail** | `events/show.blade.php` | Detail manajemen peserta per event. | **Selesai** (Standar Benchmark 100%) |
-| **Custom Standards Index** | `custom-standards/index.blade.php` | Pengaturan template standar kustom. | [ ] Pending |
-| **Custom Standards Create** | `custom-standards/create.blade.php` | Form pembuatan standar baru. | [ ] Pending |
-| **Custom Standards Edit** | `custom-standards/edit.blade.php` | Form pengeditan standar. | [ ] Pending |
+| **Custom Standards Index** | `custom-standards/index.blade.php` | Pengaturan template standar kustom. | **Selesai** (Standar Benchmark 100%) |
+| **Custom Standards Create** | `custom-standards/create.blade.php` | Form pembuatan standar baru. | **Selesai** (Standar Benchmark 100%) |
+| **Custom Standards Edit** | `custom-standards/edit.blade.php` | Form pengeditan standar. | **Selesai** (Standar Benchmark 100%) |
 | **Institution Detail** | `institutions/show.blade.php` | Detail informasi institusi klien. | **Selesai** (Standar Benchmark 100%) |
 
 ---
