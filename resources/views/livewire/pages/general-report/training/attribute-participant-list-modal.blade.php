@@ -199,17 +199,15 @@
                             ← Prev
                         </button>
 
-                        <template x-for="p in pageNumbers" :key="p">
-                            <template x-if="p !== '...'">
-                                <button x-on:click="currentPage = p"
+                        <template x-for="(p, i) in pageNumbers" :key="i">
+                            <span class="inline-flex items-center">
+                                <button x-show="p !== '...'" x-on:click="currentPage = p"
                                     :class="p === currentPage ? 'border-accent-amber bg-accent-amber text-white' : 'border-warm-border dark:border-[#25211e] bg-white dark:bg-[#1f1b18] text-primary-ink dark:text-neutral-200 hover:bg-warm-ivory'"
                                     class="rounded-md border px-3 py-1 text-xs font-bold transition-colors"
                                     x-text="p">
                                 </button>
-                            </template>
-                            <template x-if="p === '...'">
-                                <span class="px-2 py-1 text-xs text-primary-ink/50 dark:text-neutral-500">…</span>
-                            </template>
+                                <span x-show="p === '...'" class="px-2 py-1 text-xs text-primary-ink/50 dark:text-neutral-500">…</span>
+                            </span>
                         </template>
 
                         <button x-on:click="currentPage = Math.min(lastPage, currentPage + 1)"
