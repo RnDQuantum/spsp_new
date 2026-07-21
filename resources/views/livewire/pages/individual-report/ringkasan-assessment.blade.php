@@ -1,12 +1,17 @@
-<div class="mx-auto my-8 border border-warm-border dark:border-[#25211e] bg-white dark:bg-[#171412] overflow-hidden shadow-xs rounded-lg max-w-6xl font-sans">
+<div class="max-w-[1400px] mx-auto p-3 md:p-4 font-sans text-primary-ink dark:text-neutral-100">
+    <div class="bg-white dark:bg-[#171412] p-4 md:p-5 rounded-xl border border-warm-border dark:border-[#25211e] shadow-xs">
 
-    @if ($showHeader)
-    <div class="px-8 py-6 bg-white dark:bg-[#171412] border-b border-warm-border dark:border-[#25211e]">
-        <h1 class="font-display text-2xl font-bold tracking-tight text-primary-ink dark:text-neutral-100 uppercase text-center">
-            Ringkasan Hasil Asesmen
-        </h1>
-    </div>
-    @endif
+        @if ($showHeader)
+            {{-- Header Editorial Executive Journal --}}
+            <div class="mb-4 pb-4 border-b border-warm-border dark:border-[#25211e]">
+                <span class="font-mono-data text-accent-amber font-bold uppercase tracking-widest text-xs block mb-1">
+                    INDIVIDUAL REPORT / RINGKASAN ASESMEN
+                </span>
+                <h1 class="font-display text-xl md:text-2xl font-bold tracking-tight text-primary-ink dark:text-neutral-100">
+                    Ringkasan Hasil Asesmen
+                </h1>
+            </div>
+        @endif
 
     @if ($showInfoSection)
     <!-- Tolerance Selector Component -->
@@ -232,4 +237,5 @@
     </div>
     @endif
     @endif
+    </div>
 </div>

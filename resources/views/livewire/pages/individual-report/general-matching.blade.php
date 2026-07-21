@@ -150,9 +150,12 @@
     class="mx-auto my-8 border border-warm-border dark:border-[#25211e] bg-white dark:bg-[#171412] overflow-hidden rounded-md shadow-xs max-w-7xl">
     <!-- Header - DARK MODE READY -->
     @if ($showHeader)
-        <div class="px-8 py-6 bg-white dark:bg-[#171412] border-b border-warm-border dark:border-[#25211e]">
-            <h1 class="font-display text-2xl font-bold tracking-tight text-primary-ink dark:text-neutral-100 uppercase text-center">
-                General Matching
+        <div class="mb-4 pb-4 px-6 pt-5 border-b border-warm-border dark:border-[#25211e]">
+            <span class="font-mono-data text-accent-amber font-bold uppercase tracking-widest text-xs block mb-1">
+                INDIVIDUAL REPORT / GENERAL MATCHING
+            </span>
+            <h1 class="font-display text-xl md:text-2xl font-bold tracking-tight text-primary-ink dark:text-neutral-100">
+                Pemetaan Kesesuaian Kompetensi (General Matching)
             </h1>
         </div>
     @endif

@@ -1,11 +1,15 @@
-<div>
-    <div class="bg-warm-ivory dark:bg-[#1f1b18] border border-warm-border dark:border-[#25211e] rounded-lg shadow-sm overflow-hidden mx-auto my-8 max-w-[1400px] font-sans">
-        <!-- Header -->
-        <div class="border-b border-warm-border dark:border-[#25211e] py-6 px-8 bg-white dark:bg-[#171412]">
-            <h1 class="font-display text-2xl font-bold uppercase tracking-tight text-primary-ink dark:text-neutral-100">
-                GENERAL MAPPING
+<div class="max-w-[1400px] mx-auto p-3 md:p-4 font-sans text-primary-ink dark:text-neutral-100">
+    <div class="bg-white dark:bg-[#171412] p-4 md:p-5 rounded-xl border border-warm-border dark:border-[#25211e] shadow-xs">
+        
+        {{-- Header Editorial Executive Journal --}}
+        <div class="mb-4 pb-4 border-b border-warm-border dark:border-[#25211e]">
+            <span class="font-mono-data text-accent-amber font-bold uppercase tracking-widest text-xs block mb-1">
+                INDIVIDUAL REPORT / GENERAL MAPPING
+            </span>
+            <h1 class="font-display text-xl md:text-2xl font-bold tracking-tight text-primary-ink dark:text-neutral-100">
+                General Mapping Penilaian Asesmen
             </h1>
-            <div class="mt-2 text-xs text-primary-ink/75 dark:text-neutral-400 space-y-1">
+            <div class="mt-2 text-xs font-mono-data text-primary-ink/75 dark:text-neutral-400 space-y-1">
                 <p class="text-sm font-bold text-primary-ink dark:text-neutral-200">{{ $participant->name }}</p>
                 <p>{{ $participant->event->name }}</p>
                 <p class="font-medium text-accent-amber dark:text-amber-500">

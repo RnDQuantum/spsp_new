@@ -1,8 +1,13 @@
-<div class="interpretation-section">
+<div class="interpretation-section font-sans">
     @if ($showHeader && $isStandalone)
-        <div class="mb-6">
-            <h2 class="font-display text-2xl font-bold text-primary-ink dark:text-neutral-100">Interpretasi Hasil Assessment</h2>
-            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+        <div class="mb-4 pb-4 border-b border-warm-border dark:border-[#25211e]">
+            <span class="font-mono-data text-accent-amber font-bold uppercase tracking-widest text-xs block mb-1">
+                INDIVIDUAL REPORT / INTERPRETASI
+            </span>
+            <h2 class="font-display text-xl md:text-2xl font-bold tracking-tight text-primary-ink dark:text-neutral-100">
+                Interpretasi Hasil Assessment
+            </h2>
+            <p class="text-xs font-mono-data text-primary-ink/75 dark:text-neutral-400 mt-1">
                 Participant: {{ $participant?->name }} | Event: {{ $eventCode }} | Test: {{ $testNumber }}
             </p>
         </div>

@@ -1,12 +1,18 @@
-<div class="mt-8 mb-8 px-6 border border-warm-border dark:border-[#25211e] bg-white dark:bg-[#171412] shadow-xs rounded-lg">
-    <div class="px-8 py-6 bg-white dark:bg-[#171412] border-b border-warm-border dark:border-[#25211e] mb-8 -mx-6">
-        <h1 class="font-display text-2xl font-bold tracking-tight text-primary-ink dark:text-neutral-100 uppercase text-center">
-            Laporan Individu
-        </h1>
-        <div class="text-center mt-2 text-xs font-semibold text-primary-ink/77 dark:text-neutral-400">
-            {{ $eventName }} - {{ $institutionName }}
+<div class="max-w-[1400px] mx-auto p-3 md:p-4 font-sans text-primary-ink dark:text-neutral-100">
+    <div class="bg-white dark:bg-[#171412] p-4 md:p-5 rounded-xl border border-warm-border dark:border-[#25211e] shadow-xs">
+        
+        {{-- Header Editorial Executive Journal --}}
+        <div class="mb-4 pb-4 border-b border-warm-border dark:border-[#25211e]">
+            <span class="font-mono-data text-accent-amber font-bold uppercase tracking-widest text-xs block mb-1">
+                INDIVIDUAL REPORT / LAPORAN AKHIR
+            </span>
+            <h1 class="font-display text-xl md:text-2xl font-bold tracking-tight text-primary-ink dark:text-neutral-100">
+                Laporan Individu Penilaian Asesmen
+            </h1>
+            <div class="mt-1 text-xs font-mono-data text-primary-ink/75 dark:text-neutral-400">
+                {{ $eventName }} - {{ $institutionName }}
+            </div>
         </div>
-    </div>
 
     {{-- Tolerance Selector Component --}}
     <div class="mb-8">

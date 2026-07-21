@@ -1,12 +1,15 @@
-<div>
-    <div class="mx-auto my-8 border border-warm-border dark:border-[#25211e] bg-white dark:bg-[#171412] overflow-hidden shadow-xs" style="max-width: 1400px;">
+<div class="max-w-[1400px] mx-auto p-3 md:p-4 font-sans text-primary-ink dark:text-neutral-100">
+    <div class="bg-white dark:bg-[#171412] p-4 md:p-5 rounded-xl border border-warm-border dark:border-[#25211e] shadow-xs">
 
-        <!-- Header - DARK MODE READY -->
-        <div class="px-8 py-6 bg-white dark:bg-[#171412] border-b border-warm-border dark:border-[#25211e]">
-            <h1 class="font-display text-2xl font-bold tracking-tight text-primary-ink dark:text-neutral-100 uppercase">
-                Analisa Spider Plot
+        {{-- Header Editorial Executive Journal --}}
+        <div class="mb-4 pb-4 border-b border-warm-border dark:border-[#25211e]">
+            <span class="font-mono-data text-accent-amber font-bold uppercase tracking-widest text-xs block mb-1">
+                INDIVIDUAL REPORT / SPIDER PLOT
+            </span>
+            <h1 class="font-display text-xl md:text-2xl font-bold tracking-tight text-primary-ink dark:text-neutral-100">
+                Analisa Spider Plot Profil Asesmen
             </h1>
-            <div class="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-xs font-semibold text-primary-ink/75 dark:text-neutral-400">
+            <div class="mt-2 flex flex-wrap gap-x-6 gap-y-2 text-xs font-mono-data text-primary-ink/75 dark:text-neutral-400">
                 <span class="flex items-center gap-1.5"><i class="fa-regular fa-user text-accent-amber"></i> {{ $participant->name }}</span>
                 <span class="flex items-center gap-1.5"><i class="fa-regular fa-calendar text-accent-amber"></i> {{ $participant->event->name }}</span>
                 <span class="flex items-center gap-1.5"><i class="fa-regular fa-address-card text-accent-amber"></i> {{ $participant->positionFormation->name }} - {{ $participant->positionFormation->template->name }}</span>
@@ -850,4 +853,5 @@
             });
         })();
     </script>
+    </div>
 </div>
