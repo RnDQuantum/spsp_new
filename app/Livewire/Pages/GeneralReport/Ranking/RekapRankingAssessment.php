@@ -459,7 +459,7 @@ class RekapRankingAssessment extends Component
         $conclusionSummary = $this->getConclusionSummary();
         $standardInfo = $this->getStandardInfo();
 
-        return view('livewire.pages.general-report.rekap-ranking-assessment', [
+        return view('livewire.pages.general-report.ranking.rekap-ranking-assessment', [
             'potensiWeight' => $this->potensiWeight,
             'kompetensiWeight' => $this->kompetensiWeight,
             'rows' => $rows,
