@@ -99,14 +99,14 @@ Halaman admin untuk melakukan konfigurasi klien, event, dan template standar.
 
 | Halaman / Fitur | Berkas View (`resources/views/livewire/pages/`) | Pola Legacy / Masalah Desain | Status |
 | :--- | :--- | :--- | :--- |
-| **Admin Dashboard** | `admin/dashboard-admin.blade.php` | Halaman utama administrator. | [ ] Pending |
-| **Client List** | `admin/list-klien.blade.php` | Tabel daftar klien institusi. | [ ] Pending |
-| **Event List** | `events/index.blade.php` | Manajemen daftar event penilaian. | [ ] Pending |
-| **Event Show / Detail** | `events/show.blade.php` | Detail manajemen peserta per event. | [ ] Pending |
+| **Admin Dashboard** | `admin/dashboard-admin.blade.php` | Halaman utama administrator. | **Selesai** (Standar Benchmark 100%) |
+| **Client List** | `admin/list-klien.blade.php` | Tabel daftar klien institusi. | **Selesai** (Standar Benchmark 100%) |
+| **Event List** | `events/index.blade.php` | Manajemen daftar event penilaian. | **Selesai** (Standar Benchmark 100%) |
+| **Event Show / Detail** | `events/show.blade.php` | Detail manajemen peserta per event. | **Selesai** (Standar Benchmark 100%) |
 | **Custom Standards Index** | `custom-standards/index.blade.php` | Pengaturan template standar kustom. | [ ] Pending |
 | **Custom Standards Create** | `custom-standards/create.blade.php` | Form pembuatan standar baru. | [ ] Pending |
 | **Custom Standards Edit** | `custom-standards/edit.blade.php` | Form pengeditan standar. | [ ] Pending |
-| **Institution Detail** | `institutions/show.blade.php` | Detail informasi institusi klien. | [ ] Pending |
+| **Institution Detail** | `institutions/show.blade.php` | Detail informasi institusi klien. | **Selesai** (Standar Benchmark 100%) |
 
 ---
 
