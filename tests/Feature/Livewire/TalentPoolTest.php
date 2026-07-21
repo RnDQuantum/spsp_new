@@ -203,7 +203,7 @@ class TalentPoolTest extends TestCase
             'filter.position_formation_id' => $this->position->id,
         ]);
 
-        $component = Livewire::test(\App\Livewire\Pages\TalentPool\Index::class);
+        $component = Livewire::test(\App\Livewire\Pages\GeneralReport\TalentPool\Index::class);
 
         // Component should render without errors
         $component->assertStatus(200);

@@ -1,6 +1,6 @@
 <div class="max-w-7xl mx-auto p-3 md:p-4 font-sans text-primary-ink dark:text-neutral-100">
     {{-- Include Participant List Modal --}}
-    @include('livewire.pages.talent-pool.participant-list-modal')
+    @include('livewire.pages.general-report.talent-pool.participant-list-modal')
 
     <div class="bg-white dark:bg-[#171412] p-4 md:p-5 rounded-xl border border-warm-border dark:border-[#25211e] shadow-xs relative">
 

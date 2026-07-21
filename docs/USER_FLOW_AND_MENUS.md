@@ -85,13 +85,11 @@ Halaman-halaman laporan analitik yang menyajikan visualisasi dan data untuk selu
 *   **Ranking Ringkasan Asesmen**: Laporan ranking utama (*Overall Ranking*) yang menggabungkan nilai Potensi dan Kompetensi berdasarkan pembobotan kategori aktif (misal Potensi 40% dan Kompetensi 60%).
 *   **Statistik**: Menyajikan data statistik deskriptif dari kelompok peserta, seperti nilai tertinggi, nilai terendah, nilai rata-rata, dan grafik distribusi frekuensi skor.
 *   **Training Recommendation**: Modul analitik cerdas yang mengidentifikasi gap kompetensi kelompok peserta di bawah standar, lalu merekomendasikan jenis pelatihan (*training*) yang sesuai secara otomatis.
+*   **Talent Pool Management**: Merupakan menu analitik untuk memetakan dan menganalisis kandidat-kandidat berkinerja terbaik (*top talent*). Menu ini menyajikan data analitik kelompok talenta untuk mempermudah identifikasi suksesi jabatan, pemetaan kompetensi jangka panjang, serta penempatan strategis karyawan.
 *   **MMPI (Minnesota Multiphasic Personality Inventory)**: Menu non-analitik yang digunakan khusus untuk menampilkan data mentah hasil tes kepribadian klinis MMPI peserta (tidak dipengaruhi oleh simulasi standard priority).
 
-### 4. Halaman Penyesuaian Standar & Simulasi (Layer 1 - Session Adjustment)
-*(Secara struktur menu diletakkan di bawah dropdown General Report, namun fungsinya adalah sebagai panel kontrol simulasi / What-If Analysis)*:
+### 4. Halaman Penyesuaian Standar & Simulasi (Layer 1 - Session Adjustment / What-If)
+*(Secara struktur menu diletakkan di level utama sidebar sebagai panel kontrol simulasi / What-If Analysis)*:
 *   **Standar MC Mapping**: Antarmuka interaktif untuk melihat standar kompetensi yang aktif, memilih baseline (Quantum/Custom), dan menyesuaikan bobot/rating kompetensi secara dinamis di session (**Layer 1**).
 *   **Standar Potential Mapping**: Antarmuka interaktif untuk melihat standar potensi yang aktif, memilih baseline (Quantum/Custom), dan menyesuaikan bobot/rating potensi secara dinamis di session (**Layer 1**).
-
-### 5. Talent Pool Management (Analisis Potensi Talenta)
-*   **Talent Pool Management**: Merupakan menu analitik untuk memetakan dan menganalisis kandidat-kandidat berkinerja terbaik (*top talent*). Menu ini menyajikan data analitik kelompok talenta (bukan sekadar manajemen/CRUD data) untuk mempermudah identifikasi suksesi jabatan, pemetaan kompetensi jangka panjang, serta penempatan strategis karyawan.
 

@@ -84,9 +84,9 @@ Route::middleware(['auth', 'institution.access'])->group(function () {
 
     Route::livewire('/training-recommendation', App\Livewire\Pages\GeneralReport\Training\TrainingRecommendation::class)->name('training-recommendation');
 
-    Route::livewire('/standard-mc', App\Livewire\Pages\GeneralReport\StandardMc::class)->name('standard-mc');
+    Route::livewire('/standard-mc', App\Livewire\Pages\Simulation\StandardMc::class)->name('standard-mc');
 
-    Route::livewire('/standard-psikometrik', App\Livewire\Pages\GeneralReport\StandardPsikometrik::class)->name('standard-psikometrik');
+    Route::livewire('/standard-psikometrik', App\Livewire\Pages\Simulation\StandardPsikometrik::class)->name('standard-psikometrik');
     Route::livewire('/general-report/mmpi', App\Livewire\Pages\GeneralReport\MmpiResultsReport::class)->name('general-report.mmpi');
 
     Route::livewire('/final-report/{eventCode}/{testNumber}', App\Livewire\Pages\IndividualReport\FinalReport::class)->name('final_report');
@@ -101,5 +101,5 @@ Route::middleware(['auth', 'institution.access'])->group(function () {
     Route::livewire('/laporan-alat-tes-detail', App\Livewire\Pages\LaporanAlatTes\DetailLaporanTes::class)->name('laporan-alat-tes-detail');
 
     // Talent Pool Management
-    Route::livewire('/talentpool', App\Livewire\Pages\TalentPool\Index::class)->name('talentpool');
+    Route::livewire('/talentpool', App\Livewire\Pages\GeneralReport\TalentPool\Index::class)->name('talentpool');
 });

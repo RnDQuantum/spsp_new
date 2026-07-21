@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Pages\TalentPool;
+namespace App\Livewire\Pages\GeneralReport\TalentPool;
 
 use App\Models\AssessmentEvent;
 use App\Services\TalentPoolService;
@@ -394,7 +394,7 @@ class Index extends Component
     public function render()
     {
         // 🚀 PERFORMANCE: No extra processing in render to keep it fast
-        return view('livewire.pages.talent-pool.index', [
+        return view('livewire.pages.general-report.talent-pool.index', [
             'selectedTemplate' => $this->selectedEvent?->positionFormations?->first()?->template,
         ]);
     }

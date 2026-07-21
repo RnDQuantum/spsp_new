@@ -108,12 +108,8 @@ return [
                 'route' => 'training-recommendation',
             ],
             [
-                'title' => 'Standar MC Mapping',
-                'route' => 'standard-mc',
-            ],
-            [
-                'title' => 'Standar Potential Mapping',
-                'route' => 'standard-psikometrik',
+                'title' => 'Talent Pool Management',
+                'route' => 'talentpool',
             ],
             [
                 'title' => 'MMPI',
@@ -122,15 +118,21 @@ return [
         ],
     ],
 
+    'standard_mc' => [
+        'icon' => 'fa-solid fa-sliders',
+        'title' => 'Standar MC Mapping',
+        'route' => 'standard-mc',
+    ],
+
+    'standard_psikometrik' => [
+        'icon' => 'fa-solid fa-sliders-h',
+        'title' => 'Standar Potential Mapping',
+        'route' => 'standard-psikometrik',
+    ],
+
     'laporan_alat_tes' => [
         'icon' => 'fa-solid fa-square-poll-vertical',
         'title' => 'Laporan Alat Tes',
         'route' => 'laporan-alat-tes',
-    ],
-
-    'talentpool' => [
-        'icon' => 'fa-solid fa-briefcase',
-        'title' => 'Talent Pool Management',
-        'route' => 'talentpool',
     ],
 ];

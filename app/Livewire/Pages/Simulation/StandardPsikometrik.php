@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Pages\GeneralReport;
+namespace App\Livewire\Pages\Simulation;
 
 use App\Models\AssessmentEvent;
 use App\Models\AssessmentTemplate;
@@ -10,8 +10,8 @@ use App\Services\DynamicStandardService;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
-#[Layout('components.layouts.app', ['title' => 'Standar Pemetaan Kompetensi Individu'])]
-class StandardMc extends Component
+#[Layout('components.layouts.app', ['title' => 'Standar Pemetaan Potensi Individu'])]
+class StandardPsikometrik extends Component
 {
     protected $listeners = [
         'event-selected' => 'handleEventSelected',
@@ -41,10 +41,10 @@ class StandardMc extends Component
         'scores' => [],
     ];
 
+    public int $maxScore = 0;
+
     // Unique chart ID
     public string $chartId = '';
-
-    public int $maxScore = 0;
 
     // PHASE 3: Custom Standard Selection
     public ?int $selectedCustomStandardId = null;
@@ -74,7 +74,7 @@ class StandardMc extends Component
     public function mount(): void
     {
         // Generate unique chart ID
-        $this->chartId = 'standardMc'.uniqid();
+        $this->chartId = 'standardPsikometrik'.uniqid();
 
         $this->loadStandardData();
         $this->loadAvailableCustomStandards();
@@ -174,27 +174,27 @@ class StandardMc extends Component
     }
 
     /**
-     * PHASE 2C: Open modal to edit aspect rating (Kompetensi - direct rating edit)
+     * PHASE 2C: Open modal to edit sub-aspect rating
      */
-    public function openEditAspectRating(string $aspectCode, float $currentRating): void
+    public function openEditSubAspectRating(string $subAspectCode, int $currentRating): void
     {
         if (! $this->selectedTemplate) {
             return;
         }
 
         $this->resetErrorBag(); // Clear any previous errors
-        $this->editingField = $aspectCode;
-        $this->editingValue = (int) $currentRating; // Convert to int for Kompetensi
-        $this->editingOriginalValue = \App\Models\Aspect::where('template_id', $this->selectedTemplate->id)
-            ->where('code', $aspectCode)
-            ->first()?->standard_rating ?? $currentRating;
+        $this->editingField = $subAspectCode;
+        $this->editingValue = $currentRating;
+        $this->editingOriginalValue = \App\Models\SubAspect::whereHas('aspect', function ($query) {
+            $query->where('template_id', $this->selectedTemplate->id);
+        })->where('code', $subAspectCode)->first()?->standard_rating ?? $currentRating;
         $this->showEditRatingModal = true;
     }
 
     /**
-     * PHASE 2C: Save aspect rating adjustment (Kompetensi)
+     * PHASE 2C: Save sub-aspect rating adjustment
      */
-    public function saveAspectRating(): void
+    public function saveSubAspectRating(): void
     {
         if (! $this->selectedTemplate || ! is_int($this->editingValue)) {
             return;
@@ -207,7 +207,7 @@ class StandardMc extends Component
             return;
         }
 
-        app(DynamicStandardService::class)->saveAspectRating(
+        app(DynamicStandardService::class)->saveSubAspectRating(
             $this->selectedTemplate->id,
             $this->editingField,
             $this->editingValue
@@ -226,11 +226,11 @@ class StandardMc extends Component
             return;
         }
 
-        $this->dispatch('openSelectionModal', templateId: $this->selectedTemplate->id, categoryCode: 'kompetensi');
+        $this->dispatch('openSelectionModal', templateId: $this->selectedTemplate->id, categoryCode: 'potensi');
     }
 
     /**
-     * PHASE 2C: Reset adjustments (both category weights + Kompetensi aspects)
+     * PHASE 2C: Reset adjustments (both category weights + Potensi aspects)
      */
     public function resetAdjustments(): void
     {
@@ -240,8 +240,8 @@ class StandardMc extends Component
 
         $dynamicService = app(DynamicStandardService::class);
 
-        // Reset Kompetensi category adjustments (aspects, ratings)
-        $dynamicService->resetCategoryAdjustments($this->selectedTemplate->id, 'kompetensi');
+        // Reset Potensi category adjustments (aspects, sub-aspects, ratings)
+        $dynamicService->resetCategoryAdjustments($this->selectedTemplate->id, 'potensi');
 
         // Reset both category weights
         $dynamicService->resetCategoryWeights($this->selectedTemplate->id);
@@ -418,17 +418,16 @@ class StandardMc extends Component
         // Get DynamicStandardService instance (handles priority: Session → Custom Standard → Quantum Default)
         $dynamicService = app(DynamicStandardService::class);
 
-        // Check if there are session-based temporary adjustments (not custom standard selection)
-        $hasSessionAdjustments = $dynamicService->hasCategoryAdjustments($templateId, 'kompetensi');
-
-        // Load ONLY Kompetensi category type with aspects from selected position's template
+        // Load ONLY Potensi category type with aspects and sub-aspects from selected position's template
         // 🚀 OPTIMIZATION: Eager load all relationships in one query with specific columns
         $categories = CategoryType::query()
             ->select('id', 'template_id', 'code', 'name', 'weight_percentage', 'order')
             ->where('template_id', $templateId)
-            ->where('code', 'kompetensi')
+            ->where('code', 'potensi')
             ->with([
                 'aspects' => fn ($q) => $q->select('id', 'category_type_id', 'template_id', 'code', 'name', 'weight_percentage', 'standard_rating', 'order')
+                    ->orderBy('order'),
+                'aspects.subAspects' => fn ($q) => $q->select('id', 'aspect_id', 'code', 'name', 'standard_rating', 'description', 'order')
                     ->orderBy('order'),
             ])
             ->orderBy('order')
@@ -442,10 +441,11 @@ class StandardMc extends Component
 
         foreach ($categories as $category) {
             $aspectsData = [];
-            $categoryAspectCount = 0;
+            $categoryAspectsCount = 0;
             $categoryWeightSum = 0;
             $categoryStandardRatingSum = 0.0;
             $categoryScoreSum = 0.0;
+            $categorySubAspectStandardSum = 0.0;
 
             // Get category weight (Priority: Session → Custom Standard → Quantum Default)
             $categoryWeight = $dynamicService->getCategoryWeight($templateId, $category->code);
@@ -465,16 +465,45 @@ class StandardMc extends Component
                 $aspectWeight = $dynamicService->getAspectWeight($templateId, $aspect->code);
                 $aspectOriginalWeight = $aspect->weight_percentage;
 
-                // Get aspect rating (Priority: Session → Custom Standard → Quantum Default)
-                $aspectRating = $dynamicService->getAspectRating($templateId, $aspect->code);
-                $aspectOriginalRating = (float) $aspect->standard_rating;
-
-                // Check if aspect weight/rating is from session adjustment
+                // Check if aspect weight is from session adjustment
                 $isAspectWeightAdjusted = isset($adjustments['aspect_weights'][$aspect->code]);
-                $isAspectRatingAdjusted = isset($adjustments['aspect_ratings'][$aspect->code]);
+
+                $subAspectsData = [];
+                $activeSubAspectsCount = 0;
+                $activeSubAspectsStandardSum = 0;
+
+                foreach ($aspect->subAspects as $subAspect) {
+                    // Check if sub-aspect is active (Priority: Session → Custom Standard → Default true)
+                    if (! $dynamicService->isSubAspectActive($templateId, $subAspect->code)) {
+                        continue; // Skip inactive sub-aspects
+                    }
+
+                    // Get sub-aspect rating (Priority: Session → Custom Standard → Quantum Default)
+                    $subAspectRating = $dynamicService->getSubAspectRating($templateId, $subAspect->code);
+                    $subAspectOriginalRating = (int) $subAspect->standard_rating;
+
+                    // Check if sub-aspect rating is from session adjustment
+                    $isSubAspectRatingAdjusted = isset($adjustments['sub_aspect_ratings'][$subAspect->code]);
+
+                    $subAspectsData[] = [
+                        'code' => $subAspect->code,
+                        'name' => $subAspect->name,
+                        'standard_rating' => $subAspectRating,
+                        'original_rating' => $subAspectOriginalRating,
+                        'is_adjusted' => $isSubAspectRatingAdjusted,
+                        'description' => $subAspect->description,
+                    ];
+                    $activeSubAspectsCount++;
+                    $activeSubAspectsStandardSum += $subAspectRating;
+                }
+
+                // Calculate aspect average rating from ACTIVE sub-aspects
+                $aspectAvgRating = $activeSubAspectsCount > 0
+                    ? round($activeSubAspectsStandardSum / $activeSubAspectsCount, 2)
+                    : $dynamicService->getAspectRating($templateId, $aspect->code);
 
                 // Calculate aspect score: rating × adjusted weight
-                $aspectScore = round($aspectRating * $aspectWeight, 2);
+                $aspectScore = round($aspectAvgRating * $aspectWeight, 2);
 
                 $aspectsData[] = [
                     'code' => $aspect->code,
@@ -482,31 +511,31 @@ class StandardMc extends Component
                     'weight_percentage' => $aspectWeight,
                     'original_weight' => $aspectOriginalWeight,
                     'is_weight_adjusted' => $isAspectWeightAdjusted,
-                    'standard_rating' => $aspectRating,
-                    'original_rating' => $aspectOriginalRating,
-                    'is_rating_adjusted' => $isAspectRatingAdjusted,
+                    'standard_rating' => $aspectAvgRating,
+                    'sub_aspects_count' => $activeSubAspectsCount,
+                    'sub_aspects' => $subAspectsData,
+                    'sub_aspects_standard_sum' => $activeSubAspectsStandardSum,
                     'score' => $aspectScore,
-                    'attribute_count' => 1,
-                    'average_rating' => $aspectRating,
-                    'description' => $aspect->description,
                 ];
 
                 // For chart data - each ACTIVE aspect is a point on the chart
                 $this->chartData['labels'][] = $aspect->name;
-                $this->chartData['ratings'][] = $aspectRating;
+                $this->chartData['ratings'][] = $aspectAvgRating;
                 $this->chartData['scores'][] = $aspectScore;
 
                 // Track maximum score for dynamic chart scaling
                 $this->maxScore = max($this->maxScore, $aspectScore);
 
-                $categoryAspectCount++;
+                $categoryAspectsCount += $activeSubAspectsCount;
                 $categoryWeightSum += $aspectWeight;
-                $categoryStandardRatingSum += $aspectRating;
+                $categoryStandardRatingSum += $aspectAvgRating;
                 $categoryScoreSum += $aspectScore;
-                $totalAspectRatingSum += $aspectRating; // Track sum of aspect ratings
+                $categorySubAspectStandardSum += $activeSubAspectsStandardSum;
+                $totalAspectRatingSum += $aspectAvgRating; // Track sum of aspect ratings
             }
 
             // Calculate category average rating
+            $categoryAspectCount = count($aspectsData);
             $categoryAvgRating = $categoryAspectCount > 0
                 ? round($categoryStandardRatingSum / $categoryAspectCount, 2)
                 : 0.0;
@@ -517,21 +546,21 @@ class StandardMc extends Component
                 'weight_percentage' => $categoryWeight,
                 'original_weight' => $categoryOriginalWeight,
                 'is_weight_adjusted' => $isCategoryWeightAdjusted,
-                'attribute_count' => $categoryAspectCount,
+                'aspects_count' => $categoryAspectsCount,
                 'standard_rating' => $categoryAvgRating,
-                'score' => round($categoryScoreSum, 2),
+                'score' => $categoryScoreSum,
                 'aspects' => $aspectsData,
             ];
 
-            $totalAspects += $categoryAspectCount;
+            $totalAspects += $categoryAspectsCount;
             $totalWeight += $categoryWeightSum;
-            $totalStandardRatingSum += $categoryStandardRatingSum;
+            $totalStandardRatingSum += $categorySubAspectStandardSum;
             $totalScore += $categoryScoreSum;
         }
 
         $this->totals = [
             'total_aspects' => $totalAspects,
-            'total_weight' => round($totalWeight, 2),
+            'total_weight' => $totalWeight,
             'total_standard_rating_sum' => round($totalStandardRatingSum, 2),
             'total_rating_sum' => round($totalAspectRatingSum, 2), // Sum of aspect average ratings
             'total_score' => round($totalScore, 2),
@@ -546,8 +575,6 @@ class StandardMc extends Component
 
     public function render()
     {
-        // dd($this->categoryData);
-
-        return view('livewire.pages.general-report.standard-mc');
+        return view('livewire.pages.simulation.standard-psikometrik');
     }
 }

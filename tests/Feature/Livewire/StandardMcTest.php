@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature\Livewire;
 
 use PHPUnit\Framework\Attributes\Test;
-use App\Livewire\Pages\GeneralReport\StandardMc;
+use App\Livewire\Pages\Simulation\StandardMc;
 use App\Models\Aspect;
 use App\Models\AssessmentEvent;
 use App\Models\AssessmentTemplate;
