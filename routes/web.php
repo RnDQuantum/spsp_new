@@ -38,11 +38,11 @@ Route::middleware(['auth', 'institution.access'])->group(function () {
         Route::livewire('/list-klien', \App\Livewire\Pages\Admin\ClientList::class)->name('daftar-klien');
 
         // Institution Routes
-        Route::livewire('/institutions/{institution}', \App\Livewire\Pages\Institutions\Show::class)->name('institutions.show');
+        Route::livewire('/institutions/{institution}', \App\Livewire\Pages\Admin\Institutions\Show::class)->name('institutions.show');
 
         // Event Routes
-        Route::livewire('/events', \App\Livewire\Pages\Events\Index::class)->name('events.index');
-        Route::livewire('/events/{event:code}', \App\Livewire\Pages\Events\Show::class)->name('events.show');
+        Route::livewire('/events', \App\Livewire\Pages\Admin\Events\Index::class)->name('events.index');
+        Route::livewire('/events/{event:code}', \App\Livewire\Pages\Admin\Events\Show::class)->name('events.show');
     });
 
 

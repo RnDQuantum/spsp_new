@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Pages\Events;
+namespace App\Livewire\Pages\Admin\Events;
 
 use App\Models\AssessmentEvent;
 use Livewire\Attributes\Layout;
@@ -111,7 +111,7 @@ class Show extends Component
                 ->paginate($this->perPage, ['*'], 'batchPage');
         }
 
-        return view('livewire.pages.events.show', [
+        return view('livewire.pages.admin.events.show', [
             'primaryCategory' => $primaryCategory,
             'positionFormations' => $positionFormations,
             'batches' => $batches,

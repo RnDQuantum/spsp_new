@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Pages\Events;
+namespace App\Livewire\Pages\Admin\Events;
 
 use App\Models\AssessmentEvent;
 use App\Models\Institution;
@@ -116,7 +116,7 @@ class Index extends Component
 
         $events = $query->paginate($this->perPage);
 
-        return view('livewire.pages.events.index', [
+        return view('livewire.pages.admin.events.index', [
             'events' => $events,
             'institutions' => Institution::select('id', 'name')->orderBy('name')->get(),
             'categories' => InstitutionCategory::where('is_active', true)->orderBy('order')->get(),
