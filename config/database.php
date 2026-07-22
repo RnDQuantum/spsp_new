@@ -2,6 +2,52 @@
 
 use Illuminate\Support\Str;
 
+$lspProdConfig = [
+    'driver' => 'mysql',
+    'url' => env('DB_LSP_URL'),
+    'host' => env('DB_LSP_HOST', '127.0.0.1'),
+    'port' => env('DB_LSP_PORT', '3306'),
+    'database' => env('DB_LSP_DATABASE', 'forge'),
+    'username' => env('DB_LSP_USERNAME', 'forge'),
+    'password' => env('DB_LSP_PASSWORD', ''),
+    'unix_socket' => env('DB_SOCKET', ''),
+    'charset' => env('DB_CHARSET', 'utf8mb4'),
+    'collation' => env('DB_COLLATION', 'utf8mb4_unicode_ci'),
+    'prefix' => '',
+    'prefix_indexes' => true,
+    'strict' => false,
+    'engine' => null,
+    'options' => extension_loaded('pdo_mysql') ? array_filter([
+        PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+        PDO::ATTR_PERSISTENT => true,
+        PDO::ATTR_TIMEOUT => 5,
+        PDO::MYSQL_ATTR_INIT_COMMAND => 'SET sql_mode="STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION"',
+    ]) : [],
+];
+
+$lspLocalConfig = [
+    'driver' => 'mysql',
+    'url' => env('DB_LSP_URL'),
+    'host' => env('DB_LSP_LOCAL_HOST', '127.0.0.1'),
+    'port' => env('DB_LSP_LOCAL_PORT', '3307'),
+    'database' => env('DB_LSP_LOCAL_DATABASE', 'forge'),
+    'username' => env('DB_LSP_LOCAL_USERNAME', 'root'),
+    'password' => env('DB_LSP_LOCAL_PASSWORD', ''),
+    'unix_socket' => env('DB_SOCKET', ''),
+    'charset' => env('DB_CHARSET', 'utf8mb4'),
+    'collation' => env('DB_COLLATION', 'utf8mb4_unicode_ci'),
+    'prefix' => '',
+    'prefix_indexes' => true,
+    'strict' => false,
+    'engine' => null,
+    'options' => extension_loaded('pdo_mysql') ? array_filter([
+        PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+        PDO::ATTR_PERSISTENT => true,
+        PDO::ATTR_TIMEOUT => 5,
+        PDO::MYSQL_ATTR_INIT_COMMAND => 'SET sql_mode="STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION"',
+    ]) : [],
+];
+
 return [
 
     /*
@@ -111,6 +157,12 @@ return [
             // 'encrypt' => env('DB_ENCRYPT', 'yes'),
             // 'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'false'),
         ],
+
+        'lsp' => array_merge(env('DB_LSP_LOCAL', false) ? $lspLocalConfig : $lspProdConfig, ['name' => 'lsp']),
+
+        'lsp_prod' => array_merge($lspProdConfig, ['name' => 'lsp_prod']),
+
+        'lsp_local' => array_merge($lspLocalConfig, ['name' => 'lsp_local']),
 
     ],
 
