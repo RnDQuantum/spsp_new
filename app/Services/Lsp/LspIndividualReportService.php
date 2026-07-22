@@ -800,7 +800,7 @@ class LspIndividualReportService
             'klinis' => preg_split('/\d+\.\s+/', trim($row->klinis ?? ''), -1, PREG_SPLIT_NO_EMPTY),
             'kesimpulan' => preg_split('/\d+\.\s+/', trim($row->kesimpulan ?? ''), -1, PREG_SPLIT_NO_EMPTY),
             'psikogram' => preg_split('/\d+\.\s+/', trim($row->psikogram ?? ''), -1, PREG_SPLIT_NO_EMPTY),
-            'nilai_pq' => $row->nilai_pq ?? 0,
+            'nilai_pq' => is_numeric(trim((string) ($row->nilai_pq ?? ''))) ? (float) $row->nilai_pq : 0.00,
             'tingkat_stres' => $row->tingkat_stres ?? '-',
             'nilai_kejiwaan' => $nilaiKejiwaan,
             'kesimpulan_mmpi' => $kesimpulanMmpi,
