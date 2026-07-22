@@ -62,6 +62,16 @@ Deep dives into specific optimization work applied to the codebase.
 *   **[OPTIMIZATION_TRAINING_RECOMMENDATION.md](./OPTIMIZATION_TRAINING_RECOMMENDATION.md)**
     *   Optimizations for training recommendation logic on large datasets.
 
+### 6. LSP Integration & Legacy Data Synchronization
+Dokumentasi integrasi data real dan pengolahan laporan legacy dari database LSP.
+*   **[01_LEGACY_VIEW_ANALYSIS.md](./lsp_integration/01_LEGACY_VIEW_ANALYSIS.md)**
+    *   Pemetaan lengkap view legacy `report_individu_p3k_kjg_2025.php` dan 23 tabel database LSP.
+*   **[02_DATA_MAPPING_ANALYSIS.md](./lsp_integration/02_DATA_MAPPING_ANALYSIS.md)**
+    *   Analisis komparatif data CI3 legacy vs skema database SPSP (90% match & 10% data kualitatif/wawancara).
+*   **[03_LSP_INTEGRATION_GUIDE.md](./lsp_integration/03_LSP_INTEGRATION_GUIDE.md)**
+    *   Panduan operasional `LspIndividualReportService`, `LspDataImporterService`, Artisan CLI commands (`lsp:test-report` & `lsp:import`), dan norma JSON.
+
+
 ---
 
 ## 🎯 Key Concepts (Quick Reference)
