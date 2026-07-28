@@ -5,6 +5,7 @@
 - **File Command**: `app/Console/Commands/TestLspIndividualReport.php` & `app/Console/Commands/ImportLspData.php`
 - **File Test**: `tests/Feature/LspIndividualReportServiceTest.php` & `tests/Feature/LspDataImporterServiceTest.php`
 - **Lokasi Norma**: `resources/data/lsp_norms/` (`ist.json`, `kostik.json`, `personality.json`)
+- **Dokumentasi Kedinamisan Multi-Proyek**: `docs/lsp_integration/04_DYNAMIC_MULTI_PROJECT_SUPPORT.md`
 
 ---
 
