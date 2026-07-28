@@ -11,7 +11,9 @@ use Livewire\Component;
 class DashboardAdmin extends Component
 {
     public $selectedYear;
+
     public $selectedCategory = 'all';
+
     public $selectedStatus = 'all';
 
     public function mount(): void
@@ -35,6 +37,7 @@ class DashboardAdmin extends Component
     private function getAvailableYears(): array
     {
         $currentYear = date('Y');
+
         return range($currentYear, $currentYear - 5);
     }
 
@@ -58,11 +61,11 @@ class DashboardAdmin extends Component
                             $aq->where('year', $this->selectedYear);
                         });
                     }
-                }
+                },
             ])
             ->orderBy('order')
             ->get()
-            ->mapWithKeys(fn($category) => [$category->code => $category->institutions_count]);
+            ->mapWithKeys(fn ($category) => [$category->code => $category->institutions_count]);
 
         return [
             'total' => $totalClients,
@@ -81,7 +84,7 @@ class DashboardAdmin extends Component
                 $q->select('id', 'institution_id', 'year', 'status')
                     ->latest()
                     ->limit(1);
-            }
+            },
         ]);
 
         if ($this->selectedYear && $this->selectedYear !== 'all') {

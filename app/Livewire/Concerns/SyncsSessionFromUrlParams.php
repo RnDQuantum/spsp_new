@@ -75,7 +75,7 @@ trait SyncsSessionFromUrlParams
      *
      * SMART SAVE: Only updates session if values have changed to reduce overhead.
      *
-     * @param  \App\Models\Participant  $participant  The participant model with assessmentEvent loaded
+     * @param  Participant  $participant  The participant model with assessmentEvent loaded
      */
     protected function syncSessionFromParticipant(Participant $participant): void
     {
@@ -107,7 +107,7 @@ trait SyncsSessionFromUrlParams
      *
      * SMART SAVE: Only updates session if values have changed to reduce overhead.
      *
-     * @param  \App\Models\AssessmentEvent  $event  The assessment event model
+     * @param  AssessmentEvent  $event  The assessment event model
      * @param  int|null  $positionFormationId  Optional position formation ID
      */
     protected function syncSessionFromEvent(AssessmentEvent $event, ?int $positionFormationId = null): void

@@ -13,12 +13,16 @@ use Livewire\Component;
 class SelectiveAspectsModal extends Component
 {
     public int $templateId = 0;
+
     public string $categoryCode = '';
+
     public bool $show = false;
+
     public bool $dataLoaded = false;
 
     // Selected aspects and sub-aspects
     public array $selectedAspects = [];
+
     public array $selectedSubAspects = [];
 
     // Aspect weights (adjusted)
@@ -97,13 +101,14 @@ class SelectiveAspectsModal extends Component
 
             // Use eager loading to minimize queries
             $template = AssessmentTemplate::with([
-                'aspects' => fn($q) => $q->whereHas('categoryType', function ($query) {
+                'aspects' => fn ($q) => $q->whereHas('categoryType', function ($query) {
                     $query->where('code', $this->categoryCode);
                 })->orderBy('order')->with('subAspects'),
             ])->find($this->templateId);
 
-            if (!$template) {
+            if (! $template) {
                 $this->dataLoaded = false;
+
                 return;
             }
 
@@ -133,7 +138,7 @@ class SelectiveAspectsModal extends Component
             $this->dataLoaded = true;
         } catch (\Exception $e) {
             $this->dataLoaded = false;
-            logger()->error('Failed to load modal data: ' . $e->getMessage());
+            logger()->error('Failed to load modal data: '.$e->getMessage());
         }
     }
 
@@ -143,7 +148,7 @@ class SelectiveAspectsModal extends Component
     public function updatedSelectedAspects($value, $key): void
     {
         // If unchecked, auto-uncheck all sub-aspects and set weight to 0
-        if (!$value) {
+        if (! $value) {
             if (isset($this->selectedSubAspects[$key])) {
                 foreach ($this->selectedSubAspects[$key] as $subCode => $val) {
                     $this->selectedSubAspects[$key][$subCode] = false;
@@ -163,7 +168,7 @@ class SelectiveAspectsModal extends Component
             if ($this->categoryCode === 'potensi' && isset($this->selectedSubAspects[$key])) {
                 $hasActiveSubAspect = collect($this->selectedSubAspects[$key])->contains(true);
 
-                if (!$hasActiveSubAspect) {
+                if (! $hasActiveSubAspect) {
                     $firstKey = array_key_first($this->selectedSubAspects[$key]);
                     if ($firstKey) {
                         $this->selectedSubAspects[$key][$firstKey] = true;
@@ -178,7 +183,7 @@ class SelectiveAspectsModal extends Component
      */
     public function toggleExpand(string $aspectCode): void
     {
-        $this->expandedAspects[$aspectCode] = !($this->expandedAspects[$aspectCode] ?? false);
+        $this->expandedAspects[$aspectCode] = ! ($this->expandedAspects[$aspectCode] ?? false);
     }
 
     /**
@@ -224,7 +229,7 @@ class SelectiveAspectsModal extends Component
      */
     public function autoDistributeWeights(): void
     {
-        $activeAspects = array_filter($this->selectedAspects, fn($active) => $active === true);
+        $activeAspects = array_filter($this->selectedAspects, fn ($active) => $active === true);
         $activeCount = count($activeAspects);
 
         if ($activeCount > 0) {
@@ -249,9 +254,10 @@ class SelectiveAspectsModal extends Component
     {
         $validation = $this->validationResult;
 
-        if (!$validation['valid']) {
+        if (! $validation['valid']) {
             // Dispatch validation error event for toast
             $this->dispatch('show-validation-error', errors: $validation['errors']);
+
             return;
         }
 
@@ -284,7 +290,7 @@ class SelectiveAspectsModal extends Component
             // Notify parent component to refresh data
             $this->dispatch('standard-adjusted', templateId: $this->templateId);
         } catch (\Exception $e) {
-            logger()->error('Failed to apply selection: ' . $e->getMessage());
+            logger()->error('Failed to apply selection: '.$e->getMessage());
             $this->dispatch('show-validation-error', errors: ['Gagal menyimpan perubahan. Silakan coba lagi.']);
         }
     }
@@ -303,7 +309,7 @@ class SelectiveAspectsModal extends Component
     #[Computed]
     public function templateAspects()
     {
-        if (!$this->dataLoaded || $this->templateId === 0) {
+        if (! $this->dataLoaded || $this->templateId === 0) {
             return collect([]);
         }
 
@@ -313,7 +319,7 @@ class SelectiveAspectsModal extends Component
         }
 
         return AssessmentTemplate::with([
-            'aspects' => fn($q) => $q->whereHas('categoryType', function ($query) {
+            'aspects' => fn ($q) => $q->whereHas('categoryType', function ($query) {
                 $query->where('code', $this->categoryCode);
             })->orderBy('order')->with('subAspects'),
         ])->find($this->templateId)?->aspects ?? collect([]);
@@ -325,7 +331,7 @@ class SelectiveAspectsModal extends Component
     #[Computed]
     public function validationResult(): array
     {
-        if (!$this->dataLoaded) {
+        if (! $this->dataLoaded) {
             return ['valid' => false, 'errors' => ['Data belum dimuat']];
         }
 
@@ -333,12 +339,12 @@ class SelectiveAspectsModal extends Component
 
         // Check minimum active aspects (at least 3)
         if ($this->activeAspectsCount < 3) {
-            $errors[] = 'Minimal 3 aspek harus aktif (saat ini: ' . $this->activeAspectsCount . ')';
+            $errors[] = 'Minimal 3 aspek harus aktif (saat ini: '.$this->activeAspectsCount.')';
         }
 
         // Check total weight must be 100%
         if ($this->totalWeight !== 100 && $this->activeAspectsCount > 0) {
-            $errors[] = 'Total bobot harus 100% (saat ini: ' . $this->totalWeight . '%)';
+            $errors[] = 'Total bobot harus 100% (saat ini: '.$this->totalWeight.'%)';
         }
 
         // For Potensi, check each active aspect has at least 1 active sub-aspect
@@ -347,7 +353,7 @@ class SelectiveAspectsModal extends Component
                 if ($isActive && isset($this->selectedSubAspects[$aspectCode])) {
                     $activeSubCount = count(array_filter(
                         $this->selectedSubAspects[$aspectCode],
-                        fn($active) => $active === true
+                        fn ($active) => $active === true
                     ));
                     if ($activeSubCount === 0) {
                         $errors[] = "Aspek {$aspectCode} harus memiliki minimal 1 sub-aspek aktif";
@@ -374,6 +380,7 @@ class SelectiveAspectsModal extends Component
                 $total += (int) $weight;
             }
         }
+
         return $total;
     }
 
@@ -383,7 +390,7 @@ class SelectiveAspectsModal extends Component
     #[Computed]
     public function activeAspectsCount(): int
     {
-        return count(array_filter($this->selectedAspects, fn($active) => $active === true));
+        return count(array_filter($this->selectedAspects, fn ($active) => $active === true));
     }
 
     /**

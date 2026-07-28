@@ -6,8 +6,9 @@ namespace App\Services;
 
 use App\Models\Aspect;
 use App\Models\AspectAssessment;
-use Illuminate\Support\Collection;
 use App\Support\AspectRatingCalculator;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 
 /**
  * RankingService - Single Source of Truth for Ranking Calculations
@@ -107,7 +108,7 @@ class RankingService
         $cacheKey = "rankings:{$categoryCode}:{$eventId}:{$positionFormationId}:{$templateId}:{$configHash}";
 
         // Cache the raw rankings (without tolerance applied)
-        $rawRankings = \Illuminate\Support\Facades\Cache::remember($cacheKey, 60, function () use ($eventId, $positionFormationId, $templateId, $categoryCode, $activeAspectIds) {
+        $rawRankings = Cache::remember($cacheKey, 60, function () use ($eventId, $positionFormationId, $templateId, $categoryCode, $activeAspectIds) {
             // 🚀 OPTIMIZATION: PRE-COMPUTE STANDARDS ONCE (instead of 100K+ times!)
             // This reduces 100,000+ calls to DynamicStandardService to just 5-10 calls
             $standardsCache = $this->precomputeStandards($templateId, $activeAspectIds);
@@ -496,7 +497,7 @@ class RankingService
     /**
      * Calculate aspect rating from active sub-aspects (DATA-DRIVEN)
      *
-     * @param  \App\Models\Aspect  $aspect  Aspect model
+     * @param  Aspect  $aspect  Aspect model
      * @param  int  $templateId  Template ID
      * @param  DynamicStandardService  $standardService  Standard service instance
      * @return float Calculated aspect rating
@@ -522,7 +523,7 @@ class RankingService
     /**
      * Calculate individual rating from active sub-aspects (DATA-DRIVEN)
      *
-     * @param  \App\Models\AspectAssessment  $assessment  Aspect assessment
+     * @param  AspectAssessment  $assessment  Aspect assessment
      * @param  int  $templateId  Template ID
      * @param  DynamicStandardService  $standardService  Standard service instance
      * @return float Calculated individual rating
@@ -771,7 +772,7 @@ class RankingService
 
         $cacheKey = "combined_rankings:{$eventId}:{$positionFormationId}:{$templateId}:{$configHash}";
 
-        return \Illuminate\Support\Facades\Cache::remember($cacheKey, 60, function () use ($eventId, $positionFormationId, $templateId, $tolerancePercentage, $standardService) {
+        return Cache::remember($cacheKey, 60, function () use ($eventId, $positionFormationId, $templateId, $tolerancePercentage, $standardService) {
             // Get category weights
             $potensiWeight = $standardService->getCategoryWeight($templateId, 'potensi');
             $kompetensiWeight = $standardService->getCategoryWeight($templateId, 'kompetensi');
@@ -953,8 +954,8 @@ class RankingService
      */
     private function hasAnyAdjustments(int $templateId): bool
     {
-        $sessionAdjustments = app(\App\Services\DynamicStandardService::class)->getAdjustments($templateId);
-        $selectedStandard = app(\App\Services\CustomStandardService::class)->getSelected($templateId);
+        $sessionAdjustments = app(DynamicStandardService::class)->getAdjustments($templateId);
+        $selectedStandard = app(CustomStandardService::class)->getSelected($templateId);
 
         return ! empty($sessionAdjustments) || $selectedStandard !== null;
     }

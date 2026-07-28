@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  *
  * Creates aspect-level assessment records
  *
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\AspectAssessment>
+ * @extends Factory<AspectAssessment>
  */
 class AspectAssessmentFactory extends Factory
 {

@@ -18,10 +18,11 @@ use App\Models\PositionFormation;
 use App\Models\SubAspect;
 use App\Models\SubAspectAssessment;
 use App\Models\User;
+use App\Services\Cache\AspectCacheService;
 use App\Services\ConclusionService;
 use App\Services\CustomStandardService;
 use App\Services\DynamicStandardService;
-use App\Services\Cache\AspectCacheService;
+use App\Services\RankingService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use PHPUnit\Framework\Attributes\Test;
@@ -1350,7 +1351,7 @@ class RankingPsyMappingTest extends TestCase
         $firstRanking = $rankings->first();
 
         // Get same participant data from RankingService directly
-        $rankingService = app(\App\Services\RankingService::class);
+        $rankingService = app(RankingService::class);
         $directRankings = $rankingService->getRankings(
             $this->event->id,
             $this->position->id,
@@ -1418,7 +1419,7 @@ class RankingPsyMappingTest extends TestCase
         $firstRanking = $rankings->first();
 
         // Get same data from RankingService directly
-        $rankingService = app(\App\Services\RankingService::class);
+        $rankingService = app(RankingService::class);
         $directRankings = $rankingService->getRankings(
             $this->event->id,
             $this->position->id,

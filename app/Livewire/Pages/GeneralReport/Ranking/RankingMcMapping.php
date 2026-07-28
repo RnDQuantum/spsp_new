@@ -3,8 +3,8 @@
 namespace App\Livewire\Pages\GeneralReport\Ranking;
 
 use App\Models\AssessmentEvent;
-use App\Services\ConclusionService;
 use App\Models\Participant;
+use App\Services\ConclusionService;
 use App\Services\RankingService;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;

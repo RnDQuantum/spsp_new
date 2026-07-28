@@ -82,7 +82,7 @@ class Index extends Component
                         'categories' => function ($cq) {
                             $cq->select('institution_categories.id', 'institution_categories.code', 'institution_categories.name')
                                 ->orderByDesc('category_institution.is_primary');
-                        }
+                        },
                     ]);
             },
         ])->withCount(['batches', 'participants']);

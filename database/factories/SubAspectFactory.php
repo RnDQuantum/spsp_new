@@ -3,10 +3,11 @@
 namespace Database\Factories;
 
 use App\Models\Aspect;
+use App\Models\SubAspect;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\SubAspect>
+ * @extends Factory<SubAspect>
  */
 class SubAspectFactory extends Factory
 {

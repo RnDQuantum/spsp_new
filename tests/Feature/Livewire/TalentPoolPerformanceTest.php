@@ -2,9 +2,11 @@
 
 namespace Tests\Feature\Livewire;
 
-use App\Models\AssessmentEvent;
+use App\Livewire\Pages\GeneralReport\TalentPool\Index;
 use App\Models\Aspect;
 use App\Models\AspectAssessment;
+use App\Models\AssessmentEvent;
+use App\Models\CategoryAssessment;
 use App\Models\CategoryType;
 use App\Models\Participant;
 use App\Models\PositionFormation;
@@ -16,7 +18,7 @@ use Tests\TestCase;
 
 /**
  * 🚀 Performance Testing for Talent Pool Optimization
- * 
+ *
  * This test validates the performance improvements implemented
  * for handling large datasets (5000+ participants)
  */
@@ -25,7 +27,9 @@ class TalentPoolPerformanceTest extends TestCase
     use RefreshDatabase;
 
     private AssessmentEvent $event;
+
     private PositionFormation $position;
+
     private TalentPoolService $service;
 
     protected function setUp(): void
@@ -61,7 +65,7 @@ class TalentPoolPerformanceTest extends TestCase
         $this->assertLessThan(
             2.0,
             $executionTime,
-            'Query should complete within 2 seconds, but took ' . $executionTime . ' seconds'
+            'Query should complete within 2 seconds, but took '.$executionTime.' seconds'
         );
 
         // Verify data integrity
@@ -112,7 +116,7 @@ class TalentPoolPerformanceTest extends TestCase
         $this->assertLessThan(
             0.1,
             $secondLoadTime,
-            'Cached load should complete within 100ms, but took ' . ($secondLoadTime * 1000) . 'ms'
+            'Cached load should complete within 100ms, but took '.($secondLoadTime * 1000).'ms'
         );
     }
 
@@ -126,7 +130,7 @@ class TalentPoolPerformanceTest extends TestCase
 
         $startTime = microtime(true);
 
-        $component = Livewire::test(\App\Livewire\Pages\GeneralReport\TalentPool\Index::class)
+        $component = Livewire::test(Index::class)
             ->set('selectedEvent', $this->event)
             ->set('selectedPositionId', $this->position->id);
 
@@ -136,7 +140,7 @@ class TalentPoolPerformanceTest extends TestCase
         $this->assertLessThan(
             3.0,
             $renderTime,
-            'Component should render within 3 seconds, but took ' . $renderTime . ' seconds'
+            'Component should render within 3 seconds, but took '.$renderTime.' seconds'
         );
 
         // Verify component state and data is loaded
@@ -153,12 +157,12 @@ class TalentPoolPerformanceTest extends TestCase
         // Create additional position
         $position2 = PositionFormation::factory()->create([
             'event_id' => $this->event->id,
-            'template_id' => $this->position->template_id
+            'template_id' => $this->position->template_id,
         ]);
 
         Cache::flush();
 
-        $component = Livewire::test(\App\Livewire\Pages\GeneralReport\TalentPool\Index::class)
+        $component = Livewire::test(Index::class)
             ->set('selectedEvent', $this->event);
 
         // Test position change performance
@@ -172,7 +176,7 @@ class TalentPoolPerformanceTest extends TestCase
         $this->assertLessThan(
             2.0,
             $positionChangeTime,
-            'Position change should complete within 2 seconds, but took ' . $positionChangeTime . ' seconds'
+            'Position change should complete within 2 seconds, but took '.$positionChangeTime.' seconds'
         );
 
         // Test rapid position changes (debouncing)
@@ -300,29 +304,29 @@ class TalentPoolPerformanceTest extends TestCase
 
         // Create position formation
         $this->position = PositionFormation::factory()->create([
-            'event_id' => $this->event->id
+            'event_id' => $this->event->id,
         ]);
 
         // Create category types
         $potensiCategory = CategoryType::factory()->create([
             'template_id' => $this->position->template_id,
-            'code' => 'potensi'
+            'code' => 'potensi',
         ]);
 
         $kompetensiCategory = CategoryType::factory()->create([
             'template_id' => $this->position->template_id,
-            'code' => 'kompetensi'
+            'code' => 'kompetensi',
         ]);
 
         // Create aspects for each category
         $potensiAspects = Aspect::factory()->count(5)->create([
             'template_id' => $this->position->template_id,
-            'category_type_id' => $potensiCategory->id
+            'category_type_id' => $potensiCategory->id,
         ]);
 
         $kompetensiAspects = Aspect::factory()->count(5)->create([
             'template_id' => $this->position->template_id,
-            'category_type_id' => $kompetensiCategory->id
+            'category_type_id' => $kompetensiCategory->id,
         ]);
 
         // Create participants
@@ -333,14 +337,14 @@ class TalentPoolPerformanceTest extends TestCase
 
         // Create aspect assessments for each participant
         foreach ($participants as $participant) {
-            $potensiCatAss = \App\Models\CategoryAssessment::factory()->create([
+            $potensiCatAss = CategoryAssessment::factory()->create([
                 'participant_id' => $participant->id,
                 'category_type_id' => $potensiCategory->id,
                 'event_id' => $this->event->id,
                 'position_formation_id' => $this->position->id,
             ]);
 
-            $kompetensiCatAss = \App\Models\CategoryAssessment::factory()->create([
+            $kompetensiCatAss = CategoryAssessment::factory()->create([
                 'participant_id' => $participant->id,
                 'category_type_id' => $kompetensiCategory->id,
                 'event_id' => $this->event->id,
@@ -355,7 +359,7 @@ class TalentPoolPerformanceTest extends TestCase
                     'aspect_id' => $aspect->id,
                     'event_id' => $this->event->id,
                     'position_formation_id' => $this->position->id,
-                    'individual_rating' => rand(1, 5) // Random rating for testing
+                    'individual_rating' => rand(1, 5), // Random rating for testing
                 ]);
             }
 
@@ -367,7 +371,7 @@ class TalentPoolPerformanceTest extends TestCase
                     'aspect_id' => $aspect->id,
                     'event_id' => $this->event->id,
                     'position_formation_id' => $this->position->id,
-                    'individual_rating' => rand(1, 5) // Random rating for testing
+                    'individual_rating' => rand(1, 5), // Random rating for testing
                 ]);
             }
         }

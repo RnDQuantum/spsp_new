@@ -509,7 +509,7 @@ class MasterDataSeeder extends Seeder
             // Find aspect in library
             $libraryAspect = collect($library)->firstWhere('code', $code);
 
-            if (!$libraryAspect) {
+            if (! $libraryAspect) {
                 continue;
             }
 

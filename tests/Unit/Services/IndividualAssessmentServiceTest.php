@@ -15,8 +15,14 @@ use App\Models\Participant;
 use App\Models\PositionFormation;
 use App\Models\SubAspect;
 use App\Models\SubAspectAssessment;
+use App\Services\Cache\AspectCacheService;
+use App\Services\CustomStandardService;
+use App\Services\DynamicStandardService;
 use App\Services\IndividualAssessmentService;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Session;
 use Tests\TestCase;
 
 /**
@@ -37,7 +43,7 @@ use Tests\TestCase;
  *
  * TOTAL: 73/73 tests (100% COMPLETE ✅)
  *
- * @see \App\Services\IndividualAssessmentService
+ * @see IndividualAssessmentService
  * @see docs/TESTING_STRATEGY.md
  * @see docs/ASSESSMENT_CALCULATION_FLOW.md
  * @see docs/FLEXIBLE_HIERARCHY_REFACTORING.md
@@ -51,7 +57,7 @@ class IndividualAssessmentServiceTest extends TestCase
         parent::setUp();
 
         // Clear cache between tests to prevent interference
-        \App\Services\Cache\AspectCacheService::clearCache();
+        AspectCacheService::clearCache();
     }
 
     // ========================================
@@ -716,7 +722,7 @@ class IndividualAssessmentServiceTest extends TestCase
         $testData = $this->createCategoryWithMultipleAspects();
 
         // Set category weight to 60% (default is 50%)
-        $standardService = app(\App\Services\DynamicStandardService::class);
+        $standardService = app(DynamicStandardService::class);
         $standardService->saveCategoryWeight($testData['template']->id, 'kompetensi', 60);
 
         // Act: Get category assessment
@@ -749,7 +755,7 @@ class IndividualAssessmentServiceTest extends TestCase
         $testData = $this->createCategoryWithMultipleAspects();
 
         // Set aspect 2 as inactive
-        $standardService = app(\App\Services\DynamicStandardService::class);
+        $standardService = app(DynamicStandardService::class);
         $standardService->setAspectActive(
             $testData['template']->id,
             $testData['aspects'][1]->code,
@@ -945,7 +951,7 @@ class IndividualAssessmentServiceTest extends TestCase
         $this->assertIsNumeric($result['total_standard_score']);
         $this->assertIsNumeric($result['total_individual_score']);
         $this->assertIsString($result['overall_conclusion']);
-        $this->assertInstanceOf(\Illuminate\Support\Collection::class, $result['aspects']);
+        $this->assertInstanceOf(Collection::class, $result['aspects']);
     }
 
     /**
@@ -1042,7 +1048,7 @@ class IndividualAssessmentServiceTest extends TestCase
         $testData = $this->createCategoryWithMultipleAspects();
 
         // Set category weight to 60%
-        $standardService = app(\App\Services\DynamicStandardService::class);
+        $standardService = app(DynamicStandardService::class);
         $standardService->saveCategoryWeight($testData['template']->id, 'kompetensi', 60);
 
         // Act
@@ -1072,7 +1078,7 @@ class IndividualAssessmentServiceTest extends TestCase
         $testData = $this->createCompleteAssessmentData();
 
         // Act & Assert: Should throw ModelNotFoundException
-        $this->expectException(\Illuminate\Database\Eloquent\ModelNotFoundException::class);
+        $this->expectException(ModelNotFoundException::class);
 
         $service = app(IndividualAssessmentService::class);
         $service->getCategoryAssessment(
@@ -1179,7 +1185,7 @@ class IndividualAssessmentServiceTest extends TestCase
         $testData = $this->createCompleteAssessmentWithBothCategories();
 
         // Set category weights: Potensi 40%, Kompetensi 60%
-        $standardService = app(\App\Services\DynamicStandardService::class);
+        $standardService = app(DynamicStandardService::class);
         $standardService->saveCategoryWeight($testData['template']->id, 'potensi', 40);
         $standardService->saveCategoryWeight($testData['template']->id, 'kompetensi', 60);
 
@@ -1773,7 +1779,7 @@ class IndividualAssessmentServiceTest extends TestCase
         );
 
         // Assert: Should return collection
-        $this->assertInstanceOf(\Illuminate\Support\Collection::class, $result);
+        $this->assertInstanceOf(Collection::class, $result);
         $this->assertGreaterThan(0, $result->count());
 
         // First item should have matching data
@@ -1903,7 +1909,7 @@ class IndividualAssessmentServiceTest extends TestCase
         $testData = $this->createAssessmentWithSubAspects();
 
         // Set one sub-aspect as inactive
-        $standardService = app(\App\Services\DynamicStandardService::class);
+        $standardService = app(DynamicStandardService::class);
         $standardService->setSubAspectActive(
             $testData['template']->id,
             $testData['subAspects'][1]->code, // sub_kecerdasan_numerik
@@ -2950,7 +2956,7 @@ class IndividualAssessmentServiceTest extends TestCase
         )->first();
 
         // Apply session adjustment (increase aspect weight from 20% to 40%)
-        $dynamicService = app(\App\Services\DynamicStandardService::class);
+        $dynamicService = app(DynamicStandardService::class);
         $dynamicService->saveAspectWeight($testData['template']->id, $aspect->code, 40);
 
         // Act: Get assessment with session adjustment active
@@ -2993,7 +2999,7 @@ class IndividualAssessmentServiceTest extends TestCase
         )->first();
 
         // Create and select custom standard with different weight (35%)
-        $customStandardService = app(\App\Services\CustomStandardService::class);
+        $customStandardService = app(CustomStandardService::class);
         $customStandardData = [
             'institution_id' => $testData['institution']->id,
             'template_id' => $testData['template']->id,
@@ -3051,7 +3057,7 @@ class IndividualAssessmentServiceTest extends TestCase
         $aspect = $testData['aspect'];
 
         // Create and select custom standard with weight 35%
-        $customStandardService = app(\App\Services\CustomStandardService::class);
+        $customStandardService = app(CustomStandardService::class);
         $customStandardData = [
             'institution_id' => $testData['institution']->id,
             'template_id' => $testData['template']->id,
@@ -3083,7 +3089,7 @@ class IndividualAssessmentServiceTest extends TestCase
         )->first();
 
         // Apply session adjustment (weight = 45%)
-        $dynamicService = app(\App\Services\DynamicStandardService::class);
+        $dynamicService = app(DynamicStandardService::class);
         $dynamicService->saveAspectWeight($testData['template']->id, $aspect->code, 45);
 
         // Act: Get assessment with both custom (35%) and session (45%) active
@@ -3121,10 +3127,10 @@ class IndividualAssessmentServiceTest extends TestCase
         $aspect = $testData['aspect'];
 
         // Ensure no session adjustments (clear session key)
-        \Illuminate\Support\Facades\Session::forget("dynamic_standard.{$testData['template']->id}");
+        Session::forget("dynamic_standard.{$testData['template']->id}");
 
         // Ensure no custom standard selected (clear custom standard session)
-        \Illuminate\Support\Facades\Session::forget("selected_standard.{$testData['template']->id}");
+        Session::forget("selected_standard.{$testData['template']->id}");
 
         // Act: Get assessment (should use quantum defaults)
         $service = app(IndividualAssessmentService::class);

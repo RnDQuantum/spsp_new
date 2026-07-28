@@ -2,13 +2,13 @@
 
 namespace Database\Factories;
 
+use App\Models\AssessmentTemplate;
 use App\Models\CustomStandard;
 use App\Models\Institution;
-use App\Models\AssessmentTemplate;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\CustomStandard>
+ * @extends Factory<CustomStandard>
  */
 class CustomStandardFactory extends Factory
 {

@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Models\TestResult;
-use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 
 class TestResultImportService
@@ -12,17 +12,20 @@ class TestResultImportService
      * Hasil import untuk tracking/reporting.
      */
     protected int $imported = 0;
+
     protected int $skipped = 0;
+
     protected int $failed = 0;
+
     protected array $errors = [];
 
     /**
      * Import semua tes milik satu peserta dari response API Quantum.
      *
-     * @param  int    $participantId  ID peserta di tabel `participants`
-     * @param  int    $eventId        ID event di tabel `assessment_events`
-     * @param  array  $tesData        Data tes dari API: ["A.1" => {...}, "B.2" => {...}, ...]
-     * @return array  Ringkasan hasil import
+     * @param  int  $participantId  ID peserta di tabel `participants`
+     * @param  int  $eventId  ID event di tabel `assessment_events`
+     * @param  array  $tesData  Data tes dari API: ["A.1" => {...}, "B.2" => {...}, ...]
+     * @return array Ringkasan hasil import
      */
     public function importParticipantTests(int $participantId, int $eventId, array $tesData): array
     {
@@ -57,12 +60,14 @@ class TestResultImportService
         // Skip alat tes yang dikecualikan (MMPI)
         if (TestResult::isExcluded($testCode)) {
             $this->skipped++;
+
             return;
         }
 
         // Skip jika data kosong (hanya berisi nama_alat_tes / status saja)
         if ($this->isDataEmpty($testData)) {
             $this->skipped++;
+
             return;
         }
 
@@ -100,14 +105,14 @@ class TestResultImportService
     {
         return match ($testCode) {
             'A.1', 'A.2' => $this->parseCFIT($testData),
-            'A.5'        => $this->parseIST($testData),
-            'B.1'        => $this->parseKompetensiKarakter($testData),
-            'B.2'        => $this->parse16PF($testData),
-            'D.2'        => $this->parseKraeplin($testData),
-            'F.1'        => $this->parseEQ($testData),
-            'G.1'        => $this->parseBehaviorTendencies($testData),
-            'H.1'        => $this->parseRMIB($testData),
-            default      => $this->parseGeneric($testData),
+            'A.5' => $this->parseIST($testData),
+            'B.1' => $this->parseKompetensiKarakter($testData),
+            'B.2' => $this->parse16PF($testData),
+            'D.2' => $this->parseKraeplin($testData),
+            'F.1' => $this->parseEQ($testData),
+            'G.1' => $this->parseBehaviorTendencies($testData),
+            'H.1' => $this->parseRMIB($testData),
+            default => $this->parseGeneric($testData),
         };
     }
 
@@ -193,7 +198,7 @@ class TestResultImportService
                 'hasil' => $hasilFields,
                 'labels_aspek' => $data['labels_aspek'] ?? null,
             ],
-            'interpretation_data' => !empty($narasiFields) ? $narasiFields : null,
+            'interpretation_data' => ! empty($narasiFields) ? $narasiFields : null,
             'raw_response' => $this->cleanRaw($data),
         ];
     }
@@ -243,8 +248,8 @@ class TestResultImportService
 
         // Tambah statistik ringkas jika ada
         foreach (['skor_jalur', 'jumlah_X', 'jumlah_XX', 'jumlah_Y', 'jumlah_XY',
-                   'MAX_benar', 'MIN_benar', 'jumlah_salah', 'jumlah_terloncati',
-                   'skor_b', 'skor_a', 'skor_X45', 'skor_X0'] as $field) {
+            'MAX_benar', 'MIN_benar', 'jumlah_salah', 'jumlah_terloncati',
+            'skor_b', 'skor_a', 'skor_X45', 'skor_X0'] as $field) {
             if (isset($data[$field])) {
                 $summary[$field] = $data[$field];
             }
@@ -352,15 +357,15 @@ class TestResultImportService
             $interpretation['saran_pengembangan'] = $data['SARAN_PENGEMBANGAN'];
         }
 
-        return !empty($interpretation) ? $interpretation : null;
+        return ! empty($interpretation) ? $interpretation : null;
     }
 
     /**
      * Bersihkan response untuk penyimpanan raw.
      * Hapus field administratif yang tidak perlu disimpan 2x.
      *
-     * @param  array    $data     Response data
-     * @param  array    $exclude  Field tambahan yang perlu dikecualikan
+     * @param  array  $data  Response data
+     * @param  array  $exclude  Field tambahan yang perlu dikecualikan
      */
     protected function cleanRaw(array $data, array $exclude = []): array
     {
@@ -401,7 +406,7 @@ class TestResultImportService
         }
 
         try {
-            return \Carbon\Carbon::parse($timestamp)->toDateTimeString();
+            return Carbon::parse($timestamp)->toDateTimeString();
         } catch (\Throwable) {
             return null;
         }

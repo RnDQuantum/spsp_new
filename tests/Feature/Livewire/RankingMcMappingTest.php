@@ -16,10 +16,11 @@ use App\Models\Institution;
 use App\Models\Participant;
 use App\Models\PositionFormation;
 use App\Models\User;
+use App\Services\Cache\AspectCacheService;
 use App\Services\ConclusionService;
 use App\Services\CustomStandardService;
 use App\Services\DynamicStandardService;
-use App\Services\Cache\AspectCacheService;
+use App\Services\RankingService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use PHPUnit\Framework\Attributes\Test;
@@ -912,6 +913,7 @@ class RankingMcMappingTest extends TestCase
         if ($rankings === null || (is_object($rankings) && $rankings->isEmpty())) {
             // This is expected behavior when all aspects are inactive
             $this->assertTrue(true, 'Component handled all aspects inactive case correctly');
+
             return;
         }
 
@@ -1047,6 +1049,7 @@ class RankingMcMappingTest extends TestCase
         if ($rankings2 === null || (is_object($rankings2) && $rankings2->isEmpty())) {
             // This is expected behavior when all aspects are inactive
             $this->assertTrue(true, 'Component handled all aspects inactive case correctly');
+
             return;
         }
 
@@ -1286,7 +1289,7 @@ class RankingMcMappingTest extends TestCase
         $firstRanking = $rankings->first();
 
         // Get same participant data from RankingService directly
-        $rankingService = app(\App\Services\RankingService::class);
+        $rankingService = app(RankingService::class);
         $directRankings = $rankingService->getRankings(
             $this->event->id,
             $this->position->id,
@@ -1354,6 +1357,7 @@ class RankingMcMappingTest extends TestCase
         if ($rankings === null || (is_object($rankings) && $rankings->isEmpty())) {
             // This is expected behavior when all aspects are inactive
             $this->assertTrue(true, 'Component handled all aspects inactive case correctly');
+
             return;
         }
 
@@ -1362,7 +1366,7 @@ class RankingMcMappingTest extends TestCase
         $firstRanking = $rankings->first();
 
         // Get same data from RankingService directly
-        $rankingService = app(\App\Services\RankingService::class);
+        $rankingService = app(RankingService::class);
         $directRankings = $rankingService->getRankings(
             $this->event->id,
             $this->position->id,

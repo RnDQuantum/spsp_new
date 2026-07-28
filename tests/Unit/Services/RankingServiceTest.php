@@ -9,15 +9,21 @@ use App\Models\AspectAssessment;
 use App\Models\AssessmentEvent;
 use App\Models\AssessmentTemplate;
 use App\Models\Batch;
+use App\Models\CategoryAssessment;
 use App\Models\CategoryType;
 use App\Models\Institution;
 use App\Models\Participant;
 use App\Models\PositionFormation;
 use App\Models\SubAspect;
 use App\Models\SubAspectAssessment;
+use App\Services\Cache\AspectCacheService;
+use App\Services\CustomStandardService;
 use App\Services\DynamicStandardService;
 use App\Services\RankingService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Session;
 use Tests\TestCase;
 
 /**
@@ -37,7 +43,7 @@ use Tests\TestCase;
  *
  * TOTAL: 60/60 tests (100% complete ✅)
  *
- * @see \App\Services\RankingService
+ * @see RankingService
  * @see docs/TESTING_GUIDE.md
  * @see docs/RANKING_TEST_STRATEGY.md
  * @see docs/DATABASE_STRUCTURE.md
@@ -96,7 +102,7 @@ class RankingServiceTest extends TestCase
 
         // Clear any session adjustments and cache from previous tests
         session()->flush();
-        \App\Services\Cache\AspectCacheService::clearCache();
+        AspectCacheService::clearCache();
     }
 
     /**
@@ -231,7 +237,7 @@ class RankingServiceTest extends TestCase
             : $this->kompetensiCategory->id;
 
         // Create CategoryAssessment first (required for AspectAssessment)
-        $categoryAssessment = \App\Models\CategoryAssessment::factory()->create([
+        $categoryAssessment = CategoryAssessment::factory()->create([
             'participant_id' => $participant->id,
             'event_id' => $this->event->id,
             'batch_id' => $participant->batch_id,
@@ -379,7 +385,7 @@ class RankingServiceTest extends TestCase
         );
 
         // Assert
-        $this->assertInstanceOf(\Illuminate\Support\Collection::class, $rankings);
+        $this->assertInstanceOf(Collection::class, $rankings);
         $this->assertCount(0, $rankings);
     }
 
@@ -406,7 +412,7 @@ class RankingServiceTest extends TestCase
         );
 
         // Assert
-        $this->assertInstanceOf(\Illuminate\Support\Collection::class, $rankings);
+        $this->assertInstanceOf(Collection::class, $rankings);
         $this->assertCount(0, $rankings);
     }
 
@@ -1102,7 +1108,7 @@ class RankingServiceTest extends TestCase
     public function test_uses_custom_standard_when_selected(): void
     {
         // Arrange: Create custom standard with different weights
-        $customStandardService = app(\App\Services\CustomStandardService::class);
+        $customStandardService = app(CustomStandardService::class);
 
         // Create custom standard data with different aspect weight
         $firstAspect = Aspect::where('category_type_id', $this->potensiCategory->id)
@@ -1258,7 +1264,7 @@ class RankingServiceTest extends TestCase
         );
 
         // Assert: Should return empty collection
-        $this->assertInstanceOf(\Illuminate\Support\Collection::class, $rankings);
+        $this->assertInstanceOf(Collection::class, $rankings);
         $this->assertCount(0, $rankings);
     }
 
@@ -1283,7 +1289,7 @@ class RankingServiceTest extends TestCase
         );
 
         // Assert: Should return empty collection
-        $this->assertInstanceOf(\Illuminate\Support\Collection::class, $rankings);
+        $this->assertInstanceOf(Collection::class, $rankings);
         $this->assertCount(0, $rankings);
     }
 
@@ -1370,7 +1376,7 @@ class RankingServiceTest extends TestCase
         );
 
         // Assert: Should handle gracefully
-        $this->assertInstanceOf(\Illuminate\Support\Collection::class, $rankings);
+        $this->assertInstanceOf(Collection::class, $rankings);
         $this->assertGreaterThan(0, $rankings->count());
 
         // Check that weights are reflected correctly
@@ -1610,7 +1616,7 @@ class RankingServiceTest extends TestCase
         $baselineRank = $baselineRankings->first();
 
         // LAYER 2: Create and select custom standard with different weight (40%)
-        $customStandardService = app(\App\Services\CustomStandardService::class);
+        $customStandardService = app(CustomStandardService::class);
         $firstAspect = Aspect::where('category_type_id', $this->potensiCategory->id)
             ->orderBy('order')
             ->first();
@@ -1682,7 +1688,7 @@ class RankingServiceTest extends TestCase
         );
 
         // Cleanup
-        \Illuminate\Support\Facades\Session::forget("standard_adjustment.{$this->template->id}");
+        Session::forget("standard_adjustment.{$this->template->id}");
         $customStandardService->clearSelection($this->template->id);
     }
 
@@ -1709,7 +1715,7 @@ class RankingServiceTest extends TestCase
         );
 
         // LAYER 2: Create custom standard with modified weights
-        $customStandardService = app(\App\Services\CustomStandardService::class);
+        $customStandardService = app(CustomStandardService::class);
         $aspects = Aspect::where('category_type_id', $this->potensiCategory->id)
             ->orderBy('order')
             ->get();
@@ -1779,7 +1785,7 @@ class RankingServiceTest extends TestCase
         $participant = $this->createParticipantWithAssessments('Test Revert', 1.0);
 
         // LAYER 2: Create and select custom standard
-        $customStandardService = app(\App\Services\CustomStandardService::class);
+        $customStandardService = app(CustomStandardService::class);
         $firstAspect = Aspect::where('category_type_id', $this->potensiCategory->id)
             ->orderBy('order')
             ->first();
@@ -1831,10 +1837,10 @@ class RankingServiceTest extends TestCase
         $sessionRank = $sessionRankings->first();
 
         // Clear session (revert to Layer 2)
-        \Illuminate\Support\Facades\Session::forget("standard_adjustment.{$this->template->id}");
+        Session::forget("standard_adjustment.{$this->template->id}");
 
         // IMPORTANT: Clear aspect cache to force DynamicStandardService to re-read session
-        \App\Services\Cache\AspectCacheService::clearCache();
+        AspectCacheService::clearCache();
 
         // Get reverted rankings
         $revertedRankings = $this->service->getRankings(
@@ -1951,7 +1957,7 @@ class RankingServiceTest extends TestCase
         );
 
         // Act 3: Select custom standard
-        $customStandardService = app(\App\Services\CustomStandardService::class);
+        $customStandardService = app(CustomStandardService::class);
         $customStandardData = [
             'institution_id' => $this->event->institution_id,
             'template_id' => $this->template->id,
@@ -1985,7 +1991,7 @@ class RankingServiceTest extends TestCase
         );
 
         // Cleanup
-        \Illuminate\Support\Facades\Session::forget("standard_adjustment.{$this->template->id}");
+        Session::forget("standard_adjustment.{$this->template->id}");
         $customStandardService->clearSelection($this->template->id);
     }
 
@@ -2038,7 +2044,7 @@ class RankingServiceTest extends TestCase
         $dynamicService->setSubAspectActive($this->template->id, $firstSubAspect->code, false);
 
         // Clear cache to force recalculation
-        \App\Services\Cache\AspectCacheService::clearCache();
+        AspectCacheService::clearCache();
 
         // Get rankings with disabled sub-aspect
         $adjustedRankings = $this->service->getRankings(
@@ -2082,7 +2088,7 @@ class RankingServiceTest extends TestCase
         );
 
         // Cleanup
-        \Illuminate\Support\Facades\Session::forget("standard_adjustment.{$this->template->id}");
+        Session::forget("standard_adjustment.{$this->template->id}");
     }
 
     /**
@@ -2126,7 +2132,7 @@ class RankingServiceTest extends TestCase
         $dynamicService->setSubAspectActive($this->template->id, $firstSubAspect->code, false);
 
         // Clear cache
-        \App\Services\Cache\AspectCacheService::clearCache();
+        AspectCacheService::clearCache();
 
         // Get rankings with disabled sub-aspect
         $adjustedRankings = $this->service->getRankings(
@@ -2166,7 +2172,7 @@ class RankingServiceTest extends TestCase
         $this->assertEquals($sortedScores, $scores, 'Rankings should be properly ordered');
 
         // Cleanup
-        \Illuminate\Support\Facades\Session::forget("standard_adjustment.{$this->template->id}");
+        Session::forget("standard_adjustment.{$this->template->id}");
     }
 
     // ========================================
@@ -2211,7 +2217,7 @@ class RankingServiceTest extends TestCase
         $dynamicService->setSubAspectActive($this->template->id, $firstSubAspect->code, false);
 
         // Clear cache to force recalculation
-        \App\Services\Cache\AspectCacheService::clearCache();
+        AspectCacheService::clearCache();
 
         // Act 3: Get rankings with disabled sub-aspect
         $rankings2 = $this->service->getRankings(
@@ -2237,7 +2243,7 @@ class RankingServiceTest extends TestCase
         );
 
         // Cleanup
-        \Illuminate\Support\Facades\Session::forget("standard_adjustment.{$this->template->id}");
+        Session::forget("standard_adjustment.{$this->template->id}");
     }
 
     /**
@@ -2270,7 +2276,7 @@ class RankingServiceTest extends TestCase
         $dynamicService->setAspectActive($this->template->id, $firstAspect->code, false);
 
         // Clear cache
-        \App\Services\Cache\AspectCacheService::clearCache();
+        AspectCacheService::clearCache();
 
         // Act 3: Get rankings with disabled aspect
         $rankings2 = $this->service->getRankings(
@@ -2290,7 +2296,7 @@ class RankingServiceTest extends TestCase
         );
 
         // Cleanup
-        \Illuminate\Support\Facades\Session::forget("standard_adjustment.{$this->template->id}");
+        Session::forget("standard_adjustment.{$this->template->id}");
     }
 
     /**
@@ -2325,8 +2331,8 @@ class RankingServiceTest extends TestCase
         $result1 = $rankings1->first();
 
         // SESSION 2: Clear session and apply different adjustment
-        \Illuminate\Support\Facades\Session::forget("standard_adjustment.{$this->template->id}");
-        \App\Services\Cache\AspectCacheService::clearCache();
+        Session::forget("standard_adjustment.{$this->template->id}");
+        AspectCacheService::clearCache();
 
         $dynamicService->saveAspectWeight($this->template->id, $firstAspect->code, 30);
 
@@ -2347,7 +2353,7 @@ class RankingServiceTest extends TestCase
         );
 
         // Cleanup
-        \Illuminate\Support\Facades\Session::forget("standard_adjustment.{$this->template->id}");
+        Session::forget("standard_adjustment.{$this->template->id}");
     }
 
     /**
@@ -2376,7 +2382,7 @@ class RankingServiceTest extends TestCase
         $result1 = $rankings1->first();
 
         // Act 2: Select custom standard
-        $customStandardService = app(\App\Services\CustomStandardService::class);
+        $customStandardService = app(CustomStandardService::class);
         $customStandardData = [
             'institution_id' => $this->event->institution_id,
             'template_id' => $this->template->id,
@@ -2393,7 +2399,7 @@ class RankingServiceTest extends TestCase
         $customStandardService->select($this->template->id, $customStandard->id);
 
         // Clear cache
-        \App\Services\Cache\AspectCacheService::clearCache();
+        AspectCacheService::clearCache();
 
         // Act 3: Get rankings with custom standard
         $rankings2 = $this->service->getRankings(
@@ -2446,8 +2452,8 @@ class RankingServiceTest extends TestCase
         );
 
         // Clear ALL caches (AspectCacheService + Laravel Cache)
-        \App\Services\Cache\AspectCacheService::clearCache();
-        \Illuminate\Support\Facades\Cache::flush();  // CRITICAL: Clear Laravel cache too!
+        AspectCacheService::clearCache();
+        Cache::flush();  // CRITICAL: Clear Laravel cache too!
 
         // Act 3: Get combined rankings with adjusted category weights
         $rankings2 = $this->service->getCombinedRankings(
@@ -2469,7 +2475,7 @@ class RankingServiceTest extends TestCase
         $this->assertEquals(30, $result2['kompetensi_weight']);
 
         // Cleanup
-        \Illuminate\Support\Facades\Session::forget("standard_adjustment.{$this->template->id}");
+        Session::forget("standard_adjustment.{$this->template->id}");
     }
 
     /**

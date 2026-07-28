@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class CategoryAssessment extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'participant_id',
         'event_id',

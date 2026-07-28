@@ -4,6 +4,7 @@ namespace App\Livewire\Pages;
 
 use App\Models\AssessmentEvent;
 use App\Models\Participant;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -115,7 +116,7 @@ class ParticipantsList extends Component
     public function participants()
     {
         if (! $this->readyToLoad) {
-            return new \Illuminate\Pagination\LengthAwarePaginator([], 0, $this->perPage);
+            return new LengthAwarePaginator([], 0, $this->perPage);
         }
 
         $query = Participant::with([
@@ -141,9 +142,9 @@ class ParticipantsList extends Component
         // Filter berdasarkan search (nama, NIP jika ada)
         if ($this->search) {
             $query->where(function ($q) {
-                $q->where('name', 'like', '%' . $this->search . '%')
-                    ->orWhere('test_number', 'like', '%' . $this->search . '%')
-                    ->orWhere('skb_number', 'like', '%' . $this->search . '%');
+                $q->where('name', 'like', '%'.$this->search.'%')
+                    ->orWhere('test_number', 'like', '%'.$this->search.'%')
+                    ->orWhere('skb_number', 'like', '%'.$this->search.'%');
             });
         }
 
@@ -174,7 +175,7 @@ class ParticipantsList extends Component
         if ($this->perPage === 0) {
             $results = $query->get();
 
-            return new \Illuminate\Pagination\LengthAwarePaginator(
+            return new LengthAwarePaginator(
                 $results,
                 $results->count(),
                 $results->count(),

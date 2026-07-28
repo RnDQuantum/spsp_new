@@ -8,8 +8,8 @@ use App\Models\Aspect;
 use App\Models\AspectAssessment;
 use App\Models\AssessmentEvent;
 use App\Models\AssessmentTemplate;
+use App\Models\CategoryAssessment;
 use App\Models\CategoryType;
-use App\Models\CustomStandard;
 use App\Models\Institution;
 use App\Models\Participant;
 use App\Models\PositionFormation;
@@ -20,7 +20,6 @@ use App\Services\DynamicStandardService;
 use App\Services\TalentPoolService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Session;
 use Tests\TestCase;
 
 /**
@@ -135,14 +134,14 @@ class AuditPhase2FixTest extends TestCase
         ]);
 
         // Create category assessments
-        $potensiCatAss = \App\Models\CategoryAssessment::factory()->create([
+        $potensiCatAss = CategoryAssessment::factory()->create([
             'participant_id' => $participant->id,
             'category_type_id' => $potensiCategory->id,
             'event_id' => $event->id,
             'position_formation_id' => $position->id,
         ]);
 
-        $kompetensiCatAss = \App\Models\CategoryAssessment::factory()->create([
+        $kompetensiCatAss = CategoryAssessment::factory()->create([
             'participant_id' => $participant->id,
             'category_type_id' => $kompetensiCategory->id,
             'event_id' => $event->id,
@@ -260,7 +259,7 @@ class AuditPhase2FixTest extends TestCase
             'position_formation_id' => $position->id,
         ]);
 
-        $potensiCatAss = \App\Models\CategoryAssessment::factory()->create([
+        $potensiCatAss = CategoryAssessment::factory()->create([
             'participant_id' => $participant->id,
             'category_type_id' => $potensiCategory->id,
             'event_id' => $event->id,
@@ -272,7 +271,7 @@ class AuditPhase2FixTest extends TestCase
             'template_id' => $template->id,
             'code' => 'kompetensi',
         ]);
-        $kompetensiCatAss = \App\Models\CategoryAssessment::factory()->create([
+        $kompetensiCatAss = CategoryAssessment::factory()->create([
             'participant_id' => $participant->id,
             'category_type_id' => $kompetensiCategory->id,
             'event_id' => $event->id,

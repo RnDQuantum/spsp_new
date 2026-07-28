@@ -16,10 +16,13 @@ use App\Models\Participant;
 use App\Models\PositionFormation;
 use App\Models\SubAspect;
 use App\Models\SubAspectAssessment;
+use App\Services\Cache\AspectCacheService;
+use App\Services\CustomStandardService;
 use App\Services\DynamicStandardService;
 use App\Services\IndividualAssessmentService;
 use App\Services\RankingService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Session;
 use Tests\TestCase;
 
 /**
@@ -96,7 +99,7 @@ class CrossServiceConsistencyTest extends TestCase
 
         // Clear cache and session
         session()->flush();
-        \App\Services\Cache\AspectCacheService::clearCache();
+        AspectCacheService::clearCache();
     }
 
     /**
@@ -431,7 +434,7 @@ class CrossServiceConsistencyTest extends TestCase
         $dynamicService->setSubAspectActive($this->template->id, $firstSubAspect->code, false);
 
         // Clear cache
-        \App\Services\Cache\AspectCacheService::clearCache();
+        AspectCacheService::clearCache();
 
         // Act 1: Get data from RankingService
         $rankings = $this->rankingService->getRankings(
@@ -475,7 +478,7 @@ class CrossServiceConsistencyTest extends TestCase
         );
 
         // Cleanup
-        \Illuminate\Support\Facades\Session::forget("standard_adjustment.{$this->template->id}");
+        Session::forget("standard_adjustment.{$this->template->id}");
     }
 
     /**
@@ -497,7 +500,7 @@ class CrossServiceConsistencyTest extends TestCase
         $dynamicService->saveAspectWeight($this->template->id, $firstAspect->code, 50);
 
         // Clear cache
-        \App\Services\Cache\AspectCacheService::clearCache();
+        AspectCacheService::clearCache();
 
         // Act 1: Get data from RankingService
         $rankings = $this->rankingService->getRankings(
@@ -530,7 +533,7 @@ class CrossServiceConsistencyTest extends TestCase
         );
 
         // Cleanup
-        \Illuminate\Support\Facades\Session::forget("standard_adjustment.{$this->template->id}");
+        Session::forget("standard_adjustment.{$this->template->id}");
     }
 
     /**
@@ -544,7 +547,7 @@ class CrossServiceConsistencyTest extends TestCase
         $participant = $this->createParticipantWithAssessments('Test Custom Consistency', 1.0);
 
         // Select custom standard
-        $customStandardService = app(\App\Services\CustomStandardService::class);
+        $customStandardService = app(CustomStandardService::class);
         $firstAspect = Aspect::where('category_type_id', $this->potensiCategory->id)
             ->orderBy('order')
             ->first();
@@ -566,7 +569,7 @@ class CrossServiceConsistencyTest extends TestCase
         $customStandardService->select($this->template->id, $customStandard->id);
 
         // Clear cache
-        \App\Services\Cache\AspectCacheService::clearCache();
+        AspectCacheService::clearCache();
 
         // Act 1: Get data from RankingService
         $rankings = $this->rankingService->getRankings(

@@ -10,6 +10,7 @@ use App\Models\CategoryAssessment;
 use App\Models\SubAspectAssessment;
 use App\Services\Cache\AspectCacheService;
 use App\Services\DynamicStandardService;
+use Illuminate\Support\Collection;
 
 class AspectService
 {
@@ -29,7 +30,7 @@ class AspectService
      * - Save to database
      *
      * @param  float|int|null  $individualRating  From API for aspects without sub-aspects
-     * @param  \Illuminate\Support\Collection|null  $subAssessments  Pre-loaded sub-assessments (for performance)
+     * @param  Collection|null  $subAssessments  Pre-loaded sub-assessments (for performance)
      */
     public function calculateAspect(AspectAssessment $aspectAssessment, $individualRating = null, $subAssessments = null): void
     {

@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  *
  * Creates sub-aspect level assessment records (for Potensi aspects)
  *
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\SubAspectAssessment>
+ * @extends Factory<SubAspectAssessment>
  */
 class SubAspectAssessmentFactory extends Factory
 {

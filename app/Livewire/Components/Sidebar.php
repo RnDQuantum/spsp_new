@@ -156,6 +156,7 @@ class Sidebar extends Component
     public function getMenuItemsProperty(): array
     {
         $rawMenu = config('sidebar-menu', []);
+
         return $this->processMenuItems($rawMenu);
     }
 
@@ -169,7 +170,7 @@ class Sidebar extends Component
         foreach ($items as $key => $item) {
             // 1. Role Check
             if (isset($item['role'])) {
-                if (!auth()->check() || !auth()->user()->hasRole($item['role'])) {
+                if (! auth()->check() || ! auth()->user()->hasRole($item['role'])) {
                     continue;
                 }
             }
@@ -177,6 +178,7 @@ class Sidebar extends Component
             // 2. Divider / Section types
             if (isset($item['type']) && in_array($item['type'], ['divider', 'section'])) {
                 $processed[$key] = $item;
+
                 continue;
             }
 
@@ -196,7 +198,7 @@ class Sidebar extends Component
                         break;
                     }
                 }
-                
+
                 // Also check if any wildcards defined
                 if (isset($item['active']) && request()->routeIs($item['active'])) {
                     $isActiveDropdown = true;
@@ -204,11 +206,12 @@ class Sidebar extends Component
 
                 $item['active'] = $isActiveDropdown ? ($item['active'] ?? 'true') : '';
                 $processed[$key] = $item;
+
                 continue;
             }
 
             // 4. Resolve URL and parameters for standard items
-            $isDisabled = $requiresParticipant && !$canShowReports;
+            $isDisabled = $requiresParticipant && ! $canShowReports;
             $item['disabled'] = $isDisabled;
 
             if ($isDisabled) {

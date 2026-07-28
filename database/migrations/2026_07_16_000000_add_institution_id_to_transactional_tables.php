@@ -2,8 +2,8 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
@@ -29,19 +29,19 @@ return new class extends Migration
         DB::table('batches')->update([
             'institution_id' => DB::table('assessment_events')
                 ->whereColumn('assessment_events.id', 'batches.event_id')
-                ->select('institution_id')
+                ->select('institution_id'),
         ]);
 
         DB::table('position_formations')->update([
             'institution_id' => DB::table('assessment_events')
                 ->whereColumn('assessment_events.id', 'position_formations.event_id')
-                ->select('institution_id')
+                ->select('institution_id'),
         ]);
 
         DB::table('participants')->update([
             'institution_id' => DB::table('assessment_events')
                 ->whereColumn('assessment_events.id', 'participants.event_id')
-                ->select('institution_id')
+                ->select('institution_id'),
         ]);
     }
 

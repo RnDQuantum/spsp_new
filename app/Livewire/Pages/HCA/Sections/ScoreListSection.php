@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Livewire\Pages\HCA\Sections;
 
-use Livewire\Component;
 use Illuminate\View\View;
+use Livewire\Component;
 
 class ScoreListSection extends Component
 {
@@ -27,7 +27,7 @@ class ScoreListSection extends Component
                 ['label' => 'Kompetensi Sosial Kultural', 'value' => 4.00, 'desc' => 'Kemampuan berinteraksi dengan latar belakang budaya dan nilai sosial.'],
                 ['label' => 'Kompetensi Digital', 'value' => 3.70, 'desc' => 'Pemanfaatan instrumen digital untuk meningkatkan produktivitas.'],
                 ['label' => 'Kompetensi Kepemimpinan', 'value' => 3.90, 'desc' => 'Kapasitas mengarahkan, memotivasi, dan mendelegasikan tanggung jawab.'],
-            ]
+            ],
         ],
         'cognitive' => [
             'title' => 'IQ & Profil Kognitif',
@@ -42,7 +42,7 @@ class ScoreListSection extends Component
                 ['label' => 'Verbal Comprehension', 'value' => 122, 'desc' => 'Pemahaman komprehensif atas logika bahasa dan teks tertulis.'],
                 ['label' => 'Abstract Logic', 'value' => 117, 'desc' => 'Kemampuan mengidentifikasi hubungan logis dalam bentuk non-verbal.'],
                 ['label' => 'Spatial Orientation', 'value' => 116, 'desc' => 'Visualisasi dan manipulasi objek multi-dimensi dalam ruang.'],
-            ]
+            ],
         ],
         'big_five' => [
             'title' => 'Big Five Personality',
@@ -56,7 +56,7 @@ class ScoreListSection extends Component
                 ['label' => 'Extraversion', 'value' => 3.80, 'desc' => 'Tingkat kenyamanan dalam interaksi sosial, keaktifan bergaul, dan asertivitas.'],
                 ['label' => 'Agreeableness', 'value' => 4.20, 'desc' => 'Kecenderungan untuk kooperatif, berempati, mempercayai, dan membantu orang lain.'],
                 ['label' => 'Emotional Stability', 'value' => 4.00, 'desc' => 'Kapasitas mengelola stres, ketenangan emosional, dan ketahanan terhadap tekanan.'],
-            ]
+            ],
         ],
         'learning_agility' => [
             'title' => 'Learning Agility',
@@ -69,7 +69,7 @@ class ScoreListSection extends Component
                 ['label' => 'People Agility', 'value' => 3.90, 'desc' => 'Kapasitas berkolaborasi dan memahami dinamika kelompok secara cepat.'],
                 ['label' => 'Change Agility', 'value' => 4.10, 'desc' => 'Kesiapan bereksperimen dengan metode baru dan menyukai perubahan.'],
                 ['label' => 'Result Agility', 'value' => 3.80, 'desc' => 'Kemampuan memberikan hasil prima dalam situasi transisi atau baru.'],
-            ]
+            ],
         ],
         'leadership_potential' => [
             'title' => 'Leadership Potential',
@@ -84,7 +84,7 @@ class ScoreListSection extends Component
                 ['label' => 'Execution Control', 'value' => 3.80, 'desc' => 'Disiplin mengawal rencana kerja hingga tuntas.'],
                 ['label' => 'Coaching & Developing', 'value' => 3.95, 'desc' => 'Kapasitas membimbing dan mempromosikan kapabilitas anggota tim.'],
                 ['label' => 'Strategic Thinking', 'value' => 3.75, 'desc' => 'Kemampuan membaca tren eksternal organisasi dan dampaknya.'],
-            ]
+            ],
         ],
         'integrity' => [
             'title' => 'Values & Integrity',
@@ -97,7 +97,7 @@ class ScoreListSection extends Component
                 ['label' => 'Ethical Compliance', 'value' => 4.50, 'desc' => 'Ketaatan total terhadap regulasi dan prinsip etika korporasi.'],
                 ['label' => 'Accountability', 'value' => 4.40, 'desc' => 'Keberanian bertanggung jawab atas hasil keputusan kerja sendiri.'],
                 ['label' => 'Consistency', 'value' => 4.50, 'desc' => 'Kesesuaian antara ucapan dan tindakan nyata di lapangan.'],
-            ]
+            ],
         ],
     ];
 
@@ -109,6 +109,7 @@ class ScoreListSection extends Component
     public function render(): View
     {
         $data = $this->datasets[$this->sectionCode] ?? $this->datasets['competency'];
+
         return view('livewire.pages.h-c-a.sections.score-list-section', [
             'title' => $data['title'],
             'subtitle' => $data['subtitle'],
@@ -116,7 +117,7 @@ class ScoreListSection extends Component
             'average' => $data['average'],
             'max_score' => $data['max_score'],
             'is_iq' => $data['is_iq'] ?? false,
-            'scores' => $data['scores']
+            'scores' => $data['scores'],
         ]);
     }
 }

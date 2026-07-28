@@ -39,31 +39,31 @@ class HcaReportPageTest extends TestCase
         Livewire::test(HcaReportPage::class)
             // Initial state
             ->assertSet('activeSection', 'cover')
-            
+
             // Switch to HCI (which is active in Phase A)
             ->call('setSection', 'hci')
             ->assertSet('activeSection', 'hci')
-            
+
             // Switch to Riwayat Karier (active in Phase A)
             ->call('setSection', 'career')
             ->assertSet('activeSection', 'career')
-            
+
             // Switch to Performance Dashboard (active in Phase A)
             ->call('setSection', 'performance')
             ->assertSet('activeSection', 'performance')
-            
+
             // Switch to Kekuatan Psikologis (active in Phase A)
             ->call('setSection', 'strengths')
             ->assertSet('activeSection', 'strengths')
-            
+
             // Switch to Executive Summary (newly active in Phase B)
             ->call('setSection', 'exec_summary')
             ->assertSet('activeSection', 'exec_summary')
-            
+
             // Switch to DISC (newly active in Phase B)
             ->call('setSection', 'disc')
             ->assertSet('activeSection', 'disc')
-            
+
             // Switch to 9-Box Matrix (newly active in Phase B)
             ->call('setSection', 'nine_box')
             ->assertSet('activeSection', 'nine_box');
@@ -76,7 +76,7 @@ class HcaReportPageTest extends TestCase
     {
         Livewire::test(HcaReportPage::class)
             ->assertSet('activeSection', 'cover')
-            
+
             // Switch to a completely invalid code
             ->call('setSection', 'invalid_section_code_999')
             ->assertSet('activeSection', 'cover'); // should remain 'cover'

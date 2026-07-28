@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Livewire\Pages\HCA\Sections;
 
-use Livewire\Component;
 use Illuminate\View\View;
+use Livewire\Component;
 
 class TimelineSection extends Component
 {
@@ -17,8 +17,8 @@ class TimelineSection extends Component
             'achievements' => [
                 'Sukses merancang dan meluncurkan Sistem Pemetaan Staf Integratif (SPSP) berskala nasional.',
                 'Meningkatkan akurasi identifikasi suksesi kepemimpinan tingkat eksekutif sebesar 35%.',
-                'Mengurangi turnover talenta kunci (key talent) di bawah 3% pertahun melalui program retention plan terarah.'
-            ]
+                'Mengurangi turnover talenta kunci (key talent) di bawah 3% pertahun melalui program retention plan terarah.',
+            ],
         ],
         [
             'period' => '2021 — 2024',
@@ -27,8 +27,8 @@ class TimelineSection extends Component
             'achievements' => [
                 'Mendesain kurikulum kepemimpinan eksekutif untuk 200+ staf manajemen tingkat menengah.',
                 'Menyusun kerangka kompetensi kepemimpinan baru yang berorientasi pada transformasi digital.',
-                'Meningkatkan efisiensi anggaran pelatihan internal sebesar 18% dengan transisi ke blended learning.'
-            ]
+                'Meningkatkan efisiensi anggaran pelatihan internal sebesar 18% dengan transisi ke blended learning.',
+            ],
         ],
         [
             'period' => '2018 — 2021',
@@ -37,8 +37,8 @@ class TimelineSection extends Component
             'achievements' => [
                 'Memimpin restrukturisasi organisasi divisi operasional utama, menyederhanakan jalur pelaporan.',
                 'Mengurangi tumpang tindih peran operasional yang menghasilkan efisiensi biaya kerja sebesar 12%.',
-                'Merumuskan deskripsi pekerjaan berbasis output (result-oriented job descriptions) secara menyeluruh.'
-            ]
+                'Merumuskan deskripsi pekerjaan berbasis output (result-oriented job descriptions) secara menyeluruh.',
+            ],
         ],
         [
             'period' => '2015 — 2018',
@@ -47,9 +47,9 @@ class TimelineSection extends Component
             'achievements' => [
                 'Menerapkan sistem penyaringan seleksi berbasis kompetensi terintegrasi untuk posisi manajerial.',
                 'Mempercepat proses pemenuhan kebutuhan posisi kunci (time-to-fill) dari 45 hari menjadi 30 hari.',
-                'Membangun program magang kemitraan universitas kelas satu untuk suplai talenta muda.'
-            ]
-        ]
+                'Membangun program magang kemitraan universitas kelas satu untuk suplai talenta muda.',
+            ],
+        ],
     ];
 
     public function render(): View

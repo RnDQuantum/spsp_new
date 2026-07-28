@@ -2,21 +2,26 @@
 
 namespace Tests\Feature\Livewire;
 
-use PHPUnit\Framework\Attributes\Test;
+use App\Livewire\Pages\GeneralReport\Training\TrainingRecommendation;
 use App\Models\Aspect;
 use App\Models\AspectAssessment;
 use App\Models\AssessmentEvent;
 use App\Models\AssessmentTemplate;
 use App\Models\CategoryAssessment;
 use App\Models\CategoryType;
+use App\Models\CustomStandard;
 use App\Models\Institution;
 use App\Models\Participant;
 use App\Models\PositionFormation;
 use App\Models\User;
 use App\Services\Cache\AspectCacheService;
 use App\Services\DynamicStandardService;
+use App\Services\TrainingRecommendationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 use Livewire\Livewire;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 /**
@@ -40,13 +45,21 @@ class TrainingRecommendationTest extends TestCase
     use RefreshDatabase;
 
     private User $user;
+
     private Institution $institution;
+
     private AssessmentEvent $event;
+
     private PositionFormation $position;
+
     private AssessmentTemplate $template;
+
     private CategoryType $categoryType;
+
     private Aspect $aspect;
+
     private Participant $participant;
+
     private CategoryAssessment $categoryAssessment;
 
     protected function setUp(): void
@@ -147,7 +160,7 @@ class TrainingRecommendationTest extends TestCase
     public function component_mounts_with_default_state()
     {
         // Act
-        $component = Livewire::test(\App\Livewire\Pages\GeneralReport\Training\TrainingRecommendation::class);
+        $component = Livewire::test(TrainingRecommendation::class);
 
         // Assert
         $component
@@ -168,7 +181,7 @@ class TrainingRecommendationTest extends TestCase
     public function component_loads_training_summary_when_mounted_with_complete_filters()
     {
         // Act
-        $component = Livewire::test(\App\Livewire\Pages\GeneralReport\Training\TrainingRecommendation::class);
+        $component = Livewire::test(TrainingRecommendation::class);
 
         // Assert
         $component
@@ -184,14 +197,14 @@ class TrainingRecommendationTest extends TestCase
     public function component_loads_aspect_priority_data_when_mounted()
     {
         // Act
-        $component = Livewire::test(\App\Livewire\Pages\GeneralReport\Training\TrainingRecommendation::class);
+        $component = Livewire::test(TrainingRecommendation::class);
 
         // Get view data to check aspectPriorities
         $viewData = $component->instance()->render()->getData();
 
         // Assert
         $this->assertArrayHasKey('aspectPriorities', $viewData);
-        $this->assertInstanceOf(\Illuminate\Support\Collection::class, $viewData['aspectPriorities']);
+        $this->assertInstanceOf(Collection::class, $viewData['aspectPriorities']);
     }
 
     // ========== GROUP 2: Event Handling ==========
@@ -200,7 +213,7 @@ class TrainingRecommendationTest extends TestCase
     public function handle_event_selected_clears_cache_and_resets_data()
     {
         // Arrange
-        $component = Livewire::test(\App\Livewire\Pages\GeneralReport\Training\TrainingRecommendation::class);
+        $component = Livewire::test(TrainingRecommendation::class);
 
         // Act
         $component->dispatch('event-selected', 'NEW-EVENT');
@@ -222,7 +235,7 @@ class TrainingRecommendationTest extends TestCase
     public function handle_position_selected_clears_cache_and_resets_aspect_data()
     {
         // Arrange
-        $component = Livewire::test(\App\Livewire\Pages\GeneralReport\Training\TrainingRecommendation::class);
+        $component = Livewire::test(TrainingRecommendation::class);
 
         // Act
         $component->dispatch('position-selected', 999);
@@ -259,7 +272,7 @@ class TrainingRecommendationTest extends TestCase
             'individual_rating' => 3.0, // Below standard (4.0)
         ]);
 
-        $component = Livewire::test(\App\Livewire\Pages\GeneralReport\Training\TrainingRecommendation::class);
+        $component = Livewire::test(TrainingRecommendation::class);
 
         // Act
         $component->dispatch('aspect-selected', $newAspect->id);
@@ -278,7 +291,7 @@ class TrainingRecommendationTest extends TestCase
     public function handle_aspect_selected_with_null_resets_data()
     {
         // Arrange
-        $component = Livewire::test(\App\Livewire\Pages\GeneralReport\Training\TrainingRecommendation::class);
+        $component = Livewire::test(TrainingRecommendation::class);
 
         // Act
         $component->dispatch('aspect-selected', null);
@@ -301,7 +314,7 @@ class TrainingRecommendationTest extends TestCase
     public function handle_tolerance_update_clears_cache_and_reloads_data()
     {
         // Arrange
-        $component = Livewire::test(\App\Livewire\Pages\GeneralReport\Training\TrainingRecommendation::class);
+        $component = Livewire::test(TrainingRecommendation::class);
 
         // Act
         $component->dispatch('tolerance-updated', 20);
@@ -322,7 +335,7 @@ class TrainingRecommendationTest extends TestCase
     public function tolerance_change_affects_recommendation_counts()
     {
         // Arrange
-        $component = Livewire::test(\App\Livewire\Pages\GeneralReport\Training\TrainingRecommendation::class);
+        $component = Livewire::test(TrainingRecommendation::class);
 
         // Get initial counts with 10% tolerance
         $initialRecommended = $component->get('recommendedCount');
@@ -344,7 +357,7 @@ class TrainingRecommendationTest extends TestCase
     public function handle_standard_update_clears_cache_and_reloads_data()
     {
         // Arrange
-        $component = Livewire::test(\App\Livewire\Pages\GeneralReport\Training\TrainingRecommendation::class);
+        $component = Livewire::test(TrainingRecommendation::class);
 
         // Act
         $component->dispatch('standard-adjusted', $this->template->id);
@@ -362,7 +375,7 @@ class TrainingRecommendationTest extends TestCase
     public function handle_standard_switched_clears_cache_and_reloads_data()
     {
         // Arrange
-        $component = Livewire::test(\App\Livewire\Pages\GeneralReport\Training\TrainingRecommendation::class);
+        $component = Livewire::test(TrainingRecommendation::class);
 
         // Act
         $component->dispatch('standard-switched', $this->template->id);
@@ -378,7 +391,7 @@ class TrainingRecommendationTest extends TestCase
     public function handle_standard_update_ignores_invalid_template_id()
     {
         // Arrange
-        $component = Livewire::test(\App\Livewire\Pages\GeneralReport\Training\TrainingRecommendation::class);
+        $component = Livewire::test(TrainingRecommendation::class);
 
         // Get initial values
         $initialTotal = $component->get('totalParticipants');
@@ -399,7 +412,7 @@ class TrainingRecommendationTest extends TestCase
     public function updated_per_page_updates_pagination()
     {
         // Arrange
-        $component = Livewire::test(\App\Livewire\Pages\GeneralReport\Training\TrainingRecommendation::class);
+        $component = Livewire::test(TrainingRecommendation::class);
 
         // Act
         $component->set('perPage', '25');
@@ -412,7 +425,7 @@ class TrainingRecommendationTest extends TestCase
     public function updated_per_page_with_all_sets_high_value()
     {
         // Arrange
-        $component = Livewire::test(\App\Livewire\Pages\GeneralReport\Training\TrainingRecommendation::class);
+        $component = Livewire::test(TrainingRecommendation::class);
 
         // Act
         $component->set('perPage', 'all');
@@ -425,7 +438,7 @@ class TrainingRecommendationTest extends TestCase
     public function updated_per_page_resets_pagination_and_clears_cache()
     {
         // Arrange
-        $component = Livewire::test(\App\Livewire\Pages\GeneralReport\Training\TrainingRecommendation::class);
+        $component = Livewire::test(TrainingRecommendation::class);
 
         // Act
         $component->set('perPage', '50');
@@ -449,7 +462,7 @@ class TrainingRecommendationTest extends TestCase
         AspectCacheService::preloadByTemplate($this->template->id);
 
         // Act
-        $component = Livewire::test(\App\Livewire\Pages\GeneralReport\Training\TrainingRecommendation::class);
+        $component = Livewire::test(TrainingRecommendation::class);
 
         // Assert
         // Standard rating should come from Quantum Default (Layer 3) - aspect's standard_rating
@@ -463,7 +476,7 @@ class TrainingRecommendationTest extends TestCase
         $dynamicStandard = app(DynamicStandardService::class);
 
         // Create a custom standard with different aspect rating
-        $customStandard = \App\Models\CustomStandard::factory()->create([
+        $customStandard = CustomStandard::factory()->create([
             'institution_id' => $this->institution->id,
             'template_id' => $this->template->id,
             'name' => 'Test Custom Standard',
@@ -476,8 +489,8 @@ class TrainingRecommendationTest extends TestCase
                     'weight' => 15,
                     'rating' => 4.5, // Different from aspect's 3.0
                     'active' => true,
-                ]
-            ]
+                ],
+            ],
         ]);
 
         // Set custom standard in session (Layer 2)
@@ -487,7 +500,7 @@ class TrainingRecommendationTest extends TestCase
         AspectCacheService::preloadByTemplate($this->template->id);
 
         // Act
-        $component = Livewire::test(\App\Livewire\Pages\GeneralReport\Training\TrainingRecommendation::class);
+        $component = Livewire::test(TrainingRecommendation::class);
 
         // Assert
         // Standard rating should come from Custom Standard (Layer 2), not Quantum Default (Layer 3)
@@ -503,7 +516,7 @@ class TrainingRecommendationTest extends TestCase
         $dynamicStandard = app(DynamicStandardService::class);
 
         // Create a custom standard
-        $customStandard = \App\Models\CustomStandard::factory()->create([
+        $customStandard = CustomStandard::factory()->create([
             'institution_id' => $this->institution->id,
             'template_id' => $this->template->id,
             'name' => 'Test Custom Standard',
@@ -526,7 +539,7 @@ class TrainingRecommendationTest extends TestCase
         $dynamicStandard->saveAspectRating($this->template->id, $this->aspect->code, 5.0);
 
         // Act
-        $component = Livewire::test(\App\Livewire\Pages\GeneralReport\Training\TrainingRecommendation::class);
+        $component = Livewire::test(TrainingRecommendation::class);
 
         // Assert
         // Standard rating should come from session adjustment (Layer 1)
@@ -541,7 +554,7 @@ class TrainingRecommendationTest extends TestCase
     public function cache_prevents_redundant_service_calls()
     {
         // Arrange
-        $component = Livewire::test(\App\Livewire\Pages\GeneralReport\Training\TrainingRecommendation::class);
+        $component = Livewire::test(TrainingRecommendation::class);
 
         // Get initial data
         $initialData = [
@@ -554,7 +567,7 @@ class TrainingRecommendationTest extends TestCase
 
         // Call render again (should use cache)
         // Note: render() is not a public method, so we'll just create a new component
-        $component2 = Livewire::test(\App\Livewire\Pages\GeneralReport\Training\TrainingRecommendation::class);
+        $component2 = Livewire::test(TrainingRecommendation::class);
 
         // Assert
         // Data should be the same (from cache)
@@ -570,7 +583,7 @@ class TrainingRecommendationTest extends TestCase
     public function cache_cleared_on_standard_change()
     {
         // Arrange
-        $component = Livewire::test(\App\Livewire\Pages\GeneralReport\Training\TrainingRecommendation::class);
+        $component = Livewire::test(TrainingRecommendation::class);
 
         // Act
         $component->dispatch('standard-adjusted', $this->template->id);
@@ -585,7 +598,7 @@ class TrainingRecommendationTest extends TestCase
     public function cache_cleared_on_tolerance_change()
     {
         // Arrange
-        $component = Livewire::test(\App\Livewire\Pages\GeneralReport\Training\TrainingRecommendation::class);
+        $component = Livewire::test(TrainingRecommendation::class);
 
         // Act
         $component->dispatch('tolerance-updated', 15);
@@ -603,10 +616,10 @@ class TrainingRecommendationTest extends TestCase
         // Arrange - clear all session filters and ensure no events exist that could auto-load
         session()->forget(['filter.event_code', 'filter.position_formation_id', 'filter.aspect_id']);
         // Delete all events so ensureDefaultFilters() can't auto-populate
-        \App\Models\AssessmentEvent::query()->delete();
+        AssessmentEvent::query()->delete();
 
         // Act
-        $component = Livewire::test(\App\Livewire\Pages\GeneralReport\Training\TrainingRecommendation::class);
+        $component = Livewire::test(TrainingRecommendation::class);
 
         // Assert - no event found means data stays at zero defaults
         $component
@@ -624,10 +637,10 @@ class TrainingRecommendationTest extends TestCase
     {
         // Arrange - ensure no aspect in session and no auto-populate by removing event too
         session()->forget(['filter.aspect_id', 'filter.event_code', 'filter.position_formation_id']);
-        \App\Models\AssessmentEvent::query()->delete();
+        AssessmentEvent::query()->delete();
 
         // Act
-        $component = Livewire::test(\App\Livewire\Pages\GeneralReport\Training\TrainingRecommendation::class);
+        $component = Livewire::test(TrainingRecommendation::class);
 
         // Assert - without event, nothing auto-loads
         $component
@@ -662,7 +675,7 @@ class TrainingRecommendationTest extends TestCase
         ]);
 
         // Act
-        $component = Livewire::test(\App\Livewire\Pages\GeneralReport\Training\TrainingRecommendation::class);
+        $component = Livewire::test(TrainingRecommendation::class);
 
         // Assert
         // Note: Due to how the service works, even with no participants,
@@ -678,7 +691,7 @@ class TrainingRecommendationTest extends TestCase
     public function get_passing_summary_returns_correct_data()
     {
         // Arrange
-        $component = Livewire::test(\App\Livewire\Pages\GeneralReport\Training\TrainingRecommendation::class);
+        $component = Livewire::test(TrainingRecommendation::class);
 
         // Act
         $passingSummary = $component->instance()->getPassingSummary();
@@ -700,7 +713,7 @@ class TrainingRecommendationTest extends TestCase
     public function get_recommended_percentage_property_calculates_correctly()
     {
         // Arrange
-        $component = Livewire::test(\App\Livewire\Pages\GeneralReport\Training\TrainingRecommendation::class);
+        $component = Livewire::test(TrainingRecommendation::class);
 
         // Act
         $recommendedPercentage = $component->get('recommendedPercentage');
@@ -714,7 +727,7 @@ class TrainingRecommendationTest extends TestCase
     public function get_not_recommended_percentage_property_calculates_correctly()
     {
         // Arrange
-        $component = Livewire::test(\App\Livewire\Pages\GeneralReport\Training\TrainingRecommendation::class);
+        $component = Livewire::test(TrainingRecommendation::class);
 
         // Act
         $notRecommendedPercentage = $component->get('notRecommendedPercentage');
@@ -729,9 +742,9 @@ class TrainingRecommendationTest extends TestCase
     {
         // Arrange - remove all filters so component loads with no data
         session()->forget(['filter.aspect_id', 'filter.event_code', 'filter.position_formation_id']);
-        \App\Models\AssessmentEvent::query()->delete();
+        AssessmentEvent::query()->delete();
 
-        $component = Livewire::test(\App\Livewire\Pages\GeneralReport\Training\TrainingRecommendation::class);
+        $component = Livewire::test(TrainingRecommendation::class);
 
         // Act
         $recommendedPercentage = $component->get('recommendedPercentage');
@@ -748,7 +761,7 @@ class TrainingRecommendationTest extends TestCase
     public function render_passes_correct_data_to_view()
     {
         // Arrange
-        $component = Livewire::test(\App\Livewire\Pages\GeneralReport\Training\TrainingRecommendation::class);
+        $component = Livewire::test(TrainingRecommendation::class);
 
         // Act
         $viewData = $component->instance()->render()->getData();
@@ -758,15 +771,15 @@ class TrainingRecommendationTest extends TestCase
         $this->assertArrayHasKey('aspectPriorities', $viewData);
         $this->assertArrayHasKey('selectedTemplate', $viewData);
 
-        $this->assertInstanceOf(\Illuminate\Pagination\LengthAwarePaginator::class, $viewData['participants']);
-        $this->assertInstanceOf(\Illuminate\Support\Collection::class, $viewData['aspectPriorities']);
+        $this->assertInstanceOf(LengthAwarePaginator::class, $viewData['participants']);
+        $this->assertInstanceOf(Collection::class, $viewData['aspectPriorities']);
     }
 
     #[Test]
     public function participants_data_includes_position_names()
     {
         // Arrange
-        $component = Livewire::test(\App\Livewire\Pages\GeneralReport\Training\TrainingRecommendation::class);
+        $component = Livewire::test(TrainingRecommendation::class);
 
         // Act
         $viewData = $component->instance()->render()->getData();
@@ -784,7 +797,7 @@ class TrainingRecommendationTest extends TestCase
     public function open_attribute_modal_dispatches_event_with_correct_data()
     {
         // Arrange
-        $component = Livewire::test(\App\Livewire\Pages\GeneralReport\Training\TrainingRecommendation::class);
+        $component = Livewire::test(TrainingRecommendation::class);
 
         // Act
         $component->call('openAttributeModal', $this->aspect->id);
@@ -818,7 +831,7 @@ class TrainingRecommendationTest extends TestCase
         ]);
 
         // Get service to verify filtering logic
-        $service = app(\App\Services\TrainingRecommendationService::class);
+        $service = app(TrainingRecommendationService::class);
         $allParticipants = $service->getParticipantsRecommendation(
             $this->event->id,
             $this->position->id,
@@ -834,7 +847,7 @@ class TrainingRecommendationTest extends TestCase
         $this->assertGreaterThan(0, $notRecommendedCount, 'Should have at least one not recommended participant');
 
         // Act - Call the method directly to test filtering
-        $component = Livewire::test(\App\Livewire\Pages\GeneralReport\Training\TrainingRecommendation::class);
+        $component = Livewire::test(TrainingRecommendation::class);
         $component->call('openAttributeModal', $this->aspect->id);
 
         // Assert - Event should be dispatched
@@ -845,7 +858,7 @@ class TrainingRecommendationTest extends TestCase
     public function open_attribute_modal_includes_position_names()
     {
         // Act - Call method directly and verify positions are loaded
-        $service = app(\App\Services\TrainingRecommendationService::class);
+        $service = app(TrainingRecommendationService::class);
         $participants = $service->getParticipantsRecommendation(
             $this->event->id,
             $this->position->id,
@@ -854,19 +867,20 @@ class TrainingRecommendationTest extends TestCase
         );
 
         // Filter only recommended
-        $recommended = $participants->filter(fn($p) => $p['is_recommended'] === true);
+        $recommended = $participants->filter(fn ($p) => $p['is_recommended'] === true);
 
         // Load position names (this is what openAttributeModal does)
         $positionIds = $recommended->pluck('position_formation_id')->unique()->filter()->all();
 
-        if (!empty($positionIds)) {
-            $positions = \App\Models\PositionFormation::whereIn('id', $positionIds)
+        if (! empty($positionIds)) {
+            $positions = PositionFormation::whereIn('id', $positionIds)
                 ->select('id', 'name')
                 ->get()
                 ->keyBy('id');
 
             $recommended = $recommended->map(function ($participant) use ($positions) {
                 $participant['position'] = $positions->get($participant['position_formation_id'])->name ?? '-';
+
                 return $participant;
             });
         }
@@ -884,7 +898,7 @@ class TrainingRecommendationTest extends TestCase
     {
         // Arrange
         session()->forget('filter.event_code');
-        $component = Livewire::test(\App\Livewire\Pages\GeneralReport\Training\TrainingRecommendation::class);
+        $component = Livewire::test(TrainingRecommendation::class);
 
         // Act
         $component->call('openAttributeModal', $this->aspect->id);
@@ -898,7 +912,7 @@ class TrainingRecommendationTest extends TestCase
     {
         // Arrange
         session()->forget('filter.position_formation_id');
-        $component = Livewire::test(\App\Livewire\Pages\GeneralReport\Training\TrainingRecommendation::class);
+        $component = Livewire::test(TrainingRecommendation::class);
 
         // Act
         $component->call('openAttributeModal', $this->aspect->id);

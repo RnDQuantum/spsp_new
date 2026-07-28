@@ -5,13 +5,15 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Models\Aspect;
+use App\Models\AssessmentEvent;
 use App\Models\AssessmentTemplate;
 use App\Models\CategoryType;
 use App\Models\CustomStandard;
 use App\Services\Cache\AspectCacheService;
-use Illuminate\Support\Facades\Session;
-use App\Support\WeightValidator;
 use App\Support\AspectRatingCalculator;
+use App\Support\WeightValidator;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Session;
 
 class DynamicStandardService
 {
@@ -50,7 +52,7 @@ class DynamicStandardService
         // 2. Check route parameter 'event' (if it's a string code or model binding)
         $eventParam = request()->route('event');
         if ($eventParam) {
-            $code = $eventParam instanceof \App\Models\AssessmentEvent ? $eventParam->code : $eventParam;
+            $code = $eventParam instanceof AssessmentEvent ? $eventParam->code : $eventParam;
             if (is_string($code)) {
                 return $code;
             }
@@ -71,8 +73,9 @@ class DynamicStandardService
     private function getSessionKey(int $templateId): string
     {
         $context = $this->getActiveEventContext();
-        return $context 
-            ? self::SESSION_PREFIX.".{$context}.{$templateId}" 
+
+        return $context
+            ? self::SESSION_PREFIX.".{$context}.{$templateId}"
             : self::SESSION_PREFIX.".{$templateId}";
     }
 
@@ -82,8 +85,9 @@ class DynamicStandardService
     private function getSelectedStandardKey(int $templateId): string
     {
         $context = $this->getActiveEventContext();
-        return $context 
-            ? "selected_standard.{$context}.{$templateId}" 
+
+        return $context
+            ? "selected_standard.{$context}.{$templateId}"
             : "selected_standard.{$templateId}";
     }
 
@@ -311,10 +315,10 @@ class DynamicStandardService
      *
      * Formula: Average of all sub-aspect ratings
      *
-     * @param  \Illuminate\Support\Collection  $subAspects  Collection of SubAspect models
+     * @param  Collection  $subAspects  Collection of SubAspect models
      * @return float Calculated rating (0.0 if no sub-aspects)
      */
-    private function calculateRatingFromSubAspects(\Illuminate\Support\Collection $subAspects): float
+    private function calculateRatingFromSubAspects(Collection $subAspects): float
     {
         if ($subAspects->isEmpty()) {
             return 0.0;
@@ -745,30 +749,30 @@ class DynamicStandardService
 
     /**
      * Check if specific category has any adjustments
-     * 
+     *
      * 🚀 OPTIMIZATION: Uses request-scoped cache to prevent duplicate queries
-     * 
+     *
      * ⚠️ IMPORTANT: This method depends on AspectCacheService being preloaded.
      * You MUST call AspectCacheService::preloadByTemplate($templateId) before using this method.
-     * 
+     *
      * Why? This method uses AspectCacheService to avoid N+1 queries when checking
      * aspect and sub-aspect adjustments. Without preloading, the cache will be empty
      * and this method may return incorrect results.
-     * 
+     *
      * Example usage:
      * ```php
      * // ✅ CORRECT
      * AspectCacheService::preloadByTemplate($templateId);
      * $hasAdjustments = $dynamicService->hasCategoryAdjustments($templateId, 'potensi');
-     * 
+     *
      * // ❌ WRONG (may return false even if adjustments exist)
      * $hasAdjustments = $dynamicService->hasCategoryAdjustments($templateId, 'potensi');
      * ```
-     * 
-     * @param int $templateId Template ID
-     * @param string $categoryCode Category code (e.g., 'potensi', 'kompetensi')
+     *
+     * @param  int  $templateId  Template ID
+     * @param  string  $categoryCode  Category code (e.g., 'potensi', 'kompetensi')
      * @return bool True if category has any adjustments (weights, ratings, active status)
-     * 
+     *
      * @throws \RuntimeException If AspectCacheService is not preloaded (in non-production environments)
      */
     public function hasCategoryAdjustments(int $templateId, string $categoryCode): bool
@@ -1234,17 +1238,17 @@ class DynamicStandardService
                 }
             }
 
-            if (!empty($potensiWeights)) {
+            if (! empty($potensiWeights)) {
                 $error = WeightValidator::validateTotal($potensiWeights);
                 if ($error) {
-                    $errors[] = "Total bobot Potensi harus 100% (saat ini: " . array_sum($potensiWeights) . "%)";
+                    $errors[] = 'Total bobot Potensi harus 100% (saat ini: '.array_sum($potensiWeights).'%)';
                 }
             }
 
-            if (!empty($kompetensiWeights)) {
+            if (! empty($kompetensiWeights)) {
                 $error = WeightValidator::validateTotal($kompetensiWeights);
                 if ($error) {
-                    $errors[] = "Total bobot Kompetensi harus 100% (saat ini: " . array_sum($kompetensiWeights) . "%)";
+                    $errors[] = 'Total bobot Kompetensi harus 100% (saat ini: '.array_sum($kompetensiWeights).'%)';
                 }
             }
         }

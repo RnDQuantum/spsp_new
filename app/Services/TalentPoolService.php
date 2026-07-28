@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Models\AspectAssessment;
 use App\Models\CategoryType;
+use App\Models\PositionFormation;
 use App\Services\Cache\AspectCacheService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
@@ -32,7 +33,7 @@ class TalentPoolService
     /**
      * 🚀 OPTIMIZED: Cached position formation to prevent duplicate queries
      */
-    private ?\App\Models\PositionFormation $cachedPosition = null;
+    private ?PositionFormation $cachedPosition = null;
 
     /**
      * Get complete 9-Box Performance Matrix data
@@ -109,7 +110,7 @@ class TalentPoolService
             return; // Already loaded
         }
 
-        $this->cachedPosition = \App\Models\PositionFormation::find($positionFormationId);
+        $this->cachedPosition = PositionFormation::find($positionFormationId);
 
         // 🚀 PERFORMANCE: Preload aspects for this template to prevent N+1 queries
         if ($this->cachedPosition) {
@@ -333,7 +334,7 @@ class TalentPoolService
                 ->join('category_types', 'category_types.id', '=', 'aspects.category_type_id')
                 ->leftJoin('sub_aspect_assessments', function ($join) use ($activeSubAspectIds) {
                     $join->on('sub_aspect_assessments.aspect_assessment_id', '=', 'aspect_assessments.id')
-                         ->whereIn('sub_aspect_assessments.sub_aspect_id', $activeSubAspectIds);
+                        ->whereIn('sub_aspect_assessments.sub_aspect_id', $activeSubAspectIds);
                 })
                 ->where('aspect_assessments.event_id', $eventId)
                 ->where('aspect_assessments.position_formation_id', $positionFormationId)
@@ -599,8 +600,8 @@ class TalentPoolService
         // 🚀 PERFORMANCE: Simpler hash based on session adjustments only
         // Instead of querying all aspects and checking each one, we use the session data directly
         $templateId = $this->cachedPosition->template_id;
-        $sessionAdjustments = app(\App\Services\DynamicStandardService::class)->getAdjustments($templateId);
-        $selectedStandard = app(\App\Services\CustomStandardService::class)->getSelected($templateId);
+        $sessionAdjustments = app(DynamicStandardService::class)->getAdjustments($templateId);
+        $selectedStandard = app(CustomStandardService::class)->getSelected($templateId);
 
         $hasAdjustments = ! empty($sessionAdjustments) || $selectedStandard !== null;
 

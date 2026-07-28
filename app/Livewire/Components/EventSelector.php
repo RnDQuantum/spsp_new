@@ -23,7 +23,7 @@ class EventSelector extends Component
         $this->availableEvents = AssessmentEvent::query()
             ->orderByDesc('start_date')
             ->get(['code', 'name'])
-            ->map(fn($e) => ['code' => $e->code, 'name' => $e->name])
+            ->map(fn ($e) => ['code' => $e->code, 'name' => $e->name])
             ->all();
 
         // Load event from session or use first available

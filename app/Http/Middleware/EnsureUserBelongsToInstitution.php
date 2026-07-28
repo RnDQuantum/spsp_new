@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
+use App\Models\AssessmentEvent;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -40,7 +41,7 @@ class EnsureUserBelongsToInstitution
         // Validate eventCode parameter (e.g. string)
         $eventCode = $request->route('eventCode');
         if ($eventCode) {
-            $eventExists = \App\Models\AssessmentEvent::where('code', $eventCode)->exists();
+            $eventExists = AssessmentEvent::where('code', $eventCode)->exists();
             if (! $eventExists) {
                 abort(403, 'Unauthorized access to this event.');
             }
@@ -49,9 +50,9 @@ class EnsureUserBelongsToInstitution
         // Validate event parameter (can be code string or model binding)
         $eventParam = $request->route('event');
         if ($eventParam) {
-            $code = $eventParam instanceof \App\Models\AssessmentEvent ? $eventParam->code : $eventParam;
+            $code = $eventParam instanceof AssessmentEvent ? $eventParam->code : $eventParam;
             if (is_string($code)) {
-                $eventExists = \App\Models\AssessmentEvent::where('code', $code)->exists();
+                $eventExists = AssessmentEvent::where('code', $code)->exists();
                 if (! $eventExists) {
                     abort(403, 'Unauthorized access to this event.');
                 }

@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class SubAspectAssessment extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'aspect_assessment_id',
         'participant_id',

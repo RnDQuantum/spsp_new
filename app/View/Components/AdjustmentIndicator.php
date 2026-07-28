@@ -2,6 +2,7 @@
 
 namespace App\View\Components;
 
+use App\Services\Cache\AspectCacheService;
 use App\Services\DynamicStandardService;
 use Illuminate\View\Component;
 
@@ -43,8 +44,8 @@ class AdjustmentIndicator extends Component
         if ($templateId && $categoryCode) {
             // 🛡️ SAFETY: Preload cache to ensure hasCategoryAdjustments() works correctly
             // This prevents silent failures if cache hasn't been preloaded by parent component
-            \App\Services\Cache\AspectCacheService::preloadByTemplate($templateId);
-            
+            AspectCacheService::preloadByTemplate($templateId);
+
             $dynamicService = app(DynamicStandardService::class);
             $this->hasAdjustments = $dynamicService->hasCategoryAdjustments($templateId, $categoryCode);
         }

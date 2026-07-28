@@ -56,6 +56,7 @@ class Edit extends Component
         $validation = $this->validationResult;
         if (! $validation['valid']) {
             session()->flash('error', implode(' | ', $validation['errors']));
+
             return null;
         }
 

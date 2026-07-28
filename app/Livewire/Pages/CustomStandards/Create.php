@@ -3,7 +3,6 @@
 namespace App\Livewire\Pages\CustomStandards;
 
 use App\Concerns\ManagesCustomStandardForm;
-use App\Models\AssessmentTemplate;
 use App\Services\CustomStandardService;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Layout;
@@ -93,6 +92,7 @@ class Create extends Component
         $validation = $this->validationResult;
         if (! $validation['valid']) {
             session()->flash('error', implode(' | ', $validation['errors']));
+
             return null;
         }
 

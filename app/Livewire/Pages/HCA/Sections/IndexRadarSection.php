@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace App\Livewire\Pages\HCA\Sections;
 
-use Livewire\Component;
 use Illuminate\View\View;
+use Livewire\Component;
 
 class IndexRadarSection extends Component
 {
     public string $sectionCode = 'hci';
+
     public string $chartId;
 
     public array $datasets = [
@@ -48,18 +49,19 @@ class IndexRadarSection extends Component
             'actualRatings' => [4.20, 4.50, 4.10, 4.60, 4.35],
             'standardRatings' => [3.00, 3.00, 3.00, 3.00, 3.00],
             'toleranceRatings' => [2.70, 2.70, 2.70, 2.70, 2.70],
-        ]
+        ],
     ];
 
     public function mount(string $sectionCode = 'hci'): void
     {
         $this->sectionCode = $sectionCode;
-        $this->chartId = 'hciRadar_' . $sectionCode . '_' . uniqid();
+        $this->chartId = 'hciRadar_'.$sectionCode.'_'.uniqid();
     }
 
     public function render(): View
     {
         $data = $this->datasets[$this->sectionCode] ?? $this->datasets['hci'];
+
         return view('livewire.pages.h-c-a.sections.index-radar-section', [
             'title' => $data['title'],
             'subtitle' => $data['subtitle'],

@@ -4,9 +4,9 @@ namespace App\Livewire\Pages\GeneralReport;
 
 use App\Models\PsychologicalTest;
 use Illuminate\Support\Facades\DB;
+use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Livewire\Attributes\Layout;
 
 #[Layout('components.layouts.app', ['title' => 'MMPI'])]
 class MmpiResultsReport extends Component
@@ -21,6 +21,7 @@ class MmpiResultsReport extends Component
 
     // Sorting
     public $sortField = 'id'; // Default sort by ID
+
     public $sortDirection = 'asc'; // Default ascending
 
     // Query string parameters
@@ -82,12 +83,12 @@ class MmpiResultsReport extends Component
             $mmpiResultsQuery->where(function ($query) {
                 // Cari berdasarkan kode proyek
                 $query->whereHas('event', function ($eventQuery) {
-                    $eventQuery->where('code', 'like', '%' . $this->search . '%');
+                    $eventQuery->where('code', 'like', '%'.$this->search.'%');
                 })
                     // Atau berdasarkan no_test
-                    ->orWhere('no_test', 'like', '%' . $this->search . '%')
+                    ->orWhere('no_test', 'like', '%'.$this->search.'%')
                     // Atau berdasarkan tingkat_stres
-                    ->orWhere('tingkat_stres', 'like', '%' . $this->search . '%');
+                    ->orWhere('tingkat_stres', 'like', '%'.$this->search.'%');
 
                 // Jika perlu juga cari berdasarkan nilai PQ (jika angka)
                 if (is_numeric($this->search)) {

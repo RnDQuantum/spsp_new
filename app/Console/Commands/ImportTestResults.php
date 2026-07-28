@@ -39,12 +39,13 @@ class ImportTestResults extends Command
         $this->newLine();
 
         // Validasi: harus ada --file atau --dir
-        if (!$this->option('file') && !$this->option('dir')) {
+        if (! $this->option('file') && ! $this->option('dir')) {
             $this->error('Harus menyertakan --file=<path> atau --dir=<path>');
             $this->line('');
             $this->line('Contoh:');
             $this->line('  php artisan test-results:import --file=sample.json --event=1 --participant=1');
             $this->line('  php artisan test-results:import --dir=output_analisis/sample_per_tes/ --event=1 --participant=1');
+
             return Command::FAILURE;
         }
 
@@ -52,15 +53,17 @@ class ImportTestResults extends Command
         $eventId = (int) $this->option('event');
         $participantId = (int) $this->option('participant');
 
-        if (!$eventId || !$participantId) {
+        if (! $eventId || ! $participantId) {
             $this->error('Harus menyertakan --event=<id> dan --participant=<id>');
+
             return Command::FAILURE;
         }
 
         // Validasi participant ada di database
         $participant = Participant::find($participantId);
-        if (!$participant) {
+        if (! $participant) {
             $this->error("Participant ID {$participantId} tidak ditemukan di database.");
+
             return Command::FAILURE;
         }
 
@@ -73,10 +76,11 @@ class ImportTestResults extends Command
 
         if (empty($tesData)) {
             $this->warn('Tidak ada data tes yang ditemukan.');
+
             return Command::FAILURE;
         }
 
-        $this->info("Ditemukan " . count($tesData) . " alat tes");
+        $this->info('Ditemukan '.count($tesData).' alat tes');
         $this->newLine();
 
         // Dry-run mode
@@ -116,8 +120,9 @@ class ImportTestResults extends Command
      */
     protected function readSingleFile(string $path): array
     {
-        if (!file_exists($path)) {
+        if (! file_exists($path)) {
             $this->error("File tidak ditemukan: {$path}");
+
             return [];
         }
 
@@ -125,6 +130,7 @@ class ImportTestResults extends Command
 
         if (json_last_error() !== JSON_ERROR_NONE) {
             $this->error("File JSON tidak valid: {$path}");
+
             return [];
         }
 
@@ -133,11 +139,13 @@ class ImportTestResults extends Command
             $testCode = $content['kode_tes'];
             $testName = $content['nama'] ?? 'unknown';
             $this->line("  Membaca: {$testCode} — {$testName}");
+
             return [$testCode => $content['response_utuh']];
         }
 
         // Format multi-tes: {"A.1": {...}, "B.2": {...}}
         $this->line("  Membaca multi-tes dari file ({$path})");
+
         return $content;
     }
 
@@ -147,13 +155,14 @@ class ImportTestResults extends Command
      */
     protected function readDirectory(string $dir): array
     {
-        if (!is_dir($dir)) {
+        if (! is_dir($dir)) {
             $this->error("Directory tidak ditemukan: {$dir}");
+
             return [];
         }
 
         $tesData = [];
-        $files = glob(rtrim($dir, '/\\') . '/*.json');
+        $files = glob(rtrim($dir, '/\\').'/*.json');
 
         foreach ($files as $file) {
             $basename = basename($file);
@@ -166,6 +175,7 @@ class ImportTestResults extends Command
             $content = json_decode(file_get_contents($file), true);
             if (json_last_error() !== JSON_ERROR_NONE) {
                 $this->warn("  Skip (invalid JSON): {$basename}");
+
                 continue;
             }
 
@@ -205,7 +215,7 @@ class ImportTestResults extends Command
                 $testCode,
                 mb_substr($testName, 0, 30),
                 $category,
-                $dataKeys . ' fields',
+                $dataKeys.' fields',
                 $statusLabel,
             ];
         }
@@ -223,21 +233,21 @@ class ImportTestResults extends Command
      */
     protected function displayResults(array $result): void
     {
-        $this->info("┌──────────────────────────────────┐");
-        $this->info("│  Hasil Import                    │");
-        $this->info("├──────────────────────────────────┤");
+        $this->info('┌──────────────────────────────────┐');
+        $this->info('│  Hasil Import                    │');
+        $this->info('├──────────────────────────────────┤');
         $this->info("│  ✅ Imported : {$result['imported']}");
         $this->info("│  ⏭️  Skipped  : {$result['skipped']}");
 
         if ($result['failed'] > 0) {
             $this->error("│  ❌ Failed   : {$result['failed']}");
         } else {
-            $this->info("│  ❌ Failed   : 0");
+            $this->info('│  ❌ Failed   : 0');
         }
 
-        $this->info("└──────────────────────────────────┘");
+        $this->info('└──────────────────────────────────┘');
 
-        if (!empty($result['errors'])) {
+        if (! empty($result['errors'])) {
             $this->newLine();
             $this->warn('Errors:');
             foreach ($result['errors'] as $error) {

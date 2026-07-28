@@ -10,6 +10,7 @@ use App\Models\CategoryType;
 use App\Models\CustomStandard;
 use App\Models\Institution;
 use App\Models\SubAspect;
+use App\Services\Cache\AspectCacheService;
 use App\Services\DynamicStandardService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Session;
@@ -33,7 +34,7 @@ use Tests\TestCase;
  *
  * TOTAL: 52/52 tests (100% coverage) ✅
  *
- * @see \App\Services\DynamicStandardService
+ * @see DynamicStandardService
  * @see docs/TESTING_GUIDE.md
  * @see docs/CUSTOM_STANDARD_FEATURE.md
  */
@@ -50,7 +51,7 @@ class DynamicStandardServiceTest extends TestCase
         $this->service = app(DynamicStandardService::class);
 
         // Clear cache between tests to prevent interference
-        \App\Services\Cache\AspectCacheService::clearCache();
+        AspectCacheService::clearCache();
     }
 
     // ========================================
@@ -1825,7 +1826,7 @@ class DynamicStandardServiceTest extends TestCase
         ]);
 
         // CRITICAL: Preload AspectCacheService before calling hasCategoryAdjustments()
-        \App\Services\Cache\AspectCacheService::preloadByTemplate($template->id);
+        AspectCacheService::preloadByTemplate($template->id);
 
         // Act 1: Check before any adjustments
         $hasAdjustments1 = $this->service->hasCategoryAdjustments($template->id, 'potensi');
@@ -1839,7 +1840,7 @@ class DynamicStandardServiceTest extends TestCase
         $freshService = app(DynamicStandardService::class);
 
         // Preload again for fresh instance
-        \App\Services\Cache\AspectCacheService::preloadByTemplate($template->id);
+        AspectCacheService::preloadByTemplate($template->id);
 
         // Assert: Should detect Potensi has adjustments
         $hasAdjustments2 = $freshService->hasCategoryAdjustments($template->id, 'potensi');
@@ -2159,9 +2160,9 @@ class DynamicStandardServiceTest extends TestCase
     private function createInstitution(): Institution
     {
         return Institution::create([
-            'code' => 'INST_' . uniqid(),
+            'code' => 'INST_'.uniqid(),
             'name' => 'Test Institution',
-            'api_key' => 'test_api_key_' . uniqid(),
+            'api_key' => 'test_api_key_'.uniqid(),
         ]);
     }
 
@@ -2171,7 +2172,7 @@ class DynamicStandardServiceTest extends TestCase
     private function createTemplate(): AssessmentTemplate
     {
         return AssessmentTemplate::create([
-            'code' => 'TMPL_' . uniqid(),
+            'code' => 'TMPL_'.uniqid(),
             'name' => 'Test Template',
             'description' => 'Template for testing',
         ]);

@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Models\Aspect;
 use App\Models\AspectAssessment;
 use App\Models\CategoryType;
 use App\Models\Participant;
 use App\Services\Cache\AspectCacheService;
-use Illuminate\Support\Collection;
 use App\Support\AspectRatingCalculator;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Collection;
 
 /**
  * IndividualAssessmentService - Single Source of Truth for Individual Assessment Calculations
@@ -99,7 +101,7 @@ class IndividualAssessmentService
         // Get category using cache
         $category = AspectCacheService::getCategoryById($categoryTypeId);
         if (! $category) {
-            throw new \Illuminate\Database\Eloquent\ModelNotFoundException("CategoryType not found: {$categoryTypeId}");
+            throw new ModelNotFoundException("CategoryType not found: {$categoryTypeId}");
         }
         $categoryCode = $category->code;
 
@@ -108,7 +110,7 @@ class IndividualAssessmentService
 
         // Fallback to all IDs if no adjustments
         if (empty($activeAspectIds)) {
-            $activeAspectIds = \App\Models\Aspect::where('category_type_id', $categoryTypeId)
+            $activeAspectIds = Aspect::where('category_type_id', $categoryTypeId)
                 ->orderBy('order')
                 ->pluck('id')
                 ->toArray();
@@ -651,7 +653,7 @@ class IndividualAssessmentService
         if ($potensiCategory) {
             $potensiAspectIds = $standardService->getActiveAspectIds($template->id, 'potensi');
             if (empty($potensiAspectIds)) {
-                $potensiAspectIds = \App\Models\Aspect::where('category_type_id', $potensiCategory->id)
+                $potensiAspectIds = Aspect::where('category_type_id', $potensiCategory->id)
                     ->orderBy('order')
                     ->pluck('id')
                     ->toArray();
@@ -662,7 +664,7 @@ class IndividualAssessmentService
         if ($kompetensiCategory) {
             $kompetensiAspectIds = $standardService->getActiveAspectIds($template->id, 'kompetensi');
             if (empty($kompetensiAspectIds)) {
-                $kompetensiAspectIds = \App\Models\Aspect::where('category_type_id', $kompetensiCategory->id)
+                $kompetensiAspectIds = Aspect::where('category_type_id', $kompetensiCategory->id)
                     ->orderBy('order')
                     ->pluck('id')
                     ->toArray();
@@ -734,7 +736,7 @@ class IndividualAssessmentService
         // Get category using cache
         $category = AspectCacheService::getCategoryById($categoryTypeId);
         if (! $category) {
-            throw new \Illuminate\Database\Eloquent\ModelNotFoundException("CategoryType not found: {$categoryTypeId}");
+            throw new ModelNotFoundException("CategoryType not found: {$categoryTypeId}");
         }
         $categoryCode = $category->code;
 
@@ -743,7 +745,7 @@ class IndividualAssessmentService
 
         // Fallback to all IDs if no adjustments
         if (empty($activeAspectIds)) {
-            $activeAspectIds = \App\Models\Aspect::where('category_type_id', $categoryTypeId)
+            $activeAspectIds = Aspect::where('category_type_id', $categoryTypeId)
                 ->orderBy('order')
                 ->pluck('id')
                 ->toArray();

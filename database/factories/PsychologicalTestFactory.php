@@ -9,7 +9,7 @@ use App\Models\PsychologicalTest;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\PsychologicalTest>
+ * @extends Factory<PsychologicalTest>
  */
 class PsychologicalTestFactory extends Factory
 {

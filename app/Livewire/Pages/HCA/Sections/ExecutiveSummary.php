@@ -4,14 +4,15 @@ declare(strict_types=1);
 
 namespace App\Livewire\Pages\HCA\Sections;
 
-use Livewire\Component;
 use Illuminate\View\View;
+use Livewire\Component;
 
 class ExecutiveSummary extends Component
 {
     public float $talentIndex = 4.12;
+
     public string $talentCategory = 'Strong Talent';
-    
+
     public array $pillars = [
         ['name' => 'Kompetensi', 'rating' => 4.00, 'label' => 'Sangat Baik'],
         ['name' => 'Potensi', 'rating' => 4.25, 'label' => 'Sangat Baik'],

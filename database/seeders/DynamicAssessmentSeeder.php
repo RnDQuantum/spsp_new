@@ -5,13 +5,17 @@ declare(strict_types=1);
 namespace Database\Seeders;
 
 use App\Models\Aspect;
+use App\Models\AspectAssessment;
 use App\Models\AssessmentEvent;
 use App\Models\AssessmentTemplate;
 use App\Models\Batch;
+use App\Models\CategoryAssessment;
 use App\Models\CategoryType;
+use App\Models\FinalAssessment;
 use App\Models\Institution;
 use App\Models\Participant;
 use App\Models\PositionFormation;
+use App\Models\SubAspectAssessment;
 use App\Services\Cache\AspectCacheService;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -468,7 +472,7 @@ class DynamicAssessmentSeeder extends Seeder
                     ...$batchData,
                 ]);
             }
-            $this->info('  📦 Batches created: ' . count($batches));
+            $this->info('  📦 Batches created: '.count($batches));
 
             // 4. Create positions with their templates
             $positions = [];
@@ -488,7 +492,7 @@ class DynamicAssessmentSeeder extends Seeder
                 $position->load('template');
                 $positions[] = $position;
             }
-            $this->info('  💼 Positions created: ' . count($positions));
+            $this->info('  💼 Positions created: '.count($positions));
 
             // ⚡ CACHE: Pre-load all templates' categories & aspects once
             $templateIds = collect($positions)->pluck('template_id')->unique()->values();
@@ -581,8 +585,8 @@ class DynamicAssessmentSeeder extends Seeder
                 $overallProgress = round(($processedTotal / $totalParticipants) * 100, 1);
                 $avgSpeed = $processedTotal / (microtime(true) - $startTime);
 
-                $this->info("\n     ✓ Batch {$chunkNumber} completed in " . number_format($chunkDuration, 2) . 's');
-                $this->info("     📈 Overall: {$processedTotal}/{$totalParticipants} ({$overallProgress}%) | Speed: " . number_format($avgSpeed, 1) . " p/s\n");
+                $this->info("\n     ✓ Batch {$chunkNumber} completed in ".number_format($chunkDuration, 2).'s');
+                $this->info("     📈 Overall: {$processedTotal}/{$totalParticipants} ({$overallProgress}%) | Speed: ".number_format($avgSpeed, 1)." p/s\n");
 
                 // ⚡ Memory management: Lighter GC every 5 chunks (bulk insert uses less memory)
                 if ($chunkIndex % 5 === 0 && $chunkIndex > 0) {
@@ -601,7 +605,7 @@ class DynamicAssessmentSeeder extends Seeder
         $avgSpeed = $totalParticipants / $totalDuration;
 
         $this->info("  ✅ {$totalParticipants} participants created successfully!");
-        $this->info('  ⏱️  Total time: ' . number_format($totalDuration, 2) . 's | Average: ' . number_format($avgSpeed, 1) . ' participants/second');
+        $this->info('  ⏱️  Total time: '.number_format($totalDuration, 2).'s | Average: '.number_format($avgSpeed, 1).' participants/second');
     }
 
     /**
@@ -764,7 +768,7 @@ class DynamicAssessmentSeeder extends Seeder
             'username' => $this->generateUniqueUsername(),
             'test_number' => $this->generateUniqueTestNumber(),
             'skb_number' => $this->generateUniqueSkbNumber(),
-            'name' => strtoupper($firstName . ' ' . $lastName) . ', ' . $degree,
+            'name' => strtoupper($firstName.' '.$lastName).', '.$degree,
             'email' => $this->generateUniqueEmail(),
             'phone' => fake()->numerify('08##########'),
             'gender' => $gender,
@@ -894,7 +898,7 @@ class DynamicAssessmentSeeder extends Seeder
         $numbers = str_pad((string) (self::$participantCounter % 100), 2, '0', STR_PAD_LEFT);
         $suffix = str_pad((string) ((int) (self::$participantCounter / 100)), 3, '0', STR_PAD_LEFT);
 
-        return strtoupper($letters . $numbers . '-' . $suffix);
+        return strtoupper($letters.$numbers.'-'.$suffix);
     }
 
     private function generateUniqueTestNumber(): string
@@ -902,14 +906,14 @@ class DynamicAssessmentSeeder extends Seeder
         $prefix = fake()->numerify('##-#-#-##');
         $sequence = str_pad((string) self::$participantCounter, 5, '0', STR_PAD_LEFT);
 
-        return $prefix . '-' . $sequence;
+        return $prefix.'-'.$sequence;
     }
 
     private function generateUniqueSkbNumber(): string
     {
         $baseNumber = str_pad((string) self::$participantCounter, 5, '0', STR_PAD_LEFT);
 
-        return '244002401200' . $baseNumber;
+        return '244002401200'.$baseNumber;
     }
 
     private function generateUniqueEmail(): string
@@ -917,7 +921,7 @@ class DynamicAssessmentSeeder extends Seeder
         $providers = ['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com'];
         $provider = fake()->randomElement($providers);
 
-        return 'participant' . self::$participantCounter . '@' . $provider;
+        return 'participant'.self::$participantCounter.'@'.$provider;
     }
 
     /**
@@ -1443,10 +1447,10 @@ class DynamicAssessmentSeeder extends Seeder
         foreach (
             [
                 Participant::class,
-                \App\Models\CategoryAssessment::class,
-                \App\Models\AspectAssessment::class,
-                \App\Models\SubAspectAssessment::class,
-                \App\Models\FinalAssessment::class,
+                CategoryAssessment::class,
+                AspectAssessment::class,
+                SubAspectAssessment::class,
+                FinalAssessment::class,
             ] as $model
         ) {
             if (method_exists($model, 'flushEventListeners')) {

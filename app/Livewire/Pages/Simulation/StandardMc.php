@@ -2,9 +2,11 @@
 
 namespace App\Livewire\Pages\Simulation;
 
+use App\Models\Aspect;
 use App\Models\AssessmentEvent;
 use App\Models\AssessmentTemplate;
 use App\Models\CategoryType;
+use App\Services\Cache\AspectCacheService;
 use App\Services\CustomStandardService;
 use App\Services\DynamicStandardService;
 use Livewire\Attributes\Layout;
@@ -185,7 +187,7 @@ class StandardMc extends Component
         $this->resetErrorBag(); // Clear any previous errors
         $this->editingField = $aspectCode;
         $this->editingValue = (int) $currentRating; // Convert to int for Kompetensi
-        $this->editingOriginalValue = \App\Models\Aspect::where('template_id', $this->selectedTemplate->id)
+        $this->editingOriginalValue = Aspect::where('template_id', $this->selectedTemplate->id)
             ->where('code', $aspectCode)
             ->first()?->standard_rating ?? $currentRating;
         $this->showEditRatingModal = true;
@@ -413,7 +415,7 @@ class StandardMc extends Component
 
         // 🚀 OPTIMIZATION: Preload all aspects and sub-aspects into AspectCacheService
         // This eliminates 30+ N+1 queries from DynamicStandardService
-        \App\Services\Cache\AspectCacheService::preloadByTemplate($templateId);
+        AspectCacheService::preloadByTemplate($templateId);
 
         // Get DynamicStandardService instance (handles priority: Session → Custom Standard → Quantum Default)
         $dynamicService = app(DynamicStandardService::class);

@@ -3,10 +3,11 @@
 namespace Database\Factories;
 
 use App\Models\AssessmentTemplate;
+use App\Models\CategoryType;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\CategoryType>
+ * @extends Factory<CategoryType>
  */
 class CategoryTypeFactory extends Factory
 {

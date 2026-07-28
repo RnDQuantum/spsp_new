@@ -11,7 +11,7 @@ use App\Models\PositionFormation;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Participant>
+ * @extends Factory<Participant>
  */
 class ParticipantFactory extends Factory
 {
@@ -34,6 +34,7 @@ class ParticipantFactory extends Factory
             'event_id' => AssessmentEvent::factory(),
             'institution_id' => function (array $attributes) {
                 $event = AssessmentEvent::find($attributes['event_id']);
+
                 return $event ? $event->institution_id : null;
             },
             'position_formation_id' => PositionFormation::factory(),

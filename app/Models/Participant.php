@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Scopes\InstitutionScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -30,7 +31,7 @@ class Participant extends Model
 
     protected static function booted()
     {
-        static::addGlobalScope(new \App\Models\Scopes\InstitutionScope);
+        static::addGlobalScope(new InstitutionScope);
     }
 
     protected function casts(): array

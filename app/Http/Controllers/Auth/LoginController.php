@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Institution;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -16,7 +17,7 @@ class LoginController extends Controller
     public function showLoginForm(): View
     {
         // Get all institutions with their client users for dynamic credentials display
-        $institutions = \App\Models\Institution::with(['users' => function ($query) {
+        $institutions = Institution::with(['users' => function ($query) {
             $query->where('is_active', true)
                 ->whereNotNull('institution_id');
         }])

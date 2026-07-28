@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Livewire\Pages\HCA;
 
+use Illuminate\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
-use Illuminate\View\View;
 
 #[Layout('components.layouts.hca-layout', ['title' => 'Human Capital Assessment Report'])]
 class HcaReportPage extends Component
@@ -33,7 +33,7 @@ class HcaReportPage extends Component
                 ['code' => 'exec_summary', 'label' => '02 — Ringkasan Eksekutif', 'active' => true],
                 ['code' => 'participant_id', 'label' => '03 — Identitas Peserta', 'active' => true],
                 ['code' => 'hci', 'label' => '04 — Human Capital Index', 'active' => true],
-            ]
+            ],
         ],
         [
             'title' => 'Kompetensi & Potensi (Layer 1–2)',
@@ -43,7 +43,7 @@ class HcaReportPage extends Component
                 ['code' => 'career', 'label' => '06 — Riwayat Karier', 'active' => true],
                 ['code' => 'potential', 'label' => '07 — Layer 2: Potensi', 'active' => true],
                 ['code' => 'cognitive', 'label' => '08 — IQ & Profil Kognitif', 'active' => true],
-            ]
+            ],
         ],
         [
             'title' => 'Kepribadian & Perilaku',
@@ -55,7 +55,7 @@ class HcaReportPage extends Component
                 ['code' => 'leadership_potential', 'label' => '12 — Leadership Potential', 'active' => true],
                 ['code' => 'eq', 'label' => '13 — Emotional Intelligence (EQ)', 'active' => true],
                 ['code' => 'integrity', 'label' => '14 — Values & Integrity', 'active' => true],
-            ]
+            ],
         ],
         [
             'title' => 'Kinerja & Kesiapan (Layer 3)',
@@ -64,7 +64,7 @@ class HcaReportPage extends Component
                 ['code' => 'performance', 'label' => '15 — Performance Dashboard', 'active' => true],
                 ['code' => 'nine_box', 'label' => '16 — Talent 9-Box Matrix', 'active' => true],
                 ['code' => 'succession', 'label' => '17 — Succession Readiness', 'active' => true],
-            ]
+            ],
         ],
         [
             'title' => 'Kesehatan & Risiko',
@@ -74,7 +74,7 @@ class HcaReportPage extends Component
                 ['code' => 'mental_health', 'label' => '19 — Kesehatan Jiwa', 'active' => true],
                 ['code' => 'strengths', 'label' => '20 — Kekuatan Psikologis', 'active' => true],
                 ['code' => 'risk_indicators', 'label' => '21 — Indikator Risiko', 'active' => true],
-            ]
+            ],
         ],
         [
             'title' => 'Rekomendasi',
@@ -82,8 +82,8 @@ class HcaReportPage extends Component
             'sections' => [
                 ['code' => 'development_rec', 'label' => '22 — Rekomendasi Pengembangan', 'active' => true],
                 ['code' => 'next_role_rec', 'label' => '23 — Rekomendasi Peran Berikutnya', 'active' => true],
-            ]
-        ]
+            ],
+        ],
     ];
 
     /**
@@ -97,6 +97,7 @@ class HcaReportPage extends Component
                 if ($sec['code'] === $sectionCode && $sec['active']) {
                     $this->activeSection = $sectionCode;
                     $this->printMode = false;
+
                     return;
                 }
             }

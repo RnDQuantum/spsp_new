@@ -10,7 +10,7 @@ class ImportLspData extends Command
 {
     protected $signature = 'lsp:import {kode_proyek : Kode proyek pelaksanaan LSP} {--username= : Import spesifik satu username peserta} {--institution= : ID Instansi SPSP (opsional)}';
 
-    protected $description = 'Import dan sinkronkan data hasil kalkulasi proyek LSP ke database SPSP';
+    protected $description = 'Import dan sinkronkan data hasil kalkulasi proyek LSP ke database SPSP dengan performa tinggi';
 
     public function handle(LspDataImporterService $importer): int
     {
@@ -18,14 +18,27 @@ class ImportLspData extends Command
         $username = $this->option('username');
         $instId = $this->option('institution') ? (int) $this->option('institution') : null;
 
-        $this->info('=== MEMULAI SINKRONISASI DATA LSP KE SPSP ===');
+        $this->info('=== MEMULAI SINKRONISASI DATA LSP KE SPSP (OPTIMIZED ENGINE) ===');
         $this->line("Kode Proyek : {$kodeProyek}");
         if ($username) {
             $this->line("Target User : {$username}");
         }
 
         try {
-            $res = $importer->importProject($kodeProyek, $username, $instId);
+            $progressBar = null;
+
+            $res = $importer->importProject($kodeProyek, $username, $instId, function (int $stepCount) use (&$progressBar) {
+                if (! $progressBar) {
+                    $progressBar = $this->output->createProgressBar();
+                    $progressBar->start();
+                }
+                $progressBar->advance($stepCount);
+            });
+
+            if ($progressBar) {
+                $progressBar->finish();
+                $this->newLine();
+            }
 
             $this->newLine();
             $this->info('--- RINGKASAN HASIL IMPOR ---');

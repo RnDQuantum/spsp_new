@@ -6,6 +6,8 @@ use App\Models\Aspect;
 use App\Models\AssessmentEvent;
 use App\Models\PositionFormation;
 use App\Services\TrainingRecommendationService;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -45,9 +47,9 @@ class TrainingRecommendation extends Component
     // CACHE PROPERTIES - untuk menyimpan hasil service calls
     private ?array $summaryCacheData = null;
 
-    private ?\Illuminate\Support\Collection $participantsCacheData = null;
+    private ?Collection $participantsCacheData = null;
 
-    private ?\Illuminate\Support\Collection $aspectPriorityCacheData = null;
+    private ?Collection $aspectPriorityCacheData = null;
 
     /**
      * Listen to filter component events
@@ -343,7 +345,7 @@ class TrainingRecommendation extends Component
         $positionIds = $participants->pluck('position_formation_id')->unique()->filter()->all();
 
         if (! empty($positionIds)) {
-            $positions = \App\Models\PositionFormation::whereIn('id', $positionIds)
+            $positions = PositionFormation::whereIn('id', $positionIds)
                 ->select('id', 'name')
                 ->get()
                 ->keyBy('id');
@@ -365,7 +367,7 @@ class TrainingRecommendation extends Component
     /**
      * Get aspect priority data from TrainingRecommendationService
      */
-    private function getAspectPriorityData(): ?\Illuminate\Support\Collection
+    private function getAspectPriorityData(): ?Collection
     {
         $positionFormationId = session('filter.position_formation_id');
 
@@ -405,7 +407,7 @@ class TrainingRecommendation extends Component
     /**
      * Paginate a collection
      */
-    private function paginateCollection(\Illuminate\Support\Collection $collection)
+    private function paginateCollection(Collection $collection)
     {
         $perPage = $this->perPage === 'all' ? $collection->count() : (int) $this->perPage;
         $currentPage = (int) $this->getPage();
@@ -413,13 +415,13 @@ class TrainingRecommendation extends Component
         // Slice collection for current page
         $items = $collection->slice(($currentPage - 1) * $perPage, $perPage)->values()->all();
 
-        return new \Illuminate\Pagination\LengthAwarePaginator(
+        return new LengthAwarePaginator(
             $items,
             $collection->count(),
             $perPage,
             $currentPage,
             [
-                'path' => \Illuminate\Pagination\LengthAwarePaginator::resolveCurrentPath(),
+                'path' => LengthAwarePaginator::resolveCurrentPath(),
                 'pageName' => 'page',
             ]
         );
@@ -501,6 +503,7 @@ class TrainingRecommendation extends Component
 
             $participants = $participants->map(function ($p) use ($positions) {
                 $p['position'] = $positions->get($p['position_formation_id'])->name ?? '-';
+
                 return $p;
             });
         }

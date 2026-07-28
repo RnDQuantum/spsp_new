@@ -56,8 +56,10 @@ class PsychologicalTest extends Model
                     $parts[] = "{$k}: {$v}";
                 }
             }
+
             return implode("\n", $parts);
         }
+
         return (string) ($value ?? '-');
     }
 }

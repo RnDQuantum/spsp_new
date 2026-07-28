@@ -6,6 +6,7 @@ use App\Models\Aspect;
 use App\Models\CategoryAssessment;
 use App\Models\CategoryType;
 use App\Models\Participant;
+use App\Models\PositionFormation;
 use App\Services\DynamicStandardService;
 use App\Services\IndividualAssessmentService;
 use Illuminate\Support\Facades\Log;
@@ -69,8 +70,6 @@ class Dashboard extends Component
 
     public $allAspectsData = [];
 
-
-
     // Cache properties
     private ?array $potensiAspectsDataCache = null;
 
@@ -93,11 +92,11 @@ class Dashboard extends Component
     {
         // Generate static chart IDs (same across re-renders and navigations)
         // Use session-based IDs to ensure consistency with wire:navigate
-        if (!session()->has('dashboard.chart_ids')) {
+        if (! session()->has('dashboard.chart_ids')) {
             session()->put('dashboard.chart_ids', [
-                'potensi' => 'potensiSpider' . uniqid(),
-                'kompetensi' => 'kompetensiSpider' . uniqid(),
-                'general' => 'generalSpider' . uniqid(),
+                'potensi' => 'potensiSpider'.uniqid(),
+                'kompetensi' => 'kompetensiSpider'.uniqid(),
+                'general' => 'generalSpider'.uniqid(),
             ]);
         }
 
@@ -223,7 +222,7 @@ class Dashboard extends Component
         } else {
             $positionFormationId = session('filter.position_formation_id');
             if ($positionFormationId) {
-                $position = \App\Models\PositionFormation::with('template')->find($positionFormationId);
+                $position = PositionFormation::with('template')->find($positionFormationId);
                 $currentTemplateId = $position?->template->id;
             }
         }
@@ -371,7 +370,7 @@ class Dashboard extends Component
      */
     private function loadTemplateAndCategories(int $positionFormationId): void
     {
-        $position = \App\Models\PositionFormation::with('template')->find($positionFormationId);
+        $position = PositionFormation::with('template')->find($positionFormationId);
 
         if (! $position || ! $position->template) {
             return;
@@ -504,7 +503,7 @@ class Dashboard extends Component
             return;
         }
 
-        $position = \App\Models\PositionFormation::with('template')->find($positionFormationId);
+        $position = PositionFormation::with('template')->find($positionFormationId);
         if (! $position || ! $position->template) {
             return;
         }
@@ -823,8 +822,6 @@ class Dashboard extends Component
             'percentage' => $totalAspects > 0 ? round(($passingAspects / $totalAspects) * 100) : 0,
         ];
     }
-
-
 
     public function render()
     {

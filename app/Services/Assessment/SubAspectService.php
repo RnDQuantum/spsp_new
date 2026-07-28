@@ -8,6 +8,7 @@ use App\Models\AspectAssessment;
 use App\Models\SubAspect;
 use App\Models\SubAspectAssessment;
 use App\Services\Cache\AspectCacheService;
+use Illuminate\Support\Collection;
 
 class SubAspectService
 {
@@ -70,12 +71,12 @@ class SubAspectService
      * Store multiple sub-aspect assessments for an aspect
      *
      * @param  array  $subAspectsData  Array of ['sub_aspect_code' => 'code', 'individual_rating' => 3]
-     * @return \Illuminate\Support\Collection Collection of created SubAspectAssessment models
+     * @return Collection Collection of created SubAspectAssessment models
      */
     public function storeMultipleSubAspects(
         AspectAssessment $aspectAssessment,
         array $subAspectsData
-    ): \Illuminate\Support\Collection {
+    ): Collection {
         $subAssessments = [];
 
         foreach ($subAspectsData as $subAspectData) {

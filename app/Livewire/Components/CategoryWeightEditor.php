@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Components;
 
+use App\Models\AssessmentEvent;
 use App\Models\CategoryType;
 use App\Services\DynamicStandardService;
 use Livewire\Component;
@@ -54,7 +55,7 @@ class CategoryWeightEditor extends Component
         $positionFormationId = session('filter.position_formation_id');
 
         if ($eventCode && $positionFormationId) {
-            $event = \App\Models\AssessmentEvent::where('code', $eventCode)->first();
+            $event = AssessmentEvent::where('code', $eventCode)->first();
             if ($event) {
                 $position = $event->positionFormations()->where('id', $positionFormationId)->first();
                 if ($position && $position->template) {

@@ -14,7 +14,9 @@ use App\Models\PositionFormation;
 use App\Models\SubAspect;
 use App\Models\User;
 use App\Services\CustomStandardService;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Session;
 use Tests\TestCase;
 
@@ -204,7 +206,7 @@ class CustomStandardServiceTest extends TestCase
         $result = $this->service->getForInstitution($institution->id, $template->id);
 
         $this->assertCount(0, $result);
-        $this->assertInstanceOf(\Illuminate\Support\Collection::class, $result);
+        $this->assertInstanceOf(Collection::class, $result);
     }
 
     // ==========================================
@@ -547,7 +549,7 @@ class CustomStandardServiceTest extends TestCase
 
     public function test_get_template_defaults_throws_exception_for_nonexistent_template(): void
     {
-        $this->expectException(\Illuminate\Database\Eloquent\ModelNotFoundException::class);
+        $this->expectException(ModelNotFoundException::class);
 
         $this->service->getTemplateDefaults(999);
     }

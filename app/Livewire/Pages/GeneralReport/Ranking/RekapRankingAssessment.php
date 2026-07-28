@@ -8,6 +8,7 @@ use App\Services\ConclusionService;
 use App\Services\DynamicStandardService;
 use App\Services\RankingService;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -38,11 +39,11 @@ class RekapRankingAssessment extends Component
     public array $conclusionConfig = [];
 
     // CACHE PROPERTIES - untuk menyimpan hasil service calls
-    private ?\Illuminate\Support\Collection $rankingsCache = null;
+    private ?Collection $rankingsCache = null;
 
-    private ?\Illuminate\Support\Collection $potensiRankingsCache = null;
+    private ?Collection $potensiRankingsCache = null;
 
-    private ?\Illuminate\Support\Collection $kompetensiRankingsCache = null;
+    private ?Collection $kompetensiRankingsCache = null;
 
     private ?array $eventDataCache = null;
 
@@ -181,7 +182,7 @@ class RekapRankingAssessment extends Component
      * 🚀 CRITICAL OPTIMIZATION: Build combined rankings from cached potensi & kompetensi
      * to avoid duplicate database queries
      */
-    private function getRankings(): ?\Illuminate\Support\Collection
+    private function getRankings(): ?Collection
     {
         // Check cache first
         if ($this->rankingsCache !== null) {
@@ -216,7 +217,7 @@ class RekapRankingAssessment extends Component
      * Get Potensi rankings (with cache)
      * 🚀 OPTIMIZED: Fetch once and cache, reused by getRankings()
      */
-    private function getPotensiRankings(): ?\Illuminate\Support\Collection
+    private function getPotensiRankings(): ?Collection
     {
         // Return cached if available
         if ($this->potensiRankingsCache !== null) {
@@ -246,7 +247,7 @@ class RekapRankingAssessment extends Component
      * Get Kompetensi rankings (with cache)
      * 🚀 OPTIMIZED: Fetch once and cache, reused by getRankings()
      */
-    private function getKompetensiRankings(): ?\Illuminate\Support\Collection
+    private function getKompetensiRankings(): ?Collection
     {
         // Return cached if available
         if ($this->kompetensiRankingsCache !== null) {

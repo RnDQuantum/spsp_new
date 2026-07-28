@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\InterpretationTemplate;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 
 class InterpretationTemplateService
@@ -10,15 +11,14 @@ class InterpretationTemplateService
     /**
      * Get template text for specific sub-aspect/aspect + rating
      *
-     * @param string $type 'sub_aspect' or 'aspect'
-     * @param string $name The name of sub_aspect or aspect
-     * @param int $rating Rating value 1-5
-     * @return string|null
+     * @param  string  $type  'sub_aspect' or 'aspect'
+     * @param  string  $name  The name of sub_aspect or aspect
+     * @param  int  $rating  Rating value 1-5
      */
     public function getTemplateByName(string $type, string $name, int $rating): ?string
     {
         // Cache key for performance
-        $cacheKey = "interpretation_template_{$type}_" . md5($name) . "_{$rating}";
+        $cacheKey = "interpretation_template_{$type}_".md5($name)."_{$rating}";
 
         $templateText = Cache::remember($cacheKey, now()->addDay(), function () use ($type, $name, $rating) {
             // Try to get template by name first
@@ -52,6 +52,7 @@ class InterpretationTemplateService
 
     /**
      * Legacy method - kept for backward compatibility
+     *
      * @deprecated Use getTemplateByName instead
      */
     public function getTemplate(string $type, int $id, int $rating): ?string
@@ -85,9 +86,6 @@ class InterpretationTemplateService
     /**
      * Get hardcoded default template if no template found in database
      * This is a last resort fallback
-     *
-     * @param int $rating
-     * @return string
      */
     public function getDefaultTemplate(int $rating): string
     {
@@ -112,9 +110,7 @@ class InterpretationTemplateService
     /**
      * Get all templates for a specific interpretable
      *
-     * @param string $type
-     * @param int $id
-     * @return \Illuminate\Support\Collection
+     * @return Collection
      */
     public function getTemplatesForInterpretable(string $type, int $id)
     {

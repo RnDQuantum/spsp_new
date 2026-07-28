@@ -8,6 +8,16 @@ use Illuminate\Support\Facades\DB;
 class LspIndividualReportService
 {
     /**
+     * Cache in-memory static untuk norma JSON (IST, Kostik, Personality)
+     */
+    protected static ?array $normCache = null;
+
+    /**
+     * Cache in-memory instance untuk query master DB LSP (Standar Potensi, Tool Mappings, Kamus, Metadata Proyek)
+     */
+    protected array $masterCache = [];
+
+    /**
      * Mendapatkan koneksi DB LSP (koneksi 'lsp' yang terhubung ke DB_LSP_LOCAL)
      */
     protected function getLspConnection()
@@ -16,123 +26,227 @@ class LspIndividualReportService
     }
 
     /**
-     * Mengambil dan mengolah seluruh data Laporan Individu P3K KJG 2025 untuk peserta tertentu.
+     * Mengambil dan mengolah seluruh data Laporan Individu P3K KJG 2025 untuk 1 peserta.
      */
     public function getIndividualReport(string $username, string $kodeProyek): array
     {
-        $db = $this->getLspConnection();
+        $batch = $this->getBatchIndividualReports([$username], $kodeProyek);
 
-        // 1. Ambil Data Peserta
-        $peserta = $db->table('peserta_produksi')
-            ->where('username', $username)
-            ->where('kode_pelaksanaan', $kodeProyek)
-            ->first();
-
-        if (! $peserta) {
-            // Try searching by username alone if kode_pelaksanaan doesn't strictly match
-            $peserta = $db->table('peserta_produksi')
-                ->where('username', $username)
-                ->first();
-        }
-
-        if (! $peserta) {
+        if (! isset($batch[$username])) {
             throw new Exception("Data peserta dengan username '{$username}' dan kode proyek '{$kodeProyek}' tidak ditemukan.");
         }
 
-        // 2. Ambil User & Tanggal Lahir untuk hitung Umur
-        $userObj = $db->table('users')->where('username', $username)->first();
-        $tanggalLahir = $peserta->tanggal_lahir ?? ($userObj->tanggal_lahir ?? '1990-01-01');
-        $usia = $this->hitungUmurDalamTahun($tanggalLahir);
+        return $batch[$username];
+    }
 
-        // 3. Penentuan Jenis Standar Penilaian (jf_terampil vs jf_muda_pertama)
-        $standarFormPenilaian = $peserta->standar_form_penilaian ?? 'p3k_kjg_2025';
-        $levelJabatan = strtoupper($peserta->jabatan_pelaksana ?? '');
-
-        if ($standarFormPenilaian === 'p3k_kjg_2025') {
-            if ($levelJabatan === 'TERAMPIL') {
-                $standarFormPenilaian2 = 'p3k_kjg_-_jf_terampil_2025';
-            } else {
-                $standarFormPenilaian2 = 'p3k_kjg_-_jf_muda_&_pertama_2025';
-            }
-        } else {
-            $standarFormPenilaian2 = $standarFormPenilaian;
+    /**
+     * Mengambil dan mengolah data Laporan Individu untuk sekelompok (batch/chunk) peserta sekaligus.
+     * Mengurangi query N+1 hingga 95% dengan batch pre-fetching.
+     */
+    public function getBatchIndividualReports(array $usernames, string $kodeProyek): array
+    {
+        if (empty($usernames)) {
+            return [];
         }
 
-        // 4. Ambil Skor Mentah Ujian Psikometri (IST, Kostik, Personality/16PF)
+        $db = $this->getLspConnection();
+
+        // 1. Pre-fetch Peserta Produksi
+        $pesertaRows = $db->table('peserta_produksi')
+            ->whereIn('username', $usernames)
+            ->where(function ($q) use ($kodeProyek) {
+                $q->where('kode_pelaksanaan', $kodeProyek)
+                    ->orWhere('kode_pelaksanaan', 'LIKE', "%{$kodeProyek}%");
+            })
+            ->get()
+            ->keyBy('username');
+
+        // Fallback untuk username yang mungkin tidak pas di kode_pelaksanaan
+        $missingUsernames = array_diff($usernames, $pesertaRows->keys()->toArray());
+        if (! empty($missingUsernames)) {
+            $fallbackPeserta = $db->table('peserta_produksi')
+                ->whereIn('username', $missingUsernames)
+                ->get()
+                ->keyBy('username');
+
+            foreach ($fallbackPeserta as $u => $row) {
+                $pesertaRows[$u] = $row;
+            }
+        }
+
+        // 2. Pre-fetch Users (Tanggal Lahir)
+        $usersRows = $db->table('users')
+            ->whereIn('username', $usernames)
+            ->get()
+            ->keyBy('username');
+
+        // 3. Pre-fetch Skor Mentah Ujian Psikometri
         $ujianRows = $db->table('ujian_peserta_produksi')
             ->where('kode_proyek', $kodeProyek)
-            ->where('username', $username)
+            ->whereIn('username', $usernames)
             ->whereIn('typesoal', ['ist', 'kostik', 'personality'])
-            ->select('typesoal', 'nilai')
+            ->select('username', 'typesoal', 'nilai')
             ->get();
 
-        $rawScores = [
-            'ist' => null,
-            'kostik' => null,
-            'personality' => null,
-        ];
-
+        $rawScoresMap = [];
         foreach ($ujianRows as $row) {
-            $rawScores[$row->typesoal] = $row->nilai;
+            $rawScoresMap[$row->username][$row->typesoal] = $row->nilai;
         }
 
-        // 5. Konversi Nilai Psikometri via Norma JSON
+        // 4. Pre-fetch Hasil Wawancara (Kompetensi Inti)
+        $wawancaraRows = $db->table('hasil_aspek_yang_digali')
+            ->whereIn('username', $usernames)
+            ->where('kode_proyek', $kodeProyek)
+            ->where('simulasi', 'interview')
+            ->get();
+
+        $wawancaraMap = [];
+        foreach ($wawancaraRows as $wr) {
+            $wawancaraMap[$wr->username][$wr->aspek_penilaian] = $wr;
+        }
+
+        // 5. Pre-fetch MMPI / Kejiwaan
+        $mmpiRows = $db->table('rekapmmpi_p3kkjg')
+            ->whereIn('username', $usernames)
+            ->where('kode_proyek', $kodeProyek)
+            ->get()
+            ->keyBy('username');
+
+        // 6. Pre-fetch Hasil Kelebihan & Kelemahan
+        $kelebihanRows = $db->table('hasil_aspek_kelebihan')
+            ->whereIn('username', $usernames)
+            ->where('simulasi', 'interview')
+            ->get()
+            ->keyBy('username');
+
+        // 7. Pre-fetch Hasil Rekomendasi Wawancara
+        $rekomendasiRows = $db->table('hasil_rekomendasi')
+            ->whereIn('username', $usernames)
+            ->where('simulasi', 'interview')
+            ->get()
+            ->keyBy('username');
+
+        // 8. Pre-fetch Hasil Aspek Tambahan Wawancara
+        $tambahanRows = $db->table('hasil_aspek_tambahan')
+            ->whereIn('username', $usernames)
+            ->where('kode_proyek', $kodeProyek)
+            ->where('simulasi', 'interview')
+            ->get();
+
+        $tambahanMap = [];
+        foreach ($tambahanRows as $tr) {
+            $tambahanMap[$tr->username][$tr->aspek_tambahan] = $tr;
+        }
+
+        // 9. Pre-fetch Validasi TTD Dokumen
+        $validasiRows = $db->table('validasi_ttd_report')
+            ->where('kode_proyek', $kodeProyek)
+            ->where('jenis_dokumen', 'LAPORAN INDIVIDU')
+            ->whereIn('untuk', $usernames)
+            ->get()
+            ->keyBy('untuk');
+
+        // 10. Pre-fetch Asesor TA
+        $asesorPjList = $pesertaRows->pluck('asesor_pj')->filter()->unique()->toArray();
+        $taMap = [];
+        if (! empty($asesorPjList)) {
+            $taRows = $db->table('users_personil as up')
+                ->leftJoin('penugasan as p', 'p.username', '=', 'up.username')
+                ->whereIn('up.username', $asesorPjList)
+                ->where('p.kode_proyek', $kodeProyek)
+                ->select('up.username', 'up.gelar_depan', 'up.nama_lengkap', 'up.gelar_belakang', 'p.jabatan')
+                ->get();
+
+            foreach ($taRows as $tr) {
+                $taMap[$tr->username] = $tr;
+            }
+        }
+
+        // 11. Pre-fetch Metadata Proyek Komon
+        $metadataProyekCommon = $this->getMetadataProyekCached($db, $kodeProyek);
+
         $normData = $this->loadNormData();
-        $hasilIst = $this->processIstNorms($rawScores['ist'], $peserta->pendidikan ?? 'S1', $usia, $normData['ist'] ?? null);
-        $hasilKostik = $this->processKostikNorms($rawScores['kostik'], $normData['kostik'] ?? null);
-        $hasil16pf = $this->process16pfNorms($rawScores['personality'], $usia, $normData['personality'] ?? null);
+        $reports = [];
 
-        // 6. Pengolahan Profil Potensi (Aspek, Atribut, Rating 1-5, Bobot & Gap)
-        $profilPotensi = $this->calculateProfilPotensi($db, $standarFormPenilaian2, $standarFormPenilaian, $hasilIst, $hasilKostik, $hasil16pf);
+        foreach ($usernames as $u) {
+            $peserta = $pesertaRows[$u] ?? null;
+            if (! $peserta) {
+                continue;
+            }
 
-        // 7. Pengolahan Profil Kompetensi (Aspek Inti, Rating 1-5, Wawancara vs Alat Tes, Bobot & Gap)
-        $profilKompetensi = $this->calculateProfilKompetensi($db, $username, $kodeProyek, $standarFormPenilaian2, $hasilIst, $hasilKostik, $hasil16pf);
+            $userObj = $usersRows[$u] ?? null;
+            $tanggalLahir = $peserta->tanggal_lahir ?? ($userObj->tanggal_lahir ?? '1990-01-01');
+            $usia = $this->hitungUmurDalamTahun($tanggalLahir);
 
-        // 8. Evaluasi Hasil Kesimpulan Psikotest (Potensi 40% + Kompetensi 60% & PRASYARAT IQ >= 90)
-        $kesimpulanPsikotest = $this->calculateKesimpulanPsikotest($profilPotensi, $profilKompetensi, $hasilIst['iq']);
+            $standarFormPenilaian = $peserta->standar_form_penilaian ?? 'p3k_kjg_2025';
+            $levelJabatan = strtoupper($peserta->jabatan_pelaksana ?? '');
 
-        // 9. Ambil Data Tes Kejiwaan (MMPI)
-        $dataKejiwaan = $this->getKejiwaanData($db, $username, $kodeProyek);
+            if ($standarFormPenilaian === 'p3k_kjg_2025') {
+                if ($levelJabatan === 'TERAMPIL') {
+                    $standarFormPenilaian2 = 'p3k_kjg_-_jf_terampil_2025';
+                } else {
+                    $standarFormPenilaian2 = 'p3k_kjg_-_jf_muda_&_pertama_2025';
+                }
+            } else {
+                $standarFormPenilaian2 = $standarFormPenilaian;
+            }
 
-        // 10. Ambil Data Wawancara & Asesor TA
-        $dataWawancara = $this->getWawancaraData($db, $username, $kodeProyek, $standarFormPenilaian2, $peserta);
+            $rawScores = [
+                'ist' => $rawScoresMap[$u]['ist'] ?? null,
+                'kostik' => $rawScoresMap[$u]['kostik'] ?? null,
+                'personality' => $rawScoresMap[$u]['personality'] ?? null,
+            ];
 
-        // 11. Penentuan Rekomendasi Akhir Gabungan (Psikotes + Wawancara Asesor)
-        $rekomendasiAkhir = $this->evaluateFinalRecommendation($kesimpulanPsikotest, $dataWawancara['rekomendasi_asesor']);
+            $hasilIst = $this->processIstNorms($rawScores['ist'], $peserta->pendidikan ?? 'S1', $usia, $normData['ist'] ?? null);
+            $hasilKostik = $this->processKostikNorms($rawScores['kostik'], $normData['kostik'] ?? null);
+            $hasil16pf = $this->process16pfNorms($rawScores['personality'], $usia, $normData['personality'] ?? null);
 
-        // 12. Ambil Narasi Interpretasi Otomatis (Kamus Potensi & Kamus Kompetensi)
-        $interpretasiNarasi = $this->getInterpretasiNarasi($db, $peserta, $standarFormPenilaian2, $profilPotensi, $profilKompetensi);
+            $profilPotensi = $this->calculateProfilPotensiCached($db, $standarFormPenilaian2, $standarFormPenilaian, $hasilIst, $hasilKostik, $hasil16pf);
+            $profilKompetensi = $this->calculateProfilKompetensiCached($db, $wawancaraMap[$u] ?? [], $standarFormPenilaian2, $hasilIst, $hasilKostik, $hasil16pf);
 
-        // 13. Metadata Proyek & Dokumen Validasi TTD
-        $metadataProyek = $this->getMetadataProyek($db, $kodeProyek, $username, $peserta);
+            $kesimpulanPsikotest = $this->calculateKesimpulanPsikotest($profilPotensi, $profilKompetensi, $hasilIst['iq']);
+            $dataKejiwaan = $this->formatKejiwaanRow($mmpiRows[$u] ?? null);
+            $dataWawancara = $this->formatWawancaraData($db, $u, $kodeProyek, $standarFormPenilaian2, $peserta, $taMap[$peserta->asesor_pj ?? ''] ?? null, $kelebihanRows[$u] ?? null, $rekomendasiRows[$u] ?? null, $tambahanMap[$u] ?? []);
+            $rekomendasiAkhir = $this->evaluateFinalRecommendation($kesimpulanPsikotest, $dataWawancara['rekomendasi_asesor']);
+            $interpretasiNarasi = $this->getInterpretasiNarasiCached($db, $peserta, $standarFormPenilaian2, $profilPotensi, $profilKompetensi);
 
-        return [
-            'peserta' => [
-                'no_test' => $peserta->no_test ?? '-',
-                'no_kjg' => $peserta->no_kjg ?? '-',
-                'username' => $peserta->username,
-                'nama_lengkap' => trim(($peserta->gelar_depan ?? '').' '.($peserta->nama_lengkap ?? '').', '.($peserta->gelar_belakang ?? ''), ' ,'),
-                'jenis_kelamin' => $peserta->jenis_kelamin ?? 'L',
-                'pendidikan' => $peserta->pendidikan ?? '-',
-                'jabatan_pelaksana' => $peserta->jabatan_pelaksana ?? '-',
-                'minat_penempatan' => $peserta->minat_penempatan ?? '-',
-                'pasfoto' => $peserta->pasfoto ?? null,
-                'usia' => $usia,
-            ],
-            'metadata_proyek' => $metadataProyek,
-            'header_scores' => [
-                'psikotest_percent' => round($kesimpulanPsikotest['hasil_psikotest_percent'], 2),
-                'wawancara_percent' => round($kesimpulanPsikotest['hasil_wawancara_percent'], 2),
-                'kejiwaan_score' => $dataKejiwaan['nilai_kejiwaan'],
-            ],
-            'potensi' => $profilPotensi,
-            'kompetensi' => $profilKompetensi,
-            'kesimpulan_psikotest' => $kesimpulanPsikotest,
-            'kejiwaan' => $dataKejiwaan,
-            'wawancara' => $dataWawancara,
-            'rekomendasi_akhir' => $rekomendasiAkhir,
-            'interpretasi' => $interpretasiNarasi,
-        ];
+            $validasi = $validasiRows[$u] ?? null;
+            $metadataProyek = array_merge($metadataProyekCommon, [
+                'no_dokumen' => $validasi->no_dokumen ?? '001/LI-QHRM/2025',
+                'kode_validasi' => $validasi->kode_validasi ?? null,
+                'qr_code' => $validasi->qr_code ?? null,
+            ]);
+
+            $reports[$u] = [
+                'peserta' => [
+                    'no_test' => $peserta->no_test ?? '-',
+                    'no_kjg' => $peserta->no_kjg ?? '-',
+                    'username' => $peserta->username,
+                    'nama_lengkap' => trim(($peserta->gelar_depan ?? '').' '.($peserta->nama_lengkap ?? '').', '.($peserta->gelar_belakang ?? ''), ' ,'),
+                    'jenis_kelamin' => $peserta->jenis_kelamin ?? 'L',
+                    'pendidikan' => $peserta->pendidikan ?? '-',
+                    'jabatan_pelaksana' => $peserta->jabatan_pelaksana ?? '-',
+                    'minat_penempatan' => $peserta->minat_penempatan ?? '-',
+                    'pasfoto' => $peserta->pasfoto ?? null,
+                    'usia' => $usia,
+                ],
+                'metadata_proyek' => $metadataProyek,
+                'header_scores' => [
+                    'psikotest_percent' => round($kesimpulanPsikotest['hasil_psikotest_percent'], 2),
+                    'wawancara_percent' => round($kesimpulanPsikotest['hasil_wawancara_percent'], 2),
+                    'kejiwaan_score' => $dataKejiwaan['nilai_kejiwaan'],
+                ],
+                'potensi' => $profilPotensi,
+                'kompetensi' => $profilKompetensi,
+                'kesimpulan_psikotest' => $kesimpulanPsikotest,
+                'kejiwaan' => $dataKejiwaan,
+                'wawancara' => $dataWawancara,
+                'rekomendasi_akhir' => $rekomendasiAkhir,
+                'interpretasi' => $interpretasiNarasi,
+            ];
+        }
+
+        return $reports;
     }
 
     /**
@@ -154,10 +268,14 @@ class LspIndividualReportService
     }
 
     /**
-     * Read norm JSON files if available
+     * Read norm JSON files with static in-memory caching
      */
     protected function loadNormData(): array
     {
+        if (static::$normCache !== null) {
+            return static::$normCache;
+        }
+
         $norms = ['ist' => null, 'kostik' => null, 'personality' => null];
 
         $paths = [
@@ -173,7 +291,9 @@ class LspIndividualReportService
             }
         }
 
-        return $norms;
+        static::$normCache = $norms;
+
+        return static::$normCache;
     }
 
     /**
@@ -208,7 +328,6 @@ class LspIndividualReportService
         $rsME = (int) $arrayIst[8];
 
         if (! $istNorm) {
-            // Fallback estimation when JSON norm file is pending download from user
             $iqEst = 90 + min(40, (int) ($rsSum / 3));
 
             return [
@@ -221,7 +340,6 @@ class LspIndividualReportService
             ];
         }
 
-        // Processing with norm JSON when available
         $pendidikanUpper = strtoupper($pendidikan);
         if (in_array($pendidikanUpper, ['SMA', 'SMK'])) {
             $iqIst = $istNorm['hasil_iq_pendidikan'][$istNorm['sw_sma'][$rsSum] ?? 0] ?? 100;
@@ -376,7 +494,6 @@ class LspIndividualReportService
                 $baseSten = min(10, max(1, $rawVal));
             }
 
-            // MD Correction Rules
             if ($md == 10) {
                 if (in_array($fName, ['O', 'Q4'])) {
                     $baseSten += 2;
@@ -408,32 +525,37 @@ class LspIndividualReportService
     }
 
     /**
-     * Calculate Potensi Profile
+     * Calculate Potensi Profile with Master Query Caching
      */
-    protected function calculateProfilPotensi($db, string $standarJabatan, string $standarPenilaian, array $ist, array $kostik, array $pf16): array
+    protected function calculateProfilPotensiCached($db, string $standarJabatan, string $standarPenilaian, array $ist, array $kostik, array $pf16): array
     {
-        $toleransiPct = 10; // 10% default tolerance
+        $toleransiPct = 10;
 
-        // Query standar_potensi with joined aspekt & attribute
-        $standarPotensiRows = $db->table('standar_potensi')
-            ->join('standar_aspek', 'standar_aspek.kode_aspek', '=', 'standar_potensi.aspek')
-            ->join('standar_atribute', 'standar_atribute.kode_atribute', '=', 'standar_potensi.atribut')
-            ->where('standar_potensi.standar_jabatan', $standarJabatan)
-            ->where('standar_potensi.level', 'potensi')
-            ->select('standar_potensi.*', 'standar_aspek.aspek_penilaian', 'standar_atribute.nama_atribute')
-            ->orderBy('standar_potensi.id', 'asc')
-            ->orderBy('standar_potensi.urutan', 'asc')
-            ->get();
+        $cacheKeyPotensi = "potensi_rows_{$standarJabatan}";
+        if (! isset($this->masterCache[$cacheKeyPotensi])) {
+            $this->masterCache[$cacheKeyPotensi] = $db->table('standar_potensi')
+                ->join('standar_aspek', 'standar_aspek.kode_aspek', '=', 'standar_potensi.aspek')
+                ->join('standar_atribute', 'standar_atribute.kode_atribute', '=', 'standar_potensi.atribut')
+                ->where('standar_potensi.standar_jabatan', $standarJabatan)
+                ->where('standar_potensi.level', 'potensi')
+                ->select('standar_potensi.*', 'standar_aspek.aspek_penilaian', 'standar_atribute.nama_atribute')
+                ->orderBy('standar_potensi.id', 'asc')
+                ->orderBy('standar_potensi.urutan', 'asc')
+                ->get();
+        }
+        $standarPotensiRows = $this->masterCache[$cacheKeyPotensi];
 
-        // Query tool mappings
-        $toolMappings = $db->table('standar_atribute_alat_ukur')
-            ->join('standar_potensi', 'standar_atribute_alat_ukur.kode_atribute', '=', 'standar_potensi.atribut')
-            ->where('standar_potensi.standar_jabatan', $standarJabatan)
-            ->where('standar_atribute_alat_ukur.standard', $standarPenilaian)
-            ->orderBy('standar_potensi.urutan', 'asc')
-            ->get();
+        $cacheKeyMappings = "tool_mappings_{$standarJabatan}_{$standarPenilaian}";
+        if (! isset($this->masterCache[$cacheKeyMappings])) {
+            $this->masterCache[$cacheKeyMappings] = $db->table('standar_atribute_alat_ukur')
+                ->join('standar_potensi', 'standar_atribute_alat_ukur.kode_atribute', '=', 'standar_potensi.atribut')
+                ->where('standar_potensi.standar_jabatan', $standarJabatan)
+                ->where('standar_atribute_alat_ukur.standard', $standarPenilaian)
+                ->orderBy('standar_potensi.urutan', 'asc')
+                ->get();
+        }
+        $toolMappings = $this->masterCache[$cacheKeyMappings];
 
-        // Calculate individual ratings 1-5 for tool mappings
         $aspekAtributRatings = [];
         foreach ($toolMappings as $mapping) {
             $x = 0;
@@ -475,7 +597,6 @@ class LspIndividualReportService
             $aspekAtributRatings[$mapping->aspek][$mapping->atribut][] = $rating;
         }
 
-        // Average ratings per attribute
         $actualAttributeRating = [];
         foreach ($aspekAtributRatings as $aspek => $atributs) {
             foreach ($atributs as $atrib => $ratings) {
@@ -483,7 +604,6 @@ class LspIndividualReportService
             }
         }
 
-        // Aggregate per aspect
         $aspekSummary = [];
         $totalStandardRating = 0;
         $totalIndividualRating = 0;
@@ -503,7 +623,6 @@ class LspIndividualReportService
             $avgStdRating = array_sum($stdRatings) / count($stdRatings);
             $stdRatingTol = $avgStdRating - ($avgStdRating * ($toleransiPct / 100));
 
-            // Individual aspect rating
             $indivRatings = [];
             foreach ($rows as $r) {
                 $indivRatings[] = $actualAttributeRating[$aspekKode][$r->atribut] ?? (int) $r->standar_rating;
@@ -574,27 +693,23 @@ class LspIndividualReportService
     }
 
     /**
-     * Calculate Kompetensi Profile
+     * Calculate Kompetensi Profile with Cached Master Rows & Pre-fetched Interview Data
      */
-    protected function calculateProfilKompetensi($db, string $username, string $kodeProyek, string $standarJabatan, array $ist, array $kostik, array $pf16): array
+    protected function calculateProfilKompetensiCached($db, array $hasilWawancaraUserMap, string $standarJabatan, array $ist, array $kostik, array $pf16): array
     {
         $toleransiPct = 10;
 
-        $standarKompetensiRows = $db->table('standard_aspek_yang_digali')
-            ->join('aspek_yang_digali', 'aspek_yang_digali.kode_kompetensi', '=', 'standard_aspek_yang_digali.kode_kompetensi')
-            ->where('standard_aspek_yang_digali.jenis_standar', $standarJabatan)
-            ->where('standard_aspek_yang_digali.kompetensi', 'inti')
-            ->orderBy('standard_aspek_yang_digali.urutan', 'asc')
-            ->select('standard_aspek_yang_digali.*', 'aspek_yang_digali.nama_kompetensi')
-            ->get();
-
-        // Fetch interview ratings from assessor
-        $hasilWawancara = $db->table('hasil_aspek_yang_digali')
-            ->where('username', $username)
-            ->where('kode_proyek', $kodeProyek)
-            ->where('simulasi', 'interview')
-            ->get()
-            ->keyBy('aspek_penilaian');
+        $cacheKeyKompetensi = "kompetensi_rows_{$standarJabatan}";
+        if (! isset($this->masterCache[$cacheKeyKompetensi])) {
+            $this->masterCache[$cacheKeyKompetensi] = $db->table('standard_aspek_yang_digali')
+                ->join('aspek_yang_digali', 'aspek_yang_digali.kode_kompetensi', '=', 'standard_aspek_yang_digali.kode_kompetensi')
+                ->where('standard_aspek_yang_digali.jenis_standar', $standarJabatan)
+                ->where('standard_aspek_yang_digali.kompetensi', 'inti')
+                ->orderBy('standard_aspek_yang_digali.urutan', 'asc')
+                ->select('standard_aspek_yang_digali.*', 'aspek_yang_digali.nama_kompetensi')
+                ->get();
+        }
+        $standarKompetensiRows = $this->masterCache[$cacheKeyKompetensi];
 
         $aspekSummary = [];
         $totalStandardRating = 0;
@@ -609,8 +724,7 @@ class LspIndividualReportService
             $stdRating = (float) $row->standar_rating;
             $stdRatingTol = $stdRating - ($stdRating * ($toleransiPct / 100));
 
-            // Indiv rating from interview, fallback to standard rating
-            $indivRating = isset($hasilWawancara[$kodeKom]) ? (float) $hasilWawancara[$kodeKom]->nilai_rating : $stdRating;
+            $indivRating = isset($hasilWawancaraUserMap[$kodeKom]) ? (float) $hasilWawancaraUserMap[$kodeKom]->nilai_rating : $stdRating;
 
             $stdScoreTol = $stdRatingTol * $bobot;
             $indivScore = $indivRating * $bobot;
@@ -684,7 +798,6 @@ class LspIndividualReportService
         $kompetensiStdScore = $kompetensi['total_standard_score'];
         $kompetensiIndivScore = $kompetensi['total_individual_score'];
 
-        // Weighted 40:60
         $potensiStdScoreAkhir = ($potensiStdScore * 40) / 100;
         $potensiIndivScoreAkhir = ($potensiIndivScore * 40) / 100;
 
@@ -695,7 +808,6 @@ class LspIndividualReportService
         $totalIndivScore = $potensiIndivScoreAkhir + $kompetensiIndivScoreAkhir;
         $totalStdScoreTol = $totalStdScore - ($totalStdScore * ($toleransiPct / 100));
 
-        // IQ Prerequisite Rule (IQ >= 90)
         if ($iq >= 90) {
             if ($totalIndivScore >= $totalStdScore) {
                 $kesimpulanCode = 'MS';
@@ -712,7 +824,6 @@ class LspIndividualReportService
             $kesimpulanText = 'TIDAK MEMENUHI SYARAT (TMS)';
         }
 
-        // Header Percentages Formula
         $hasilPsikotestPct = $potensiStdScore > 0 ? (($potensiIndivScore / $potensiStdScore) * 100) - 30 : 0;
         $hasilWawancaraPct = $kompetensiStdScore > 0 ? (($kompetensiIndivScore / $kompetensiStdScore) * 100) - 20 : 0;
 
@@ -739,15 +850,10 @@ class LspIndividualReportService
     }
 
     /**
-     * Get MMPI / Kejiwaan Data
+     * Format Kejiwaan Row
      */
-    protected function getKejiwaanData($db, string $username, string $kodeProyek): array
+    protected function formatKejiwaanRow(?object $row): array
     {
-        $row = $db->table('rekapmmpi_p3kkjg')
-            ->where('username', $username)
-            ->where('kode_proyek', $kodeProyek)
-            ->first();
-
         if (! $row) {
             return [
                 'validitas' => '-',
@@ -808,34 +914,12 @@ class LspIndividualReportService
     }
 
     /**
-     * Get Wawancara Qualitative & Assessor Data
+     * Format Wawancara Data
      */
-    protected function getWawancaraData($db, string $username, string $kodeProyek, string $standarJabatan, $peserta): array
+    protected function formatWawancaraData($db, string $username, string $kodeProyek, string $standarJabatan, $peserta, ?object $taRow, ?object $kelebihanRow, ?object $rekomRow, array $tambahanMap): array
     {
-        $kodeTa = $peserta->asesor_pj ?? '';
-
-        // Assessor details
-        $taRow = $db->table('users_personil as up')
-            ->leftJoin('penugasan as p', 'p.username', '=', 'up.username')
-            ->where('up.username', $kodeTa)
-            ->where('p.kode_proyek', $kodeProyek)
-            ->select('up.gelar_depan', 'up.nama_lengkap', 'up.gelar_belakang', 'p.jabatan')
-            ->first();
-
         $namaTa = $taRow ? trim(($taRow->gelar_depan ?? '').' '.($taRow->nama_lengkap ?? '').', '.($taRow->gelar_belakang ?? ''), ' ,') : 'Asesor Penanggung Jawab';
         $jabatanTa = $taRow->jabatan ?? 'Technical Advisor';
-
-        // Strengths & Weaknesses
-        $kelebihanRow = $db->table('hasil_aspek_kelebihan')
-            ->where('username', $username)
-            ->where('simulasi', 'interview')
-            ->first();
-
-        // Recommendation
-        $rekomRow = $db->table('hasil_rekomendasi')
-            ->where('username', $username)
-            ->where('simulasi', 'interview')
-            ->first();
 
         $rekomCode = $rekomRow->rekomendasi ?? 'MS';
         $rekomText = match ($rekomCode) {
@@ -844,25 +928,21 @@ class LspIndividualReportService
             default => 'MEMENUHI SYARAT (MS)'
         };
 
-        // Additional aspects
-        $aspekTambahanRows = $db->table('aspek_tambahan')
-            ->join('standard_aspek_yang_digali', 'standard_aspek_yang_digali.kode_kompetensi', '=', 'aspek_tambahan.kode_aspek_tambahan')
-            ->where('standard_aspek_yang_digali.jenis_standar', $standarJabatan)
-            ->where('standard_aspek_yang_digali.kompetensi', 'tambahan')
-            ->select('aspek_tambahan.*', 'standard_aspek_yang_digali.standar_rating')
-            ->get();
-
-        $hasilTambahanRows = $db->table('hasil_aspek_tambahan')
-            ->where('username', $username)
-            ->where('kode_proyek', $kodeProyek)
-            ->where('simulasi', 'interview')
-            ->get()
-            ->keyBy('aspek_tambahan');
+        $cacheKeyAspekTambahan = "aspek_tambahan_{$standarJabatan}";
+        if (! isset($this->masterCache[$cacheKeyAspekTambahan])) {
+            $this->masterCache[$cacheKeyAspekTambahan] = $db->table('aspek_tambahan')
+                ->join('standard_aspek_yang_digali', 'standard_aspek_yang_digali.kode_kompetensi', '=', 'aspek_tambahan.kode_aspek_tambahan')
+                ->where('standard_aspek_yang_digali.jenis_standar', $standarJabatan)
+                ->where('standard_aspek_yang_digali.kompetensi', 'tambahan')
+                ->select('aspek_tambahan.*', 'standard_aspek_yang_digali.standar_rating')
+                ->get();
+        }
+        $aspekTambahanRows = $this->masterCache[$cacheKeyAspekTambahan];
 
         $aspekTambahanList = [];
         foreach ($aspekTambahanRows as $at) {
             $atKode = $at->kode_aspek_tambahan;
-            $h = $hasilTambahanRows[$atKode] ?? null;
+            $h = $tambahanMap[$atKode] ?? null;
             $aspekTambahanList[] = [
                 'kode_aspek_tambahan' => $atKode,
                 'nama_aspek_tambahan' => $at->nama_aspek_tambahan,
@@ -887,7 +967,7 @@ class LspIndividualReportService
     }
 
     /**
-     * Evaluate Final Combined Recommendation (Psikotes + Wawancara)
+     * Evaluate Final Combined Recommendation
      */
     protected function evaluateFinalRecommendation(array $psikotest, string $rekomWawancara): array
     {
@@ -915,23 +995,27 @@ class LspIndividualReportService
     }
 
     /**
-     * Get Narrative Interpretation
+     * Get Narrative Interpretation with Caching
      */
-    protected function getInterpretasiNarasi($db, $peserta, string $standarJabatan, array $potensi, array $kompetensi): array
+    protected function getInterpretasiNarasiCached($db, $peserta, string $standarJabatan, array $potensi, array $kompetensi): array
     {
         $angka = $peserta->angka ?? 1;
 
-        // Fetch Kamus Potensi
-        $kamusPotensiRows = $db->table('kamus_potensi')
-            ->where('standard', $standarJabatan)
-            ->where('versi', $angka)
-            ->get();
+        $cacheKeyPotensi = "kamus_potensi_{$standarJabatan}_{$angka}";
+        if (! isset($this->masterCache[$cacheKeyPotensi])) {
+            $kamusRows = $db->table('kamus_potensi')
+                ->where('standard', $standarJabatan)
+                ->where('versi', $angka)
+                ->get();
 
-        $mapPotensi = [];
-        foreach ($kamusPotensiRows as $item) {
-            $key = $item->kode_atribute.'_'.$item->rating;
-            $mapPotensi[$key] = $item->interpretasi;
+            $map = [];
+            foreach ($kamusRows as $item) {
+                $key = $item->kode_atribute.'_'.$item->rating;
+                $map[$key] = $item->interpretasi;
+            }
+            $this->masterCache[$cacheKeyPotensi] = $map;
         }
+        $mapPotensi = $this->masterCache[$cacheKeyPotensi];
 
         $potensiNarasi = [];
         foreach ($potensi['aspek_list'] as $aspek) {
@@ -943,17 +1027,21 @@ class LspIndividualReportService
             }
         }
 
-        // Fetch Kamus Kompetensi
-        $kamusKompetensiRows = $db->table('kamus_kompetensi')
-            ->where('standard', $standarJabatan)
-            ->where('versi', $angka)
-            ->get();
+        $cacheKeyKompetensi = "kamus_kompetensi_{$standarJabatan}_{$angka}";
+        if (! isset($this->masterCache[$cacheKeyKompetensi])) {
+            $kamusRows = $db->table('kamus_kompetensi')
+                ->where('standard', $standarJabatan)
+                ->where('versi', $angka)
+                ->get();
 
-        $mapKompetensi = [];
-        foreach ($kamusKompetensiRows as $item) {
-            $key = $item->kode_kompetensi.'_'.$item->rating;
-            $mapKompetensi[$key] = $item->interpretasi;
+            $map = [];
+            foreach ($kamusRows as $item) {
+                $key = $item->kode_kompetensi.'_'.$item->rating;
+                $map[$key] = $item->interpretasi;
+            }
+            $this->masterCache[$cacheKeyKompetensi] = $map;
         }
+        $mapKompetensi = $this->masterCache[$cacheKeyKompetensi];
 
         $kompetensiNarasi = [];
         foreach ($kompetensi['aspek_list'] as $kom) {
@@ -971,29 +1059,25 @@ class LspIndividualReportService
     }
 
     /**
-     * Get Proyek & Validation Metadata
+     * Get Common Project Metadata Cached
      */
-    protected function getMetadataProyek($db, string $kodeProyek, string $username, $peserta): array
+    protected function getMetadataProyekCached($db, string $kodeProyek): array
     {
-        $proyek = $db->table('proyek')->where('kode_proyek', $kodeProyek)->first();
-        $proyekProduksi = $proyek ? $db->table('proyek_produksi')->where('kode', $proyek->nama_proyek)->first() : null;
-        $klien = $proyekProduksi ? $db->table('klien')->where('kode_klien', $proyekProduksi->instansi)->first() : null;
+        $cacheKey = "metadata_proyek_common_{$kodeProyek}";
+        if (! isset($this->masterCache[$cacheKey])) {
+            $proyek = $db->table('proyek')->where('kode_proyek', $kodeProyek)->first();
+            $proyekProduksi = $proyek ? $db->table('proyek_produksi')->where('kode', $proyek->nama_proyek)->first() : null;
+            $klien = $proyekProduksi ? $db->table('klien')->where('kode_klien', $proyekProduksi->instansi)->first() : null;
 
-        $validasi = $db->table('validasi_ttd_report')
-            ->where('kode_proyek', $kodeProyek)
-            ->where('jenis_dokumen', 'LAPORAN INDIVIDU')
-            ->where('untuk', $username)
-            ->first();
+            $this->masterCache[$cacheKey] = [
+                'nama_proyek' => $proyek->nama_proyek ?? '-',
+                'lokasi' => $proyek->lokasi ?? '-',
+                'tanggal_pelaksanaan' => $proyek->tanggal_pelaksanaan ?? date('Y-m-d'),
+                'sampai_tanggal' => $proyek->sampai_tanggal ?? date('Y-m-d'),
+                'nama_klien' => $klien->nama_klien ?? '-',
+            ];
+        }
 
-        return [
-            'nama_proyek' => $proyek->nama_proyek ?? '-',
-            'lokasi' => $proyek->lokasi ?? '-',
-            'tanggal_pelaksanaan' => $proyek->tanggal_pelaksanaan ?? date('Y-m-d'),
-            'sampai_tanggal' => $proyek->sampai_tanggal ?? date('Y-m-d'),
-            'nama_klien' => $klien->nama_klien ?? '-',
-            'no_dokumen' => $validasi->no_dokumen ?? '001/LI-QHRM/2025',
-            'kode_validasi' => $validasi->kode_validasi ?? null,
-            'qr_code' => $validasi->qr_code ?? null,
-        ];
+        return $this->masterCache[$cacheKey];
     }
 }

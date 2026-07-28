@@ -2,21 +2,24 @@
 
 namespace Tests\Feature\Livewire;
 
-use PHPUnit\Framework\Attributes\Test;
+use App\Livewire\Pages\GeneralReport\Statistic;
 use App\Models\Aspect;
 use App\Models\AspectAssessment;
 use App\Models\AssessmentEvent;
 use App\Models\AssessmentTemplate;
 use App\Models\CategoryAssessment;
 use App\Models\CategoryType;
+use App\Models\CustomStandard;
 use App\Models\Institution;
 use App\Models\Participant;
 use App\Models\PositionFormation;
+use App\Models\SubAspect;
 use App\Models\User;
 use App\Services\Cache\AspectCacheService;
 use App\Services\DynamicStandardService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 /**
@@ -37,15 +40,25 @@ class StatisticTest extends TestCase
     use RefreshDatabase;
 
     private User $user;
+
     private Institution $institution;
+
     private AssessmentEvent $event;
+
     private PositionFormation $position;
+
     private AssessmentTemplate $template;
+
     private CategoryType $categoryType;
+
     private CategoryType $potensiCategoryType;
+
     private CategoryType $potensiCategory;
+
     private Aspect $aspect;
+
     private Participant $participant;
+
     private CategoryAssessment $categoryAssessment;
 
     protected function setUp(): void
@@ -153,7 +166,7 @@ class StatisticTest extends TestCase
     public function component_mounts_with_default_state()
     {
         // Act
-        $component = Livewire::test(\App\Livewire\Pages\GeneralReport\Statistic::class);
+        $component = Livewire::test(Statistic::class);
 
         // Assert
         $component
@@ -171,7 +184,7 @@ class StatisticTest extends TestCase
     public function component_loads_statistics_when_mounted_with_complete_filters()
     {
         // Act
-        $component = Livewire::test(\App\Livewire\Pages\GeneralReport\Statistic::class);
+        $component = Livewire::test(Statistic::class);
 
         // Assert
         $component
@@ -185,7 +198,7 @@ class StatisticTest extends TestCase
     public function handle_event_selected_clears_cache_and_waits_for_position()
     {
         // Arrange
-        $component = Livewire::test(\App\Livewire\Pages\GeneralReport\Statistic::class);
+        $component = Livewire::test(Statistic::class);
 
         // Act
         $component->dispatch('event-selected', 'NEW-EVENT');
@@ -200,7 +213,7 @@ class StatisticTest extends TestCase
     public function handle_position_selected_clears_cache_and_waits_for_aspect()
     {
         // Arrange
-        $component = Livewire::test(\App\Livewire\Pages\GeneralReport\Statistic::class);
+        $component = Livewire::test(Statistic::class);
 
         // Act
         $component->dispatch('position-selected', 999);
@@ -230,7 +243,7 @@ class StatisticTest extends TestCase
             'individual_rating' => 4.0,
         ]);
 
-        $component = Livewire::test(\App\Livewire\Pages\GeneralReport\Statistic::class);
+        $component = Livewire::test(Statistic::class);
 
         // Act
         $component->dispatch('aspect-selected', $newAspect->id);
@@ -247,7 +260,7 @@ class StatisticTest extends TestCase
     public function handle_standard_update_refreshes_statistics_and_dispatches_chart_update()
     {
         // Arrange
-        $component = Livewire::test(\App\Livewire\Pages\GeneralReport\Statistic::class);
+        $component = Livewire::test(Statistic::class);
 
         // Act
         $component->dispatch('standard-adjusted', $this->template->id);
@@ -262,7 +275,7 @@ class StatisticTest extends TestCase
     public function handle_standard_switched_refreshes_statistics_and_dispatches_chart_update()
     {
         // Arrange
-        $component = Livewire::test(\App\Livewire\Pages\GeneralReport\Statistic::class);
+        $component = Livewire::test(Statistic::class);
 
         // Act
         $component->dispatch('standard-switched', $this->template->id);
@@ -280,7 +293,7 @@ class StatisticTest extends TestCase
         session()->forget(['filter.event_code', 'filter.position_formation_id', 'filter.aspect_id']);
 
         // Act
-        $component = Livewire::test(\App\Livewire\Pages\GeneralReport\Statistic::class);
+        $component = Livewire::test(Statistic::class);
 
         // Assert
         $component
@@ -297,7 +310,7 @@ class StatisticTest extends TestCase
         session(['filter.event_code' => 'INVALID-EVENT']);
 
         // Act
-        $component = Livewire::test(\App\Livewire\Pages\GeneralReport\Statistic::class);
+        $component = Livewire::test(Statistic::class);
 
         // Assert
         $component
@@ -314,7 +327,7 @@ class StatisticTest extends TestCase
         session(['filter.position_formation_id' => 999]);
 
         // Act
-        $component = Livewire::test(\App\Livewire\Pages\GeneralReport\Statistic::class);
+        $component = Livewire::test(Statistic::class);
 
         // Assert
         $component
@@ -328,7 +341,7 @@ class StatisticTest extends TestCase
     public function dispatch_chart_update_sends_correct_data_structure()
     {
         // Arrange
-        $component = Livewire::test(\App\Livewire\Pages\GeneralReport\Statistic::class);
+        $component = Livewire::test(Statistic::class);
 
         // Act
         $component->dispatch('aspect-selected', $this->aspect->id);
@@ -350,7 +363,7 @@ class StatisticTest extends TestCase
     {
         // Arrange
         session()->forget('filter.aspect_id');
-        $component = Livewire::test(\App\Livewire\Pages\GeneralReport\Statistic::class);
+        $component = Livewire::test(Statistic::class);
 
         // Act
         $aspectName = $component->viewData('aspectName');
@@ -363,7 +376,7 @@ class StatisticTest extends TestCase
     public function get_current_aspect_name_returns_aspect_name_when_aspect_exists()
     {
         // Arrange
-        $component = Livewire::test(\App\Livewire\Pages\GeneralReport\Statistic::class);
+        $component = Livewire::test(Statistic::class);
 
         // Act
         $aspectName = $component->viewData('aspectName');
@@ -415,7 +428,7 @@ class StatisticTest extends TestCase
         ]);
 
         // Act
-        $component = Livewire::test(\App\Livewire\Pages\GeneralReport\Statistic::class);
+        $component = Livewire::test(Statistic::class);
 
         // Assert
         // Boundaries should be inclusive on upper bound (>=) and exclusive on lower bound (<)
@@ -445,7 +458,7 @@ class StatisticTest extends TestCase
         $dynamicStandard->saveAspectRating($this->template->id, $this->aspect->code, 5.0);
 
         // Act
-        $component = Livewire::test(\App\Livewire\Pages\GeneralReport\Statistic::class);
+        $component = Livewire::test(Statistic::class);
 
         // Assert
         // Standard rating should come from session adjustment (Layer 1)
@@ -459,7 +472,7 @@ class StatisticTest extends TestCase
         $dynamicStandard = app(DynamicStandardService::class);
 
         // Create a custom standard
-        $customStandard = \App\Models\CustomStandard::factory()->create([
+        $customStandard = CustomStandard::factory()->create([
             'institution_id' => $this->institution->id,
             'template_id' => $this->template->id,
             'name' => 'Test Custom Standard',
@@ -481,7 +494,7 @@ class StatisticTest extends TestCase
         AspectCacheService::preloadByTemplate($this->template->id);
 
         // Act
-        $component = Livewire::test(\App\Livewire\Pages\GeneralReport\Statistic::class);
+        $component = Livewire::test(Statistic::class);
 
         // Assert
         // Standard rating should come from session adjustment (Layer 1)
@@ -495,7 +508,7 @@ class StatisticTest extends TestCase
         $dynamicStandard = app(DynamicStandardService::class);
 
         // First call to populate cache
-        $component1 = Livewire::test(\App\Livewire\Pages\GeneralReport\Statistic::class);
+        $component1 = Livewire::test(Statistic::class);
         $initialStandard = $component1->get('standardRating');
 
         // Preload cache to avoid error
@@ -511,7 +524,7 @@ class StatisticTest extends TestCase
         AspectCacheService::preloadByTemplate($this->template->id);
 
         // Act
-        $component2 = Livewire::test(\App\Livewire\Pages\GeneralReport\Statistic::class);
+        $component2 = Livewire::test(Statistic::class);
 
         // Assert
         // Cache should be invalidated and new standard rating should be used
@@ -524,7 +537,7 @@ class StatisticTest extends TestCase
     {
         // Test that component initializes without error
         // The actual preload happens in the component's mount method
-        $component = Livewire::test(\App\Livewire\Pages\GeneralReport\Statistic::class);
+        $component = Livewire::test(Statistic::class);
 
         // Assert
         $this->assertNotNull($component);
@@ -535,7 +548,7 @@ class StatisticTest extends TestCase
     public function render_passes_correct_data_to_view()
     {
         // Arrange
-        $component = Livewire::test(\App\Livewire\Pages\GeneralReport\Statistic::class);
+        $component = Livewire::test(Statistic::class);
 
         // Act
         $viewData = $component->instance()->render()->getData();
@@ -563,8 +576,8 @@ class StatisticTest extends TestCase
     public function chart_id_is_unique_across_instances()
     {
         // Arrange
-        $component1 = Livewire::test(\App\Livewire\Pages\GeneralReport\Statistic::class);
-        $component2 = Livewire::test(\App\Livewire\Pages\GeneralReport\Statistic::class);
+        $component1 = Livewire::test(Statistic::class);
+        $component2 = Livewire::test(Statistic::class);
 
         // Act
         $chartId1 = $component1->get('chartId');
@@ -637,7 +650,7 @@ class StatisticTest extends TestCase
         $dynamicStandard->setAspectActive($this->template->id, $testAspect->code, false);
 
         // Act
-        $component = Livewire::test(\App\Livewire\Pages\GeneralReport\Statistic::class);
+        $component = Livewire::test(Statistic::class);
 
         // Assert
         // Component should handle inactive aspect gracefully
@@ -687,12 +700,12 @@ class StatisticTest extends TestCase
         ]);
 
         // Create sub-aspects
-        $subAspect1 = \App\Models\SubAspect::factory()->create([
+        $subAspect1 = SubAspect::factory()->create([
             'aspect_id' => $aspectWithSubAspects->id,
             'code' => 'sub1',
         ]);
 
-        $subAspect2 = \App\Models\SubAspect::factory()->create([
+        $subAspect2 = SubAspect::factory()->create([
             'aspect_id' => $aspectWithSubAspects->id,
             'code' => 'sub2',
         ]);
@@ -718,7 +731,7 @@ class StatisticTest extends TestCase
         AspectCacheService::preloadByTemplate($this->template->id);
 
         // Act 1: Get initial statistics with all sub-aspects active
-        $component1 = Livewire::test(\App\Livewire\Pages\GeneralReport\Statistic::class);
+        $component1 = Livewire::test(Statistic::class);
         $initialStandardRating = $component1->get('standardRating');
 
         // Act 2: Mark one sub-aspect as inactive
@@ -727,7 +740,7 @@ class StatisticTest extends TestCase
         // Clear cache to force recalculation
         AspectCacheService::preloadByTemplate($this->template->id);
 
-        $component2 = Livewire::test(\App\Livewire\Pages\GeneralReport\Statistic::class);
+        $component2 = Livewire::test(Statistic::class);
         $adjustedStandardRating = $component2->get('standardRating');
 
         // Assert
@@ -771,12 +784,12 @@ class StatisticTest extends TestCase
         ]);
 
         // Create sub-aspects
-        $subAspect1 = \App\Models\SubAspect::factory()->create([
+        $subAspect1 = SubAspect::factory()->create([
             'aspect_id' => $aspectWithSubAspects->id,
             'code' => 'sub1',
         ]);
 
-        $subAspect2 = \App\Models\SubAspect::factory()->create([
+        $subAspect2 = SubAspect::factory()->create([
             'aspect_id' => $aspectWithSubAspects->id,
             'code' => 'sub2',
         ]);
@@ -808,7 +821,7 @@ class StatisticTest extends TestCase
         // Clear cache to force recalculation
         AspectCacheService::preloadByTemplate($this->template->id);
 
-        $component = Livewire::test(\App\Livewire\Pages\GeneralReport\Statistic::class);
+        $component = Livewire::test(Statistic::class);
 
         // Assert
         // When all sub-aspects are inactive, standard rating should be 0
@@ -831,7 +844,7 @@ class StatisticTest extends TestCase
             'template_id' => $this->template->id,
         ]);
 
-        $subAspect = \App\Models\SubAspect::factory()->create([
+        $subAspect = SubAspect::factory()->create([
             'aspect_id' => $aspectWithSubAspects->id,
             'code' => 'test-sub',
         ]);
@@ -853,7 +866,7 @@ class StatisticTest extends TestCase
         AspectCacheService::preloadByTemplate($this->template->id);
 
         // Act 1: First call to populate cache
-        $component1 = Livewire::test(\App\Livewire\Pages\GeneralReport\Statistic::class);
+        $component1 = Livewire::test(Statistic::class);
         $initialStandardRating = $component1->get('standardRating');
 
         // Act 2: Change sub-aspect active status
@@ -862,7 +875,7 @@ class StatisticTest extends TestCase
         // Clear cache to force recalculation
         AspectCacheService::preloadByTemplate($this->template->id);
 
-        $component2 = Livewire::test(\App\Livewire\Pages\GeneralReport\Statistic::class);
+        $component2 = Livewire::test(Statistic::class);
         $newStandardRating = $component2->get('standardRating');
 
         // Assert
@@ -876,14 +889,14 @@ class StatisticTest extends TestCase
     public function custom_standard_selection_affects_cache_key()
     {
         // Arrange
-        $customStandard = \App\Models\CustomStandard::factory()->create([
+        $customStandard = CustomStandard::factory()->create([
             'institution_id' => $this->institution->id,
             'template_id' => $this->template->id,
             'name' => 'Test Custom Standard',
         ]);
 
         // Act 1: First call with Quantum Default
-        $component1 = Livewire::test(\App\Livewire\Pages\GeneralReport\Statistic::class);
+        $component1 = Livewire::test(Statistic::class);
         $initialStandardRating = $component1->get('standardRating');
 
         // Act 2: Switch to Custom Standard
@@ -892,7 +905,7 @@ class StatisticTest extends TestCase
         // Clear cache to force recalculation
         AspectCacheService::preloadByTemplate($this->template->id);
 
-        $component2 = Livewire::test(\App\Livewire\Pages\GeneralReport\Statistic::class);
+        $component2 = Livewire::test(Statistic::class);
         $customStandardRating = $component2->get('standardRating');
 
         // Assert
@@ -908,7 +921,7 @@ class StatisticTest extends TestCase
         $dynamicStandard = app(DynamicStandardService::class);
 
         // Act 1: First call to populate cache
-        $component1 = Livewire::test(\App\Livewire\Pages\GeneralReport\Statistic::class);
+        $component1 = Livewire::test(Statistic::class);
         $initialStandardRating = $component1->get('standardRating');
 
         // Act 2: Apply session adjustment
@@ -917,7 +930,7 @@ class StatisticTest extends TestCase
         // Clear cache to force recalculation
         AspectCacheService::preloadByTemplate($this->template->id);
 
-        $component2 = Livewire::test(\App\Livewire\Pages\GeneralReport\Statistic::class);
+        $component2 = Livewire::test(Statistic::class);
         $adjustedStandardRating = $component2->get('standardRating');
 
         // Assert
@@ -949,7 +962,7 @@ class StatisticTest extends TestCase
         ]);
 
         // Act
-        $component = Livewire::test(\App\Livewire\Pages\GeneralReport\Statistic::class);
+        $component = Livewire::test(Statistic::class);
 
         // Assert
         // When no participants, average should be 0.0
@@ -1001,7 +1014,7 @@ class StatisticTest extends TestCase
         ]);
 
         // Act
-        $component = Livewire::test(\App\Livewire\Pages\GeneralReport\Statistic::class);
+        $component = Livewire::test(Statistic::class);
 
         // Assert
         $component
@@ -1038,7 +1051,7 @@ class StatisticTest extends TestCase
         }
 
         // Act
-        $component = Livewire::test(\App\Livewire\Pages\GeneralReport\Statistic::class);
+        $component = Livewire::test(Statistic::class);
 
         // Assert
         // Note: The existing test data from setUp() is still present
@@ -1066,7 +1079,7 @@ class StatisticTest extends TestCase
         ]);
 
         // Act
-        $component = Livewire::test(\App\Livewire\Pages\GeneralReport\Statistic::class);
+        $component = Livewire::test(Statistic::class);
 
         // Assert
         // Should only include the original participant with assessment data
@@ -1090,7 +1103,7 @@ class StatisticTest extends TestCase
         session(['filter.aspect_id' => $unusedAspect->id]);
 
         // Act
-        $component = Livewire::test(\App\Livewire\Pages\GeneralReport\Statistic::class);
+        $component = Livewire::test(Statistic::class);
 
         // Assert
         $component
@@ -1135,7 +1148,7 @@ class StatisticTest extends TestCase
         }
 
         // Act
-        $component = Livewire::test(\App\Livewire\Pages\GeneralReport\Statistic::class);
+        $component = Livewire::test(Statistic::class);
 
         // Assert
         // Note: The existing test data from setUp() is still present
@@ -1153,7 +1166,7 @@ class StatisticTest extends TestCase
         // In Statistic component, tolerance is handled client-side for chart display
 
         // Act 1: First call
-        $component1 = Livewire::test(\App\Livewire\Pages\GeneralReport\Statistic::class);
+        $component1 = Livewire::test(Statistic::class);
         $initialData = [
             'distribution' => $component1->get('distribution'),
             'standardRating' => $component1->get('standardRating'),
@@ -1162,7 +1175,7 @@ class StatisticTest extends TestCase
 
         // Act 2: Simulate tolerance change (this would normally come from client-side)
         // Since tolerance is handled client-side, we verify that component data doesn't change
-        $component2 = Livewire::test(\App\Livewire\Pages\GeneralReport\Statistic::class);
+        $component2 = Livewire::test(Statistic::class);
         $afterToleranceData = [
             'distribution' => $component2->get('distribution'),
             'standardRating' => $component2->get('standardRating'),
@@ -1183,7 +1196,7 @@ class StatisticTest extends TestCase
         $dynamicStandard = app(DynamicStandardService::class);
 
         // Create a custom standard with different aspect rating
-        $customStandard = \App\Models\CustomStandard::factory()->create([
+        $customStandard = CustomStandard::factory()->create([
             'institution_id' => $this->institution->id,
             'template_id' => $this->template->id,
             'name' => 'Test Custom Standard',
@@ -1196,8 +1209,8 @@ class StatisticTest extends TestCase
                     'weight' => 15,
                     'rating' => 4.5, // Different from aspect's 3.0
                     'active' => true,
-                ]
-            ]
+                ],
+            ],
         ]);
 
         // Set custom standard in session (Layer 2)
@@ -1207,7 +1220,7 @@ class StatisticTest extends TestCase
         AspectCacheService::preloadByTemplate($this->template->id);
 
         // Act
-        $component = Livewire::test(\App\Livewire\Pages\GeneralReport\Statistic::class);
+        $component = Livewire::test(Statistic::class);
 
         // Assert
         // Standard rating should come from Custom Standard (Layer 2), not Quantum Default (Layer 3)
@@ -1229,7 +1242,7 @@ class StatisticTest extends TestCase
         AspectCacheService::preloadByTemplate($this->template->id);
 
         // Act
-        $component = Livewire::test(\App\Livewire\Pages\GeneralReport\Statistic::class);
+        $component = Livewire::test(Statistic::class);
 
         // Assert
         // Standard rating should come from Quantum Default (Layer 3) - aspect's standard_rating

@@ -3,10 +3,11 @@
 namespace Database\Factories;
 
 use App\Models\AssessmentEvent;
+use App\Models\Batch;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Batch>
+ * @extends Factory<Batch>
  */
 class BatchFactory extends Factory
 {
@@ -26,6 +27,7 @@ class BatchFactory extends Factory
             'event_id' => AssessmentEvent::factory(),
             'institution_id' => function (array $attributes) {
                 $event = AssessmentEvent::find($attributes['event_id']);
+
                 return $event ? $event->institution_id : null;
             },
             'code' => 'BATCH-'.str_pad((string) $batchCounter, 3, '0', STR_PAD_LEFT),

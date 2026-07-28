@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Livewire;
 
-use PHPUnit\Framework\Attributes\Test;
 use App\Livewire\Pages\Simulation\StandardPsikometrik;
 use App\Models\Aspect;
 use App\Models\AssessmentEvent;
@@ -15,15 +14,18 @@ use App\Models\Institution;
 use App\Models\PositionFormation;
 use App\Models\SubAspect;
 use App\Models\User;
+use App\Services\Cache\AspectCacheService;
 use App\Services\CustomStandardService;
 use App\Services\DynamicStandardService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class StandardPsikometrikTest extends TestCase
 {
     use RefreshDatabase;
+
     protected User $user;
 
     protected Institution $institution;
@@ -138,7 +140,7 @@ class StandardPsikometrikTest extends TestCase
         session()->flush();
 
         // Clear AspectCacheService static cache to prevent stale data between tests
-        \App\Services\Cache\AspectCacheService::clearCache();
+        AspectCacheService::clearCache();
 
         parent::tearDown();
     }
@@ -271,7 +273,7 @@ class StandardPsikometrikTest extends TestCase
         $this->setSessionFilters();
 
         // Preload cache for hasCategoryAdjustments() to work
-        \App\Services\Cache\AspectCacheService::preloadByTemplate($this->template->id);
+        AspectCacheService::preloadByTemplate($this->template->id);
 
         // Set session adjustments
         $dynamicService = app(DynamicStandardService::class);
@@ -466,7 +468,7 @@ class StandardPsikometrikTest extends TestCase
         $this->setSessionFilters();
 
         // Preload cache for hasCategoryAdjustments() to work
-        \App\Services\Cache\AspectCacheService::preloadByTemplate($this->template->id);
+        AspectCacheService::preloadByTemplate($this->template->id);
 
         // Select custom standard
         $customStandardService = app(CustomStandardService::class);
@@ -478,7 +480,7 @@ class StandardPsikometrikTest extends TestCase
         $dynamicService->saveSubAspectRating($this->template->id, 'daya-analisa', 5); // Custom std has 4
 
         // Preload cache again after setting adjustments (fresh instance needs cache)
-        \App\Services\Cache\AspectCacheService::preloadByTemplate($this->template->id);
+        AspectCacheService::preloadByTemplate($this->template->id);
 
         // Verify adjustments exist
         $this->assertTrue($dynamicService->hasCategoryAdjustments($this->template->id, 'potensi'));

@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  *
  * Creates category-level assessment records (Potensi/Kompetensi totals)
  *
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\CategoryAssessment>
+ * @extends Factory<CategoryAssessment>
  */
 class CategoryAssessmentFactory extends Factory
 {

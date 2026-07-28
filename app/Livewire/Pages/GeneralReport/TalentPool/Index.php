@@ -152,6 +152,7 @@ class Index extends Component
         }
 
         $this->loadMatrixData();
+
         return $this->matrixData ?? [];
     }
 
@@ -188,7 +189,7 @@ class Index extends Component
             $this->applyMatrixData($matrix);
         } catch (\Exception $e) {
             // Handle error gracefully
-            $this->dispatch('error', 'Failed to load talent pool data: ' . $e->getMessage());
+            $this->dispatch('error', 'Failed to load talent pool data: '.$e->getMessage());
         }
     }
 
@@ -335,7 +336,7 @@ class Index extends Component
     public function getBoxLabelsProperty(): array
     {
         return collect($this->boxConfig)
-            ->mapWithKeys(fn($config, $number) => [$number => $config['label']])
+            ->mapWithKeys(fn ($config, $number) => [$number => $config['label']])
             ->toArray();
     }
 
@@ -372,12 +373,12 @@ class Index extends Component
         $boxConfig = $this->boxConfig[$boxNumber] ?? null;
 
         $participantsInBox = $matrix['participants']
-            ->filter(fn($p) => (int)$p['box_number'] === $boxNumber)
-            ->map(fn($p) => [
+            ->filter(fn ($p) => (int) $p['box_number'] === $boxNumber)
+            ->map(fn ($p) => [
                 'name' => $p['name'],
                 'test_number' => $p['test_number'],
                 'potensi_rating' => $p['potensi_rating'],
-                'kinerja_rating' => $p['kinerja_rating']
+                'kinerja_rating' => $p['kinerja_rating'],
             ])
             ->values()
             ->toArray();

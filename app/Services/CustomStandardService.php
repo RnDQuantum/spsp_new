@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Models\AssessmentEvent;
 use App\Models\AssessmentTemplate;
 use App\Models\CustomStandard;
 use Illuminate\Support\Collection;
@@ -333,7 +334,7 @@ class CustomStandardService
      * Get available templates for institution
      * Only returns templates that are used by the institution's events
      */
-    public function getAvailableTemplatesForInstitution(int $institutionId): \Illuminate\Support\Collection
+    public function getAvailableTemplatesForInstitution(int $institutionId): Collection
     {
         return AssessmentTemplate::whereHas('positionFormations.assessmentEvent', function ($query) use ($institutionId) {
             $query->where('institution_id', $institutionId);
@@ -361,7 +362,7 @@ class CustomStandardService
         // 2. Check route parameter 'event' (if it's a string code or model binding)
         $eventParam = request()->route('event');
         if ($eventParam) {
-            $code = $eventParam instanceof \App\Models\AssessmentEvent ? $eventParam->code : $eventParam;
+            $code = $eventParam instanceof AssessmentEvent ? $eventParam->code : $eventParam;
             if (is_string($code)) {
                 return $code;
             }
@@ -379,16 +380,18 @@ class CustomStandardService
     private function getSelectedKey(int $templateId): string
     {
         $context = $this->getActiveEventContext();
-        return $context 
-            ? self::SESSION_PREFIX.".{$context}.{$templateId}" 
+
+        return $context
+            ? self::SESSION_PREFIX.".{$context}.{$templateId}"
             : self::SESSION_PREFIX.".{$templateId}";
     }
 
     private function getAdjustmentKey(int $templateId): string
     {
         $context = $this->getActiveEventContext();
-        return $context 
-            ? "standard_adjustment.{$context}.{$templateId}" 
+
+        return $context
+            ? "standard_adjustment.{$context}.{$templateId}"
             : "standard_adjustment.{$templateId}";
     }
 }

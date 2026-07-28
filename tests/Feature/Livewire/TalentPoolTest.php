@@ -2,8 +2,11 @@
 
 namespace Tests\Feature\Livewire;
 
-use App\Models\AssessmentEvent;
+use App\Livewire\Pages\GeneralReport\TalentPool\Index;
+use App\Models\Aspect;
 use App\Models\AspectAssessment;
+use App\Models\AssessmentEvent;
+use App\Models\CategoryAssessment;
 use App\Models\CategoryType;
 use App\Models\Participant;
 use App\Models\PositionFormation;
@@ -17,7 +20,9 @@ class TalentPoolTest extends TestCase
     use RefreshDatabase;
 
     private AssessmentEvent $event;
+
     private PositionFormation $position;
+
     private TalentPoolService $service;
 
     protected function setUp(): void
@@ -203,7 +208,7 @@ class TalentPoolTest extends TestCase
             'filter.position_formation_id' => $this->position->id,
         ]);
 
-        $component = Livewire::test(\App\Livewire\Pages\GeneralReport\TalentPool\Index::class);
+        $component = Livewire::test(Index::class);
 
         // Component should render without errors
         $component->assertStatus(200);
@@ -224,12 +229,12 @@ class TalentPoolTest extends TestCase
     {
         // Create assessment event
         $this->event = AssessmentEvent::factory()->create([
-            'code' => 'TEST-EVENT-2025'
+            'code' => 'TEST-EVENT-2025',
         ]);
 
         // Create position formation with template
         $this->position = PositionFormation::factory()->create([
-            'event_id' => $this->event->id
+            'event_id' => $this->event->id,
         ]);
 
         // Create category types
@@ -237,14 +242,14 @@ class TalentPoolTest extends TestCase
             'template_id' => $this->position->template_id,
             'code' => 'potensi',
             'name' => 'Potensi',
-            'weight_percentage' => 25
+            'weight_percentage' => 25,
         ]);
 
         $kompetensiCategory = CategoryType::factory()->create([
             'template_id' => $this->position->template_id,
             'code' => 'kompetensi',
             'name' => 'Kompetensi',
-            'weight_percentage' => 75
+            'weight_percentage' => 75,
         ]);
 
         // Create aspects for each category
@@ -252,24 +257,24 @@ class TalentPoolTest extends TestCase
         $kompetensiAspects = [];
 
         for ($i = 1; $i <= 4; $i++) {
-            $potensiAspects[] = \App\Models\Aspect::factory()->create([
+            $potensiAspects[] = Aspect::factory()->create([
                 'template_id' => $this->position->template_id,
                 'category_type_id' => $potensiCategory->id,
                 'code' => "potensi-{$i}",
                 'name' => "Potensi Aspect {$i}",
                 'weight_percentage' => 6.25, // 25% / 4 aspects
-                'standard_rating' => 3.5
+                'standard_rating' => 3.5,
             ]);
         }
 
         for ($i = 1; $i <= 7; $i++) {
-            $kompetensiAspects[] = \App\Models\Aspect::factory()->create([
+            $kompetensiAspects[] = Aspect::factory()->create([
                 'template_id' => $this->position->template_id,
                 'category_type_id' => $kompetensiCategory->id,
                 'code' => "kompetensi-{$i}",
                 'name' => "Kompetensi Aspect {$i}",
                 'weight_percentage' => 10.71, // 75% / 7 aspects
-                'standard_rating' => 3.5
+                'standard_rating' => 3.5,
             ]);
         }
 
@@ -278,19 +283,19 @@ class TalentPoolTest extends TestCase
         // Create participants (simulate large dataset)
         $participants = Participant::factory()->count(100)->create([
             'event_id' => $this->event->id,
-            'position_formation_id' => $this->position->id
+            'position_formation_id' => $this->position->id,
         ]);
 
         // Create aspect assessments for each participant
         foreach ($participants as $participant) {
-            $potensiCatAss = \App\Models\CategoryAssessment::factory()->create([
+            $potensiCatAss = CategoryAssessment::factory()->create([
                 'participant_id' => $participant->id,
                 'category_type_id' => $potensiCategory->id,
                 'event_id' => $this->event->id,
                 'position_formation_id' => $this->position->id,
             ]);
 
-            $kompetensiCatAss = \App\Models\CategoryAssessment::factory()->create([
+            $kompetensiCatAss = CategoryAssessment::factory()->create([
                 'participant_id' => $participant->id,
                 'category_type_id' => $kompetensiCategory->id,
                 'event_id' => $this->event->id,
@@ -312,7 +317,7 @@ class TalentPoolTest extends TestCase
                     'event_id' => $this->event->id,
                     'position_formation_id' => $this->position->id,
                     'individual_rating' => $rating,
-                    'individual_score' => $rating * $aspect->weight_percentage
+                    'individual_score' => $rating * $aspect->weight_percentage,
                 ]);
             }
         }

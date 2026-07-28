@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Builder;
 
 class TestResult extends Model
 {
@@ -49,15 +49,15 @@ class TestResult extends Model
      * Mapping kode tes → kategori, untuk normalisasi data API.
      */
     public const TEST_CATEGORIES = [
-        'A.1'   => 'Kecerdasan / IQ',
-        'A.2'   => 'Kecerdasan / IQ',
-        'A.5'   => 'Kecerdasan / IQ',
-        'B.1'   => 'Kepribadian / Karakter',
-        'B.2'   => 'Kepribadian / Psikometri',
-        'D.2'   => 'Sikap Kerja',
-        'F.1'   => 'Kecerdasan Emosional (EQ)',
-        'G.1'   => 'Kecenderungan Perilaku',
-        'H.1'   => 'Minat Jabatan',
+        'A.1' => 'Kecerdasan / IQ',
+        'A.2' => 'Kecerdasan / IQ',
+        'A.5' => 'Kecerdasan / IQ',
+        'B.1' => 'Kepribadian / Karakter',
+        'B.2' => 'Kepribadian / Psikometri',
+        'D.2' => 'Sikap Kerja',
+        'F.1' => 'Kecerdasan Emosional (EQ)',
+        'G.1' => 'Kecenderungan Perilaku',
+        'H.1' => 'Minat Jabatan',
     ];
 
     // ─── Relationships ─────────────────────────────────────────

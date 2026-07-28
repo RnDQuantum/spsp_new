@@ -19,6 +19,7 @@ class WeightValidator
         if ($total !== $expected) {
             return "Total bobot harus {$expected}% (saat ini: {$total}%)";
         }
+
         return null;
     }
 }

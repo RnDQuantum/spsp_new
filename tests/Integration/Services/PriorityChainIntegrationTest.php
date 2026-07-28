@@ -16,11 +16,13 @@ use App\Models\Participant;
 use App\Models\PositionFormation;
 use App\Models\SubAspect;
 use App\Models\SubAspectAssessment;
+use App\Services\Cache\AspectCacheService;
 use App\Services\CustomStandardService;
 use App\Services\DynamicStandardService;
 use App\Services\IndividualAssessmentService;
 use App\Services\RankingService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Session;
 use Tests\TestCase;
 
 /**
@@ -34,9 +36,9 @@ use Tests\TestCase;
  *
  * TOTAL: 2/2 tests
  *
- * @see \App\Services\DynamicStandardService
- * @see \App\Services\IndividualAssessmentService
- * @see \App\Services\RankingService
+ * @see DynamicStandardService
+ * @see IndividualAssessmentService
+ * @see RankingService
  * @see docs/TESTING_GUIDE.md
  * @see docs/FLEXIBLE_HIERARCHY_REFACTORING.md
  */
@@ -89,7 +91,7 @@ class PriorityChainIntegrationTest extends TestCase
 
         // Clear cache and session
         session()->flush();
-        \App\Services\Cache\AspectCacheService::clearCache();
+        AspectCacheService::clearCache();
     }
 
     // ========================================
@@ -178,7 +180,7 @@ class PriorityChainIntegrationTest extends TestCase
         $customStandardService->select($this->template->id, $customStandard->id);
 
         // Clear cache after custom standard selection
-        \App\Services\Cache\AspectCacheService::clearCache();
+        AspectCacheService::clearCache();
 
         // Step 5: Verify individual assessment updates to custom (Layer 2)
         $customAssessment = $individualService->getAspectAssessments(
@@ -221,7 +223,7 @@ class PriorityChainIntegrationTest extends TestCase
         $dynamicService->saveAspectWeight($this->template->id, $firstPotensiAspect->code, 40);
 
         // Clear cache after session adjustment
-        \App\Services\Cache\AspectCacheService::clearCache();
+        AspectCacheService::clearCache();
 
         // Step 8: Verify individual assessment updates to session (Layer 1 > Layer 2)
         $sessionAssessment = $individualService->getAspectAssessments(
@@ -264,7 +266,7 @@ class PriorityChainIntegrationTest extends TestCase
         $this->assertLessThan($sessionRankingScore, $customRankingScore);
 
         // Cleanup
-        \Illuminate\Support\Facades\Session::forget("standard_adjustment.{$this->template->id}");
+        Session::forget("standard_adjustment.{$this->template->id}");
         $customStandardService->clearSelection($this->template->id);
     }
 
@@ -330,7 +332,7 @@ class PriorityChainIntegrationTest extends TestCase
         $dynamicService->saveAspectWeight($this->template->id, $aspect1->code, 45);
 
         // Clear cache after all adjustments
-        \App\Services\Cache\AspectCacheService::clearCache();
+        AspectCacheService::clearCache();
 
         // Aspect 3 uses quantum default (20%) - no adjustment needed
 
@@ -395,7 +397,7 @@ class PriorityChainIntegrationTest extends TestCase
         );
 
         // Cleanup
-        \Illuminate\Support\Facades\Session::forget("standard_adjustment.{$this->template->id}");
+        Session::forget("standard_adjustment.{$this->template->id}");
         $customStandardService->clearSelection($this->template->id);
     }
 

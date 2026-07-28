@@ -32,8 +32,8 @@ return new class extends Migration
 
             // Status konversi ke rating SPSP (untuk tahap 2)
             $table->enum('conversion_status', ['pending', 'converted', 'skipped', 'not_applicable'])
-                  ->default('pending')
-                  ->comment('Status konversi ke rating 1-5 SPSP');
+                ->default('pending')
+                ->comment('Status konversi ke rating 1-5 SPSP');
             $table->timestamp('converted_at')->nullable();
 
             $table->timestamps();

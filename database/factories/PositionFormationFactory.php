@@ -4,10 +4,11 @@ namespace Database\Factories;
 
 use App\Models\AssessmentEvent;
 use App\Models\AssessmentTemplate;
+use App\Models\PositionFormation;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\PositionFormation>
+ * @extends Factory<PositionFormation>
  */
 class PositionFormationFactory extends Factory
 {
@@ -22,6 +23,7 @@ class PositionFormationFactory extends Factory
             'event_id' => AssessmentEvent::factory(),
             'institution_id' => function (array $attributes) {
                 $event = AssessmentEvent::find($attributes['event_id']);
+
                 return $event ? $event->institution_id : null;
             },
             'template_id' => AssessmentTemplate::factory(),

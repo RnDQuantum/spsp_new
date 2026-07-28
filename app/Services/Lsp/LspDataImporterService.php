@@ -17,24 +17,38 @@ use App\Models\PositionFormation;
 use App\Models\PsychologicalTest;
 use App\Models\SubAspect;
 use App\Models\SubAspectAssessment;
+use Closure;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class LspDataImporterService
 {
+    /**
+     * Registry master data in-memory per import session
+     */
+    protected array $templateRegistry = [];
+
+    protected array $batchRegistry = [];
+
+    protected array $formationRegistry = [];
+
+    protected array $aspectRegistry = [];
+
+    protected array $subAspectRegistry = [];
+
     public function __construct(
         protected LspIndividualReportService $reportService
     ) {}
 
     /**
-     * Import seluruh peserta dari proyek LSP tertentu ke database SPSP.
+     * Import seluruh peserta dari proyek LSP tertentu ke database SPSP dengan metode chunking & bulk upsert.
      */
-    public function importProject(string $kodeProyek, ?string $singleUsername = null, ?int $institutionId = null): array
+    public function importProject(string $kodeProyek, ?string $singleUsername = null, ?int $institutionId = null, ?Closure $progressCallback = null): array
     {
         $dbLsp = DB::connection('lsp');
 
-        // 1. Dapatkan atau buat Institution default SPSP (misal Kejaksaan Agung)
+        // 1. Dapatkan atau buat Institution default SPSP
         if (! $institutionId) {
             $institution = Institution::firstOrCreate(
                 ['code' => 'kejaksaan'],
@@ -79,25 +93,50 @@ class LspDataImporterService
             $query->where('username', $singleUsername);
         }
 
-        $pesertaRows = $query->get();
+        $pesertaRows = $query->select('username', 'batch', 'jabatan_pelaksana', 'minat_penempatan')->get();
 
         if ($pesertaRows->isEmpty()) {
             throw new Exception("Tidak ada data peserta ditemukan pada proyek LSP '{$kodeProyek}'".($singleUsername ? " untuk username '{$singleUsername}'" : ''));
         }
 
+        $allUsernames = $pesertaRows->pluck('username')->unique()->toArray();
+        $totalFound = count($allUsernames);
+
         $importedCount = 0;
         $failedCount = 0;
         $errors = [];
 
-        foreach ($pesertaRows as $pesertaLsp) {
+        // 4. Chunking peserta (100 peserta per chunk) untuk batch calculation & bulk upserts
+        $chunkSize = 100;
+        $chunks = array_chunk($allUsernames, $chunkSize);
+
+        foreach ($chunks as $chunkUsernames) {
             try {
-                DB::transaction(function () use ($pesertaLsp, $kodeProyek, $event) {
-                    $this->importSingleParticipant($pesertaLsp->username, $kodeProyek, $event);
+                $chunkImported = DB::transaction(function () use ($chunkUsernames, $kodeProyek, $event) {
+                    return $this->importParticipantBatch($chunkUsernames, $kodeProyek, $event);
                 });
-                $importedCount++;
+
+                $importedCount += $chunkImported;
+
+                if ($progressCallback) {
+                    $progressCallback(count($chunkUsernames));
+                }
             } catch (Exception $e) {
-                $failedCount++;
-                $errors[] = "Peserta {$pesertaLsp->username}: ".$e->getMessage();
+                // Fallback attempt: if bulk transaction fails for chunk, retry individually for error isolation
+                foreach ($chunkUsernames as $u) {
+                    try {
+                        DB::transaction(function () use ($u, $kodeProyek, $event) {
+                            $this->importSingleParticipant($u, $kodeProyek, $event);
+                        });
+                        $importedCount++;
+                        if ($progressCallback) {
+                            $progressCallback(1);
+                        }
+                    } catch (Exception $ex) {
+                        $failedCount++;
+                        $errors[] = "Peserta {$u}: ".$ex->getMessage();
+                    }
+                }
             }
         }
 
@@ -105,7 +144,7 @@ class LspDataImporterService
             'event_id' => $event->id,
             'event_code' => $event->code,
             'event_name' => $event->name,
-            'total_found' => $pesertaRows->count(),
+            'total_found' => $totalFound,
             'imported_count' => $importedCount,
             'failed_count' => $failedCount,
             'errors' => $errors,
@@ -113,85 +152,144 @@ class LspDataImporterService
     }
 
     /**
-     * Import satu peserta spesifik beserta seluruh agregasi data penilaiatnya.
+     * Import sekelompok (batch/chunk) peserta sekaligus dengan bulk upserts ke DB SPSP.
      */
-    public function importSingleParticipant(string $username, string $kodeProyek, AssessmentEvent $event): Participant
+    public function importParticipantBatch(array $usernames, string $kodeProyek, AssessmentEvent $event): int
     {
-        $dbLsp = DB::connection('lsp');
-        $pesertaLspRow = $dbLsp->table('peserta_produksi')->where('username', $username)->first();
+        if (empty($usernames)) {
+            return 0;
+        }
 
-        // Execute report calculation service to get structured DTO
-        $reportData = $this->reportService->getIndividualReport($username, $kodeProyek);
+        $reportsMap = $this->reportService->getBatchIndividualReports($usernames, $kodeProyek);
+        if (empty($reportsMap)) {
+            return 0;
+        }
 
-        $pesertaInfo = $reportData['peserta'];
+        $now = now()->toDateTimeString();
 
-        // 1. Sinkronkan Batch
-        $batchName = $pesertaLspRow->batch ?? '1';
-        $location = $reportData['metadata_proyek']['lokasi'] ?? 'Pusat';
-        $batch = Batch::updateOrCreate(
-            [
+        // 1. Resolve & Batch Create Master Batches & Formations
+        $batchMap = [];
+        $formationMap = [];
+
+        foreach ($usernames as $u) {
+            $rep = $reportsMap[$u] ?? null;
+            if (! $rep) {
+                continue;
+            }
+
+            $pesertaInfo = $rep['peserta'];
+            $batchName = $rep['peserta']['batch'] ?? '1';
+            $location = $rep['metadata_proyek']['lokasi'] ?? 'Pusat';
+
+            $batchKey = "{$event->id}_{$batchName}";
+            if (! isset($this->batchRegistry[$batchKey])) {
+                $batchModel = Batch::updateOrCreate(
+                    [
+                        'event_id' => $event->id,
+                        'code' => Str::slug("{$event->code}-{$batchName}"),
+                    ],
+                    [
+                        'name' => "Gelombang {$batchName}",
+                        'location' => $location,
+                        'batch_number' => is_numeric($batchName) ? (int) $batchName : 1,
+                        'start_date' => $event->start_date,
+                        'end_date' => $event->end_date,
+                    ]
+                );
+                $this->batchRegistry[$batchKey] = $batchModel;
+            }
+            $batchMap[$u] = $this->batchRegistry[$batchKey];
+
+            // Master Template & PositionFormation
+            $levelJabatan = strtoupper($pesertaInfo['jabatan_pelaksana'] ?? 'STAFF');
+            $template = $this->ensureAssessmentTemplate($levelJabatan);
+
+            $formationCode = Str::slug($levelJabatan);
+            $formationName = $pesertaInfo['minat_penempatan'] !== '-' ? $pesertaInfo['minat_penempatan'] : $levelJabatan;
+            $formationKey = "{$event->id}_{$formationCode}";
+
+            if (! isset($this->formationRegistry[$formationKey])) {
+                $formationModel = PositionFormation::updateOrCreate(
+                    [
+                        'event_id' => $event->id,
+                        'code' => $formationCode,
+                    ],
+                    [
+                        'template_id' => $template->id,
+                        'name' => $formationName,
+                        'quota' => 100,
+                    ]
+                );
+                $this->formationRegistry[$formationKey] = $formationModel;
+            }
+            $formationMap[$u] = [
+                'template' => $template,
+                'formation' => $this->formationRegistry[$formationKey],
+            ];
+        }
+
+        // 2. Prepare Bulk Upsert Participants
+        $participantsBulk = [];
+        foreach ($usernames as $u) {
+            $rep = $reportsMap[$u] ?? null;
+            if (! $rep) {
+                continue;
+            }
+
+            $b = $batchMap[$u];
+            $f = $formationMap[$u]['formation'];
+            $pesertaInfo = $rep['peserta'];
+
+            $participantsBulk[] = [
                 'event_id' => $event->id,
-                'code' => Str::slug("{$event->code}-{$batchName}"),
-            ],
-            [
-                'name' => "Gelombang {$batchName}",
-                'location' => $location,
-                'batch_number' => is_numeric($batchName) ? (int) $batchName : 1,
-                'start_date' => $event->start_date,
-                'end_date' => $event->end_date,
-            ]
-        );
-
-        // 2. Sinkronkan Master Template & PositionFormation
-        $levelJabatan = strtoupper($pesertaInfo['jabatan_pelaksana'] ?? 'STAFF');
-        $formationCode = Str::slug($levelJabatan);
-        $formationName = $pesertaInfo['minat_penempatan'] !== '-' ? $pesertaInfo['minat_penempatan'] : $levelJabatan;
-
-        $template = $this->ensureAssessmentTemplate($levelJabatan);
-
-        $formation = PositionFormation::updateOrCreate(
-            [
-                'event_id' => $event->id,
-                'code' => $formationCode,
-            ],
-            [
-                'template_id' => $template->id,
-                'name' => $formationName,
-                'quota' => 100,
-            ]
-        );
-
-        // 3. Upsert Participant Record
-        $participant = Participant::updateOrCreate(
-            [
-                'event_id' => $event->id,
-                'username' => $username,
-            ],
-            [
-                'batch_id' => $batch->id,
-                'position_formation_id' => $formation->id,
+                'batch_id' => $b->id,
+                'position_formation_id' => $f->id,
                 'test_number' => $pesertaInfo['no_test'],
                 'skb_number' => $pesertaInfo['no_kjg'],
                 'name' => $pesertaInfo['nama_lengkap'],
                 'gender' => $pesertaInfo['jenis_kelamin'],
+                'username' => $u,
                 'photo_path' => $pesertaInfo['pasfoto'],
-                'assessment_date' => $reportData['metadata_proyek']['tanggal_pelaksanaan'],
-            ]
+                'assessment_date' => $rep['metadata_proyek']['tanggal_pelaksanaan'],
+                'created_at' => $now,
+                'updated_at' => $now,
+            ];
+        }
+
+        if (empty($participantsBulk)) {
+            return 0;
+        }
+
+        Participant::upsert(
+            $participantsBulk,
+            ['event_id', 'username'],
+            ['batch_id', 'position_formation_id', 'test_number', 'skb_number', 'name', 'gender', 'photo_path', 'assessment_date', 'updated_at']
         );
 
-        // 4. Upsert PsychologicalTest (Data MMPI)
-        $kejiwaan = $reportData['kejiwaan'];
-        $rawNilaiPq = $kejiwaan['nilai_pq'] ?? 0;
-        $numericNilaiPq = is_numeric(trim((string) $rawNilaiPq)) ? (float) $rawNilaiPq : 0.00;
+        // Map participant username to DB participant_id
+        $participantModels = Participant::where('event_id', $event->id)
+            ->whereIn('username', $usernames)
+            ->get()
+            ->keyBy('username');
 
-        PsychologicalTest::updateOrCreate(
-            [
+        // 3. Prepare Bulk Upsert PsychologicalTest
+        $psychBulk = [];
+        foreach ($usernames as $u) {
+            $p = $participantModels[$u] ?? null;
+            $rep = $reportsMap[$u] ?? null;
+            if (! $p || ! $rep) {
+                continue;
+            }
+
+            $kejiwaan = $rep['kejiwaan'];
+            $rawNilaiPq = $kejiwaan['nilai_pq'] ?? 0;
+            $numericNilaiPq = is_numeric(trim((string) $rawNilaiPq)) ? (float) $rawNilaiPq : 0.00;
+
+            $psychBulk[] = [
                 'event_id' => $event->id,
-                'participant_id' => $participant->id,
-            ],
-            [
-                'no_test' => $pesertaInfo['no_test'],
-                'username' => $username,
+                'participant_id' => $p->id,
+                'no_test' => $rep['peserta']['no_test'],
+                'username' => $u,
                 'validitas' => $kejiwaan['validitas'],
                 'internal' => implode(' ', $kejiwaan['internal_pribadi']),
                 'interpersonal' => implode(' ', $kejiwaan['interpersonal']),
@@ -201,52 +299,68 @@ class LspDataImporterService
                 'psikogram' => json_encode($kejiwaan['psikogram']),
                 'nilai_pq' => $numericNilaiPq,
                 'tingkat_stres' => $kejiwaan['tingkat_stres'],
-            ]
-        );
+                'created_at' => $now,
+                'updated_at' => $now,
+            ];
+        }
 
-        // 5. Upsert Interpretations (Potensi & Kompetensi Narrative)
-        $potensiCatType = CategoryType::query()->where('template_id', $template->id)->where('code', 'potensi')->first();
-        $kompetensiCatType = CategoryType::query()->where('template_id', $template->id)->where('code', 'kompetensi')->first();
-
-        if ($potensiCatType && ! empty($reportData['interpretasi']['potensi_text'])) {
-            Interpretation::updateOrCreate(
-                [
-                    'participant_id' => $participant->id,
-                    'event_id' => $event->id,
-                    'category_type_id' => $potensiCatType->id,
-                ],
-                [
-                    'interpretation_text' => $reportData['interpretasi']['potensi_text'],
-                ]
+        if (! empty($psychBulk)) {
+            PsychologicalTest::upsert(
+                $psychBulk,
+                ['event_id', 'participant_id'],
+                ['no_test', 'username', 'validitas', 'internal', 'interpersonal', 'kap_kerja', 'klinik', 'kesimpulan', 'psikogram', 'nilai_pq', 'tingkat_stres', 'updated_at']
             );
         }
 
-        if ($kompetensiCatType && ! empty($reportData['interpretasi']['kompetensi_text'])) {
-            Interpretation::updateOrCreate(
-                [
-                    'participant_id' => $participant->id,
+        // 4. Prepare Bulk Upsert Interpretations & CategoryAssessments
+        $interpBulk = [];
+        $catAssessBulk = [];
+
+        foreach ($usernames as $u) {
+            $p = $participantModels[$u] ?? null;
+            $rep = $reportsMap[$u] ?? null;
+            if (! $p || ! $rep) {
+                continue;
+            }
+
+            $template = $formationMap[$u]['template'];
+            $b = $batchMap[$u];
+            $f = $formationMap[$u]['formation'];
+
+            $potensiCatType = CategoryType::query()->where('template_id', $template->id)->where('code', 'potensi')->first();
+            $kompetensiCatType = CategoryType::query()->where('template_id', $template->id)->where('code', 'kompetensi')->first();
+
+            // Interpretations
+            if ($potensiCatType && ! empty($rep['interpretasi']['potensi_text'])) {
+                $interpBulk[] = [
+                    'participant_id' => $p->id,
+                    'event_id' => $event->id,
+                    'category_type_id' => $potensiCatType->id,
+                    'interpretation_text' => $rep['interpretasi']['potensi_text'],
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ];
+            }
+            if ($kompetensiCatType && ! empty($rep['interpretasi']['kompetensi_text'])) {
+                $interpBulk[] = [
+                    'participant_id' => $p->id,
                     'event_id' => $event->id,
                     'category_type_id' => $kompetensiCatType->id,
-                ],
-                [
-                    'interpretation_text' => $reportData['interpretasi']['kompetensi_text'],
-                ]
-            );
-        }
+                    'interpretation_text' => $rep['interpretasi']['kompetensi_text'],
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ];
+            }
 
-        // 6. Upsert CategoryAssessments & AspectAssessments (Potensi)
-        if ($potensiCatType) {
-            $potensiData = $reportData['potensi'];
-
-            $catAssessPotensi = CategoryAssessment::updateOrCreate(
-                [
-                    'participant_id' => $participant->id,
+            // CategoryAssessments (Potensi)
+            if ($potensiCatType) {
+                $potensiData = $rep['potensi'];
+                $catAssessBulk[] = [
+                    'participant_id' => $p->id,
                     'event_id' => $event->id,
                     'category_type_id' => $potensiCatType->id,
-                ],
-                [
-                    'batch_id' => $batch->id,
-                    'position_formation_id' => $formation->id,
+                    'batch_id' => $b->id,
+                    'position_formation_id' => $f->id,
                     'total_standard_rating' => $potensiData['total_standard_rating'],
                     'total_standard_score' => $potensiData['total_standard_score'],
                     'total_individual_rating' => $potensiData['total_individual_rating'],
@@ -255,38 +369,109 @@ class LspDataImporterService
                     'gap_score' => $potensiData['gap_total_score'],
                     'conclusion_code' => $potensiData['kesimpulan_akhir'] === 'Memenuhi Standard' ? 'MS' : 'TMS',
                     'conclusion_text' => strtoupper($potensiData['kesimpulan_akhir']),
-                ]
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ];
+            }
+
+            // CategoryAssessments (Kompetensi)
+            if ($kompetensiCatType) {
+                $kompetensiData = $rep['kompetensi'];
+                $catAssessBulk[] = [
+                    'participant_id' => $p->id,
+                    'event_id' => $event->id,
+                    'category_type_id' => $kompetensiCatType->id,
+                    'batch_id' => $b->id,
+                    'position_formation_id' => $f->id,
+                    'total_standard_rating' => $kompetensiData['total_standard_rating'],
+                    'total_standard_score' => $kompetensiData['total_standard_score'],
+                    'total_individual_rating' => $kompetensiData['total_individual_rating'],
+                    'total_individual_score' => $kompetensiData['total_individual_score'],
+                    'gap_rating' => $kompetensiData['gap_total_rating'],
+                    'gap_score' => $kompetensiData['gap_total_score'],
+                    'conclusion_code' => $kompetensiData['kesimpulan_akhir'] === 'Sangat Kompeten' ? 'SK' : ($kompetensiData['kesimpulan_akhir'] === 'Kompeten' ? 'K' : 'BK'),
+                    'conclusion_text' => strtoupper($kompetensiData['kesimpulan_akhir']),
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ];
+            }
+        }
+
+        if (! empty($interpBulk)) {
+            Interpretation::upsert(
+                $interpBulk,
+                ['participant_id', 'event_id', 'category_type_id'],
+                ['interpretation_text', 'updated_at']
             );
+        }
 
-            foreach ($potensiData['aspek_list'] as $aspekKey => $aspekData) {
-                $aspectModel = Aspect::query()->where('template_id', $template->id)
-                    ->where('category_type_id', $potensiCatType->id)
-                    ->where('name', $aspekData['nama_aspek'])
-                    ->first();
+        if (! empty($catAssessBulk)) {
+            CategoryAssessment::upsert(
+                $catAssessBulk,
+                ['participant_id', 'event_id', 'category_type_id'],
+                ['batch_id', 'position_formation_id', 'total_standard_rating', 'total_standard_score', 'total_individual_rating', 'total_individual_score', 'gap_rating', 'gap_score', 'conclusion_code', 'conclusion_text', 'updated_at']
+            );
+        }
 
-                if (! $aspectModel) {
-                    $aspectModel = Aspect::create([
-                        'template_id' => $template->id,
-                        'category_type_id' => $potensiCatType->id,
-                        'code' => Str::slug($aspekData['nama_aspek']),
-                        'name' => $aspekData['nama_aspek'],
-                        'description' => "Aspek Potensi {$aspekData['nama_aspek']}",
-                        'weight_percentage' => $aspekData['bobot'],
-                        'standard_rating' => $aspekData['standard_rating'],
-                        'order' => 1,
-                    ]);
-                }
+        // Map CategoryAssessments
+        $pIds = $participantModels->pluck('id')->toArray();
+        $catAssessModels = CategoryAssessment::where('event_id', $event->id)
+            ->whereIn('participant_id', $pIds)
+            ->get();
 
-                $aspAssess = AspectAssessment::updateOrCreate(
-                    [
+        $catAssessMap = [];
+        foreach ($catAssessModels as $ca) {
+            $catAssessMap[$ca->participant_id][$ca->category_type_id] = $ca;
+        }
+
+        // 5. Prepare Bulk Upsert AspectAssessments & SubAspectAssessments
+        $aspectAssessBulk = [];
+        $subAspectAssessList = [];
+
+        foreach ($usernames as $u) {
+            $p = $participantModels[$u] ?? null;
+            $rep = $reportsMap[$u] ?? null;
+            if (! $p || ! $rep) {
+                continue;
+            }
+
+            $template = $formationMap[$u]['template'];
+            $b = $batchMap[$u];
+            $f = $formationMap[$u]['formation'];
+
+            $potensiCatType = CategoryType::query()->where('template_id', $template->id)->where('code', 'potensi')->first();
+            $kompetensiCatType = CategoryType::query()->where('template_id', $template->id)->where('code', 'kompetensi')->first();
+
+            // Potensi Aspects
+            if ($potensiCatType && isset($catAssessMap[$p->id][$potensiCatType->id])) {
+                $catAssessPotensi = $catAssessMap[$p->id][$potensiCatType->id];
+                foreach ($rep['potensi']['aspek_list'] as $aspekKey => $aspekData) {
+                    $aspKey = "{$template->id}_{$potensiCatType->id}_".Str::slug($aspekData['nama_aspek']);
+                    if (! isset($this->aspectRegistry[$aspKey])) {
+                        $this->aspectRegistry[$aspKey] = Aspect::firstOrCreate(
+                            [
+                                'template_id' => $template->id,
+                                'category_type_id' => $potensiCatType->id,
+                                'code' => Str::slug($aspekData['nama_aspek']),
+                            ],
+                            [
+                                'name' => $aspekData['nama_aspek'],
+                                'description' => "Aspek Potensi {$aspekData['nama_aspek']}",
+                                'weight_percentage' => $aspekData['bobot'],
+                                'standard_rating' => $aspekData['standard_rating'],
+                                'order' => 1,
+                            ]
+                        );
+                    }
+                    $aspectModel = $this->aspectRegistry[$aspKey];
+
+                    $aspectAssessBulk[] = [
                         'category_assessment_id' => $catAssessPotensi->id,
-                        'participant_id' => $participant->id,
+                        'participant_id' => $p->id,
                         'aspect_id' => $aspectModel->id,
-                    ],
-                    [
                         'event_id' => $event->id,
-                        'batch_id' => $batch->id,
-                        'position_formation_id' => $formation->id,
+                        'batch_id' => $b->id,
+                        'position_formation_id' => $f->id,
                         'standard_rating' => $aspekData['standard_rating_toleransi'],
                         'standard_score' => $aspekData['standard_score_toleransi'],
                         'individual_rating' => $aspekData['individual_rating'],
@@ -296,32 +481,32 @@ class LspDataImporterService
                         'percentage_score' => (int) round(($aspekData['individual_rating'] / max(1, $aspekData['standard_rating_toleransi'])) * 100),
                         'conclusion_code' => Str::slug($aspekData['kesimpulan']),
                         'conclusion_text' => $aspekData['kesimpulan'],
-                    ]
-                );
+                        'created_at' => $now,
+                        'updated_at' => $now,
+                    ];
 
-                // Upsert SubAspectAssessments
-                foreach ($aspekData['atributs'] as $atribData) {
-                    $subAspectModel = SubAspect::query()->where('aspect_id', $aspectModel->id)
-                        ->where('name', $atribData['nama_atribut'])
-                        ->first();
+                    foreach ($aspekData['atributs'] as $atribData) {
+                        $subKey = "{$aspectModel->id}_".Str::slug($atribData['nama_atribut']);
+                        if (! isset($this->subAspectRegistry[$subKey])) {
+                            $this->subAspectRegistry[$subKey] = SubAspect::firstOrCreate(
+                                [
+                                    'aspect_id' => $aspectModel->id,
+                                    'code' => Str::slug($atribData['nama_atribut']),
+                                ],
+                                [
+                                    'name' => $atribData['nama_atribut'],
+                                    'standard_rating' => $atribData['standard_rating'],
+                                    'order' => 1,
+                                ]
+                            );
+                        }
+                        $subAspectModel = $this->subAspectRegistry[$subKey];
 
-                    if (! $subAspectModel) {
-                        $subAspectModel = SubAspect::create([
+                        $subAspectAssessList[] = [
+                            'participant_id' => $p->id,
+                            'category_assessment_id' => $catAssessPotensi->id,
                             'aspect_id' => $aspectModel->id,
-                            'code' => Str::slug($atribData['nama_atribut']),
-                            'name' => $atribData['nama_atribut'],
-                            'standard_rating' => $atribData['standard_rating'],
-                            'order' => 1,
-                        ]);
-                    }
-
-                    SubAspectAssessment::updateOrCreate(
-                        [
-                            'aspect_assessment_id' => $aspAssess->id,
-                            'participant_id' => $participant->id,
                             'sub_aspect_id' => $subAspectModel->id,
-                        ],
-                        [
                             'event_id' => $event->id,
                             'standard_rating' => $atribData['standard_rating'],
                             'individual_rating' => $atribData['individual_rating'],
@@ -332,65 +517,41 @@ class LspDataImporterService
                                 2 => 'Kurang',
                                 default => 'Sangat Kurang'
                             },
-                        ]
-                    );
+                        ];
+                    }
                 }
             }
-        }
 
-        // 7. Upsert CategoryAssessments & AspectAssessments (Kompetensi)
-        if ($kompetensiCatType) {
-            $kompetensiData = $reportData['kompetensi'];
+            // Kompetensi Aspects
+            if ($kompetensiCatType && isset($catAssessMap[$p->id][$kompetensiCatType->id])) {
+                $catAssessKompetensi = $catAssessMap[$p->id][$kompetensiCatType->id];
+                foreach ($rep['kompetensi']['aspek_list'] as $komKey => $komData) {
+                    $aspKey = "{$template->id}_{$kompetensiCatType->id}_".Str::slug($komData['nama_kompetensi']);
+                    if (! isset($this->aspectRegistry[$aspKey])) {
+                        $this->aspectRegistry[$aspKey] = Aspect::firstOrCreate(
+                            [
+                                'template_id' => $template->id,
+                                'category_type_id' => $kompetensiCatType->id,
+                                'code' => Str::slug($komData['nama_kompetensi']),
+                            ],
+                            [
+                                'name' => $komData['nama_kompetensi'],
+                                'description' => "Kompetensi Inti {$komData['nama_kompetensi']}",
+                                'weight_percentage' => $komData['bobot'],
+                                'standard_rating' => $komData['standard_rating'],
+                                'order' => 1,
+                            ]
+                        );
+                    }
+                    $aspectModel = $this->aspectRegistry[$aspKey];
 
-            $catAssessKompetensi = CategoryAssessment::updateOrCreate(
-                [
-                    'participant_id' => $participant->id,
-                    'event_id' => $event->id,
-                    'category_type_id' => $kompetensiCatType->id,
-                ],
-                [
-                    'batch_id' => $batch->id,
-                    'position_formation_id' => $formation->id,
-                    'total_standard_rating' => $kompetensiData['total_standard_rating'],
-                    'total_standard_score' => $kompetensiData['total_standard_score'],
-                    'total_individual_rating' => $kompetensiData['total_individual_rating'],
-                    'total_individual_score' => $kompetensiData['total_individual_score'],
-                    'gap_rating' => $kompetensiData['gap_total_rating'],
-                    'gap_score' => $kompetensiData['gap_total_score'],
-                    'conclusion_code' => $kompetensiData['kesimpulan_akhir'] === 'Sangat Kompeten' ? 'SK' : ($kompetensiData['kesimpulan_akhir'] === 'Kompeten' ? 'K' : 'BK'),
-                    'conclusion_text' => strtoupper($kompetensiData['kesimpulan_akhir']),
-                ]
-            );
-
-            foreach ($kompetensiData['aspek_list'] as $komKey => $komData) {
-                $aspectModel = Aspect::query()->where('template_id', $template->id)
-                    ->where('category_type_id', $kompetensiCatType->id)
-                    ->where('name', $komData['nama_kompetensi'])
-                    ->first();
-
-                if (! $aspectModel) {
-                    $aspectModel = Aspect::create([
-                        'template_id' => $template->id,
-                        'category_type_id' => $kompetensiCatType->id,
-                        'code' => Str::slug($komData['nama_kompetensi']),
-                        'name' => $komData['nama_kompetensi'],
-                        'description' => "Kompetensi Inti {$komData['nama_kompetensi']}",
-                        'weight_percentage' => $komData['bobot'],
-                        'standard_rating' => $komData['standard_rating'],
-                        'order' => 1,
-                    ]);
-                }
-
-                AspectAssessment::updateOrCreate(
-                    [
+                    $aspectAssessBulk[] = [
                         'category_assessment_id' => $catAssessKompetensi->id,
-                        'participant_id' => $participant->id,
+                        'participant_id' => $p->id,
                         'aspect_id' => $aspectModel->id,
-                    ],
-                    [
                         'event_id' => $event->id,
-                        'batch_id' => $batch->id,
-                        'position_formation_id' => $formation->id,
+                        'batch_id' => $b->id,
+                        'position_formation_id' => $f->id,
                         'standard_rating' => $komData['standard_rating_toleransi'],
                         'standard_score' => $komData['standard_score_toleransi'],
                         'individual_rating' => $komData['individual_rating'],
@@ -400,23 +561,80 @@ class LspDataImporterService
                         'percentage_score' => (int) round(($komData['individual_rating'] / max(1, $komData['standard_rating_toleransi'])) * 100),
                         'conclusion_code' => Str::slug($komData['kesimpulan']),
                         'conclusion_text' => $komData['kesimpulan'],
-                    ]
+                        'created_at' => $now,
+                        'updated_at' => $now,
+                    ];
+                }
+            }
+        }
+
+        if (! empty($aspectAssessBulk)) {
+            AspectAssessment::upsert(
+                $aspectAssessBulk,
+                ['category_assessment_id', 'participant_id', 'aspect_id'],
+                ['event_id', 'batch_id', 'position_formation_id', 'standard_rating', 'standard_score', 'individual_rating', 'individual_score', 'gap_rating', 'gap_score', 'percentage_score', 'conclusion_code', 'conclusion_text', 'updated_at']
+            );
+        }
+
+        // SubAspectAssessments Upsert
+        if (! empty($subAspectAssessList)) {
+            $aspectAssessModels = AspectAssessment::whereIn('participant_id', $pIds)->get();
+            $aspAssessMap = [];
+            foreach ($aspectAssessModels as $aa) {
+                $aspAssessMap[$aa->category_assessment_id][$aa->aspect_id] = $aa;
+            }
+
+            $subAspectBulk = [];
+            foreach ($subAspectAssessList as $item) {
+                $caId = $item['category_assessment_id'];
+                $aspId = $item['aspect_id'];
+                $pId = $item['participant_id'];
+                $aa = $aspAssessMap[$caId][$aspId] ?? null;
+                if (! $aa) {
+                    continue;
+                }
+
+                $subAspectBulk[] = [
+                    'aspect_assessment_id' => $aa->id,
+                    'participant_id' => $pId,
+                    'sub_aspect_id' => $item['sub_aspect_id'],
+                    'event_id' => $item['event_id'],
+                    'standard_rating' => $item['standard_rating'],
+                    'individual_rating' => $item['individual_rating'],
+                    'rating_label' => $item['rating_label'],
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ];
+            }
+
+            if (! empty($subAspectBulk)) {
+                SubAspectAssessment::upsert(
+                    $subAspectBulk,
+                    ['aspect_assessment_id', 'participant_id', 'sub_aspect_id'],
+                    ['event_id', 'standard_rating', 'individual_rating', 'rating_label', 'updated_at']
                 );
             }
         }
 
-        // 8. Upsert FinalAssessments
-        $kesimpulanPsikotes = $reportData['kesimpulan_psikotest'];
-        $rekomAkhir = $reportData['rekomendasi_akhir'];
+        // 6. Bulk Upsert FinalAssessments
+        $finalBulk = [];
+        foreach ($usernames as $u) {
+            $p = $participantModels[$u] ?? null;
+            $rep = $reportsMap[$u] ?? null;
+            if (! $p || ! $rep) {
+                continue;
+            }
 
-        FinalAssessment::updateOrCreate(
-            [
-                'participant_id' => $participant->id,
+            $b = $batchMap[$u];
+            $f = $formationMap[$u]['formation'];
+            $kesimpulanPsikotes = $rep['kesimpulan_psikotest'];
+            $rekomAkhir = $rep['rekomendasi_akhir'];
+
+            $finalBulk[] = [
+                'participant_id' => $p->id,
                 'event_id' => $event->id,
-            ],
-            [
-                'batch_id' => $batch->id,
-                'position_formation_id' => $formation->id,
+                'batch_id' => $b->id,
+                'position_formation_id' => $f->id,
                 'potensi_weight' => 40,
                 'potensi_standard_score' => $kesimpulanPsikotes['potensi_std_score_akhir'],
                 'potensi_individual_score' => $kesimpulanPsikotes['potensi_indiv_score_akhir'],
@@ -428,8 +646,33 @@ class LspDataImporterService
                 'achievement_percentage' => $kesimpulanPsikotes['total_std_score'] > 0 ? round(($kesimpulanPsikotes['total_indiv_score'] / $kesimpulanPsikotes['total_std_score']) * 100, 2) : 100,
                 'conclusion_code' => $rekomAkhir['final_code'],
                 'conclusion_text' => $rekomAkhir['final_text'],
-            ]
-        );
+                'created_at' => $now,
+                'updated_at' => $now,
+            ];
+        }
+
+        if (! empty($finalBulk)) {
+            FinalAssessment::upsert(
+                $finalBulk,
+                ['participant_id', 'event_id'],
+                ['batch_id', 'position_formation_id', 'potensi_weight', 'potensi_standard_score', 'potensi_individual_score', 'kompetensi_weight', 'kompetensi_standard_score', 'kompetensi_individual_score', 'total_standard_score', 'total_individual_score', 'achievement_percentage', 'conclusion_code', 'conclusion_text', 'updated_at']
+            );
+        }
+
+        return count($participantModels);
+    }
+
+    /**
+     * Import 1 peserta spesifik (digunakan untuk fallback per individu jika terjadi error khusus).
+     */
+    public function importSingleParticipant(string $username, string $kodeProyek, AssessmentEvent $event): Participant
+    {
+        $this->importParticipantBatch([$username], $kodeProyek, $event);
+
+        $participant = Participant::where('event_id', $event->id)->where('username', $username)->first();
+        if (! $participant) {
+            throw new Exception("Gagal mengimpor peserta {$username}");
+        }
 
         return $participant;
     }
@@ -440,6 +683,10 @@ class LspDataImporterService
     protected function ensureAssessmentTemplate(string $levelJabatan): AssessmentTemplate
     {
         $code = Str::slug("template-{$levelJabatan}");
+        if (isset($this->templateRegistry[$code])) {
+            return $this->templateRegistry[$code];
+        }
+
         $name = 'Standar Jabatan '.ucfirst(strtolower($levelJabatan));
 
         $template = AssessmentTemplate::firstOrCreate(
@@ -467,6 +714,8 @@ class LspDataImporterService
                 'order' => 2,
             ]
         );
+
+        $this->templateRegistry[$code] = $template;
 
         return $template;
     }
