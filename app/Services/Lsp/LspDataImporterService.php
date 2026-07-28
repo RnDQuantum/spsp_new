@@ -201,11 +201,13 @@ class LspDataImporterService
             $batchMap[$u] = $this->batchRegistry[$batchKey];
 
             // Master Template & PositionFormation
-            $levelJabatan = strtoupper($pesertaInfo['jabatan_pelaksana'] ?? 'STAFF');
+            $rawJabatan = trim($pesertaInfo['jabatan_pelaksana'] ?? '');
+            $levelJabatan = $rawJabatan !== '' ? strtoupper($rawJabatan) : 'STAFF';
             $template = $this->ensureAssessmentTemplate($levelJabatan);
 
             $formationCode = Str::slug($levelJabatan);
-            $formationName = $pesertaInfo['minat_penempatan'] !== '-' ? $pesertaInfo['minat_penempatan'] : $levelJabatan;
+            $minat = trim($pesertaInfo['minat_penempatan'] ?? '');
+            $formationName = ($minat !== '' && $minat !== '-') ? $minat : $levelJabatan;
             $formationKey = "{$event->id}_{$formationCode}";
 
             if (! isset($this->formationRegistry[$formationKey])) {
@@ -262,8 +264,8 @@ class LspDataImporterService
 
         Participant::upsert(
             $participantsBulk,
-            ['event_id', 'username'],
-            ['batch_id', 'position_formation_id', 'test_number', 'skb_number', 'name', 'gender', 'photo_path', 'assessment_date', 'updated_at']
+            ['username'],
+            ['event_id', 'batch_id', 'position_formation_id', 'test_number', 'skb_number', 'name', 'gender', 'photo_path', 'assessment_date', 'updated_at']
         );
 
         // Map participant username to DB participant_id
@@ -272,7 +274,9 @@ class LspDataImporterService
             ->get()
             ->keyBy('username');
 
-        // 3. Prepare Bulk Upsert PsychologicalTest
+        $pIds = $participantModels->pluck('id')->toArray();
+
+        // 3. Prepare Bulk Insert PsychologicalTest
         $psychBulk = [];
         foreach ($usernames as $u) {
             $p = $participantModels[$u] ?? null;
@@ -305,11 +309,8 @@ class LspDataImporterService
         }
 
         if (! empty($psychBulk)) {
-            PsychologicalTest::upsert(
-                $psychBulk,
-                ['event_id', 'participant_id'],
-                ['no_test', 'username', 'validitas', 'internal', 'interpersonal', 'kap_kerja', 'klinik', 'kesimpulan', 'psikogram', 'nilai_pq', 'tingkat_stres', 'updated_at']
-            );
+            PsychologicalTest::whereIn('participant_id', $pIds)->delete();
+            PsychologicalTest::insert($psychBulk);
         }
 
         // 4. Prepare Bulk Upsert Interpretations & CategoryAssessments
@@ -398,23 +399,19 @@ class LspDataImporterService
         }
 
         if (! empty($interpBulk)) {
-            Interpretation::upsert(
-                $interpBulk,
-                ['participant_id', 'event_id', 'category_type_id'],
-                ['interpretation_text', 'updated_at']
-            );
+            Interpretation::whereIn('participant_id', $pIds)->delete();
+            Interpretation::insert($interpBulk);
         }
 
         if (! empty($catAssessBulk)) {
             CategoryAssessment::upsert(
                 $catAssessBulk,
-                ['participant_id', 'event_id', 'category_type_id'],
-                ['batch_id', 'position_formation_id', 'total_standard_rating', 'total_standard_score', 'total_individual_rating', 'total_individual_score', 'gap_rating', 'gap_score', 'conclusion_code', 'conclusion_text', 'updated_at']
+                ['participant_id', 'category_type_id'],
+                ['event_id', 'batch_id', 'position_formation_id', 'total_standard_rating', 'total_standard_score', 'total_individual_rating', 'total_individual_score', 'gap_rating', 'gap_score', 'conclusion_code', 'conclusion_text', 'updated_at']
             );
         }
 
         // Map CategoryAssessments
-        $pIds = $participantModels->pluck('id')->toArray();
         $catAssessModels = CategoryAssessment::where('event_id', $event->id)
             ->whereIn('participant_id', $pIds)
             ->get();
@@ -424,7 +421,7 @@ class LspDataImporterService
             $catAssessMap[$ca->participant_id][$ca->category_type_id] = $ca;
         }
 
-        // 5. Prepare Bulk Upsert AspectAssessments & SubAspectAssessments
+        // 5. Prepare Bulk AspectAssessments & SubAspectAssessments
         $aspectAssessBulk = [];
         $subAspectAssessList = [];
 
@@ -569,14 +566,12 @@ class LspDataImporterService
         }
 
         if (! empty($aspectAssessBulk)) {
-            AspectAssessment::upsert(
-                $aspectAssessBulk,
-                ['category_assessment_id', 'participant_id', 'aspect_id'],
-                ['event_id', 'batch_id', 'position_formation_id', 'standard_rating', 'standard_score', 'individual_rating', 'individual_score', 'gap_rating', 'gap_score', 'percentage_score', 'conclusion_code', 'conclusion_text', 'updated_at']
-            );
+            $catIds = $catAssessModels->pluck('id')->toArray();
+            AspectAssessment::whereIn('category_assessment_id', $catIds)->delete();
+            AspectAssessment::insert($aspectAssessBulk);
         }
 
-        // SubAspectAssessments Upsert
+        // SubAspectAssessments Bulk Insert
         if (! empty($subAspectAssessList)) {
             $aspectAssessModels = AspectAssessment::whereIn('participant_id', $pIds)->get();
             $aspAssessMap = [];
@@ -608,11 +603,9 @@ class LspDataImporterService
             }
 
             if (! empty($subAspectBulk)) {
-                SubAspectAssessment::upsert(
-                    $subAspectBulk,
-                    ['aspect_assessment_id', 'participant_id', 'sub_aspect_id'],
-                    ['event_id', 'standard_rating', 'individual_rating', 'rating_label', 'updated_at']
-                );
+                $aaIds = $aspectAssessModels->pluck('id')->toArray();
+                SubAspectAssessment::whereIn('aspect_assessment_id', $aaIds)->delete();
+                SubAspectAssessment::insert($subAspectBulk);
             }
         }
 
@@ -654,8 +647,8 @@ class LspDataImporterService
         if (! empty($finalBulk)) {
             FinalAssessment::upsert(
                 $finalBulk,
-                ['participant_id', 'event_id'],
-                ['batch_id', 'position_formation_id', 'potensi_weight', 'potensi_standard_score', 'potensi_individual_score', 'kompetensi_weight', 'kompetensi_standard_score', 'kompetensi_individual_score', 'total_standard_score', 'total_individual_score', 'achievement_percentage', 'conclusion_code', 'conclusion_text', 'updated_at']
+                ['participant_id'],
+                ['event_id', 'batch_id', 'position_formation_id', 'potensi_weight', 'potensi_standard_score', 'potensi_individual_score', 'kompetensi_weight', 'kompetensi_standard_score', 'kompetensi_individual_score', 'total_standard_score', 'total_individual_score', 'achievement_percentage', 'conclusion_code', 'conclusion_text', 'updated_at']
             );
         }
 
@@ -682,6 +675,9 @@ class LspDataImporterService
      */
     protected function ensureAssessmentTemplate(string $levelJabatan): AssessmentTemplate
     {
+        $rawJabatan = trim($levelJabatan);
+        $levelJabatan = $rawJabatan !== '' ? strtoupper($rawJabatan) : 'STAFF';
+
         $code = Str::slug("template-{$levelJabatan}");
         if (isset($this->templateRegistry[$code])) {
             return $this->templateRegistry[$code];

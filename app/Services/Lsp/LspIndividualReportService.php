@@ -178,8 +178,10 @@ class LspIndividualReportService
             $tanggalLahir = $peserta->tanggal_lahir ?? ($userObj->tanggal_lahir ?? '1990-01-01');
             $usia = $this->hitungUmurDalamTahun($tanggalLahir);
 
-            $standarFormPenilaian = $peserta->standar_form_penilaian ?? 'p3k_kjg_2025';
-            $levelJabatan = strtoupper($peserta->jabatan_pelaksana ?? '');
+            $rawStandarForm = trim($peserta->standar_form_penilaian ?? '');
+            $standarFormPenilaian = $rawStandarForm !== '' ? $rawStandarForm : 'p3k_kjg_2025';
+            $rawJabatan = trim($peserta->jabatan_pelaksana ?? '');
+            $levelJabatan = $rawJabatan !== '' ? strtoupper($rawJabatan) : 'STAFF';
 
             if ($standarFormPenilaian === 'p3k_kjg_2025') {
                 if ($levelJabatan === 'TERAMPIL') {
