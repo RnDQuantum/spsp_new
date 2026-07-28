@@ -4,13 +4,22 @@ declare(strict_types=1);
 
 namespace App\Livewire\Pages\HCA;
 
+use App\Models\Participant;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\View\View;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 
 #[Layout('components.layouts.hca-layout', ['title' => 'Human Capital Assessment Report'])]
 class HcaReportPage extends Component
 {
+    /**
+     * Active participant ID
+     */
+    #[Url(as: 'participant_id')]
+    public ?int $participantId = null;
+
     /**
      * Active section code
      */
@@ -20,6 +29,16 @@ class HcaReportPage extends Component
      * Print mode flag
      */
     public bool $printMode = false;
+
+    /**
+     * Talent selector modal visibility flag
+     */
+    public bool $showTalentModal = false;
+
+    /**
+     * Search query for talent selector modal
+     */
+    public string $searchParticipant = '';
 
     /**
      * Available sections grouping for sidebar TOC
@@ -85,6 +104,120 @@ class HcaReportPage extends Component
             ],
         ],
     ];
+
+    /**
+     * Mount component
+     */
+    public function mount(?int $participant = null): void
+    {
+        if ($participant) {
+            $this->participantId = $participant;
+        }
+
+        if (! $this->participantId) {
+            $this->participantId = session('filter.participant_id');
+        }
+
+        if (! $this->participantId) {
+            $this->participantId = Participant::query()->first()?->id;
+        }
+
+        if ($this->participantId && $p = $this->participant) {
+            session([
+                'filter.participant_id' => $p->id,
+                'filter.position_formation_id' => $p->position_formation_id,
+                'filter.event_code' => $p->assessmentEvent?->code ?? session('filter.event_code'),
+            ]);
+        }
+    }
+
+    /**
+     * Select a participant
+     */
+    public function selectParticipant(int $id): void
+    {
+        $this->participantId = $id;
+        $participant = Participant::with('assessmentEvent')->find($id);
+        if ($participant) {
+            session([
+                'filter.participant_id' => $participant->id,
+                'filter.position_formation_id' => $participant->position_formation_id,
+                'filter.event_code' => $participant->assessmentEvent?->code ?? session('filter.event_code'),
+            ]);
+        }
+        $this->showTalentModal = false;
+    }
+
+    /**
+     * Toggle talent selector modal
+     */
+    public function toggleTalentModal(): void
+    {
+        $this->showTalentModal = ! $this->showTalentModal;
+    }
+
+    /**
+     * Get active participant model property
+     */
+    public function getParticipantProperty(): ?Participant
+    {
+        if (! $this->participantId) {
+            return null;
+        }
+
+        return Participant::with([
+            'assessmentEvent.institution',
+            'positionFormation.template',
+            'batch',
+            'finalAssessment',
+            'psychologicalTest',
+            'institution',
+        ])->find($this->participantId);
+    }
+
+    /**
+     * Get available participants for talent switcher modal
+     */
+    public function getAvailableParticipantsProperty(): Collection
+    {
+        $query = Participant::with(['positionFormation', 'assessmentEvent']);
+
+        if (! empty(trim($this->searchParticipant))) {
+            $search = trim($this->searchParticipant);
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('test_number', 'like', "%{$search}%")
+                    ->orWhereHas('positionFormation', function ($pq) use ($search) {
+                        $pq->where('name', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        return $query->orderBy('name')->take(30)->get();
+    }
+
+    /**
+     * Helper to get participant initials
+     */
+    public function getInitials(?string $name): string
+    {
+        if (! $name) {
+            return 'P';
+        }
+
+        $cleanName = explode(',', $name)[0];
+        $words = array_filter(explode(' ', trim($cleanName)));
+
+        if (count($words) === 0) {
+            return 'P';
+        }
+
+        if (count($words) === 1) {
+            return strtoupper(substr($words[0], 0, 2));
+        }
+
+        return strtoupper(substr($words[0], 0, 1).substr(end($words), 0, 1));
+    }
 
     /**
      * Switch active section

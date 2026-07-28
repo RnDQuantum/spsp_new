@@ -46,6 +46,7 @@ Route::get('/kebijakan-privasi', function () {
 })->name('privacy');
 
 Route::get('/hca-report-demo', HcaReportPage::class)->name('hca-report-demo');
+Route::get('/hca-report/{participant?}', HcaReportPage::class)->name('hca-report');
 
 Route::middleware(['guest'])->group(function () {
     // Authentication Routes

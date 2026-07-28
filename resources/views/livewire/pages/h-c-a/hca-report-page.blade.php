@@ -4,7 +4,7 @@
         <div class="print-container bg-white p-0">
             <!-- 01 Cover -->
             <div class="page-break">
-                <livewire:pages.h-c-a.sections.cover />
+                <livewire:pages.h-c-a.sections.cover :participant-id="$participantId" :key="'cover_print_'.$participantId" />
             </div>
 
             <!-- 02 Ringkasan Eksekutif -->
@@ -148,17 +148,39 @@
                 </div>
 
                 <!-- Participant Brief Profile -->
-                <div class="p-6 border-b border-warm-border/10 flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-full bg-slate-700 overflow-hidden border-2 border-accent-amber flex items-center justify-center font-display font-bold text-white text-lg">
-                        BS
+                @php
+                    $currentTalent = $this->participant;
+                    $talentInitials = $currentTalent ? $this->getInitials($currentTalent->name) : 'P';
+                @endphp
+                <div class="p-5 border-b border-warm-border/10 flex items-center justify-between gap-3 bg-[#241f1c]">
+                    <div class="flex items-center gap-3 min-w-0">
+                        <div class="w-10 h-10 rounded-full bg-slate-700 overflow-hidden border-2 border-accent-amber flex shrink-0 items-center justify-center font-display font-bold text-white text-xs">
+                            @if ($currentTalent?->photo_path && file_exists(public_path('storage/' . $currentTalent->photo_path)))
+                                <img src="{{ asset('storage/' . $currentTalent->photo_path) }}" alt="{{ $currentTalent->name }}" class="w-full h-full object-cover" />
+                            @else
+                                {{ $talentInitials }}
+                            @endif
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <h2 class="font-semibold text-white text-xs truncate" title="{{ $currentTalent?->name }}">
+                                {{ $currentTalent?->name ?? 'Belum memilih peserta' }}
+                            </h2>
+                            <p class="text-[11px] text-slate-400 truncate" title="{{ $currentTalent?->positionFormation?->name }}">
+                                {{ $currentTalent?->positionFormation?->name ?? '-' }}
+                            </p>
+                            <span class="inline-flex mt-1 items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-accent-amber/20 text-accent-amber border border-accent-amber/30">
+                                Active Talent
+                            </span>
+                        </div>
                     </div>
-                    <div class="overflow-hidden">
-                        <h2 class="font-semibold text-white text-sm truncate">Budi Santoso, M.B.A.</h2>
-                        <p class="text-xs text-slate-400 truncate">VP of Talent Development</p>
-                        <span class="inline-flex mt-1 items-center px-1.5 py-0.5 rounded text-xs font-medium bg-accent-amber/20 text-accent-amber border border-accent-amber/30">
-                            Active Talent
-                        </span>
-                    </div>
+                    <button 
+                        wire:click="toggleTalentModal" 
+                        class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-all text-xs shrink-0 flex items-center gap-1 border border-slate-700 cursor-pointer"
+                        title="Ganti Peserta / Switch Talent"
+                    >
+                        <i class="fas fa-users-line text-accent-amber"></i>
+                        <i class="fas fa-chevron-down text-[10px] text-slate-400"></i>
+                    </button>
                 </div>
 
                 <!-- TOC Sections list -->
@@ -252,7 +274,7 @@
                         <div class="transition-all duration-300">
                             @switch($activeSection)
                                 @case('cover')
-                                    <livewire:pages.h-c-a.sections.cover />
+                                    <livewire:pages.h-c-a.sections.cover :participant-id="$participantId" :key="'cover_'.$participantId" />
                                     @break
                                 @case('exec_summary')
                                     <livewire:pages.h-c-a.sections.executive-summary />
@@ -308,6 +330,67 @@
                         </div>
                     </div>
                 </div>
+
+        <!-- Talent Selector Modal -->
+        @if ($showTalentModal)
+            <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+                <div class="bg-[#1e1b18] border border-warm-border/20 rounded-xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[80vh]">
+                    <!-- Modal Header -->
+                    <div class="p-4 border-b border-warm-border/10 flex items-center justify-between bg-[#282320]">
+                        <div class="flex items-center gap-2 text-white font-semibold text-sm">
+                            <i class="fas fa-user-check text-accent-amber"></i>
+                            <span>Pilih Active Talent (Peserta Asesmen)</span>
+                        </div>
+                        <button wire:click="toggleTalentModal" class="text-slate-400 hover:text-white text-sm p-1 cursor-pointer">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+
+                    <!-- Search Bar -->
+                    <div class="p-4 border-b border-warm-border/10 bg-[#221e1a]">
+                        <div class="relative">
+                            <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                            <input 
+                                type="text" 
+                                wire:model.live.debounce.250ms="searchParticipant"
+                                placeholder="Cari nama, nomor tes, atau posisi..." 
+                                class="w-full bg-[#181513] border border-warm-border/20 rounded-lg pl-9 pr-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-accent-amber"
+                            />
+                        </div>
+                    </div>
+
+                    <!-- Talent List -->
+                    <div class="flex-1 overflow-y-auto p-3 space-y-1">
+                        @forelse ($this->availableParticipants as $p)
+                            <button 
+                                wire:click="selectParticipant({{ $p->id }})"
+                                class="w-full text-left p-3 rounded-lg flex items-center justify-between gap-3 transition-all cursor-pointer {{ $participantId === $p->id ? 'bg-accent-amber/20 border border-accent-amber/40 text-white' : 'hover:bg-[#2c2724] text-slate-300' }}"
+                            >
+                                <div class="flex items-center gap-3 min-w-0">
+                                    <div class="w-9 h-9 rounded-full bg-slate-700 border border-slate-600 flex items-center justify-center text-xs font-bold text-white shrink-0">
+                                        {{ $this->getInitials($p->name) }}
+                                    </div>
+                                    <div class="min-w-0">
+                                        <div class="font-medium text-xs text-white truncate">{{ $p->name }}</div>
+                                        <div class="text-[11px] text-slate-400 truncate font-mono">{{ $p->test_number }} &bull; {{ $p->positionFormation?->name ?? 'Posisi N/A' }}</div>
+                                    </div>
+                                </div>
+                                @if ($participantId === $p->id)
+                                    <span class="text-accent-amber text-xs font-bold shrink-0">
+                                        <i class="fas fa-check-circle"></i> Active
+                                    </span>
+                                @endif
+                            </button>
+                        @empty
+                            <div class="p-8 text-center text-slate-500 text-xs">
+                                Tidak ada peserta yang cocok dengan pencarian "{{ $searchParticipant }}".
+                            </div>
+                        @endforelse
+                    </div>
+                </div>
+            </div>
+        @endif
+
             </main>
         </div>
     @endif

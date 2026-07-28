@@ -1,3 +1,13 @@
+@php
+    $cleanName = explode(',', $participant?->name ?? 'Participant')[0];
+    $words = array_filter(explode(' ', trim($cleanName)));
+    $initials = count($words) >= 2 
+        ? strtoupper(substr($words[0], 0, 1) . substr(end($words), 0, 1)) 
+        : (count($words) === 1 ? strtoupper(substr($words[0], 0, 2)) : 'P');
+
+    $docCode = 'HCA-' . ($participant?->assessmentEvent?->code ?? date('Y')) . '-' . str_pad((string)($participant?->id ?? 1), 4, '0', STR_PAD_LEFT);
+@endphp
+
 <div class="w-full max-w-5xl mx-auto bg-white border border-warm-border rounded-xl overflow-hidden print:border-none min-h-[900px] flex flex-col justify-between p-12 md:p-16 relative">
     
     <!-- Top Decorative Accents & Confidentiality -->
@@ -32,20 +42,27 @@
         <div class="w-full md:w-2/5 border-l-2 border-warm-border pl-8 space-y-8 py-2">
             <div>
                 <span class="text-[11px] font-bold uppercase tracking-widest text-slate-400 block mb-1">Kode Dokumen</span>
-                <span class="font-mono text-sm text-slate-700 font-semibold uppercase tracking-wider">HCA-2026-BS09</span>
+                <span class="font-mono text-sm text-slate-700 font-semibold uppercase tracking-wider">{{ $docCode }}</span>
             </div>
             <div>
                 <span class="text-[11px] font-bold uppercase tracking-widest text-slate-400 block mb-1">Metode Assessment</span>
                 <span class="text-sm text-slate-700 font-semibold flex items-center gap-1.5">
-                    <i class="fas fa-layer-group text-accent-amber"></i> 3-Layer Integrated Assessment
+                    <i class="fas fa-layer-group text-accent-amber"></i> {{ $participant?->positionFormation?->template?->name ?? '3-Layer Integrated Assessment' }}
                 </span>
             </div>
             <div>
                 <span class="text-[11px] font-bold uppercase tracking-widest text-slate-400 block mb-1">Status Laporan</span>
-                <span class="inline-flex items-center gap-1.5 text-xs text-accent-amber font-semibold bg-amber-50 border border-amber-100 px-2 py-0.5 rounded-full">
-                    <span class="w-1.5 h-1.5 rounded-full bg-accent-amber animate-pulse"></span>
-                    Verified & Locked
-                </span>
+                @if ($participant?->finalAssessment)
+                    <span class="inline-flex items-center gap-1.5 text-xs text-emerald-700 font-semibold bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-full">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                        Verified & Locked
+                    </span>
+                @else
+                    <span class="inline-flex items-center gap-1.5 text-xs text-accent-amber font-semibold bg-amber-50 border border-amber-100 px-2 py-0.5 rounded-full">
+                        <span class="w-1.5 h-1.5 rounded-full bg-accent-amber animate-pulse"></span>
+                        Asesmen Terverifikasi
+                    </span>
+                @endif
             </div>
         </div>
     </div>
@@ -54,11 +71,14 @@
     <div class="py-8 border-t border-b border-warm-border flex flex-col md:flex-row items-center justify-between gap-8">
         <!-- Photo Placeholder (Rounded, Premium Frame) -->
         <div class="shrink-0 flex items-center justify-center relative">
-            <div class="w-28 h-28 rounded-full overflow-hidden border-2 border-warm-border shadow-sm bg-slate-300">
-                <!-- Fallback Icon if no image -->
-                <div class="w-full h-full flex items-center justify-center bg-slate-200 text-slate-500">
-                    <i class="fas fa-user-tie text-4xl"></i>
-                </div>
+            <div class="w-28 h-28 rounded-full overflow-hidden border-2 border-warm-border shadow-sm bg-slate-200 flex items-center justify-center">
+                @if ($participant?->photo_path && file_exists(public_path('storage/' . $participant->photo_path)))
+                    <img src="{{ asset('storage/' . $participant->photo_path) }}" alt="{{ $participant->name }}" class="w-full h-full object-cover" />
+                @else
+                    <span class="font-display font-bold text-slate-700 text-3xl tracking-wider">
+                        {{ $initials }}
+                    </span>
+                @endif
             </div>
             <div class="absolute -bottom-1 right-2 bg-accent-amber text-white w-6 h-6 rounded-full flex items-center justify-center text-xs shadow border-2 border-white">
                 <i class="fas fa-check"></i>
@@ -69,19 +89,21 @@
         <div class="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-8 text-sm">
             <div>
                 <span class="text-[11px] font-bold uppercase tracking-widest text-slate-400 block mb-0.5">Nama Lengkap</span>
-                <span class="font-display font-semibold text-slate-800 text-base">Budi Santoso, M.B.A.</span>
+                <span class="font-display font-semibold text-slate-800 text-base">{{ $participant?->name ?? '-' }}</span>
             </div>
             <div>
                 <span class="text-[11px] font-bold uppercase tracking-widest text-slate-400 block mb-0.5">Nomor Ujian / Tes</span>
-                <span class="font-mono text-slate-700 font-semibold text-sm">TS-00918-2026</span>
+                <span class="font-mono text-slate-700 font-semibold text-sm">{{ $participant?->test_number ?? '-' }}</span>
             </div>
             <div>
                 <span class="text-[11px] font-bold uppercase tracking-widest text-slate-400 block mb-0.5">Posisi Target</span>
-                <span class="text-slate-700 font-semibold">VP of Talent Development</span>
+                <span class="text-slate-700 font-semibold">{{ $participant?->positionFormation?->name ?? '-' }}</span>
             </div>
             <div>
                 <span class="text-[11px] font-bold uppercase tracking-widest text-slate-400 block mb-0.5">Tanggal Asesmen</span>
-                <span class="text-slate-700 font-semibold">06 Juli 2026</span>
+                <span class="text-slate-700 font-semibold">
+                    {{ $participant?->assessment_date ? $participant->assessment_date->translatedFormat('d F Y') : ($participant?->created_at ? $participant->created_at->translatedFormat('d F Y') : '-') }}
+                </span>
             </div>
         </div>
     </div>
@@ -89,7 +111,7 @@
     <!-- Bottom Footer (Authorized Sign-off) -->
     <div class="mt-8 border-t border-warm-border pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500">
         <div>
-            Lembaga Penyelenggara: <strong class="text-slate-500">SPSP (Sistem Pemetaan Staf Integratif)</strong>
+            Lembaga Penyelenggara: <strong class="text-slate-700">{{ $participant?->institution?->name ?? $participant?->assessmentEvent?->institution?->name ?? 'SPSP (Sistem Pemetaan Staf Integratif)' }}</strong>
         </div>
         <div class="mt-2 sm:mt-0 italic flex items-center gap-1.5">
             <i class="fas fa-shield-halved text-accent-amber"></i>
@@ -98,3 +120,4 @@
     </div>
 
 </div>
+

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature\Livewire;
 
 use App\Livewire\Pages\HCA\HcaReportPage;
+use App\Models\Participant;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -93,5 +94,34 @@ class HcaReportPageTest extends TestCase
             ->assertSet('printMode', true)
             ->call('togglePrintMode', false)
             ->assertSet('printMode', false);
+    }
+
+    /**
+     * Test that selecting a participant updates participantId and session
+     */
+    public function test_selecting_participant_updates_participant_id(): void
+    {
+        $participant = Participant::query()->first();
+        if ($participant) {
+            Livewire::test(HcaReportPage::class)
+                ->call('selectParticipant', $participant->id)
+                ->assertSet('participantId', $participant->id)
+                ->assertSet('showTalentModal', false);
+
+            $this->assertEquals($participant->id, session('filter.participant_id'));
+        }
+    }
+
+    /**
+     * Test toggling talent selector modal
+     */
+    public function test_toggling_talent_modal_updates_state(): void
+    {
+        Livewire::test(HcaReportPage::class)
+            ->assertSet('showTalentModal', false)
+            ->call('toggleTalentModal')
+            ->assertSet('showTalentModal', true)
+            ->call('toggleTalentModal')
+            ->assertSet('showTalentModal', false);
     }
 }
