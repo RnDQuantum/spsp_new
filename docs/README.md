@@ -75,6 +75,15 @@ Dokumentasi integrasi data real dan pengolahan laporan legacy dari database LSP.
 *   **[05_FALLBACK_AND_SAFETY_MECHANISMS.md](./lsp_integration/05_FALLBACK_AND_SAFETY_MECHANISMS.md)**
     *   Dokumentasi lengkap seluruh matriks fallback data, pembatasan error, dan mekanisme isolasi transaksi impor.
 
+### 7. Human Capital Assessment (HCA) Report Documentation
+Dokumentasi lengkap untuk arsitektur, UI/UX, data mapping, dan tracker integrasi dinamis HCA Report.
+*   **[01_DYNAMIC_INTEGRATION_TRACKER.md](./hca/01_DYNAMIC_INTEGRATION_TRACKER.md)**
+    *   Tracker kemajuan integrasi dinamis per-halaman/section untuk 23 section HCA Report.
+*   **[02_DATA_MAPPING_SPEC.md](./hca/02_DATA_MAPPING_SPEC.md)**
+    *   Spesifikasi pemetaan data backend HCA vs tabel SPSP (Reuse, Partial, dan New data sources).
+*   **[03_DESIGN_AND_UI_SPEC.md](./hca/03_DESIGN_AND_UI_SPEC.md)**
+    *   Spesifikasi desain visual "Executive Journal", palette, layout, dan arsitektur komponen Livewire v3 HCA.
+
 
 
 
