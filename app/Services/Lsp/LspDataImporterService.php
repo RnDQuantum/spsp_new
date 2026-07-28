@@ -119,7 +119,7 @@ class LspDataImporterService
                 $importedCount += $chunkImported;
 
                 if ($progressCallback) {
-                    $progressCallback(count($chunkUsernames));
+                    $progressCallback(count($chunkUsernames), $totalFound);
                 }
             } catch (Exception $e) {
                 // Fallback attempt: if bulk transaction fails for chunk, retry individually for error isolation
@@ -130,7 +130,7 @@ class LspDataImporterService
                         });
                         $importedCount++;
                         if ($progressCallback) {
-                            $progressCallback(1);
+                            $progressCallback(1, $totalFound);
                         }
                     } catch (Exception $ex) {
                         $failedCount++;

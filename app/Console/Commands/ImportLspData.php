@@ -27,9 +27,12 @@ class ImportLspData extends Command
         try {
             $progressBar = null;
 
-            $res = $importer->importProject($kodeProyek, $username, $instId, function (int $stepCount) use (&$progressBar) {
+            $res = $importer->importProject($kodeProyek, $username, $instId, function (int $stepCount, int $totalFound) use (&$progressBar) {
                 if (! $progressBar) {
-                    $progressBar = $this->output->createProgressBar();
+                    $this->newLine();
+                    $this->info("Menemukan {$totalFound} peserta. Memproses sinkronisasi data...");
+                    $progressBar = $this->output->createProgressBar($totalFound);
+                    $progressBar->setFormat(' %current%/%max% [%bar%] %percent:3s%% | Waktu: %elapsed:6s%/%estimated:-6s%');
                     $progressBar->start();
                 }
                 $progressBar->advance($stepCount);
@@ -37,7 +40,7 @@ class ImportLspData extends Command
 
             if ($progressBar) {
                 $progressBar->finish();
-                $this->newLine();
+                $this->newLine(2);
             }
 
             $this->newLine();
