@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Livewire\Pages\HCA;
 
+use App\Models\AssessmentEvent;
 use App\Models\Participant;
+use App\Models\PositionFormation;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\View\View;
 use Livewire\Attributes\Layout;
@@ -19,6 +21,16 @@ class HcaReportPage extends Component
      */
     #[Url(as: 'participant_id')]
     public ?int $participantId = null;
+
+    /**
+     * Selected event code for modal filter
+     */
+    public ?string $selectedEventCode = null;
+
+    /**
+     * Selected position formation ID for modal filter
+     */
+    public ?int $selectedPositionId = null;
 
     /**
      * Active section code
@@ -123,10 +135,13 @@ class HcaReportPage extends Component
         }
 
         if ($this->participantId && $p = $this->participant) {
+            $this->selectedPositionId = $p->position_formation_id;
+            $this->selectedEventCode = $p->assessmentEvent?->code ?? session('filter.event_code');
+
             session([
                 'filter.participant_id' => $p->id,
                 'filter.position_formation_id' => $p->position_formation_id,
-                'filter.event_code' => $p->assessmentEvent?->code ?? session('filter.event_code'),
+                'filter.event_code' => $this->selectedEventCode,
             ]);
         }
     }
@@ -139,10 +154,13 @@ class HcaReportPage extends Component
         $this->participantId = $id;
         $participant = Participant::with('assessmentEvent')->find($id);
         if ($participant) {
+            $this->selectedPositionId = $participant->position_formation_id;
+            $this->selectedEventCode = $participant->assessmentEvent?->code ?? session('filter.event_code');
+
             session([
                 'filter.participant_id' => $participant->id,
                 'filter.position_formation_id' => $participant->position_formation_id,
-                'filter.event_code' => $participant->assessmentEvent?->code ?? session('filter.event_code'),
+                'filter.event_code' => $this->selectedEventCode,
             ]);
         }
         $this->showTalentModal = false;
@@ -154,6 +172,37 @@ class HcaReportPage extends Component
     public function toggleTalentModal(): void
     {
         $this->showTalentModal = ! $this->showTalentModal;
+
+        if ($this->showTalentModal && $p = $this->participant) {
+            $this->selectedEventCode = session('filter.event_code') ?? $p->assessmentEvent?->code;
+            $this->selectedPositionId = session('filter.position_formation_id') ?? $p->position_formation_id;
+        }
+    }
+
+    /**
+     * Handle update of selected event code in modal
+     */
+    public function updatedSelectedEventCode(?string $value): void
+    {
+        $this->selectedPositionId = null;
+        if ($value) {
+            session(['filter.event_code' => $value]);
+        } else {
+            session()->forget('filter.event_code');
+        }
+        session()->forget('filter.position_formation_id');
+    }
+
+    /**
+     * Handle update of selected position ID in modal
+     */
+    public function updatedSelectedPositionId(?int $value): void
+    {
+        if ($value) {
+            session(['filter.position_formation_id' => $value]);
+        } else {
+            session()->forget('filter.position_formation_id');
+        }
     }
 
     /**
@@ -176,24 +225,54 @@ class HcaReportPage extends Component
     }
 
     /**
+     * Get available assessment events for selector
+     */
+    public function getEventsProperty(): Collection
+    {
+        return AssessmentEvent::query()
+            ->orderByDesc('start_date')
+            ->get(['code', 'name']);
+    }
+
+    /**
+     * Get available positions for selector based on selected event
+     */
+    public function getPositionsProperty(): Collection
+    {
+        if (! $this->selectedEventCode) {
+            return new Collection;
+        }
+
+        return PositionFormation::query()
+            ->whereHas('assessmentEvent', fn ($q) => $q->where('code', $this->selectedEventCode))
+            ->orderBy('name')
+            ->get(['id', 'name']);
+    }
+
+    /**
      * Get available participants for talent switcher modal
      */
     public function getAvailableParticipantsProperty(): Collection
     {
         $query = Participant::with(['positionFormation', 'assessmentEvent']);
 
+        if ($this->selectedEventCode) {
+            $query->whereHas('assessmentEvent', fn ($q) => $q->where('code', $this->selectedEventCode));
+        }
+
+        if ($this->selectedPositionId) {
+            $query->where('position_formation_id', $this->selectedPositionId);
+        }
+
         if (! empty(trim($this->searchParticipant))) {
             $search = trim($this->searchParticipant);
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('test_number', 'like', "%{$search}%")
-                    ->orWhereHas('positionFormation', function ($pq) use ($search) {
-                        $pq->where('name', 'like', "%{$search}%");
-                    });
+                    ->orWhere('test_number', 'like', "%{$search}%");
             });
         }
 
-        return $query->orderBy('name')->take(30)->get();
+        return $query->orderBy('name')->take(50)->get();
     }
 
     /**
