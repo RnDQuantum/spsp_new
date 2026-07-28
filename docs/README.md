@@ -72,6 +72,9 @@ Dokumentasi integrasi data real dan pengolahan laporan legacy dari database LSP.
     *   Panduan operasional `LspIndividualReportService`, `LspDataImporterService`, Artisan CLI commands (`lsp:test-report` & `lsp:import`), dan norma JSON.
 *   **[04_DYNAMIC_MULTI_PROJECT_SUPPORT.md](./lsp_integration/04_DYNAMIC_MULTI_PROJECT_SUPPORT.md)**
     *   Arsitektur dan penjelasan kedinamisan multi-proyek integrasi LSP serta pemetaan lengkap 17 tabel database LSP ke DB SPSP.
+*   **[05_FALLBACK_AND_SAFETY_MECHANISMS.md](./lsp_integration/05_FALLBACK_AND_SAFETY_MECHANISMS.md)**
+    *   Dokumentasi lengkap seluruh matriks fallback data, pembatasan error, dan mekanisme isolasi transaksi impor.
+
 
 
 

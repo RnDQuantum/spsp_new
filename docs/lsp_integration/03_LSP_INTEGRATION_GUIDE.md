@@ -6,6 +6,7 @@
 - **File Test**: `tests/Feature/LspIndividualReportServiceTest.php` & `tests/Feature/LspDataImporterServiceTest.php`
 - **Lokasi Norma**: `resources/data/lsp_norms/` (`ist.json`, `kostik.json`, `personality.json`)
 - **Dokumentasi Kedinamisan Multi-Proyek**: `docs/lsp_integration/04_DYNAMIC_MULTI_PROJECT_SUPPORT.md`
+- **Dokumentasi Fallback & Ketahanan Sistem**: `docs/lsp_integration/05_FALLBACK_AND_SAFETY_MECHANISMS.md`
 
 ---
 
