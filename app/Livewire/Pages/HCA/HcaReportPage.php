@@ -254,6 +254,10 @@ class HcaReportPage extends Component
      */
     public function getAvailableParticipantsProperty(): Collection
     {
+        if (! $this->selectedEventCode && ! $this->selectedPositionId && empty(trim($this->searchParticipant))) {
+            return new Collection;
+        }
+
         $query = Participant::with(['positionFormation', 'assessmentEvent']);
 
         if ($this->selectedEventCode) {

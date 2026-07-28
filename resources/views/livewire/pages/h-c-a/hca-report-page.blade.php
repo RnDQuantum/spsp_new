@@ -374,42 +374,137 @@
                     </button>
                 </div>
 
-                <!-- 3-Level Filter Selects -->
-                <div class="p-4 border-b border-warm-border/10 bg-[#221e1a] space-y-3 text-xs">
-                    <!-- 1. Select Event -->
-                    <div>
+                <!-- 3-Level Custom Searchable Filter -->
+                <div class="p-4 border-b border-warm-border/10 bg-[#221e1a] space-y-4 text-xs">
+                    
+                    <!-- 1. Custom Searchable Dropdown: Event Asesmen -->
+                    <div x-data="{ openEvent: false, searchEvent: '' }" @click.away="openEvent = false" class="relative">
                         <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">
                             1. Event Asesmen
                         </label>
-                        <select 
-                            wire:model.live="selectedEventCode"
-                            class="w-full bg-[#181513] border border-warm-border/20 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-accent-amber cursor-pointer"
+                        @php
+                            $currentEvent = collect($this->events)->firstWhere('code', $selectedEventCode);
+                        @endphp
+                        <button 
+                            type="button"
+                            @click="openEvent = !openEvent"
+                            class="w-full bg-[#181513] border border-warm-border/20 rounded-lg px-3 py-2.5 text-left text-white flex items-center justify-between hover:border-accent-amber transition cursor-pointer"
                         >
-                            <option value="">-- Semua Event --</option>
-                            @foreach ($this->events as $ev)
-                                <option value="{{ $ev->code }}">{{ $ev->name }}</option>
-                            @endforeach
-                        </select>
+                            <span class="truncate {{ $currentEvent ? 'font-medium text-amber-400' : 'text-slate-400' }}">
+                                <i class="fas fa-folder-open text-xs mr-2 opacity-70"></i>
+                                {{ $currentEvent ? $currentEvent->name : 'Semua Event Asesmen...' }}
+                            </span>
+                            <i class="fas fa-chevron-down text-[10px] text-slate-400 transition-transform duration-200" :class="{ 'rotate-180': openEvent }"></i>
+                        </button>
+
+                        <!-- Dropdown Menu Event -->
+                        <div 
+                            x-show="openEvent"
+                            x-transition.opacity.duration.150ms
+                            class="absolute z-30 w-full mt-1 bg-[#1a1715] border border-warm-border/30 rounded-xl shadow-2xl overflow-hidden p-2 space-y-1"
+                        >
+                            <div class="relative mb-1">
+                                <i class="fas fa-search absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-500 text-[10px]"></i>
+                                <input 
+                                    type="text" 
+                                    x-model="searchEvent"
+                                    placeholder="Cari event..." 
+                                    class="w-full bg-[#12100f] border border-warm-border/20 rounded-md pl-7 pr-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-accent-amber"
+                                />
+                            </div>
+                            <div class="max-h-48 overflow-y-auto space-y-0.5 scrollbar-thin">
+                                <button 
+                                    type="button"
+                                    @click="$wire.set('selectedEventCode', null); openEvent = false; searchEvent = ''"
+                                    class="w-full text-left px-3 py-2 rounded-md hover:bg-[#2c2724] text-slate-400 text-xs transition"
+                                >
+                                    -- Semua Event --
+                                </button>
+                                @foreach ($this->events as $ev)
+                                    <button 
+                                        type="button"
+                                        x-show="!searchEvent || '{{ strtolower(addslashes($ev->name)) }}'.includes(searchEvent.toLowerCase())"
+                                        @click="$wire.set('selectedEventCode', '{{ $ev->code }}'); openEvent = false; searchEvent = ''"
+                                        class="w-full text-left px-3 py-2 rounded-md hover:bg-[#2c2724] text-xs transition flex items-center justify-between {{ $selectedEventCode === $ev->code ? 'bg-accent-amber/20 text-accent-amber font-semibold' : 'text-slate-200' }}"
+                                    >
+                                        <span class="truncate">{{ $ev->name }}</span>
+                                        @if ($selectedEventCode === $ev->code)
+                                            <i class="fas fa-check text-[10px]"></i>
+                                        @endif
+                                    </button>
+                                @endforeach
+                            </div>
+                        </div>
                     </div>
 
-                    <!-- 2. Select Jabatan / Formasi -->
-                    <div>
+                    <!-- 2. Custom Searchable Dropdown: Jabatan / Formasi -->
+                    <div x-data="{ openPos: false, searchPos: '' }" @click.away="openPos = false" class="relative">
                         <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">
-                            2. Jabatan / Formasi
+                            2. Jabatan / Formasi Target
                         </label>
-                        <select 
-                            wire:model.live="selectedPositionId"
-                            class="w-full bg-[#181513] border border-warm-border/20 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-accent-amber cursor-pointer"
+                        @php
+                            $currentPosition = collect($this->positions)->firstWhere('id', $selectedPositionId);
+                        @endphp
+                        <button 
+                            type="button"
+                            @click="if({{ $selectedEventCode ? 'true' : 'false' }}) openPos = !openPos"
                             @disabled(!$selectedEventCode)
+                            class="w-full bg-[#181513] border border-warm-border/20 rounded-lg px-3 py-2.5 text-left text-white flex items-center justify-between transition cursor-pointer {{ $selectedEventCode ? 'hover:border-accent-amber' : 'opacity-50 cursor-not-allowed' }}"
                         >
-                            <option value="">-- {{ $selectedEventCode ? 'Semua Jabatan' : 'Pilih Event Terlebih Dahulu' }} --</option>
-                            @foreach ($this->positions as $pos)
-                                <option value="{{ $pos->id }}">{{ $pos->name }}</option>
-                            @endforeach
-                        </select>
+                            <span class="truncate {{ $currentPosition ? 'font-medium text-amber-400' : 'text-slate-400' }}">
+                                <i class="fas fa-briefcase text-xs mr-2 opacity-70"></i>
+                                @if (!$selectedEventCode)
+                                    Pilih Event Terlebih Dahulu...
+                                @else
+                                    {{ $currentPosition ? $currentPosition->name : 'Semua Jabatan / Formasi...' }}
+                                @endif
+                            </span>
+                            <i class="fas fa-chevron-down text-[10px] text-slate-400 transition-transform duration-200" :class="{ 'rotate-180': openPos }"></i>
+                        </button>
+
+                        <!-- Dropdown Menu Jabatan -->
+                        @if ($selectedEventCode)
+                            <div 
+                                x-show="openPos"
+                                x-transition.opacity.duration.150ms
+                                class="absolute z-30 w-full mt-1 bg-[#1a1715] border border-warm-border/30 rounded-xl shadow-2xl overflow-hidden p-2 space-y-1"
+                            >
+                                <div class="relative mb-1">
+                                    <i class="fas fa-search absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-500 text-[10px]"></i>
+                                    <input 
+                                        type="text" 
+                                        x-model="searchPos"
+                                        placeholder="Cari jabatan..." 
+                                        class="w-full bg-[#12100f] border border-warm-border/20 rounded-md pl-7 pr-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-accent-amber"
+                                    />
+                                </div>
+                                <div class="max-h-48 overflow-y-auto space-y-0.5 scrollbar-thin">
+                                    <button 
+                                        type="button"
+                                        @click="$wire.set('selectedPositionId', null); openPos = false; searchPos = ''"
+                                        class="w-full text-left px-3 py-2 rounded-md hover:bg-[#2c2724] text-slate-400 text-xs transition"
+                                    >
+                                        -- Semua Jabatan --
+                                    </button>
+                                    @foreach ($this->positions as $pos)
+                                        <button 
+                                            type="button"
+                                            x-show="!searchPos || '{{ strtolower(addslashes($pos->name)) }}'.includes(searchPos.toLowerCase())"
+                                            @click="$wire.set('selectedPositionId', {{ $pos->id }}); openPos = false; searchPos = ''"
+                                            class="w-full text-left px-3 py-2 rounded-md hover:bg-[#2c2724] text-xs transition flex items-center justify-between {{ $selectedPositionId === $pos->id ? 'bg-accent-amber/20 text-accent-amber font-semibold' : 'text-slate-200' }}"
+                                        >
+                                            <span class="truncate">{{ $pos->name }}</span>
+                                            @if ($selectedPositionId === $pos->id)
+                                                <i class="fas fa-check text-[10px]"></i>
+                                            @endif
+                                        </button>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
                     </div>
 
-                    <!-- 3. Quick Search Input -->
+                    <!-- 3. Searchable Input: Cari Peserta -->
                     <div>
                         <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">
                             3. Cari Nama / No. Tes Peserta
@@ -419,49 +514,71 @@
                             <input 
                                 type="text" 
                                 wire:model.live.debounce.250ms="searchParticipant"
-                                placeholder="Cari nama atau nomor tes..." 
-                                class="w-full bg-[#181513] border border-warm-border/20 rounded-lg pl-9 pr-4 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-accent-amber"
+                                placeholder="Ketik nama atau nomor tes..." 
+                                class="w-full bg-[#181513] border border-warm-border/20 rounded-lg pl-9 pr-8 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-accent-amber"
                             />
+                            @if ($searchParticipant)
+                                <button 
+                                    type="button" 
+                                    wire:click="$set('searchParticipant', '')"
+                                    class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white text-xs p-1 cursor-pointer"
+                                >
+                                    <i class="fas fa-times-circle"></i>
+                                </button>
+                            @endif
                         </div>
                     </div>
+
                 </div>
 
                 <!-- Talent List -->
                 <div class="flex-1 overflow-y-auto p-3 space-y-1">
-                    <div class="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center justify-between">
-                        <span>Daftar Peserta ({{ count($this->availableParticipants) }})</span>
-                        @if ($selectedPositionId || $selectedEventCode || $searchParticipant)
+                    @if (!$selectedEventCode && !$selectedPositionId && empty(trim($searchParticipant)))
+                        <div class="p-8 text-center text-slate-500 text-xs space-y-3 my-auto">
+                            <div class="w-12 h-12 rounded-full bg-[#181513] border border-warm-border/20 flex items-center justify-center mx-auto text-accent-amber shadow-sm">
+                                <i class="fas fa-filter text-base"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium text-slate-300 text-xs">Pilih Filter Terlebih Dahulu</p>
+                                <p class="text-[11px] text-slate-400 mt-1 max-w-xs mx-auto leading-relaxed">
+                                    Silakan pilih <strong>Event Asesmen</strong> dan <strong>Jabatan</strong>, atau ketik nama/nomor tes di kolom pencarian untuk menampilkan daftar peserta.
+                                </p>
+                            </div>
+                        </div>
+                    @else
+                        <div class="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center justify-between">
+                            <span>Daftar Peserta ({{ count($this->availableParticipants) }})</span>
                             <button wire:click="$set('selectedPositionId', null); $set('selectedEventCode', null); $set('searchParticipant', '')" class="text-accent-amber hover:underline cursor-pointer">
                                 Reset Filter
                             </button>
-                        @endif
-                    </div>
-
-                    @forelse ($this->availableParticipants as $p)
-                        <button 
-                            wire:click="selectParticipant({{ $p->id }})"
-                            class="w-full text-left p-3 rounded-lg flex items-center justify-between gap-3 transition-all cursor-pointer {{ $participantId === $p->id ? 'bg-accent-amber/20 border border-accent-amber/40 text-white' : 'hover:bg-[#2c2724] text-slate-300' }}"
-                        >
-                            <div class="flex items-center gap-3 min-w-0">
-                                <div class="w-9 h-9 rounded-full bg-slate-700 border border-slate-600 flex items-center justify-center text-xs font-bold text-white shrink-0">
-                                    {{ $this->getInitials($p->name) }}
-                                </div>
-                                <div class="min-w-0">
-                                    <div class="font-medium text-xs text-white truncate">{{ $p->name }}</div>
-                                    <div class="text-[11px] text-slate-400 truncate font-mono">{{ $p->test_number }} &bull; {{ $p->positionFormation?->name ?? 'Posisi N/A' }}</div>
-                                </div>
-                            </div>
-                            @if ($participantId === $p->id)
-                                <span class="text-accent-amber text-xs font-bold shrink-0">
-                                    <i class="fas fa-check-circle"></i> Active
-                                </span>
-                            @endif
-                        </button>
-                    @empty
-                        <div class="p-8 text-center text-slate-500 text-xs">
-                            Tidak ada peserta yang cocok dengan filter yang dipilih.
                         </div>
-                    @endforelse
+
+                        @forelse ($this->availableParticipants as $p)
+                            <button 
+                                wire:click="selectParticipant({{ $p->id }})"
+                                class="w-full text-left p-3 rounded-lg flex items-center justify-between gap-3 transition-all cursor-pointer {{ $participantId === $p->id ? 'bg-accent-amber/20 border border-accent-amber/40 text-white' : 'hover:bg-[#2c2724] text-slate-300' }}"
+                            >
+                                <div class="flex items-center gap-3 min-w-0">
+                                    <div class="w-9 h-9 rounded-full bg-slate-700 border border-slate-600 flex items-center justify-center text-xs font-bold text-white shrink-0">
+                                        {{ $this->getInitials($p->name) }}
+                                    </div>
+                                    <div class="min-w-0">
+                                        <div class="font-medium text-xs text-white truncate">{{ $p->name }}</div>
+                                        <div class="text-[11px] text-slate-400 truncate font-mono">{{ $p->test_number }} &bull; {{ $p->positionFormation?->name ?? 'Posisi N/A' }}</div>
+                                    </div>
+                                </div>
+                                @if ($participantId === $p->id)
+                                    <span class="text-accent-amber text-xs font-bold shrink-0">
+                                        <i class="fas fa-check-circle"></i> Active
+                                    </span>
+                                @endif
+                            </button>
+                        @empty
+                            <div class="p-8 text-center text-slate-500 text-xs">
+                                Tidak ada peserta yang cocok dengan filter yang dipilih.
+                            </div>
+                        @endforelse
+                    @endif
                 </div>
             </div>
         </div>
