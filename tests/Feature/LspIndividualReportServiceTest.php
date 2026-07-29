@@ -2,7 +2,8 @@
 
 namespace Tests\Feature;
 
-use App\Services\Lsp\LspIndividualReportService;
+use App\Services\Lsp\LspDataTransformerService;
+use App\Services\Lsp\LspNormEngineService;
 use Tests\TestCase;
 
 class LspIndividualReportServiceTest extends TestCase
@@ -12,7 +13,8 @@ class LspIndividualReportServiceTest extends TestCase
      */
     public function test_can_generate_lsp_individual_report_from_local_db(): void
     {
-        $service = new LspIndividualReportService;
+        $normEngine = new LspNormEngineService;
+        $service = new LspDataTransformerService($normEngine);
 
         $username = 'bntn01-001';
         $kodeProyek = 'PR-A-313';

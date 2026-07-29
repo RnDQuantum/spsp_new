@@ -2,14 +2,14 @@
 
 - **Modul**: Integrasi Database LSP (Quantum HRMI) $\rightarrow$ Native SPSP System
 - **Status**: **100% Dinamis & Multi-Proyek** (Tidak terbatas hanya pada proyek `p3kkjg`)
-- **File Service**: `app/Services/Lsp/LspIndividualReportService.php` & `app/Services/Lsp/LspDataImporterService.php`
-- **Tanggal Pembaruan**: 28 Juli 2026
+- **File Service**: `app/Services/Lsp/LspNormEngineService.php`, `app/Services/Lsp/LspDataTransformerService.php` & `app/Services/Lsp/LspDataImporterService.php`
+- **Tanggal Pembaruan**: 29 Juli 2026
 
 ---
 
 ## 1. Ikhtisar Kedinamisan Multi-Proyek
 
-Modul integrasi LSP dirancang dengan arsitektur **generic & multi-project**. Meskipun pengujian dan standar acuan awal berasal dari proyek P3K Kejaksaan Agung 2025 (`p3kkjg`), seluruh *data pipeline* pada `LspIndividualReportService` dan `LspDataImporterService` beroperasi secara **dinamis berbasis variabel `$kodeProyek` dan `$username`**.
+Modul integrasi LSP dirancang dengan arsitektur **generic & multi-project**. Meskipun pengujian dan standar acuan awal berasal dari proyek P3K Kejaksaan Agung 2025 (`p3kkjg`), seluruh *data pipeline* pada `LspDataTransformerService` dan `LspDataImporterService` beroperasi secara **dinamis berbasis variabel `$kodeProyek` dan `$username`**.
 
 Setiap proyek instansi yang berada di dalam clone database LSP (`DB_LSP_LOCAL` / koneksi `lsp`) dapat diolah, diuji, dan diimpor secara langsung tanpa perlu mengubah *source code*.
 
@@ -19,7 +19,7 @@ Setiap proyek instansi yang berada di dalam clone database LSP (`DB_LSP_LOCAL` /
 
 ```mermaid
 flowchart TD
-    A[Artisan Command / Service Call] -->|Input: kodeProyek & username| B[LspIndividualReportService]
+    A[Artisan Command / Service Call] -->|Input: kodeProyek & username| B[LspDataTransformerService]
     
     subgraph DYNAMIC_SCOPING [Scoping & Dynamic Resolution]
         B --> C1[1. Scoping Peserta: peserta_produksi & users]
@@ -29,7 +29,7 @@ flowchart TD
         B --> C5[5. Scoping Kejiwaan: rekapmmpi_p3kkjg + Fallback Safe]
     end
 
-    DYNAMIC_SCOPING --> D[Norm Engine: ist.json, kostik.json, personality.json]
+    DYNAMIC_SCOPING --> D[LspNormEngineService: ist.json, kostik.json, personality.json]
     D --> E[LspDataImporterService]
     E --> F[Database Native SPSP]
 ```
@@ -58,7 +58,7 @@ Berikut adalah 17 tabel pada koneksi database LSP (`DB_LSP_LOCAL`) yang dipetaka
 | 4 | `rekapmmpi_p3kkjg` | Evaluasi 9 domain tes kejiwaan MMPI (`validitas`, `internal_pribadi`, `interpersonal`, `kapasitas_kerja`, `klinis`, `kesimpulan`, `psikogram`, `nilai_pq`, `tingkat_stres`). | `psychological_tests` |
 | 5 | `standar_potensi` | Definisi aspek potensi, atribut target, standar rating (1–5), bobot (`bobot`), dan urutan display. | `sub_aspect_assessments` & `aspect_assessments` |
 | 6 | `standar_aspek` & `standar_atribute` | Master nama aspek & atribut potensi. | `sub_aspect_assessments` & `aspect_assessments` |
-| 7 | `standar_atribute_alat_ukur` | **Tabel Kunci Konversi Potensi**: Cut-off skala 1–5 (`skala_1` s.d. `skala_5`) & korelasi (`+`/`-`) untuk memetakan subtest alat tes ke atribut potensi. | Engine Kalkulasi `LspIndividualReportService` |
+| 7 | `standar_atribute_alat_ukur` | **Tabel Kunci Konversi Potensi**: Cut-off skala 1–5 (`skala_1` s.d. `skala_5`) & korelasi (`+`/`-`) untuk memetakan subtest alat tes ke atribut potensi. | Engine Kalkulasi `LspNormEngineService` |
 | 8 | `aspek_yang_digali` & `standard_aspek_yang_digali` | Master kompetensi wawancara inti/tambahan beserta standar rating & bobotnya. | `aspect_assessments` & `category_assessments` |
 | 9 | `hasil_aspek_yang_digali` | Rating wawancara kompetensi inti dari asesor (`nilai_rating`, `bukti_perilaku`). | `aspect_assessments` |
 | 10 | `hasil_aspek_kelebihan` | Catatan kualitatif kekuatan (`aspek_kelebihan`) dan kelemahan (`aspek_kelemahan`) wawancara. | `interpretations` / `final_assessments` |

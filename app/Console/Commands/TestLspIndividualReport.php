@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Services\Lsp\LspIndividualReportService;
+use App\Services\Lsp\LspDataTransformerService;
 use Exception;
 use Illuminate\Console\Command;
 
@@ -10,9 +10,9 @@ class TestLspIndividualReport extends Command
 {
     protected $signature = 'lsp:test-report {username : Username peserta LSP} {kode_proyek : Kode proyek pelaksanaan}';
 
-    protected $description = 'Test LspIndividualReportService calculation engine against local LSP database';
+    protected $description = 'Test LspDataTransformerService calculation engine against local LSP database';
 
-    public function handle(LspIndividualReportService $service): int
+    public function handle(LspDataTransformerService $service): int
     {
         $username = $this->argument('username');
         $kodeProyek = $this->argument('kode_proyek');

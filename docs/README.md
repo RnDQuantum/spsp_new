@@ -69,7 +69,7 @@ Dokumentasi integrasi data real dan pengolahan laporan legacy dari database LSP.
 *   **[02_DATA_MAPPING_ANALYSIS.md](./lsp_integration/02_DATA_MAPPING_ANALYSIS.md)**
     *   Analisis komparatif data CI3 legacy vs skema database SPSP (90% match & 10% data kualitatif/wawancara).
 *   **[03_LSP_INTEGRATION_GUIDE.md](./lsp_integration/03_LSP_INTEGRATION_GUIDE.md)**
-    *   Panduan operasional `LspIndividualReportService`, `LspDataImporterService`, Artisan CLI commands (`lsp:test-report` & `lsp:import`), dan norma JSON.
+    *   Panduan operasional `LspNormEngineService`, `LspDataTransformerService`, `LspDataImporterService`, `TestReportService`, Artisan CLI commands (`lsp:test-report` & `lsp:import`), dan norma JSON.
 *   **[04_DYNAMIC_MULTI_PROJECT_SUPPORT.md](./lsp_integration/04_DYNAMIC_MULTI_PROJECT_SUPPORT.md)**
     *   Arsitektur dan penjelasan kedinamisan multi-proyek integrasi LSP serta pemetaan lengkap 17 tabel database LSP ke DB SPSP.
 *   **[05_FALLBACK_AND_SAFETY_MECHANISMS.md](./lsp_integration/05_FALLBACK_AND_SAFETY_MECHANISMS.md)**

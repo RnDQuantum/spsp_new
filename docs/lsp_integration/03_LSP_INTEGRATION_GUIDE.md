@@ -1,9 +1,13 @@
 # Panduan Integrasi & Sinkronisasi Data LSP ke SPSP
 
 - **Modul**: Integrasi LSP (Quantum HRMI) $\rightarrow$ SPSP System
-- **File Service**: `app/Services/Lsp/LspIndividualReportService.php` & `app/Services/Lsp/LspDataImporterService.php`
+- **File Service**:
+  - `app/Services/Lsp/LspNormEngineService.php` (Engine Perhitungan Norma Psikometri)
+  - `app/Services/Lsp/LspDataTransformerService.php` (Transformer Data Impor LSP, menggantikan `LspIndividualReportService`)
+  - `app/Services/Lsp/LspDataImporterService.php` (Importer Data ke DB Native SPSP)
+  - `app/Services/TestReportService.php` (Fondasi Laporan Alat Tes SPSP Native)
 - **File Command**: `app/Console/Commands/TestLspIndividualReport.php` & `app/Console/Commands/ImportLspData.php`
-- **File Test**: `tests/Feature/LspIndividualReportServiceTest.php` & `tests/Feature/LspDataImporterServiceTest.php`
+- **File Test**: `tests/Feature/LspNormEngineServiceTest.php`, `tests/Feature/LspIndividualReportServiceTest.php` & `tests/Feature/LspDataImporterServiceTest.php`
 - **Lokasi Norma**: `resources/data/lsp_norms/` (`ist.json`, `kostik.json`, `personality.json`)
 - **Dokumentasi Kedinamisan Multi-Proyek**: `docs/lsp_integration/04_DYNAMIC_MULTI_PROJECT_SUPPORT.md`
 - **Dokumentasi Fallback & Ketahanan Sistem**: `docs/lsp_integration/05_FALLBACK_AND_SAFETY_MECHANISMS.md`
@@ -12,7 +16,7 @@
 
 ## 1. Ikhtisar Arsitektur Integrasi
 
-Integrasi LSP bertugas mengambil data mentah hasil ujian dari clone database LSP (`DB_LSP_LOCAL` / koneksi `lsp`), mengolah norma psikometri presisi, dan menyinkronkan data ke tabel-tabel native SPSP (`participants`, `psychological_tests`, `interpretations`, `aspect_assessments`, `sub_aspect_assessments`, `category_assessments`, `final_assessments`).
+Integrasi LSP bertugas mengambil data mentah hasil ujian dari clone database LSP (`DB_LSP_LOCAL` / koneksi `lsp`), mengolah norma psikometri presisi via `LspNormEngineService`, dan mentransformasi data via `LspDataTransformerService` untuk disinkronkan ke tabel-tabel native SPSP (`participants`, `psychological_tests`, `interpretations`, `aspect_assessments`, `sub_aspect_assessments`, `category_assessments`, `final_assessments`).
 
 ```mermaid
 flowchart TD
@@ -25,9 +29,10 @@ flowchart TD
     end
 
     subgraph SPSP_ENGINE [Laravel SPSP Engine]
-        B1[LspIndividualReportService]
-        B2[LspDataImporterService]
-        B3[Norm JSON: ist, kostik, 16pf]
+        B1[LspNormEngineService]
+        B2[LspDataTransformerService]
+        B3[LspDataImporterService]
+        B4[Norm JSON: ist, kostik, 16pf]
     end
 
     subgraph SPSP_DATABASE [Database Native SPSP]
@@ -37,20 +42,22 @@ flowchart TD
         C4[aspect_assessments & sub_aspect_assessments]
         C5[category_assessments]
         C6[final_assessments]
+        C7[test_results]
     end
 
-    LSP_DATABASE --> B1
-    B3 --> B1
+    LSP_DATABASE --> B2
+    B4 --> B1
     B1 --> B2
-    B2 --> SPSP_DATABASE
+    B2 --> B3
+    B3 --> SPSP_DATABASE
 ```
 
 ---
 
 ## 2. Penggunaan Command Artisan CLI
 
-### A. Uji Coba Laporan Individu (Tanpa Menyimpan ke DB SPSP)
-Menguji kalkulasi laporan individu peserta secara instan dan menampilkan DTO/tabel pada terminal:
+### A. Uji Coba Transformer & Laporan Individu (Tanpa Menyimpan ke DB SPSP)
+Menguji kalkulasi norma & transformasi data peserta secara instan dan menampilkan DTO/tabel pada terminal:
 ```bash
 php artisan lsp:test-report <username_peserta> <kode_proyek>
 ```
@@ -81,7 +88,10 @@ Untuk memastikan seluruh pengujian integrasi LSP berjalan tanpa error:
 # Menjalankan seluruh test suite integrasi LSP
 php artisan test --compact --filter=Lsp
 
-# Menjalankan unit test LspIndividualReportService
+# Menjalankan unit test LspNormEngineService
+php artisan test --compact --filter=LspNormEngineServiceTest
+
+# Menjalankan unit test LspDataTransformerService
 php artisan test --compact --filter=LspIndividualReportServiceTest
 
 # Menjalankan unit test LspDataImporterService

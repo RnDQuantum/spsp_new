@@ -85,4 +85,4 @@ View CI3 memuat 3 nilai persentase pada Box Header Laporan Individu:
 
 Sebagian besar data utama SPSP (Potensi, Kompetensi, Sub-aspek, Rekap Skor, MMPI) **sudah sangat kompatibel (90% match)** dengan struktur tabel yang didefinisikan pada `docs/DATABASE_STRUCTURE.md`.
 
-Untuk 10% sisanya (Data Kualitatif Wawancara, Detail Asesor, Legalisasi TTD QR, Skor Header %), SPSP dapat menampungnya melalui **Service Integrasi (LspDataImporter / LspIndividualReportService)** yang memetakan data mentah dari `DB_LSP_LOCAL` ke DTO / Model SPSP secara transparan.
+Untuk 10% sisanya (Data Kualitatif Wawancara, Detail Asesor, Legalisasi TTD QR, Skor Header %), SPSP dapat menampungnya melalui **Service Integrasi (LspDataImporter / LspDataTransformerService & LspNormEngineService)** yang memetakan data mentah dari `DB_LSP_LOCAL` ke DTO / Model SPSP secara transparan.

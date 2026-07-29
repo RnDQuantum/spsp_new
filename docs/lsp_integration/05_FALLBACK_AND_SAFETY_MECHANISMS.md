@@ -2,8 +2,8 @@
 
 - **Modul**: Integrasi Database LSP (Quantum HRMI) $\rightarrow$ Native SPSP System
 - **Status**: **Robust & Fault-Tolerant** (Tahan terhadap data kosong / missing dari DB LSP)
-- **File Terkait**: `app/Services/Lsp/LspIndividualReportService.php` & `app/Services/Lsp/LspDataImporterService.php`
-- **Tanggal Pembaruan**: 28 Juli 2026
+- **File Terkait**: `app/Services/Lsp/LspNormEngineService.php`, `app/Services/Lsp/LspDataTransformerService.php` & `app/Services/Lsp/LspDataImporterService.php`
+- **Tanggal Pembaruan**: 29 Juli 2026
 
 ---
 

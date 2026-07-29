@@ -38,7 +38,7 @@ class LspDataImporterService
     protected array $subAspectRegistry = [];
 
     public function __construct(
-        protected LspIndividualReportService $reportService
+        protected LspDataTransformerService $reportService
     ) {}
 
     /**
