@@ -74,6 +74,8 @@ Dokumentasi integrasi data real dan pengolahan laporan legacy dari database LSP.
     *   Arsitektur dan penjelasan kedinamisan multi-proyek integrasi LSP serta pemetaan lengkap 17 tabel database LSP ke DB SPSP.
 *   **[05_FALLBACK_AND_SAFETY_MECHANISMS.md](./lsp_integration/05_FALLBACK_AND_SAFETY_MECHANISMS.md)**
     *   Dokumentasi lengkap seluruh matriks fallback data, pembatasan error, dan mekanisme isolasi transaksi impor.
+*   **[06_LSP_SERVICES_ARCHITECTURE.md](./lsp_integration/06_LSP_SERVICES_ARCHITECTURE.md)**
+    *   Spesifikasi arsitektur multi-service integrasi LSP (`LspNormEngineService`, `LspDataTransformerService`, `LspDataImporterService`, `TestReportService`, dan `IndividualAssessmentService`).
 
 ### 7. Human Capital Assessment (HCA) Report Documentation
 Dokumentasi lengkap untuk arsitektur, UI/UX, data mapping, dan tracker integrasi dinamis HCA Report.
