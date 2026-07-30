@@ -237,6 +237,7 @@ class LspDataTransformerService
                     'wawancara_percent' => round($kesimpulanPsikotest['hasil_wawancara_percent'], 2),
                     'kejiwaan_score' => $dataKejiwaan['nilai_kejiwaan'],
                 ],
+                'raw_scores' => $rawScores,
                 'potensi' => $profilPotensi,
                 'kompetensi' => $profilKompetensi,
                 'kesimpulan_psikotest' => $kesimpulanPsikotest,

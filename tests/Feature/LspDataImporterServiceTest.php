@@ -7,6 +7,7 @@ use App\Models\CategoryAssessment;
 use App\Models\FinalAssessment;
 use App\Models\Participant;
 use App\Models\PsychologicalTest;
+use App\Models\TestResult;
 use App\Services\Lsp\LspDataImporterService;
 use Tests\TestCase;
 
@@ -25,6 +26,7 @@ class LspDataImporterServiceTest extends TestCase
         $result = $importer->importProject($kodeProyek, $username);
 
         $this->assertIsArray($result);
+        $this->assertEmpty($result['errors'], json_encode($result['errors']));
         $this->assertEquals(1, $result['imported_count']);
         $this->assertEquals(0, $result['failed_count']);
 
@@ -52,5 +54,10 @@ class LspDataImporterServiceTest extends TestCase
         $this->assertNotNull($final);
         $this->assertEquals('MS', $final->conclusion_code);
         $this->assertEquals('MEMENUHI SYARAT (MS)', $final->conclusion_text);
+
+        // Assert Raw TestResults saved from LSP DB
+        $testResults = TestResult::where('participant_id', $participant->id)->get();
+        $this->assertGreaterThan(0, $testResults->count());
+        $this->assertEquals('lsp_db', $testResults->first()->source);
     }
 }

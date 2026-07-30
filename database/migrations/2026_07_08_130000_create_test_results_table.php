@@ -24,6 +24,7 @@ return new class extends Migration
             // Metadata tes
             $table->string('status', 20)->default('completed');
             $table->timestamp('test_started_at')->nullable()->comment('Waktu mulai tes (mulai_tes dari API)');
+            $table->string('source', 50)->default('api')->index()->comment('Asal sumber data mentah: api, lsp_db, file_import');
 
             // Data tes — dipecah untuk efisiensi query & storage
             $table->json('summary_data')->comment('Skor ringkasan: IQ, kategori, hasil aspek, kesimpulan');

@@ -17,6 +17,7 @@ use App\Models\PositionFormation;
 use App\Models\PsychologicalTest;
 use App\Models\SubAspect;
 use App\Models\SubAspectAssessment;
+use App\Models\TestResult;
 use Closure;
 use Exception;
 use Illuminate\Support\Facades\DB;
@@ -275,6 +276,83 @@ class LspDataImporterService
             ->keyBy('username');
 
         $pIds = $participantModels->pluck('id')->toArray();
+
+        // 2b. Prepare Bulk Upsert TestResult (Raw Scores from LSP DB)
+        $testResultsBulk = [];
+        foreach ($usernames as $u) {
+            $p = $participantModels[$u] ?? null;
+            $rep = $reportsMap[$u] ?? null;
+            if (! $p || ! $rep || empty($rep['raw_scores'])) {
+                continue;
+            }
+
+            $rawScores = $rep['raw_scores'];
+
+            // IST (A.5)
+            if (! empty($rawScores['ist'])) {
+                $testResultsBulk[] = [
+                    'participant_id' => $p->id,
+                    'event_id' => $event->id,
+                    'test_code' => 'A.5',
+                    'test_name' => 'Intelligenz Struktur Test (IST)',
+                    'test_category' => TestResult::getCategoryForCode('A.5'),
+                    'status' => 'completed',
+                    'source' => 'lsp_db',
+                    'summary_data' => json_encode(['raw_score' => $rawScores['ist'], 'iq' => $rep['potensi']['total_individual_score'] ?? null]),
+                    'interpretation_data' => null,
+                    'raw_response' => json_encode(['raw' => $rawScores['ist']]),
+                    'conversion_status' => 'pending',
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ];
+            }
+
+            // PAPI Kostik (D.1)
+            if (! empty($rawScores['kostik'])) {
+                $testResultsBulk[] = [
+                    'participant_id' => $p->id,
+                    'event_id' => $event->id,
+                    'test_code' => 'D.1',
+                    'test_name' => 'PAPI Kostik',
+                    'test_category' => TestResult::getCategoryForCode('D.1'),
+                    'status' => 'completed',
+                    'source' => 'lsp_db',
+                    'summary_data' => json_encode(['raw_score' => $rawScores['kostik']]),
+                    'interpretation_data' => null,
+                    'raw_response' => json_encode(['raw' => $rawScores['kostik']]),
+                    'conversion_status' => 'pending',
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ];
+            }
+
+            // 16PF (B.2)
+            if (! empty($rawScores['personality'])) {
+                $testResultsBulk[] = [
+                    'participant_id' => $p->id,
+                    'event_id' => $event->id,
+                    'test_code' => 'B.2',
+                    'test_name' => '16 Personality Factor (16PF)',
+                    'test_category' => TestResult::getCategoryForCode('B.2'),
+                    'status' => 'completed',
+                    'source' => 'lsp_db',
+                    'summary_data' => json_encode(['raw_score' => $rawScores['personality']]),
+                    'interpretation_data' => null,
+                    'raw_response' => json_encode(['raw' => $rawScores['personality']]),
+                    'conversion_status' => 'pending',
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ];
+            }
+        }
+
+        if (! empty($testResultsBulk)) {
+            TestResult::upsert(
+                $testResultsBulk,
+                ['participant_id', 'event_id', 'test_code'],
+                ['test_name', 'test_category', 'status', 'source', 'summary_data', 'raw_response', 'conversion_status', 'updated_at']
+            );
+        }
 
         // 3. Prepare Bulk Insert PsychologicalTest
         $psychBulk = [];

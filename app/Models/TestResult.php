@@ -18,6 +18,7 @@ class TestResult extends Model
         'test_name',
         'test_category',
         'status',
+        'source',
         'test_started_at',
         'summary_data',
         'interpretation_data',
@@ -92,6 +93,11 @@ class TestResult extends Model
     public function scopePendingConversion(Builder $query): Builder
     {
         return $query->where('conversion_status', 'pending');
+    }
+
+    public function scopeBySource(Builder $query, string $source): Builder
+    {
+        return $query->where('source', $source);
     }
 
     public function scopeConverted(Builder $query): Builder

@@ -27,13 +27,13 @@ class TestResultImportService
      * @param  array  $tesData  Data tes dari API: ["A.1" => {...}, "B.2" => {...}, ...]
      * @return array Ringkasan hasil import
      */
-    public function importParticipantTests(int $participantId, int $eventId, array $tesData): array
+    public function importParticipantTests(int $participantId, int $eventId, array $tesData, string $source = 'api'): array
     {
         $this->resetCounters();
 
         foreach ($tesData as $testCode => $testData) {
             try {
-                $this->importSingleTest($participantId, $eventId, $testCode, $testData);
+                $this->importSingleTest($participantId, $eventId, $testCode, $testData, $source);
             } catch (\Throwable $e) {
                 $this->failed++;
                 $this->errors[] = [
@@ -45,6 +45,7 @@ class TestResultImportService
                     'error' => $e->getMessage(),
                     'participant_id' => $participantId,
                     'event_id' => $eventId,
+                    'source' => $source,
                 ]);
             }
         }
@@ -55,7 +56,7 @@ class TestResultImportService
     /**
      * Import satu alat tes untuk satu peserta.
      */
-    protected function importSingleTest(int $participantId, int $eventId, string $testCode, array $testData): void
+    protected function importSingleTest(int $participantId, int $eventId, string $testCode, array $testData, string $source = 'api'): void
     {
         // Skip alat tes yang dikecualikan (MMPI)
         if (TestResult::isExcluded($testCode)) {
@@ -85,6 +86,7 @@ class TestResultImportService
                 'test_name' => $testData['nama_alat_tes'] ?? "Tidak diketahui ({$testCode})",
                 'test_category' => TestResult::getCategoryForCode($testCode),
                 'status' => ($testData['status'] ?? true) ? 'completed' : 'incomplete',
+                'source' => $source,
                 'test_started_at' => $this->parseTimestamp($testData['mulai_tes'] ?? null),
                 'summary_data' => $parsed['summary_data'],
                 'interpretation_data' => $parsed['interpretation_data'],

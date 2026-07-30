@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\Participant;
 use App\Models\TestResult;
+use App\Services\Api\QuantumApiClient;
 use App\Services\TestResultImportService;
 use Illuminate\Console\Command;
 
@@ -17,6 +18,7 @@ class ImportTestResults extends Command
     protected $signature = 'test-results:import
                             {--file= : Path ke file JSON untuk import (format: sample per-tes atau multi-peserta)}
                             {--dir= : Path ke directory berisi file JSON per alat tes}
+                            {--fetch-api : Tarik data tes langsung dari Client API Quantum HRMI}
                             {--event= : Event ID untuk import}
                             {--participant= : Participant ID untuk import}
                             {--dry-run : Tampilkan data yang akan di-import tanpa menyimpan}';
@@ -26,28 +28,17 @@ class ImportTestResults extends Command
      *
      * @var string
      */
-    protected $description = 'Import data tes mentah dari file JSON ke tabel test_results (development & testing)';
+    protected $description = 'Import data tes mentah dari API Quantum HRMI atau file JSON ke tabel test_results';
 
     /**
      * Execute the console command.
      */
-    public function handle(TestResultImportService $importService): int
+    public function handle(TestResultImportService $importService, QuantumApiClient $apiClient): int
     {
         $this->info('╔══════════════════════════════════════════════╗');
         $this->info('║  Import Test Results — Data API Tes Online   ║');
         $this->info('╚══════════════════════════════════════════════╝');
         $this->newLine();
-
-        // Validasi: harus ada --file atau --dir
-        if (! $this->option('file') && ! $this->option('dir')) {
-            $this->error('Harus menyertakan --file=<path> atau --dir=<path>');
-            $this->line('');
-            $this->line('Contoh:');
-            $this->line('  php artisan test-results:import --file=sample.json --event=1 --participant=1');
-            $this->line('  php artisan test-results:import --dir=output_analisis/sample_per_tes/ --event=1 --participant=1');
-
-            return Command::FAILURE;
-        }
 
         // Validasi event & participant
         $eventId = (int) $this->option('event');
@@ -55,6 +46,10 @@ class ImportTestResults extends Command
 
         if (! $eventId || ! $participantId) {
             $this->error('Harus menyertakan --event=<id> dan --participant=<id>');
+            $this->line('');
+            $this->line('Contoh:');
+            $this->line('  php artisan test-results:import --fetch-api --event=1 --participant=1');
+            $this->line('  php artisan test-results:import --file=sample.json --event=1 --participant=1');
 
             return Command::FAILURE;
         }
@@ -71,8 +66,17 @@ class ImportTestResults extends Command
         $this->info("Participant : {$participant->name} (ID: {$participantId})");
         $this->newLine();
 
-        // Kumpulkan data tes dari file(s)
-        $tesData = $this->collectTestData();
+        $source = 'api';
+        $tesData = [];
+
+        if ($this->option('fetch-api') || (! $this->option('file') && ! $this->option('dir'))) {
+            $this->info('Menarik data tes dari API Quantum HRMI Client...');
+            $tesData = $apiClient->fetchParticipantTests($participantId, $eventId);
+            $source = 'api';
+        } else {
+            $source = 'file_import';
+            $tesData = $this->collectTestData();
+        }
 
         if (empty($tesData)) {
             $this->warn('Tidak ada data tes yang ditemukan.');
@@ -80,7 +84,7 @@ class ImportTestResults extends Command
             return Command::FAILURE;
         }
 
-        $this->info('Ditemukan '.count($tesData).' alat tes');
+        $this->info('Ditemukan '.count($tesData).' alat tes (Sumber: '.$source.')');
         $this->newLine();
 
         // Dry-run mode
@@ -90,7 +94,7 @@ class ImportTestResults extends Command
 
         // Import!
         $this->info('Memulai import...');
-        $result = $importService->importParticipantTests($participantId, $eventId, $tesData);
+        $result = $importService->importParticipantTests($participantId, $eventId, $tesData, $source);
 
         $this->newLine();
         $this->displayResults($result);
