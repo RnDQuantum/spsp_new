@@ -6,6 +6,12 @@ HCA Report adalah laporan eksekutif berstandar *Executive Journal* yang menginte
 
 ---
 
+> [!NOTE]
+> **Catatan Kedinamisan & Penyesuaian Section**:
+> Spesifikasi, susunan, maupun sumber data pada section-section HCA Report ini bersifat dinamis dan adaptif. Dalam perjalanannya (*development roadmap* & integrasi bertahap), section-section ini dapat mengalami perubahan, penyesuaian logika, penggabungan, atau penyempurnaan sesuai keputusan bisnis, kebutuhan HR institusi klien, dan masukan pengguna (*user feedback*).
+
+---
+
 ## 📚 Struktur Dokumentasi HCA Report
 
 Dokumentasi HCA Report dibagi menjadi 4 dokumen utama dan 1 folder spesifikasi per-section:

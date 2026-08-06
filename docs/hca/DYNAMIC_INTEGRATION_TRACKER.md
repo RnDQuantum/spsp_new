@@ -14,7 +14,9 @@ Setiap section diuji dan di-update secara bertahap sesuai keputusan dan verifika
 | **Persentase** | **100%** | **12.5%** | **0%** | **87.5%** |
 
 > [!NOTE]
-> **Metode Pengerjaan**: Integrasi dilakukan 1 per 1 section. Setiap section yang akan diintegrasikan direview sumber datanya di database SPSP sebelum di-wiring secara permanen.
+> **Metode Pengerjaan & Kedinamisan Section**:
+> 1. Integrasi dilakukan 1 per 1 section. Setiap section yang akan diintegrasikan direview sumber datanya di database SPSP sebelum di-wiring secara permanen.
+> 2. **Fleksibilitas Struktur**: Dalam perjalanannya, spesifikasi, urutan, maupun jumlah section dapat mengalami penyesuaian/perubahan (*iterative evolution*) sesuai keputusan tim produk, masukan pengguna, dan ketersediaan instrumen data.
 
 ---
 
