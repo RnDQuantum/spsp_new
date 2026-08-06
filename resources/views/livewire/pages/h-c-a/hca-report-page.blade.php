@@ -14,7 +14,7 @@
 
             <!-- 03 Identitas Peserta -->
             <div class="page-break p-8">
-                <livewire:pages.h-c-a.sections.participant-profile />
+                <livewire:pages.h-c-a.sections.participant-profile :participant-id="$participantId" :key="'participant_profile_print_'.$participantId" />
             </div>
 
             <!-- 04 HCI -->
@@ -280,7 +280,7 @@
                                     <livewire:pages.h-c-a.sections.executive-summary :participant-id="$participantId" :key="'exec_summary_'.$participantId" />
                                     @break
                                 @case('participant_id')
-                                    <livewire:pages.h-c-a.sections.participant-profile />
+                                    <livewire:pages.h-c-a.sections.participant-profile :participant-id="$participantId" :key="'participant_profile_'.$participantId" />
                                     @break
                                 @case('hci')
                                 @case('potential')

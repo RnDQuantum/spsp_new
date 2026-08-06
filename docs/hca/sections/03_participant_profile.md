@@ -3,7 +3,7 @@
 * **Nama Visual**: Profil Biodata Lengkap Peserta
 * **Kode Section**: `participant_id`
 * **Komponen File**: [ParticipantProfile.php](file:///c:/laragon/www/spsp_new/app/Livewire/Pages/HCA/Sections/ParticipantProfile.php) & [participant-profile.blade.php](file:///c:/laragon/www/spsp_new/resources/views/livewire/pages/h-c-a/sections/participant-profile.blade.php)
-* **Status Dynamic**: 📋 **PLANNED** (Data SPSP 🟢 Reuse)
+* **Status Dynamic**: ✅ **DONE** (Data SPSP 🟢 Reuse)
 
 ---
 
