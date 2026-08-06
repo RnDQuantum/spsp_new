@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature\Livewire;
 
 use App\Livewire\Pages\HCA\HcaReportPage;
+use App\Livewire\Pages\HCA\Sections\ExecutiveSummary;
 use App\Models\Participant;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -123,5 +124,22 @@ class HcaReportPageTest extends TestCase
             ->assertSet('showTalentModal', true)
             ->call('toggleTalentModal')
             ->assertSet('showTalentModal', false);
+    }
+
+    /**
+     * Test executive summary section renders dynamic 5 pillars data
+     */
+    public function test_executive_summary_section_renders_dynamic_data(): void
+    {
+        $participant = Participant::query()->first();
+        if ($participant) {
+            Livewire::test(ExecutiveSummary::class, ['participantId' => $participant->id])
+                ->assertSee('Ringkasan')
+                ->assertSee('Talent Index Score')
+                ->assertSee('Pilar Evaluasi Asesmen')
+                ->assertSee('Kompetensi')
+                ->assertSee('Potensi')
+                ->assertSee('Kinerja');
+        }
     }
 }

@@ -10,8 +10,8 @@ Setiap section diuji dan di-update secara bertahap sesuai keputusan dan verifika
 
 | Indicator | Total Section | Selesai (Dynamic) | Menunggu Pengecekan | Belum Dikerjakan |
 | :--- | :---: | :---: | :---: | :---: |
-| **Jumlah** | **23 Sections + Nav** | **2** | **0** | **22** |
-| **Persentase** | **100%** | **8.7%** | **0%** | **91.3%** |
+| **Jumlah** | **23 Sections + Nav** | **3** | **0** | **21** |
+| **Persentase** | **100%** | **12.5%** | **0%** | **87.5%** |
 
 > [!NOTE]
 > **Metode Pengerjaan**: Integrasi dilakukan 1 per 1 section. Setiap section yang akan diintegrasikan direview sumber datanya di database SPSP sebelum di-wiring secara permanen.
@@ -24,7 +24,7 @@ Setiap section diuji dan di-update secara bertahap sesuai keputusan dan verifika
 | :-: | :--- | :-: | :-: | :--- | :--- |
 | **00** | **Active Talent Selector & Sidebar** | 🟢 Reuse | ✅ **DONE** | [HcaReportPage.php](file:///c:/laragon/www/spsp_new/app/Livewire/Pages/HCA/HcaReportPage.php) | Cascading 3-select filter (Event &rarr; Position &rarr; Participant), session sync, dan modal animatif. |
 | **01** | **Cover Page** | 🟢 Reuse | ✅ **DONE** | [cover.blade.php](file:///c:/laragon/www/spsp_new/resources/views/livewire/pages/h-c-a/sections/cover.blade.php) | Mengambil nama, foto/inisial, no. tes, formasi posisi, tanggal asesmen, & instansi dari model `Participant`. |
-| **02** | **Ringkasan Eksekutif** | 🟡 Partial | 📋 **PLANNED** | [executive-summary.blade.php](file:///c:/laragon/www/spsp_new/resources/views/livewire/pages/h-c-a/sections/executive-summary.blade.php) | Agregasi 5 pilar & Talent Index kualitatif. |
+| **02** | **Ringkasan Eksekutif** | 🟡 Partial | ✅ **DONE** | [executive-summary.blade.php](file:///c:/laragon/www/spsp_new/resources/views/livewire/pages/h-c-a/sections/executive-summary.blade.php) | Dynamically computed 5 pillars, Talent Index, & status kesiapan bawaan SPSP (`final_assessments.conclusion_text`). |
 | **03** | **Identitas Peserta** | 🟢 Reuse | 📋 **PLANNED** | [participant-profile.blade.php](file:///c:/laragon/www/spsp_new/resources/views/livewire/pages/h-c-a/sections/participant-profile.blade.php) | Biodata lengkap peserta (`$participant`). |
 | **04** | **Human Capital Index (HCI)** | 🟡 Partial | 📋 **PLANNED** | [index-radar-section.blade.php](file:///c:/laragon/www/spsp_new/resources/views/livewire/pages/h-c-a/sections/index-radar-section.blade.php) | Radar chart skoring 5 pilar HCI. |
 | **05** | **Layer 1: Kompetensi** | 🟢 Reuse | 📋 **PLANNED** | [score-list-section.blade.php](file:///c:/laragon/www/spsp_new/resources/views/livewire/pages/h-c-a/sections/score-list-section.blade.php) | Reuse data `general-mc-mapping` (rating vs standard). |

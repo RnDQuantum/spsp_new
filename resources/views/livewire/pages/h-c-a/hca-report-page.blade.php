@@ -9,7 +9,7 @@
 
             <!-- 02 Ringkasan Eksekutif -->
             <div class="page-break p-8">
-                <livewire:pages.h-c-a.sections.executive-summary />
+                <livewire:pages.h-c-a.sections.executive-summary :participant-id="$participantId" :key="'exec_summary_print_'.$participantId" />
             </div>
 
             <!-- 03 Identitas Peserta -->
@@ -277,7 +277,7 @@
                                     <livewire:pages.h-c-a.sections.cover :participant-id="$participantId" :key="'cover_'.$participantId" />
                                     @break
                                 @case('exec_summary')
-                                    <livewire:pages.h-c-a.sections.executive-summary />
+                                    <livewire:pages.h-c-a.sections.executive-summary :participant-id="$participantId" :key="'exec_summary_'.$participantId" />
                                     @break
                                 @case('participant_id')
                                     <livewire:pages.h-c-a.sections.participant-profile />

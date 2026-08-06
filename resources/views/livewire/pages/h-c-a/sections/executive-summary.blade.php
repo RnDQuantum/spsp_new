@@ -11,8 +11,16 @@
         <!-- Total Score Snapshot -->
         <div class="flex items-center gap-2">
             <span class="text-xs font-semibold text-slate-500">Status Kesiapan:</span>
-            <span class="text-xs font-bold text-accent-amber bg-accent-amber/10 border border-accent-amber/20 px-3 py-1 rounded-md">
-                READY FOR PROMOTION
+            @php
+                $statusUpper = strtoupper($readinessStatus);
+                $badgeClass = match (true) {
+                    str_contains($statusUpper, 'SANGAT') || ($statusUpper === 'DISARANKAN') => 'text-emerald-700 bg-emerald-50 border-emerald-200',
+                    str_contains($statusUpper, 'CATATAN') => 'text-amber-700 bg-amber-50 border-amber-200',
+                    default => 'text-rose-700 bg-rose-50 border-rose-200',
+                };
+            @endphp
+            <span class="text-xs font-bold border px-3 py-1 rounded-md {{ $badgeClass }}">
+                {{ $readinessStatus }}
             </span>
         </div>
     </div>
