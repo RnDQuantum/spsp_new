@@ -19,7 +19,7 @@
 
             <!-- 04 HCI -->
             <div class="page-break p-8">
-                <livewire:pages.h-c-a.sections.index-radar-section sectionCode="hci" />
+                <livewire:pages.h-c-a.sections.index-radar-section sectionCode="hci" :participant-id="$participantId" :key="'hci_print_'.$participantId" />
             </div>
 
             <!-- 05 Kompetensi -->
@@ -285,7 +285,7 @@
                                 @case('hci')
                                 @case('potential')
                                 @case('eq')
-                                    <livewire:pages.h-c-a.sections.index-radar-section :sectionCode="$activeSection" :key="'radar_' . $activeSection" />
+                                    <livewire:pages.h-c-a.sections.index-radar-section :sectionCode="$activeSection" :participant-id="$participantId" :key="'radar_' . $activeSection . '_' . $participantId" />
                                     @break
                                 @case('competency')
                                 @case('cognitive')

@@ -19,7 +19,7 @@ Dokumentasi HCA Report dibagi menjadi 4 dokumen utama dan 1 folder spesifikasi p
 ### 1. Dokumentasi Utama (Master Files)
 
 * **[DYNAMIC_INTEGRATION_TRACKER.md](./DYNAMIC_INTEGRATION_TRACKER.md)**
-  * Tracker kemajuan migrasi data dinamis per-halaman/section (4/24 Selesai / 16.7%).
+  * Tracker kemajuan migrasi data dinamis per-halaman/section (5/24 Selesai / 20.8%).
   * Menghubungkan ringkasan status dengan file spesifikasi individual di folder `sections/`.
 
 * **[DATA_MAPPING_SPEC.md](./DATA_MAPPING_SPEC.md)**
@@ -39,7 +39,7 @@ Setiap section memiliki dokumentasi mandiri yang menjelaskan **Tujuan & Maksud K
 | **01** | **Cover Page** | [01_cover_page.md](./sections/01_cover_page.md) | ✅ **DONE** |
 | **02** | **Ringkasan Eksekutif** | [02_executive_summary.md](./sections/02_executive_summary.md) | ✅ **DONE** |
 | **03** | **Identitas Peserta** | [03_participant_profile.md](./sections/03_participant_profile.md) | ✅ **DONE** |
-| **04** | **Human Capital Index (HCI)** | [04_human_capital_index.md](./sections/04_human_capital_index.md) | 📋 PLANNED |
+| **04** | **Human Capital Index (HCI)** | [04_human_capital_index.md](./sections/04_human_capital_index.md) | ✅ **DONE** |
 | **05** | **Layer 1: Kompetensi** | [05_layer1_kompetensi.md](./sections/05_layer1_kompetensi.md) | 📋 PLANNED |
 | **06** | **Riwayat Karier** | [06_riwayat_karier.md](./sections/06_riwayat_karier.md) | 📋 PLANNED |
 | **07** | **Layer 2: Potensi** | [07_layer2_potensi.md](./sections/07_layer2_potensi.md) | 📋 PLANNED |

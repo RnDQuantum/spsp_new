@@ -3,7 +3,7 @@
 * **Nama Visual**: Human Capital Index Radar & Composite Gauge
 * **Kode Section**: `hci`
 * **Komponen File**: [IndexRadarSection.php](file:///c:/laragon/www/spsp_new/app/Livewire/Pages/HCA/Sections/IndexRadarSection.php) & [index-radar-section.blade.php](file:///c:/laragon/www/spsp_new/resources/views/livewire/pages/h-c-a/sections/index-radar-section.blade.php)
-* **Status Dynamic**: 📋 **PLANNED** (Data SPSP 🟡 Partial)
+* **Status Dynamic**: ✅ **DONE** (Data SPSP 🟢 Dynamic)
 
 ---
 

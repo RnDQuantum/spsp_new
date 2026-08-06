@@ -10,8 +10,8 @@ Setiap section diuji dan di-update secara bertahap sesuai keputusan dan verifika
 
 | Indicator | Total Section | Selesai (Dynamic) | Menunggu Pengecekan | Belum Dikerjakan |
 | :--- | :---: | :---: | :---: | :---: |
-| **Jumlah** | **23 Sections + Nav** | **4** | **0** | **20** |
-| **Persentase** | **100%** | **16.7%** | **0%** | **83.3%** |
+| **Jumlah** | **23 Sections + Nav** | **5** | **0** | **19** |
+| **Persentase** | **100%** | **20.8%** | **0%** | **79.2%** |
 
 > [!NOTE]
 > **Metode Pengerjaan & Kedinamisan Section**:
@@ -28,7 +28,7 @@ Setiap section diuji dan di-update secara bertahap sesuai keputusan dan verifika
 | **01** | **Cover Page** | 🟢 Reuse | ✅ **DONE** | [01_cover_page.md](./sections/01_cover_page.md) | Mengambil nama, foto/inisial, no. tes, formasi posisi, tanggal asesmen, & instansi dari model `Participant`. |
 | **02** | **Ringkasan Eksekutif** | 🟡 Partial | ✅ **DONE** | [02_executive_summary.md](./sections/02_executive_summary.md) | Dynamically computed 5 pillars, Talent Index, & status kesiapan bawaan SPSP (`final_assessments.conclusion_text`). |
 | **03** | **Identitas Peserta** | 🟢 Reuse | ✅ **DONE** | [03_participant_profile.md](./sections/03_participant_profile.md) | Biodata lengkap peserta (`$participant`). |
-| **04** | **Human Capital Index (HCI)** | 🟡 Partial | 📋 **PLANNED** | [04_human_capital_index.md](./sections/04_human_capital_index.md) | Radar chart skoring 5 pilar HCI. |
+| **04** | **Human Capital Index (HCI)** | 🟡 Partial | ✅ **DONE** | [04_human_capital_index.md](./sections/04_human_capital_index.md) | Radar chart skoring 5 pilar HCI. |
 | **05** | **Layer 1: Kompetensi** | 🟢 Reuse | 📋 **PLANNED** | [05_layer1_kompetensi.md](./sections/05_layer1_kompetensi.md) | Reuse data `general-mc-mapping` (rating vs standard). |
 | **06** | **Riwayat Karier** | 🔴 New | 📋 **PLANNED** | [06_riwayat_karier.md](./sections/06_riwayat_karier.md) | Data histori karier / input manual / HRIS. |
 | **07** | **Layer 2: Potensi** | 🟢 Reuse | 📋 **PLANNED** | [07_layer2_potensi.md](./sections/07_layer2_potensi.md) | Reuse data `general-psy-mapping`. |
