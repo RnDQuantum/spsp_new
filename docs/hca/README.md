@@ -1,0 +1,63 @@
+# 📑 Human Capital Assessment (HCA) Report — Documentation Index
+
+Selamat datang di indeks dokumentasi **Human Capital Assessment (HCA) Report** pada Sistem Pemetaan & Statistik Psikologi (SPSP).
+
+HCA Report adalah laporan eksekutif berstandar *Executive Journal* yang mengintegrasikan data psikometri, kompetensi manajerial, profil perilaku, hingga indikator suksesi kepemimpinan kandidat ke dalam satu media visual yang interaktif dan *print-ready*.
+
+---
+
+## 📚 Struktur Dokumentasi HCA Report
+
+Dokumentasi HCA Report dibagi menjadi 4 dokumen utama dan 1 folder spesifikasi per-section:
+
+### 1. Dokumentasi Utama (Master Files)
+
+* **[DYNAMIC_INTEGRATION_TRACKER.md](./DYNAMIC_INTEGRATION_TRACKER.md)**
+  * Tracker kemajuan migrasi data dinamis per-halaman/section (3/24 Selesai / 12.5%).
+  * Menghubungkan ringkasan status dengan file spesifikasi individual di folder `sections/`.
+
+* **[DATA_MAPPING_SPEC.md](./DATA_MAPPING_SPEC.md)**
+  * Spesifikasi pemetaan data backend SPSP vs kebutuhan HCA Report.
+  * Pengelompokan status data: 🟢 **Reuse**, 🟡 **Partial**, dan 🔴 **New**.
+
+* **[DESIGN_AND_UI_SPEC.md](./DESIGN_AND_UI_SPEC.md)**
+  * Spesifikasi visual identity theme *"Executive Journal"*, token warna, tipografi (`Lora` & `Instrument Sans`), serta arsitektur komponen Livewire v3.
+
+### 2. Spesifikasi Per-Halaman & Section ([docs/hca/sections/](./sections/))
+
+Setiap section memiliki dokumentasi mandiri yang menjelaskan **Tujuan & Maksud Keilmuan (HR & Psychological Science)** serta **Sumber Data DB SPSP & Logic Calculation**:
+
+| No | Section / Halaman | Dokumen Spesifikasi | Status Dynamic |
+| :-: | :--- | :--- | :-: |
+| **00** | **Active Talent Selector & Sidebar** | [00_talent_selector.md](./sections/00_talent_selector.md) | ✅ **DONE** |
+| **01** | **Cover Page** | [01_cover_page.md](./sections/01_cover_page.md) | ✅ **DONE** |
+| **02** | **Ringkasan Eksekutif** | [02_executive_summary.md](./sections/02_executive_summary.md) | ✅ **DONE** |
+| **03** | **Identitas Peserta** | [03_participant_profile.md](./sections/03_participant_profile.md) | 📋 PLANNED |
+| **04** | **Human Capital Index (HCI)** | [04_human_capital_index.md](./sections/04_human_capital_index.md) | 📋 PLANNED |
+| **05** | **Layer 1: Kompetensi** | [05_layer1_kompetensi.md](./sections/05_layer1_kompetensi.md) | 📋 PLANNED |
+| **06** | **Riwayat Karier** | [06_riwayat_karier.md](./sections/06_riwayat_karier.md) | 📋 PLANNED |
+| **07** | **Layer 2: Potensi** | [07_layer2_potensi.md](./sections/07_layer2_potensi.md) | 📋 PLANNED |
+| **08** | **IQ & Profil Kognitif** | [08_iq_kognitif.md](./sections/08_iq_kognitif.md) | 📋 PLANNED |
+| **09** | **Big Five Personality** | [09_big_five_personality.md](./sections/09_big_five_personality.md) | 📋 PLANNED |
+| **10** | **DISC Profile** | [10_disc_profile.md](./sections/10_disc_profile.md) | 📋 PLANNED |
+| **11** | **Learning Agility** | [11_learning_agility.md](./sections/11_learning_agility.md) | 📋 PLANNED |
+| **12** | **Leadership Potential** | [12_leadership_potential.md](./sections/12_leadership_potential.md) | 📋 PLANNED |
+| **13** | **Emotional Intelligence (EQ)** | [13_emotional_intelligence.md](./sections/13_emotional_intelligence.md) | 📋 PLANNED |
+| **14** | **Values & Integrity** | [14_values_integrity.md](./sections/14_values_integrity.md) | 📋 PLANNED |
+| **15** | **Performance Dashboard** | [15_performance_dashboard.md](./sections/15_performance_dashboard.md) | 📋 PLANNED |
+| **16** | **Talent 9-Box Matrix** | [16_talent_9box_matrix.md](./sections/16_talent_9box_matrix.md) | 📋 PLANNED |
+| **17** | **Succession Readiness** | [17_succession_readiness.md](./sections/17_succession_readiness.md) | 📋 PLANNED |
+| **18** | **Profil Personal (Pelengkap)** | [18_profil_personal.md](./sections/18_profil_personal.md) | 📋 PLANNED |
+| **19** | **Kesehatan Jiwa** | [19_kesehatan_jiwa.md](./sections/19_kesehatan_jiwa.md) | 📋 PLANNED |
+| **20** | **Kekuatan Psikologis** | [20_kekuatan_psikologis.md](./sections/20_kekuatan_psikologis.md) | 📋 PLANNED |
+| **21** | **Indikator Risiko** | [21_indikator_risiko.md](./sections/21_indikator_risiko.md) | 📋 PLANNED |
+| **22** | **Rekomendasi Pengembangan** | [22_rekomendasi_pengembangan.md](./sections/22_rekomendasi_pengembangan.md) | 📋 PLANNED |
+| **23** | **Rekomendasi Peran Berikutnya** | [23_rekomendasi_peran_berikutnya.md](./sections/23_rekomendasi_peran_berikutnya.md) | 📋 PLANNED |
+
+---
+
+## 🎯 Prinsip Pengerjaan
+
+1. **User-Guided Page-by-Page Integration**: Integrasi dilakukan bertahap 1 per 1 section untuk menjamin keakuratan data dan performa query.
+2. **Standard HCA Layout (`hca-layout.blade.php`)**: Seluruh komponen dirender dalam kontainer full-bleed tanpa tertekan oleh sidebar utama SPSP.
+3. **Data Immutability**: Hasil rating individual peserta bersifat historis (immutable), sedangkan standar kompetensi/potensi bersifat dinamis sesuai konfigurasi institusi.

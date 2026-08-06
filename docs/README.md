@@ -78,13 +78,17 @@ Dokumentasi integrasi data real dan pengolahan laporan legacy dari database LSP.
     *   Spesifikasi arsitektur multi-service integrasi LSP (`LspNormEngineService`, `LspDataTransformerService`, `LspDataImporterService`, `TestReportService`, dan `IndividualAssessmentService`).
 
 ### 7. Human Capital Assessment (HCA) Report Documentation
-Dokumentasi lengkap untuk arsitektur, UI/UX, data mapping, dan tracker integrasi dinamis HCA Report.
-*   **[01_DYNAMIC_INTEGRATION_TRACKER.md](./hca/01_DYNAMIC_INTEGRATION_TRACKER.md)**
+Dokumentasi lengkap untuk arsitektur, UI/UX, data mapping, tracker integrasi dinamis, serta spesifikasi keilmuan per-section pada HCA Report.
+*   **[hca/README.md](./hca/README.md)**
+    *   Master Index & Navigation Dokumentasi HCA Report.
+*   **[DYNAMIC_INTEGRATION_TRACKER.md](./hca/DYNAMIC_INTEGRATION_TRACKER.md)**
     *   Tracker kemajuan integrasi dinamis per-halaman/section untuk 23 section HCA Report.
-*   **[02_DATA_MAPPING_SPEC.md](./hca/02_DATA_MAPPING_SPEC.md)**
+*   **[DATA_MAPPING_SPEC.md](./hca/DATA_MAPPING_SPEC.md)**
     *   Spesifikasi pemetaan data backend HCA vs tabel SPSP (Reuse, Partial, dan New data sources).
-*   **[03_DESIGN_AND_UI_SPEC.md](./hca/03_DESIGN_AND_UI_SPEC.md)**
+*   **[DESIGN_AND_UI_SPEC.md](./hca/DESIGN_AND_UI_SPEC.md)**
     *   Spesifikasi desain visual "Executive Journal", palette, layout, dan arsitektur komponen Livewire v3 HCA.
+*   **[docs/hca/sections/](./hca/sections/)**
+    *   Folder dokumentasi mandiri per-section (24 file) memuat latar belakang ilmiah HR & sumber data DB SPSP.
 
 
 
