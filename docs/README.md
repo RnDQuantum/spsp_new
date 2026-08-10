@@ -8,7 +8,7 @@ Welcome to SPSP (Sistem Pemetaan & Statistik Psikologi) documentation! This inde
 
 ### 1. Business & Concepts
 Start here to understand the core business logic of the system.
-*   **[00_SPSP_FUNDAMENTAL_ARCHITECTURE.md](./00_SPSP_FUNDAMENTAL_ARCHITECTURE.md)**
+*   **[FUNDAMENTAL_ARCHITECTURE.md](./lsp_integration/FUNDAMENTAL_ARCHITECTURE.md)**
     *   **Fundamental Architecture & Dual-Path Data Ingestion (MUST READ)**
     *   SPSP as a BI System (not CRUD)
     *   Dual-Path Ingestion: Path A (Legacy DB `< PR-A-338`) vs Path B (API Online `≥ PR-A-338`)
@@ -72,17 +72,13 @@ Deep dives into specific optimization work applied to the codebase.
 Dokumentasi integrasi data real dan pengolahan laporan legacy dari database LSP.
 *   **[lsp_integration/README.md](./lsp_integration/README.md)**
     *   **Master Index & Navigation Dokumentasi Integrasi LSP**.
-*   **[01_LEGACY_VIEW_ANALYSIS.md](./lsp_integration/01_LEGACY_VIEW_ANALYSIS.md)**
-    *   Pemetaan lengkap view legacy `report_individu_p3k_kjg_2025.php` dan 23 tabel database LSP.
-*   **[02_DATA_MAPPING_ANALYSIS.md](./lsp_integration/02_DATA_MAPPING_ANALYSIS.md)**
-    *   Analisis komparatif data CI3 legacy vs skema database SPSP (90% match & 10% data kualitatif/wawancara).
-*   **[03_LSP_INTEGRATION_GUIDE.md](./lsp_integration/03_LSP_INTEGRATION_GUIDE.md)**
+*   **[FUNDAMENTAL_ARCHITECTURE.md](./lsp_integration/FUNDAMENTAL_ARCHITECTURE.md)**
+    *   **Master Dokumentasi**: Arsitektur fondasi SPSP, Dual-Path Ingestion (Legacy vs API Baru), 5 file norma resmi, dan 2-Level Konversi.
+*   **[INTEGRATION_GUIDE.md](./lsp_integration/INTEGRATION_GUIDE.md)**
     *   Panduan operasional `LspNormEngineService`, `LspDataTransformerService`, `LspDataImporterService`, `TestReportService`, Artisan CLI commands (`lsp:test-report` & `lsp:import`), dan norma JSON.
-*   **[04_DYNAMIC_MULTI_PROJECT_SUPPORT.md](./lsp_integration/04_DYNAMIC_MULTI_PROJECT_SUPPORT.md)**
-    *   Arsitektur dan penjelasan kedinamisan multi-proyek integrasi LSP serta pemetaan lengkap 17 tabel database LSP ke DB SPSP.
-*   **[05_FALLBACK_AND_SAFETY_MECHANISMS.md](./lsp_integration/05_FALLBACK_AND_SAFETY_MECHANISMS.md)**
+*   **[FALLBACK_AND_SAFETY_MECHANISMS.md](./lsp_integration/FALLBACK_AND_SAFETY_MECHANISMS.md)**
     *   Dokumentasi lengkap seluruh matriks fallback data, pembatasan error, dan mekanisme isolasi transaksi impor.
-*   **[06_LSP_SERVICES_ARCHITECTURE.md](./lsp_integration/06_LSP_SERVICES_ARCHITECTURE.md)**
+*   **[SERVICES_ARCHITECTURE.md](./lsp_integration/SERVICES_ARCHITECTURE.md)**
     *   Spesifikasi arsitektur multi-service integrasi LSP (`LspNormEngineService`, `LspDataTransformerService`, `LspDataImporterService`, `TestReportService`, dan `IndividualAssessmentService`).
 
 ### 7. Human Capital Assessment (HCA) Report Documentation
