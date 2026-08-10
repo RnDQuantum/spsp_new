@@ -1,14 +1,20 @@
-# Arsitektur & Spesifikasi Service Integrasi LSP
+# 🏗️ Arsitektur & Spesifikasi Service Integrasi LSP
+
+[← Kembali ke Indeks Dokumentasi Integrasi LSP](./README.md)
 
 - **Modul**: Integrasi Database LSP (Quantum HRMI) $\rightarrow$ Native SPSP System
-- **File Dokumentasi**: `docs/lsp_integration/06_LSP_SERVICES_ARCHITECTURE.md`
+- **File Dokumentasi**: [docs/lsp_integration/06_LSP_SERVICES_ARCHITECTURE.md](./06_LSP_SERVICES_ARCHITECTURE.md)
 - **Tanggal Pembaruan**: 29 Juli 2026
 
 ---
 
-## 1. Ikhtisar Arsitektur Multi-Service
+> [!NOTE]
+> **Ikhtisar Arsitektur Multi-Service**:
+> Modul integrasi LSP menerapkan prinsip **Single Responsibility Principle (SRP)** dengan memisahkan tugas pipeline data ke dalam service-service modular. Setiap service bertanggung jawab atas 1 tahap spesifik (Norm Calculation, Data Transformation, Importer, dan Presentation).
 
-Modul integrasi LSP menerapkan prinsip **Single Responsibility Principle (SRP)** dengan memisahkan tugas pipeline data ke dalam service-service modular:
+---
+
+## 🏛️ 1. Diagram Alur Service Architecture
 
 ```mermaid
 flowchart TD
@@ -50,10 +56,10 @@ flowchart TD
 
 ---
 
-## 2. Rincian & Peran Masing-Masing Service
+## 🧩 2. Rincian & Peran Masing-Masing Service
 
 ### 1. `LspNormEngineService`
-- **Lokasi File**: `app/Services/Lsp/LspNormEngineService.php`
+- **Lokasi File**: [LspNormEngineService.php](file:///c:/laragon/www/spsp_new/app/Services/Lsp/LspNormEngineService.php)
 - **Tanggung Jawab Utama**: Murni mengolah konversi norma psikometri dari skor mentah (*raw score*) ke *standard score*, IQ, Sten score, dan rating aspek/atribut (skala 1–5).
 - **Independensi**: Tidak tergantung pada database SPSP, sehingga *reusable* untuk berbagai kebutuhan pengolahan norma.
 - **Method Utama**:
@@ -61,12 +67,12 @@ flowchart TD
   - `processIstNorms($rawIst, $pendidikan, $usia)`: Mengonversi 9 subtest IST ke SW (Standard Score) & IQ.
   - `processKostikNorms($rawKostik)`: Mengolah 20 faktor kepribadian PAPI Kostik.
   - `process16pfNorms($rawPersonality, $usia)`: Mengonversi 16PF ke Sten Score (1–10) + koreksi MD.
-  - `calculateProfilPotensiCached($db, $standarJabatan, $standarPenilaian, ...)`: Menghitung rating aspek potensi (skala 1–5) dari tabel `standar_atribute_alat_ukur`.
+  - `calculateProfilPotensiCached(...)`: Menghitung rating aspek potensi (skala 1–5) dari tabel `standar_atribute_alat_ukur`.
 
 ---
 
 ### 2. `LspDataTransformerService`
-- **Lokasi File**: `app/Services/Lsp/LspDataTransformerService.php`
+- **Lokasi File**: [LspDataTransformerService.php](file:///c:/laragon/www/spsp_new/app/Services/Lsp/LspDataTransformerService.php)
 - **Tanggung Jawab Utama**: Pipeline ekstraksi dan transformasi data mentah dari koneksi DB LSP (`DB_LSP_LOCAL`) menjadi struktur DTO/array terstandar.
 - **Catatan Penamaan**: Menggantikan peran `LspIndividualReportService` yang lama agar penamaannya secara tegas mencerminkan tugas aslinya sebagai data transformer untuk impor data legacy.
 - **Method Utama**:
@@ -76,40 +82,41 @@ flowchart TD
 ---
 
 ### 3. `LspDataImporterService`
-- **Lokasi File**: `app/Services/Lsp/LspDataImporterService.php`
+- **Lokasi File**: [LspDataImporterService.php](file:///c:/laragon/www/spsp_new/app/Services/Lsp/LspDataImporterService.php)
 - **Tanggung Jawab Utama**: Memasukkan (*import/sync*) payload DTO hasil kalkulasi transformer ke tabel-tabel native SPSP (`participants`, `psychological_tests`, `interpretations`, `aspect_assessments`, `sub_aspect_assessments`, `category_assessments`, `final_assessments`).
 - **Fitur Utama**: *Idempotent upsert*, isolasi transaksi per peserta, dan *registry in-memory caching* untuk master data.
 
 ---
 
 ### 4. `TestReportService`
-- **Lokasi File**: `app/Services/TestReportService.php`
+- **Lokasi File**: [TestReportService.php](file:///c:/laragon/www/spsp_new/app/Services/TestReportService.php)
 - **Tanggung Jawab Utama**: Fondasi Service penyedia data **Laporan Alat Tes per Instrumen** (contoh: Laporan Detail IST, Laporan PAPI Kostik, Laporan 16PF) untuk disajikan di UI SPSP.
 - **Sumber Data**: Membaca data mentah dari tabel SPSP Native `test_results` dan mengonversinya via `LspNormEngineService`.
 
 ---
 
 ### 5. `IndividualAssessmentService` (Core SPSP Existing)
-- **Lokasi File**: `app/Services/IndividualAssessmentService.php`
+- **Lokasi File**: [IndividualAssessmentService.php](file:///c:/laragon/www/spsp_new/app/Services/IndividualAssessmentService.php)
 - **Tanggung Jawab Utama**: Service resmi SPSP yang menjadi *Single Source of Truth* penyajian **Laporan Individu / Executive Report** di UI SPSP setelah data diimpor.
 
 ---
 
-## 3. Matriks Perbandingan & Alur Penggunaan
+## 📊 3. Matriks Perbandingan & Alur Penggunaan
 
-| Pertanyaan | Service yang Bertanggung Jawab |
-| :--- | :--- |
-| *Di mana rumus konversi IST / IQ / PAPI Kostik dihitung?* | `LspNormEngineService` |
-| *Service apa yang membaca DB LSP lama saat impor?* | `LspDataTransformerService` |
-| *Service apa yang menulis data ke tabel SPSP?* | `LspDataImporterService` |
-| *Service apa yang menyajikan Laporan Alat Tes di UI SPSP?* | `TestReportService` |
-| *Service apa yang menyajikan Laporan Individu di UI SPSP?* | `IndividualAssessmentService` |
+| Pertanyaan / Pertimbangan | Service yang Bertanggung Jawab | Status Service |
+| :--- | :--- | :-: |
+| *Di mana rumus konversi IST / IQ / PAPI Kostik dihitung?* | `LspNormEngineService` | 🟢 **Active Calculation** |
+| *Service apa yang membaca DB LSP lama saat impor?* | `LspDataTransformerService` | 🟢 **Active Transformer** |
+| *Service apa yang menulis data ke tabel native SPSP?* | `LspDataImporterService` | 🟢 **Active Importer** |
+| *Service apa yang menyajikan Laporan Alat Tes di UI SPSP?* | `TestReportService` | 🟢 **Active Native UI** |
+| *Service apa yang menyajikan Laporan Individu di UI SPSP?* | `IndividualAssessmentService` | 🟢 **Active Executive UI** |
 
 ---
 
-## 4. Panduan Ekstensi (Extensibility Guide)
+## 🛠️ 4. Panduan Ekstensi (Extensibility Guide)
 
-### Menambahkan Alat Tes atau Norma Baru
-1. Tambahkan file norma JSON baru di `resources/data/lsp_norms/` (jika berupa file norma).
-2. Tambahkan method konversi baru pada `LspNormEngineService.php`.
-3. Panggil method konversi tersebut di `LspDataTransformerService.php` (untuk integrasi LSP) atau `TestReportService.php` (untuk alat tes native SPSP).
+> [!TIP]
+> **Menambahkan Alat Tes atau Norma Baru**:
+> 1. Tambahkan file norma JSON baru di `resources/data/lsp_norms/` (jika berupa file norma).
+> 2. Tambahkan method konversi baru pada [LspNormEngineService.php](file:///c:/laragon/www/spsp_new/app/Services/Lsp/LspNormEngineService.php).
+> 3. Panggil method konversi tersebut di [LspDataTransformerService.php](file:///c:/laragon/www/spsp_new/app/Services/Lsp/LspDataTransformerService.php) (untuk integrasi LSP) atau [TestReportService.php](file:///c:/laragon/www/spsp_new/app/Services/TestReportService.php) (untuk alat tes native SPSP).

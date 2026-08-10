@@ -64,6 +64,8 @@ Deep dives into specific optimization work applied to the codebase.
 
 ### 6. LSP Integration & Legacy Data Synchronization
 Dokumentasi integrasi data real dan pengolahan laporan legacy dari database LSP.
+*   **[lsp_integration/README.md](./lsp_integration/README.md)**
+    *   **Master Index & Navigation Dokumentasi Integrasi LSP**.
 *   **[01_LEGACY_VIEW_ANALYSIS.md](./lsp_integration/01_LEGACY_VIEW_ANALYSIS.md)**
     *   Pemetaan lengkap view legacy `report_individu_p3k_kjg_2025.php` dan 23 tabel database LSP.
 *   **[02_DATA_MAPPING_ANALYSIS.md](./lsp_integration/02_DATA_MAPPING_ANALYSIS.md)**

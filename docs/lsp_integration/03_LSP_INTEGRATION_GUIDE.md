@@ -1,22 +1,26 @@
-# Panduan Integrasi & Sinkronisasi Data LSP ke SPSP
+# 📖 Panduan Operasional Integrasi & Sinkronisasi Data LSP ke SPSP
 
-- **Modul**: Integrasi LSP (Quantum HRMI) $\rightarrow$ SPSP System
+[← Kembali ke Indeks Dokumentasi Integrasi LSP](./README.md)
+
+- **Modul**: Integrasi LSP (Quantum HRMI) $\rightarrow$ Native SPSP System
 - **File Service**:
-  - `app/Services/Lsp/LspNormEngineService.php` (Engine Perhitungan Norma Psikometri)
-  - `app/Services/Lsp/LspDataTransformerService.php` (Transformer Data Impor LSP, menggantikan `LspIndividualReportService`)
-  - `app/Services/Lsp/LspDataImporterService.php` (Importer Data ke DB Native SPSP)
-  - `app/Services/TestReportService.php` (Fondasi Laporan Alat Tes SPSP Native)
-- **File Command**: `app/Console/Commands/TestLspIndividualReport.php` & `app/Console/Commands/ImportLspData.php`
-- **File Test**: `tests/Feature/LspNormEngineServiceTest.php`, `tests/Feature/LspIndividualReportServiceTest.php` & `tests/Feature/LspDataImporterServiceTest.php`
+  - [LspNormEngineService.php](file:///c:/laragon/www/spsp_new/app/Services/Lsp/LspNormEngineService.php) (Engine Perhitungan Norma Psikometri)
+  - [LspDataTransformerService.php](file:///c:/laragon/www/spsp_new/app/Services/Lsp/LspDataTransformerService.php) (Transformer Data Impor LSP)
+  - [LspDataImporterService.php](file:///c:/laragon/www/spsp_new/app/Services/Lsp/LspDataImporterService.php) (Importer Data ke DB Native SPSP)
+  - [TestReportService.php](file:///c:/laragon/www/spsp_new/app/Services/TestReportService.php) (Fondasi Laporan Alat Tes Native)
+- **File Command**: `TestLspIndividualReport.php` & `ImportLspData.php`
 - **Lokasi Norma**: `resources/data/lsp_norms/` (`ist.json`, `kostik.json`, `personality.json`)
-- **Dokumentasi Kedinamisan Multi-Proyek**: `docs/lsp_integration/04_DYNAMIC_MULTI_PROJECT_SUPPORT.md`
-- **Dokumentasi Fallback & Ketahanan Sistem**: `docs/lsp_integration/05_FALLBACK_AND_SAFETY_MECHANISMS.md`
+- **Tanggal Pembaruan**: 29 Juli 2026
 
 ---
 
-## 1. Ikhtisar Arsitektur Integrasi
+> [!NOTE]
+> **Ikhtisar Pipeline Integrasi**:
+> Modul integrasi bertugas mengambil data mentah dari clone database LSP (`DB_LSP_LOCAL` / koneksi `lsp`), mengolah norma psikometri presisi via `LspNormEngineService`, mentransformasi data via `LspDataTransformerService`, dan menyinkronkannya ke tabel native SPSP via `LspDataImporterService`.
 
-Integrasi LSP bertugas mengambil data mentah hasil ujian dari clone database LSP (`DB_LSP_LOCAL` / koneksi `lsp`), mengolah norma psikometri presisi via `LspNormEngineService`, dan mentransformasi data via `LspDataTransformerService` untuk disinkronkan ke tabel-tabel native SPSP (`participants`, `psychological_tests`, `interpretations`, `aspect_assessments`, `sub_aspect_assessments`, `category_assessments`, `final_assessments`).
+---
+
+## 🏗️ 1. Diagram Alur Data Pipeline
 
 ```mermaid
 flowchart TD
@@ -32,7 +36,7 @@ flowchart TD
         B1[LspNormEngineService]
         B2[LspDataTransformerService]
         B3[LspDataImporterService]
-        B4[Norm JSON: ist, kostik, 16pf]
+        B4[Norm JSON: ist, kostik, personality]
     end
 
     subgraph SPSP_DATABASE [Database Native SPSP]
@@ -54,56 +58,67 @@ flowchart TD
 
 ---
 
-## 2. Penggunaan Command Artisan CLI
+## 💻 2. Penggunaan Command Artisan CLI
 
-### A. Uji Coba Transformer & Laporan Individu (Tanpa Menyimpan ke DB SPSP)
-Menguji kalkulasi norma & transformasi data peserta secara instan dan menampilkan DTO/tabel pada terminal:
+> [!TIP]
+> **Dua Command Utama**:
+> 1. `lsp:test-report`: Menguji transformer tanpa menulis ke database SPSP (Read-Only Test).
+> 2. `lsp:import`: Mengimpor & menyinkronkan data ke tabel-tabel native SPSP.
+
+### A. Uji Coba Transformer & Laporan Individu (Dry-Run)
+Menguji kalkulasi norma & transformasi data peserta secara instan dan menampilkan DTO/tabel pada terminal tanpa menyimpan ke database SPSP:
 ```bash
 php artisan lsp:test-report <username_peserta> <kode_proyek>
 ```
+
 *Contoh*:
 ```bash
 php artisan lsp:test-report bntn01-001 PR-A-313
 ```
 
-### B. Impor / Sinkronisasi Data LSP ke Database SPSP
-Mengimpor data peserta dari database LSP dan menyimpan/menyinkronkannya ke tabel-tabel SPSP:
+---
+
+### B. Impor / Sinkronisasi Data LSP ke Database Native SPSP
+Mengimpor data peserta dari database LSP dan menyimpan/menyinkronkannya ke tabel-tabel native SPSP:
+
 ```bash
-# Impor seluruh peserta dalam 1 proyek LSP
+# 1. Impor seluruh peserta dalam 1 proyek LSP
 php artisan lsp:import <kode_proyek>
 
-# Impor spesifik 1 username peserta saja
+# 2. Impor spesifik 1 username peserta saja
 php artisan lsp:import <kode_proyek> --username=<username_peserta>
 
-# Impor dengan menentukan ID Instansi SPSP spesifik
+# 3. Impor dengan menentukan ID Instansi SPSP spesifik
 php artisan lsp:import <kode_proyek> --institution=<institution_id>
 ```
 
----
-
-## 3. Eksekusi Automated Tests
-
-Untuk memastikan seluruh pengujian integrasi LSP berjalan tanpa error:
+*Contoh*:
 ```bash
-# Menjalankan seluruh test suite integrasi LSP
-php artisan test --compact --filter=Lsp
-
-# Menjalankan unit test LspNormEngineService
-php artisan test --compact --filter=LspNormEngineServiceTest
-
-# Menjalankan unit test LspDataTransformerService
-php artisan test --compact --filter=LspIndividualReportServiceTest
-
-# Menjalankan unit test LspDataImporterService
-php artisan test --compact --filter=LspDataImporterServiceTest
+php artisan lsp:import PR-A-313 --username=bntn01-001 --institution=1
 ```
 
 ---
 
-## 4. Struktur File Norma JSON
+## 🧪 3. Eksekusi Automated Test Suite
+
+Untuk memastikan seluruh pengujian integrasi LSP berjalan tanpa error dan validasi norma 100% presisi:
+
+| Test Target | Perintah Artisan Test | Status Assertions |
+| :--- | :--- | :-: |
+| **Seluruh Integrasi LSP** | `php artisan test --compact --filter=Lsp` | 🟢 **2 Passed (27 Assertions)** |
+| **LspNormEngineService** | `php artisan test --compact --filter=LspNormEngineServiceTest` | 🟢 **Passed** |
+| **LspDataTransformerService** | `php artisan test --compact --filter=LspIndividualReportServiceTest` | 🟢 **Passed** |
+| **LspDataImporterService** | `php artisan test --compact --filter=LspDataImporterServiceTest` | 🟢 **Passed** |
+
+---
+
+## 📁 4. Lokasi & Struktur File Norma JSON
 
 File norma psikometri disimpan pada direktori:
 `resources/data/lsp_norms/`
-- `ist.json`: Norma konversi subtest & total IQ IST.
-- `kostik.json`: Norma konversi 20 faktor PAPI Kostik.
-- `personality.json`: Norma konversi Sten Score (1–10) 16PF dengan koreksi MD.
+
+| Nama File Norma | Deskripsi & Kegunaan |
+| :--- | :--- |
+| **`ist.json`** | Norma konversi 9 subtest IST & kalkulasi total IQ berdasarkan tingkat pendidikan dan norma usia. |
+| **`kostik.json`** | Norma konversi 20 faktor kepribadian kerja PAPI Kostik. |
+| **`personality.json`** | Norma konversi Sten Score (1–10) 16PF dengan penyesuaian koreksi Motivasi Manipulasi (MD). |

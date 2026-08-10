@@ -1,50 +1,67 @@
-# Analisis Legacy View Report Individu P3K Kejaksaan Agung 2025
+# 🔍 Analisis Legacy View Report Individu P3K Kejaksaan Agung 2025
+
+[← Kembali ke Indeks Dokumentasi Integrasi LSP](./README.md)
 
 - **File Sumber**: `D:\bima\RND\SPSP\legacy\report_individu_p3k_kjg_2025.php`
-- **Aplikasi Asal**: CodeIgniter 3 (LSP)
-- **Koneksi Database**: `DB_LSP_LOCAL` / `lspLocalConfig`
+- **Aplikasi Asal**: CodeIgniter 3 (LSP / Quantum HRMI)
+- **Koneksi Database**: `DB_LSP_LOCAL` / `lspLocalConfig` (Koneksi `lsp`)
 - **Tanggal Analisis**: 22 Juli 2026
 
 ---
 
-## 1. Ikhtisar & Ringkasan Fitur
-View `report_individu_p3k_kjg_2025.php` merupakan tampilan laporan individu hasil asesmen peserta **P3K Kejaksaan Agung RI 2025**. File ini bertindak sebagai gabungan *controller-view logic* yang mengambil data mentah peserta dari database LSP, mengolah norma alat tes psikometri (IST, Kostik, 16PF), mengonversi skor ke rating 1–5, menghitung nilai berbobot Potensi (40%) dan Kompetensi (60%), memproses tes kejiwaan (MMPI), menarik interpretasi narasi otomatis, hingga menentukan kesimpulan akhir kelulusan (MS / MMS / TMS).
+> [!NOTE]
+> **Tujuan Dokumen**:
+> Dokumen ini menganalisis secara mendalam view legacy `report_individu_p3k_kjg_2025.php` yang menjadi acuan utama kalkulasi asesmen individu. View ini bertindak sebagai gabungan *controller-view logic* untuk mengolah 23 tabel database LSP, norma psikometri (IST, Kostik, 16PF), evaluasi MMPI, hingga penentuan kesimpulan kelulusan (MS / MMS / TMS).
 
 ---
 
-## 2. Pemetaan Tabel Database LSP
+## 📑 1. Ikhtisar & Ringkasan Fitur
 
-Berikut adalah 20 tabel database LSP yang diakses oleh view legacy ini:
-
-| No | Nama Tabel | Fungsi & Kolom Utama yang Dipakai |
-|---:|:---|:---|
-| 1 | `peserta_produksi` / `$peserta` | Identitas peserta (`no_test`, `no_kjg`, `username`, `nama_lengkap`, `gelar_depan`, `gelar_belakang`, `tanggal_lahir`, `pendidikan`, `jenis_kelamin`, `jabatan_pelaksana`, `minat_penempatan`, `batch`, `kode_pelaksanaan`, `pasfoto`, `angka`). |
-| 2 | `ujian_peserta_produksi` | Skor mentah alat tes (`typesoal` IN (`ist`, `kostik`, `personality`), `nilai`). |
-| 3 | `rekapmmpi_p3kkjg` | Evaluasi tes kejiwaan/MMPI (`validitas`, `internal_pribadi`, `interpersonal`, `kapasitas_kerja`, `klinis`, `kesimpulan`, `psikogram`, `nilai_pq`, `tingkat_stres`). |
-| 4 | `proyek` | Metadata pelaksanaan (`tanggal_pelaksanaan`, `sampai_tanggal`, `nama_proyek`, `lokasi`). |
-| 5 | `proyek_produksi` | Data instansi proyek (`instansi`). |
-| 6 | `klien` | Data nama instansi/klien (`nama_klien`, `kode_instansi`). |
-| 7 | `validasi_ttd_report` | Penomoran dokumen resmi (`no_dokumen`), kode validasi TTD digital (`kode_validasi`), dan file QR code. |
-| 8 | `standard` | Penentuan jenis standar penilaian (`p3k_kjg_-_jf_terampil_2025` atau `p3k_kjg_-_jf_muda_&_pertama_2025`). |
-| 9 | `aspek_yang_digali` | Daftar kompetensi inti wawancara (`kode_kompetensi`, `nama_kompetensi`, `interview`). |
-| 10 | `standard_aspek_yang_digali` | Mapping standar rating target (1–5) dan bobot (`bobot`, `standar_rating`, `jenis_standar`, `kompetensi`). |
-| 11 | `hasil_aspek_yang_digali` | Hasil penilaian wawancara dari asesor (`nilai_rating`, `bukti_perilaku`, `kuk`, `kode_ta`). |
-| 12 | `aspek_tambahan` | Aspek tambahan wawancara (`kode_aspek_tambahan`, `nama_aspek_tambahan`, `definisi`). |
-| 13 | `hasil_aspek_tambahan` | Nilai dan keterangan aspek tambahan dari asesor (`nilai`, `keterangan`). |
-| 14 | `standar_potensi` | Definisi aspek potensi, atribut target, standar rating (1–5), bobot (`bobot`), dan urutan display. |
-| 15 | `standar_aspek` | Master nama aspek potensi (`kode_aspek`, `aspek_penilaian`). |
-| 16 | `standar_atribute` | Master nama atribut potensi (`kode_atribute`, `nama_atribute`). |
-| 17 | `standar_atribute_alat_ukur` | **Tabel Utama Konversi Potensi**: Mapping komponen alat tes ke atribut beserta rentang skala norma (`skala_1` s.d. `skala_5`) & arah korelasi (`tingkat` `+`/`-`). |
-| 18 | `standar_kompetensi_alat_ukur` | **Tabel Utama Konversi Kompetensi**: Mapping komponen alat tes ke kompetensi inti beserta rentang skala norma. |
-| 19 | `kamus_potensi` | Narasi interpretasi potensi berdasarkan (`standard`, `versi`, `kode_atribute`, `rating`, `interpretasi`). |
-| 20 | `kamus_kompetensi` | Narasi interpretasi kompetensi berdasarkan (`standard`, `versi`, `kode_kompetensi`, `rating`, `interpretasi`). |
-| 21 | `hasil_aspek_kelebihan` | Catatan kualitatif kekuatan (`aspek_kelebihan`) & kelemahan (`aspek_kelemahan`) dari asesor. |
-| 22 | `hasil_rekomendasi` | Rekomendasi akhir wawancara asesor (`catatan_wajib`, `saran_pengembangan`, `rekomendasi` MS/MMS/TMS). |
-| 23 | `users_personil` & `penugasan` | Data Asesor / Technical Advisor (TA): gelar, nama lengkap, jabatan. |
+View `report_individu_p3k_kjg_2025.php` memproses seluruh alur laporan individu peserta asesmen **P3K Kejaksaan Agung RI 2025**:
+1. Ekstraksi identitas & formasi peserta dari database LSP.
+2. Kalkulasi norma alat tes kognitif (IST Subtests 1–9), kepribadian kerja (PAPI Kostik 20 Faktor), dan faktor psikologis (16PF 17 Faktor + koreksi MD).
+3. Konversi skor tes ke skala rating 1–5 berdasarkan aturan batas *cut-off* pada tabel mapping.
+4. Perhitungan total skor berbobot: **Potensi (40%)** dan **Kompetensi (60%)**.
+5. Evaluasi tes kejiwaan MMPI (9 domain) dan konversi status stres.
+6. Penarikan narasi interpretasi otomatis berbasis versi angka acak (1–5).
+7. Penentuan rekomendasi kelulusan psikotes, wawancara, dan matriks kesimpulan akhir.
+8. Generasi nomor dokumen resmi & URL verifikasi QR code TTD digital.
 
 ---
 
-## 3. Logika & Pipeline Kalkulasi Alat Tes Psikometri
+## 🗄️ 2. Pemetaan 23 Tabel Database LSP
+
+Berikut adalah pemetaan rinci 23 tabel database LSP yang dikonsumsi oleh view legacy:
+
+| No | Nama Tabel LSP | Fungsi & Kolom Utama yang Dipakai | Status Pemetaan SPSP |
+| :-: | :--- | :--- | :-: |
+| **1** | `peserta_produksi` / `$peserta` | Identitas peserta (`no_test`, `no_kjg`, `username`, `nama_lengkap`, `gelar_depan`, `gelar_belakang`, `tanggal_lahir`, `pendidikan`, `jenis_kelamin`, `jabatan_pelaksana`, `minat_penempatan`, `batch`, `kode_pelaksanaan`, `pasfoto`, `angka`). | 🟢 **Tercover** ([participants](file:///c:/laragon/www/spsp_new/docs/DATABASE_STRUCTURE.md)) |
+| **2** | `ujian_peserta_produksi` | Skor mentah alat tes (`typesoal` IN (`ist`, `kostik`, `personality`), `nilai`). | 🟢 **Tercover** ([test_results](file:///c:/laragon/www/spsp_new/docs/DATABASE_STRUCTURE.md)) |
+| **3** | `rekapmmpi_p3kkjg` | Evaluasi tes kejiwaan MMPI (`validitas`, `internal_pribadi`, `interpersonal`, `kapasitas_kerja`, `klinis`, `kesimpulan`, `psikogram`, `nilai_pq`, `tingkat_stres`). | 🟢 **Tercover** ([psychological_tests](file:///c:/laragon/www/spsp_new/docs/DATABASE_STRUCTURE.md)) |
+| **4** | `proyek` | Metadata pelaksanaan (`tanggal_pelaksanaan`, `sampai_tanggal`, `nama_proyek`, `lokasi`). | 🟢 **Tercover** ([batches](file:///c:/laragon/www/spsp_new/docs/DATABASE_STRUCTURE.md)) |
+| **5** | `proyek_produksi` | Data instansi proyek (`instansi`). | 🟢 **Tercover** ([institutions](file:///c:/laragon/www/spsp_new/docs/DATABASE_STRUCTURE.md)) |
+| **6** | `klien` | Data nama instansi/klien (`nama_klien`, `kode_instansi`). | 🟢 **Tercover** ([institutions](file:///c:/laragon/www/spsp_new/docs/DATABASE_STRUCTURE.md)) |
+| **7** | `validasi_ttd_report` | Penomoran dokumen resmi (`no_dokumen`), kode validasi TTD digital (`kode_validasi`), dan QR code. | 🟡 **Payload Metadata** ([final_assessments](file:///c:/laragon/www/spsp_new/docs/DATABASE_STRUCTURE.md)) |
+| **8** | `standard` | Penentuan jenis standar penilaian (`p3k_kjg_-_jf_terampil_2025` / `p3k_kjg_-_jf_muda_&_pertama_2025`). | 🟢 **Tercover** ([standards](file:///c:/laragon/www/spsp_new/docs/DATABASE_STRUCTURE.md)) |
+| **9** | `aspek_yang_digali` | Daftar kompetensi inti wawancara (`kode_kompetensi`, `nama_kompetensi`, `interview`). | 🟢 **Tercover** ([aspects](file:///c:/laragon/www/spsp_new/docs/DATABASE_STRUCTURE.md)) |
+| **10** | `standard_aspek_yang_digali` | Mapping standar rating target (1–5) dan bobot (`bobot`, `standar_rating`, `jenis_standar`, `kompetensi`). | 🟢 **Tercover** ([aspect_standards](file:///c:/laragon/www/spsp_new/docs/DATABASE_STRUCTURE.md)) |
+| **11** | `hasil_aspek_yang_digali` | Hasil penilaian wawancara dari asesor (`nilai_rating`, `bukti_perilaku`, `kuk`, `kode_ta`). | 🟢 **Tercover** ([aspect_assessments](file:///c:/laragon/www/spsp_new/docs/DATABASE_STRUCTURE.md)) |
+| **12** | `aspek_tambahan` | Aspek tambahan wawancara (`kode_aspek_tambahan`, `nama_aspek_tambahan`, `definisi`). | 🟡 **Payload Interpretasi** ([interpretations](file:///c:/laragon/www/spsp_new/docs/DATABASE_STRUCTURE.md)) |
+| **13** | `hasil_aspek_tambahan` | Nilai dan keterangan aspek tambahan dari asesor (`nilai`, `keterangan`). | 🟡 **Payload Interpretasi** ([interpretations](file:///c:/laragon/www/spsp_new/docs/DATABASE_STRUCTURE.md)) |
+| **14** | `standar_potensi` | Definisi aspek potensi, atribut target, standar rating (1–5), bobot (`bobot`), dan urutan display. | 🟢 **Tercover** ([aspect_standards](file:///c:/laragon/www/spsp_new/docs/DATABASE_STRUCTURE.md)) |
+| **15** | `standar_aspek` | Master nama aspek potensi (`kode_aspek`, `aspek_penilaian`). | 🟢 **Tercover** ([aspects](file:///c:/laragon/www/spsp_new/docs/DATABASE_STRUCTURE.md)) |
+| **16** | `standar_atribute` | Master nama atribut potensi (`kode_atribute`, `nama_atribute`). | 🟢 **Tercover** ([sub_aspects](file:///c:/laragon/www/spsp_new/docs/DATABASE_STRUCTURE.md)) |
+| **17** | `standar_atribute_alat_ukur` | **Tabel Konversi Potensi**: Mapping komponen alat tes ke atribut beserta rentang skala norma (`skala_1` s.d. `skala_5`) & korelasi (`+`/`-`). | 🟢 **Norm Engine** ([LspNormEngineService](file:///c:/laragon/www/spsp_new/app/Services/Lsp/LspNormEngineService.php)) |
+| **18** | `standar_kompetensi_alat_ukur` | **Tabel Konversi Kompetensi**: Mapping komponen alat tes ke kompetensi inti beserta rentang skala norma. | 🟢 **Norm Engine** ([LspNormEngineService](file:///c:/laragon/www/spsp_new/app/Services/Lsp/LspNormEngineService.php)) |
+| **19** | `kamus_potensi` | Narasi interpretasi potensi berdasarkan (`standard`, `versi`, `kode_atribute`, `rating`, `interpretasi`). | 🟢 **Tercover** ([interpretations](file:///c:/laragon/www/spsp_new/docs/DATABASE_STRUCTURE.md)) |
+| **20** | `kamus_kompetensi` | Narasi interpretasi kompetensi berdasarkan (`standard`, `versi`, `kode_kompetensi`, `rating`, `interpretasi`). | 🟢 **Tercover** ([interpretations](file:///c:/laragon/www/spsp_new/docs/DATABASE_STRUCTURE.md)) |
+| **21** | `hasil_aspek_kelebihan` | Catatan kualitatif kekuatan (`aspek_kelebihan`) & kelemahan (`aspek_kelemahan`) dari asesor. | 🟡 **Payload Interpretasi** ([interpretations](file:///c:/laragon/www/spsp_new/docs/DATABASE_STRUCTURE.md)) |
+| **22** | `hasil_rekomendasi` | Rekomendasi akhir wawancara asesor (`catatan_wajib`, `saran_pengembangan`, `rekomendasi` MS/MMS/TMS). | 🟢 **Tercover** ([final_assessments](file:///c:/laragon/www/spsp_new/docs/DATABASE_STRUCTURE.md)) |
+| **23** | `users_personil` & `penugasan` | Data Asesor / Technical Advisor (TA): gelar, nama lengkap, jabatan. | 🟡 **Payload Metadata** ([final_assessments](file:///c:/laragon/www/spsp_new/docs/DATABASE_STRUCTURE.md)) |
+
+---
+
+## ⚙️ 3. Pipeline Kalkulasi Alat Tes Psikometri
 
 View ini memproses 3 instrumen psikometri utama:
 
@@ -54,13 +71,13 @@ flowchart TD
     A --> C[KOSTIK 20 Factors]
     A --> D[16PF 17 Factors]
 
-    B --> B1[Lookup Norma JSON: assets/json/ist.json]
+    B --> B1[Lookup Norma JSON: resources/data/lsp_norms/ist.json]
     B1 --> B2[SS Subtests & Total IQ IST]
 
     C --> C1[Skor Faktor Kostik A, G, N, R, C, D, T, V, F, W, L, P, I, S, O, B, X, E, K, Z]
 
     D --> D1[MD Manipulation Score Adjustment]
-    D1 --> D2[Lookup Sten Score JSON: assets/json/personality.json]
+    D1 --> D2[Lookup Sten Score JSON: resources/data/lsp_norms/personality.json]
     D2 --> D3[Sten Scores 1-10]
 
     B2 --> E[Konversi via standar_atribute_alat_ukur & standar_kompetensi_alat_ukur]
@@ -73,10 +90,10 @@ flowchart TD
 
 ### A. IST (Intelligenz Struktur Test)
 - **Subtest**: `SE`, `WA`, `AN`, `GE`, `RA`, `ZR`, `FA`, `WU`, `ME` (di-explode dari CSV).
-- **Norma Pendidikan/Usia**: Look up ke `assets/json/ist.json` sesuai tingkat pendidikan peserta (`SMA/SMK` vs `S1/D3` vs Norma Usia).
+- **Norma Pendidikan/Usia**: Look up ke [resources/data/lsp_norms/ist.json](file:///c:/laragon/www/spsp_new/resources/data/lsp_norms/ist.json) sesuai tingkat pendidikan (`SMA/SMK` vs `S1/D3` vs Norma Usia).
 - **Output**: Standard Score (SS) per subtest dan IQ IST.
 - **Kategori IQ**:
-  - $\le 89 \rightarrow$ Kategori 5 (Sangat Rendah / Rendah)
+  - $\le 89 \rightarrow$ Kategori 5 (Sangat Rendah / Rendah) — *Otomatis TMS Psikotes*
   - $90 - 109 \rightarrow$ Kategori 4 (Rata-rata)
   - $110 - 119 \rightarrow$ Kategori 3 (Rata-rata Tinggi)
   - $120 - 129 \rightarrow$ Kategori 2 (Tinggi)
@@ -91,16 +108,16 @@ flowchart TD
   - Jika $MD = 10$: Penyesuaian $+2$ / $-2$ / $+1$ / $-1$ pada faktor tertentu.
   - Jika $MD = 8$ atau $9$: Penyesuaian $+1$ / $-1$ pada faktor tertentu.
   - Jika $MD = 7$: Penyesuaian $+1$ / $-1$ pada faktor $O, Q4, C, Q3$.
-- **Look Up Norma Sten**: Mengambil dari `assets/json/personality.json` berdasarkan kelompok usia ($\le 19$, $20-29$, $\ge 30$) untuk menghasilkan **Sten Score (1–10)**.
+- **Look Up Norma Sten**: Mengambil dari [resources/data/lsp_norms/personality.json](file:///c:/laragon/www/spsp_new/resources/data/lsp_norms/personality.json) berdasarkan kelompok usia ($\le 19$, $20-29$, $\ge 30$) untuk menghasilkan **Sten Score (1–10)**.
 
 ---
 
-## 4. Konversi Komponen Alat Tes ke Rating 1–5
+## 📊 4. Konversi Komponen Alat Tes ke Rating 1–5
 
-Proses konversi komponen tes ke skala rating 1–5 dilakukan dengan membaca aturan pada tabel `standar_atribute_alat_ukur` (untuk Potensi) dan `standar_kompetensi_alat_ukur` (untuk Kompetensi):
+Proses konversi komponen tes ke skala rating 1–5 dilakukan dengan membaca aturan pada tabel `standar_atribute_alat_ukur` (Potensi) dan `standar_kompetensi_alat_ukur` (Kompetensi):
 
 ### Aturan Skala & Korelasi (`tingkat`)
-Setiap baris mapping berisi batas cut-off: `skala_1`, `skala_2`, `skala_3`, `skala_4`, `skala_5`.
+Setiap baris mapping berisi batas *cut-off*: `skala_1`, `skala_2`, `skala_3`, `skala_4`, `skala_5`.
 
 1. **Korelasi Positif (`tingkat = '+'`)**:
    - Jika Skor $\le$ `skala_1` $\rightarrow$ **Rating 1**
@@ -120,7 +137,7 @@ Jika satu atribut/kompetensi dipengaruhi oleh lebih dari 1 faktor alat tes, maka
 
 ---
 
-## 5. Kerangka Kalkulasi Potensi & Kompetensi
+## 📐 5. Kerangka Kalkulasi Potensi & Kompetensi
 
 ### A. Toleransi Default (10%)
 Secara default pada view ini: `$toleransi = "10"` (10%).
@@ -140,7 +157,7 @@ Secara default pada view ini: `$toleransi = "10"` (10%).
 
 ---
 
-## 6. Pengolahan Tes Kejiwaan (MMPI)
+## 🧠 6. Pengolahan Tes Kejiwaan (MMPI)
 
 Data dari `rekapmmpi_p3kkjg` dievaluasi pada 9 domain:
 1. Validitas
@@ -153,15 +170,16 @@ Data dari `rekapmmpi_p3kkjg` dievaluasi pada 9 domain:
 8. Nilai PQ
 9. Tingkat Stres
 
-**Logika Konversi Kejiwaan ke Skor & Status**:
-View mencari frasa kunci pada kolom `kesimpulan`:
-- *"tidak mengalami stres"* $\rightarrow$ **Nilai 90** | Status: **MEMENUHI SYARAT (MS)** (Hijau)
-- *"stres ringan"* atau *"stres sedang"* $\rightarrow$ **Nilai 77.5 / 65** | Status: **MASIH MEMENUHI SYARAT (MMS)** (Kuning)
-- *"stres berat"* atau *"gejala kejiwaan"* $\rightarrow$ **Nilai 52.5 / 40** | Status: **TIDAK MEMENUHI SYARAT (TMS)** (Merah)
+> [!IMPORTANT]
+> **Logika Konversi Status Kejiwaan**:
+> View mencari frasa kunci pada kolom `kesimpulan`:
+> - *"tidak mengalami stres"* $\rightarrow$ **Nilai 90** | Status: 🟢 **MEMENUHI SYARAT (MS)**
+> - *"stres ringan"* / *"stres sedang"* $\rightarrow$ **Nilai 77.5 / 65** | Status: 🟡 **MASIH MEMENUHI SYARAT (MMS)**
+> - *"stres berat"* / *"gejala kejiwaan"* $\rightarrow$ **Nilai 52.5 / 40** | Status: 🔴 **TIDAK MEMENUHI SYARAT (TMS)**
 
 ---
 
-## 7. Sistem Interpretasi Narasi Otomatis
+## 📖 7. Sistem Interpretasi Narasi Otomatis
 
 - Peserta mendapatkan versi narasi acak (1–5) yang tersimpan di `peserta_produksi.angka`.
 - Kunci pencarian narasi pada `kamus_potensi` & `kamus_kompetensi`:
@@ -171,27 +189,28 @@ View mencari frasa kunci pada kolom `kesimpulan`:
 
 ---
 
-## 8. Logika Rekomendasi & Kesimpulan Akhir (MS / MMS / TMS)
+## 🎯 8. Logika Rekomendasi & Kesimpulan Akhir (MS / MMS / TMS)
 
 1. **Total Skor Akhir Psikotes**:
    $$\text{Total Skor Akhir} = (\text{Skor Potensi} \times 40\%) + (\text{Skor Kompetensi} \times 60\%)$$
 
 2. **Syarat Kelulusan Psikotes**:
-   - **Prasyarat IQ**: $IQ \ge 90$. Jika $IQ < 90$, maka Kesimpulan Psikotes otomatis **TIDAK MEMENUHI SYARAT (TMS)** (Merah).
+   - **Prasyarat IQ**: $IQ \ge 90$. Jika $IQ < 90$, maka Kesimpulan Psikotes otomatis 🔴 **TIDAK MEMENUHI SYARAT (TMS)**.
    - **Kriteria Total Skor**:
-     - $\text{Total Skor Akhir} \ge \text{Total Skor Standar}$ $\rightarrow$ **MEMENUHI SYARAT (MS)** (Hijau)
-     - $\text{Total Skor Akhir} \ge \text{Total Skor Standar Toleransi}$ $\rightarrow$ **MASIH MEMENUHI SYARAT (MMS)** (Kuning)
-     - Di bawah toleransi $\rightarrow$ **TIDAK MEMENUHI SYARAT (TMS)** (Merah)
+     - $\text{Total Skor Akhir} \ge \text{Total Skor Standar}$ $\rightarrow$ 🟢 **MEMENUHI SYARAT (MS)**
+     - $\text{Total Skor Akhir} \ge \text{Total Skor Standar Toleransi}$ $\rightarrow$ 🟡 **MASIH MEMENUHI SYARAT (MMS)**
+     - Di bawah toleransi $\rightarrow$ 🔴 **TIDAK MEMENUHI SYARAT (TMS)**
 
 3. **Matriks Kesimpulan Final (Psikotes + Wawancara Asesor)**:
-   - Psikotes (MS) + Wawancara (MS) $\rightarrow$ **MS** (Hijau)
-   - Psikotes (TMS) + Wawancara (MS) $\rightarrow$ **MMS** (Kuning)
-   - Psikotes (MS) + Wawancara (TMS) $\rightarrow$ **MMS** (Kuning)
-   - Psikotes (MMS) + Wawancara (MMS) $\rightarrow$ **MMS** (Kuning)
-   - Psikotes (TMS) + Wawancara (TMS) $\rightarrow$ **TMS** (Merah)
+   - Psikotes (MS) + Wawancara (MS) $\rightarrow$ 🟢 **MS**
+   - Psikotes (TMS) + Wawancara (MS) $\rightarrow$ 🟡 **MMS**
+   - Psikotes (MS) + Wawancara (TMS) $\rightarrow$ 🟡 **MMS**
+   - Psikotes (MMS) + Wawancara (MMS) $\rightarrow$ 🟡 **MMS**
+   - Psikotes (TMS) + Wawancara (TMS) $\rightarrow$ 🔴 **TMS**
 
 ---
 
-## 9. TTD Elektronik & QR Code
+## 🔒 9. TTD Elektronik & QR Code
+
 - Menghasilkan nomor dokumen resmi berformat: `001-[batch]/LI-QHRM-[kode_instansi]-[kode_nama]/[bulan_romawi]/[tahun]`.
 - Mengirim AJAX request ke `qr_code/create_qr_lapin/` untuk merekam log validasi dan generate URL QR Code TTD digital yang mengarah ke link verifikasi LSP.
