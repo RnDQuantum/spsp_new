@@ -7,8 +7,9 @@ Modul ini bertanggung jawab untuk melakukan ekstraksi, transformasi norma psikom
 ---
 
 > [!NOTE]
-> **Catatan Kedinamisan & Arsitektur Multi-Proyek**:
-> Seluruh *pipeline* integrasi LSP beroperasi secara **100% dinamis dan generic** berbasis variabel proyek (`$kodeProyek`) dan nama pengguna (`$username`). Modul ini tahan terhadap variasi data legacy, mendukung berbagai instansi/proyek tanpa perubahan *source code*, serta terisolasi dari *error crash* data historis.
+> **Arsitektur Utama & Dual-Path Data Ingestion**:
+> Untuk memahami fondasi utama SPSP dan pemisahan Jalur A (Legacy DB `< PR-A-338`) vs Jalur B (API Online `≥ PR-A-338`), baca dokumen **[00_SPSP_FUNDAMENTAL_ARCHITECTURE.md](../00_SPSP_FUNDAMENTAL_ARCHITECTURE.md)**.
+> Seluruh *pipeline* integrasi LSP beroperasi secara **100% dinamis dan generic** berbasis variabel proyek (`$kodeProyek`) dan nama pengguna (`$username`).
 
 ---
 
@@ -18,7 +19,8 @@ Dokumentasi Integrasi LSP terbagi ke dalam 6 dokumen spesifikasi mendalam:
 
 | No | Dokumen Spesifikasi | Deskripsi & Cakupan Utama | Status Pipeline |
 | :-: | :--- | :--- | :-: |
-| **01** | **[01_LEGACY_VIEW_ANALYSIS.md](./01_LEGACY_VIEW_ANALYSIS.md)** | Pemetaan lengkap view legacy `report_individu_p3k_kjg_2025.php` dan 23 tabel database LSP, norma IST/Kostik/16PF, MMPI, serta formula kelulusan (MS/MMS/TMS). | ✅ **DOCUMENTED** |
+| **00** | **[00_SPSP_FUNDAMENTAL_ARCHITECTURE.md](../00_SPSP_FUNDAMENTAL_ARCHITECTURE.md)** | Arsitektur fondasi SPSP, Dual-Path Ingestion (Legacy vs API Baru), 5 file norma resmi, dan 2-Level Konversi. | 🟢 **MASTER DOC** |
+| **01** | **[01_LEGACY_VIEW_ANALYSIS.md](./01_LEGACY_VIEW_ANALYSIS.md)** | Pemetaan lengkap view legacy `report_individu_p3k_kjg_2025.php` dan 23 tabel database LSP, norma IST/Kostik/16PF/CFIT, MMPI, serta formula kelulusan (MS/MMS/TMS). | ✅ **DOCUMENTED** |
 | **02** | **[02_DATA_MAPPING_ANALYSIS.md](./02_DATA_MAPPING_ANALYSIS.md)** | Analisis komparatif data CI3 legacy vs skema database SPSP (90% direct match & 10% data kualitatif/wawancara asesor). | ✅ **DOCUMENTED** |
 | **03** | **[03_LSP_INTEGRATION_GUIDE.md](./03_LSP_INTEGRATION_GUIDE.md)** | Panduan operasional integrasi, eksekusi Artisan CLI (`lsp:test-report` & `lsp:import`), pengujian otomatis (`php artisan test`), dan lokasi norma JSON. | ✅ **DOCUMENTED** |
 | **04** | **[04_DYNAMIC_MULTI_PROJECT_SUPPORT.md](./04_DYNAMIC_MULTI_PROJECT_SUPPORT.md)** | Arsitektur integrasi multi-proyek dinamis dan pemetaan rinci 17 tabel database LSP ke 7 tabel native SPSP. | ✅ **DOCUMENTED** |
@@ -44,7 +46,7 @@ flowchart TD
         S1[LspNormEngineService]
         S2[LspDataTransformerService]
         S3[LspDataImporterService]
-        S4[Norm JSONs: ist, kostik, personality]
+        S4[5 Norm JSONs: ist, kostik, personality, cfit3a, cfit3b]
     end
 
     subgraph SPSP_NATIVE [Layer System & Database Native SPSP]

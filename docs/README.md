@@ -8,6 +8,12 @@ Welcome to SPSP (Sistem Pemetaan & Statistik Psikologi) documentation! This inde
 
 ### 1. Business & Concepts
 Start here to understand the core business logic of the system.
+*   **[00_SPSP_FUNDAMENTAL_ARCHITECTURE.md](./00_SPSP_FUNDAMENTAL_ARCHITECTURE.md)**
+    *   **Fundamental Architecture & Dual-Path Data Ingestion (MUST READ)**
+    *   SPSP as a BI System (not CRUD)
+    *   Dual-Path Ingestion: Path A (Legacy DB `< PR-A-338`) vs Path B (API Online `≥ PR-A-338`)
+    *   5 Official Psychological Norm Files (`resources/data/lsp_norms/`)
+    *   2-Level Data Conversion & Core SPSP Database Entities
 *   **[SPSP_BUSINESS_CONCEPTS.md](./SPSP_BUSINESS_CONCEPTS.md)**
     *   What is SPSP? (BI System, not CRUD)
     *   Core business concepts (Assessment structure, Standards, Rankings)

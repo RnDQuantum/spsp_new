@@ -23,12 +23,20 @@ class LspNormEngineService
             return static::$normCache;
         }
 
-        $norms = ['ist' => null, 'kostik' => null, 'personality' => null];
+        $norms = [
+            'ist' => null,
+            'kostik' => null,
+            'personality' => null,
+            'cfit3a' => null,
+            'cfit3b' => null,
+        ];
 
         $paths = [
             'ist' => resource_path('data/lsp_norms/ist.json'),
             'kostik' => resource_path('data/lsp_norms/kostik.json'),
             'personality' => resource_path('data/lsp_norms/personality.json'),
+            'cfit3a' => resource_path('data/lsp_norms/cfit3a.json'),
+            'cfit3b' => resource_path('data/lsp_norms/cfit3b.json'),
         ];
 
         foreach ($paths as $key => $path) {
