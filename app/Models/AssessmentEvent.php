@@ -14,6 +14,7 @@ class AssessmentEvent extends Model
 
     protected $fillable = [
         'institution_id',
+        'project_id',
         'code',
         'name',
         'description',
@@ -42,6 +43,11 @@ class AssessmentEvent extends Model
     public function institution(): BelongsTo
     {
         return $this->belongsTo(Institution::class);
+    }
+
+    public function project(): BelongsTo
+    {
+        return $this->belongsTo(Project::class);
     }
 
     public function batches(): HasMany

@@ -126,7 +126,7 @@ Route::middleware(['auth', 'institution.access'])->group(function () {
 
     // Laporan Alat Tes
     Route::livewire('/laporan-alat-tes', LaporanAlatTes::class)->name('laporan-alat-tes');
-    Route::livewire('/laporan-alat-tes-detail', DetailLaporanTes::class)->name('laporan-alat-tes-detail');
+    Route::livewire('/laporan-alat-tes-detail/{participantId?}', DetailLaporanTes::class)->name('laporan-alat-tes-detail');
 
     // Talent Pool Management
     Route::livewire('/talentpool', App\Livewire\Pages\GeneralReport\TalentPool\Index::class)->name('talentpool');

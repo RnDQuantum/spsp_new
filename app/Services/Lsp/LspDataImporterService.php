@@ -15,6 +15,7 @@ use App\Models\Interpretation;
 use App\Models\Mmpi;
 use App\Models\Participant;
 use App\Models\PositionFormation;
+use App\Models\Project;
 use App\Models\SubAspect;
 use App\Models\SubAspectAssessment;
 use App\Models\TestResult;
@@ -65,22 +66,67 @@ class LspDataImporterService
     {
         $dbLsp = DB::connection('lsp');
 
-        // 1. Dapatkan atau buat Institution default SPSP
+        // 1. Fetch metadata dari DB LSP: Pelaksanaan (proyek), Master Proyek (proyek_produksi), & Klien (klien)
+        $proyekLsp = $dbLsp->table('proyek')->where('kode_proyek', $kodeProyek)->first();
+        $proyekProduksiLsp = null;
+        if ($proyekLsp && ! empty($proyekLsp->nama_proyek)) {
+            $proyekProduksiLsp = $dbLsp->table('proyek_produksi')
+                ->where('kode', $proyekLsp->nama_proyek)
+                ->orWhere('nama', $proyekLsp->nama_proyek)
+                ->first();
+        }
+
+        $klienKode = $proyekProduksiLsp->instansi ?? ($proyekLsp->instansi ?? null);
+        $klienLsp = null;
+        if ($klienKode) {
+            $klienLsp = $dbLsp->table('klien')->where('kode_klien', $klienKode)->first();
+        }
+
+        // 2. Sinkronkan Instansi / Klien
         if (! $institutionId) {
-            $institution = Institution::firstOrCreate(
-                ['code' => 'kejaksaan'],
-                [
-                    'name' => 'Kejaksaan Agung RI',
-                    'logo_path' => 'logos/kejaksaan.png',
-                    'api_key' => Str::random(32),
-                ]
-            );
+            if ($klienLsp && ! empty($klienLsp->nama_klien)) {
+                $instCode = Str::slug($klienLsp->kode_klien ?: $klienLsp->nama_klien);
+                $institution = Institution::updateOrCreate(
+                    ['code' => $instCode],
+                    [
+                        'name' => $klienLsp->nama_klien,
+                        'logo_path' => $klienLsp->logo ? "logos/{$klienLsp->logo}" : 'logos/default.png',
+                        'api_key' => Str::random(32),
+                    ]
+                );
+            } else {
+                $institution = Institution::firstOrCreate(
+                    ['code' => 'kejaksaan'],
+                    [
+                        'name' => 'Kejaksaan Agung RI',
+                        'logo_path' => 'logos/kejaksaan.png',
+                        'api_key' => Str::random(32),
+                    ]
+                );
+            }
             $institutionId = $institution->id;
         }
 
-        // 2. Dapatkan proyek dari LSP DB & Sinkronkan AssessmentEvent SPSP
-        $proyekLsp = $dbLsp->table('proyek')->where('kode_proyek', $kodeProyek)->first();
-        $namaProyek = $proyekLsp->nama_proyek ?? "Proyek LSP {$kodeProyek}";
+        // 3. Sinkronkan Master Proyek (proyek_produksi)
+        $projectId = null;
+        if ($proyekProduksiLsp && ! empty($proyekProduksiLsp->kode)) {
+            $projectModel = Project::updateOrCreate(
+                ['code' => $proyekProduksiLsp->kode],
+                [
+                    'institution_id' => $institutionId,
+                    'name' => $proyekProduksiLsp->nama ?? $proyekProduksiLsp->kode,
+                    'year' => (int) ($proyekProduksiLsp->tahun ?? date('Y')),
+                    'contract_number' => $proyekProduksiLsp->no_kontrak ?? null,
+                    'status' => $proyekProduksiLsp->status ?? 'completed',
+                ]
+            );
+            $projectId = $projectModel->id;
+        }
+
+        // 4. Sinkronkan Pelaksanaan (AssessmentEvent)
+        $namaPelaksanaan = ! empty($proyekLsp->nama_pelaksanaan)
+            ? $proyekLsp->nama_pelaksanaan
+            : ($proyekProduksiLsp->nama ?? "Pelaksanaan {$kodeProyek}");
         $tanggalMulai = $proyekLsp->tanggal_pelaksanaan ?? date('Y-m-d');
         $tanggalSelesai = $proyekLsp->sampai_tanggal ?? date('Y-m-d');
         $tahun = (int) date('Y', strtotime($tanggalMulai));
@@ -89,8 +135,9 @@ class LspDataImporterService
             ['code' => $kodeProyek],
             [
                 'institution_id' => $institutionId,
-                'name' => $namaProyek,
-                'description' => "Imported from LSP DB Project {$kodeProyek}",
+                'project_id' => $projectId,
+                'name' => $namaPelaksanaan,
+                'description' => "Imported from LSP DB Execution {$kodeProyek}",
                 'year' => $tahun,
                 'start_date' => $tanggalMulai,
                 'end_date' => $tanggalSelesai,
@@ -315,61 +362,87 @@ class LspDataImporterService
 
             $rawScores = $rep['raw_scores'];
 
-            // IST (A.5)
-            if (! empty($rawScores['ist'])) {
-                $testResultsBulk[] = [
-                    'participant_id' => $p->id,
-                    'event_id' => $event->id,
-                    'test_code' => 'A.5',
-                    'test_name' => 'Intelligenz Struktur Test (IST)',
-                    'test_category' => TestResult::getCategoryForCode('A.5'),
-                    'status' => 'completed',
-                    'source' => $sourceMarker,
-                    'summary_data' => json_encode(['raw_score' => $rawScores['ist'], 'iq' => $rep['potensi']['total_individual_score'] ?? null]),
-                    'interpretation_data' => null,
-                    'raw_response' => json_encode(['raw' => $rawScores['ist']]),
-                    'conversion_status' => 'pending',
-                    'created_at' => $now,
-                    'updated_at' => $now,
-                ];
-            }
+            // Jika terdapat data instrumen lengkap dari REST API (Jalur B)
+            if (! empty($rawScores['api_full']) && is_array($rawScores['api_full'])) {
+                foreach ($rawScores['api_full'] as $tCode => $tPayload) {
+                    $tCodeStr = (string) $tCode;
+                    if (TestResult::isExcluded($tCodeStr)) {
+                        continue;
+                    }
+                    $tName = is_array($tPayload) ? ($tPayload['nama_alat_tes'] ?? $tPayload['nama'] ?? "Alat Tes {$tCodeStr}") : "Alat Tes {$tCodeStr}";
+                    $testResultsBulk[] = [
+                        'participant_id' => $p->id,
+                        'event_id' => $event->id,
+                        'test_code' => $tCodeStr,
+                        'test_name' => $tName,
+                        'test_category' => TestResult::getCategoryForCode($tCodeStr),
+                        'status' => 'completed',
+                        'source' => $sourceMarker,
+                        'summary_data' => json_encode($tPayload),
+                        'interpretation_data' => null,
+                        'raw_response' => json_encode($tPayload),
+                        'conversion_status' => 'pending',
+                        'created_at' => $now,
+                        'updated_at' => $now,
+                    ];
+                }
+            } else {
+                // Jalur A atau Fallback: IST (A.5)
+                if (! empty($rawScores['ist'])) {
+                    $testResultsBulk[] = [
+                        'participant_id' => $p->id,
+                        'event_id' => $event->id,
+                        'test_code' => 'A.5',
+                        'test_name' => 'Intelligenz Struktur Test (IST)',
+                        'test_category' => TestResult::getCategoryForCode('A.5'),
+                        'status' => 'completed',
+                        'source' => $sourceMarker,
+                        'summary_data' => json_encode(['raw_score' => $rawScores['ist'], 'iq' => $rep['potensi']['total_individual_score'] ?? null]),
+                        'interpretation_data' => null,
+                        'raw_response' => json_encode(['raw' => $rawScores['ist']]),
+                        'conversion_status' => 'pending',
+                        'created_at' => $now,
+                        'updated_at' => $now,
+                    ];
+                }
 
-            // PAPI Kostik (D.1)
-            if (! empty($rawScores['kostik'])) {
-                $testResultsBulk[] = [
-                    'participant_id' => $p->id,
-                    'event_id' => $event->id,
-                    'test_code' => 'D.1',
-                    'test_name' => 'PAPI Kostik',
-                    'test_category' => TestResult::getCategoryForCode('D.1'),
-                    'status' => 'completed',
-                    'source' => $sourceMarker,
-                    'summary_data' => json_encode(['raw_score' => $rawScores['kostik']]),
-                    'interpretation_data' => null,
-                    'raw_response' => json_encode(['raw' => $rawScores['kostik']]),
-                    'conversion_status' => 'pending',
-                    'created_at' => $now,
-                    'updated_at' => $now,
-                ];
-            }
+                // PAPI Kostik (D.1)
+                if (! empty($rawScores['kostik'])) {
+                    $testResultsBulk[] = [
+                        'participant_id' => $p->id,
+                        'event_id' => $event->id,
+                        'test_code' => 'D.1',
+                        'test_name' => 'PAPI Kostik',
+                        'test_category' => TestResult::getCategoryForCode('D.1'),
+                        'status' => 'completed',
+                        'source' => $sourceMarker,
+                        'summary_data' => json_encode(['raw_score' => $rawScores['kostik']]),
+                        'interpretation_data' => null,
+                        'raw_response' => json_encode(['raw' => $rawScores['kostik']]),
+                        'conversion_status' => 'pending',
+                        'created_at' => $now,
+                        'updated_at' => $now,
+                    ];
+                }
 
-            // 16PF (B.2)
-            if (! empty($rawScores['personality'])) {
-                $testResultsBulk[] = [
-                    'participant_id' => $p->id,
-                    'event_id' => $event->id,
-                    'test_code' => 'B.2',
-                    'test_name' => '16 Personality Factor (16PF)',
-                    'test_category' => TestResult::getCategoryForCode('B.2'),
-                    'status' => 'completed',
-                    'source' => $sourceMarker,
-                    'summary_data' => json_encode(['raw_score' => $rawScores['personality']]),
-                    'interpretation_data' => null,
-                    'raw_response' => json_encode(['raw' => $rawScores['personality']]),
-                    'conversion_status' => 'pending',
-                    'created_at' => $now,
-                    'updated_at' => $now,
-                ];
+                // 16PF (B.2)
+                if (! empty($rawScores['personality'])) {
+                    $testResultsBulk[] = [
+                        'participant_id' => $p->id,
+                        'event_id' => $event->id,
+                        'test_code' => 'B.2',
+                        'test_name' => '16 Personality Factor (16PF)',
+                        'test_category' => TestResult::getCategoryForCode('B.2'),
+                        'status' => 'completed',
+                        'source' => $sourceMarker,
+                        'summary_data' => json_encode(['raw_score' => $rawScores['personality']]),
+                        'interpretation_data' => null,
+                        'raw_response' => json_encode(['raw' => $rawScores['personality']]),
+                        'conversion_status' => 'pending',
+                        'created_at' => $now,
+                        'updated_at' => $now,
+                    ];
+                }
             }
         }
 

@@ -44,6 +44,77 @@ class TestReportService
     }
 
     /**
+     * Ambil seluruh laporan detail alat tes yang dimiliki peserta pada event tertentu.
+     */
+    public function getParticipantAllTestReports(int $participantId, int $eventId): array
+    {
+        $testResults = TestResult::where('participant_id', $participantId)
+            ->where('event_id', $eventId)
+            ->get();
+
+        $reports = [];
+        foreach ($testResults as $tr) {
+            $reports[$tr->test_code] = [
+                'test_code' => $tr->test_code,
+                'test_name' => $tr->test_name,
+                'test_category' => $tr->test_category,
+                'status' => $tr->status,
+                'source' => $tr->source,
+                'summary_data' => $tr->summary_data,
+                'interpretation_data' => $tr->interpretation_data,
+                'formatted' => $this->formatTestDataForDisplay($tr),
+            ];
+        }
+
+        return $reports;
+    }
+
+    /**
+     * Format payload summary_data untuk kebutuhan tampilan UI Laporan Alat Tes.
+     */
+    public function formatTestDataForDisplay(TestResult $tr): array
+    {
+        $data = $tr->summary_data ?? [];
+
+        // Format per kode tes
+        return match ($tr->test_code) {
+            'A.1', 'A.2', 'A.5' => [
+                'iq' => $data['iq'] ?? $data['index_kecerdasan_umum'] ?? '100',
+                'kategori' => $data['hasil_kategori'] ?? $data['kategori'] ?? 'Rata-rata',
+                'subtests' => $data['label_values'] ?? $data['hasil_sub'] ?? [],
+            ],
+            'B.1', 'D.1' => [
+                'factors' => $data['nilaiAspek'] ?? [],
+                'labels' => $data['labels_aspek'] ?? [],
+                'narratives' => array_filter($data, fn ($k) => str_contains((string) $k, '_1') || str_contains((string) $k, '_2') || str_contains((string) $k, '_3'), ARRAY_FILTER_USE_KEY),
+            ],
+            'B.2' => [
+                'sten_scores' => $data['nilaiAspek'] ?? [],
+                'md_score' => $data['MDStenScore'] ?? 5,
+            ],
+            'D.2' => [
+                'pspeed' => $data['pspeed'] ?? $data['kecepatan'] ?? 0,
+                'pacc' => $data['pacc'] ?? $data['ketelitian'] ?? 0,
+                'pstab' => $data['pstab'] ?? $data['kestabilan'] ?? 0,
+                'pstn' => $data['pstn'] ?? $data['ketahanan'] ?? 0,
+            ],
+            'F.1' => [
+                'eq_score' => $data['eq_score'] ?? $data['skor_eq'] ?? 0,
+                'kategori' => $data['kategori'] ?? 'Cukup',
+                'aspects' => $data['labels_aspek'] ?? $data['aspek'] ?? [],
+            ],
+            'G.1' => [
+                'most' => $data['most'] ?? [],
+                'least' => $data['least'] ?? [],
+                'change' => $data['change'] ?? [],
+            ],
+            default => [
+                'raw_payload' => $data,
+            ],
+        };
+    }
+
+    /**
      * Hitung norma IST secara langsung dari raw score string.
      */
     public function evaluateIstNorms(?string $rawIst, string $pendidikan = 'S1', int $usia = 25): array

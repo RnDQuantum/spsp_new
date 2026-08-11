@@ -22,6 +22,11 @@ class Institution extends Model
         'api_key',
     ];
 
+    public function projects(): HasMany
+    {
+        return $this->hasMany(Project::class);
+    }
+
     public function assessmentEvents(): HasMany
     {
         return $this->hasMany(AssessmentEvent::class);

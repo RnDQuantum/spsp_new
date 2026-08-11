@@ -36,6 +36,15 @@ class LspDataImporterServiceTest extends TestCase
         $this->assertEquals('dr. TAN ANDI, Sp.An-TI', $participant->name);
         $this->assertEquals('24400240110001036', $participant->skb_number);
 
+        // Assert Master Data: Project & Institution
+        $event = $participant->event;
+        $this->assertNotNull($event);
+        $this->assertEquals('PR-A-313', $event->code);
+        $this->assertNotNull($event->project);
+        $this->assertEquals('AP-085', $event->project->code);
+        $this->assertNotNull($event->institution);
+        $this->assertEquals('kp-110', $event->institution->code);
+
         // Assert Mmpi
         $mmpi = Mmpi::where('participant_id', $participant->id)->first();
         $this->assertNotNull($mmpi);
