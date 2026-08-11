@@ -75,7 +75,7 @@ Dokumentasi integrasi data real dan pengolahan laporan legacy dari database LSP.
 *   **[FUNDAMENTAL_ARCHITECTURE.md](./lsp_integration/FUNDAMENTAL_ARCHITECTURE.md)**
     *   **Master Dokumentasi**: Arsitektur fondasi SPSP, Dual-Path Ingestion (Legacy vs API Baru), 5 file norma resmi, dan 2-Level Konversi.
 *   **[INTEGRATION_GUIDE.md](./lsp_integration/INTEGRATION_GUIDE.md)**
-    *   Panduan operasional `LspNormEngineService`, `LspDataTransformerService`, `LspDataImporterService`, `TestReportService`, Artisan CLI commands (`lsp:test-report` & `lsp:import`), dan norma JSON.
+    *   Panduan operasional `LspNormEngineService`, `LspDataTransformerService`, `ApiDataTransformerService`, `LspDataImporterService`, `QuantumApiClient`, Artisan CLI commands (`lsp:test-report` & `lsp:import`), dan norma JSON.
 *   **[FALLBACK_AND_SAFETY_MECHANISMS.md](./lsp_integration/FALLBACK_AND_SAFETY_MECHANISMS.md)**
     *   Dokumentasi lengkap seluruh matriks fallback data, pembatasan error, dan mekanisme isolasi transaksi impor.
 *   **[SERVICES_ARCHITECTURE.md](./lsp_integration/SERVICES_ARCHITECTURE.md)**

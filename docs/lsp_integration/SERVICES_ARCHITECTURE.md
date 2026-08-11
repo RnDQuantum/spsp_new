@@ -71,31 +71,40 @@ flowchart TD
 
 ---
 
-### 2. `LspDataTransformerService`
+### 2. `LspDataTransformerService` (Jalur A - Legacy DB)
 - **Lokasi File**: [LspDataTransformerService.php](file:///c:/laragon/www/spsp_new/app/Services/Lsp/LspDataTransformerService.php)
-- **Tanggung Jawab Utama**: Pipeline ekstraksi dan transformasi data mentah dari koneksi DB LSP (`DB_LSP_LOCAL`) menjadi struktur DTO/array terstandar.
-- **Catatan Penamaan**: Menggantikan peran `LspIndividualReportService` yang lama agar penamaannya secara tegas mencerminkan tugas aslinya sebagai data transformer untuk impor data legacy.
+- **Tanggung Jawab Utama**: Pipeline ekstraksi dan transformasi data mentah dari koneksi DB LSP (`DB_LSP_LOCAL`) untuk proyek legacy (`< PR-A-338`) menjadi struktur DTO terstandar.
 - **Method Utama**:
   - `getIndividualReport($username, $kodeProyek)`: Membaca & mentransformasi 1 peserta.
   - `getBatchIndividualReports(array $usernames, string $kodeProyek)`: Mengolah sekelompok (*batch/chunk*) peserta sekaligus dengan optimasi query N+1 hingga 95%.
 
 ---
 
-### 3. `LspDataImporterService`
+### 3. `ApiDataTransformerService` (Jalur B - REST API Online)
+- **Lokasi File**: [ApiDataTransformerService.php](file:///c:/laragon/www/spsp_new/app/Services/Api/ApiDataTransformerService.php)
+- **Tanggung Jawab Utama**: Transformer data khusus proyek baru (`≥ PR-A-338`) yang membaca payload JSON dari REST API `psikotes.qhrmi.id` via `QuantumApiClient`.
+- **Fitur Utama**: Mengekstrak komponen matang (IQ, SS IST, Sten 16PF terkoreksi MD, MMPI 9 domain) secara langsung tanpa melalui local norm engine, lalu mentransformantikannya menjadi DTO SPSP.
+- **Method Utama**:
+  - `getProjectIndividualReports($kodeProyek, $singleUsername)`: Membaca & mentransformasi seluruh peserta dalam satu proyek dari API `psikotes.qhrmi.id`.
+
+---
+
+### 4. `LspDataImporterService`
 - **Lokasi File**: [LspDataImporterService.php](file:///c:/laragon/www/spsp_new/app/Services/Lsp/LspDataImporterService.php)
-- **Tanggung Jawab Utama**: Memasukkan (*import/sync*) payload DTO hasil kalkulasi transformer ke tabel-tabel native SPSP (`participants`, `psychological_tests`, `interpretations`, `aspect_assessments`, `sub_aspect_assessments`, `category_assessments`, `final_assessments`).
-- **Fitur Utama**: *Idempotent upsert*, isolasi transaksi per peserta, dan *registry in-memory caching* untuk master data.
+- **Tanggung Jawab Utama**: Core Importer & Router Dual-Path Ingestion yang memasukkan payload DTO hasil kalkulasi transformer (Jalur A atau Jalur B) ke tabel-tabel native SPSP.
+- **Fitur Utama**:
+  - `isLegacyProject($kodeProyek)`: Deteksi alur Ingest (Jalur A `< PR-A-338` vs Jalur B `≥ PR-A-338`).
+  - *Idempotent upsert*, isolasi transaksi per peserta, dan *registry in-memory caching* untuk master data.
 
 ---
 
-### 4. `TestReportService`
+### 5. `TestReportService`
 - **Lokasi File**: [TestReportService.php](file:///c:/laragon/www/spsp_new/app/Services/TestReportService.php)
-- **Tanggung Jawab Utama**: Fondasi Service penyedia data **Laporan Alat Tes per Instrumen** (contoh: Laporan Detail IST, Laporan PAPI Kostik, Laporan 16PF) untuk disajikan di UI SPSP.
-- **Sumber Data**: Membaca data mentah dari tabel SPSP Native `test_results` dan mengonversinya via `LspNormEngineService`.
+- **Tanggung Jawab Utama**: Fondasi Service penyedia data **Laporan Alat Tes per Instrumen** untuk disajikan di UI SPSP.
 
 ---
 
-### 5. `IndividualAssessmentService` (Core SPSP Existing)
+### 6. `IndividualAssessmentService` (Core SPSP Existing)
 - **Lokasi File**: [IndividualAssessmentService.php](file:///c:/laragon/www/spsp_new/app/Services/IndividualAssessmentService.php)
 - **Tanggung Jawab Utama**: Service resmi SPSP yang menjadi *Single Source of Truth* penyajian **Laporan Individu / Executive Report** di UI SPSP setelah data diimpor.
 
@@ -105,9 +114,11 @@ flowchart TD
 
 | Pertanyaan / Pertimbangan | Service yang Bertanggung Jawab | Status Service |
 | :--- | :--- | :-: |
-| *Di mana rumus konversi IST / IQ / PAPI Kostik dihitung?* | `LspNormEngineService` | 🟢 **Active Calculation** |
-| *Service apa yang membaca DB LSP lama saat impor?* | `LspDataTransformerService` | 🟢 **Active Transformer** |
-| *Service apa yang menulis data ke tabel native SPSP?* | `LspDataImporterService` | 🟢 **Active Importer** |
+| *Di mana rumus konversi IST / IQ / PAPI Kostik dihitung (Jalur A)?* | `LspNormEngineService` | 🟢 **Active Calculation** |
+| *Service apa yang membaca DB LSP lama saat impor (< PR-A-338)?* | `LspDataTransformerService` | 🟢 **Active Transformer (Jalur A)** |
+| *Service apa yang membaca REST API psikotes.qhrmi.id (≥ PR-A-338)?* | `ApiDataTransformerService` & `QuantumApiClient` | 🟢 **Active Transformer (Jalur B)** |
+| *Service apa yang memandu alur dan menulis data ke tabel native SPSP?* | `LspDataImporterService` | 🟢 **Active Core Importer** |
+| *Di mana kredensial API disimpan?* | Environment Variables `.env` (`QUANTUM_API_BASE_URL` & `QUANTUM_API_KEY`) | 🟢 **Secure Environment** |
 | *Service apa yang menyajikan Laporan Alat Tes di UI SPSP?* | `TestReportService` | 🟢 **Active Native UI** |
 | *Service apa yang menyajikan Laporan Individu di UI SPSP?* | `IndividualAssessmentService` | 🟢 **Active Executive UI** |
 

@@ -6,11 +6,22 @@ use App\Services\Lsp\LspDataImporterService;
 use Exception;
 use Illuminate\Console\Command;
 
-class ImportLspData extends Command
+class ImportProjectData extends Command
 {
-    protected $signature = 'lsp:import {kode_proyek : Kode proyek pelaksanaan LSP} {--username= : Import spesifik satu username peserta} {--institution= : ID Instansi SPSP (opsional)}';
+    /**
+     * Nama dan signature dari perintah console.
+     */
+    protected $signature = 'project:import {kode_proyek : Kode proyek pelaksanaan} {--username= : Import spesifik satu username peserta} {--institution= : ID Instansi SPSP (opsional)}';
 
-    protected $description = 'Import dan sinkronkan data hasil kalkulasi proyek LSP ke database SPSP dengan performa tinggi';
+    /**
+     * Alias perintah console untuk kompatibilitas.
+     */
+    protected $aliases = ['lsp:import'];
+
+    /**
+     * Deskripsi perintah console.
+     */
+    protected $description = 'Import dan sinkronkan data hasil asesmen proyek (Jalur A: DB LSP / Jalur B: REST API psikotes.qhrmi.id) ke database SPSP';
 
     public function handle(LspDataImporterService $importer): int
     {
@@ -21,7 +32,7 @@ class ImportLspData extends Command
         $isLegacy = $importer->isLegacyProject($kodeProyek);
         $pathLabel = $isLegacy ? 'Jalur A — Legacy Database LSP (< PR-A-338)' : 'Jalur B — REST API psikotes.qhrmi.id (>= PR-A-338)';
 
-        $this->info('=== MEMULAI SINKRONISASI DATA LSP KE SPSP (DUAL-PATH ENGINE) ===');
+        $this->info('=== MEMULAI SINKRONISASI DATA PROYEK KE SPSP (DUAL-PATH ENGINE) ===');
         $this->line("Kode Proyek : {$kodeProyek}");
         $this->line("Alur Ingest : {$pathLabel}");
         if ($username) {
@@ -70,7 +81,7 @@ class ImportLspData extends Command
             }
 
             $this->newLine();
-            $this->info('✅ IMPOR DATA PROYEK LSP BERHASIL DISINKRONKAN KE SPSP!');
+            $this->info('✅ IMPOR DATA PROYEK ASESMEN BERHASIL DISINKRONKAN KE SPSP!');
 
             return 0;
 

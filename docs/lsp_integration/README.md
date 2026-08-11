@@ -28,22 +28,20 @@ Dokumentasi Integrasi LSP terstruktur secara ringkas dan efektif ke dalam 4 doku
 
 ## 🏗️ Ringkasan Arsitektur Service Pipeline
 
-Integrasi LSP menerapkan arsitektur *Single Responsibility Principle* (SRP) yang memisahkan tugas pengolahan norma, ekstraksi data legacy, dan sinkronisasi database SPSP:
+Integrasi LSP menerapkan arsitektur *Single Responsibility Principle* (SRP) yang memisahkan tugas pengolahan norma, ekstraksi data legacy (Jalur A), konsumsi REST API (Jalur B), dan sinkronisasi database SPSP:
 
 ```mermaid
 flowchart TD
-    subgraph LSP_SOURCE [Koneksi DB LSP / DB_LSP_LOCAL]
-        DB1[(peserta_produksi)]
-        DB2[(ujian_peserta_produksi)]
-        DB3[(hasil_aspek_yang_digali)]
-        DB4[(rekapmmpi_p3kkjg)]
+    subgraph INGESTION_SOURCES [Dual Ingestion Sources]
+        DB1[(peserta_produksi\nDB_LSP_LOCAL: Proyek < PR-A-338)]
+        API1[REST API: psikotes.qhrmi.id\nProyek ≥ PR-A-338]
     end
 
     subgraph LSP_SERVICES [Layer Pipeline Integrasi LSP]
-        S1[LspNormEngineService]
-        S2[LspDataTransformerService]
-        S3[LspDataImporterService]
-        S4[5 Norm JSONs: ist, kostik, personality, cfit3a, cfit3b]
+        S1[LspNormEngineService + 5 Norm JSONs]
+        S2[LspDataTransformerService: Jalur A]
+        S3[ApiDataTransformerService + QuantumApiClient: Jalur B]
+        S4[LspDataImporterService: Core Importer]
     end
 
     subgraph SPSP_NATIVE [Layer System & Database Native SPSP]
@@ -52,12 +50,12 @@ flowchart TD
         S6[IndividualAssessmentService]
     end
 
-    DB2 --> S1
-    S4 --> S1
-    DB1 & DB3 & DB4 --> S2
+    DB1 --> S2
     S1 -->|Standard Scores & Ratings| S2
-    S2 -->|Payload DTO| S3
-    S3 -->|Bulk Upsert| DB_SPSP
+    API1 --> S3
+    S2 -->|Payload DTO| S4
+    S3 -->|Payload DTO Matang| S4
+    S4 -->|Bulk Upsert| DB_SPSP
 
     DB_SPSP --> S5
     DB_SPSP --> S6
@@ -73,11 +71,11 @@ flowchart TD
 > # 1. Uji coba kalkulasi norma & transformer 1 peserta (Tanpa simpan DB SPSP)
 > php artisan lsp:test-report <username_peserta> <kode_proyek>
 > 
-> # 2. Impor / sinkronisasi seluruh peserta dalam 1 proyek LSP ke SPSP
-> php artisan lsp:import <kode_proyek>
+> # 2. Impor / sinkronisasi seluruh peserta dalam 1 proyek ke SPSP
+> php artisan project:import <kode_proyek>
 > 
-> # 3. Impor single peserta spesifik dari proyek LSP
-> php artisan lsp:import <kode_proyek> --username=<username_peserta>
+> # 3. Impor single peserta spesifik dari proyek
+> php artisan project:import <kode_proyek> --username=<username_peserta>
 > 
 > # 4. Menjalankan automated test suite integrasi LSP
 > php artisan test --compact --filter=Lsp

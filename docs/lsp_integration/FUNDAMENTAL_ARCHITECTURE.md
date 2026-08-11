@@ -62,6 +62,7 @@ flowchart TD
 ### B. Jalur B: REST API Tes Online Baru (`psikotes.qhrmi.id`)
 * **Cakupan Proyek**: Seluruh proyek asesmen baru (**Kode Proyek `≥ PR-A-338`**, misalnya `PR-A-338` s.d `PR-A-387` dan seterusnya).
 * **Sumber Data**: Endpoint REST API HTTP Client (`/api/ambil_semua`) disuplay via [`QuantumApiClient.php`](file:///c:/laragon/www/spsp_new/app/Services/Api/QuantumApiClient.php).
+* **Keamanan Kredensial**: Endpoint URL & API Key dikonfigurasi secara aman melalui environment variables di `.env` (`QUANTUM_API_BASE_URL` & `QUANTUM_API_KEY`).
 * **Karakteristik Data**: Backend server `psikotes.qhrmi.id` **sudah melakukan perhitungan norma psikometri langsung di servernya**. Payload JSON API sudah mengembalikan komponen hasil matang secara utuh:
   * IST (`A.5`): Mengembalikan `"iq": "91"`, `"hasil_kategori": "Rata-rata"`, dan `"label_values"` (SS per subtest: `SE`, `WA`, `AN`, `GE`, `ME`, `RA`, `ZR`, `FA`, `WU`).
   * 16PF (`B.2`): Mengembalikan `"MDStenScore"`, `"standart_final"`, dan `"nilaiAspek"` (Sten Score 1-10 yang terkoreksi MD).
@@ -124,7 +125,7 @@ Participant  ──►  Batch / Event  ──►  Position Formation  ──► 
 php artisan lsp:test-report <username> PR-A-313
 
 # 2. Synchronize Proyek Legacy DB < PR-A-338 ke Native SPSP
-php artisan lsp:import PR-A-313
+php artisan project:import PR-A-313
 
 # 3. Test Ingestion Jalur B (Proyek API Baru ≥ PR-A-338) via REST API Client
 php artisan test-results:import --fetch-api --event=1 --participant=15436
