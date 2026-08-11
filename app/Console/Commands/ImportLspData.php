@@ -18,8 +18,12 @@ class ImportLspData extends Command
         $username = $this->option('username');
         $instId = $this->option('institution') ? (int) $this->option('institution') : null;
 
-        $this->info('=== MEMULAI SINKRONISASI DATA LSP KE SPSP (OPTIMIZED ENGINE) ===');
+        $isLegacy = $importer->isLegacyProject($kodeProyek);
+        $pathLabel = $isLegacy ? 'Jalur A — Legacy Database LSP (< PR-A-338)' : 'Jalur B — REST API psikotes.qhrmi.id (>= PR-A-338)';
+
+        $this->info('=== MEMULAI SINKRONISASI DATA LSP KE SPSP (DUAL-PATH ENGINE) ===');
         $this->line("Kode Proyek : {$kodeProyek}");
+        $this->line("Alur Ingest : {$pathLabel}");
         if ($username) {
             $this->line("Target User : {$username}");
         }

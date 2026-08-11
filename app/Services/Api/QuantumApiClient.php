@@ -19,36 +19,87 @@ class QuantumApiClient
     }
 
     /**
-     * Tarik data tes online peserta dari API Quantum HRMI.
-     * Jika URL API belum dikonfigurasi, gunakan data mock/simulasi untuk development.
+     * Ambik daftar semua kode proyek yang tersedia di API Tes Online.
+     */
+    public function getProjectCodes(): array
+    {
+        if (! $this->baseUrl || ! $this->apiKey) {
+            return [];
+        }
+
+        try {
+            $url = rtrim($this->baseUrl, '/').'/ambil_kode_proyek';
+            $response = Http::withHeaders([
+                'Content-Type' => 'application/json',
+                'X-API-Key' => $this->apiKey,
+            ])->timeout(30)->get($url);
+
+            if ($response->successful() && $response->json('status')) {
+                return $response->json('proyek') ?? [];
+            }
+        } catch (Exception $e) {
+            Log::error("QuantumApiClient: Exception in getProjectCodes: {$e->getMessage()}");
+        }
+
+        return [];
+    }
+
+    /**
+     * Ambil data lengkap seluruh peserta & hasil tes pada satu proyek dari API Tes Online.
+     */
+    public function getProjectData(string $kodeProyek): ?array
+    {
+        if (! $this->baseUrl || ! $this->apiKey) {
+            return null;
+        }
+
+        try {
+            $url = rtrim($this->baseUrl, '/').'/ambil_semua';
+            $response = Http::withHeaders([
+                'Content-Type' => 'application/json',
+                'X-API-Key' => $this->apiKey,
+            ])->timeout(60)->post($url, [
+                'kode' => $kodeProyek,
+            ]);
+
+            if ($response->successful() && $response->json('status')) {
+                return $response->json();
+            }
+
+            Log::warning("QuantumApiClient: getProjectData returned unsuccessful status for {$kodeProyek}", [
+                'status' => $response->status(),
+                'body' => substr($response->body(), 0, 200),
+            ]);
+        } catch (Exception $e) {
+            Log::error("QuantumApiClient: Exception in getProjectData for {$kodeProyek}: {$e->getMessage()}");
+        }
+
+        return null;
+    }
+
+    /**
+     * Tarik data tes online peserta spesifik dari API Quantum HRMI.
      */
     public function fetchParticipantTests(string|int $participantIdentifier, ?int $eventId = null): array
     {
         if ($this->baseUrl && $this->apiKey) {
             try {
-                $response = Http::withToken($this->apiKey)
-                    ->timeout(15)
-                    ->get("{$this->baseUrl}/api/v1/test-results", [
-                        'participant_id' => $participantIdentifier,
-                        'event_id' => $eventId,
-                    ]);
+                $url = rtrim($this->baseUrl, '/').'/api/v1/test-results';
+                $response = Http::withHeaders([
+                    'X-API-Key' => $this->apiKey,
+                ])->timeout(15)->get($url, [
+                    'participant_id' => $participantIdentifier,
+                    'event_id' => $eventId,
+                ]);
 
                 if ($response->successful()) {
                     return $response->json('data') ?? $response->json() ?? [];
                 }
-
-                Log::warning("QuantumApiClient: Failed to fetch API for participant {$participantIdentifier}", [
-                    'status' => $response->status(),
-                    'body' => $response->body(),
-                ]);
             } catch (Exception $e) {
-                Log::error("QuantumApiClient: Exception while connecting to Quantum API: {$e->getMessage()}", [
-                    'participant' => $participantIdentifier,
-                ]);
+                Log::warning("QuantumApiClient: Falling back to mock data for participant {$participantIdentifier}: {$e->getMessage()}");
             }
         }
 
-        // Fallback: Simulasi response API jika live endpoint belum aktif
         return $this->getMockParticipantTests($participantIdentifier);
     }
 

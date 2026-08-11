@@ -18,6 +18,7 @@ use App\Models\PsychologicalTest;
 use App\Models\SubAspect;
 use App\Models\SubAspectAssessment;
 use App\Models\TestResult;
+use App\Services\Api\ApiDataTransformerService;
 use Closure;
 use Exception;
 use Illuminate\Support\Facades\DB;
@@ -39,8 +40,23 @@ class LspDataImporterService
     protected array $subAspectRegistry = [];
 
     public function __construct(
-        protected LspDataTransformerService $reportService
-    ) {}
+        protected LspDataTransformerService $reportService,
+        protected ?ApiDataTransformerService $apiTransformer = null
+    ) {
+        $this->apiTransformer = $apiTransformer ?? app(ApiDataTransformerService::class);
+    }
+
+    /**
+     * Memeriksa apakah proyek termasuk Jalur A (Legacy DB < PR-A-338) atau Jalur B (API Online >= PR-A-338).
+     */
+    public function isLegacyProject(string $kodeProyek): bool
+    {
+        if (preg_match('/PR-[A-Z]-(\d+)/i', $kodeProyek, $matches)) {
+            return (int) $matches[1] < 338;
+        }
+
+        return true;
+    }
 
     /**
      * Import seluruh peserta dari proyek LSP tertentu ke database SPSP dengan metode chunking & bulk upsert.
@@ -161,7 +177,18 @@ class LspDataImporterService
             return 0;
         }
 
-        $reportsMap = $this->reportService->getBatchIndividualReports($usernames, $kodeProyek);
+        $isLegacy = $this->isLegacyProject($kodeProyek);
+        $sourceMarker = $isLegacy ? 'lsp_db' : 'api';
+
+        if ($isLegacy || ! $this->apiTransformer) {
+            $reportsMap = $this->reportService->getBatchIndividualReports($usernames, $kodeProyek);
+        } else {
+            $reportsMap = $this->apiTransformer->getProjectIndividualReports($kodeProyek);
+            if (empty($reportsMap)) {
+                $reportsMap = $this->reportService->getBatchIndividualReports($usernames, $kodeProyek);
+            }
+        }
+
         if (empty($reportsMap)) {
             return 0;
         }
@@ -297,7 +324,7 @@ class LspDataImporterService
                     'test_name' => 'Intelligenz Struktur Test (IST)',
                     'test_category' => TestResult::getCategoryForCode('A.5'),
                     'status' => 'completed',
-                    'source' => 'lsp_db',
+                    'source' => $sourceMarker,
                     'summary_data' => json_encode(['raw_score' => $rawScores['ist'], 'iq' => $rep['potensi']['total_individual_score'] ?? null]),
                     'interpretation_data' => null,
                     'raw_response' => json_encode(['raw' => $rawScores['ist']]),
@@ -316,7 +343,7 @@ class LspDataImporterService
                     'test_name' => 'PAPI Kostik',
                     'test_category' => TestResult::getCategoryForCode('D.1'),
                     'status' => 'completed',
-                    'source' => 'lsp_db',
+                    'source' => $sourceMarker,
                     'summary_data' => json_encode(['raw_score' => $rawScores['kostik']]),
                     'interpretation_data' => null,
                     'raw_response' => json_encode(['raw' => $rawScores['kostik']]),
@@ -335,7 +362,7 @@ class LspDataImporterService
                     'test_name' => '16 Personality Factor (16PF)',
                     'test_category' => TestResult::getCategoryForCode('B.2'),
                     'status' => 'completed',
-                    'source' => 'lsp_db',
+                    'source' => $sourceMarker,
                     'summary_data' => json_encode(['raw_score' => $rawScores['personality']]),
                     'interpretation_data' => null,
                     'raw_response' => json_encode(['raw' => $rawScores['personality']]),

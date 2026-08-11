@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'quantum_hrmi' => [
+        'base_url' => env('QUANTUM_API_BASE_URL'),
+        'api_key' => env('QUANTUM_API_KEY'),
+    ],
+
 ];
