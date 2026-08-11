@@ -18,5 +18,5 @@
 
 ## 📊 Sumber Data DB SPSP & Logic Calculation
 
-* **Model Utama**: `App\Models\PsychologicalTest` (`$psychologicalTest`).
+* **Model Utama**: `App\Models\Mmpi` (`$mmpi` / tabel `mmpi`).
 * **Field DB yang Dipakai**: `validitas`, `internal`, `interpersonal`, `kap_kerja`, `klinik`, `kesimpulan`, `nilai_pq`, `tingkat_stres`.

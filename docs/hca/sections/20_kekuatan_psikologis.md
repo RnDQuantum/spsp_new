@@ -18,4 +18,4 @@
 
 ## 📊 Sumber Data DB SPSP & Logic Calculation
 
-* **Model Utama**: Ekstraksi dari deskripsi kualitatif pada `App\Models\PsychologicalTest` (field `internal` & `interpersonal`) atau interpretasi aspek terpilih dari `InterpretationGeneratorService`.
+* **Model Utama**: Ekstraksi dari deskripsi kualitatif pada `App\Models\Mmpi` (field `internal` & `interpersonal`) atau interpretasi aspek terpilih dari `InterpretationGeneratorService`.

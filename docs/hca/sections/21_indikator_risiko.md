@@ -18,4 +18,4 @@
 
 ## 📊 Sumber Data DB SPSP & Logic Calculation
 
-* **Sumber Data**: Skoring indikator risiko dari kombinasi tingkat stres pada `psychological_tests` & instrumen risiko klinis tambahan.
+* **Sumber Data**: Skoring indikator risiko dari kombinasi tingkat stres pada tabel `mmpi` & instrumen risiko klinis tambahan.
