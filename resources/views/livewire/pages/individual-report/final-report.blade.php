@@ -230,7 +230,7 @@
                         </tr>
 
                         <!-- Row 3: Tes Kejiwaan (Content) -->
-                        @if ($psychologicalTest)
+                        @if ($mmpi)
                         <tr class="hover:bg-warm-ivory/50 dark:hover:bg-[#1f1b18]/50 transition-colors duration-150 text-sm text-primary-ink dark:text-neutral-200">
                             <td
                                 class="border border-warm-border dark:border-[#25211e] px-4 py-2 text-center font-normal align-top">
@@ -247,7 +247,7 @@
                                     <div class="border-b border-warm-border dark:border-[#25211e]/40 pb-2">
                                         <div class="font-semibold mb-1">1. Validitas</div>
                                         <div class="pl-4 text-primary-ink/80 dark:text-neutral-300">
-                                            {{ $psychologicalTest->validitas ?? '-' }}
+                                            {{ $mmpi->validitas ?? '-' }}
                                         </div>
                                     </div>
 
@@ -255,7 +255,7 @@
                                     <div class="border-b border-warm-border dark:border-[#25211e]/40 pb-2">
                                         <div class="font-semibold mb-1">2. Internal Pribadi</div>
                                         <div class="pl-4 text-primary-ink/80 dark:text-neutral-300 whitespace-pre-line">
-                                            {{ $psychologicalTest->internal ?? '-' }}
+                                            {{ $mmpi->internal ?? '-' }}
                                         </div>
                                     </div>
 
@@ -263,7 +263,7 @@
                                     <div class="border-b border-warm-border dark:border-[#25211e]/40 pb-2">
                                         <div class="font-semibold mb-1">3. Interpersonal</div>
                                         <div class="pl-4 text-primary-ink/80 dark:text-neutral-300 whitespace-pre-line">
-                                            {{ $psychologicalTest->interpersonal ?? '-' }}
+                                            {{ $mmpi->interpersonal ?? '-' }}
                                         </div>
                                     </div>
 
@@ -271,7 +271,7 @@
                                     <div class="border-b border-warm-border dark:border-[#25211e]/40 pb-2">
                                         <div class="font-semibold mb-1">4. Kapasitas Kerja</div>
                                         <div class="pl-4 text-primary-ink/80 dark:text-neutral-300 whitespace-pre-line">
-                                            {{ $psychologicalTest->kap_kerja ?? '-' }}
+                                            {{ $mmpi->kap_kerja ?? '-' }}
                                         </div>
                                     </div>
 
@@ -279,7 +279,7 @@
                                     <div class="border-b border-warm-border dark:border-[#25211e]/40 pb-2">
                                         <div class="font-semibold mb-1">5. Klinis</div>
                                         <div class="pl-4 text-primary-ink/80 dark:text-neutral-300 whitespace-pre-line">
-                                            {{ $psychologicalTest->klinik ?? '-' }}
+                                            {{ $mmpi->klinik ?? '-' }}
                                         </div>
                                     </div>
 
@@ -287,7 +287,7 @@
                                     <div class="border-b border-warm-border dark:border-[#25211e]/40 pb-2">
                                         <div class="font-semibold mb-1">6. Kesimpulan</div>
                                         <div class="pl-4 text-primary-ink/80 dark:text-neutral-300 whitespace-pre-line">
-                                            {{ $psychologicalTest->kesimpulan ?? '-' }}
+                                            {{ $mmpi->kesimpulan ?? '-' }}
                                         </div>
                                     </div>
 
@@ -295,7 +295,7 @@
                                     <div class="border-b border-warm-border dark:border-[#25211e]/40 pb-2">
                                         <div class="font-semibold mb-1">7. Psikogram</div>
                                         <div class="pl-4 text-primary-ink/80 dark:text-neutral-300 whitespace-pre-line">
-                                            {{ $psychologicalTest->psikogram_formatted }}
+                                            {{ $mmpi->psikogram_formatted }}
                                         </div>
                                     </div>
 
@@ -303,7 +303,7 @@
                                     <div class="border-b border-warm-border dark:border-[#25211e]/40 pb-2">
                                         <div class="font-semibold mb-1">8. Nilai PQ</div>
                                         <div class="pl-4 text-primary-ink/80 dark:text-neutral-300">
-                                            {{ $psychologicalTest->nilai_pq ?? '-' }}
+                                            {{ $mmpi->nilai_pq ?? '-' }}
                                         </div>
                                     </div>
 
@@ -311,7 +311,7 @@
                                     <div>
                                         <div class="font-semibold mb-1">9. Tingkat Stres</div>
                                         <div class="pl-4 text-primary-ink/80 dark:text-neutral-300">
-                                            {{ $psychologicalTest->tingkat_stres ?? '-' }}
+                                            {{ $mmpi->tingkat_stres ?? '-' }}
                                         </div>
                                     </div>
                                 </div>

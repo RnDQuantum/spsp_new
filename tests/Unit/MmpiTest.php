@@ -2,14 +2,14 @@
 
 namespace Tests\Unit;
 
-use App\Models\PsychologicalTest;
+use App\Models\Mmpi;
 use Tests\TestCase;
 
-class PsychologicalTestTest extends TestCase
+class MmpiTest extends TestCase
 {
     public function test_psikogram_formatted_accessor_with_null(): void
     {
-        $test = new PsychologicalTest;
+        $test = new Mmpi;
         $test->psikogram = null;
 
         $this->assertEquals('-', $test->psikogram_formatted);
@@ -17,7 +17,7 @@ class PsychologicalTestTest extends TestCase
 
     public function test_psikogram_formatted_accessor_with_string(): void
     {
-        $test = new PsychologicalTest;
+        $test = new Mmpi;
         $test->psikogram = 'Ini adalah psikogram dalam bentuk string.';
 
         $this->assertEquals('Ini adalah psikogram dalam bentuk string.', $test->psikogram_formatted);
@@ -25,7 +25,7 @@ class PsychologicalTestTest extends TestCase
 
     public function test_psikogram_formatted_accessor_with_indexed_array(): void
     {
-        $test = new PsychologicalTest;
+        $test = new Mmpi;
         $test->psikogram = ['Poin Pertama', 'Poin Kedua'];
 
         $this->assertEquals("Poin Pertama\nPoin Kedua", $test->psikogram_formatted);
@@ -33,7 +33,7 @@ class PsychologicalTestTest extends TestCase
 
     public function test_psikogram_formatted_accessor_with_associative_array(): void
     {
-        $test = new PsychologicalTest;
+        $test = new Mmpi;
         $test->psikogram = [
             'Kepemimpinan' => 'Sangat Baik',
             'Adaptasi' => 'Cukup',

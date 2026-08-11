@@ -12,9 +12,9 @@ use App\Models\CategoryType;
 use App\Models\FinalAssessment;
 use App\Models\Institution;
 use App\Models\Interpretation;
+use App\Models\Mmpi;
 use App\Models\Participant;
 use App\Models\PositionFormation;
-use App\Models\PsychologicalTest;
 use App\Models\SubAspect;
 use App\Models\SubAspectAssessment;
 use App\Models\TestResult;
@@ -381,8 +381,8 @@ class LspDataImporterService
             );
         }
 
-        // 3. Prepare Bulk Insert PsychologicalTest
-        $psychBulk = [];
+        // 3. Prepare Bulk Insert Mmpi
+        $mmpiBulk = [];
         foreach ($usernames as $u) {
             $p = $participantModels[$u] ?? null;
             $rep = $reportsMap[$u] ?? null;
@@ -390,32 +390,47 @@ class LspDataImporterService
                 continue;
             }
 
-            $kejiwaan = $rep['kejiwaan'];
+            $kejiwaan = $rep['mmpi'] ?? $rep['kejiwaan'] ?? null;
+            if (! $kejiwaan) {
+                continue;
+            }
+
             $rawNilaiPq = $kejiwaan['nilai_pq'] ?? 0;
             $numericNilaiPq = is_numeric(trim((string) $rawNilaiPq)) ? (float) $rawNilaiPq : 0.00;
 
-            $psychBulk[] = [
+            $formatStringOrArray = function ($val) {
+                if (is_array($val)) {
+                    return implode(' ', $val);
+                }
+
+                return (string) ($val ?? '-');
+            };
+
+            $psikogramVal = $kejiwaan['psikogram'] ?? '-';
+            $jsonPsikogram = is_array($psikogramVal) ? json_encode($psikogramVal) : json_encode([$psikogramVal]);
+
+            $mmpiBulk[] = [
                 'event_id' => $event->id,
                 'participant_id' => $p->id,
-                'no_test' => $rep['peserta']['no_test'],
+                'no_test' => $rep['peserta']['no_test'] ?? $p->test_number,
                 'username' => $u,
-                'validitas' => $kejiwaan['validitas'],
-                'internal' => implode(' ', $kejiwaan['internal_pribadi']),
-                'interpersonal' => implode(' ', $kejiwaan['interpersonal']),
-                'kap_kerja' => implode(' ', $kejiwaan['kapasitas_kerja']),
-                'klinik' => implode(' ', $kejiwaan['klinis']),
-                'kesimpulan' => implode(' ', $kejiwaan['kesimpulan']),
-                'psikogram' => json_encode($kejiwaan['psikogram']),
+                'validitas' => $formatStringOrArray($kejiwaan['validitas'] ?? '-'),
+                'internal' => $formatStringOrArray($kejiwaan['internal_pribadi'] ?? ($kejiwaan['internal'] ?? '-')),
+                'interpersonal' => $formatStringOrArray($kejiwaan['interpersonal'] ?? '-'),
+                'kap_kerja' => $formatStringOrArray($kejiwaan['kapasitas_kerja'] ?? ($kejiwaan['kap_kerja'] ?? '-')),
+                'klinik' => $formatStringOrArray($kejiwaan['klinis'] ?? ($kejiwaan['klinik'] ?? '-')),
+                'kesimpulan' => $formatStringOrArray($kejiwaan['kesimpulan'] ?? '-'),
+                'psikogram' => $jsonPsikogram,
                 'nilai_pq' => $numericNilaiPq,
-                'tingkat_stres' => $kejiwaan['tingkat_stres'],
+                'tingkat_stres' => $kejiwaan['tingkat_stres'] ?? '-',
                 'created_at' => $now,
                 'updated_at' => $now,
             ];
         }
 
-        if (! empty($psychBulk)) {
-            PsychologicalTest::whereIn('participant_id', $pIds)->delete();
-            PsychologicalTest::insert($psychBulk);
+        if (! empty($mmpiBulk)) {
+            Mmpi::whereIn('participant_id', $pIds)->delete();
+            Mmpi::insert($mmpiBulk);
         }
 
         // 4. Prepare Bulk Upsert Interpretations & CategoryAssessments

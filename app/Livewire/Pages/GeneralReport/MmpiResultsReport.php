@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Pages\GeneralReport;
 
-use App\Models\PsychologicalTest;
+use App\Models\Mmpi;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -68,15 +68,15 @@ class MmpiResultsReport extends Component
     public function render()
     {
         // Cek apakah tabel ada dan berisi data
-        $tableExists = DB::getSchemaBuilder()->hasTable('psychological_tests');
+        $tableExists = DB::getSchemaBuilder()->hasTable('mmpi');
         $dataCount = 0;
 
         if ($tableExists) {
-            $dataCount = DB::table('psychological_tests')->count();
+            $dataCount = DB::table('mmpi')->count();
         }
 
         // Ambil data dengan filter
-        $mmpiResultsQuery = PsychologicalTest::query();
+        $mmpiResultsQuery = Mmpi::query();
 
         // Jika ada pencarian, cari di semua field relevan sekaligus
         if ($this->search) {
@@ -101,9 +101,9 @@ class MmpiResultsReport extends Component
         switch ($this->sortField) {
             case 'kode_proyek':
                 // Sort by relation (event code)
-                $mmpiResultsQuery->join('events', 'psychological_tests.event_id', '=', 'events.id')
+                $mmpiResultsQuery->join('events', 'mmpi.event_id', '=', 'events.id')
                     ->orderBy('events.code', $this->sortDirection)
-                    ->select('psychological_tests.*');
+                    ->select('mmpi.*');
                 break;
 
             case 'no_test':
@@ -111,11 +111,7 @@ class MmpiResultsReport extends Component
                 break;
 
             case 'username':
-                // Sort by username (asumsi ada relasi user atau field username)
-                // Sesuaikan dengan struktur database Anda
-                $mmpiResultsQuery->join('users', 'psychological_tests.user_id', '=', 'users.id')
-                    ->orderBy('users.username', $this->sortDirection)
-                    ->select('psychological_tests.*');
+                $mmpiResultsQuery->orderBy('username', $this->sortDirection);
                 break;
 
             case 'nilai_pq':

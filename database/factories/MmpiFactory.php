@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Models\Mmpi;
 use App\Models\Participant;
-use App\Models\PsychologicalTest;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends Factory<PsychologicalTest>
+ * @extends Factory<Mmpi>
  */
-class PsychologicalTestFactory extends Factory
+class MmpiFactory extends Factory
 {
-    protected $model = PsychologicalTest::class;
+    protected $model = Mmpi::class;
 
     public function definition(): array
     {

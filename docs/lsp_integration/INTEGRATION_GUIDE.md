@@ -41,7 +41,7 @@ flowchart TD
 
     subgraph SPSP_DATABASE [Database Native SPSP]
         C1[participants]
-        C2[psychological_tests]
+        C2[mmpi]
         C3[interpretations]
         C4[aspect_assessments & sub_aspect_assessments]
         C5[category_assessments]

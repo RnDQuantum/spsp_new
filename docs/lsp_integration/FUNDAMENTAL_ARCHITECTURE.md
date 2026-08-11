@@ -112,7 +112,7 @@ Participant  ──►  Batch / Event  ──►  Position Formation  ──► 
 5. **`aspect_assessments`**: Rekap rating aspek potensi & kompetensi (1–5), skor berbobot (Potensi 40% & Kompetensi 60%), dan GAP rating.
 6. **`category_assessments`**: Aggregat total skor potensi dan total skor kompetensi.
 7. **`final_assessments`**: Total skor akhir asesmen, persentase pencapaian, rekomendasi akhir (MS / MMS / TMS), dan metadata penandatangan TTD digital.
-8. **`psychological_tests`**: Mirroring hasil 9 domain tes kejiwaan MMPI (Validitas, Stres, Psikogram, PQ, dll).
+8. **`mmpi`**: Penampung hasil tes kejiwaan MMPI (Validitas, Stres, Psikogram, PQ, Klinik, Kesimpulan, dll).
 9. **`interpretations`**: Teks naskah interpretasi psikologis per aspek/atribut.
 10. **`test_results`**: Tabel *Single Source of Truth* penampung backup data mentah hasil ujian dengan penanda `source` (`'lsp_db'`, `'api'`, atau `'file_import'`).
 

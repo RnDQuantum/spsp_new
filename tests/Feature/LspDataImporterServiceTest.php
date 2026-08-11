@@ -5,8 +5,8 @@ namespace Tests\Feature;
 use App\Models\AspectAssessment;
 use App\Models\CategoryAssessment;
 use App\Models\FinalAssessment;
+use App\Models\Mmpi;
 use App\Models\Participant;
-use App\Models\PsychologicalTest;
 use App\Models\TestResult;
 use App\Services\Lsp\LspDataImporterService;
 use Tests\TestCase;
@@ -36,8 +36,8 @@ class LspDataImporterServiceTest extends TestCase
         $this->assertEquals('dr. TAN ANDI, Sp.An-TI', $participant->name);
         $this->assertEquals('24400240110001036', $participant->skb_number);
 
-        // Assert PsychologicalTest (MMPI)
-        $mmpi = PsychologicalTest::where('participant_id', $participant->id)->first();
+        // Assert Mmpi
+        $mmpi = Mmpi::where('participant_id', $participant->id)->first();
         $this->assertNotNull($mmpi);
         $this->assertStringContainsString('kurang akurat', $mmpi->validitas);
 

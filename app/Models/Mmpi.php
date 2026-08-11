@@ -6,9 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class PsychologicalTest extends Model
+class Mmpi extends Model
 {
     use HasFactory;
+
+    protected $table = 'mmpi';
 
     protected $fillable = [
         'participant_id',

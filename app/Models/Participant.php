@@ -81,9 +81,9 @@ class Participant extends Model
         return $this->hasOne(FinalAssessment::class);
     }
 
-    public function psychologicalTest(): HasOne
+    public function mmpi(): HasOne
     {
-        return $this->hasOne(PsychologicalTest::class);
+        return $this->hasOne(Mmpi::class);
     }
 
     public function testResults(): HasMany

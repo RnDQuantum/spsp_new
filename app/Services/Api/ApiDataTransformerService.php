@@ -144,6 +144,17 @@ class ApiDataTransformerService
                 'nilai_pq' => (float) ($mmpiData['pq'] ?? 90.0),
                 'tingkat_stres' => $mmpiData['stres'] ?? 'Normal',
             ],
+            'kejiwaan' => [
+                'validitas' => $mmpiData['validitas'] ?? '-',
+                'internal_pribadi' => $mmpiData['internal'] ?? '-',
+                'interpersonal' => $mmpiData['interpersonal'] ?? '-',
+                'kapasitas_kerja' => $mmpiData['kapasitas_kerja'] ?? '-',
+                'klinis' => $mmpiData['klinis'] ?? '-',
+                'kesimpulan' => $mmpiData['kesimpulan'] ?? 'TIDAK MENUNJUKKAN GEJALA GANGGUAN JIWA BERAT',
+                'psikogram' => $mmpiData['psikogram'] ?? '-',
+                'nilai_pq' => (float) ($mmpiData['pq'] ?? 90.0),
+                'tingkat_stres' => $mmpiData['stres'] ?? 'Normal',
+            ],
             'raw_scores' => [
                 'ist' => $istData,
                 'pf16' => $pfData,

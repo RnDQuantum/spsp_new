@@ -7,8 +7,8 @@ use App\Models\AssessmentEvent;
 use App\Models\CategoryAssessment;
 use App\Models\CategoryType;
 use App\Models\FinalAssessment;
+use App\Models\Mmpi;
 use App\Models\Participant;
-use App\Models\PsychologicalTest;
 use App\Services\ConclusionService;
 use App\Services\IndividualAssessmentService;
 use Livewire\Attributes\Layout;
@@ -32,7 +32,7 @@ class FinalReport extends Component
 
     public $finalAssessment;
 
-    public $psychologicalTest;
+    public $mmpi;
 
     // Category assessments
     public $potensiAssessment = null;
@@ -86,8 +86,8 @@ class FinalReport extends Component
         // Load Final Assessment
         $this->finalAssessment = FinalAssessment::where('participant_id', $this->participant->id)->first();
 
-        // Load Psychological Test
-        $this->psychologicalTest = PsychologicalTest::where('participant_id', $this->participant->id)->first();
+        // Load MMPI
+        $this->mmpi = Mmpi::where('participant_id', $this->participant->id)->first();
 
         // Load category assessments for conclusion calculation
         $template = $this->participant->positionFormation->template;
