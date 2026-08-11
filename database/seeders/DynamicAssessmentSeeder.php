@@ -734,10 +734,10 @@ class DynamicAssessmentSeeder extends Seeder
             }
         }
 
-        // ⚡ BULK INSERT: Insert psychological tests
+        // ⚡ BULK INSERT: Insert MMPI tests
         if (! empty($psychTestsData)) {
             foreach (array_chunk($psychTestsData, $insertChunkSize) as $chunk) {
-                DB::table('psychological_tests')->insert($chunk);
+                DB::table('mmpi')->insert($chunk);
             }
         }
 
