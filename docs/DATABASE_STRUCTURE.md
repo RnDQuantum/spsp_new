@@ -95,12 +95,14 @@ Berikut adalah visualisasi hubungan antar tabel (Entity Relationship Diagram) di
 
 ```mermaid
 erDiagram
-    %% Hubungan Multi-Tenancy & Pengguna
+    %% Hubungan Multi-Tenancy & Master Data
     institutions ||--o{ users : "memiliki"
     institutions ||--o{ category_institution : "dikelompokkan"
     institution_categories ||--o{ category_institution : "memiliki"
+    institutions ||--o{ projects : "memiliki"
     institutions ||--o{ assessment_events : "menyelenggarakan"
     institutions ||--o{ custom_standards : "memiliki"
+    projects ||--o{ assessment_events : "memiliki pelaksanaan"
     users ||--o{ custom_standards : "membuat"
 
     %% Hubungan Master Penilaian
@@ -262,15 +264,44 @@ Menyimpan sub-aspek penunjang aspek utama (Hanya untuk aspek dari kategori `pote
 
 ## 2. Tabel Manajemen Event & Peserta
 
+### `projects`
+Mendefinisikan Master Proyek asesmen yang disinkronkan dari tabel `proyek_produksi` DB LSP.
+
+| Kolom | Tipe | Nullable | Deskripsi |
+| :--- | :--- | :--- | :--- |
+| `id` | bigint | No | Primary Key |
+| `institution_id` | bigint | Yes | Foreign Key ke `institutions.id` |
+| `code` | varchar(255) | No | Kode master proyek unik (e.g., `AP-085`, `AP-100`, `AP-554`) |
+| `name` | varchar(255) | No | Nama master proyek |
+| `year` | int | Yes | Tahun proyek |
+| `contract_number` | varchar(255) | Yes | Nomor kontrak proyek |
+| `status` | varchar(255) | Yes | Status proyek (`Selesai`, `completed`) |
+
+*Contoh Data*:
+```json
+{
+  "id": 1,
+  "institution_id": 1,
+  "code": "AP-085",
+  "name": "SELEKSI KOMPETENSI TEKNIS TAMBAHAN PSIKOTES DAFTAR RIWAYAT HIDUP",
+  "year": 2025,
+  "contract_number": "QHI17024-02-MR-001-01",
+  "status": "completed"
+}
+```
+
+---
+
 ### `assessment_events`
-Mendefinisikan event/proyek asesmen yang diadakan oleh suatu instansi.
+Mendefinisikan pelaksanaan proyek asesmen (Pelaksanaan) yang disinkronkan dari tabel `proyek` DB LSP (`kode_proyek` e.g., `PR-A-313`, `PR-A-338`).
 
 | Kolom | Tipe | Nullable | Deskripsi |
 | :--- | :--- | :--- | :--- |
 | `id` | bigint | No | Primary Key |
 | `institution_id` | bigint | No | Foreign Key ke `institutions.id` |
-| `code` | varchar(255) | No | Kode event unik (e.g., `P3K-KEJAKSAAN-2025`) |
-| `name` | varchar(255) | No | Nama kegiatan |
+| `project_id` | bigint | Yes | Foreign Key ke `projects.id` |
+| `code` | varchar(255) | No | Kode pelaksanaan event unik (e.g., `PR-A-313`, `PR-A-338`) |
+| `name` | varchar(255) | No | Nama pelaksanaan |
 | `description` | text | Yes | Keterangan tambahan event |
 | `year` | int | No | Tahun penyelenggaraan |
 | `start_date` | date | No | Tanggal mulai event |
@@ -283,9 +314,10 @@ Mendefinisikan event/proyek asesmen yang diadakan oleh suatu instansi.
 {
   "id": 1,
   "institution_id": 1,
-  "code": "P3K-KEJAKSAAN-2025",
-  "name": "Seleksi P3K Kejaksaan 2025",
-  "description": "Assessment P3K untuk Kejaksaan RI tahun 2025",
+  "project_id": 1,
+  "code": "PR-A-313",
+  "name": "Seleksi Kompetensi Teknis Tambahan Kejaksaan 2025",
+  "description": "Imported from LSP DB Execution PR-A-313",
   "year": 2025,
   "start_date": "2025-09-01",
   "end_date": "2025-12-31",
