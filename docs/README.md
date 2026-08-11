@@ -31,10 +31,6 @@ Understand the database structure, table definitions, relationships, and calcula
     *   Entity Relationship Diagram (ERD) with Mermaid visualizer
     *   Deep dive on 3-Layer Priority system data flow
     *   Sample data and step-by-step scoring calculation walkthroughs
-*   **[ONLINE_TEST_API_INTEGRATION.md](./ONLINE_TEST_API_INTEGRATION.md)**
-    *   Unified raw test results database schema (`test_results`) with source tracking (`api`, `lsp_db`, `file_import`)
-    *   Dual-source data ingestion architecture (Quantum HRMI REST API Client & LSP DB Sync)
-    *   Custom parser logic for 9 test instruments (CFIT, IST, Character, Kraeplin, etc.) and CLI commands
 
 ### 3. Architecture Decisions
 Understand WHY the system is built the way it is.
