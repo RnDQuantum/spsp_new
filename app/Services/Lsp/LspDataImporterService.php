@@ -146,24 +146,37 @@ class LspDataImporterService
             ]
         );
 
-        // 3. Ambil daftar peserta dari peserta_produksi
-        $query = $dbLsp->table('peserta_produksi')
-            ->where(function ($q) use ($kodeProyek) {
-                $q->where('kode_pelaksanaan', $kodeProyek)
-                    ->orWhere('kode_pelaksanaan', 'LIKE', "%{$kodeProyek}%");
-            });
+        // 3. Ambil daftar peserta dari DB LSP dan/atau API Online (Jalur B)
+        $dbLspUsernames = [];
+        try {
+            $query = $dbLsp->table('peserta_produksi')
+                ->where(function ($q) use ($kodeProyek) {
+                    $q->where('kode_pelaksanaan', $kodeProyek)
+                        ->orWhere('kode_pelaksanaan', 'LIKE', "%{$kodeProyek}%");
+                });
 
-        if ($singleUsername) {
-            $query->where('username', $singleUsername);
+            if ($singleUsername) {
+                $query->where('username', $singleUsername);
+            }
+
+            $dbLspUsernames = $query->pluck('username')->unique()->toArray();
+        } catch (\Throwable $e) {
+            // Safe fallback if DB LSP query fails
         }
 
-        $pesertaRows = $query->select('username', 'batch', 'jabatan_pelaksana', 'minat_penempatan')->get();
+        $apiUsernames = [];
+        if (! $this->isLegacyProject($kodeProyek) && $this->apiTransformer) {
+            $apiReports = $this->apiTransformer->getProjectIndividualReports($kodeProyek, $singleUsername);
+            if (! empty($apiReports)) {
+                $apiUsernames = array_keys($apiReports);
+            }
+        }
 
-        if ($pesertaRows->isEmpty()) {
+        $allUsernames = array_values(array_unique(array_merge($apiUsernames, $dbLspUsernames)));
+
+        if (empty($allUsernames)) {
             throw new Exception("Tidak ada data peserta ditemukan pada proyek LSP '{$kodeProyek}'".($singleUsername ? " untuk username '{$singleUsername}'" : ''));
         }
-
-        $allUsernames = $pesertaRows->pluck('username')->unique()->toArray();
         $totalFound = count($allUsernames);
 
         $importedCount = 0;
@@ -186,7 +199,13 @@ class LspDataImporterService
                     $progressCallback(count($chunkUsernames), $totalFound);
                 }
             } catch (Exception $e) {
-                // Fallback attempt: if bulk transaction fails for chunk, retry individually for error isolation
+                // Fallback attempt: reset in-memory registries on rollback to prevent stale FK IDs
+                $this->formationRegistry = [];
+                $this->batchRegistry = [];
+                $this->templateRegistry = [];
+                $this->aspectRegistry = [];
+                $this->subAspectRegistry = [];
+
                 foreach ($chunkUsernames as $u) {
                     try {
                         DB::transaction(function () use ($u, $kodeProyek, $event) {
@@ -242,19 +261,40 @@ class LspDataImporterService
 
         $now = now()->toDateTimeString();
 
+        $noTestMap = [];
+        try {
+            $noTestMap = DB::connection('lsp')->table('peserta_produksi')
+                ->whereIn('username', $usernames)
+                ->pluck('no_test', 'username')
+                ->toArray();
+        } catch (\Throwable $e) {
+            // Non-blocking fallback if DB LSP connection fails
+        }
+
+        $getRep = function (string $u) use (&$reportsMap, &$noTestMap): ?array {
+            if (isset($reportsMap[$u])) {
+                return $reportsMap[$u];
+            }
+            $noTest = $noTestMap[$u] ?? null;
+            if ($noTest && isset($reportsMap[$noTest])) {
+                return $reportsMap[$noTest];
+            }
+            return null;
+        };
+
         // 1. Resolve & Batch Create Master Batches & Formations
         $batchMap = [];
         $formationMap = [];
 
         foreach ($usernames as $u) {
-            $rep = $reportsMap[$u] ?? null;
+            $rep = $getRep($u);
             if (! $rep) {
                 continue;
             }
 
             $pesertaInfo = $rep['peserta'];
             $batchName = $rep['peserta']['batch'] ?? '1';
-            $location = $rep['metadata_proyek']['lokasi'] ?? 'Pusat';
+            $location = $rep['metadata_proyek']['lokasi'] ?? ($rep['metadata']['lokasi'] ?? 'Pusat');
 
             $batchKey = "{$event->id}_{$batchName}";
             if (! isset($this->batchRegistry[$batchKey])) {
@@ -308,7 +348,7 @@ class LspDataImporterService
         // 2. Prepare Bulk Upsert Participants
         $participantsBulk = [];
         foreach ($usernames as $u) {
-            $rep = $reportsMap[$u] ?? null;
+            $rep = $getRep($u);
             if (! $rep) {
                 continue;
             }
@@ -322,12 +362,12 @@ class LspDataImporterService
                 'batch_id' => $b->id,
                 'position_formation_id' => $f->id,
                 'test_number' => $pesertaInfo['no_test'],
-                'skb_number' => $pesertaInfo['no_kjg'],
+                'skb_number' => $pesertaInfo['no_kjg'] ?? '-',
                 'name' => $pesertaInfo['nama_lengkap'],
                 'gender' => $pesertaInfo['jenis_kelamin'],
                 'username' => $u,
                 'photo_path' => $pesertaInfo['pasfoto'],
-                'assessment_date' => $rep['metadata_proyek']['tanggal_pelaksanaan'],
+                'assessment_date' => $rep['metadata_proyek']['tanggal_pelaksanaan'] ?? ($rep['metadata']['tanggal_pelaksanaan'] ?? $event->start_date),
                 'created_at' => $now,
                 'updated_at' => $now,
             ];
@@ -355,7 +395,7 @@ class LspDataImporterService
         $testResultsBulk = [];
         foreach ($usernames as $u) {
             $p = $participantModels[$u] ?? null;
-            $rep = $reportsMap[$u] ?? null;
+            $rep = $getRep($u);
             if (! $p || ! $rep || empty($rep['raw_scores'])) {
                 continue;
             }
@@ -458,7 +498,7 @@ class LspDataImporterService
         $mmpiBulk = [];
         foreach ($usernames as $u) {
             $p = $participantModels[$u] ?? null;
-            $rep = $reportsMap[$u] ?? null;
+            $rep = $getRep($u);
             if (! $p || ! $rep) {
                 continue;
             }
@@ -512,7 +552,7 @@ class LspDataImporterService
 
         foreach ($usernames as $u) {
             $p = $participantModels[$u] ?? null;
-            $rep = $reportsMap[$u] ?? null;
+            $rep = $getRep($u);
             if (! $p || ! $rep) {
                 continue;
             }
@@ -555,14 +595,14 @@ class LspDataImporterService
                     'category_type_id' => $potensiCatType->id,
                     'batch_id' => $b->id,
                     'position_formation_id' => $f->id,
-                    'total_standard_rating' => $potensiData['total_standard_rating'],
-                    'total_standard_score' => $potensiData['total_standard_score'],
-                    'total_individual_rating' => $potensiData['total_individual_rating'],
-                    'total_individual_score' => $potensiData['total_individual_score'],
-                    'gap_rating' => $potensiData['gap_total_rating'],
-                    'gap_score' => $potensiData['gap_total_score'],
-                    'conclusion_code' => $potensiData['kesimpulan_akhir'] === 'Memenuhi Standard' ? 'MS' : 'TMS',
-                    'conclusion_text' => strtoupper($potensiData['kesimpulan_akhir']),
+                    'total_standard_rating' => $potensiData['total_standard_rating'] ?? ($potensiData['total_skor_standar'] ?? 0),
+                    'total_standard_score' => $potensiData['total_standard_score'] ?? ($potensiData['total_skor_standar'] ?? 0),
+                    'total_individual_rating' => $potensiData['total_individual_rating'] ?? ($potensiData['total_skor_individu'] ?? 0),
+                    'total_individual_score' => $potensiData['total_individual_score'] ?? ($potensiData['total_skor_individu'] ?? 0),
+                    'gap_rating' => $potensiData['gap_total_rating'] ?? 0,
+                    'gap_score' => $potensiData['gap_total_score'] ?? 0,
+                    'conclusion_code' => ($potensiData['kesimpulan_akhir'] ?? 'MS') === 'Memenuhi Standard' ? 'MS' : 'TMS',
+                    'conclusion_text' => strtoupper($potensiData['kesimpulan_akhir'] ?? 'MS'),
                     'created_at' => $now,
                     'updated_at' => $now,
                 ];
@@ -577,14 +617,14 @@ class LspDataImporterService
                     'category_type_id' => $kompetensiCatType->id,
                     'batch_id' => $b->id,
                     'position_formation_id' => $f->id,
-                    'total_standard_rating' => $kompetensiData['total_standard_rating'],
-                    'total_standard_score' => $kompetensiData['total_standard_score'],
-                    'total_individual_rating' => $kompetensiData['total_individual_rating'],
-                    'total_individual_score' => $kompetensiData['total_individual_score'],
-                    'gap_rating' => $kompetensiData['gap_total_rating'],
-                    'gap_score' => $kompetensiData['gap_total_score'],
-                    'conclusion_code' => $kompetensiData['kesimpulan_akhir'] === 'Sangat Kompeten' ? 'SK' : ($kompetensiData['kesimpulan_akhir'] === 'Kompeten' ? 'K' : 'BK'),
-                    'conclusion_text' => strtoupper($kompetensiData['kesimpulan_akhir']),
+                    'total_standard_rating' => $kompetensiData['total_standard_rating'] ?? ($kompetensiData['total_skor_standar'] ?? 0),
+                    'total_standard_score' => $kompetensiData['total_standard_score'] ?? ($kompetensiData['total_skor_standar'] ?? 0),
+                    'total_individual_rating' => $kompetensiData['total_individual_rating'] ?? ($kompetensiData['total_skor_individu'] ?? 0),
+                    'total_individual_score' => $kompetensiData['total_individual_score'] ?? ($kompetensiData['total_skor_individu'] ?? 0),
+                    'gap_rating' => $kompetensiData['gap_total_rating'] ?? 0,
+                    'gap_score' => $kompetensiData['gap_total_score'] ?? 0,
+                    'conclusion_code' => ($kompetensiData['kesimpulan_akhir'] ?? 'SK') === 'Sangat Kompeten' ? 'SK' : (($kompetensiData['kesimpulan_akhir'] ?? 'K') === 'Kompeten' ? 'K' : 'BK'),
+                    'conclusion_text' => strtoupper($kompetensiData['kesimpulan_akhir'] ?? 'K'),
                     'created_at' => $now,
                     'updated_at' => $now,
                 ];
@@ -620,7 +660,7 @@ class LspDataImporterService
 
         foreach ($usernames as $u) {
             $p = $participantModels[$u] ?? null;
-            $rep = $reportsMap[$u] ?? null;
+            $rep = $getRep($u);
             if (! $p || ! $rep) {
                 continue;
             }
@@ -635,7 +675,7 @@ class LspDataImporterService
             // Potensi Aspects
             if ($potensiCatType && isset($catAssessMap[$p->id][$potensiCatType->id])) {
                 $catAssessPotensi = $catAssessMap[$p->id][$potensiCatType->id];
-                foreach ($rep['potensi']['aspek_list'] as $aspekKey => $aspekData) {
+                foreach ($rep['potensi']['aspek_list'] ?? ($rep['potensi']['aspek'] ?? []) as $aspekKey => $aspekData) {
                     $aspKey = "{$template->id}_{$potensiCatType->id}_".Str::slug($aspekData['nama_aspek']);
                     if (! isset($this->aspectRegistry[$aspKey])) {
                         $this->aspectRegistry[$aspKey] = Aspect::firstOrCreate(
@@ -715,7 +755,7 @@ class LspDataImporterService
             // Kompetensi Aspects
             if ($kompetensiCatType && isset($catAssessMap[$p->id][$kompetensiCatType->id])) {
                 $catAssessKompetensi = $catAssessMap[$p->id][$kompetensiCatType->id];
-                foreach ($rep['kompetensi']['aspek_list'] as $komKey => $komData) {
+                foreach ($rep['kompetensi']['aspek_list'] ?? ($rep['kompetensi']['aspek'] ?? []) as $komKey => $komData) {
                     $aspKey = "{$template->id}_{$kompetensiCatType->id}_".Str::slug($komData['nama_kompetensi']);
                     if (! isset($this->aspectRegistry[$aspKey])) {
                         $this->aspectRegistry[$aspKey] = Aspect::firstOrCreate(
@@ -813,8 +853,18 @@ class LspDataImporterService
 
             $b = $batchMap[$u];
             $f = $formationMap[$u]['formation'];
-            $kesimpulanPsikotes = $rep['kesimpulan_psikotest'];
-            $rekomAkhir = $rep['rekomendasi_akhir'];
+            $kesimpulanPsikotes = $rep['kesimpulan_psikotest'] ?? [
+                'potensi_std_score_akhir' => $rep['potensi']['total_standard_score'] ?? 0,
+                'potensi_indiv_score_akhir' => $rep['potensi']['total_individual_score'] ?? ($rep['potensi']['total_skor_individu'] ?? 0),
+                'kompetensi_std_score_akhir' => $rep['kompetensi']['total_standard_score'] ?? 0,
+                'kompetensi_indiv_score_akhir' => $rep['kompetensi']['total_individual_score'] ?? ($rep['kompetensi']['total_skor_individu'] ?? 0),
+                'total_std_score' => $rep['rekap']['total_skor_standar'] ?? 0,
+                'total_indiv_score' => $rep['rekap']['total_skor_akhir'] ?? ($rep['rekap']['total_skor_individu'] ?? 0),
+            ];
+            $rekomAkhir = $rep['rekomendasi_akhir'] ?? [
+                'final_code' => $rep['rekap']['kesimpulan_final'] ?? 'MS',
+                'final_text' => 'MEMENUHI SYARAT (' . ($rep['rekap']['kesimpulan_final'] ?? 'MS') . ')',
+            ];
 
             $finalBulk[] = [
                 'participant_id' => $p->id,
@@ -822,16 +872,16 @@ class LspDataImporterService
                 'batch_id' => $b->id,
                 'position_formation_id' => $f->id,
                 'potensi_weight' => 40,
-                'potensi_standard_score' => $kesimpulanPsikotes['potensi_std_score_akhir'],
-                'potensi_individual_score' => $kesimpulanPsikotes['potensi_indiv_score_akhir'],
+                'potensi_standard_score' => $kesimpulanPsikotes['potensi_std_score_akhir'] ?? 0,
+                'potensi_individual_score' => $kesimpulanPsikotes['potensi_indiv_score_akhir'] ?? 0,
                 'kompetensi_weight' => 60,
-                'kompetensi_standard_score' => $kesimpulanPsikotes['kompetensi_std_score_akhir'],
-                'kompetensi_individual_score' => $kesimpulanPsikotes['kompetensi_indiv_score_akhir'],
-                'total_standard_score' => $kesimpulanPsikotes['total_std_score'],
-                'total_individual_score' => $kesimpulanPsikotes['total_indiv_score'],
-                'achievement_percentage' => $kesimpulanPsikotes['total_std_score'] > 0 ? round(($kesimpulanPsikotes['total_indiv_score'] / $kesimpulanPsikotes['total_std_score']) * 100, 2) : 100,
-                'conclusion_code' => $rekomAkhir['final_code'],
-                'conclusion_text' => $rekomAkhir['final_text'],
+                'kompetensi_standard_score' => $kesimpulanPsikotes['kompetensi_std_score_akhir'] ?? 0,
+                'kompetensi_individual_score' => $kesimpulanPsikotes['kompetensi_indiv_score_akhir'] ?? 0,
+                'total_standard_score' => $kesimpulanPsikotes['total_std_score'] ?? 0,
+                'total_individual_score' => $kesimpulanPsikotes['total_indiv_score'] ?? 0,
+                'achievement_percentage' => ($kesimpulanPsikotes['total_std_score'] ?? 0) > 0 ? round((($kesimpulanPsikotes['total_indiv_score'] ?? 0) / $kesimpulanPsikotes['total_std_score']) * 100, 2) : 100,
+                'conclusion_code' => $rekomAkhir['final_code'] ?? ($rekomAkhir['rekomendasi_code'] ?? 'MS'),
+                'conclusion_text' => $rekomAkhir['final_text'] ?? ($rekomAkhir['rekomendasi_text'] ?? 'MEMENUHI SYARAT (MS)'),
                 'created_at' => $now,
                 'updated_at' => $now,
             ];

@@ -38,6 +38,9 @@ class ApiDataTransformerService
             $transformed = $this->transformSingleParticipant($kodeProyek, $username, $pesertaData);
             if ($transformed) {
                 $results[$username] = $transformed;
+                if ((string) $noTes !== (string) $username) {
+                    $results[(string) $noTes] = $transformed;
+                }
             }
         }
 
