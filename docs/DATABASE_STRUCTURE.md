@@ -1,8 +1,8 @@
 # Dokumentasi Struktur Database & ERD - SPSP Assessment System
 
-> **Versi**: 2.0 (Terbaru)  
-> **Terakhir Diperbarui**: 2026-07-01  
-> **Tujuan**: Referensi lengkap untuk skema database, hubungan antar tabel, representasi ERD, dan aliran data sistem SPSP.
+> **Versi**: 2.1 (Terbaru)  
+> **Terakhir Diperbarui**: 2026-08-13  
+> **Tujuan**: Referensi lengkap untuk skema database, hubungan antar tabel, representasi ERD, dan aliran data sistem SPSP (termasuk Ingesti Dual-Path LSP & API).
 
 ---
 
@@ -38,23 +38,24 @@ Berdasarkan rancangan database dan ERD SPSP, seluruh tabel dikelompokkan ke dala
 ```
 [1. HIERARKI DEFINISI & MASTER DATA]
 Institutions (Instansi Client)
-  ├── custom_standards (Konfigurasi Bobot & Nilai Kelulusan Kustom Instansi)
-  └── assessment_events (Event Seleksi/Asesmen yang Diselenggarakan)
-        ├── batches (Gelombang Pembagian Kelompok Hari Ujian)
-        │     └── Participant (Peserta Ujian)
-        └── position_formations (Formasi Jabatan yang Dibuka)
-              │ (mengikat template master)
-              ▼
-        assessment_templates (Template Master Standar Kompetensi Jabatan)
-              └── category_types (Kategori Penilaian: Potensi & Kompetensi)
-                    └── aspects (Aspek-Aspek Penilaian)
-                          ├── sub_aspects (Sub-Aspek Potensi - e.g. Daya Analisa)
-                          └── interpretation_templates (Template Narasi Tafsir Skor Polimorfik)
+  ├── projects (Master Proyek Assessment - e.g. AP-085, AP-100)
+  │     └── assessment_events (Event Seleksi/Pelaksanaan - e.g. PR-A-313, PR-A-338)
+  │           ├── batches (Gelombang Pembagian Kelompok Hari Ujian)
+  │           │     └── Participant (Peserta Ujian)
+  │           └── position_formations (Formasi Jabatan yang Dibuka)
+  │                 │ (mengikat template master)
+  │                 ▼
+  │           assessment_templates (Template Master Standar Kompetensi Jabatan)
+  │                 └── category_types (Kategori Penilaian: Potensi & Kompetensi)
+  │                       └── aspects (Aspek-Aspek Penilaian)
+  │                             ├── sub_aspects (Sub-Aspek Potensi - e.g. Daya Analisa)
+  │                             └── interpretation_templates (Template Narasi Tafsir Skor Polimorfik)
+  └── custom_standards (Konfigurasi Bobot & Nilai Kelulusan Kustom Instansi)
 
 [2. HIERARKI TRANSAKSI & HASIL PENILAIAN PESERTA]
 Participant (Peserta Ujian)
-  ├── test_results (Data Mentah Ujian Online - *Data Dummy Seeder*)
-  ├── psychological_tests (Laporan Klinis MMPI, Stres, Psikogram)
+  ├── test_results (Data Mentah Instrument Tes — Single Source Ingestion Dual-Path: source 'api' / 'lsp_db')
+  ├── mmpi (Laporan Tes Kejiwaan MMPI, Stres, Psikogram)
   ├── interpretations (Teks Narasi Hasil per Kategori Peserta)
   └── final_assessments (Agregasi Rekomendasi Akhir & Skor Kelulusan)
         └── category_assessments (Total Skor Kategori Potensi & Kompetensi)
@@ -68,10 +69,12 @@ Participant (Peserta Ujian)
 
 Meskipun secara relasional database (Foreign Key) seluruh tabel transaksi di atas merujuk ke tabel `participants` via `participant_id`, secara bisnis aliran kalkulasi data mengalir bertahap dari bawah ke atas:
 
-1. **Pengisian Data Awal**: 
-   * Saat API sesungguhnya belum matang (development stage), data mentah di-populate ke tabel `test_results` menggunakan **Seeder (Data Dummy)**.
-2. **Konversi (Tahap 2)**: 
-   * Nilai mentah di `test_results` dipetakan ke skala rating SPSP (1-5), lalu di-insert ke `sub_aspect_assessments` (Potensi) atau `aspect_assessments` (Kompetensi).
+1. **Dual-Path Data Ingestion**: 
+   * Data komponen tes mentah di-ingest ke tabel `test_results` dari dua pintu masuk:
+     - **Jalur A (`source = 'lsp_db'`)**: Proyek legacy `< PR-A-338` diekstrak dari DB LSP local (`DB_LSP_LOCAL`) dan dikonversi via `LspNormEngineService`.
+     - **Jalur B (`source = 'api'`)**: Proyek online `≥ PR-A-338` dikonsumsi langsung dari REST API `psikotes.qhrmi.id` via `QuantumApiClient`.
+2. **Konversi Rating SPSP**: 
+   * Nilai komponen tes di `test_results` dipetakan ke skala rating SPSP (1-5), lalu disimpan pada `sub_aspect_assessments` (Potensi) atau `aspect_assessments` (Kompetensi).
 3. **Agregasi Aspek**: 
    * Rating pada `aspect_assessments` (untuk Potensi) dihitung otomatis dari rata-rata nilai `sub_aspect_assessments` di bawahnya.
 4. **Agregasi Kategori**: 
@@ -81,10 +84,10 @@ Meskipun secara relasional database (Foreign Key) seluruh tabel transaksi di ata
 
 ---
 
-#### 3. Struktur Data Mentah (Source API / Dummy Seeder)
-Tabel ini bertindak sebagai penampung respons API Quantum HRMI apa adanya (Single Source of Truth) sebelum dikonversi ke dalam Hierarki Struktur Hasil di atas. Selama tahap pengembangan di mana API belum production-ready, data di tabel ini disuplai via **Seeder / Data Dummy** untuk simulasi.
+#### 3. Struktur Data Mentah (Dual-Path Ingestion Source)
+Tabel ini bertindak sebagai penampung respons instrumen hasil tes (Single Source of Truth) sebelum dikonversi ke dalam Hierarki Struktur Hasil di atas.
 ```
-test_results (Data Mentah Hasil Ujian Online per Peserta - e.g. A.1, B.2, D.2)
+test_results (Data Mentah Hasil Ujian per Alat Tes — source: 'api' atau 'lsp_db')
 ```
 
 ---
@@ -125,7 +128,7 @@ erDiagram
     assessment_events ||--o{ aspect_assessments : "merekam"
     assessment_events ||--o{ sub_aspect_assessments : "merekam"
     assessment_events ||--o{ final_assessments : "merekam"
-    assessment_events ||--o{ psychological_tests : "menyimpan"
+    assessment_events ||--o{ mmpi : "menyimpan"
     assessment_events ||--o{ interpretations : "menyimpan"
 
     batches ||--o{ participants : "dikelompokkan"
@@ -135,7 +138,7 @@ erDiagram
     participants ||--o{ aspect_assessments : "memiliki"
     participants ||--o{ sub_aspect_assessments : "memiliki"
     participants ||--|| final_assessments : "memiliki"
-    participants ||--|| psychological_tests : "melakukan"
+    participants ||--|| mmpi : "melakukan"
     participants ||--o{ interpretations : "memiliki"
     participants ||--o{ test_results : "memiliki"
 
@@ -592,9 +595,7 @@ Hasil akhir penilaian gabungan (Potensi + Kompetensi) untuk setiap peserta. Hany
 ---
 
 ### `test_results`
-Menyimpan respons data mentah (raw data) ujian online dari API Quantum HRMI per alat tes per peserta. Berfungsi sebagai Single Source of Truth sebelum data dikonversi ke rating 1-5 SPSP. 
-
-*Catatan: Selama tahap pengembangan (API belum siap sepenuhnya), data di tabel ini disuplai menggunakan seeder berisi **data dummy** untuk simulasi.*
+Menyimpan respons data mentah (raw data) instrumen hasil tes per alat tes per peserta dari **Dual-Path Ingestion** (Path A dari DB LSP legacy atau Path B dari REST API `psikotes.qhrmi.id`). Berfungsi sebagai *Single Source of Truth* sebelum data dikonversi ke rating 1-5 SPSP.
 
 | Kolom | Tipe | Nullable | Deskripsi |
 | :--- | :--- | :--- | :--- |
@@ -602,13 +603,14 @@ Menyimpan respons data mentah (raw data) ujian online dari API Quantum HRMI per 
 | `participant_id` | bigint | No | Foreign Key ke `participants.id` |
 | `event_id` | bigint | No | Foreign Key ke `assessment_events.id` |
 | `test_code` | varchar(50) | No | Kode alat tes (e.g. `A.1`, `B.2`, `D.2`) |
-| `test_name` | varchar(255) | No | Nama alat tes dari API (e.g. "Typical CFIT3A") |
-| `test_category` | varchar(100) | No | Kategori/tipe tes (e.g. "Kecerdasan / IQ") |
+| `test_name` | varchar(255) | No | Nama alat tes (e.g. "Typical CFIT3A", "PAPI Kostik") |
+| `test_category` | varchar(100) | No | Kategori/tipe tes (e.g. "Kecerdasan / IQ", "Kepribadian") |
 | `status` | varchar(20) | No | Status tes (`completed` / `incomplete`) |
 | `test_started_at` | timestamp | Yes | Waktu mulai tes |
+| `source` | varchar(50) | No | Asal sumber data mentah (`api`, `lsp_db`, `file_import`) |
 | `summary_data` | json | No | Skor akhir kuantitatif/numerik hasil parser |
 | `interpretation_data` | json | Yes | Teks interpretasi deskriptif & saran pengembangan |
-| `raw_response` | json | No | Backup respons asli API (minus detail Kraeplin) |
+| `raw_response` | json | No | Backup respons asli API / DB LSP |
 | `conversion_status` | enum | No | Status konversi rating (`pending`, `converted`, `skipped`, `not_applicable`) |
 | `converted_at` | timestamp | Yes | Waktu ketika data dikonversi ke rating SPSP |
 
@@ -623,6 +625,7 @@ Menyimpan respons data mentah (raw data) ujian online dari API Quantum HRMI per 
   "test_category": "Kecerdasan / IQ",
   "status": "completed",
   "test_started_at": "2025-11-28 08:23:27",
+  "source": "api",
   "summary_data": {
     "iq": 70,
     "total": 12,
@@ -641,8 +644,8 @@ Menyimpan respons data mentah (raw data) ujian online dari API Quantum HRMI per 
     "total": 12,
     "kategori": "Borderline"
   },
-  "conversion_status": "pending",
-  "converted_at": null
+  "conversion_status": "converted",
+  "converted_at": "2026-08-11 10:00:00"
 }
 ```
 
@@ -708,8 +711,8 @@ Menyimpan modifikasi (overlay) bobot dan nilai standar yang disesuaikan oleh ins
 
 ---
 
-### `psychological_tests`
-Menyimpan data mentah tes psikologi tambahan, seperti hasil tes klinis, tingkat stres, dan detail psikogram.
+### `mmpi`
+Menyimpan data hasil tes kejiwaan MMPI (Minnesota Multiphasic Personality Inventory), tingkat stres, dan detail psikogram klinis peserta (di-rename dari `psychological_tests`).
 
 | Kolom | Tipe | Nullable | Deskripsi |
 | :--- | :--- | :--- | :--- |
@@ -718,12 +721,12 @@ Menyimpan data mentah tes psikologi tambahan, seperti hasil tes klinis, tingkat 
 | `participant_id` | bigint | No | Foreign Key ke `participants.id` |
 | `no_test` | varchar(30) | Yes | Nomor tes |
 | `username` | varchar(100) | Yes | Username peserta |
-| `validitas` | text | Yes | Hasil validitas tes |
+| `validitas` | text | Yes | Hasil validitas tes MMPI |
 | `internal` | text | Yes | Hasil deskripsi profil internal peserta |
 | `interpersonal` | text | Yes | Keterangan kecakapan interpersonal |
 | `kap_kerja` | text | Yes | Kapasitas kerja peserta |
-| `klinik` | text | Yes | Catatan klinis |
-| `kesimpulan` | text | Yes | Kesimpulan psikologis |
+| `klinik` | text | Yes | Catatan klinis MMPI |
+| `kesimpulan` | text | Yes | Kesimpulan psikologis / rekomendasi kejiwaan |
 | `psikogram` | text | Yes | JSON array berisi poin-poin psikogram |
 | `nilai_pq` | decimal(10,2) | Yes | Nilai Psychological Quotient (PQ) |
 | `tingkat_stres` | varchar(20) | Yes | Tingkat stres (`Rendah`, `Sedang`, `Tinggi`) |
