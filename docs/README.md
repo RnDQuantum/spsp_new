@@ -200,5 +200,5 @@ Cache::remember("rankings:{$configHash}", 60, fn() => $rankings);
 
 ---
 
-**Last Updated:** July 2026
+**Last Updated:** 13 Agustus 2026
 **Maintainers:** SPSP Development Team

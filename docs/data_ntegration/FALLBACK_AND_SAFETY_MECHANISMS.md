@@ -5,7 +5,7 @@
 - **Modul**: Integrasi Database LSP (Quantum HRMI) $\rightarrow$ Native SPSP System
 - **Status**: 🟢 **Robust & Fault-Tolerant**
 - **File Terkait**: [LspNormEngineService.php](file:///c:/laragon/www/spsp_new/app/Services/Lsp/LspNormEngineService.php), [LspDataTransformerService.php](file:///c:/laragon/www/spsp_new/app/Services/Lsp/LspDataTransformerService.php), [LspDataImporterService.php](file:///c:/laragon/www/spsp_new/app/Services/Lsp/LspDataImporterService.php)
-- **Tanggal Pembaruan**: 29 Juli 2026
+- **Tanggal Pembaruan**: 13 Agustus 2026
 
 ---
 
@@ -32,9 +32,7 @@
 ### B. Formasi Jabatan, Template, & Gelombang (Batch)
 | Field / Variabel | Kondisi Data Mentah LSP | Nilai Fallback / Aturan Penanganan | Status Safety |
 | :--- | :--- | :--- | :-: |
-| **Standar Form Penilaian** | `standar_form_penilaian` di LSP kosong | Default `'p3k_kjg_2025'`. | 🟡 **Fallback Form** |
 | **Level Jabatan** | `jabatan_pelaksana` di LSP kosong | Default `'STAFF'`. | 🟡 **Fallback Level** |
-| **Pemetaan Standar Penilaian** | `standar_form_penilaian` = `'p3k_kjg_2025'` | Jika `levelJabatan` = `'TERAMPIL'` $\rightarrow$ `'p3k_kjg_-_jf_terampil_2025'`. Selainnya $\rightarrow$ `'p3k_kjg_-_jf_muda_&_pertama_2025'`. | 🟢 **Auto Scoping** |
 | **Nama Gelombang / Batch** | Kolom `batch` di LSP kosong / `NULL` | Default `'1'` (Gelombang 1). | 🟡 **Fallback Batch** |
 | **Nama Formasi (PositionFormation)**| `minat_penempatan` di LSP kosong | Menggunakan nilai `levelJabatan` (misal `'STAFF'`). | 🟡 **Fallback Formation** |
 
@@ -56,7 +54,6 @@
 | Data Wawancara | Kondisi Data Mentah LSP | Nilai Fallback / Aturan Penanganan | Status Safety |
 | :--- | :--- | :--- | :-: |
 | **Rating Kompetensi Inti** | Record di `hasil_aspek_yang_digali` tidak ada | Menggunakan nilai **Standard Rating Target**. | 🟡 **Fallback Target** |
-| **Asesor Penanggung Jawab** | Data asesor di `users_personil` tidak ada | Nama: `'Asesor Penanggung Jawab'`, Jabatan: `'Technical Advisor'`. | 🟡 **Fallback TA** |
 | **Keunggulan & Kelemahan** | Record di `hasil_aspek_kelebihan` kosong | `'kekuatan' => '-'`, `'kelemahan' => '-'`. | 🟡 **Fallback Text** |
 | **Rekomendasi Wawancara** | Record di `hasil_rekomendasi` kosong | Rekomendasi default `'MS'` (Memenuhi Syarat), Catatan = `'-'`. | 🟡 **Fallback Rec** |
 | **Aspek Tambahan** | Rating aspek tambahan di `hasil_aspek_tambahan` kosong | Nilai default = **Standard Rating Target**, Keterangan = `'-'`. | 🟡 **Fallback Add** |

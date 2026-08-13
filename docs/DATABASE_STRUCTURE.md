@@ -1,6 +1,6 @@
 # Dokumentasi Struktur Database & ERD - SPSP Assessment System
 
-> **Versi**: 2.1 (Terbaru)  
+> **Versi**: 2.2 (Terbaru)  
 > **Terakhir Diperbarui**: 2026-08-13  
 > **Tujuan**: Referensi lengkap untuk skema database, hubungan antar tabel, representasi ERD, dan aliran data sistem SPSP (termasuk Ingesti Dual-Path LSP & API).
 
@@ -278,6 +278,9 @@ Mendefinisikan Master Proyek asesmen yang disinkronkan dari tabel `proyek_produk
 | `name` | varchar(255) | No | Nama master proyek |
 | `year` | int | Yes | Tahun proyek |
 | `contract_number` | varchar(255) | Yes | Nomor kontrak proyek |
+| `pic_name` | varchar(100) | Yes | Nama PIC Penanggung Jawab Proyek |
+| `pic_phone` | varchar(50) | Yes | Nomor telepon/WhatsApp PIC Proyek |
+| `project_type` | varchar(50) | Yes | Tipe/Jenis Proyek (e.g. `Seleksi & Pemetaan`, `Development`) |
 | `status` | varchar(255) | Yes | Status proyek (`Selesai`, `completed`) |
 
 *Contoh Data*:
@@ -286,9 +289,12 @@ Mendefinisikan Master Proyek asesmen yang disinkronkan dari tabel `proyek_produk
   "id": 1,
   "institution_id": 1,
   "code": "AP-085",
-  "name": "SELEKSI KOMPETENSI TEKNIS TAMBAHAN PSIKOTES DAFTAR RIWAYAT HIDUP",
+  "name": "Master Proyek Assessment Kejaksaan Agung RI (AP-085)",
   "year": 2025,
   "contract_number": "QHI17024-02-MR-001-01",
+  "pic_name": "Technical Coordinator",
+  "pic_phone": "081234567890",
+  "project_type": "Seleksi & Pemetaan",
   "status": "completed"
 }
 ```
@@ -306,6 +312,9 @@ Mendefinisikan pelaksanaan proyek asesmen (Pelaksanaan) yang disinkronkan dari t
 | `code` | varchar(255) | No | Kode pelaksanaan event unik (e.g., `PR-A-313`, `PR-A-338`) |
 | `name` | varchar(255) | No | Nama pelaksanaan |
 | `description` | text | Yes | Keterangan tambahan event |
+| `location` | varchar(255) | Yes | Lokasi penyelenggaraan event |
+| `target_participants` | int | Yes | Target total kuota peserta event |
+| `assessment_type` | varchar(50) | Yes | Metode/Tipe asesmen (`Psikotes & Kompetensi`, `Online`) |
 | `year` | int | No | Tahun penyelenggaraan |
 | `start_date` | date | No | Tanggal mulai event |
 | `end_date` | date | No | Tanggal selesai event |
@@ -321,6 +330,9 @@ Mendefinisikan pelaksanaan proyek asesmen (Pelaksanaan) yang disinkronkan dari t
   "code": "PR-A-313",
   "name": "Seleksi Kompetensi Teknis Tambahan Kejaksaan 2025",
   "description": "Imported from LSP DB Execution PR-A-313",
+  "location": "Mojokerto",
+  "target_participants": 300,
+  "assessment_type": "Psikotes & Kompetensi",
   "year": 2025,
   "start_date": "2025-09-01",
   "end_date": "2025-12-31",
@@ -370,6 +382,8 @@ Daftar jabatan/formasi lowongan yang dibuka dalam suatu event. Relasi krusial ya
 | `template_id` | bigint | No | Foreign Key ke `assessment_templates.id` |
 | `code` | varchar(255) | No | Kode formasi jabatan |
 | `name` | varchar(255) | No | Nama formasi jabatan |
+| `level_jabatan` | varchar(50) | Yes | Jenjang/Level Jabatan (e.g., `MUDA`, `STAF`, `SUPERVISOR`) |
+| `description` | text | Yes | Deskripsi formasi jabatan |
 | `quota` | int | Yes | Kuota formasi yang tersedia |
 
 *Contoh Data*:
@@ -380,6 +394,8 @@ Daftar jabatan/formasi lowongan yang dibuka dalam suatu event. Relasi krusial ya
   "template_id": 4,
   "code": "fisikawan_medis",
   "name": "Fisikawan Medis",
+  "level_jabatan": "MUDA",
+  "description": "Formasi Jabatan Fisikawan Medis",
   "quota": 20
 }
 ```
@@ -387,7 +403,7 @@ Daftar jabatan/formasi lowongan yang dibuka dalam suatu event. Relasi krusial ya
 ---
 
 ### `participants`
-Data diri lengkap peserta ujian yang mengikuti event tertentu.
+Data diri lengkap peserta ujian yang mengikuti event tertentu (disinkronkan dari `peserta_produksi` DB LSP).
 
 | Kolom | Tipe | Nullable | Deskripsi |
 | :--- | :--- | :--- | :--- |
@@ -399,11 +415,29 @@ Data diri lengkap peserta ujian yang mengikuti event tertentu.
 | `test_number` | varchar(255) | No | Nomor ujian peserta (unik) |
 | `skb_number` | varchar(255) | No | Nomor SKB peserta |
 | `name` | varchar(255) | No | Nama lengkap peserta |
+| `tempat_lahir` | varchar(100) | Yes | Kota tempat lahir |
+| `tanggal_lahir` | date | Yes | Tanggal lahir peserta |
+| `gelar_depan` | varchar(50) | Yes | Gelar akademis depan (e.g. `Drs.`, `Dr.`) |
+| `gelar_belakang` | varchar(50) | Yes | Gelar akademis belakang (e.g. `S.Kom`, `S.H.`) |
+| `pendidikan` | varchar(50) | Yes | Tingkat pendidikan (e.g. `S1`, `S2`, `D3`) |
+| `agama` | varchar(50) | Yes | Agama peserta |
+| `status_perkawinan` | varchar(50) | Yes | Status pernikahan |
 | `email` | varchar(255) | Yes | Alamat email peserta |
-| `phone` | varchar(255) | Yes | Nomor telepon |
+| `phone` | varchar(255) | Yes | Nomor telepon / HP |
 | `gender` | varchar(255) | Yes | Jenis kelamin (`L` / `P`) |
-| `photo_path` | varchar(255) | Yes | Path foto peserta |
+| `photo_path` | varchar(255) | Yes | Path pasfoto peserta |
 | `assessment_date` | date | No | Tanggal pelaksanaan asesmen |
+| `nik` | varchar(20) | Yes | Nomor Induk Kependudukan (NIK) |
+| `no_kjg` | varchar(30) | Yes | Nomor registrasi KJG |
+| `jabatan_pelaksana` | varchar(100) | Yes | Jabatan pelaksana |
+| `jbt_fungsional` | varchar(100) | Yes | Jabatan fungsional |
+| `jbt_struktural` | varchar(100) | Yes | Jabatan struktural |
+| `pangkat` | varchar(50) | Yes | Pangkat kepegawaian |
+| `golongan` | varchar(20) | Yes | Golongan kepegawaian (e.g. `III/a`) |
+| `status_kepegawaian` | varchar(50) | Yes | Status kepegawaian (`PNS`, `CPNS`, `PPPK`, `BUMN`) |
+| `unit_kerja` | varchar(255) | Yes | Unit kerja / bagian instansi |
+| `minat_penempatan` | varchar(255) | Yes | Lokasi / minat penempatan formasi |
+| `pengalaman_kerja` | varchar(255) | Yes | Masa / pengalaman kerja |
 
 *Contoh Data*:
 ```json
@@ -416,11 +450,29 @@ Data diri lengkap peserta ujian yang mengikuti event tertentu.
   "test_number": "68-7-2-34-00001",
   "skb_number": "24400240120000001",
   "name": "MARIADI ASTUTI, S.Kom",
+  "tempat_lahir": "Mojokerto",
+  "tanggal_lahir": "1992-05-14",
+  "gelar_depan": null,
+  "gelar_belakang": "S.Kom",
+  "pendidikan": "S1",
+  "agama": "Islam",
+  "status_perkawinan": "Menikah",
   "email": "participant1@hotmail.com",
   "phone": "080459449674",
   "gender": "L",
   "photo_path": null,
-  "assessment_date": "2026-06-15"
+  "assessment_date": "2026-06-15",
+  "nik": "3515081405920001",
+  "no_kjg": "24400240120000001",
+  "jabatan_pelaksana": "FISIKAWAN MEDIS",
+  "jbt_fungsional": "Fisikawan Medis Ahli Pertama",
+  "jbt_struktural": "-",
+  "pangkat": "Penata Muda",
+  "golongan": "III/a",
+  "status_kepegawaian": "PNS",
+  "unit_kerja": "Kejaksaan Negeri Mojokerto",
+  "minat_penempatan": "Kejaksaan Negeri Mojokerto",
+  "pengalaman_kerja": "5 Tahun"
 }
 ```
 
@@ -849,13 +901,17 @@ Tabel pengguna pengelola sistem.
 ---
 
 ### `institutions`
-Instansi client penyewa SaaS SPSP.
+Instansi client penyewa SaaS SPSP (disinkronkan dari tabel `klien` DB LSP).
 
 | Kolom | Tipe | Nullable | Deskripsi |
 | :--- | :--- | :--- | :--- |
 | `id` | bigint | No | Primary Key |
 | `code` | varchar(255) | No | Kode unik instansi (e.g. `kejaksaan`, `kemenkes`) |
 | `name` | varchar(255) | No | Nama lengkap instansi |
+| `address` | varchar(255) | Yes | Alamat kantor instansi |
+| `phone` | varchar(50) | Yes | Nomor telepon / HP instansi |
+| `pic_name` | varchar(100) | Yes | Nama PIC Penanggung Jawab Instansi |
+| `pic_phone` | varchar(50) | Yes | Nomor telepon / WhatsApp PIC Instansi |
 | `logo_path` | varchar(255) | Yes | Path file logo instansi |
 | `api_key` | varchar(255) | No | API Key untuk autentikasi integrasi data |
 
@@ -865,6 +921,10 @@ Instansi client penyewa SaaS SPSP.
   "id": 1,
   "code": "kejaksaan",
   "name": "Kejaksaan Agung RI",
+  "address": "Jl. Sultan Hasanuddin No. 1, Kebayoran Baru, Jakarta Selatan",
+  "phone": "021-7221337",
+  "pic_name": "Bambang Sugeng, S.H., M.H.",
+  "pic_phone": "081299887766",
   "logo_path": "logos/kejaksaan.png",
   "api_key": "4x470qTGHZoJe92TuY0cEAl0bv6UWJ5W"
 }

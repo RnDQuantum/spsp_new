@@ -2,7 +2,7 @@
 
 - **Sistem**: Sistem Pemetaan & Statistik Psikologi (SPSP)
 - **Tipe Sistem**: Business Intelligence (BI) & Analytical System
-- **Terakhir Diperbarui**: 11 Agustus 2026
+- **Terakhir Diperbarui**: 13 Agustus 2026
 
 ---
 
@@ -69,13 +69,15 @@ flowchart TD
 
 ## 🔀 2. Spesifikasi Rinci Jalur Ingestion & Master Data
 
-### A. Hirarki 3 Level Master Data SPSP
+### A. Hirarki 3 Level Master Data & Profil SPSP
 1. **Klien / Instansi (`institutions`)**:
-   - Disinkronkan dari tabel `klien` pada DB LSP (`kode_klien` $\rightarrow$ `code`, `nama_klien` $\rightarrow$ `name`, `logo` $\rightarrow$ `logo_path`).
+   - Disinkronkan dari tabel `klien` pada DB LSP (`kode_klien` $\rightarrow$ `code`, `nama_klien` $\rightarrow$ `name`, `logo` $\rightarrow$ `logo_path`, `address`, `phone`, `pic_name`, `pic_phone`).
 2. **Master Proyek (`projects`)**:
-   - Disinkronkan dari tabel `proyek_produksi` pada DB LSP (`kode` $\rightarrow$ `code` misal `'AP-085'`, `'AP-100'`, `'AP-554'`, `nama` $\rightarrow$ `name`, `tahun` $\rightarrow$ `year`, `institution_id`).
+   - Disinkronkan dari tabel `proyek_produksi` pada DB LSP (`kode` $\rightarrow$ `code` misal `'AP-085'`, `'AP-100'`, `'AP-554'`, `nama` $\rightarrow$ `name`, `tahun` $\rightarrow$ `year`, `contract_number`, `pic_name`, `pic_phone`, `project_type`, `institution_id`).
 3. **Pelaksanaan / Execution (`assessment_events`)**:
-   - Disinkronkan dari tabel `proyek` pada DB LSP (`kode_proyek` $\rightarrow$ `code` misal `'PR-A-313'`, `'PR-A-338'`, `nama_pelaksanaan` $\rightarrow$ `name`, `project_id`, `institution_id`).
+   - Disinkronkan dari tabel `proyek` pada DB LSP (`kode_proyek` $\rightarrow$ `code` misal `'PR-A-313'`, `'PR-A-338'`, `nama_pelaksanaan` $\rightarrow$ `name`, `location`, `target_participants`, `assessment_type`, `project_id`, `institution_id`).
+4. **Data Peserta (`participants`)**:
+   - Disinkronkan dari tabel `peserta_produksi` pada DB LSP dengan bulk upsert 18 kolom profil lengkap (`tempat_lahir`, `tanggal_lahir`, `gelar_depan`, `gelar_belakang`, `pendidikan`, `agama`, `status_perkawinan`, `nik`, `no_kjg`, `jabatan_pelaksana`, `jbt_fungsional`, `jbt_struktural`, `pangkat`, `golongan`, `status_kepegawaian`, `unit_kerja`, `minat_penempatan`, `pengalaman_kerja`).
 
 ---
 

@@ -11,7 +11,7 @@
   - [QuantumApiClient.php](file:///c:/laragon/www/spsp_new/app/Services/Api/QuantumApiClient.php) (Client REST API psikotes.qhrmi.id)
 - **File Command**: `TestLspIndividualReport.php` & `ImportLspData.php`
 - **Lokasi Norma**: `resources/data/lsp_norms/` (`ist.json`, `kostik.json`, `personality.json`, `cfit3a.json`, `cfit3b.json`)
-- **Tanggal Pembaruan**: 11 Agustus 2026
+- **Tanggal Pembaruan**: 13 Agustus 2026
 
 ---
 

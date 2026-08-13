@@ -4,7 +4,7 @@
 
 - **Modul**: Integrasi Database LSP (Quantum HRMI) $\rightarrow$ Native SPSP System
 - **File Dokumentasi**: [docs/lsp_integration/SERVICES_ARCHITECTURE.md](./SERVICES_ARCHITECTURE.md)
-- **Tanggal Pembaruan**: 11 Agustus 2026
+- **Tanggal Pembaruan**: 13 Agustus 2026
 
 ---
 
@@ -80,6 +80,7 @@ flowchart TD
 ### 2. `LspDataTransformerService` (Jalur A - Legacy DB)
 - **Lokasi File**: [LspDataTransformerService.php](file:///c:/laragon/www/spsp_new/app/Services/Lsp/LspDataTransformerService.php)
 - **Tanggung Jawab Utama**: Pipeline ekstraksi dan transformasi data mentah dari koneksi DB LSP (`DB_LSP_LOCAL`) untuk proyek legacy (`< PR-A-338`) menjadi struktur DTO terstandar.
+- **Fitur Profil Lengkap**: Membaca dan mengekstrak 18 atribut profil peserta dari `peserta_produksi` (`tempat_lahir`, `tanggal_lahir`, `gelar_depan`, `gelar_belakang`, `pendidikan`, `agama`, `status_perkawinan`, `nik`, `no_kjg`, `jabatan_pelaksana`, `jbt_fungsional`, `jbt_struktural`, `pangkat`, `golongan`, `status_kepegawaian`, `unit_kerja`, `minat_penempatan`, `pengalaman_kerja`).
 - **Method Utama**:
   - `getIndividualReport($username, $kodeProyek)`: Membaca & mentransformasi 1 peserta.
   - `getBatchIndividualReports(array $usernames, string $kodeProyek)`: Mengolah sekelompok (*batch/chunk*) peserta sekaligus dengan optimasi query N+1 hingga 95%.
@@ -89,7 +90,7 @@ flowchart TD
 ### 3. `ApiDataTransformerService` (Jalur B - REST API Online)
 - **Lokasi File**: [ApiDataTransformerService.php](file:///c:/laragon/www/spsp_new/app/Services/Api/ApiDataTransformerService.php)
 - **Tanggung Jawab Utama**: Transformer data khusus proyek baru (`≥ PR-A-338`) yang membaca payload JSON dari REST API `psikotes.qhrmi.id` via `QuantumApiClient`.
-- **Fitur Utama**: Mengekstrak komponen matang (IQ, SS IST, Sten 16PF terkoreksi MD, MMPI 9 domain, EQ, Kraepelin, DISC) secara langsung dan menyimpannya ke `api_full` pada DTO SPSP.
+- **Fitur Utama**: Mengekstrak komponen matang (IQ, SS IST, Sten 16PF terkoreksi MD, MMPI 9 domain, EQ, Kraepelin, DISC) dan seluruh atribut profil peserta secara langsung dan menyimpannya ke DTO SPSP.
 
 ---
 
@@ -98,7 +99,12 @@ flowchart TD
 - **Tanggung Jawab Utama**: Core Importer & Router Dual-Path Ingestion yang menyinkronkan master data dan menulis payload DTO ke tabel-tabel native SPSP.
 - **Fitur Utama**:
   - `isLegacyProject($kodeProyek)`: Deteksi alur Ingest (Jalur A `< PR-A-338` vs Jalur B `≥ PR-A-338`).
-  - **Sinkronisasi Master Data**: Membaca `klien` $\rightarrow$ `institutions`, `proyek_produksi` $\rightarrow$ `projects`, `proyek` $\rightarrow$ `assessment_events`.
+  - **Sinkronisasi Master Data & Profil**: 
+    - `klien` $\rightarrow$ `institutions` (termasuk `address`, `phone`, `pic_name`, `pic_phone`).
+    - `proyek_produksi` $\rightarrow$ `projects` (termasuk `pic_name`, `pic_phone`, `project_type`).
+    - `proyek` $\rightarrow$ `assessment_events` (termasuk `location`, `target_participants`, `assessment_type`).
+    - `peserta_produksi` $\rightarrow$ `participants` (bulk upsert 18 kolom profil peserta).
+    - Formasi Jabatan $\rightarrow$ `position_formations` (termasuk `level_jabatan` & `description`).
   - **Single Source TestResults**: Memproses seluruh komponen alat tes ke tabel `test_results`.
   - *Idempotent bulk upserts*, isolasi transaksi 100-chunk per peserta, dan *in-memory registry*.
 
