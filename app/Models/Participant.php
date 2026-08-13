@@ -22,11 +22,29 @@ class Participant extends Model
         'test_number',
         'skb_number',
         'name',
+        'tempat_lahir',
+        'tanggal_lahir',
+        'gelar_depan',
+        'gelar_belakang',
+        'pendidikan',
+        'agama',
+        'status_perkawinan',
         'email',
         'phone',
         'gender',
         'photo_path',
         'assessment_date',
+        'nik',
+        'no_kjg',
+        'jabatan_pelaksana',
+        'jbt_fungsional',
+        'jbt_struktural',
+        'pangkat',
+        'golongan',
+        'status_kepegawaian',
+        'unit_kerja',
+        'minat_penempatan',
+        'pengalaman_kerja',
     ];
 
     protected static function booted()
@@ -38,6 +56,7 @@ class Participant extends Model
     {
         return [
             'assessment_date' => 'date',
+            'tanggal_lahir' => 'date',
         ];
     }
 

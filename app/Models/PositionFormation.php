@@ -18,6 +18,8 @@ class PositionFormation extends Model
         'template_id',
         'code',
         'name',
+        'level_jabatan',
+        'description',
         'quota',
     ];
 

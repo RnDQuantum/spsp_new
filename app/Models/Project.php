@@ -17,6 +17,9 @@ class Project extends Model
         'name',
         'year',
         'contract_number',
+        'pic_name',
+        'pic_phone',
+        'project_type',
         'status',
     ];
 

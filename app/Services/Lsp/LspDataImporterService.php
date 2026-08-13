@@ -279,6 +279,7 @@ class LspDataImporterService
             if ($noTest && isset($reportsMap[$noTest])) {
                 return $reportsMap[$noTest];
             }
+
             return null;
         };
 
@@ -334,6 +335,8 @@ class LspDataImporterService
                     [
                         'template_id' => $template->id,
                         'name' => $formationName,
+                        'level_jabatan' => $levelJabatan,
+                        'description' => "Formasi Jabatan {$formationName}",
                         'quota' => 100,
                     ]
                 );
@@ -364,10 +367,30 @@ class LspDataImporterService
                 'test_number' => $pesertaInfo['no_test'],
                 'skb_number' => $pesertaInfo['no_kjg'] ?? '-',
                 'name' => $pesertaInfo['nama_lengkap'],
-                'gender' => $pesertaInfo['jenis_kelamin'],
-                'username' => $u,
-                'photo_path' => $pesertaInfo['pasfoto'],
+                'tempat_lahir' => $pesertaInfo['tempat_lahir'] ?? null,
+                'tanggal_lahir' => ! empty($pesertaInfo['tanggal_lahir']) && $pesertaInfo['tanggal_lahir'] !== '1990-01-01' ? $pesertaInfo['tanggal_lahir'] : null,
+                'gelar_depan' => $pesertaInfo['gelar_depan'] ?? null,
+                'gelar_belakang' => $pesertaInfo['gelar_belakang'] ?? null,
+                'pendidikan' => $pesertaInfo['pendidikan'] ?? 'S1',
+                'agama' => $pesertaInfo['agama'] ?? null,
+                'status_perkawinan' => $pesertaInfo['status_perkawinan'] ?? null,
+                'email' => $pesertaInfo['email'] ?? null,
+                'phone' => $pesertaInfo['no_hp'] ?? ($pesertaInfo['phone'] ?? null),
+                'gender' => $pesertaInfo['jenis_kelamin'] ?? 'L',
+                'photo_path' => $pesertaInfo['pasfoto'] ?? null,
                 'assessment_date' => $rep['metadata_proyek']['tanggal_pelaksanaan'] ?? ($rep['metadata']['tanggal_pelaksanaan'] ?? $event->start_date),
+                'nik' => $pesertaInfo['nik_skb'] ?? ($pesertaInfo['nik'] ?? null),
+                'no_kjg' => $pesertaInfo['no_kjg'] ?? null,
+                'jabatan_pelaksana' => $pesertaInfo['jabatan_pelaksana'] ?? null,
+                'jbt_fungsional' => $pesertaInfo['jbt_fungsional'] ?? null,
+                'jbt_struktural' => $pesertaInfo['jbt_struktural'] ?? null,
+                'pangkat' => $pesertaInfo['pangkat'] ?? null,
+                'golongan' => $pesertaInfo['gol'] ?? ($pesertaInfo['golongan'] ?? null),
+                'status_kepegawaian' => $pesertaInfo['status_kepegawaian'] ?? null,
+                'unit_kerja' => $pesertaInfo['unit_kerja'] ?? ($pesertaInfo['bagian'] ?? null),
+                'minat_penempatan' => $pesertaInfo['minat_penempatan'] ?? null,
+                'pengalaman_kerja' => $pesertaInfo['pengalaman_kerja'] ?? null,
+                'username' => $u,
                 'created_at' => $now,
                 'updated_at' => $now,
             ];
@@ -380,7 +403,14 @@ class LspDataImporterService
         Participant::upsert(
             $participantsBulk,
             ['username'],
-            ['event_id', 'batch_id', 'position_formation_id', 'test_number', 'skb_number', 'name', 'gender', 'photo_path', 'assessment_date', 'updated_at']
+            [
+                'event_id', 'batch_id', 'position_formation_id', 'test_number', 'skb_number', 'name',
+                'tempat_lahir', 'tanggal_lahir', 'gelar_depan', 'gelar_belakang', 'pendidikan', 'agama', 'status_perkawinan',
+                'email', 'phone', 'gender', 'photo_path', 'assessment_date',
+                'nik', 'no_kjg', 'jabatan_pelaksana', 'jbt_fungsional', 'jbt_struktural', 'pangkat', 'golongan',
+                'status_kepegawaian', 'unit_kerja', 'minat_penempatan', 'pengalaman_kerja',
+                'updated_at',
+            ]
         );
 
         // Map participant username to DB participant_id
@@ -863,7 +893,7 @@ class LspDataImporterService
             ];
             $rekomAkhir = $rep['rekomendasi_akhir'] ?? [
                 'final_code' => $rep['rekap']['kesimpulan_final'] ?? 'MS',
-                'final_text' => 'MEMENUHI SYARAT (' . ($rep['rekap']['kesimpulan_final'] ?? 'MS') . ')',
+                'final_text' => 'MEMENUHI SYARAT ('.($rep['rekap']['kesimpulan_final'] ?? 'MS').')',
             ];
 
             $finalBulk[] = [

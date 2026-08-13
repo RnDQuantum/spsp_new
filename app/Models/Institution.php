@@ -14,6 +14,10 @@ class Institution extends Model
     protected $fillable = [
         'code',
         'name',
+        'address',
+        'phone',
+        'pic_name',
+        'pic_phone',
         'logo_path',
         'api_key',
     ];

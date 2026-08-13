@@ -195,6 +195,10 @@ class InstitutionWithCategoriesSeeder extends Seeder
             [
                 'code' => 'kejaksaan',
                 'name' => 'Kejaksaan Agung RI',
+                'address' => 'Jl. Sultan Hasanuddin No. 1, Kebayoran Baru, Jakarta Selatan',
+                'phone' => '021-7221337',
+                'pic_name' => 'Bambang Sugeng, S.H., M.H.',
+                'pic_phone' => '081299887766',
                 'api_key' => Str::random(32),
                 'categories' => [
                     ['code' => 'kementerian', 'is_primary' => true],
@@ -203,6 +207,10 @@ class InstitutionWithCategoriesSeeder extends Seeder
             [
                 'code' => 'bkn',
                 'name' => 'Badan Kepegawaian Negara (BKN)',
+                'address' => 'Jl. Mayor Jendral Sutoyo No. 12, Cililitan, Jakarta Timur',
+                'phone' => '021-8093008',
+                'pic_name' => 'Dr. Ir. H. Suharmen, S.Kom., M.Si.',
+                'pic_phone' => '081122334455',
                 'api_key' => Str::random(32),
                 'categories' => [
                     ['code' => 'kementerian', 'is_primary' => true],
@@ -211,6 +219,10 @@ class InstitutionWithCategoriesSeeder extends Seeder
             [
                 'code' => 'kemendikbud',
                 'name' => 'Kementerian Pendidikan dan Kebudayaan',
+                'address' => 'Jl. Jenderal Sudirman, Senayan, Jakarta Pusat',
+                'phone' => '021-5703303',
+                'pic_name' => 'Dra. Sri Wahyuni, M.Ed.',
+                'pic_phone' => '081344556677',
                 'api_key' => Str::random(32),
                 'categories' => [
                     ['code' => 'kementerian', 'is_primary' => true],
@@ -220,6 +232,10 @@ class InstitutionWithCategoriesSeeder extends Seeder
             [
                 'code' => 'kemenkes',
                 'name' => 'Kementerian Kesehatan',
+                'address' => 'Jl. H.R. Rasuna Said Blok X-5 Kav. 4-9, Kuningan, Jakarta Selatan',
+                'phone' => '021-5201590',
+                'pic_name' => 'drg. Arianti Anaya, MKM',
+                'pic_phone' => '081566778899',
                 'api_key' => Str::random(32),
                 'categories' => [
                     ['code' => 'kementerian', 'is_primary' => true],
@@ -233,6 +249,10 @@ class InstitutionWithCategoriesSeeder extends Seeder
                 ['code' => $data['code']],
                 [
                     'name' => $data['name'],
+                    'address' => $data['address'],
+                    'phone' => $data['phone'],
+                    'pic_name' => $data['pic_name'],
+                    'pic_phone' => $data['pic_phone'],
                     'api_key' => $data['api_key'],
                 ]
             );
