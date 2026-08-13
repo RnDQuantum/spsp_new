@@ -102,15 +102,14 @@ class HcaReportPageTest extends TestCase
      */
     public function test_selecting_participant_updates_participant_id(): void
     {
-        $participant = Participant::query()->first();
-        if ($participant) {
-            Livewire::test(HcaReportPage::class)
-                ->call('selectParticipant', $participant->id)
-                ->assertSet('participantId', $participant->id)
-                ->assertSet('showTalentModal', false);
+        $participant = Participant::query()->first() ?? Participant::factory()->create();
 
-            $this->assertEquals($participant->id, session('filter.participant_id'));
-        }
+        Livewire::test(HcaReportPage::class)
+            ->call('selectParticipant', $participant->id)
+            ->assertSet('participantId', $participant->id)
+            ->assertSet('showTalentModal', false);
+
+        $this->assertEquals($participant->id, session('filter.participant_id'));
     }
 
     /**
@@ -131,15 +130,14 @@ class HcaReportPageTest extends TestCase
      */
     public function test_executive_summary_section_renders_dynamic_data(): void
     {
-        $participant = Participant::query()->first();
-        if ($participant) {
-            Livewire::test(ExecutiveSummary::class, ['participantId' => $participant->id])
-                ->assertSee('Ringkasan')
-                ->assertSee('Talent Index Score')
-                ->assertSee('Pilar Evaluasi Asesmen')
-                ->assertSee('Kompetensi')
-                ->assertSee('Potensi')
-                ->assertSee('Kinerja');
-        }
+        $participant = Participant::query()->first() ?? Participant::factory()->create();
+
+        Livewire::test(ExecutiveSummary::class, ['participantId' => $participant->id])
+            ->assertSee('Ringkasan')
+            ->assertSee('Talent Index Score')
+            ->assertSee('Pilar Evaluasi Asesmen')
+            ->assertSee('Kompetensi')
+            ->assertSee('Potensi')
+            ->assertSee('Kinerja');
     }
 }

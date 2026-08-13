@@ -219,7 +219,7 @@ class HcaReportPage extends Component
             'positionFormation.template',
             'batch',
             'finalAssessment',
-            'psychologicalTest',
+            'mmpi',
             'institution',
         ])->find($this->participantId);
     }
