@@ -18,13 +18,13 @@ class LaporanAlatTes extends Component
     public int $perPage = 15;
 
     #[On('event-selected')]
-    public function handleEventSelected($eventId): void
+    public function handleEventSelected(?string $eventCode = null): void
     {
         $this->resetPage();
     }
 
     #[On('position-selected')]
-    public function handlePositionSelected($positionId): void
+    public function handlePositionSelected(?int $positionFormationId = null): void
     {
         $this->resetPage();
     }
