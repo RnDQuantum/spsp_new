@@ -3,7 +3,7 @@
 * **Nama Visual**: Kekuatan Utama & Karakter Dominan
 * **Kode Section**: `strengths`
 * **Komponen File**: [QualitativeListSection.php](file:///c:/laragon/www/spsp_new/app/Livewire/Pages/HCA/Sections/QualitativeListSection.php) & [qualitative-list-section.blade.php](file:///c:/laragon/www/spsp_new/resources/views/livewire/pages/h-c-a/sections/qualitative-list-section.blade.php)
-* **Status Dynamic**: 🟨 **ACTIVE (UI Ready / Qualitative Dataset)**
+* **Status Dynamic**: ✅ **DONE (Dynamic DB Sync via `AspectAssessment` & `Mmpi`)**
 
 ---
 
@@ -24,5 +24,9 @@
 
 ## 📊 Sumber Data DB SPSP & Logic Calculation
 
-* **Model Utama**: Ekstraksi dari deskripsi kualitatif `App\Models\Mmpi` (field `internal` & `interpersonal`) serta aspek rating tertinggi pada `AspectAssessment`.
+* **Model Utama**: `App\Models\AspectAssessment`, `App\Models\SubAspectAssessment`, `App\Models\Mmpi`, `App\Models\Participant`.
+* **Logika Query & Sintesis Dinamis**:
+  1. Mengambil 5 aspek dengan `individual_rating` dan gap tertinggi pada `aspect_assessments` milik peserta.
+  2. Mengintegrasikan tingkat stres dan catatan stabilitas mental dari tabel `mmpi`.
+  3. Menyusun 5 kartu kekuatan eksekutif terpersonalisasi yang secara langsung menyebutkan skor riil dan aspek unggulan kandidat.
 * **Tampilan Visual UI**: Daftar kartu-kartu kekuatan modular dengan tag tematik (*Mental Toughness, Leadership, Cognitive Agility, Interpersonal, Core Values*) dan penjelasan perilaku kerja konkret.

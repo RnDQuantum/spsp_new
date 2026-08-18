@@ -119,4 +119,9 @@ class Participant extends Model
     {
         return $this->hasMany(ParticipantPerformanceRecord::class)->orderBy('year', 'asc');
     }
+
+    public function personalProfile(): HasOne
+    {
+        return $this->hasOne(ParticipantPersonalProfile::class);
+    }
 }

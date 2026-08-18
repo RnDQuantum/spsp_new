@@ -3,7 +3,7 @@
 * **Nama Visual**: Informasi Personal & Karakter Pelengkap
 * **Kode Section**: `personal_profile`
 * **Komponen File**: [QualitativeListSection.php](file:///c:/laragon/www/spsp_new/app/Livewire/Pages/HCA/Sections/QualitativeListSection.php) & [qualitative-list-section.blade.php](file:///c:/laragon/www/spsp_new/resources/views/livewire/pages/h-c-a/sections/qualitative-list-section.blade.php)
-* **Status Dynamic**: 🟨 **ACTIVE (UI Ready / Qualitative Dataset)**
+* **Status Dynamic**: ✅ **DONE (Dynamic DB Sync via `participant_personal_profiles`)**
 
 ---
 
@@ -20,5 +20,17 @@
 
 ## 📊 Sumber Data DB SPSP & Logic Calculation
 
-* **Model Utama**: Atribut pelengkap pada profil `Participant` atau instrumen kuesioner minat personal/biodata pengayaan.
-* **Tampilan Visual UI**: Kartu-kartu kualitatif modular dengan icon tematik (*Active Life, Medical Reference, Cultural Profile, Tradition*) dan deskripsi kontekstual yang elegan.
+* **Tabel Database**: `participant_personal_profiles`.
+* **Model Eloquent**: `App\Models\ParticipantPersonalProfile` berelasi dengan `App\Models\Participant::personalProfile()`.
+* **Field yang Digunakan**:
+  * `blood_type`: Golongan darah (O+, A+, B+, AB+).
+  * `hobbies`: Hobi utama kandidat di waktu luang.
+  * `sports`: Aktivitas olahraga rutin.
+  * `zodiac`: Zodiak Barat (dihitung deterministik dari tanggal lahir).
+  * `chinese_zodiac`: Shio Tionghoa (dihitung deterministik dari tahun lahir).
+  * `weton`: Weton kelahiran penanggalan Jawa (dihitung deterministik dari tanggal lahir).
+  * `medical_notes`: Catatan kelaikan medis umum.
+  * `cultural_notes`: Catatan karakter sosio-kultural.
+  * `motto_or_values`: Prinsip hidup atau moto profesional.
+* **Seeder Generator**: `Database\Seeders\Support\PersonalProfileGenerator` dan `ParticipantPersonalProfileSeeder`.
+* **Tampilan Visual UI**: Kartu-kartu kualitatif modular dengan icon tematik (*Active Life, Medical Reference, Cultural Profile, Tradition, Motto*) dan deskripsi kontekstual yang elegan.

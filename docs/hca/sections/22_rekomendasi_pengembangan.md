@@ -3,7 +3,7 @@
 * **Nama Visual**: Rekomendasi Program Pelatihan & Rencana Pengembangan Individu
 * **Kode Section**: `development_rec`
 * **Komponen File**: [DevelopmentRecommendation.php](file:///c:/laragon/www/spsp_new/app/Livewire/Pages/HCA/Sections/DevelopmentRecommendation.php) & [development-recommendation.blade.php](file:///c:/laragon/www/spsp_new/resources/views/livewire/pages/h-c-a/sections/development-recommendation.blade.php)
-* **Status Dynamic**: 🟨 **ACTIVE (UI Ready / Connected to TrainingCatalog)**
+* **Status Dynamic**: ✅ **DONE (Dynamic DB Sync via `AspectAssessment` & 70-20-10 IDP)**
 
 ---
 
@@ -23,7 +23,9 @@
 
 ## 📊 Sumber Data DB SPSP & Logic Calculation
 
-* **Service Utama**: `App\Services\TrainingRecommendationService`.
-* **Model Terkait**: `App\Models\AspectAssessment`, `App\Models\TrainingCatalog`.
-* **Logika Query**: Menjaring aspek-aspek kompetensi/potensi yang memiliki skor gap negatif terbesar ($\text{individual\_rating} < \text{standard\_rating}$), lalu memetakan secara otomatis ke modul pelatihan yang relevan di katalog pelatihan SPSP.
-* **Tampilan Visual UI**: Dua kolom kartu komparasi elegan: *Pilar Kekuatan Utama (Key Strengths)* beraksen hijau di sisi kiri, dan *Area Pengembangan Prioritas (Growth Opportunities)* beraksen amber di sisi kanan.
+* **Model Terkait**: `App\Models\AspectAssessment`, `App\Models\Participant`, `App\Models\PositionFormation`.
+* **Logika Query & Kalkulasi Dinamis**:
+  1. Mengidentifikasi 3 aspek dengan skor/gap tertinggi untuk dirumuskan strategi kapitalisasi (*multiplier strengths*).
+  2. Mengidentifikasi 3 aspek dengan gap defisit terbesar ($\text{individual\_rating} < \text{standard\_rating}$) sebagai sasaran IDP.
+  3. Menyusun rencana aksi konkret per aspek kesenjangan ke dalam 3 level intervensi (70% On-the-job, 20% Coaching, 10% Pelatihan Formal).
+* **Tampilan Visual UI**: Dua kolom kartu komparasi elegan: *Pilar Kekuatan Utama (Key Strengths)* beraksen hijau di sisi kiri, dan *Area Prioritas Pengembangan (IDP 70-20-10)* di sisi kanan lengkap dengan badge persentase.

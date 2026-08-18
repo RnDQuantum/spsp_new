@@ -221,6 +221,9 @@ class HcaReportPage extends Component
             'finalAssessment',
             'mmpi',
             'institution',
+            'personalProfile',
+            'careerHistories',
+            'performanceRecords',
         ])->find($this->participantId);
     }
 

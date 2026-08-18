@@ -26,6 +26,7 @@ use Database\Seeders\Support\AssessmentRecordGenerator;
 use Database\Seeders\Support\CareerHistoryGenerator;
 use Database\Seeders\Support\ParticipantProfileGenerator;
 use Database\Seeders\Support\PerformanceRecordGenerator;
+use Database\Seeders\Support\PersonalProfileGenerator;
 use Database\Seeders\Support\TestResultGenerator;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -251,6 +252,8 @@ class DynamicAssessmentSeeder extends Seeder
         $finalAssessmentsData = [];
         $testResultsData = [];
         $careerHistoriesData = [];
+        $performanceRecordsData = [];
+        $personalProfilesData = [];
 
         // 1. Generate participants data
         for ($i = 0; $i < $chunkSize; $i++) {
@@ -339,6 +342,9 @@ class DynamicAssessmentSeeder extends Seeder
                 $performanceRecordsData[] = $perfRecord;
             }
 
+            // 🚀 NEW: Generate authentic personal profiles (participant_personal_profiles)
+            $personalProfilesData[] = PersonalProfileGenerator::generateForParticipant($participant);
+
             $progressBar->advance();
         }
 
@@ -391,6 +397,12 @@ class DynamicAssessmentSeeder extends Seeder
         if (! empty($performanceRecordsData)) {
             foreach (array_chunk($performanceRecordsData, $insertChunkSize) as $chunk) {
                 DB::table('participant_performance_records')->insert($chunk);
+            }
+        }
+        // 🚀 BULK INSERT participant_personal_profiles
+        if (! empty($personalProfilesData)) {
+            foreach (array_chunk($personalProfilesData, $insertChunkSize) as $chunk) {
+                DB::table('participant_personal_profiles')->insert($chunk);
             }
         }
     }
