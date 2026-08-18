@@ -80,13 +80,20 @@ class TestReportService
 
         // Format per kode tes
         return match ($tr->test_code) {
-            'A.1', 'A.2', 'A.5' => [
-                'iq' => $data['iq'] ?? $data['index_kecerdasan_umum'] ?? '100',
-                'kategori' => $data['hasil_kategori'] ?? $data['kategori'] ?? 'Rata-rata',
-                'subtests' => $data['label_values'] ?? $data['hasil_sub'] ?? $data['hasil_ist'] ?? [],
-                'interpretasi' => $data['INTERPRETASI_HASIL'] ?? null,
-                'saran' => $data['SARAN_PENGEMBANGAN'] ?? null,
-            ],
+            'A.1', 'A.2', 'A.5' => (function () use ($data) {
+                $rawKategori = $data['kategori'] ?? ($data['hasil_kategori']['IQ'] ?? ($data['hasil_kategori'] ?? 'Rata-rata'));
+                $kategori = is_array($rawKategori) ? ($rawKategori['IQ'] ?? implode(', ', array_values($rawKategori))) : (string) $rawKategori;
+                $rawIq = $data['iq'] ?? $data['index_kecerdasan_umum'] ?? '100';
+                $iq = is_array($rawIq) ? ($rawIq['iq'] ?? ($rawIq['nilai'] ?? '100')) : (string) $rawIq;
+
+                return [
+                    'iq' => $iq,
+                    'kategori' => $kategori,
+                    'subtests' => $data['label_values'] ?? $data['hasil_sub'] ?? $data['hasil_ist'] ?? [],
+                    'interpretasi' => $data['INTERPRETASI_HASIL'] ?? null,
+                    'saran' => $data['SARAN_PENGEMBANGAN'] ?? null,
+                ];
+            })(),
             'B.1', 'D.1' => [
                 'factors' => ! empty($data['nilaiAspek']) ? $data['nilaiAspek'] : (! empty($data['hasil']) ? $data['hasil'] : array_filter($data, fn ($k) => str_starts_with((string) $k, 'hasil_'), ARRAY_FILTER_USE_KEY)),
                 'labels' => $data['labels_aspek'] ?? [],
@@ -94,7 +101,7 @@ class TestReportService
             ],
             'B.2' => [
                 'sten_scores' => $data['standart_final'] ?? $data['nilaiAspek'] ?? $data['nilai'] ?? [],
-                'md_score' => $data['MDStenScore'] ?? 5,
+                'md_score' => is_array($data['MDStenScore'] ?? null) ? ($data['MDStenScore']['nilai'] ?? 5) : ($data['MDStenScore'] ?? 5),
                 'descriptions' => $data['deskripsi_aspek'] ?? [],
             ],
             'D.2' => [
@@ -108,24 +115,29 @@ class TestReportService
             ],
             'F.1' => [
                 'eq_score' => $data['skor_akhir'] ?? $data['eq_score'] ?? $data['skor_eq'] ?? 0,
-                'kategori' => $data['kategori'] ?? 'Cukup',
+                'kategori' => is_array($data['kategori'] ?? null) ? implode(', ', $data['kategori']) : ($data['kategori'] ?? 'Cukup'),
                 'dimensions' => $data['dimensi'] ?? [],
                 'final_ratings' => $data['hasil_akhir'] ?? [],
                 'aspects' => $data['labels_aspek'] ?? $data['aspek'] ?? [],
             ],
-            'G.1' => [
-                'tipe' => $data['hasil_kecenderungan'] ?? ($data['tipe'] ?? 'Perilaku'),
-                'iman' => $data['iman'] ?? null,
-                'pikiran' => $data['pikiran'] ?? null,
-                'perasaan' => $data['perasaan'] ?? null,
-                'interpretasi' => $data['interpretasi_kebiasaan'] ?? null,
-                'most' => $data['most'] ?? [],
-                'least' => $data['least'] ?? [],
-                'change' => $data['change'] ?? [],
-            ],
+            'G.1' => (function () use ($data) {
+                $rawTipe = $data['hasil_kecenderungan'] ?? ($data['tipe'] ?? 'Perilaku');
+                $tipe = is_array($rawTipe) ? ($rawTipe['tipe'] ?? implode(', ', $rawTipe)) : (string) $rawTipe;
+
+                return [
+                    'tipe' => $tipe,
+                    'iman' => $data['iman'] ?? null,
+                    'pikiran' => $data['pikiran'] ?? null,
+                    'perasaan' => $data['perasaan'] ?? null,
+                    'interpretasi' => $data['interpretasi_kebiasaan'] ?? null,
+                    'most' => $data['most'] ?? [],
+                    'least' => $data['least'] ?? [],
+                    'change' => $data['change'] ?? [],
+                ];
+            })(),
             'H.1' => [
                 'top_interests' => array_filter([$data['nilai_1'] ?? null, $data['nilai_2'] ?? null, $data['nilai_3'] ?? null]),
-                'scores' => $data['nilai'] ?? null,
+                'scores' => is_array($data['nilai'] ?? null) ? implode(', ', $data['nilai']) : ($data['nilai'] ?? null),
             ],
             default => [
                 'raw_payload' => $data,

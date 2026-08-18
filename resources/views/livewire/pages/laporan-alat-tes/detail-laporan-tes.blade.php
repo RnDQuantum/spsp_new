@@ -160,10 +160,10 @@
                                     <div class="bg-blue-50/50 dark:bg-blue-900/20 p-4 rounded-xl border border-blue-100 dark:border-blue-800 text-center flex flex-col justify-center">
                                         <span class="text-xs uppercase font-semibold text-blue-600 dark:text-blue-400">Skor Total IQ</span>
                                         <span class="text-4xl font-extrabold text-blue-700 dark:text-blue-300 my-1">
-                                            {{ $fmt['iq'] ?? 100 }}
+                                            {{ is_array($fmt['iq'] ?? null) ? ($fmt['iq']['iq'] ?? ($fmt['iq']['nilai'] ?? '100')) : ($fmt['iq'] ?? 100) }}
                                         </span>
                                         <span class="text-xs font-medium text-blue-800 dark:text-blue-200">
-                                            Kategori: {{ $fmt['kategori'] ?? 'Rata-rata' }}
+                                            Kategori: {{ is_array($fmt['kategori'] ?? null) ? ($fmt['kategori']['IQ'] ?? implode(', ', $fmt['kategori'])) : ($fmt['kategori'] ?? 'Rata-rata') }}
                                         </span>
                                     </div>
 
@@ -189,7 +189,7 @@
                                             @foreach($fmt['interpretasi'] as $iTitle => $iDesc)
                                                 <div>
                                                     <span class="font-bold text-gray-800 dark:text-gray-200">{{ $iTitle }}:</span>
-                                                    <span>{{ $iDesc }}</span>
+                                                    <span>{{ is_array($iDesc) ? implode(', ', $iDesc) : $iDesc }}</span>
                                                 </div>
                                             @endforeach
                                         </div>
@@ -203,7 +203,7 @@
                                             @foreach($fmt['saran'] as $saranText)
                                                 <div class="flex items-start space-x-2">
                                                     <i class="fa-solid fa-lightbulb text-emerald-500 mt-0.5 text-[10px]"></i>
-                                                    <span>{{ $saranText }}</span>
+                                                    <span>{{ is_array($saranText) ? implode(', ', $saranText) : $saranText }}</span>
                                                 </div>
                                             @endforeach
                                         </div>
@@ -217,10 +217,12 @@
                                 <h5 class="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase">Faktor Kepribadian Kerja</h5>
                                 <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-2 text-xs">
                                     @foreach($fmt['factors'] ?? [] as $fKey => $fVal)
-                                        @php $fName = str_replace('hasil_', '', $fKey); @endphp
+                                        @php $fName = str_replace('hasil_', '', (string) $fKey); @endphp
                                         <div class="bg-gray-50 dark:bg-gray-700/50 p-2.5 rounded-lg border border-gray-100 dark:border-gray-700 text-center">
                                             <span class="font-bold text-gray-400 text-[10px] block uppercase">{{ $fmt['labels'][$fKey] ?? $fName }} ({{ $fName }})</span>
-                                            <span class="text-base font-extrabold text-blue-600 dark:text-blue-400">{{ $fVal }}</span>
+                                            <span class="text-base font-extrabold text-blue-600 dark:text-blue-400">
+                                                {{ is_array($fVal) ? ($fVal['nilai'] ?? json_encode($fVal)) : $fVal }}
+                                            </span>
                                         </div>
                                     @endforeach
                                 </div>
@@ -232,7 +234,7 @@
                                             @foreach($fmt['narratives'] as $nKey => $nText)
                                                 <div class="flex items-start space-x-2">
                                                     <i class="fa-solid fa-circle-check text-blue-500 mt-0.5 text-[10px]"></i>
-                                                    <span>{{ $nText }}</span>
+                                                    <span>{{ is_array($nText) ? implode(' ', $nText) : $nText }}</span>
                                                 </div>
                                             @endforeach
                                         </div>

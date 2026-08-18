@@ -7,6 +7,7 @@ namespace Database\Seeders\Support;
 use App\Models\AssessmentEvent;
 use App\Models\Participant;
 use App\Models\TestResult;
+use DateTimeInterface;
 
 /**
  * TestResultGenerator - Generator Riwayat Hasil Tes Psikometri Otentik
@@ -16,6 +17,24 @@ use App\Models\TestResult;
  */
 class TestResultGenerator
 {
+    /**
+     * Format assessment_date safely into standard MySQL datetime string: 'Y-m-d H:i:s'.
+     */
+    private static function formatTestDateTime(mixed $date, string $defaultTime): string
+    {
+        if (empty($date)) {
+            return now()->format('Y-m-d').' '.$defaultTime;
+        }
+
+        if ($date instanceof DateTimeInterface) {
+            return $date->format('Y-m-d').' '.$defaultTime;
+        }
+
+        $dateStr = substr((string) $date, 0, 10);
+
+        return $dateStr.' '.$defaultTime;
+    }
+
     /**
      * Generate seluruh data test_results untuk 1 peserta.
      *
@@ -61,6 +80,7 @@ class TestResultGenerator
             'low' => [fake()->numberBetween(82, 95), 'Rata-rata Bawah'],
         };
         $swBase = (int) round($iq / 10);
+        $istTime = self::formatTestDateTime($participant->assessment_date, '08:30:00');
         $results[] = [
             'participant_id' => $participant->id,
             'event_id' => $event->id,
@@ -69,7 +89,7 @@ class TestResultGenerator
             'test_category' => TestResult::getCategoryForCode('A.5'),
             'status' => 'completed',
             'source' => $source,
-            'test_started_at' => $participant->assessment_date ? $participant->assessment_date.' 08:30:00' : now(),
+            'test_started_at' => $istTime,
             'summary_data' => json_encode([
                 'iq' => $iq,
                 'kategori' => $kategoriIq,
@@ -123,6 +143,7 @@ class TestResultGenerator
             'F' => max(1, min(9, $kBase + fake()->numberBetween(-2, 1))),
             'W' => max(1, min(9, $kBase + fake()->numberBetween(0, 2))),
         ];
+        $papiTime = self::formatTestDateTime($participant->assessment_date, '10:00:00');
         $results[] = [
             'participant_id' => $participant->id,
             'event_id' => $event->id,
@@ -131,7 +152,7 @@ class TestResultGenerator
             'test_category' => TestResult::getCategoryForCode('B.1'),
             'status' => 'completed',
             'source' => $source,
-            'test_started_at' => $participant->assessment_date ? $participant->assessment_date.' 10:00:00' : now(),
+            'test_started_at' => $papiTime,
             'summary_data' => json_encode([
                 'nilaiAspek' => $kostikFactors,
                 'labels_aspek' => [
@@ -171,6 +192,7 @@ class TestResultGenerator
             'Q3' => max(1, min(10, $stenBase + fake()->numberBetween(0, 2))),
             'Q4' => max(1, min(10, $stenBase + fake()->numberBetween(-2, 1))),
         ];
+        $pfTime = self::formatTestDateTime($participant->assessment_date, '11:15:00');
         $results[] = [
             'participant_id' => $participant->id,
             'event_id' => $event->id,
@@ -179,7 +201,7 @@ class TestResultGenerator
             'test_category' => TestResult::getCategoryForCode('B.2'),
             'status' => 'completed',
             'source' => $source,
-            'test_started_at' => $participant->assessment_date ? $participant->assessment_date.' 11:15:00' : now(),
+            'test_started_at' => $pfTime,
             'summary_data' => json_encode([
                 'standart_final' => $sten16pf,
                 'MDStenScore' => fake()->numberBetween(5, 7),
@@ -207,7 +229,6 @@ class TestResultGenerator
     ): array {
         $source = 'api';
         $results = [];
-        $startTime = $participant->assessment_date ? $participant->assessment_date.' 08:15:00' : now();
 
         // 1. CFIT 3A (A.1)
         [$iq, $kategoriIq] = match ($performanceLevel) {
@@ -228,6 +249,7 @@ class TestResultGenerator
             'high' => 4, 'medium' => 2, 'low' => 1
         };
 
+        $cfitTime = self::formatTestDateTime($participant->assessment_date, '08:15:00');
         $results[] = [
             'participant_id' => $participant->id,
             'event_id' => $event->id,
@@ -236,10 +258,10 @@ class TestResultGenerator
             'test_category' => TestResult::getCategoryForCode('A.1'),
             'status' => 'completed',
             'source' => $source,
-            'test_started_at' => $startTime,
+            'test_started_at' => $cfitTime,
             'summary_data' => json_encode([
                 'status' => true,
-                'mulai_tes' => $startTime,
+                'mulai_tes' => $cfitTime,
                 'total' => (int) round($iq / 6),
                 'iq' => $iq,
                 'kategori' => $kategoriIq,
@@ -307,6 +329,7 @@ class TestResultGenerator
             ],
             'nama_alat_tes' => 'KOMPETENSI KARAKTER',
         ];
+        $papiApiTime = self::formatTestDateTime($participant->assessment_date, '09:45:00');
         $results[] = [
             'participant_id' => $participant->id,
             'event_id' => $event->id,
@@ -315,7 +338,7 @@ class TestResultGenerator
             'test_category' => TestResult::getCategoryForCode('B.1'),
             'status' => 'completed',
             'source' => $source,
-            'test_started_at' => $startTime,
+            'test_started_at' => $papiApiTime,
             'summary_data' => json_encode($kostikData),
             'interpretation_data' => null,
             'raw_response' => json_encode(['status' => true]),
@@ -347,6 +370,7 @@ class TestResultGenerator
             'Q3' => max(1, min(10, $stenBase + fake()->numberBetween(0, 2))),
             'Q4' => max(1, min(10, $stenBase + fake()->numberBetween(-2, 1))),
         ];
+        $pfApiTime = self::formatTestDateTime($participant->assessment_date, '10:30:00');
         $results[] = [
             'participant_id' => $participant->id,
             'event_id' => $event->id,
@@ -355,7 +379,7 @@ class TestResultGenerator
             'test_category' => TestResult::getCategoryForCode('B.2'),
             'status' => 'completed',
             'source' => $source,
-            'test_started_at' => $startTime,
+            'test_started_at' => $pfApiTime,
             'summary_data' => json_encode([
                 'status' => true,
                 'kode' => '16PF',
@@ -382,6 +406,7 @@ class TestResultGenerator
         $kRating = match ($performanceLevel) {
             'high' => 4, 'medium' => 3, 'low' => 2
         };
+        $kraeplinTime = self::formatTestDateTime($participant->assessment_date, '11:15:00');
         $results[] = [
             'participant_id' => $participant->id,
             'event_id' => $event->id,
@@ -390,10 +415,10 @@ class TestResultGenerator
             'test_category' => TestResult::getCategoryForCode('D.2'),
             'status' => 'completed',
             'source' => $source,
-            'test_started_at' => $startTime,
+            'test_started_at' => $kraeplinTime,
             'summary_data' => json_encode([
                 'status' => true,
-                'mulai_tes' => $startTime,
+                'mulai_tes' => $kraeplinTime,
                 'pendidikan' => $participant->pendidikan ?? 'S1',
                 'kesimpulan' => [
                     'panker' => $panker,
@@ -425,6 +450,7 @@ class TestResultGenerator
             'medium' => [fake()->numberBetween(290, 339), 'Tinggi'],
             'low' => [fake()->numberBetween(220, 289), 'Cukup'],
         };
+        $eqTime = self::formatTestDateTime($participant->assessment_date, '13:00:00');
         $results[] = [
             'participant_id' => $participant->id,
             'event_id' => $event->id,
@@ -433,7 +459,7 @@ class TestResultGenerator
             'test_category' => TestResult::getCategoryForCode('F.1'),
             'status' => 'completed',
             'source' => $source,
-            'test_started_at' => $startTime,
+            'test_started_at' => $eqTime,
             'summary_data' => json_encode([
                 'status' => true,
                 'skor_akhir' => $eqScore,
@@ -470,6 +496,7 @@ class TestResultGenerator
 
         // 6. Behavior Tendencies (G.1)
         $tipeBehavior = fake()->randomElement(['ILMUWAN', 'PEMIMPIN', 'PENGAYOM', 'PELAKSANA']);
+        $behaviorTime = self::formatTestDateTime($participant->assessment_date, '14:00:00');
         $results[] = [
             'participant_id' => $participant->id,
             'event_id' => $event->id,
@@ -478,7 +505,7 @@ class TestResultGenerator
             'test_category' => TestResult::getCategoryForCode('G.1'),
             'status' => 'completed',
             'source' => $source,
-            'test_started_at' => $startTime,
+            'test_started_at' => $behaviorTime,
             'summary_data' => json_encode([
                 'status' => true,
                 'iman' => fake()->numberBetween(15, 25),
@@ -499,6 +526,7 @@ class TestResultGenerator
         // 7. RMIB (H.1)
         $minatPool = ['Clerical', 'Scientific', 'Computational', 'Executive', 'Social Service', 'Persuasive', 'Literary', 'Musical', 'Practical', 'Medical'];
         $selectedMinat = fake()->randomElements($minatPool, 3);
+        $rmibTime = self::formatTestDateTime($participant->assessment_date, '14:45:00');
         $results[] = [
             'participant_id' => $participant->id,
             'event_id' => $event->id,
@@ -507,7 +535,7 @@ class TestResultGenerator
             'test_category' => TestResult::getCategoryForCode('H.1'),
             'status' => 'completed',
             'source' => $source,
-            'test_started_at' => $startTime,
+            'test_started_at' => $rmibTime,
             'summary_data' => json_encode([
                 'status' => true,
                 'nilai_1' => $selectedMinat[0],
