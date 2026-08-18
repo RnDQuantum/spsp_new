@@ -47,9 +47,9 @@ Setiap section diuji dan di-update secara bertahap sesuai keputusan dan verifika
 | **18** | **Profil Personal (Pelengkap)** | 🔴 New | 🟨 **ACTIVE (UI Ready)** | [18_profil_personal.md](./sections/18_profil_personal.md) | Component active `QualitativeListSection` (profil personal hobi/karakter). |
 | **19** | **Kesehatan Jiwa** | 🟡 Partial | ✅ **DONE (Dynamic)** | [19_kesehatan_jiwa.md](./sections/19_kesehatan_jiwa.md) | Component active `MentalHealthSection` + terhubung model `Mmpi` (`psychologicalTest`). |
 | **20** | **Kekuatan Psikologis** | 🟡 Partial | 🟨 **ACTIVE (UI Ready)** | [20_kekuatan_psikologis.md](./sections/20_kekuatan_psikologis.md) | Component active `QualitativeListSection` (poin kekuatan & area pengembangan). |
-| **21** | **Indikator Risiko** | 🔴 New | 🟨 **ACTIVE (UI Ready)** | [21_indikator_risiko.md](./sections/21_indikator_risiko.md) | Component active `RiskIndicators` (indikator risiko burnout/stres/klinis). |
+| **21** | **Indikator Risiko** | 🔴 Dynamic DB | ✅ **DONE (Dynamic)** | [21_indikator_risiko.md](./sections/21_indikator_risiko.md) | Terhubung dinamis dengan tingkat stres tabel `mmpi` & indikator ketahanan kerja. |
 | **22** | **Rekomendasi Pengembangan** | 🟡 Partial | 🟨 **ACTIVE (UI Ready)** | [22_rekomendasi_pengembangan.md](./sections/22_rekomendasi_pengembangan.md) | Component active `DevelopmentRecommendation` (rekomendasi training SPSP). |
-| **23** | **Rekomendasi Peran Berikutnya** | 🔴 New | 🟨 **ACTIVE (UI Ready)** | [23_rekomendasi_peran_berikutnya.md](./sections/23_rekomendasi_peran_berikutnya.md) | Component active `NextRoleRecommendation` (career pathing & action plan). |
+| **23** | **Rekomendasi Peran Berikutnya** | 🔴 Dynamic DB | ✅ **DONE (Dynamic)** | [23_rekomendasi_peran_berikutnya.md](./sections/23_rekomendasi_peran_berikutnya.md) | Terhubung dinamis dengan klasifikasi 9-Box (Section 16), suksesi (Section 17), dan formasi target. |
 | **24** | **Laporan Hasil Alat Tes (Technical Appendix)** | 🟢 Reuse | 📋 **PLANNED** | [24_laporan_alat_tes.md](./sections/24_laporan_alat_tes.md) | Rincian skor matang per instrumen psikometri (`test_results` via `TestReportService`). |
 
 ---
