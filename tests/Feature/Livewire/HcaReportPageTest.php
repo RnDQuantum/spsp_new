@@ -212,7 +212,9 @@ class HcaReportPageTest extends TestCase
         ])
             ->assertSee('Layer 1')
             ->assertSee('Kompetensi')
-            ->assertSee('Skor Rata-Rata');
+            ->assertSee('Skor Rata-Rata')
+            ->assertSee('Skor aktual')
+            ->assertSee('Standar');
     }
 
     /**

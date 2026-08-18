@@ -21,4 +21,4 @@
 * **Model Utama**: `App\Models\AspectAssessment`, `App\Models\CategoryType` (Code: `kompetensi`), `App\Models\Participant`.
 * **Query Service**: `App\Services\IndividualAssessmentService::getAspectAssessments($participantId, $kompetensiCategoryId, 0)`.
 * **Field DB yang Dipakai**: `aspect_name`, `aspect_code`, `standard_rating`, `individual_rating`, `gap_rating`, `conclusion_text`, `description`.
-* **Tampilan UI**: Daftar baris progres skor dengan garis target standar merah (*hard reference*), badge gap rating numerik (+/-), pill kesimpulan evaluasi (*Di Atas Standar*, *Memenuhi Standar*, *Di Bawah Standar*), dan rata-rata komposit kompetensi.
+* **Tampilan UI**: Daftar baris progres skor dengan garis target standar netral gelap + handle segitiga (▲) berkontur putih, badge gap delta 3-status (hijau untuk positif, abu-abu netral untuk 0.00 tepat standar, merah untuk gap negatif), pill kesimpulan evaluasi non-konfliktif, label standar berkontras tinggi (*Std: X.XX*), rata-rata komposit kompetensi, dan legenda indikator visual di footer kartu.
