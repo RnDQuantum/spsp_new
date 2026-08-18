@@ -84,13 +84,13 @@ Dokumentasi lengkap untuk arsitektur, UI/UX, data mapping, tracker integrasi din
 *   **[hca/README.md](./hca/README.md)**
     *   Master Index & Navigation Dokumentasi HCA Report.
 *   **[DYNAMIC_INTEGRATION_TRACKER.md](./hca/DYNAMIC_INTEGRATION_TRACKER.md)**
-    *   Tracker kemajuan integrasi dinamis per-halaman/section untuk 23 section HCA Report.
+    *   Tracker kemajuan integrasi dinamis per-halaman/section untuk 24 section HCA Report + Navigasi.
 *   **[DATA_MAPPING_SPEC.md](./hca/DATA_MAPPING_SPEC.md)**
     *   Spesifikasi pemetaan data backend HCA vs tabel SPSP (Reuse, Partial, dan New data sources).
 *   **[DESIGN_AND_UI_SPEC.md](./hca/DESIGN_AND_UI_SPEC.md)**
     *   Spesifikasi desain visual "Executive Journal", palette, layout, dan arsitektur komponen Livewire v3 HCA.
 *   **[docs/hca/sections/](./hca/sections/)**
-    *   Folder dokumentasi mandiri per-section (24 file) memuat latar belakang ilmiah HR & sumber data DB SPSP.
+    *   Folder dokumentasi mandiri per-section (25 file) memuat latar belakang ilmiah HR & sumber data DB SPSP.
 
 
 

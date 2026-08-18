@@ -8,16 +8,17 @@ Setiap section diuji dan di-update secara bertahap sesuai keputusan dan verifika
 
 ## 🚀 Ringkasan Kemajuan (Progress Overview)
 
-| Indicator | Total Section | Dynamic DB Sync (Selesai) | Component Active (Ready UI) | Belum Dikerjakan |
+| Indicator | Total Section | Dynamic DB Sync (Selesai) | Component Active (Ready UI) | Belum Dikerjakan (Planned) |
 | :--- | :---: | :---: | :---: | :---: |
-| **Jumlah** | **23 Sections + Nav** | **9** | **14** | **0** |
-| **Persentase** | **100%** | **39.1%** | **60.9%** | **0%** |
+| **Jumlah** | **24 Sections + Nav** | **9** | **14** | **1** |
+| **Persentase** | **100%** | **37.5%** | **58.3%** | **4.2%** |
 
 > [!NOTE]
 > **Metode Pengerjaan & Kedinamisan Section**:
-> 1. **Seluruh 23 Section + Navigasi** telah dibuat komponen Livewire-nya dan telah **DIKTIFKAN (ACTIVE)** di menu bar `HcaReportPage.php` serta dapat diakses via UI interaktif maupun fitur cetak PDF.
+> 1. **Seluruh 24 Section + Navigasi** telah terdata spesifikasinya dalam arsitektur HCA Report.
 > 2. **Dynamic DB Integration**: Section 00-05, 07, 13, dan 19 sudah terhubung penuh dengan kalkulasi dinamis database SPSP (`IndividualAssessmentService`, model `Participant`, dan `Mmpi`).
 > 3. **Component Active (UI Ready)**: Section 06, 08-12, 14-18, dan 20-23 telah aktif dengan komponen UI mandiri dan dataset terstruktur siap integrasi data eksternal/HRIS.
+> 4. **Planned Appendix**: Section 24 (Laporan Hasil Alat Tes / Technical Appendix) disiapkan sebagai pembuktian Level 1 (*evidence layer*) menggunakan tabel `test_results` dan `TestReportService`.
 
 ---
 
@@ -49,6 +50,7 @@ Setiap section diuji dan di-update secara bertahap sesuai keputusan dan verifika
 | **21** | **Indikator Risiko** | 🔴 New | 🟨 **ACTIVE (UI Ready)** | [21_indikator_risiko.md](./sections/21_indikator_risiko.md) | Component active `RiskIndicators` (indikator risiko burnout/stres/klinis). |
 | **22** | **Rekomendasi Pengembangan** | 🟡 Partial | 🟨 **ACTIVE (UI Ready)** | [22_rekomendasi_pengembangan.md](./sections/22_rekomendasi_pengembangan.md) | Component active `DevelopmentRecommendation` (rekomendasi training SPSP). |
 | **23** | **Rekomendasi Peran Berikutnya** | 🔴 New | 🟨 **ACTIVE (UI Ready)** | [23_rekomendasi_peran_berikutnya.md](./sections/23_rekomendasi_peran_berikutnya.md) | Component active `NextRoleRecommendation` (career pathing & action plan). |
+| **24** | **Laporan Hasil Alat Tes (Technical Appendix)** | 🟢 Reuse | 📋 **PLANNED** | [24_laporan_alat_tes.md](./sections/24_laporan_alat_tes.md) | Rincian skor matang per instrumen psikometri (`test_results` via `TestReportService`). |
 
 ---
 

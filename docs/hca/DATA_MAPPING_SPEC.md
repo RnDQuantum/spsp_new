@@ -18,6 +18,7 @@
 | Layer 1 — Kompetensi | `general-mc-mapping` / `general-matching` (`showKompetensi=true`)             | Reuse komponen `IndividualAssessmentService::getAspectAssessments` dengan props `kompetensi`                                                                                                 |
 | Layer 2 — Potensi    | `general-psy-mapping` (`showPotensi=true`)                                    | Reuse `IndividualAssessmentService::getAspectAssessments` dengan props `potensi`                                                                                                             |
 | IQ & Profil Kognitif | Sub-aspect dari `general-psy-mapping`, di bawah aspek "Daya Pikir"            | Extract sub-aspek kognitif (Analytical, Numerical, Verbal, Abstract, Spatial) dari `sub_aspect_assessments`                                                                                 |
+| Laporan Hasil Alat Tes (Appendix) | Model `TestResult` (tabel `test_results`) via `TestReportService`             | Single Source of Truth skor matang & interpretasi instrumen psikometri (IST, CFIT, PAPI, 16PF, Kraepelin, MMPI, EQ, DISC, RMIB) dari Jalur A & Jalur B.                                    |
 
 ---
 
