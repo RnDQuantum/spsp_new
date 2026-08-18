@@ -18,4 +18,12 @@
 
 ## 📊 Sumber Data DB SPSP & Logic Calculation
 
-* **Sumber Data**: Model pemetaan jalur karir (*career matrix*) institusi dan business rule rekomendasi jabatan target dari tim HR.
+* **Rantai Keputusan Talenta (*Talent Progression Chain*)**:
+  * Mengambil hasil klasifikasi kuadran dari **Section 16 (Talent 9-Box Matrix)** dan horizon kesiapan dari **Section 17 (Succession Readiness)**.
+* **Model Utama**: `App\Models\Participant`, `App\Models\PositionFormation`, `App\Models\FinalAssessment`, `App\Models\ParticipantPerformanceRecord`.
+* **Logika Penentuan Peran Rekomendasi**:
+  * Jika kandidat berada di kuadran *Star Talent / High Potential* (Box 9/8) & *Horizon 1 Ready Now*: Merekomendasikan promosi langsung ke level jabatan setingkat lebih tinggi (contoh: *Senior Manager / Head of Division / Director*).
+  * Jika kandidat berada di *Core Player / High Performer* (Box 5/6) & *Horizon 2 Ready 1-2 Years*: Merekomendasikan pengayaan peran spesialis atau proyek strategis lintas divisi (*Job Enrichment & Cross-Functional Project Lead*).
+  * Jika kandidat membutuhkan penguatan kompetensi (Box 1-4/7) & *Horizon 3*: Merekomendasikan konsolidasi peran fungsional dan pendampingan eksekusi kerja (*Performance Stabilization & Mentoring*).
+* **Tampilan UI**: Kartu peran target utama, badge status kesiapan, dan roadmap 3 fase transisi (*Fase 1: Transisi & Pendampingan, Fase 2: Rotasi Proyek Lintas Divisi, Fase 3: Kemandirian Penuh*).
+

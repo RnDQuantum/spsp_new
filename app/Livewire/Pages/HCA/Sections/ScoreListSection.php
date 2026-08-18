@@ -514,6 +514,8 @@ class ScoreListSection extends Component
             default => $this->datasets[$this->sectionCode] ?? $this->datasets['competency'],
         };
 
+        $isSynthesized = in_array($this->sectionCode, ['learning_agility', 'leadership_potential', 'integrity'], true);
+
         return view('livewire.pages.h-c-a.sections.score-list-section', [
             'title' => $data['title'],
             'subtitle' => $data['subtitle'],
@@ -521,6 +523,7 @@ class ScoreListSection extends Component
             'average' => $data['average'],
             'max_score' => $data['max_score'],
             'is_iq' => $data['is_iq'] ?? false,
+            'is_synthesized' => $isSynthesized,
             'iqScore' => $data['iq_score'] ?? ($data['average'] > 50 ? (int) $data['average'] : null),
             'iqCategory' => $data['iq_category'] ?? null,
             'iqTestName' => $data['iq_test_name'] ?? null,

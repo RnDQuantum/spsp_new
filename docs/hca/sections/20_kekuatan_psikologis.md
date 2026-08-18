@@ -18,4 +18,7 @@
 
 ## 📊 Sumber Data DB SPSP & Logic Calculation
 
+* **Konsep Keilmuan (Lensa 2 Triangulasi MMPI)**: **Lensa Positif & Kekuatan Perilaku (*Key Strengths*)** — Mengekstraksi potensi dan karakter unggul kandidat dari asesmen psikologis untuk dioptimalkan dalam penugasan kerja strategis.
 * **Model Utama**: Ekstraksi dari deskripsi kualitatif pada `App\Models\Mmpi` (field `internal` & `interpersonal`) atau interpretasi aspek terpilih dari `InterpretationGeneratorService`.
+* **Tampilan UI**: Daftar kartu kartu kekuatan utama (*Mental Toughness, Leadership, Cognitive Agility, Strategic Influence, Core Values*) beserta deskripsi perilaku kerja konkret.
+

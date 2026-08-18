@@ -18,4 +18,8 @@
 
 ## 📊 Sumber Data DB SPSP & Logic Calculation
 
-* **Sumber Data**: Skoring indikator risiko dari kombinasi tingkat stres pada tabel `mmpi` & instrumen risiko klinis tambahan.
+* **Konsep Keilmuan (Lensa 3 Triangulasi MMPI)**: **Sistem Peringatan Dini Risiko (*Early Warning System*)** — Mengidentifikasi potensi gesekan perilaku, kejenuhan (*burnout risk*), dan kerentanan stres kerja untuk intervensi manajerial proaktif.
+* **Model Utama**: `App\Models\Mmpi` (`tingkat_stres` & skor klinis), `App\Models\Participant`.
+* **Formula DB**: Pemetaan tingkat stres MMPI dan ketahanan kerja instrumen psikometri ke dalam 4 indikator risiko: *Burnout Risk, Stress Susceptibility, Indeks Konflik Interpersonal, dan Risiko Penurunan Produktivitas*.
+* **Tampilan UI**: Badge level risiko keseluruhan (*Rendah / Sedang / Tinggi*), baris indikator risiko bergradasi warna, dan deskripsi mitigasi resiko.
+

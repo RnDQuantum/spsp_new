@@ -5,10 +5,14 @@ declare(strict_types=1);
 namespace App\Livewire\Pages\HCA\Sections;
 
 use Illuminate\View\View;
+use Livewire\Attributes\Reactive;
 use Livewire\Component;
 
 class QualitativeListSection extends Component
 {
+    #[Reactive]
+    public ?int $participantId = null;
+
     public string $sectionCode = 'strengths';
 
     public array $datasets = [

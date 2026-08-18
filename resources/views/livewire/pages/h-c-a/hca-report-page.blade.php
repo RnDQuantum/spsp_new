@@ -89,32 +89,32 @@
 
             <!-- 18 Profil Personal -->
             <div class="page-break p-8">
-                <livewire:pages.h-c-a.sections.qualitative-list-section sectionCode="personal_profile" />
+                <livewire:pages.h-c-a.sections.qualitative-list-section sectionCode="personal_profile" :participant-id="$participantId" :key="'personal_profile_print_'.$participantId" />
             </div>
 
             <!-- 19 Kesehatan Jiwa -->
             <div class="page-break p-8">
-                <livewire:pages.h-c-a.sections.mental-health-section />
+                <livewire:pages.h-c-a.sections.mental-health-section :participant-id="$participantId" :key="'mental_health_print_'.$participantId" />
             </div>
 
             <!-- 20 Kekuatan Psikologis -->
             <div class="page-break p-8">
-                <livewire:pages.h-c-a.sections.qualitative-list-section sectionCode="strengths" />
+                <livewire:pages.h-c-a.sections.qualitative-list-section sectionCode="strengths" :participant-id="$participantId" :key="'strengths_print_'.$participantId" />
             </div>
 
             <!-- 21 Indikator Risiko -->
             <div class="page-break p-8">
-                <livewire:pages.h-c-a.sections.risk-indicators />
+                <livewire:pages.h-c-a.sections.risk-indicators :participant-id="$participantId" :key="'risk_indicators_print_'.$participantId" />
             </div>
 
             <!-- 22 Rekomendasi Pengembangan -->
             <div class="page-break p-8">
-                <livewire:pages.h-c-a.sections.development-recommendation />
+                <livewire:pages.h-c-a.sections.development-recommendation :participant-id="$participantId" :key="'development_rec_print_'.$participantId" />
             </div>
 
             <!-- 23 Rekomendasi Peran Berikutnya -->
             <div class="p-8">
-                <livewire:pages.h-c-a.sections.next-role-recommendation />
+                <livewire:pages.h-c-a.sections.next-role-recommendation :participant-id="$participantId" :key="'next_role_rec_print_'.$participantId" />
             </div>
         </div>
 
@@ -312,19 +312,19 @@
                                     @break
                                 @case('personal_profile')
                                 @case('strengths')
-                                    <livewire:pages.h-c-a.sections.qualitative-list-section :sectionCode="$activeSection" :key="'qualitative_' . $activeSection" />
+                                    <livewire:pages.h-c-a.sections.qualitative-list-section :sectionCode="$activeSection" :participant-id="$participantId" :key="'qualitative_' . $activeSection . '_' . $participantId" />
                                     @break
                                 @case('mental_health')
-                                    <livewire:pages.h-c-a.sections.mental-health-section />
+                                    <livewire:pages.h-c-a.sections.mental-health-section :participant-id="$participantId" :key="'mental_health_'.$participantId" />
                                     @break
                                 @case('risk_indicators')
-                                    <livewire:pages.h-c-a.sections.risk-indicators />
+                                    <livewire:pages.h-c-a.sections.risk-indicators :participant-id="$participantId" :key="'risk_indicators_'.$participantId" />
                                     @break
                                 @case('development_rec')
-                                    <livewire:pages.h-c-a.sections.development-recommendation />
+                                    <livewire:pages.h-c-a.sections.development-recommendation :participant-id="$participantId" :key="'development_rec_'.$participantId" />
                                     @break
                                 @case('next_role_rec')
-                                    <livewire:pages.h-c-a.sections.next-role-recommendation />
+                                    <livewire:pages.h-c-a.sections.next-role-recommendation :participant-id="$participantId" :key="'next_role_rec_'.$participantId" />
                                     @break
                             @endswitch
                         </div>

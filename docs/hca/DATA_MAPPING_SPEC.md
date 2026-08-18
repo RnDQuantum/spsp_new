@@ -54,8 +54,31 @@
 
 ---
 
-## 🛠️ Rekomendasi Urutan Integrasi
+## 🛠️ Rekomendasi Urutan Integrasi & Prinsip Keilmuan
 
-1. **Tahap 1 (Cepat / Reuse)**: Identitas Peserta, Layer 1 Kompetensi, Layer 2 Potensi, IQ/Kognitif.
-2. **Tahap 2 (Sedang / Partial)**: Ringkasan Eksekutif, HCI, Learning Agility, Leadership Potential, EQ, Values & Integrity, Kesehatan Jiwa, Kekuatan Psikologis, Rekomendasi Pengembangan.
-3. **Tahap 3 (Keputusan Produk / New Data)**: Riwayat Karier, Big Five, DISC, Performance Dashboard, 9-Box, Succession Readiness, Profil Personal, Indikator Risiko, Rekomendasi Peran Berikutnya.
+1. **Tahap 1 (Cepat / Reuse)**: Identitas Peserta, Layer 1 Kompetensi, Layer 2 Potensi, IQ/Kognitif, Laporan Hasil Alat Tes (Appendix).
+2. **Tahap 2 (Sedang / Partial & Synthesized)**: Ringkasan Eksekutif, HCI, Learning Agility, Leadership Potential, EQ, Values & Integrity, Kesehatan Jiwa, Kekuatan Psikologis, Rekomendasi Pengembangan.
+3. **Tahap 3 (Keputusan Produk / Dynamic DB Active)**: Riwayat Karier, Big Five, DISC, Performance Dashboard, 9-Box, Succession Readiness, Profil Personal, Indikator Risiko, Rekomendasi Peran Berikutnya.
+
+---
+
+## 🧬 Prinsip Metodologi & Penyelarasan Keilmuan
+
+### 1. Indeks Sintesis Tematik (*Synthesized Meta-Constructs*) — Klaster 3
+Section 11 (*Learning Agility*), Section 12 (*Leadership Potential*), dan Section 14 (*Values & Integrity*) **bukanlah alat tes baru yang berdiri sendiri**, melainkan agregasi terbobot dari sub-aspek kompetensi/potensi pada database SPSP (`sub_aspect_assessments`). 
+- **Tujuan**: Menyediakan analisis tematik modern bagi eksekutif tanpa memerlukan baterai tes tambahan yang membebani kandidat.
+
+### 2. Rantai Keputusan Talenta (*Talent Progression Chain*)
+Section 16, 17, dan 23 membentuk rangkaian kausal berurutan:
+```mermaid
+flowchart LR
+    A["Section 16: Diagnosa 9-Box Matrix<br/>(Potensi × Kinerja)"] --> B["Section 17: Horizon Kesiapan<br/>(Ready Now / 1-2 Thn / 2-3 Thn)"]
+    B --> C["Section 23: Peran Berikutnya & Roadmap<br/>(Target Role & 3-Phase Action Plan)"]
+```
+
+### 3. Triangulasi 3 Lensa Kualitatif MMPI (Section 19, 20, 21)
+Satu instrumen evaluasi klinis/psikologis (`mmpi`) dipisahkan secara ketat menjadi 3 lensa analisis:
+- **Lensa 1: Skrining Klinis & Validitas (Section 19)** &rarr; *Hygiene gatekeeper* (skala L, F, K, distres). **Tidak dirata-ratakan ke Talent Index**.
+- **Lensa 2: Kekuatan Perilaku Dominan (Section 20)** &rarr; Ekstraksi keunggulan personal (*Key Strengths*).
+- **Lensa 3: Sistem Peringatan Dini Risiko (Section 21)** &rarr; Deteksi dini kejenuhan (*Burnout Risk*) dan kerentanan stres kerja.
+

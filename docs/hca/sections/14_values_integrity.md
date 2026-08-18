@@ -18,6 +18,8 @@
 
 ## 📊 Sumber Data DB SPSP & Logic Calculation
 
+* **Konsep Keilmuan**: **Indeks Sintesis Tematik (*Synthesized Meta-Construct*)** — Mengagregasi sub-aspek nilai moral, ketaatan aturan, dan loyalitas kerja ke dalam 4 pilar integritas etika terstandar.
 * **Model Utama**: `App\Models\SubAspectAssessment`, `App\Models\AspectAssessment`, `App\Models\Participant`.
 * **Formula DB**: Agregasi skor sub-aspek *Honesty & Transparency* (Kejujuran, Integritas), *Ethical Compliance* (Kedisiplinan, Sistematika Kerja), *Accountability* (Tanggung Jawab, Komitmen), dan *Consistency & Loyalty* (Loyalitas, Kestabilan Kerja).
-* **Tampilan UI**: Daftar baris progres skor 4 dimensi integritas, standar formasi, gap, kesimpulan (*Memenuhi Standar*), dan rata-rata skor integritas.
+* **Tampilan UI**: Daftar baris progres skor 4 dimensi integritas, standar formasi, gap, kesimpulan (*Memenuhi Standar*), badge konteks *Indeks Sintesis Tematik*, dan rata-rata skor integritas.
+

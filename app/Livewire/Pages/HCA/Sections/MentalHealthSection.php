@@ -5,10 +5,14 @@ declare(strict_types=1);
 namespace App\Livewire\Pages\HCA\Sections;
 
 use Illuminate\View\View;
+use Livewire\Attributes\Reactive;
 use Livewire\Component;
 
 class MentalHealthSection extends Component
 {
+    #[Reactive]
+    public ?int $participantId = null;
+
     public float $wellbeingIndex = 4.20; // Scale 1.00 - 5.00
 
     public string $wellbeingCategory = 'Baik / Sehat';

@@ -18,5 +18,8 @@
 
 ## 📊 Sumber Data DB SPSP & Logic Calculation
 
+* **Konsep Keilmuan (Lensa 1 Triangulasi MMPI)**: **Skrining Klinis & Hygiene Factor** — Berfungsi sebagai indikator kelayakan dasar (*Go / No-Go / Red Flag*) yang **tidak dirata-ratakan ke dalam skor positif Talent Index** demi menjaga etika asesmen psikologi dan validitas prediktif.
 * **Model Utama**: `App\Models\Mmpi` (`$mmpi` / tabel `mmpi`).
 * **Field DB yang Dipakai**: `validitas`, `internal`, `interpersonal`, `kap_kerja`, `klinik`, `kesimpulan`, `nilai_pq`, `tingkat_stres`.
+* **Tampilan UI**: Status validitas profil tes, ringkasan evaluasi klinis internal & interpersonal, kapasitas kerja, tingkat stres, dan kesimpulan kebugaran mental (*mental fitness*).
+

@@ -3,9 +3,16 @@
     <!-- Section Header -->
     <div class="border-b border-warm-border pb-6 mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-            <span class="text-[11px] font-bold uppercase tracking-widest text-slate-400 block mb-1">
-                {{ $subtitle }}
-            </span>
+            <div class="flex items-center gap-2 mb-1 flex-wrap">
+                <span class="text-[11px] font-bold uppercase tracking-widest text-slate-400 block">
+                    {{ $subtitle }}
+                </span>
+                @if (!empty($is_synthesized))
+                    <span class="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-amber-700 bg-amber-50 border border-amber-200/80 px-2 py-0.5 rounded-md" title="Konstruk agregasi terbobot sub-aspek SPSP">
+                        <i class="fas fa-layer-group text-[9px]"></i> Indeks Sintesis Tematik
+                    </span>
+                @endif
+            </div>
             <h2 class="font-display text-2xl md:text-3xl text-primary-ink font-semibold">
                 {{ explode(':', $title)[0] }} <span class="text-accent-amber italic">{{ count(explode(':', $title)) > 1 ? trim(explode(':', $title)[1]) : '' }}</span>
             </h2>
@@ -190,7 +197,13 @@
     <div class="mt-10 pt-6 border-t border-warm-border flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 text-xs text-slate-500">
         <div class="flex items-center gap-2">
             <i class="fas fa-info-circle text-accent-amber text-xs"></i>
-            <span>Skala penilaian 1.00 – {{ number_format($max_score, $is_iq ? 0 : 2) }} terstandarisasi.</span>
+            <span>
+                @if (!empty($is_synthesized))
+                    Indeks dihitung dari agregasi terbobot sub-aspek kompetensi dan potensi psikologis terkait (skala 1.00 – {{ number_format($max_score, 2) }}).
+                @else
+                    Skala penilaian 1.00 – {{ number_format($max_score, $is_iq ? 0 : 2) }} terstandarisasi.
+                @endif
+            </span>
         </div>
         <div class="flex items-center gap-6">
             <!-- Legend Item 1: Skor Aktual -->

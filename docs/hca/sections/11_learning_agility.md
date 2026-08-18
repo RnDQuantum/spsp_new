@@ -21,6 +21,8 @@
 
 ## 📊 Sumber Data DB SPSP & Logic Calculation
 
+* **Konsep Keilmuan**: **Indeks Sintesis Tematik (*Synthesized Meta-Construct*)** — Mengagregasi sub-aspek kompetensi dan potensi psikologis yang sudah dinilai ke dalam 4 dimensi kelincahan belajar terstandar tanpa menambah beban alat tes baru bagi peserta.
 * **Model Utama**: `App\Models\SubAspectAssessment`, `App\Models\AspectAssessment`, `App\Models\Participant`.
 * **Formula DB**: Agregasi skor sub-aspek *Mental Agility* (Daya Analisa, Logika Berpikir, Kreativitas), *People Agility* (Sosualitas, Komunikasi Sosial, Kepekaan Interpersonal), *Change Agility* (Penyesuaian Diri, Agen Perubahan, Mobilitas), dan *Result Agility* (Hasrat Berprestasi, Daya Tahan Kerja, Semangat Kerja).
-* **Tampilan UI**: Daftar baris progres skor 4 pilar agility, standar formasi, gap, kesimpulan (*Memenuhi Standar* / *Perlu Penguatan*), dan rata-rata skor agility.
+* **Tampilan UI**: Daftar baris progres skor 4 pilar agility, standar formasi, gap, kesimpulan (*Memenuhi Standar* / *Perlu Penguatan*), badge konteks *Indeks Sintesis Tematik*, dan rata-rata skor agility.
+

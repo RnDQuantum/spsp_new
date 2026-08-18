@@ -5,10 +5,14 @@ declare(strict_types=1);
 namespace App\Livewire\Pages\HCA\Sections;
 
 use Illuminate\View\View;
+use Livewire\Attributes\Reactive;
 use Livewire\Component;
 
 class DevelopmentRecommendation extends Component
 {
+    #[Reactive]
+    public ?int $participantId = null;
+
     public array $strengths = [
         'Kapasitas kepemimpinan strategis yang sangat mapan, terbukti dari nilai visi organisasi dan pengelolaan tim yang solid.',
         'Kelincahan belajar tinggi (*learning agility*), memudahkan adaptasi pada ekosistem digital baru dan perubahan proses bisnis cepat.',
