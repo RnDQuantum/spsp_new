@@ -137,8 +137,9 @@ class QualitativeListSection extends Component
         $items = [];
 
         if ($participant) {
-            // 1. Get top rated aspects
-            $topAspects = AspectAssessment::where('participant_id', $participant->id)
+            // 1. Get top rated aspects with aspect relation eager loaded
+            $topAspects = AspectAssessment::with('aspect')
+                ->where('participant_id', $participant->id)
                 ->orderByDesc('individual_rating')
                 ->take(5)
                 ->get();
@@ -157,9 +158,13 @@ class QualitativeListSection extends Component
             ];
 
             // Item 2: Cognitive & Problem Solving
-            $cognitiveAspect = $topAspects->first(fn ($a) => str_contains(strtolower($a->aspect_name), 'pikir') || str_contains(strtolower($a->aspect_name), 'analis') || str_contains(strtolower($a->aspect_name), 'logika'));
+            $cognitiveAspect = $topAspects->first(function ($a) {
+                $name = strtolower($a->aspect?->name ?? '');
+
+                return str_contains($name, 'pikir') || str_contains($name, 'analis') || str_contains($name, 'logika');
+            });
             $cogRating = $cognitiveAspect ? number_format((float) $cognitiveAspect->individual_rating, 2) : '4.20';
-            $cogName = $cognitiveAspect?->aspect_name ?? 'Daya Pikir & Analisis';
+            $cogName = $cognitiveAspect?->aspect?->name ?? 'Daya Pikir & Analisis';
             $items[] = [
                 'title' => "Kapasitas Berpikir Analitis & Tajam ({$cogName})",
                 'icon' => 'fa-brain',
@@ -168,9 +173,13 @@ class QualitativeListSection extends Component
             ];
 
             // Item 3: Leadership / Visioning / Strategic Thinking
-            $leadAspect = $topAspects->first(fn ($a) => str_contains(strtolower($a->aspect_name), 'pimpin') || str_contains(strtolower($a->aspect_name), 'keputusan') || str_contains(strtolower($a->aspect_name), 'rencana'));
+            $leadAspect = $topAspects->first(function ($a) {
+                $name = strtolower($a->aspect?->name ?? '');
+
+                return str_contains($name, 'pimpin') || str_contains($name, 'keputusan') || str_contains($name, 'rencana');
+            });
             $leadRating = $leadAspect ? number_format((float) $leadAspect->individual_rating, 2) : '4.00';
-            $leadName = $leadAspect?->aspect_name ?? 'Pengambilan Keputusan & Visi';
+            $leadName = $leadAspect?->aspect?->name ?? 'Pengambilan Keputusan & Visi';
             $items[] = [
                 'title' => "Kekuatan Pengambilan Keputusan & Kepemimpinan ({$leadName})",
                 'icon' => 'fa-compass',
@@ -179,9 +188,13 @@ class QualitativeListSection extends Component
             ];
 
             // Item 4: Interpersonal Influence / Communication
-            $interAspect = $topAspects->first(fn ($a) => str_contains(strtolower($a->aspect_name), 'komunikasi') || str_contains(strtolower($a->aspect_name), 'kerjasama') || str_contains(strtolower($a->aspect_name), 'sosial') || str_contains(strtolower($a->aspect_name), 'layanan'));
+            $interAspect = $topAspects->first(function ($a) {
+                $name = strtolower($a->aspect?->name ?? '');
+
+                return str_contains($name, 'komunikasi') || str_contains($name, 'kerjasama') || str_contains($name, 'sosial') || str_contains($name, 'layanan');
+            });
             $interRating = $interAspect ? number_format((float) $interAspect->individual_rating, 2) : '3.90';
-            $interName = $interAspect?->aspect_name ?? 'Komunikasi & Pengaruh';
+            $interName = $interAspect?->aspect?->name ?? 'Komunikasi & Pengaruh';
             $items[] = [
                 'title' => "Komunikasi & Pengaruh Kolaboratif ({$interName})",
                 'icon' => 'fa-comments',
@@ -190,9 +203,13 @@ class QualitativeListSection extends Component
             ];
 
             // Item 5: Core Values & Integrity
-            $intAspect = $topAspects->first(fn ($a) => str_contains(strtolower($a->aspect_name), 'integritas') || str_contains(strtolower($a->aspect_name), 'tanggung') || str_contains(strtolower($a->aspect_name), 'disiplin') || str_contains(strtolower($a->aspect_name), 'sikap'));
+            $intAspect = $topAspects->first(function ($a) {
+                $name = strtolower($a->aspect?->name ?? '');
+
+                return str_contains($name, 'integritas') || str_contains($name, 'tanggung') || str_contains($name, 'disiplin') || str_contains($name, 'sikap');
+            });
             $intRating = $intAspect ? number_format((float) $intAspect->individual_rating, 2) : '4.50';
-            $intName = $intAspect?->aspect_name ?? 'Integritas & Etika Kerja';
+            $intName = $intAspect?->aspect?->name ?? 'Integritas & Etika Kerja';
             $items[] = [
                 'title' => "Integritas & Konsistensi Etika Kerja ({$intName})",
                 'icon' => 'fa-award',

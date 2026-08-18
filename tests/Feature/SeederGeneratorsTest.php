@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
+use App\Livewire\Pages\HCA\Sections\DevelopmentRecommendation;
+use App\Livewire\Pages\HCA\Sections\QualitativeListSection;
 use App\Models\AssessmentEvent;
 use App\Models\Batch;
 use App\Models\Participant;
@@ -11,6 +13,7 @@ use App\Models\PositionFormation;
 use Database\Seeders\Data\AssessmentEventConfig;
 use Database\Seeders\Support\AssessmentRecordGenerator;
 use Database\Seeders\Support\ParticipantProfileGenerator;
+use Database\Seeders\Support\PersonalProfileGenerator;
 use Database\Seeders\Support\TestResultGenerator;
 use Tests\TestCase;
 
@@ -124,5 +127,59 @@ class SeederGeneratorsTest extends TestCase
         $this->assertContains('D.1', $legacyCodes);
         $this->assertContains('B.2', $legacyCodes);
         $this->assertEquals('lsp_db', $legacyResults[0]['source']);
+    }
+
+    /**
+     * Test PersonalProfileGenerator calculates zodiac, shio, weton accurately
+     */
+    public function test_personal_profile_generator_calculates_zodiac_shio_weton(): void
+    {
+        $participant = new Participant([
+            'name' => 'Dr. Bambang Setiawan, M.M.',
+            'tanggal_lahir' => '1985-08-17',
+        ]);
+        $participant->id = 101;
+
+        $profile = PersonalProfileGenerator::generateForParticipant($participant);
+
+        $this->assertIsArray($profile);
+        $this->assertEquals(101, $profile['participant_id']);
+        $this->assertEquals('Leo', $profile['zodiac']);
+        $this->assertEquals('Kerbau', $profile['chinese_zodiac']); // 1985 is Kerbau (Ox)
+        $this->assertStringContainsString('Sabtu', $profile['weton']); // 1985-08-17 was Saturday
+        $this->assertNotEmpty($profile['hobbies']);
+        $this->assertNotEmpty($profile['sports']);
+        $this->assertNotEmpty($profile['blood_type']);
+    }
+
+    /**
+     * Test HCA Livewire Section components render without errors
+     */
+    public function test_hca_sections_render_dynamically(): void
+    {
+        $participant = Participant::query()->first();
+        if (! $participant) {
+            $this->markTestSkipped('No participants in test database');
+        }
+
+        // Test DevelopmentRecommendation
+        $devComp = new DevelopmentRecommendation;
+        $devComp->participantId = $participant->id;
+        $devView = $devComp->render();
+        $this->assertNotEmpty($devView->getData()['focusTheme']);
+        $this->assertIsArray($devView->getData()['strengths']);
+        $this->assertIsArray($devView->getData()['gaps']);
+
+        // Test QualitativeListSection (strengths)
+        $qualComp = new QualitativeListSection;
+        $qualComp->participantId = $participant->id;
+        $qualComp->sectionCode = 'strengths';
+        $qualView = $qualComp->render();
+        $this->assertCount(5, $qualView->getData()['items']);
+
+        // Test QualitativeListSection (personal_profile)
+        $qualComp->sectionCode = 'personal_profile';
+        $profView = $qualComp->render();
+        $this->assertGreaterThanOrEqual(4, count($profView->getData()['items']));
     }
 }

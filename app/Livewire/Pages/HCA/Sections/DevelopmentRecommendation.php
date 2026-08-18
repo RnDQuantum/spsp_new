@@ -88,8 +88,9 @@ class DevelopmentRecommendation extends Component
             ];
         }
 
-        // Query all aspect assessments for the participant
-        $assessments = AspectAssessment::where('participant_id', $participant->id)
+        // Query all aspect assessments for the participant with aspect relation
+        $assessments = AspectAssessment::with('aspect')
+            ->where('participant_id', $participant->id)
             ->orderByDesc('individual_rating')
             ->get();
 
@@ -98,17 +99,18 @@ class DevelopmentRecommendation extends Component
         $strengthItems = [];
 
         foreach ($topStrengths as $st) {
-            $aspectName = $st->aspect_name;
+            $aspectName = $st->aspect?->name ?? 'Aspek Kompetensi';
             $rating = (float) $st->individual_rating;
             $std = (float) $st->standard_rating;
             $gap = $rating - $std;
             $gapFormatted = ($gap >= 0 ? '+' : '').number_format($gap, 2);
 
+            $lowerName = strtolower($aspectName);
             $rec = match (true) {
-                str_contains(strtolower($aspectName), 'pikir') || str_contains(strtolower($aspectName), 'analis') => 'Kapitalisasi ketajaman analisa untuk memimpin kajian kelayakan inisiatif strategis organisasi.',
-                str_contains(strtolower($aspectName), 'pimpin') || str_contains(strtolower($aspectName), 'arah') => 'Posisikan sebagai Lead Project atau Person-in-Charge program prioritas serta mentor bagi tim.',
-                str_contains(strtolower($aspectName), 'integritas') || str_contains(strtolower($aspectName), 'etika') => 'Jadikan role model tata kelola organisasi (GCG) dan pengawal standar kepatuhan etika.',
-                str_contains(strtolower($aspectName), 'komunikasi') || str_contains(strtolower($aspectName), 'kerjasama') => 'Manfaatkan kemahiran komunikasi untuk negosiasi stakeholder dan diplomasi lintas unit.',
+                str_contains($lowerName, 'pikir') || str_contains($lowerName, 'analis') => 'Kapitalisasi ketajaman analisa untuk memimpin kajian kelayakan inisiatif strategis organisasi.',
+                str_contains($lowerName, 'pimpin') || str_contains($lowerName, 'arah') => 'Posisikan sebagai Lead Project atau Person-in-Charge program prioritas serta mentor bagi tim.',
+                str_contains($lowerName, 'integritas') || str_contains($lowerName, 'etika') => 'Jadikan role model tata kelola organisasi (GCG) dan pengawal standar kepatuhan etika.',
+                str_contains($lowerName, 'komunikasi') || str_contains($lowerName, 'kerjasama') => 'Manfaatkan kemahiran komunikasi untuk negosiasi stakeholder dan diplomasi lintas unit.',
                 default => 'Berdayakan keunggulan kapabilitas ini sebagai motor penggerak pencapaian target unit kerja.',
             };
 
@@ -125,7 +127,7 @@ class DevelopmentRecommendation extends Component
         $gapItems = [];
 
         foreach ($bottomGaps as $gp) {
-            $aspectName = $gp->aspect_name;
+            $aspectName = $gp->aspect?->name ?? 'Aspek Kompetensi';
             $rating = (float) $gp->individual_rating;
             $std = (float) $gp->standard_rating;
             $gap = $rating - $std;
@@ -145,7 +147,9 @@ class DevelopmentRecommendation extends Component
 
         $focusTheme = 'PENGUATAN KAPABILITAS & AKSELERASI TALENTA';
         if ($bottomGaps->isNotEmpty()) {
-            $focusTheme = 'PENGEMBANGAN '.strtoupper($bottomGaps->first()->aspect_name).' & '.strtoupper($bottomGaps->last()->aspect_name);
+            $firstName = $bottomGaps->first()->aspect?->name ?? 'Kompetensi';
+            $lastName = $bottomGaps->last()->aspect?->name ?? 'Potensi';
+            $focusTheme = 'PENGEMBANGAN '.strtoupper($firstName).' & '.strtoupper($lastName);
         }
 
         return [
@@ -158,9 +162,9 @@ class DevelopmentRecommendation extends Component
     /**
      * Map specific aspect name to actionable 70-20-10 development activities
      */
-    private function derive702010Actions(string $aspectName): array
+    private function derive702010Actions(?string $aspectName): array
     {
-        $lower = strtolower($aspectName);
+        $lower = strtolower($aspectName ?? '');
 
         if (str_contains($lower, 'pimpin') || str_contains($lower, 'arah') || str_contains($lower, 'kelola')) {
             return [
