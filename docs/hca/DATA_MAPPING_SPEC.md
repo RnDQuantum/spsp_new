@@ -82,3 +82,12 @@ Satu instrumen evaluasi klinis/psikologis (`mmpi`) dipisahkan secara ketat menja
 - **Lensa 2: Kekuatan Perilaku Dominan (Section 20)** &rarr; Ekstraksi keunggulan personal (*Key Strengths*).
 - **Lensa 3: Sistem Peringatan Dini Risiko (Section 21)** &rarr; Deteksi dini kejenuhan (*Burnout Risk*) dan kerentanan stres kerja.
 
+### 4. Dualitas Metodologi 9-Box Matrix: HCA vs General Report
+Kedua model 9-box di SPSP memiliki landasan ilmiah resmi yang diakui, namun diterapkan pada use-case bisnis yang berbeda:
+1. **Model General Report (Talent Pool — Norm-Referenced $\mu \pm \sigma$)**:
+   - **Sumbu**: Potensi Psikologis (X) $\times$ Kompetensi Perilaku (Y).
+   - **Tujuan**: Penilaian berbasis kohort/batch (*Assessment Center Method*) saat data KPI belum ada/tidak seragam (misal: seleksi terbuka JPT / rekrutmen).
+2. **Model HCA Report (Section 16 — Criterion-Referenced / Ambang Mutlak)**:
+   - **Sumbu**: Kinerja Aktual KPI (X) $\times$ Potensi Masa Depan (Y).
+   - **Tujuan**: Standar global McKinsey/GE untuk *Executive Talent Review* & suksesi kepemimpinan internal korporasi/instansi.
+

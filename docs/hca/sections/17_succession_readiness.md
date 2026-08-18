@@ -1,27 +1,33 @@
 # Section 17 — Succession Readiness
 
-* **Nama Visual**: Indikator Kesiapan Suksesi Kepemimpinan
+* **Nama Visual**: Indikator Kesiapan Suksesi Kepemimpinan (Succession Readiness)
 * **Kode Section**: `succession`
 * **Komponen File**: [SuccessionReadiness.php](file:///c:/laragon/www/spsp_new/app/Livewire/Pages/HCA/Sections/SuccessionReadiness.php) & [succession-readiness.blade.php](file:///c:/laragon/www/spsp_new/resources/views/livewire/pages/h-c-a/sections/succession-readiness.blade.php)
-* **Status Dynamic**: ✅ **DONE (Dynamic DB)**
+* **Status Dynamic**: ✅ **DONE (Dynamic DB Sync)**
 
 ---
 
-## 🧬 Tujuan & Maksud Keilmuan (HR & Assessment Science)
+## 🧬 Tujuan & Maksud Keilmuan (HR & Succession Planning)
 
-1. **Succession Pipeline Timeline**:
-   * Menilai estimasi waktu kesiapan kandidat untuk menduduki posisi pimpinan kunci di masa mendatang: *Ready Now* (siap promosi segera), *Ready 1 Year* (siap dalam 12 bulan setelah akselerasi), atau *Ready 2-3 Years* (suksesi jangka panjang).
-2. **Business Continuity Risk Mitigation**:
-   * Mencegah kekosongan kepemimpinan (*leadership vacuum*) pada posisi-posisi krusial organisasi melalui pemetaan peran target yang jelas.
+1. **Leadership Pipeline & Business Continuity Risk Mitigation (Rothwell & Charan)**:
+   * Mengamankan kelangsungan bisnis (*business continuity*) organisasi dengan mengidentifikasi dan mempersiapkan kandidat pengganti untuk posisi-posisi kunci kepemimpinan sebelum terjadi kekosongan jabatan (*leadership vacuum*).
+   * Menilai estimasi horizon waktu kesiapan suksesi (*Succession Horizon*):
+     * **Horizon 1 (Ready Now)**: Siap promosi segera tanpa masa transisi panjang ($0-6$ bulan).
+     * **Horizon 2 (Ready in 1–2 Years)**: Memiliki potensi tinggi namun membutuhkan akselerasi kompetensi manajerial spesifik ($12-24$ bulan).
+     * **Horizon 3 (Ready in 2–3 Years)**: Suksesi jangka menengah dengan fokus pada rotasi lintas fungsi dan pematangan kepemimpinan ($24-36$ bulan).
+
+2. **Rantai Keputusan Talenta (*Talent Progression Chain*)**:
+   * Menghubungkan secara langsung diagnosa kuadran 9-Box (Section 16) dengan penetapan peran suksesi:
+     * Kandidat di *Star Talent / High Potential* (Box 9 & 8) diproyeksikan langsung untuk peran Horizon 1 & Horizon 2 jenjang eksekutif.
+     * Kandidat di *Core Player / High Performer* (Box 5 & 6) diproyeksikan untuk peran Horizon 2 & Horizon 3 pengayaan fungsional/spesialis.
 
 ---
 
 ## 📊 Sumber Data DB SPSP & Logic Calculation
 
 * **Model Utama**: `App\Models\Participant`, `App\Models\PositionFormation`, `App\Models\FinalAssessment`, `App\Models\ParticipantPerformanceRecord`.
-* **Formula DB**:
-  * **Jabatan Target Utama**: Diderivasi dari formasi jabatan aktif peserta (`PositionFormation::name` / `current_position`).
-  * **Horizon 1 (Siap Sekarang)**: Persentase kesiapan berdasarkan skor capaian KPI aktual dan potensi (&le; 98%).
-  * **Horizon 2 (Kesiapan 1-2 Tahun)**: Target peran manajerial yang lebih tinggi (Direktur / Senior Manager).
-  * **Horizon 3 (Kesiapan 2-3 Tahun)**: Target peran eksekutif puncak (Chief Executive / Head of Division).
-* **Tampilan UI**: Timeline bertingkat (Horizon 1, 2, 3) dengan status kesiapan badge, persentase keyakinan, dan rencana pengembangan spesifik tiap horizon.
+* **Formula Penentuan Horizon & Keyakinan**:
+  * **Peran Target Utama**: Diderivasi dari formasi posisi aktif (`PositionFormation::name` / `current_position`).
+  * **Persentase Kesiapan Horizon 1**: Dihitung dari kombinasi skor capaian KPI aktual dan skor potensi individual ($\le 98\%$).
+  * **Deskripsi Horizon**: Disesuaikan secara otomatis berdasarkan klasifikasi 9-Box untuk memberikan arahan pengembangan spesifik tiap horizon.
+* **Tampilan Visual UI**: Kartu peran target utama, timeline bertingkat 3 horizon (Siap Sekarang, 1 Tahun, 2-3 Tahun) dengan persentase keyakinan kesiapan, status badge, dan deskripsi intervensi pendukung.
