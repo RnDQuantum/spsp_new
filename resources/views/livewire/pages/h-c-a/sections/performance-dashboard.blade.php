@@ -119,6 +119,34 @@
             existingChart.destroy();
         }
 
+        // Calculate dynamic min and max based on data values
+        const allValues = [...trends, ...benchmarks].map(Number).filter(v => !isNaN(v) && v !== null);
+        let dynamicMin = 80;
+        let dynamicMax = 100;
+
+        if (allValues.length > 0) {
+            const minVal = Math.min(...allValues);
+            const maxVal = Math.max(...allValues);
+
+            // Berikan buffer 3-4% ke bawah dan ke atas, dibulatkan ke kelipatan 5 terdekat
+            dynamicMin = Math.max(0, Math.floor((minVal - 3) / 5) * 5);
+            dynamicMax = Math.ceil((maxVal + 3) / 5) * 5;
+
+            // Pastikan rentang minimal 15% agar visual kurva proporsional dan tidak flat
+            if (dynamicMax - dynamicMin < 15) {
+                dynamicMin = Math.max(0, dynamicMin - 5);
+                dynamicMax = dynamicMax + 5;
+            }
+        }
+
+        const range = dynamicMax - dynamicMin;
+        let stepSize = 5;
+        if (range > 30 && range <= 60) {
+            stepSize = 10;
+        } else if (range > 60) {
+            stepSize = 20;
+        }
+
         new Chart(ctx, {
             type: 'line',
             data: {
@@ -128,7 +156,7 @@
                         label: 'Aktual KPI',
                         data: trends,
                         borderColor: '#15803d',
-                        backgroundColor: 'rgba(21, 128, 61, 0.05)',
+                        backgroundColor: 'rgba(21, 128, 61, 0.08)',
                         borderWidth: 3,
                         pointBackgroundColor: '#15803d',
                         pointBorderColor: '#ffffff',
@@ -137,7 +165,32 @@
                         pointHoverRadius: 7,
                         fill: true,
                         tension: 0.25,
-                        z: 2
+                        z: 2,
+                        datalabels: {
+                            display: true,
+                            align: 'top',
+                            anchor: 'end',
+                            offset: 6,
+                            color: '#15803d',
+                            backgroundColor: 'rgba(255, 255, 255, 0.92)',
+                            borderColor: 'rgba(21, 128, 61, 0.25)',
+                            borderWidth: 1,
+                            borderRadius: 4,
+                            padding: {
+                                top: 2,
+                                bottom: 1,
+                                left: 5,
+                                right: 5
+                            },
+                            font: {
+                                family: 'Instrument Sans',
+                                weight: '700',
+                                size: 10
+                            },
+                            formatter: function(value) {
+                                return Number(value).toFixed(2) + '%';
+                            }
+                        }
                     },
                     {
                         label: 'Target',
@@ -148,21 +201,42 @@
                         pointRadius: 0,
                         fill: false,
                         tension: 0,
-                        z: 1
+                        z: 1,
+                        datalabels: {
+                            display: false
+                        }
                     }
                 ]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                layout: {
+                    padding: {
+                        top: 28,
+                        bottom: 8,
+                        left: 8,
+                        right: 12
+                    }
+                },
                 plugins: {
                     legend: {
-                        display: false // We use our own custom SVG legend
+                        display: false // Menggunakan custom SVG legend di header
                     },
                     tooltip: {
+                        backgroundColor: 'rgba(23, 20, 18, 0.9)',
+                        titleFont: {
+                            family: 'Instrument Sans',
+                            weight: '600'
+                        },
+                        bodyFont: {
+                            family: 'Instrument Sans'
+                        },
+                        padding: 10,
+                        cornerRadius: 6,
                         callbacks: {
                             label: function(context) {
-                                return context.dataset.label + ': ' + context.raw.toFixed(2) + '%';
+                                return context.dataset.label + ': ' + Number(context.raw).toFixed(2) + '%';
                             }
                         }
                     }
@@ -176,23 +250,28 @@
                             color: '#64748b',
                             font: {
                                 family: 'Instrument Sans',
-                                weight: '500'
-                            }
+                                weight: '600',
+                                size: 11
+                            },
+                            padding: 6
                         }
                     },
                     y: {
-                        min: 85,
-                        max: 100,
+                        min: dynamicMin,
+                        max: dynamicMax,
                         grid: {
-                            color: '#f0ebe4'
+                            color: '#f0ebe4',
+                            drawBorder: false
                         },
                         ticks: {
-                            stepSize: 5,
+                            stepSize: stepSize,
                             color: '#94a3b8',
                             font: {
                                 family: 'Instrument Sans',
-                                size: 9
+                                size: 10,
+                                weight: '500'
                             },
+                            padding: 8,
                             callback: function(value) {
                                 return value + '%';
                             }
