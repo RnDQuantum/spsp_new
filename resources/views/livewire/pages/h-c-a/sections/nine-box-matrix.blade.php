@@ -11,8 +11,8 @@
         <!-- Talent Quadrant Callout -->
         <div class="flex items-center gap-2">
             <span class="text-xs font-semibold text-slate-500">Talent Klasifikasi:</span>
-            <span class="text-xs font-bold text-white bg-accent-amber px-3 py-1 rounded-md uppercase tracking-wider">
-                Star Talent (Box 9)
+            <span class="text-xs font-bold text-white bg-accent-amber px-3 py-1 rounded-md uppercase tracking-wider shadow-xs">
+                {{ $boxLabel }} (Box {{ $boxNumber }})
             </span>
         </div>
     </div>
@@ -51,18 +51,18 @@
                     
                     @if ($isActive)
                         <!-- Active Talent Cell -->
-                        <div class="bg-accent-amber border-2 border-accent-amber rounded-xl p-4 flex flex-col justify-between min-h-[100px] shadow-sm text-white transition-all duration-300 hover:scale-[1.02]">
-                            <span class="text-[10px] font-bold tracking-wider opacity-85">BOX {{ ($rowVal-1)*3 + $colVal }}</span>
+                        <div class="bg-accent-amber border-2 border-accent-amber rounded-xl p-4 flex flex-col justify-between min-h-[105px] shadow-md text-white transition-all duration-300 scale-[1.02] ring-2 ring-accent-amber/30">
+                            <span class="text-[10px] font-bold tracking-wider opacity-90">BOX {{ $cell[4] ?? (($rowVal-1)*3 + $colVal) }}</span>
                             <div class="my-auto">
                                 <h4 class="font-display font-extrabold text-sm leading-tight">{{ $cell[2] }}</h4>
                                 <p class="text-[10px] opacity-90 mt-1 leading-normal hidden sm:block">{{ $cell[3] }}</p>
                             </div>
-                            <span class="text-[9px] font-bold uppercase tracking-wider bg-white/20 px-1.5 py-0.5 rounded self-start">Kandidat</span>
+                            <span class="text-[9px] font-bold uppercase tracking-wider bg-white/25 px-2 py-0.5 rounded-full self-start shadow-xs">Kandidat Terpilih</span>
                         </div>
                     @else
                         <!-- Inactive Cell -->
-                        <div class="bg-white border border-warm-border rounded-xl p-4 flex flex-col justify-between min-h-[100px] transition-all duration-300 hover:border-slate-300">
-                            <span class="text-[10px] font-bold text-slate-300">BOX {{ ($rowVal-1)*3 + $colVal }}</span>
+                        <div class="bg-white border border-warm-border rounded-xl p-4 flex flex-col justify-between min-h-[105px] transition-all duration-300 hover:border-slate-300 opacity-80">
+                            <span class="text-[10px] font-bold text-slate-300">BOX {{ $cell[4] ?? (($rowVal-1)*3 + $colVal) }}</span>
                             <div class="my-auto">
                                 <h4 class="font-display font-bold text-primary-ink text-xs leading-tight opacity-75">{{ $cell[2] }}</h4>
                                 <p class="text-[9px] text-slate-400 mt-0.5 leading-normal hidden sm:block">{{ $cell[3] }}</p>
@@ -86,10 +86,10 @@
     </div>
 
     <!-- Section Bottom Info -->
-    <div class="bg-warm-ivory border border-warm-border rounded-xl p-6 text-xs text-slate-500 leading-relaxed flex items-start gap-3">
-        <i class="fas fa-circle-info text-accent-amber text-sm mt-0.5"></i>
+    <div class="bg-warm-ivory border border-warm-border rounded-xl p-6 text-xs text-slate-600 leading-relaxed flex items-start gap-3 shadow-xs">
+        <i class="fas fa-circle-info text-accent-amber text-sm mt-0.5 shrink-0"></i>
         <span>
-            <strong>Talent Placement (Star Talent):</strong> Kandidat berada di kuadran berkinerja tinggi dengan kapasitas kepemimpinan potensial teratas. Direkomendasikan untuk promosi kepemimpinan akselerasi (*fast track*) dan pengembangan program suksesi kritis.
+            <strong>Talent Placement ({{ $boxLabel }}):</strong> {{ $placementNarrative }}
         </span>
     </div>
 </div>

@@ -11,8 +11,8 @@
         <!-- Target Role Header -->
         <div class="flex items-center gap-2">
             <span class="text-xs font-semibold text-slate-500">Jabatan Target Utama:</span>
-            <span class="text-xs font-bold text-accent-amber bg-accent-amber/10 border border-accent-amber/20 px-3 py-1 rounded-md">
-                VP OF HC DEVELOPMENT
+            <span class="text-xs font-bold text-accent-amber bg-accent-amber/10 border border-accent-amber/20 px-3 py-1 rounded-md uppercase tracking-wider shadow-xs">
+                {{ $primaryTargetRole }}
             </span>
         </div>
     </div>

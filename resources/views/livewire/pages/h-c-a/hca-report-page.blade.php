@@ -79,12 +79,12 @@
 
             <!-- 16 9-Box Matrix -->
             <div class="page-break p-8">
-                <livewire:pages.h-c-a.sections.nine-box-matrix />
+                <livewire:pages.h-c-a.sections.nine-box-matrix :participant-id="$participantId" :key="'nine_box_print_'.$participantId" />
             </div>
 
             <!-- 17 Succession Readiness -->
             <div class="page-break p-8">
-                <livewire:pages.h-c-a.sections.succession-readiness />
+                <livewire:pages.h-c-a.sections.succession-readiness :participant-id="$participantId" :key="'succession_print_'.$participantId" />
             </div>
 
             <!-- 18 Profil Personal -->
@@ -305,10 +305,10 @@
                                     <livewire:pages.h-c-a.sections.performance-dashboard :participant-id="$participantId" :key="'performance_'.$participantId" />
                                     @break
                                 @case('nine_box')
-                                    <livewire:pages.h-c-a.sections.nine-box-matrix />
+                                    <livewire:pages.h-c-a.sections.nine-box-matrix :participant-id="$participantId" :key="'nine_box_'.$participantId" />
                                     @break
                                 @case('succession')
-                                    <livewire:pages.h-c-a.sections.succession-readiness />
+                                    <livewire:pages.h-c-a.sections.succession-readiness :participant-id="$participantId" :key="'succession_'.$participantId" />
                                     @break
                                 @case('personal_profile')
                                 @case('strengths')

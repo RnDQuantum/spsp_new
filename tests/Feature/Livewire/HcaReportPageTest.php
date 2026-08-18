@@ -8,8 +8,10 @@ use App\Livewire\Pages\HCA\HcaReportPage;
 use App\Livewire\Pages\HCA\Sections\DiscProfile;
 use App\Livewire\Pages\HCA\Sections\ExecutiveSummary;
 use App\Livewire\Pages\HCA\Sections\IndexRadarSection;
+use App\Livewire\Pages\HCA\Sections\NineBoxMatrix;
 use App\Livewire\Pages\HCA\Sections\PerformanceDashboard;
 use App\Livewire\Pages\HCA\Sections\ScoreListSection;
+use App\Livewire\Pages\HCA\Sections\SuccessionReadiness;
 use App\Livewire\Pages\HCA\Sections\TimelineSection;
 use App\Models\Participant;
 use Livewire\Livewire;
@@ -404,5 +406,44 @@ class HcaReportPageTest extends TestCase
         $record = $participant->performanceRecords()->first();
         $this->assertNotNull($record->year);
         $this->assertIsFloat((float) $record->kpi_score);
+    }
+
+    /**
+     * Test nine box matrix renders dynamic data for participant
+     */
+    public function test_nine_box_matrix_renders_dynamic_data(): void
+    {
+        $participant = Participant::with(['finalAssessment', 'performanceRecords'])->first();
+        if (! $participant) {
+            $this->markTestSkipped('No participant found');
+        }
+
+        Livewire::test(NineBoxMatrix::class, [
+            'participantId' => $participant->id,
+        ])
+            ->assertSee('9-Box')
+            ->assertSee('Talent Klasifikasi')
+            ->assertSee('BOX')
+            ->assertSee('Talent Placement');
+    }
+
+    /**
+     * Test succession readiness renders dynamic data for participant
+     */
+    public function test_succession_readiness_renders_dynamic_data(): void
+    {
+        $participant = Participant::with(['positionFormation.template', 'finalAssessment', 'performanceRecords'])->first();
+        if (! $participant) {
+            $this->markTestSkipped('No participant found');
+        }
+
+        Livewire::test(SuccessionReadiness::class, [
+            'participantId' => $participant->id,
+        ])
+            ->assertSee('Succession')
+            ->assertSee('Readiness')
+            ->assertSee('Jabatan Target Utama')
+            ->assertSee('Horizon 1')
+            ->assertSee('Siap Sekarang');
     }
 }

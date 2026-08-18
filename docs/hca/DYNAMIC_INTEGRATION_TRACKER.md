@@ -10,14 +10,14 @@ Setiap section diuji dan di-update secara bertahap sesuai keputusan dan verifika
 
 | Indicator | Total Section | Dynamic DB Sync (Selesai) | Component Active (Ready UI) | Belum Dikerjakan (Planned) |
 | :--- | :---: | :---: | :---: | :---: |
-| **Jumlah** | **24 Sections + Nav** | **19** | **4** | **1** |
-| **Persentase** | **100%** | **79.2%** | **16.7%** | **4.2%** |
+| **Jumlah** | **24 Sections + Nav** | **21** | **2** | **1** |
+| **Persentase** | **100%** | **87.5%** | **8.3%** | **4.2%** |
 
 > [!NOTE]
 > **Metode Pengerjaan & Kedinamisan Section**:
 > 1. **Seluruh 24 Section + Navigasi** telah terdata spesifikasinya dalam arsitektur HCA Report.
-> 2. **Dynamic DB Integration**: Section 00-15 dan 19 sudah terhubung penuh dengan kalkulasi dinamis database SPSP (`IndividualAssessmentService`, model `Participant`, `ParticipantCareerHistory`, `ParticipantPerformanceRecord`, `SubAspectAssessment`, `TestResult`, dan `Mmpi`).
-> 3. **Component Active (UI Ready)**: Section 16-18 dan 20-23 telah aktif dengan komponen UI mandiri dan dataset terstruktur siap integrasi data eksternal/HRIS.
+> 2. **Dynamic DB Integration**: Section 00-17 dan 19 sudah terhubung penuh dengan kalkulasi dinamis database SPSP (`IndividualAssessmentService`, model `Participant`, `ParticipantCareerHistory`, `ParticipantPerformanceRecord`, `SubAspectAssessment`, `TestResult`, dan `Mmpi`).
+> 3. **Component Active (UI Ready)**: Section 18 dan 20-23 telah aktif dengan komponen UI mandiri dan dataset terstruktur siap integrasi data eksternal/HRIS.
 > 4. **Planned Appendix**: Section 24 (Laporan Hasil Alat Tes / Technical Appendix) disiapkan sebagai pembuktian Level 1 (*evidence layer*) menggunakan tabel `test_results` dan `TestReportService`.
 
 ---
@@ -42,8 +42,8 @@ Setiap section diuji dan di-update secara bertahap sesuai keputusan dan verifika
 | **13** | **Emotional Intelligence (EQ)** | 🟡 Partial | ✅ **DONE (Dynamic)** | [13_emotional_intelligence.md](./sections/13_emotional_intelligence.md) | Component active `IndexRadarSection` (radar/skor 5 dimensi EQ). |
 | **14** | **Values & Integrity** | 🟡 Partial | ✅ **DONE (Dynamic)** | [14_values_integrity.md](./sections/14_values_integrity.md) | Agregasi dinamis 4 dimensi integritas dan nilai kerja dari `sub_aspect_assessments`. |
 | **15** | **Performance Dashboard** | 🟢 Dynamic DB | ✅ **DONE (Dynamic)** | [15_performance_dashboard.md](./sections/15_performance_dashboard.md) | Tabel `participant_performance_records`, model `ParticipantPerformanceRecord`, seeder generator, dan relasi `Participant::performanceRecords()`. |
-| **16** | **Talent 9-Box Matrix** | 🔴 New | 🟨 **ACTIVE (UI Ready)** | [16_talent_9box_matrix.md](./sections/16_talent_9box_matrix.md) | Component active `NineBoxMatrix` (matriks Potensi &times; Kinerja). |
-| **17** | **Succession Readiness** | 🔴 New | 🟨 **ACTIVE (UI Ready)** | [17_succession_readiness.md](./sections/17_succession_readiness.md) | Component active `SuccessionReadiness` (indikator kesiapan suksesi kepemimpinan). |
+| **16** | **Talent 9-Box Matrix** | 🟢 Dynamic DB | ✅ **DONE (Dynamic)** | [16_talent_9box_matrix.md](./sections/16_talent_9box_matrix.md) | Matriks Potensi &times; Kinerja dinamis, penanda kandidat aktif, dan narasi interpretasi kuadran talenta. |
+| **17** | **Succession Readiness** | 🟢 Dynamic DB | ✅ **DONE (Dynamic)** | [17_succession_readiness.md](./sections/17_succession_readiness.md) | Horizon suksesi dinamis (Horizon 1, 2, 3), penentuan peran target utama, dan tingkat keyakinan kesiapan. |
 | **18** | **Profil Personal (Pelengkap)** | 🔴 New | 🟨 **ACTIVE (UI Ready)** | [18_profil_personal.md](./sections/18_profil_personal.md) | Component active `QualitativeListSection` (profil personal hobi/karakter). |
 | **19** | **Kesehatan Jiwa** | 🟡 Partial | ✅ **DONE (Dynamic)** | [19_kesehatan_jiwa.md](./sections/19_kesehatan_jiwa.md) | Component active `MentalHealthSection` + terhubung model `Mmpi` (`psychologicalTest`). |
 | **20** | **Kekuatan Psikologis** | 🟡 Partial | 🟨 **ACTIVE (UI Ready)** | [20_kekuatan_psikologis.md](./sections/20_kekuatan_psikologis.md) | Component active `QualitativeListSection` (poin kekuatan & area pengembangan). |
