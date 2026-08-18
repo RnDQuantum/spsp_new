@@ -10,8 +10,8 @@ Setiap section diuji dan di-update secara bertahap sesuai keputusan dan verifika
 
 | Indicator | Total Section | Dynamic DB Sync (Selesai) | Component Active (Ready UI) | Belum Dikerjakan (Planned) |
 | :--- | :---: | :---: | :---: | :---: |
-| **Jumlah** | **24 Sections + Nav** | **10** | **13** | **1** |
-| **Persentase** | **100%** | **41.7%** | **54.2%** | **4.2%** |
+| **Jumlah** | **24 Sections + Nav** | **11** | **12** | **1** |
+| **Persentase** | **100%** | **45.8%** | **50.0%** | **4.2%** |
 
 > [!NOTE]
 > **Metode Pengerjaan & Kedinamisan Section**:
@@ -31,7 +31,7 @@ Setiap section diuji dan di-update secara bertahap sesuai keputusan dan verifika
 | **02** | **Ringkasan Eksekutif** | 🟡 Partial | ✅ **DONE (Dynamic)** | [02_executive_summary.md](./sections/02_executive_summary.md) | Dynamically computed 5 pillars, Talent Index, & status kesiapan bawaan SPSP (`final_assessments.conclusion_text`). |
 | **03** | **Identitas Peserta** | 🟢 Reuse | ✅ **DONE (Dynamic)** | [03_participant_profile.md](./sections/03_participant_profile.md) | Biodata lengkap peserta (`$participant`). |
 | **04** | **Human Capital Index (HCI)** | 🟡 Partial | ✅ **DONE (Dynamic)** | [04_human_capital_index.md](./sections/04_human_capital_index.md) | Radar chart skoring 5 pilar HCI via `IndividualAssessmentService`. |
-| **05** | **Layer 1: Kompetensi** | 🟢 Reuse | ✅ **DONE (Dynamic)** | [05_layer1_kompetensi.md](./sections/05_layer1_kompetensi.md) | Component active & wired `ScoreListSection` (rating vs standard kompetensi). |
+| **05** | **Layer 1: Kompetensi** | 🟢 Reuse | ✅ **DONE (Dynamic)** | [05_layer1_kompetensi.md](./sections/05_layer1_kompetensi.md) | Query dinamis `IndividualAssessmentService::getAspectAssessments` kategori kompetensi, standar rating, gap, dan kesimpulan. |
 | **06** | **Riwayat Karier** | 🟢 Dynamic DB | ✅ **DONE (Dynamic)** | [06_riwayat_karier.md](./sections/06_riwayat_karier.md) | Tabel `participant_career_histories`, model `ParticipantCareerHistory`, seeder generator, dan relasi `Participant::careerHistories()`. |
 | **07** | **Layer 2: Potensi** | 🟢 Reuse | ✅ **DONE (Dynamic)** | [07_layer2_potensi.md](./sections/07_layer2_potensi.md) | Component active `IndexRadarSection` + `IndividualAssessmentService` potensi. |
 | **08** | **IQ & Profil Kognitif** | 🟢 Reuse | 🟨 **ACTIVE (UI Ready)** | [08_iq_kognitif.md](./sections/08_iq_kognitif.md) | Component active `ScoreListSection` (breakdown sub-aspek kognitif). |

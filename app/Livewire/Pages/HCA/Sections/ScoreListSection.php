@@ -4,30 +4,31 @@ declare(strict_types=1);
 
 namespace App\Livewire\Pages\HCA\Sections;
 
+use App\Models\CategoryType;
+use App\Models\Participant;
+use App\Services\IndividualAssessmentService;
 use Illuminate\View\View;
+use Livewire\Attributes\Reactive;
 use Livewire\Component;
 
 class ScoreListSection extends Component
 {
+    #[Reactive]
+    public ?int $participantId = null;
+
     public string $sectionCode = '';
 
     /**
-     * Datasets for each parameterized score list section
+     * Datasets for parameterized score list sections
      */
     public array $datasets = [
         'competency' => [
             'title' => 'Layer 1: Kompetensi',
-            'subtitle' => 'Hard Evidence & Manajerial',
-            'desc' => 'Hasil evaluasi komparatif tingkat kompetensi manajerial, sosial, teknis, digital, dan kepemimpinan peserta.',
+            'subtitle' => 'Hard Evidence & Perilaku Manajerial',
+            'desc' => 'Hasil evaluasi komparatif tingkat kompetensi manajerial, sosial kultural, teknis, dan kepemimpinan peserta terhadap standar formasi jabatan.',
             'average' => 3.90,
             'max_score' => 5.00,
-            'scores' => [
-                ['label' => 'Kompetensi Teknis', 'value' => 4.10, 'desc' => 'Penguasaan keahlian fungsional dan operasional sesuai bidang tugas.'],
-                ['label' => 'Kompetensi Manajerial', 'value' => 3.80, 'desc' => 'Kemampuan mengelola tim, merencanakan kerja, dan mengeksekusi target.'],
-                ['label' => 'Kompetensi Sosial Kultural', 'value' => 4.00, 'desc' => 'Kemampuan berinteraksi dengan latar belakang budaya dan nilai sosial.'],
-                ['label' => 'Kompetensi Digital', 'value' => 3.70, 'desc' => 'Pemanfaatan instrumen digital untuk meningkatkan produktivitas.'],
-                ['label' => 'Kompetensi Kepemimpinan', 'value' => 3.90, 'desc' => 'Kapasitas mengarahkan, memotivasi, dan mendelegasikan tanggung jawab.'],
-            ],
+            'scores' => [],
         ],
         'cognitive' => [
             'title' => 'IQ & Profil Kognitif',
@@ -106,9 +107,87 @@ class ScoreListSection extends Component
         $this->sectionCode = $sectionCode;
     }
 
+    /**
+     * Get active participant.
+     */
+    public function getParticipantProperty(): ?Participant
+    {
+        if (! $this->participantId) {
+            return Participant::with(['positionFormation.template', 'finalAssessment'])->first();
+        }
+
+        return Participant::with(['positionFormation.template', 'finalAssessment'])->find($this->participantId);
+    }
+
+    /**
+     * Get dynamic competency data from SPSP database.
+     */
+    private function getCompetencyData(): array
+    {
+        $participant = $this->participant;
+
+        if (! $participant || ! $participant->positionFormation?->template) {
+            return [
+                'title' => 'Layer 1: Kompetensi',
+                'subtitle' => 'Hard Evidence & Perilaku Manajerial',
+                'desc' => 'Hasil evaluasi komparatif tingkat kompetensi manajerial peserta terhadap standar formasi jabatan.',
+                'average' => 3.90,
+                'max_score' => 5.00,
+                'scores' => [
+                    ['label' => 'Integritas', 'value' => 4.00, 'standard' => 3.00, 'gap' => 1.00, 'conclusion' => 'Di Atas Standar', 'desc' => 'Konsisten berperilaku selaras dengan nilai, norma, dan etika organisasi.'],
+                    ['label' => 'Kerjasama', 'value' => 3.80, 'standard' => 3.00, 'gap' => 0.80, 'conclusion' => 'Memenuhi Standar', 'desc' => 'Kemampuan membangun hubungan kerja yang produktif dan saling mendukung.'],
+                    ['label' => 'Komunikasi', 'value' => 4.10, 'standard' => 3.00, 'gap' => 1.10, 'conclusion' => 'Di Atas Standar', 'desc' => 'Kemampuan menyampaikan informasi secara jelas, persuasif, dan efektif.'],
+                    ['label' => 'Orientasi pada Hasil', 'value' => 3.70, 'standard' => 3.00, 'gap' => 0.70, 'conclusion' => 'Memenuhi Standar', 'desc' => 'Fokus pada pencapaian target kerja dengan standar kualitas tinggi.'],
+                    ['label' => 'Pelayanan Publik', 'value' => 4.00, 'standard' => 3.00, 'gap' => 1.00, 'conclusion' => 'Di Atas Standar', 'desc' => 'Komitmen memberikan pelayanan prima bagi para pemangku kepentingan.'],
+                ],
+            ];
+        }
+
+        $templateId = $participant->positionFormation->template_id;
+        $service = app(IndividualAssessmentService::class);
+
+        $kompetensiCat = CategoryType::where('template_id', $templateId)->where('code', 'kompetensi')->first();
+
+        if (! $kompetensiCat) {
+            return $this->datasets['competency'];
+        }
+
+        $aspectAssessments = $service->getAspectAssessments($participant->id, $kompetensiCat->id, 0);
+
+        if ($aspectAssessments->isEmpty()) {
+            return $this->datasets['competency'];
+        }
+
+        $scores = $aspectAssessments->map(function ($item) {
+            return [
+                'label' => $item['name'],
+                'value' => (float) $item['individual_rating'],
+                'standard' => (float) ($item['standard_rating'] ?? 3.00),
+                'gap' => (float) ($item['gap_rating'] ?? 0.00),
+                'conclusion' => (string) ($item['conclusion_text'] ?? ''),
+                'desc' => (string) ($item['description'] ?? 'Aspek kompetensi perilaku dan manajerial jabatan.'),
+            ];
+        })->toArray();
+
+        $average = (float) $aspectAssessments->avg('individual_rating');
+
+        return [
+            'title' => 'Layer 1: Kompetensi',
+            'subtitle' => 'Hard Evidence & Perilaku Manajerial',
+            'desc' => 'Hasil evaluasi komparatif tingkat kompetensi manajerial, sosial kultural, teknis, dan kepemimpinan peserta terhadap standar formasi jabatan yang dipersyaratkan.',
+            'average' => round($average, 2),
+            'max_score' => 5.00,
+            'scores' => $scores,
+        ];
+    }
+
     public function render(): View
     {
-        $data = $this->datasets[$this->sectionCode] ?? $this->datasets['competency'];
+        if ($this->sectionCode === 'competency') {
+            $data = $this->getCompetencyData();
+        } else {
+            $data = $this->datasets[$this->sectionCode] ?? $this->datasets['competency'];
+        }
 
         return view('livewire.pages.h-c-a.sections.score-list-section', [
             'title' => $data['title'],
@@ -118,6 +197,7 @@ class ScoreListSection extends Component
             'max_score' => $data['max_score'],
             'is_iq' => $data['is_iq'] ?? false,
             'scores' => $data['scores'],
+            'participant' => $this->participant,
         ]);
     }
 }

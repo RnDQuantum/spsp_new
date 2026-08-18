@@ -24,7 +24,7 @@
 
             <!-- 05 Kompetensi -->
             <div class="page-break p-8">
-                <livewire:pages.h-c-a.sections.score-list-section sectionCode="competency" />
+                <livewire:pages.h-c-a.sections.score-list-section sectionCode="competency" :participant-id="$participantId" :key="'competency_print_'.$participantId" />
             </div>
 
             <!-- 06 Riwayat Karier -->
@@ -293,7 +293,7 @@
                                 @case('learning_agility')
                                 @case('leadership_potential')
                                 @case('integrity')
-                                    <livewire:pages.h-c-a.sections.score-list-section :sectionCode="$activeSection" :key="'scores_' . $activeSection" />
+                                    <livewire:pages.h-c-a.sections.score-list-section :sectionCode="$activeSection" :participant-id="$participantId" :key="'scores_' . $activeSection . '_' . $participantId" />
                                     @break
                                 @case('career')
                                     <livewire:pages.h-c-a.sections.timeline-section :participant-id="$participantId" :key="'career_'.$participantId" />

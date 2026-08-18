@@ -6,6 +6,7 @@ namespace Tests\Feature\Livewire;
 
 use App\Livewire\Pages\HCA\HcaReportPage;
 use App\Livewire\Pages\HCA\Sections\ExecutiveSummary;
+use App\Livewire\Pages\HCA\Sections\ScoreListSection;
 use App\Livewire\Pages\HCA\Sections\TimelineSection;
 use App\Models\Participant;
 use Livewire\Livewire;
@@ -187,5 +188,24 @@ class HcaReportPageTest extends TestCase
         $this->assertNotNull($firstCareer->position_title);
         $this->assertTrue($firstCareer->is_current);
         $this->assertIsArray($firstCareer->achievements);
+    }
+
+    /**
+     * Test score list section renders dynamic competency data for participant
+     */
+    public function test_score_list_section_renders_dynamic_competency_data(): void
+    {
+        $participant = Participant::query()->first();
+        if (! $participant) {
+            $this->markTestSkipped('No participant found');
+        }
+
+        Livewire::test(ScoreListSection::class, [
+            'sectionCode' => 'competency',
+            'participantId' => $participant->id,
+        ])
+            ->assertSee('Layer 1')
+            ->assertSee('Kompetensi')
+            ->assertSee('Skor Rata-Rata');
     }
 }
