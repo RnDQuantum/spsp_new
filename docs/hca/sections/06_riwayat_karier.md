@@ -3,7 +3,7 @@
 * **Nama Visual**: Timeline Histori Jabatan & Pencapaian
 * **Kode Section**: `career`
 * **Komponen File**: [TimelineSection.php](file:///c:/laragon/www/spsp_new/app/Livewire/Pages/HCA/Sections/TimelineSection.php) & [timeline-section.blade.php](file:///c:/laragon/www/spsp_new/resources/views/livewire/pages/h-c-a/sections/timeline-section.blade.php)
-* **Status Dynamic**: 📋 **PLANNED** (Data SPSP 🔴 New Data Source)
+* **Status Dynamic**: ✅ **DONE (Dynamic DB)**
 
 ---
 
@@ -18,5 +18,8 @@
 
 ## 📊 Sumber Data DB SPSP & Logic Calculation
 
-* **Sumber Data**: Data histori karier merupakan data eksternal dari sistem HRIS instansi klien atau modul input manual riwayat kerja yang akan disinkronkan ke DB SPSP.
-* **Tampilan UI**: Timeline vertikal interaktif berurutan secara kronologis (*latest to oldest*).
+* **Tabel Database**: `participant_career_histories`
+* **Model Eloquent**: `App\Models\ParticipantCareerHistory` berelasi dengan `App\Models\Participant::careerHistories()`.
+* **Field yang Digunakan**: `position_title`, `company_or_institution`, `start_year`, `end_year`, `is_current`, `achievements` (JSON array), `order_index`.
+* **Seeder Generator**: `Database\Seeders\Support\CareerHistoryGenerator` yang terintegrasi di `DynamicAssessmentSeeder` dan `ParticipantCareerHistorySeeder`.
+* **Tampilan UI**: Timeline vertikal asimetris dengan indikator posisi aktif (*pulse ping*), estimasi total masa kerja efektif, dan rincian poin pencapaian kerja per periode jabatan.

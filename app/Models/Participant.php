@@ -109,4 +109,9 @@ class Participant extends Model
     {
         return $this->hasMany(TestResult::class);
     }
+
+    public function careerHistories(): HasMany
+    {
+        return $this->hasMany(ParticipantCareerHistory::class)->orderBy('order_index');
+    }
 }

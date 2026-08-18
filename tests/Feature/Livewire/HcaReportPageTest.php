@@ -6,6 +6,7 @@ namespace Tests\Feature\Livewire;
 
 use App\Livewire\Pages\HCA\HcaReportPage;
 use App\Livewire\Pages\HCA\Sections\ExecutiveSummary;
+use App\Livewire\Pages\HCA\Sections\TimelineSection;
 use App\Models\Participant;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -139,5 +140,52 @@ class HcaReportPageTest extends TestCase
             ->assertSee('Kompetensi')
             ->assertSee('Potensi')
             ->assertSee('Kinerja');
+    }
+
+    /**
+     * Test timeline section renders dynamic career history data
+     */
+    public function test_timeline_section_renders_dynamic_career_history_data(): void
+    {
+        $participant = Participant::with('careerHistories')->first();
+        if (! $participant) {
+            $this->markTestSkipped('No participant found');
+        }
+
+        Livewire::test(TimelineSection::class, ['participantId' => $participant->id])
+            ->assertSee('Riwayat')
+            ->assertSee('Karier')
+            ->assertSee('Estimasi Masa Kerja Efektif')
+            ->assertSee('Posisi Saat Ini');
+    }
+
+    /**
+     * Test participant has careerHistories relationship working
+     */
+    public function test_participant_has_career_histories_relationship(): void
+    {
+        $participant = Participant::with('careerHistories')->first();
+        if (! $participant) {
+            $this->markTestSkipped('No participant found');
+        }
+
+        if ($participant->careerHistories()->doesntExist()) {
+            $participant->careerHistories()->create([
+                'position_title' => 'VP of Talent Management',
+                'company_or_institution' => 'Kantor Pusat',
+                'start_year' => 2024,
+                'end_year' => null,
+                'is_current' => true,
+                'achievements' => ['Memimpin transformasi talent mapping.'],
+                'order_index' => 0,
+            ]);
+            $participant->load('careerHistories');
+        }
+
+        $this->assertTrue($participant->careerHistories()->exists());
+        $firstCareer = $participant->careerHistories->first();
+        $this->assertNotNull($firstCareer->position_title);
+        $this->assertTrue($firstCareer->is_current);
+        $this->assertIsArray($firstCareer->achievements);
     }
 }

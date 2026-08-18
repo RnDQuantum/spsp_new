@@ -10,14 +10,14 @@ Setiap section diuji dan di-update secara bertahap sesuai keputusan dan verifika
 
 | Indicator | Total Section | Dynamic DB Sync (Selesai) | Component Active (Ready UI) | Belum Dikerjakan (Planned) |
 | :--- | :---: | :---: | :---: | :---: |
-| **Jumlah** | **24 Sections + Nav** | **9** | **14** | **1** |
-| **Persentase** | **100%** | **37.5%** | **58.3%** | **4.2%** |
+| **Jumlah** | **24 Sections + Nav** | **10** | **13** | **1** |
+| **Persentase** | **100%** | **41.7%** | **54.2%** | **4.2%** |
 
 > [!NOTE]
 > **Metode Pengerjaan & Kedinamisan Section**:
 > 1. **Seluruh 24 Section + Navigasi** telah terdata spesifikasinya dalam arsitektur HCA Report.
-> 2. **Dynamic DB Integration**: Section 00-05, 07, 13, dan 19 sudah terhubung penuh dengan kalkulasi dinamis database SPSP (`IndividualAssessmentService`, model `Participant`, dan `Mmpi`).
-> 3. **Component Active (UI Ready)**: Section 06, 08-12, 14-18, dan 20-23 telah aktif dengan komponen UI mandiri dan dataset terstruktur siap integrasi data eksternal/HRIS.
+> 2. **Dynamic DB Integration**: Section 00-07, 13, dan 19 sudah terhubung penuh dengan kalkulasi dinamis database SPSP (`IndividualAssessmentService`, model `Participant`, `ParticipantCareerHistory`, dan `Mmpi`).
+> 3. **Component Active (UI Ready)**: Section 08-12, 14-18, dan 20-23 telah aktif dengan komponen UI mandiri dan dataset terstruktur siap integrasi data eksternal/HRIS.
 > 4. **Planned Appendix**: Section 24 (Laporan Hasil Alat Tes / Technical Appendix) disiapkan sebagai pembuktian Level 1 (*evidence layer*) menggunakan tabel `test_results` dan `TestReportService`.
 
 ---
@@ -32,7 +32,7 @@ Setiap section diuji dan di-update secara bertahap sesuai keputusan dan verifika
 | **03** | **Identitas Peserta** | 🟢 Reuse | ✅ **DONE (Dynamic)** | [03_participant_profile.md](./sections/03_participant_profile.md) | Biodata lengkap peserta (`$participant`). |
 | **04** | **Human Capital Index (HCI)** | 🟡 Partial | ✅ **DONE (Dynamic)** | [04_human_capital_index.md](./sections/04_human_capital_index.md) | Radar chart skoring 5 pilar HCI via `IndividualAssessmentService`. |
 | **05** | **Layer 1: Kompetensi** | 🟢 Reuse | ✅ **DONE (Dynamic)** | [05_layer1_kompetensi.md](./sections/05_layer1_kompetensi.md) | Component active & wired `ScoreListSection` (rating vs standard kompetensi). |
-| **06** | **Riwayat Karier** | 🔴 New | 🟨 **ACTIVE (UI Ready)** | [06_riwayat_karier.md](./sections/06_riwayat_karier.md) | Component active `TimelineSection` (data histori karier / input manual / HRIS). |
+| **06** | **Riwayat Karier** | 🟢 Dynamic DB | ✅ **DONE (Dynamic)** | [06_riwayat_karier.md](./sections/06_riwayat_karier.md) | Tabel `participant_career_histories`, model `ParticipantCareerHistory`, seeder generator, dan relasi `Participant::careerHistories()`. |
 | **07** | **Layer 2: Potensi** | 🟢 Reuse | ✅ **DONE (Dynamic)** | [07_layer2_potensi.md](./sections/07_layer2_potensi.md) | Component active `IndexRadarSection` + `IndividualAssessmentService` potensi. |
 | **08** | **IQ & Profil Kognitif** | 🟢 Reuse | 🟨 **ACTIVE (UI Ready)** | [08_iq_kognitif.md](./sections/08_iq_kognitif.md) | Component active `ScoreListSection` (breakdown sub-aspek kognitif). |
 | **09** | **Big Five Personality** | 🔴 New | 🟨 **ACTIVE (UI Ready)** | [09_big_five_personality.md](./sections/09_big_five_personality.md) | Component active `ScoreListSection` (model OCEAN kepribadian). |

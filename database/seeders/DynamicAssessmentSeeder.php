@@ -23,6 +23,7 @@ use App\Models\TestResult;
 use App\Services\Cache\AspectCacheService;
 use Database\Seeders\Data\AssessmentEventConfig;
 use Database\Seeders\Support\AssessmentRecordGenerator;
+use Database\Seeders\Support\CareerHistoryGenerator;
 use Database\Seeders\Support\ParticipantProfileGenerator;
 use Database\Seeders\Support\TestResultGenerator;
 use Illuminate\Database\Seeder;
@@ -248,6 +249,7 @@ class DynamicAssessmentSeeder extends Seeder
         $subAspectAssessmentsData = [];
         $finalAssessmentsData = [];
         $testResultsData = [];
+        $careerHistoriesData = [];
 
         // 1. Generate participants data
         for ($i = 0; $i < $chunkSize; $i++) {
@@ -324,6 +326,12 @@ class DynamicAssessmentSeeder extends Seeder
                 $testResultsData[] = $trRecord;
             }
 
+            // 🚀 NEW: Generate authentic career histories (participant_career_histories)
+            $participantCareers = CareerHistoryGenerator::generateForParticipant($participant, $event, $position);
+            foreach ($participantCareers as $careerRecord) {
+                $careerHistoriesData[] = $careerRecord;
+            }
+
             $progressBar->advance();
         }
 
@@ -364,6 +372,12 @@ class DynamicAssessmentSeeder extends Seeder
         if (! empty($testResultsData)) {
             foreach (array_chunk($testResultsData, $insertChunkSize) as $chunk) {
                 DB::table('test_results')->insert($chunk);
+            }
+        }
+        // 🚀 BULK INSERT participant_career_histories
+        if (! empty($careerHistoriesData)) {
+            foreach (array_chunk($careerHistoriesData, $insertChunkSize) as $chunk) {
+                DB::table('participant_career_histories')->insert($chunk);
             }
         }
     }

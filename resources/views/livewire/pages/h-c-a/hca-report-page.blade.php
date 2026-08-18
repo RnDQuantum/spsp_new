@@ -29,7 +29,7 @@
 
             <!-- 06 Riwayat Karier -->
             <div class="page-break p-8">
-                <livewire:pages.h-c-a.sections.timeline-section />
+                <livewire:pages.h-c-a.sections.timeline-section :participant-id="$participantId" :key="'timeline_print_'.$participantId" />
             </div>
 
             <!-- 07 Potensi -->
@@ -296,7 +296,7 @@
                                     <livewire:pages.h-c-a.sections.score-list-section :sectionCode="$activeSection" :key="'scores_' . $activeSection" />
                                     @break
                                 @case('career')
-                                    <livewire:pages.h-c-a.sections.timeline-section />
+                                    <livewire:pages.h-c-a.sections.timeline-section :participant-id="$participantId" :key="'career_'.$participantId" />
                                     @break
                                 @case('disc')
                                     <livewire:pages.h-c-a.sections.disc-profile />
