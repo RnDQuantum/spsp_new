@@ -1,7 +1,7 @@
 <div class="w-full max-w-5xl mx-auto bg-white border border-warm-border rounded-xl p-8 md:p-12 print:border-none shadow-sm">
     
     <!-- Section Header -->
-    <div class="border-b border-warm-border pb-6 mb-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div class="border-b border-warm-border pb-6 mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
             <span class="text-[11px] font-bold uppercase tracking-widest text-slate-400 block mb-1">
                 {{ $subtitle }}
@@ -10,14 +10,61 @@
                 {{ explode(':', $title)[0] }} <span class="text-accent-amber italic">{{ count(explode(':', $title)) > 1 ? trim(explode(':', $title)[1]) : '' }}</span>
             </h2>
         </div>
-        <!-- Average Index Callout -->
-        <div class="flex items-center gap-3">
-            <span class="text-xs font-semibold text-slate-500">Skor Rata-Rata:</span>
-            <span class="text-sm font-bold text-primary-ink bg-warm-ivory border border-warm-border px-3.5 py-1.5 rounded-md shadow-xs">
-                {{ number_format($average, $is_iq ? 0 : 2) }} <span class="text-xs font-normal text-slate-400">/ {{ number_format($max_score, 0) }}</span>
-            </span>
+        <!-- Average Index & IQ Callout -->
+        <div class="flex flex-wrap items-center gap-3">
+            @if (!empty($iqScore))
+                <div class="flex items-center gap-2 bg-accent-amber/15 border border-accent-amber/30 px-3.5 py-1.5 rounded-lg shadow-2xs">
+                    <span class="text-xs font-bold uppercase tracking-wider text-accent-amber">Skor IQ:</span>
+                    <span class="text-base font-display font-bold text-primary-ink">{{ $iqScore }}</span>
+                    @if (!empty($iqCategory))
+                        <span class="text-[10px] font-bold uppercase tracking-wider bg-accent-amber text-white px-2 py-0.5 rounded-md">
+                            {{ $iqCategory }}
+                        </span>
+                    @endif
+                </div>
+            @endif
+            <div class="flex items-center gap-2 bg-warm-ivory border border-warm-border px-3.5 py-1.5 rounded-lg shadow-2xs">
+                <span class="text-xs font-semibold text-slate-500">Skor Rata-Rata:</span>
+                <span class="text-sm font-bold text-primary-ink">
+                    {{ number_format($average, $is_iq ? 0 : 2) }} <span class="text-xs font-normal text-slate-400">/ {{ number_format($max_score, 0) }}</span>
+                </span>
+            </div>
         </div>
     </div>
+
+    @if (!empty($iqScore))
+        <!-- Executive IQ Spotlight Banner -->
+        <div class="mb-8 p-5 bg-gradient-to-r from-warm-ivory via-white to-warm-ivory border border-warm-border rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 shadow-2xs">
+            <div class="flex items-center gap-4">
+                <div class="w-14 h-14 rounded-xl bg-accent-amber text-white flex flex-col items-center justify-center font-display shadow-sm shrink-0">
+                    <span class="text-[10px] font-bold uppercase tracking-wider opacity-80 leading-none">IQ</span>
+                    <span class="text-xl font-bold leading-tight">{{ $iqScore }}</span>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <h3 class="font-display font-bold text-base text-primary-ink">
+                            Kapasitas Inteligensi Umum
+                        </h3>
+                        @if (!empty($iqCategory))
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-accent-amber/20 text-accent-amber border border-accent-amber/30">
+                                {{ $iqCategory }}
+                            </span>
+                        @endif
+                    </div>
+                    <p class="text-xs text-slate-500 mt-1 leading-relaxed">
+                        {{ $iqInterpretation ?? 'Kapasitas pemrosesan kognitif, ketajaman logika berpikir, daya analisa, dan kecepatan pemecahan masalah objektif.' }}
+                    </p>
+                </div>
+            </div>
+
+            @if (!empty($iqTestName))
+                <div class="sm:text-right shrink-0 border-t sm:border-t-0 sm:border-l border-warm-border pt-3 sm:pt-0 sm:pl-5 w-full sm:w-auto">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Instrumen Tes</span>
+                    <span class="text-xs font-semibold text-primary-ink block mt-0.5">{{ $iqTestName }}</span>
+                </div>
+            @endif
+        </div>
+    @endif
 
     <!-- Description Paragraph -->
     <p class="text-xs text-slate-500 leading-relaxed mb-8 border-b border-warm-border/10 pb-6">

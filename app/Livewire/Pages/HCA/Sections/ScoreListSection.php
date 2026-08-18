@@ -205,16 +205,26 @@ class ScoreListSection extends Component
                 $q->where('test_name', 'like', '%CFIT%')
                     ->orWhere('test_name', 'like', '%IST%')
                     ->orWhere('test_code', 'like', '%CFIT%')
-                    ->orWhere('test_code', 'like', '%IST%');
+                    ->orWhere('test_code', 'like', '%IST%')
+                    ->orWhere('test_code', 'A.1')
+                    ->orWhere('test_code', 'A.2')
+                    ->orWhere('test_code', 'A.5');
             })
             ->first();
 
         $cfitIq = null;
         $cfitCategory = null;
+        $cfitTestName = null;
+        $cfitInterpretation = null;
+
         if ($iqTest && ! empty($iqTest->summary_data)) {
             $summary = $iqTest->summary_data;
-            $cfitIq = $summary['total_iq'] ?? $summary['iq_score'] ?? $summary['iq'] ?? null;
-            $cfitCategory = $summary['category'] ?? $summary['kategori_iq'] ?? null;
+            $cfitIq = $summary['iq'] ?? $summary['total_iq'] ?? $summary['iq_score'] ?? null;
+            $cfitCategory = $summary['kategori'] ?? $summary['category'] ?? $summary['kategori_iq'] ?? null;
+            $cfitTestName = $iqTest->test_name ?? 'CFIT';
+            $cfitInterpretation = $summary['INTERPRETASI_HASIL']['Kecerdasan Umum']
+                ?? $summary['INTERPRETASI_HASIL']['General Intelligence']
+                ?? null;
         }
 
         // 2. Ambil sub-aspek di bawah aspek "Intelektual" atau "Daya Pikir"
@@ -251,14 +261,26 @@ class ScoreListSection extends Component
 
             $avgRating = (float) $subAssessments->avg('individual_rating');
             $calculatedIq = (int) ($cfitIq ?? round(100 + ($avgRating - 3.0) * 15));
+            $categoryDisplay = $cfitCategory ?: match (true) {
+                $calculatedIq >= 130 => 'Sangat Superior',
+                $calculatedIq >= 120 => 'Superior',
+                $calculatedIq >= 110 => 'Istimewa / Rata-Rata Atas',
+                $calculatedIq >= 90 => 'Rata-Rata',
+                $calculatedIq >= 80 => 'Rata-Rata Bawah',
+                default => 'Kurang',
+            };
 
             return [
                 'title' => 'IQ & Profil Kognitif',
                 'subtitle' => 'Kapasitas Berpikir & Kemampuan Logika',
-                'desc' => "Kandidat memiliki estimasi kapasitas inteligensi setara IQ {$calculatedIq}".($cfitCategory ? " ({$cfitCategory})" : '').'. Menunjukkan profil menyeluruh kecepatan pemrosesan informasi, kapasitas kognitif umum, serta inteligensi numerik, verbal, dan penalaran abstrak.',
+                'desc' => "Kandidat memiliki kapasitas inteligensi setara IQ {$calculatedIq}".($categoryDisplay ? " ({$categoryDisplay})" : '').'. Menunjukkan profil menyeluruh kecepatan pemrosesan informasi, kapasitas kognitif umum, serta inteligensi numerik, verbal, dan penalaran abstrak.',
                 'average' => round($avgRating, 2),
                 'max_score' => 5.00,
                 'is_iq' => false,
+                'iq_score' => $calculatedIq,
+                'iq_category' => $categoryDisplay,
+                'iq_test_name' => $cfitTestName ?: 'Instrumen Inteligensi SPSP',
+                'iq_interpretation' => $cfitInterpretation,
                 'scores' => $scores,
             ];
         }
@@ -499,6 +521,10 @@ class ScoreListSection extends Component
             'average' => $data['average'],
             'max_score' => $data['max_score'],
             'is_iq' => $data['is_iq'] ?? false,
+            'iqScore' => $data['iq_score'] ?? ($data['average'] > 50 ? (int) $data['average'] : null),
+            'iqCategory' => $data['iq_category'] ?? null,
+            'iqTestName' => $data['iq_test_name'] ?? null,
+            'iqInterpretation' => $data['iq_interpretation'] ?? null,
             'scores' => $data['scores'],
             'participant' => $this->participant,
         ]);
