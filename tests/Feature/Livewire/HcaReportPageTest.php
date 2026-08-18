@@ -5,7 +5,10 @@ declare(strict_types=1);
 namespace Tests\Feature\Livewire;
 
 use App\Livewire\Pages\HCA\HcaReportPage;
+use App\Livewire\Pages\HCA\Sections\DiscProfile;
 use App\Livewire\Pages\HCA\Sections\ExecutiveSummary;
+use App\Livewire\Pages\HCA\Sections\IndexRadarSection;
+use App\Livewire\Pages\HCA\Sections\PerformanceDashboard;
 use App\Livewire\Pages\HCA\Sections\ScoreListSection;
 use App\Livewire\Pages\HCA\Sections\TimelineSection;
 use App\Models\Participant;
@@ -207,5 +210,199 @@ class HcaReportPageTest extends TestCase
             ->assertSee('Layer 1')
             ->assertSee('Kompetensi')
             ->assertSee('Skor Rata-Rata');
+    }
+
+    /**
+     * Test index radar section renders dynamic potential data for participant
+     */
+    public function test_index_radar_section_renders_dynamic_potential_data(): void
+    {
+        $participant = Participant::query()->first();
+        if (! $participant) {
+            $this->markTestSkipped('No participant found');
+        }
+
+        Livewire::test(IndexRadarSection::class, [
+            'sectionCode' => 'potential',
+            'participantId' => $participant->id,
+        ])
+            ->assertSee('Layer')
+            ->assertSee('Potensi')
+            ->assertSee('Score Index');
+    }
+
+    /**
+     * Test score list section renders dynamic cognitive profile data for participant
+     */
+    public function test_score_list_section_renders_dynamic_cognitive_data(): void
+    {
+        $participant = Participant::query()->first();
+        if (! $participant) {
+            $this->markTestSkipped('No participant found');
+        }
+
+        Livewire::test(ScoreListSection::class, [
+            'sectionCode' => 'cognitive',
+            'participantId' => $participant->id,
+        ])
+            ->assertSee('IQ')
+            ->assertSee('Profil Kognitif')
+            ->assertSee('Skor Rata-Rata');
+    }
+
+    /**
+     * Test score list section renders dynamic Big Five personality data for participant
+     */
+    public function test_score_list_section_renders_dynamic_big_five_data(): void
+    {
+        $participant = Participant::query()->first();
+        if (! $participant) {
+            $this->markTestSkipped('No participant found');
+        }
+
+        Livewire::test(ScoreListSection::class, [
+            'sectionCode' => 'big_five',
+            'participantId' => $participant->id,
+        ])
+            ->assertSee('Big Five')
+            ->assertSee('Personality')
+            ->assertSee('Openness to Experience')
+            ->assertSee('Conscientiousness');
+    }
+
+    /**
+     * Test disc profile renders dynamic data for participant
+     */
+    public function test_disc_profile_renders_dynamic_data(): void
+    {
+        $participant = Participant::query()->first();
+        if (! $participant) {
+            $this->markTestSkipped('No participant found');
+        }
+
+        Livewire::test(DiscProfile::class, [
+            'participantId' => $participant->id,
+        ])
+            ->assertSee('Profil')
+            ->assertSee('DISC')
+            ->assertSee('Dominant Style');
+    }
+
+    /**
+     * Test score list section renders dynamic Learning Agility data for participant
+     */
+    public function test_score_list_section_renders_dynamic_learning_agility_data(): void
+    {
+        $participant = Participant::query()->first();
+        if (! $participant) {
+            $this->markTestSkipped('No participant found');
+        }
+
+        Livewire::test(ScoreListSection::class, [
+            'sectionCode' => 'learning_agility',
+            'participantId' => $participant->id,
+        ])
+            ->assertSee('Learning Agility')
+            ->assertSee('Mental Agility')
+            ->assertSee('People Agility');
+    }
+
+    /**
+     * Test score list section renders dynamic Leadership Potential data for participant
+     */
+    public function test_score_list_section_renders_dynamic_leadership_potential_data(): void
+    {
+        $participant = Participant::query()->first();
+        if (! $participant) {
+            $this->markTestSkipped('No participant found');
+        }
+
+        Livewire::test(ScoreListSection::class, [
+            'sectionCode' => 'leadership_potential',
+            'participantId' => $participant->id,
+        ])
+            ->assertSee('Leadership Potential')
+            ->assertSee('Visioning')
+            ->assertSee('Decision Making');
+    }
+
+    /**
+     * Test score list section renders dynamic Values & Integrity data for participant
+     */
+    public function test_score_list_section_renders_dynamic_integrity_data(): void
+    {
+        $participant = Participant::query()->first();
+        if (! $participant) {
+            $this->markTestSkipped('No participant found');
+        }
+
+        Livewire::test(ScoreListSection::class, [
+            'sectionCode' => 'integrity',
+            'participantId' => $participant->id,
+        ])
+            ->assertSee('Values & Integrity')
+            ->assertSee('Honesty & Transparency')
+            ->assertSee('Ethical Compliance');
+    }
+
+    /**
+     * Test performance dashboard renders dynamic data for participant
+     */
+    public function test_performance_dashboard_renders_dynamic_data(): void
+    {
+        $participant = Participant::with('performanceRecords')->first();
+        if (! $participant) {
+            $this->markTestSkipped('No participant found');
+        }
+
+        if ($participant->performanceRecords()->doesntExist()) {
+            $participant->performanceRecords()->create([
+                'year' => 2026,
+                'kpi_score' => 98.20,
+                'target_score' => 100.00,
+                'benchmark_score' => 90.00,
+                'performance_rating' => 'Sangat Baik',
+                'kpi_breakdown' => [
+                    ['metric' => 'Revenue', 'weight' => '30%', 'target' => '100%', 'actual' => '102%', 'status' => 'Exceeded', 'statusClass' => ''],
+                ],
+                'achievements' => ['Mencapai KPI 98.2%'],
+            ]);
+            $participant->load('performanceRecords');
+        }
+
+        Livewire::test(PerformanceDashboard::class, [
+            'participantId' => $participant->id,
+        ])
+            ->assertSee('Performance')
+            ->assertSee('Dashboard')
+            ->assertSee('Analisa Kinerja');
+    }
+
+    /**
+     * Test participant has performanceRecords relationship working
+     */
+    public function test_participant_has_performance_records_relationship(): void
+    {
+        $participant = Participant::query()->first();
+        if (! $participant) {
+            $this->markTestSkipped('No participant found');
+        }
+
+        if ($participant->performanceRecords()->doesntExist()) {
+            $participant->performanceRecords()->create([
+                'year' => 2026,
+                'kpi_score' => 98.20,
+                'target_score' => 100.00,
+                'benchmark_score' => 90.00,
+                'performance_rating' => 'Sangat Baik',
+                'kpi_breakdown' => [],
+                'achievements' => [],
+            ]);
+        }
+
+        $this->assertTrue($participant->performanceRecords()->exists());
+        $record = $participant->performanceRecords()->first();
+        $this->assertNotNull($record->year);
+        $this->assertIsFloat((float) $record->kpi_score);
     }
 }

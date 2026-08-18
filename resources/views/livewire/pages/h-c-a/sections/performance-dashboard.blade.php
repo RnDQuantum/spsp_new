@@ -16,9 +16,9 @@
         </div>
         <!-- Latest Score Badge -->
         <div class="flex items-center gap-2">
-            <span class="text-xs font-semibold text-slate-500">Skor Terakhir (2026):</span>
-            <span class="text-sm font-bold text-forest-green bg-emerald-50 border border-emerald-100 px-3 py-1 rounded-md font-mono">
-                98.20%
+            <span class="text-xs font-semibold text-slate-500">Skor Terakhir ({{ $latestYear }}):</span>
+            <span class="text-sm font-bold text-forest-green bg-emerald-50 border border-emerald-100 px-3 py-1 rounded-md font-mono shadow-xs">
+                {{ number_format($latestScore, 2) }}%
             </span>
         </div>
     </div>
@@ -28,7 +28,7 @@
         <!-- Left: Line Chart (8 cols) -->
         <div class="md:col-span-8 p-6 md:p-8 relative flex flex-col items-center">
             <div class="w-full flex justify-between items-center mb-6">
-                <span class="text-[11px] font-bold uppercase tracking-widest text-slate-400">Tren KPI 5 Tahun</span>
+                <span class="text-[11px] font-bold uppercase tracking-widest text-slate-400">Tren KPI {{ count($years) }} Tahun</span>
                 <!-- Custom SVG Legend -->
                 <div class="flex items-center gap-3 text-[11px] font-semibold text-slate-600">
                     <span class="flex items-center gap-1.5">
@@ -56,16 +56,16 @@
         <div class="md:col-span-4 space-y-4">
             <h3 class="font-display font-semibold text-primary-ink text-base">Analisa Kinerja</h3>
             <p class="text-xs text-slate-600 leading-relaxed">
-                Terdapat tren peningkatan kinerja yang stabil dari tahun 2022 hingga 2026. Pencapaian KPI tahun terakhir sebesar <strong class="text-forest-green">98.20%</strong> menandakan konsistensi tinggi dalam mengeksekusi inisiatif strategis di tingkat VP.
+                {{ $analysisDesc }}
             </p>
-            <div class="p-4 bg-emerald-50/50 border border-emerald-100 rounded-lg text-xs space-y-1.5">
+            <div class="p-4 bg-emerald-50/50 border border-emerald-100 rounded-lg text-xs space-y-1.5 shadow-xs">
                 <div class="flex justify-between font-semibold">
-                    <span class="text-slate-500">Rata-rata 5 Tahun:</span>
-                    <span class="text-primary-ink font-mono">95.40%</span>
+                    <span class="text-slate-500">Rata-rata {{ count($years) }} Tahun:</span>
+                    <span class="text-primary-ink font-mono">{{ number_format($avgKpi, 2) }}%</span>
                 </div>
                 <div class="flex justify-between font-semibold">
                     <span class="text-slate-500">Pertumbuhan/Tahun:</span>
-                    <span class="text-forest-green font-mono">+1.45%</span>
+                    <span class="text-forest-green font-mono">{{ $growthPerYear >= 0 ? '+' : '' }}{{ number_format($growthPerYear, 2) }}%</span>
                 </div>
             </div>
         </div>
@@ -73,7 +73,7 @@
 
     <!-- Snapshot Grid Table (Details of current year) -->
     <div>
-        <h3 class="font-display font-semibold text-primary-ink text-sm mb-4">Breakdown Metrik Kinerja (Tahun Buku 2026)</h3>
+        <h3 class="font-display font-semibold text-primary-ink text-sm mb-4">Breakdown Metrik Kinerja (Tahun Buku {{ $latestYear }})</h3>
         <x-hca-table :headers="[
             ['label' => 'Metrik KPI', 'class' => 'w-5/12'],
             ['label' => 'Bobot', 'class' => 'text-center'],

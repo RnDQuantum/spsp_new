@@ -34,47 +34,47 @@
 
             <!-- 07 Potensi -->
             <div class="page-break p-8">
-                <livewire:pages.h-c-a.sections.index-radar-section sectionCode="potential" />
+                <livewire:pages.h-c-a.sections.index-radar-section sectionCode="potential" :participant-id="$participantId" :key="'potential_print_'.$participantId" />
             </div>
 
             <!-- 08 IQ -->
             <div class="page-break p-8">
-                <livewire:pages.h-c-a.sections.score-list-section sectionCode="cognitive" />
+                <livewire:pages.h-c-a.sections.score-list-section sectionCode="cognitive" :participant-id="$participantId" :key="'cognitive_print_'.$participantId" />
             </div>
 
             <!-- 09 Big Five -->
             <div class="page-break p-8">
-                <livewire:pages.h-c-a.sections.score-list-section sectionCode="big_five" />
+                <livewire:pages.h-c-a.sections.score-list-section sectionCode="big_five" :participant-id="$participantId" :key="'big_five_print_'.$participantId" />
             </div>
 
             <!-- 10 DISC -->
             <div class="page-break p-8">
-                <livewire:pages.h-c-a.sections.disc-profile />
+                <livewire:pages.h-c-a.sections.disc-profile :participant-id="$participantId" :key="'disc_print_'.$participantId" />
             </div>
 
             <!-- 11 Learning Agility -->
             <div class="page-break p-8">
-                <livewire:pages.h-c-a.sections.score-list-section sectionCode="learning_agility" />
+                <livewire:pages.h-c-a.sections.score-list-section sectionCode="learning_agility" :participant-id="$participantId" :key="'learning_agility_print_'.$participantId" />
             </div>
 
             <!-- 12 Leadership Potential -->
             <div class="page-break p-8">
-                <livewire:pages.h-c-a.sections.score-list-section sectionCode="leadership_potential" />
+                <livewire:pages.h-c-a.sections.score-list-section sectionCode="leadership_potential" :participant-id="$participantId" :key="'leadership_potential_print_'.$participantId" />
             </div>
 
             <!-- 13 EQ -->
             <div class="page-break p-8">
-                <livewire:pages.h-c-a.sections.index-radar-section sectionCode="eq" />
+                <livewire:pages.h-c-a.sections.index-radar-section sectionCode="eq" :participant-id="$participantId" :key="'eq_print_'.$participantId" />
             </div>
 
             <!-- 14 Values & Integrity -->
             <div class="page-break p-8">
-                <livewire:pages.h-c-a.sections.score-list-section sectionCode="integrity" />
+                <livewire:pages.h-c-a.sections.score-list-section sectionCode="integrity" :participant-id="$participantId" :key="'integrity_print_'.$participantId" />
             </div>
 
             <!-- 15 Performance Dashboard -->
             <div class="page-break p-8">
-                <livewire:pages.h-c-a.sections.performance-dashboard />
+                <livewire:pages.h-c-a.sections.performance-dashboard :participant-id="$participantId" :key="'performance_print_'.$participantId" />
             </div>
 
             <!-- 16 9-Box Matrix -->
@@ -299,10 +299,10 @@
                                     <livewire:pages.h-c-a.sections.timeline-section :participant-id="$participantId" :key="'career_'.$participantId" />
                                     @break
                                 @case('disc')
-                                    <livewire:pages.h-c-a.sections.disc-profile />
+                                    <livewire:pages.h-c-a.sections.disc-profile :participant-id="$participantId" :key="'disc_'.$participantId" />
                                     @break
                                 @case('performance')
-                                    <livewire:pages.h-c-a.sections.performance-dashboard />
+                                    <livewire:pages.h-c-a.sections.performance-dashboard :participant-id="$participantId" :key="'performance_'.$participantId" />
                                     @break
                                 @case('nine_box')
                                     <livewire:pages.h-c-a.sections.nine-box-matrix />

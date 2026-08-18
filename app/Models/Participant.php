@@ -114,4 +114,9 @@ class Participant extends Model
     {
         return $this->hasMany(ParticipantCareerHistory::class)->orderBy('order_index');
     }
+
+    public function performanceRecords(): HasMany
+    {
+        return $this->hasMany(ParticipantPerformanceRecord::class)->orderBy('year', 'asc');
+    }
 }

@@ -25,6 +25,7 @@ use Database\Seeders\Data\AssessmentEventConfig;
 use Database\Seeders\Support\AssessmentRecordGenerator;
 use Database\Seeders\Support\CareerHistoryGenerator;
 use Database\Seeders\Support\ParticipantProfileGenerator;
+use Database\Seeders\Support\PerformanceRecordGenerator;
 use Database\Seeders\Support\TestResultGenerator;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -332,6 +333,12 @@ class DynamicAssessmentSeeder extends Seeder
                 $careerHistoriesData[] = $careerRecord;
             }
 
+            // 🚀 NEW: Generate authentic performance records (participant_performance_records)
+            $participantPerf = PerformanceRecordGenerator::generateForParticipant($participant);
+            foreach ($participantPerf as $perfRecord) {
+                $performanceRecordsData[] = $perfRecord;
+            }
+
             $progressBar->advance();
         }
 
@@ -378,6 +385,12 @@ class DynamicAssessmentSeeder extends Seeder
         if (! empty($careerHistoriesData)) {
             foreach (array_chunk($careerHistoriesData, $insertChunkSize) as $chunk) {
                 DB::table('participant_career_histories')->insert($chunk);
+            }
+        }
+        // 🚀 BULK INSERT participant_performance_records
+        if (! empty($performanceRecordsData)) {
+            foreach (array_chunk($performanceRecordsData, $insertChunkSize) as $chunk) {
+                DB::table('participant_performance_records')->insert($chunk);
             }
         }
     }

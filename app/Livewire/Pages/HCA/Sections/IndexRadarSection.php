@@ -87,7 +87,7 @@ class IndexRadarSection extends Component
 
         // 4. Pilar Kepemimpinan
         $leadershipAspect = $potensiAspects->concat($kompetensiAspects)->first(function ($item) {
-            $name = strtolower($item['aspect_name'] ?? '');
+            $name = strtolower($item['name'] ?? $item['aspect_name'] ?? '');
             $code = strtolower($item['aspect_code'] ?? '');
 
             return str_contains($name, 'kepemimpinan') || str_contains($code, 'kepemimpinan') || str_contains($name, 'leadership') || str_contains($code, 'leadership');
@@ -98,7 +98,7 @@ class IndexRadarSection extends Component
 
         // 5. Pilar Integritas
         $integrityAspect = $potensiAspects->concat($kompetensiAspects)->first(function ($item) {
-            $name = strtolower($item['aspect_name'] ?? '');
+            $name = strtolower($item['name'] ?? $item['aspect_name'] ?? '');
             $code = strtolower($item['aspect_code'] ?? '');
 
             return str_contains($name, 'integritas') || str_contains($code, 'integritas') || str_contains($name, 'integrity') || str_contains($code, 'integrity');
@@ -179,39 +179,123 @@ class IndexRadarSection extends Component
         ];
     }
 
+    /**
+     * Get dynamic Layer 2: Potensi data from SPSP database.
+     */
+    private function getPotentialData(): array
+    {
+        $participant = $this->participant;
+
+        if (! $participant || ! $participant->positionFormation?->template) {
+            return [
+                'title' => 'Layer 2: Potensi',
+                'subtitle' => 'Evaluasi Kapasitas Psikologis Laten',
+                'desc' => 'Profil aspek potensi kandidat belum dikalkulasi.',
+                'talentIndex' => 4.00,
+                'talentIndexPercent' => 80.00,
+                'talentCategory' => 'Strong Potential',
+                'labels' => ['Intelektual', 'Sikap Kerja', 'Potensi Kerja', 'Sosualitas', 'Kepribadian'],
+                'actualRatings' => [4.00, 4.20, 3.80, 4.10, 3.90],
+                'standardRatings' => [3.00, 3.00, 3.00, 3.00, 3.00],
+                'toleranceRatings' => [2.70, 2.70, 2.70, 2.70, 2.70],
+            ];
+        }
+
+        $templateId = $participant->positionFormation->template_id;
+        $service = app(IndividualAssessmentService::class);
+        $potensiCat = CategoryType::where('template_id', $templateId)->where('code', 'potensi')->first();
+
+        if (! $potensiCat) {
+            return [
+                'title' => 'Layer 2: Potensi',
+                'subtitle' => 'Evaluasi Kapasitas Psikologis Laten',
+                'desc' => 'Kategori potensi tidak ditemukan pada template jabatan ini.',
+                'talentIndex' => 4.00,
+                'talentIndexPercent' => 80.00,
+                'talentCategory' => 'Strong Potential',
+                'labels' => ['Intelektual', 'Sikap Kerja', 'Potensi Kerja', 'Sosualitas', 'Kepribadian'],
+                'actualRatings' => [4.00, 4.20, 3.80, 4.10, 3.90],
+                'standardRatings' => [3.00, 3.00, 3.00, 3.00, 3.00],
+                'toleranceRatings' => [2.70, 2.70, 2.70, 2.70, 2.70],
+            ];
+        }
+
+        $aspectAssessments = $service->getAspectAssessments($participant->id, $potensiCat->id, 0);
+
+        if ($aspectAssessments->isEmpty()) {
+            return [
+                'title' => 'Layer 2: Potensi',
+                'subtitle' => 'Evaluasi Kapasitas Psikologis Laten',
+                'desc' => 'Data asesmen aspek potensi belum tersedia.',
+                'talentIndex' => 4.00,
+                'talentIndexPercent' => 80.00,
+                'talentCategory' => 'Strong Potential',
+                'labels' => ['Intelektual', 'Sikap Kerja', 'Potensi Kerja', 'Sosualitas', 'Kepribadian'],
+                'actualRatings' => [4.00, 4.20, 3.80, 4.10, 3.90],
+                'standardRatings' => [3.00, 3.00, 3.00, 3.00, 3.00],
+                'toleranceRatings' => [2.70, 2.70, 2.70, 2.70, 2.70],
+            ];
+        }
+
+        $labels = $aspectAssessments->pluck('name')->toArray();
+        $actualRatings = $aspectAssessments->pluck('individual_rating')->map(fn ($v) => round((float) $v, 2))->toArray();
+        $standardRatings = $aspectAssessments->pluck('standard_rating')->map(fn ($v) => round((float) $v, 2))->toArray();
+        $toleranceRatings = $aspectAssessments->map(fn ($item) => round(((float) $item['standard_rating']) * 0.9, 2))->toArray();
+
+        $avgRating = round((float) $aspectAssessments->avg('individual_rating'), 2);
+        $talentIndexPercent = round(($avgRating / 5.00) * 100, 2);
+
+        $talentCategory = match (true) {
+            $avgRating >= 4.50 => 'Top Potential',
+            $avgRating >= 4.00 => 'High Potential',
+            $avgRating >= 3.50 => 'Strong Potential',
+            $avgRating >= 3.00 => 'Developing Potential',
+            default => 'Needs Focus',
+        };
+
+        $desc = "Evaluasi aspek potensi psikologis {$participant->name} menghasilkan rata-rata skor {$avgRating} dari skala 5.00 ({$talentIndexPercent}%). Mengukur kapasitas daya pikir, sikap kerja, stabilitas emosi, dan orientasi prestasi laten sebagai fondasi adaptabilitas kerja jangka panjang.";
+
+        return [
+            'title' => 'Layer 2: Potensi',
+            'subtitle' => 'Evaluasi Kapasitas Psikologis Laten',
+            'desc' => $desc,
+            'talentIndex' => $avgRating,
+            'talentIndexPercent' => $talentIndexPercent,
+            'talentCategory' => $talentCategory,
+            'labels' => $labels,
+            'actualRatings' => $actualRatings,
+            'standardRatings' => $standardRatings,
+            'toleranceRatings' => $toleranceRatings,
+        ];
+    }
+
+    /**
+     * Get EQ data.
+     */
+    private function getEqData(): array
+    {
+        return [
+            'title' => 'Emotional Intelligence (EQ)',
+            'subtitle' => 'Kematangan Emosional & Hubungan Kerja',
+            'desc' => 'Evaluasi aspek pengenalan diri, pengendalian emosi, keterampilan sosial, empati, dan motivasi intrinsik kandidat.',
+            'talentIndex' => 4.35,
+            'talentIndexPercent' => 87.00,
+            'talentCategory' => 'Highly Mature',
+            'labels' => ['Self Awareness', 'Self Regulation', 'Social Skills', 'Empathy', 'Motivation'],
+            'actualRatings' => [4.20, 4.50, 4.10, 4.60, 4.35],
+            'standardRatings' => [3.00, 3.00, 3.00, 3.00, 3.00],
+            'toleranceRatings' => [2.70, 2.70, 2.70, 2.70, 2.70],
+        ];
+    }
+
     public function render(): View
     {
-        if ($this->sectionCode === 'hci') {
-            $data = $this->getHciData();
-        } else {
-            $fallbackDatasets = [
-                'potential' => [
-                    'title' => 'Layer 2: Potensi',
-                    'subtitle' => 'Breakdown Kapasitas Berkembang',
-                    'desc' => 'Analisis dimensi kapasitas pertumbuhan personal, kesiapan memimpin, kelincahan kognitif, dan motivasi kerja jangka panjang.',
-                    'talentIndex' => 4.25,
-                    'talentIndexPercent' => 85.00,
-                    'talentCategory' => 'High Potential',
-                    'labels' => ['Cognitive', 'Innovation', 'Agility', 'Strategy', 'EQ'],
-                    'actualRatings' => [2.50, 4.10, 4.00, 4.30, 4.35],
-                    'standardRatings' => [4.00, 4.00, 3.00, 3.00, 3.00],
-                    'toleranceRatings' => [3.70, 2.70, 2.70, 2.70, 2.70],
-                ],
-                'eq' => [
-                    'title' => 'Emotional Intelligence (EQ)',
-                    'subtitle' => 'Kematangan Emosional & Hubungan Kerja',
-                    'desc' => 'Evaluasi aspek pengenalan diri, pengendalian emosi, keterampilan sosial, empati, dan motivasi intrinsik kandidat.',
-                    'talentIndex' => 4.35,
-                    'talentIndexPercent' => 87.00,
-                    'talentCategory' => 'Highly Mature',
-                    'labels' => ['Self Awareness', 'Self Regulation', 'Social Skills', 'Empathy', 'Motivation'],
-                    'actualRatings' => [4.20, 4.50, 4.10, 4.60, 4.35],
-                    'standardRatings' => [3.00, 3.00, 3.00, 3.00, 3.00],
-                    'toleranceRatings' => [2.70, 2.70, 2.70, 2.70, 2.70],
-                ],
-            ];
-            $data = $fallbackDatasets[$this->sectionCode] ?? $this->getHciData();
-        }
+        $data = match ($this->sectionCode) {
+            'hci' => $this->getHciData(),
+            'potential' => $this->getPotentialData(),
+            'eq' => $this->getEqData(),
+            default => $this->getHciData(),
+        };
 
         return view('livewire.pages.h-c-a.sections.index-radar-section', [
             'title' => $data['title'],

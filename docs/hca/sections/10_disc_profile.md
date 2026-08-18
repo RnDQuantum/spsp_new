@@ -3,7 +3,7 @@
 * **Nama Visual**: Grafik Gaya Perilaku Peran DISC
 * **Kode Section**: `disc`
 * **Komponen File**: [DiscProfile.php](file:///c:/laragon/www/spsp_new/app/Livewire/Pages/HCA/Sections/DiscProfile.php) & [disc-profile.blade.php](file:///c:/laragon/www/spsp_new/resources/views/livewire/pages/h-c-a/sections/disc-profile.blade.php)
-* **Status Dynamic**: 📋 **PLANNED** (Data SPSP 🔴 New Data Source)
+* **Status Dynamic**: ✅ **DONE (Dynamic DB)**
 
 ---
 
@@ -18,4 +18,6 @@
 
 ## 📊 Sumber Data DB SPSP & Logic Calculation
 
-* **Sumber Data**: Data tes DISC (Graph 1 Mask/Public, Graph 2 Core/Private, Graph 3 Mirror/Perceived) dari instrumen psikometri DISC.
+* **Model Utama**: `App\Models\TestResult` (`test_code: D.1` PAPI Kostik / `test_code: G.1` Behavior Tendencies), `App\Models\Participant`.
+* **Formula Psikometri**: Pemetaan 20 skala PAPI Kostik (L, P, G untuk D; S, X, V untuk I; K, C, E untuk S; D, R, W untuk C) untuk menentukan gaya dominan kandidat secara objektif.
+* **Tampilan UI**: Matriks 2x2 interaktif 4 kuadran DISC dengan penandaan visual emas pada kuadran dominan, lencana gaya dominan di header, serta narasi interpretasi gaya kerja personal.
