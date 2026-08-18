@@ -129,3 +129,14 @@ File norma psikometri disimpan pada direktori:
 | **`personality.json`** | Norma konversi Sten Score (1–10) 16PF dengan penyesuaian koreksi Motivasi Manipulasi (MD). |
 | **`cfit3a.json`** | Norma konversi IQ alat tes CFIT 3A. |
 | **`cfit3b.json`** | Norma konversi IQ alat tes CFIT 3B. |
+
+---
+
+## 📑 5. Dokumentasi Skema Payload Alat Tes API Online (Jalur B)
+
+Spesifikasi lengkap struktur payload JSON 35 instrumen tes online dan data sampel terisi dapat dipelajari pada:
+* **Dokumen Skema**: **[API_TEST_INSTRUMENTS_SCHEMA.md](./API_TEST_INSTRUMENTS_SCHEMA.md)**
+* **Dataset Referensi Riset**: `D:\bima\RND\SPSP\collect data api tes online\output_analisis\hasil fix\`
+  - `sample_per_tes_20260701_121933/` (36 file sampel JSON per alat tes).
+  - `ringkasan_20260701_121933.txt` (Rangkuman 31 proyek dan 35 instrumen).
+  - `dokumentasi_alat_tes_20260701_121933.json` (Metadata & fitur field per kode tes).

@@ -3,7 +3,7 @@
 [← Kembali ke Indeks Dokumentasi Integrasi LSP](./README.md)
 
 - **Modul**: Integrasi Database LSP (Quantum HRMI) $\rightarrow$ Native SPSP System
-- **File Dokumentasi**: [docs/lsp_integration/SERVICES_ARCHITECTURE.md](./SERVICES_ARCHITECTURE.md)
+- **File Dokumentasi**: [docs/data_ntegration/SERVICES_ARCHITECTURE.md](./SERVICES_ARCHITECTURE.md)
 - **Tanggal Pembaruan**: 13 Agustus 2026
 
 ---

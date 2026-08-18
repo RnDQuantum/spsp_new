@@ -20,6 +20,7 @@ Dokumentasi Integrasi LSP terstruktur secara ringkas dan efektif ke dalam 4 doku
 | Dokumen Spesifikasi | Deskripsi & Cakupan Utama | Status Pipeline |
 | :--- | :--- | :-: |
 | **[FUNDAMENTAL_ARCHITECTURE.md](./FUNDAMENTAL_ARCHITECTURE.md)** | **Master Dokumentasi**: Arsitektur fondasi SPSP, Dual-Path Ingestion (Legacy vs API Baru), 5 file norma resmi, dan 2-Level Konversi. | 🟢 **MASTER DOC** |
+| **[API_TEST_INSTRUMENTS_SCHEMA.md](./API_TEST_INSTRUMENTS_SCHEMA.md)** | **Spesifikasi Skema API & Katalog Alat Tes**: Taksonomi 35 alat tes API online (`psikotes.qhrmi.id`), rincian schema JSON 11 alat tes terisi (CFIT, IST, 16PF, PAPI, Kraepelin, MMPI, EQ, DISC, RMIB), serta mapping `test_results.summary_data`. | 🟢 **ACTIVE SCHEMA** |
 | **[INTEGRATION_GUIDE.md](./INTEGRATION_GUIDE.md)** | **Panduan Operasional**: CLI execution (`lsp:test-report` & `lsp:import`), pengujian otomatis (`php artisan test`), dan lokasi norma JSON. | ✅ **DOCUMENTED** |
 | **[FALLBACK_AND_SAFETY_MECHANISMS.md](./FALLBACK_AND_SAFETY_MECHANISMS.md)** | **Spesifikasi Keamanan**: Matriks *fallback* data mentah, pembatasan *error*, dan mekanisme isolasi transaksi impor 100-chunk. | ✅ **DOCUMENTED** |
 | **[SERVICES_ARCHITECTURE.md](./SERVICES_ARCHITECTURE.md)** | **Arsitektur Service Codebase**: Penjelasan multi-service SRP (`LspNormEngineService`, `LspDataTransformerService`, `LspDataImporterService`). | ✅ **DOCUMENTED** |

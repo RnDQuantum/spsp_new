@@ -8,7 +8,7 @@ Welcome to SPSP (Sistem Pemetaan & Statistik Psikologi) documentation! This inde
 
 ### 1. Business & Concepts
 Start here to understand the core business logic of the system.
-*   **[FUNDAMENTAL_ARCHITECTURE.md](./lsp_integration/FUNDAMENTAL_ARCHITECTURE.md)**
+*   **[FUNDAMENTAL_ARCHITECTURE.md](./data_ntegration/FUNDAMENTAL_ARCHITECTURE.md)**
     *   **Fundamental Architecture & Dual-Path Data Ingestion (MUST READ)**
     *   SPSP as a BI System (not CRUD)
     *   Dual-Path Ingestion: Path A (Legacy DB `< PR-A-338`) vs Path B (API Online `≥ PR-A-338`)
@@ -65,16 +65,18 @@ Deep dives into specific optimization work applied to the codebase.
     *   Optimizations for training recommendation logic on large datasets.
 
 ### 6. LSP Integration & Legacy Data Synchronization
-Dokumentasi integrasi data real dan pengolahan laporan legacy dari database LSP.
-*   **[lsp_integration/README.md](./lsp_integration/README.md)**
+Dokumentasi integrasi data real dan pengolahan laporan legacy dari database LSP serta REST API Online.
+*   **[data_ntegration/README.md](./data_ntegration/README.md)**
     *   **Master Index & Navigation Dokumentasi Integrasi LSP**.
-*   **[FUNDAMENTAL_ARCHITECTURE.md](./lsp_integration/FUNDAMENTAL_ARCHITECTURE.md)**
+*   **[FUNDAMENTAL_ARCHITECTURE.md](./data_ntegration/FUNDAMENTAL_ARCHITECTURE.md)**
     *   **Master Dokumentasi**: Arsitektur fondasi SPSP, Dual-Path Ingestion (Legacy vs API Baru), 5 file norma resmi, dan 2-Level Konversi.
-*   **[INTEGRATION_GUIDE.md](./lsp_integration/INTEGRATION_GUIDE.md)**
+*   **[API_TEST_INSTRUMENTS_SCHEMA.md](./data_ntegration/API_TEST_INSTRUMENTS_SCHEMA.md)**
+    *   **Spesifikasi Skema API & Katalog Alat Tes**: Taksonomi 35 alat tes API online (`psikotes.qhrmi.id`), rincian schema JSON 11 alat tes terisi, dan mapping `test_results.summary_data` (dataset `sample_per_tes_20260701_121933`).
+*   **[INTEGRATION_GUIDE.md](./data_ntegration/INTEGRATION_GUIDE.md)**
     *   Panduan operasional `LspNormEngineService`, `LspDataTransformerService`, `ApiDataTransformerService`, `LspDataImporterService`, `QuantumApiClient`, Artisan CLI commands (`lsp:test-report` & `lsp:import`), dan norma JSON.
-*   **[FALLBACK_AND_SAFETY_MECHANISMS.md](./lsp_integration/FALLBACK_AND_SAFETY_MECHANISMS.md)**
+*   **[FALLBACK_AND_SAFETY_MECHANISMS.md](./data_ntegration/FALLBACK_AND_SAFETY_MECHANISMS.md)**
     *   Dokumentasi lengkap seluruh matriks fallback data, pembatasan error, dan mekanisme isolasi transaksi impor.
-*   **[SERVICES_ARCHITECTURE.md](./lsp_integration/SERVICES_ARCHITECTURE.md)**
+*   **[SERVICES_ARCHITECTURE.md](./data_ntegration/SERVICES_ARCHITECTURE.md)**
     *   Spesifikasi arsitektur multi-service integrasi LSP (`LspNormEngineService`, `LspDataTransformerService`, `LspDataImporterService`, `TestReportService`, dan `IndividualAssessmentService`).
 
 ### 7. Human Capital Assessment (HCA) Report Documentation

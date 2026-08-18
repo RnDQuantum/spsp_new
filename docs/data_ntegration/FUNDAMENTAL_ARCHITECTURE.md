@@ -92,6 +92,7 @@ flowchart TD
 #### Jalur B: REST API Tes Online Baru (`psikotes.qhrmi.id`)
 * **Cakupan Proyek**: Seluruh proyek asesmen baru (**Kode Proyek `≥ PR-A-338`**, misal `PR-A-338` s.d `PR-A-387` dan seterusnya).
 * **Sumber Data**: Endpoint REST API HTTP Client (`/api/ambil_semua`) via [`QuantumApiClient.php`](file:///c:/laragon/www/spsp_new/app/Services/Api/QuantumApiClient.php).
+* **Katalog & Skema Data Lengkap**: Lihat dokumentasi spesifikasi skema 35 instrumen tes pada **[API_TEST_INSTRUMENTS_SCHEMA.md](./API_TEST_INSTRUMENTS_SCHEMA.md)** (berdasarkan dataset riset `D:\bima\RND\SPSP\collect data api tes online\output_analisis\hasil fix\sample_per_tes_20260701_121933/`).
 * **Penyimpanan Komponen Alat Tes**: Seluruh instrumen hasil tes (IST `A.1`/`A.2`/`A.5`, PAPI Kostik/Karakter `B.1`/`D.1`, 16PF `B.2`, Kraepelin `D.2`, EQ `F.1`, DISC `G.1`, MMPI `E.1`/`E.2`) disimpan ke tabel `test_results` dan disajikan pada UI **Laporan Alat Tes** ([`LaporanAlatTes`](file:///c:/laragon/www/spsp_new/app/Livewire/Pages/LaporanAlatTes/LaporanAlatTes.php) & [`DetailLaporanTes`](file:///c:/laragon/www/spsp_new/app/Livewire/Pages/LaporanAlatTes/DetailLaporanTes.php)).
 
 ---
