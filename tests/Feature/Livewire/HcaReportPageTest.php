@@ -9,6 +9,7 @@ use App\Livewire\Pages\HCA\Sections\DiscProfile;
 use App\Livewire\Pages\HCA\Sections\ExecutiveSummary;
 use App\Livewire\Pages\HCA\Sections\IndexRadarSection;
 use App\Livewire\Pages\HCA\Sections\NineBoxMatrix;
+use App\Livewire\Pages\HCA\Sections\ParticipantProfile;
 use App\Livewire\Pages\HCA\Sections\PerformanceDashboard;
 use App\Livewire\Pages\HCA\Sections\ScoreListSection;
 use App\Livewire\Pages\HCA\Sections\SuccessionReadiness;
@@ -445,5 +446,27 @@ class HcaReportPageTest extends TestCase
             ->assertSee('Jabatan Target Utama')
             ->assertSee('Horizon 1')
             ->assertSee('Siap Sekarang');
+    }
+
+    /**
+     * Test participant profile renders complete demographics, employment, and assessment data
+     */
+    public function test_participant_profile_renders_complete_demographics_and_employment_data(): void
+    {
+        $participant = Participant::with(['positionFormation.template', 'assessmentEvent.institution', 'batch', 'institution'])->first();
+        if (! $participant) {
+            $this->markTestSkipped('No participant found');
+        }
+
+        Livewire::test(ParticipantProfile::class, [
+            'participantId' => $participant->id,
+        ])
+            ->assertSee('Identitas')
+            ->assertSee('Peserta')
+            ->assertSee('Informasi Pribadi')
+            ->assertSee('Profil Kepegawaian')
+            ->assertSee('Konteks Asesmen')
+            ->assertSee($participant->name)
+            ->assertSee($participant->test_number);
     }
 }
