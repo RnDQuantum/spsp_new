@@ -55,32 +55,49 @@ class ApiDataTransformerService
         $nama = $pesertaData['nama'] ?? $username;
         $tesMap = $pesertaData['tes'] ?? [];
 
-        // 1. Ekstraksi Komponen Matang IST, 16PF, Kostik, MMPI dari API
-        $istData = $tesMap['A.5'] ?? $tesMap['A.1'] ?? [];
+        // 1. Ekstraksi Komponen Matang IST/CFIT, 16PF, Kostik, MMPI dari API
+        $istData = $tesMap['A.5'] ?? $tesMap['A.2'] ?? $tesMap['A.1'] ?? [];
         $pfData = $tesMap['B.2'] ?? [];
         $kostikData = $tesMap['B.1'] ?? [];
         $mmpiData = $tesMap['E.2'] ?? $tesMap['E.1'] ?? [];
 
-        // IQ & Subtest SS (IST)
-        $iq = (float) ($istData['iq'] ?? 100);
-        $kategoriIq = $istData['hasil_kategori'] ?? 'Rata-rata';
-        $subtestSs = $istData['label_values'] ?? [
+        // IQ & Subtest SS (IST / CFIT)
+        $iq = (float) ($istData['iq'] ?? $istData['index_kecerdasan_umum'] ?? 100);
+        $kategoriIq = $istData['hasil_kategori'] ?? $istData['kategori'] ?? 'Rata-rata';
+        $subtestSs = $istData['label_values'] ?? $istData['hasil_sub'] ?? [
             'SE' => 10, 'WA' => 10, 'AN' => 10, 'GE' => 10, 'ME' => 10,
             'RA' => 10, 'ZR' => 10, 'FA' => 10, 'WU' => 10,
         ];
 
         // Sten Scores (16PF)
-        $sten16pf = $pfData['nilaiAspek'] ?? [
+        $sten16pf = $pfData['standart_final'] ?? $pfData['nilaiAspek'] ?? [
             'A' => 5, 'B' => 5, 'C' => 5, 'E' => 5, 'F' => 5, 'G' => 5, 'H' => 5,
             'I' => 5, 'L' => 5, 'M' => 5, 'N' => 5, 'O' => 5, 'Q1' => 5, 'Q2' => 5, 'Q3' => 5, 'Q4' => 5,
         ];
         $mdScore = (int) ($pfData['MDStenScore'] ?? 5);
 
-        // Kostik Factors
-        $kostikFactors = $kostikData['nilaiAspek'] ?? [
-            'A' => 1, 'G' => 1, 'N' => 1, 'R' => 1, 'C' => 1, 'D' => 1, 'T' => 1, 'V' => 1,
-            'F' => 1, 'W' => 1, 'L' => 1, 'P' => 1, 'I' => 1, 'S' => 1, 'O' => 1, 'B' => 1,
-            'X' => 1, 'E' => 1, 'K' => 1, 'Z' => 1,
+        // Kostik Factors (PAPI Kostik: cek nilaiAspek, hasil, atau key hasil_*)
+        $kostikFactors = $kostikData['nilaiAspek'] ?? $kostikData['hasil'] ?? [
+            'A' => $kostikData['hasil_A'] ?? 1,
+            'G' => $kostikData['hasil_G'] ?? 1,
+            'N' => $kostikData['hasil_N'] ?? 1,
+            'R' => $kostikData['hasil_R'] ?? 1,
+            'C' => $kostikData['hasil_C'] ?? 1,
+            'D' => $kostikData['hasil_D'] ?? 1,
+            'T' => $kostikData['hasil_T'] ?? 1,
+            'V' => $kostikData['hasil_V'] ?? 1,
+            'F' => $kostikData['hasil_F'] ?? 1,
+            'W' => $kostikData['hasil_W'] ?? 1,
+            'L' => $kostikData['hasil_L'] ?? 1,
+            'P' => $kostikData['hasil_P'] ?? 1,
+            'I' => $kostikData['hasil_I'] ?? 1,
+            'S' => $kostikData['hasil_S'] ?? 1,
+            'O' => $kostikData['hasil_O'] ?? 1,
+            'B' => $kostikData['hasil_B'] ?? 1,
+            'X' => $kostikData['hasil_X'] ?? 1,
+            'E' => $kostikData['hasil_E'] ?? 1,
+            'K' => $kostikData['hasil_K'] ?? 1,
+            'Z' => $kostikData['hasil_Z'] ?? 1,
         ];
 
         // 2. Jika DB LSP lokal memiliki data pendukung wawancara & identitas, gabungkan!

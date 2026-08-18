@@ -155,30 +155,60 @@
 
                         @if(in_array($code, ['A.1', 'A.2', 'A.5']))
                             {{-- Tampilan IST / CFIT --}}
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                <div class="bg-blue-50/50 dark:bg-blue-900/20 p-4 rounded-xl border border-blue-100 dark:border-blue-800 text-center flex flex-col justify-center">
-                                    <span class="text-xs uppercase font-semibold text-blue-600 dark:text-blue-400">Skor Total IQ</span>
-                                    <span class="text-4xl font-extrabold text-blue-700 dark:text-blue-300 my-1">
-                                        {{ $fmt['iq'] ?? 100 }}
-                                    </span>
-                                    <span class="text-xs font-medium text-blue-800 dark:text-blue-200">
-                                        Kategori: {{ $fmt['kategori'] ?? 'Rata-rata' }}
-                                    </span>
-                                </div>
+                            <div class="space-y-4">
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    <div class="bg-blue-50/50 dark:bg-blue-900/20 p-4 rounded-xl border border-blue-100 dark:border-blue-800 text-center flex flex-col justify-center">
+                                        <span class="text-xs uppercase font-semibold text-blue-600 dark:text-blue-400">Skor Total IQ</span>
+                                        <span class="text-4xl font-extrabold text-blue-700 dark:text-blue-300 my-1">
+                                            {{ $fmt['iq'] ?? 100 }}
+                                        </span>
+                                        <span class="text-xs font-medium text-blue-800 dark:text-blue-200">
+                                            Kategori: {{ $fmt['kategori'] ?? 'Rata-rata' }}
+                                        </span>
+                                    </div>
 
-                                <div class="md:col-span-2">
-                                    <h5 class="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase mb-2">Rincian Standard Score (SS) Subtest</h5>
-                                    <div class="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-5 gap-2 text-xs">
-                                        @foreach($fmt['subtests'] ?? [] as $subName => $subVal)
-                                            <div class="bg-gray-50 dark:bg-gray-700/50 p-2.5 rounded-lg border border-gray-100 dark:border-gray-700 text-center">
-                                                <span class="font-bold text-gray-500 dark:text-gray-400 text-[10px] block uppercase">{{ $subName }}</span>
-                                                <span class="text-sm font-bold text-gray-800 dark:text-gray-100">
-                                                    {{ is_array($subVal) ? ($subVal['nilai'] ?? json_encode($subVal)) : $subVal }}
-                                                </span>
-                                            </div>
-                                        @endforeach
+                                    <div class="md:col-span-2">
+                                        <h5 class="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase mb-2">Rincian Standard Score (SS) Subtest</h5>
+                                        <div class="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-5 gap-2 text-xs">
+                                            @foreach($fmt['subtests'] ?? [] as $subName => $subVal)
+                                                <div class="bg-gray-50 dark:bg-gray-700/50 p-2.5 rounded-lg border border-gray-100 dark:border-gray-700 text-center">
+                                                    <span class="font-bold text-gray-500 dark:text-gray-400 text-[10px] block uppercase">{{ $subName }}</span>
+                                                    <span class="text-sm font-bold text-gray-800 dark:text-gray-100">
+                                                        {{ is_array($subVal) ? ($subVal['nilai'] ?? ($subVal['sw'] ?? json_encode($subVal))) : $subVal }}
+                                                    </span>
+                                                </div>
+                                            @endforeach
+                                        </div>
                                     </div>
                                 </div>
+
+                                @if(!empty($fmt['interpretasi']) && is_array($fmt['interpretasi']))
+                                    <div class="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
+                                        <h5 class="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase mb-2">Interpretasi Hasil</h5>
+                                        <div class="space-y-2 text-xs text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-700/40 p-3 rounded-xl">
+                                            @foreach($fmt['interpretasi'] as $iTitle => $iDesc)
+                                                <div>
+                                                    <span class="font-bold text-gray-800 dark:text-gray-200">{{ $iTitle }}:</span>
+                                                    <span>{{ $iDesc }}</span>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endif
+
+                                @if(!empty($fmt['saran']) && is_array($fmt['saran']))
+                                    <div class="mt-2 pt-2 border-t border-gray-100 dark:border-gray-700">
+                                        <h5 class="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase mb-2">Saran Pengembangan</h5>
+                                        <div class="space-y-1.5 text-xs text-gray-600 dark:text-gray-300 bg-emerald-50/50 dark:bg-emerald-950/20 p-3 rounded-xl border border-emerald-100 dark:border-emerald-900/40">
+                                            @foreach($fmt['saran'] as $saranText)
+                                                <div class="flex items-start space-x-2">
+                                                    <i class="fa-solid fa-lightbulb text-emerald-500 mt-0.5 text-[10px]"></i>
+                                                    <span>{{ $saranText }}</span>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endif
                             </div>
 
                         @elseif(in_array($code, ['B.1', 'D.1']))
@@ -233,21 +263,103 @@
                             {{-- Tampilan Kraepelin --}}
                             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
                                 <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-xl border border-gray-100 dark:border-gray-700">
-                                    <span class="text-xs font-semibold text-gray-400 block uppercase">Kecepatan (Pspeed)</span>
+                                    <span class="text-xs font-semibold text-gray-400 block uppercase">Kecepatan (PANKER)</span>
                                     <span class="text-2xl font-bold text-gray-800 dark:text-gray-100">{{ $fmt['pspeed'] }}</span>
                                 </div>
                                 <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-xl border border-gray-100 dark:border-gray-700">
-                                    <span class="text-xs font-semibold text-gray-400 block uppercase">Ketelitian (Pacc)</span>
+                                    <span class="text-xs font-semibold text-gray-400 block uppercase">Ketelitian (JANKER)</span>
                                     <span class="text-2xl font-bold text-gray-800 dark:text-gray-100">{{ $fmt['pacc'] }}</span>
+                                    @if(!empty($fmt['janker_range']))
+                                        <span class="text-[10px] text-gray-400 block mt-0.5">Range: {{ $fmt['janker_range'] }}</span>
+                                    @endif
                                 </div>
                                 <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-xl border border-gray-100 dark:border-gray-700">
-                                    <span class="text-xs font-semibold text-gray-400 block uppercase">Kestabilan (Pstab)</span>
+                                    <span class="text-xs font-semibold text-gray-400 block uppercase">Kestabilan (HANKER)</span>
                                     <span class="text-2xl font-bold text-gray-800 dark:text-gray-100">{{ $fmt['pstab'] }}</span>
                                 </div>
                                 <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-xl border border-gray-100 dark:border-gray-700">
-                                    <span class="text-xs font-semibold text-gray-400 block uppercase">Ketahanan (Pstn)</span>
+                                    <span class="text-xs font-semibold text-gray-400 block uppercase">Ketahanan (TIANKER)</span>
                                     <span class="text-2xl font-bold text-gray-800 dark:text-gray-100">{{ $fmt['pstn'] }}</span>
                                 </div>
+                            </div>
+
+                        @elseif($code === 'F.1')
+                            {{-- Tampilan Typical EQ (Kecerdasan Emosional) --}}
+                            <div class="space-y-4">
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                    <div class="bg-teal-50/50 dark:bg-teal-900/20 p-4 rounded-xl border border-teal-100 dark:border-teal-800 text-center flex flex-col justify-center">
+                                        <span class="text-xs uppercase font-semibold text-teal-600 dark:text-teal-400">Total Skor EQ</span>
+                                        <span class="text-3xl font-extrabold text-teal-700 dark:text-teal-300 my-1">{{ $fmt['eq_score'] }}</span>
+                                        <span class="text-xs font-medium text-teal-800 dark:text-teal-200">Kategori: {{ $fmt['kategori'] }}</span>
+                                    </div>
+                                    <div class="sm:col-span-2">
+                                        <h5 class="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase mb-2">Rincian Dimensi Kecerdasan Emosional</h5>
+                                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
+                                            @foreach($fmt['dimensions'] ?? [] as $dId => $dData)
+                                                <div class="bg-gray-50 dark:bg-gray-700/50 p-2.5 rounded-lg border border-gray-100 dark:border-gray-700">
+                                                    <span class="font-bold text-gray-500 dark:text-gray-400 text-[10px] block truncate">{{ $dData['nama'] ?? "Dimensi {$dId}" }}</span>
+                                                    <div class="flex items-center justify-between mt-1">
+                                                        <span class="text-sm font-bold text-teal-700 dark:text-teal-300">{{ $dData['skor'] ?? '-' }}</span>
+                                                        @if(isset($fmt['final_ratings'][$dId]))
+                                                            <span class="text-[10px] px-1.5 py-0.5 rounded bg-teal-100 text-teal-800 dark:bg-teal-900/40 dark:text-teal-300 font-semibold">
+                                                                Rating {{ $fmt['final_ratings'][$dId] }}
+                                                            </span>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        @elseif($code === 'G.1')
+                            {{-- Tampilan Behavior Tendencies / DISC --}}
+                            <div class="space-y-4">
+                                <div class="flex flex-wrap items-center justify-between gap-2">
+                                    <h5 class="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase">Profil Kecenderungan Perilaku</h5>
+                                    <span class="px-3 py-1 bg-indigo-50 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300 font-bold text-xs rounded-lg uppercase tracking-wider">
+                                        Tipe: {{ $fmt['tipe'] }}
+                                    </span>
+                                </div>
+                                <div class="grid grid-cols-3 gap-3 text-center">
+                                    <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-xl border border-gray-100 dark:border-gray-700">
+                                        <span class="text-[10px] font-bold text-gray-400 uppercase block">Nilai Iman</span>
+                                        <span class="text-xl font-extrabold text-indigo-600 dark:text-indigo-400">{{ $fmt['iman'] ?? '-' }}</span>
+                                    </div>
+                                    <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-xl border border-gray-100 dark:border-gray-700">
+                                        <span class="text-[10px] font-bold text-gray-400 uppercase block">Nilai Pikiran</span>
+                                        <span class="text-xl font-extrabold text-blue-600 dark:text-blue-400">{{ $fmt['pikiran'] ?? '-' }}</span>
+                                    </div>
+                                    <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-xl border border-gray-100 dark:border-gray-700">
+                                        <span class="text-[10px] font-bold text-gray-400 uppercase block">Nilai Perasaan</span>
+                                        <span class="text-xl font-extrabold text-pink-600 dark:text-pink-400">{{ $fmt['perasaan'] ?? '-' }}</span>
+                                    </div>
+                                </div>
+                                @if(!empty($fmt['interpretasi']))
+                                    <div class="p-4 rounded-xl bg-gray-50 dark:bg-gray-700/40 text-xs text-gray-600 dark:text-gray-300 leading-relaxed border border-gray-100 dark:border-gray-700">
+                                        {!! $fmt['interpretasi'] !!}
+                                    </div>
+                                @endif
+                            </div>
+
+                        @elseif($code === 'H.1')
+                            {{-- Tampilan RMIB (Minat Jabatan) --}}
+                            <div class="space-y-3">
+                                <h5 class="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase">Top 3 Pilihan Minat Bidang Kerja (RMIB)</h5>
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                    @foreach($fmt['top_interests'] ?? [] as $rank => $interestName)
+                                        <div class="bg-amber-50/50 dark:bg-amber-950/20 p-3 rounded-xl border border-amber-200 dark:border-amber-900/40 flex items-center space-x-3">
+                                            <span class="w-7 h-7 rounded-full bg-amber-500 text-white font-bold text-xs flex items-center justify-center shadow-sm">
+                                                #{{ $loop->iteration }}
+                                            </span>
+                                            <span class="font-bold text-xs text-gray-800 dark:text-gray-200">{{ $interestName }}</span>
+                                        </div>
+                                    @endforeach
+                                </div>
+                                @if(!empty($fmt['scores']))
+                                    <span class="text-[11px] text-gray-500 dark:text-gray-400 block">Distribusi Nilai: {{ $fmt['scores'] }}</span>
+                                @endif
                             </div>
 
                         @else

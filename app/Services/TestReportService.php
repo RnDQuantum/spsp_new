@@ -23,7 +23,8 @@ class TestReportService
      */
     public function getTestReport(int $participantId, int $eventId, string $testCode): array
     {
-        $testResult = TestResult::where('participant_id', $participantId)
+        $testResult = TestResult::query()
+            ->where('participant_id', $participantId)
             ->where('event_id', $eventId)
             ->where('test_code', $testCode)
             ->first();
@@ -48,7 +49,8 @@ class TestReportService
      */
     public function getParticipantAllTestReports(int $participantId, int $eventId): array
     {
-        $testResults = TestResult::where('participant_id', $participantId)
+        $testResults = TestResult::query()
+            ->where('participant_id', $participantId)
             ->where('event_id', $eventId)
             ->get();
 
@@ -81,32 +83,49 @@ class TestReportService
             'A.1', 'A.2', 'A.5' => [
                 'iq' => $data['iq'] ?? $data['index_kecerdasan_umum'] ?? '100',
                 'kategori' => $data['hasil_kategori'] ?? $data['kategori'] ?? 'Rata-rata',
-                'subtests' => $data['label_values'] ?? $data['hasil_sub'] ?? [],
+                'subtests' => $data['label_values'] ?? $data['hasil_sub'] ?? $data['hasil_ist'] ?? [],
+                'interpretasi' => $data['INTERPRETASI_HASIL'] ?? null,
+                'saran' => $data['SARAN_PENGEMBANGAN'] ?? null,
             ],
             'B.1', 'D.1' => [
-                'factors' => $data['nilaiAspek'] ?? [],
+                'factors' => ! empty($data['nilaiAspek']) ? $data['nilaiAspek'] : (! empty($data['hasil']) ? $data['hasil'] : array_filter($data, fn ($k) => str_starts_with((string) $k, 'hasil_'), ARRAY_FILTER_USE_KEY)),
                 'labels' => $data['labels_aspek'] ?? [],
-                'narratives' => array_filter($data, fn ($k) => str_contains((string) $k, '_1') || str_contains((string) $k, '_2') || str_contains((string) $k, '_3'), ARRAY_FILTER_USE_KEY),
+                'narratives' => array_filter($data, fn ($k) => str_contains((string) $k, '_1') || str_contains((string) $k, '_2') || str_contains((string) $k, '_3') || str_contains((string) $k, '_4'), ARRAY_FILTER_USE_KEY),
             ],
             'B.2' => [
-                'sten_scores' => $data['nilaiAspek'] ?? [],
+                'sten_scores' => $data['standart_final'] ?? $data['nilaiAspek'] ?? $data['nilai'] ?? [],
                 'md_score' => $data['MDStenScore'] ?? 5,
+                'descriptions' => $data['deskripsi_aspek'] ?? [],
             ],
             'D.2' => [
-                'pspeed' => $data['pspeed'] ?? $data['kecepatan'] ?? 0,
-                'pacc' => $data['pacc'] ?? $data['ketelitian'] ?? 0,
-                'pstab' => $data['pstab'] ?? $data['kestabilan'] ?? 0,
-                'pstn' => $data['pstn'] ?? $data['ketahanan'] ?? 0,
+                'pspeed' => $data['kesimpulan_akhir']['panker'] ?? $data['kesimpulan']['panker'] ?? $data['pspeed'] ?? $data['kecepatan'] ?? 0,
+                'pacc' => $data['kesimpulan_akhir']['janker_average'] ?? $data['kesimpulan']['janker_average'] ?? $data['pacc'] ?? $data['ketelitian'] ?? 0,
+                'pstab' => $data['kesimpulan_akhir']['hanker'] ?? $data['kesimpulan']['hanker'] ?? $data['pstab'] ?? $data['kestabilan'] ?? 0,
+                'pstn' => $data['kesimpulan_akhir']['tianker'] ?? $data['kesimpulan']['tianker'] ?? $data['pstn'] ?? $data['ketahanan'] ?? 0,
+                'janker_range' => $data['kesimpulan_akhir']['janker_range'] ?? $data['kesimpulan']['janker_range'] ?? 0,
+                'pendidikan' => $data['pendidikan'] ?? null,
+                'kesimpulan_akhir' => $data['kesimpulan_akhir'] ?? [],
             ],
             'F.1' => [
-                'eq_score' => $data['eq_score'] ?? $data['skor_eq'] ?? 0,
+                'eq_score' => $data['skor_akhir'] ?? $data['eq_score'] ?? $data['skor_eq'] ?? 0,
                 'kategori' => $data['kategori'] ?? 'Cukup',
+                'dimensions' => $data['dimensi'] ?? [],
+                'final_ratings' => $data['hasil_akhir'] ?? [],
                 'aspects' => $data['labels_aspek'] ?? $data['aspek'] ?? [],
             ],
             'G.1' => [
+                'tipe' => $data['hasil_kecenderungan'] ?? ($data['tipe'] ?? 'Perilaku'),
+                'iman' => $data['iman'] ?? null,
+                'pikiran' => $data['pikiran'] ?? null,
+                'perasaan' => $data['perasaan'] ?? null,
+                'interpretasi' => $data['interpretasi_kebiasaan'] ?? null,
                 'most' => $data['most'] ?? [],
                 'least' => $data['least'] ?? [],
                 'change' => $data['change'] ?? [],
+            ],
+            'H.1' => [
+                'top_interests' => array_filter([$data['nilai_1'] ?? null, $data['nilai_2'] ?? null, $data['nilai_3'] ?? null]),
+                'scores' => $data['nilai'] ?? null,
             ],
             default => [
                 'raw_payload' => $data,
