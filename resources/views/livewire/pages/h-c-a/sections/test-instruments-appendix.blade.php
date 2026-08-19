@@ -12,10 +12,10 @@
                     </span>
                 </div>
                 <h2 class="font-serif text-2xl font-bold text-primary-ink tracking-tight">
-                    Laporan Hasil Alat Tes Psikometri
+                    Laporan Hasil Alat Tes Psikometri & Psikogram
                 </h2>
                 <p class="text-xs text-primary-ink/70 mt-1 max-w-3xl leading-relaxed">
-                    Lampiran rincian skor matang (*raw scores*), skor terstandar (*Standard Score / Sten / T-Score*), dan sub-komponen dari seluruh instrumen psikometri yang diikuti peserta. Berfungsi sebagai bukti audit ilmiah yang melandasi evaluasi pada Layer 1 (Kompetensi) dan Layer 2 (Potensi).
+                    Menyajikan rincian data mentah (*raw scores*), skor terstandar (*Standard Score, Sten, T-Score*), serta deskripsi dimensi dari setiap instrumen psikologi yang diikuti peserta. Dokumen ini berfungsi sebagai bukti audit ilmiah (*audit-proof layer*) yang melandasi evaluasi pada Layer 1 (Kompetensi) dan Layer 2 (Potensi).
                 </p>
             </div>
 
@@ -78,7 +78,7 @@
             @endif
         </div>
     @else
-        <div class="space-y-6">
+        <div class="space-y-8">
             {{-- Render Each Test Report from test_results --}}
             @foreach ($testReports as $code => $report)
                 @php
@@ -115,101 +115,156 @@
                     <div class="p-6 space-y-6">
                         @if (in_array($code, ['A.1', 'A.2', 'A.5']))
                             {{-- 1. IST / CFIT Kognitif --}}
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                <div class="bg-warm-ivory border border-warm-border p-6 rounded-xl text-center flex flex-col justify-center items-center">
-                                    <span class="text-xs uppercase font-bold tracking-wider text-primary-ink/60 block">Skor Total IQ</span>
-                                    <span class="font-serif text-5xl font-extrabold text-primary-ink my-2">
-                                        {{ is_array($fmt['iq'] ?? null) ? ($fmt['iq']['iq'] ?? ($fmt['iq']['nilai'] ?? '100')) : ($fmt['iq'] ?? 100) }}
-                                    </span>
-                                    <span class="inline-flex items-center px-3 py-1 rounded-md text-xs font-semibold bg-emerald-50 text-forest-green border border-emerald-200">
-                                        Kategori: {{ is_array($fmt['kategori'] ?? null) ? ($fmt['kategori']['IQ'] ?? implode(', ', $fmt['kategori'])) : ($fmt['kategori'] ?? 'Rata-rata') }}
-                                    </span>
+                            <div class="space-y-6">
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    <div class="bg-warm-ivory border border-warm-border p-6 rounded-xl text-center flex flex-col justify-center items-center">
+                                        <span class="text-xs font-bold uppercase tracking-wider text-primary-ink/60 block">Skor Total IQ</span>
+                                        <span class="font-serif text-5xl font-extrabold text-primary-ink my-2">
+                                            {{ is_array($fmt['iq'] ?? null) ? ($fmt['iq']['iq'] ?? ($fmt['iq']['nilai'] ?? '100')) : ($fmt['iq'] ?? 100) }}
+                                        </span>
+                                        <span class="inline-flex items-center px-3 py-1 rounded-md text-xs font-semibold bg-emerald-50 text-forest-green border border-emerald-200">
+                                            Kategori: {{ is_array($fmt['kategori'] ?? null) ? ($fmt['kategori']['IQ'] ?? implode(', ', $fmt['kategori'])) : ($fmt['kategori'] ?? 'Rata-rata') }}
+                                        </span>
+                                        <p class="text-xs text-primary-ink/60 mt-3 leading-relaxed">
+                                            @if ($code === 'A.5')
+                                                Intelligenz Struktur Test (IST) mengukur profil struktur kecerdasan melalui 9 sub-dimensi kemampuan berpikir.
+                                            @else
+                                                Culture Fair Intelligence Test (CFIT) mengukur kapasitas inteligensi umum (*fluid intelligence*) non-verbal yang bebas bias budaya dan bahasa.
+                                            @endif
+                                        </p>
+                                    </div>
+
+                                    <div class="md:col-span-2 space-y-3">
+                                        <div class="flex items-center justify-between">
+                                            <h4 class="text-xs font-bold uppercase tracking-wider text-primary-ink/80">
+                                                Rincian Komponen Subtes & Penjelasan Kemampuan
+                                            </h4>
+                                            <span class="text-xs text-primary-ink/60">Skor Terstandar Psikometri</span>
+                                        </div>
+
+                                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                                            @foreach ($fmt['subtests'] ?? [] as $subKey => $subData)
+                                                @php
+                                                    $isArr = is_array($subData);
+                                                    $subCode = $isArr ? ($subData['code'] ?? strtoupper((string) $subKey)) : strtoupper((string) $subKey);
+                                                    $subName = $isArr ? ($subData['name'] ?? "Subtes {$subKey}") : "Subtes {$subKey}";
+                                                    $subDesc = $isArr ? ($subData['desc'] ?? 'Mengukur dimensi kapasitas kognitif.') : 'Mengukur dimensi kapasitas kognitif.';
+                                                    $subScore = $isArr ? ($subData['score'] ?? '-') : $subData;
+                                                @endphp
+                                                <div class="bg-warm-ivory/50 border border-warm-border p-3.5 rounded-lg flex flex-col justify-between hover:border-warm-border/80 transition">
+                                                    <div>
+                                                        <div class="flex items-center justify-between mb-1">
+                                                            <span class="font-mono text-xs font-bold text-accent-amber uppercase">{{ $subCode }}</span>
+                                                            <span class="font-mono text-base font-extrabold text-primary-ink">{{ $subScore }}</span>
+                                                        </div>
+                                                        <h5 class="font-bold text-xs text-primary-ink leading-tight mb-1">{{ $subName }}</h5>
+                                                        <p class="text-xs text-primary-ink/70 leading-relaxed">{{ $subDesc }}</p>
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
                                 </div>
 
-                                <div class="md:col-span-2 space-y-3">
-                                    <div class="flex items-center justify-between">
-                                        <h4 class="text-xs font-bold uppercase tracking-wider text-primary-ink/80">
-                                            Rincian Standard Score (SS) Subtes
+                                @if (! empty($fmt['interpretasi']) && is_array($fmt['interpretasi']))
+                                    <div class="pt-4 border-t border-warm-border">
+                                        <h4 class="text-xs font-bold uppercase tracking-wider text-primary-ink/80 mb-2">
+                                            Interpretasi Naratif Kapasitas Kognitif
                                         </h4>
-                                        <span class="text-xs text-primary-ink/60">Skala Standar Psikometri</span>
+                                        <div class="bg-warm-ivory/40 border border-warm-border p-4 rounded-xl space-y-2.5 text-xs text-primary-ink/80 leading-relaxed">
+                                            @foreach ($fmt['interpretasi'] as $iTitle => $iDesc)
+                                                <div>
+                                                    <span class="font-bold text-primary-ink">{{ $iTitle }}:</span>
+                                                    <span>{{ is_array($iDesc) ? implode(', ', $iDesc) : $iDesc }}</span>
+                                                </div>
+                                            @endforeach
+                                        </div>
                                     </div>
-                                    <div class="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-5 gap-2.5">
-                                        @foreach ($fmt['subtests'] ?? [] as $subName => $subVal)
-                                            <div class="bg-warm-ivory/60 border border-warm-border p-3 rounded-lg text-center">
-                                                <span class="font-bold text-primary-ink/60 text-xs block uppercase">{{ $subName }}</span>
-                                                <span class="font-mono text-base font-bold text-primary-ink mt-0.5 block">
-                                                    {{ is_array($subVal) ? ($subVal['nilai'] ?? ($subVal['sw'] ?? json_encode($subVal))) : $subVal }}
-                                                </span>
-                                            </div>
-                                        @endforeach
+                                @endif
+
+                                @if (! empty($fmt['saran']) && is_array($fmt['saran']))
+                                    <div class="pt-4 border-t border-warm-border">
+                                        <h4 class="text-xs font-bold uppercase tracking-wider text-primary-ink/80 mb-2">
+                                            Saran Pengembangan Pola Pikir & Strategi Berpikir
+                                        </h4>
+                                        <div class="bg-emerald-50/40 border border-emerald-100 p-4 rounded-xl space-y-2 text-xs text-primary-ink/80 leading-relaxed">
+                                            @foreach ($fmt['saran'] as $saranText)
+                                                <div class="flex items-start gap-2">
+                                                    <i class="fas fa-lightbulb text-accent-amber mt-0.5 text-xs"></i>
+                                                    <span>{{ is_array($saranText) ? implode(', ', $saranText) : $saranText }}</span>
+                                                </div>
+                                            @endforeach
+                                        </div>
                                     </div>
-                                </div>
+                                @endif
                             </div>
 
-                            @if (! empty($fmt['interpretasi']) && is_array($fmt['interpretasi']))
-                                <div class="pt-4 border-t border-warm-border">
-                                    <h4 class="text-xs font-bold uppercase tracking-wider text-primary-ink/80 mb-2">
-                                        Interpretasi Kapasitas Kognitif
-                                    </h4>
-                                    <div class="bg-warm-ivory/40 border border-warm-border p-4 rounded-xl space-y-2 text-xs text-primary-ink/80 leading-relaxed">
-                                        @foreach ($fmt['interpretasi'] as $iTitle => $iDesc)
-                                            <div>
-                                                <span class="font-semibold text-primary-ink">{{ $iTitle }}:</span>
-                                                <span>{{ is_array($iDesc) ? implode(', ', $iDesc) : $iDesc }}</span>
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                </div>
-                            @endif
-
-                            @if (! empty($fmt['saran']) && is_array($fmt['saran']))
-                                <div class="pt-4 border-t border-warm-border">
-                                    <h4 class="text-xs font-bold uppercase tracking-wider text-primary-ink/80 mb-2">
-                                        Saran Pengembangan Berpikir
-                                    </h4>
-                                    <div class="bg-emerald-50/40 border border-emerald-100 p-4 rounded-xl space-y-2 text-xs text-primary-ink/80 leading-relaxed">
-                                        @foreach ($fmt['saran'] as $saranText)
-                                            <div class="flex items-start gap-2">
-                                                <i class="fas fa-lightbulb text-accent-amber mt-0.5 text-xs"></i>
-                                                <span>{{ is_array($saranText) ? implode(', ', $saranText) : $saranText }}</span>
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                </div>
-                            @endif
-
                         @elseif (in_array($code, ['B.1', 'D.1']))
-                            {{-- 2. PAPI Kostik / Kompetensi Karakter --}}
-                            <div class="space-y-4">
-                                <div class="flex items-center justify-between">
-                                    <h4 class="text-xs font-bold uppercase tracking-wider text-primary-ink/80">
-                                        20 Skala Kebutuhan & Peran Kerja PAPI Kostik
-                                    </h4>
-                                    <span class="text-xs text-primary-ink/60">Rentang Standar Sten 0–9</span>
+                            {{-- 2. PAPI Kostik / Kompetensi Karakter (Grouped by 7 Work Domains) --}}
+                            <div class="space-y-6">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-warm-border pb-3">
+                                    <div>
+                                        <h4 class="font-serif font-bold text-lg text-primary-ink">
+                                            20 Skala Perilaku Kerja PAPI Kostik (7 Klaster Dimensi)
+                                        </h4>
+                                        <p class="text-xs text-primary-ink/70">
+                                            Skor Sten 0–9 memetakan kebutuhan (*needs*) dan peran (*roles*) perilaku kerja kandidat di lingkungan profesional.
+                                        </p>
+                                    </div>
+                                    <div class="flex items-center gap-3 text-xs shrink-0">
+                                        <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Tinggi (7–9)</span>
+                                        <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span> Sedang (4–6)</span>
+                                        <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> Rendah (0–3)</span>
+                                    </div>
                                 </div>
 
-                                <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-2.5">
-                                    @foreach ($fmt['factors'] ?? [] as $fKey => $fVal)
-                                        @php
-                                            $fName = str_replace('hasil_', '', (string) $fKey);
-                                            $valNum = is_array($fVal) ? (int) ($fVal['nilai'] ?? 0) : (int) $fVal;
-                                            $badgeColor = $valNum >= 7 ? 'text-forest-green bg-emerald-50 border-emerald-200' : ($valNum <= 3 ? 'text-amber-700 bg-amber-50 border-amber-200' : 'text-primary-ink bg-warm-ivory border-warm-border');
-                                        @endphp
-                                        <div class="border {{ $badgeColor }} p-3 rounded-lg text-center transition">
-                                            <span class="font-bold text-primary-ink/60 text-xs block uppercase truncate" title="{{ $fmt['labels'][$fKey] ?? $fName }}">
-                                                {{ $fmt['labels'][$fKey] ?? $fName }} ({{ strtoupper($fName) }})
-                                            </span>
-                                            <span class="font-mono text-xl font-bold mt-1 block">
-                                                {{ $valNum }}
-                                            </span>
-                                        </div>
-                                    @endforeach
-                                </div>
+                                @if (! empty($fmt['grouped_domains']))
+                                    <div class="space-y-5">
+                                        @foreach ($fmt['grouped_domains'] as $domainTitle => $factorItems)
+                                            <div class="bg-warm-ivory/30 border border-warm-border rounded-xl p-4 space-y-3">
+                                                <div class="flex items-center gap-2">
+                                                    <span class="w-2 h-2 rounded-full bg-accent-amber"></span>
+                                                    <h5 class="font-bold text-xs uppercase tracking-wider text-primary-ink">
+                                                        {{ $domainTitle }}
+                                                    </h5>
+                                                </div>
+
+                                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                                    @foreach ($factorItems as $fCode => $fInfo)
+                                                        @php
+                                                            $valNum = (int) $fInfo['score'];
+                                                            $badgeStyle = $valNum >= 7 ? 'bg-emerald-50 border-emerald-200 text-forest-green' : ($valNum <= 3 ? 'bg-amber-50 border-amber-200 text-amber-800' : 'bg-white border-warm-border text-primary-ink');
+                                                            $scorePill = $valNum >= 7 ? 'bg-emerald-600 text-white' : ($valNum <= 3 ? 'bg-amber-500 text-white' : 'bg-slate-700 text-white');
+                                                        @endphp
+                                                        <div class="border {{ $badgeStyle }} rounded-lg p-3 flex flex-col justify-between transition">
+                                                            <div>
+                                                                <div class="flex items-center justify-between mb-1">
+                                                                    <span class="font-mono text-xs font-bold uppercase tracking-wider text-primary-ink/70">
+                                                                        Skala {{ $fInfo['code'] }}
+                                                                    </span>
+                                                                    <span class="font-mono text-xs font-extrabold px-2 py-0.5 rounded {{ $scorePill }}">
+                                                                        Skor: {{ $valNum }}
+                                                                    </span>
+                                                                </div>
+                                                                <h6 class="font-bold text-xs text-primary-ink leading-snug mb-1">
+                                                                    {{ $fInfo['name'] }}
+                                                                </h6>
+                                                                <p class="text-xs text-primary-ink/70 leading-relaxed">
+                                                                    {{ $fInfo['desc'] }}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    @endforeach
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @endif
 
                                 @if (! empty($fmt['narratives']))
                                     <div class="pt-4 border-t border-warm-border">
                                         <h4 class="text-xs font-bold uppercase tracking-wider text-primary-ink/80 mb-2">
-                                            Dinamika Perilaku & Interaksi Kerja
+                                            Dinamika Interaksi & Pola Komunikasi Kerja
                                         </h4>
                                         <div class="bg-warm-ivory/40 border border-warm-border p-4 rounded-xl space-y-2.5 text-xs text-primary-ink/80 leading-relaxed">
                                             @foreach ($fmt['narratives'] as $nKey => $nText)
@@ -225,83 +280,87 @@
 
                         @elseif ($code === 'B.2')
                             {{-- 3. 16PF (Sixteen Personality Factor Questionnaire) --}}
-                            <div class="space-y-4">
-                                <div class="flex items-center justify-between">
-                                    <h4 class="text-xs font-bold uppercase tracking-wider text-primary-ink/80">
-                                        Sten Scores 16 Faktor Kepribadian Cattell
-                                    </h4>
-                                    <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200">
-                                        Distorsi Motivasi (MD Score): {{ $fmt['md_score'] ?? 5 }}
-                                    </span>
+                            <div class="space-y-6">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-warm-border pb-3">
+                                    <div>
+                                        <h4 class="font-serif font-bold text-lg text-primary-ink">
+                                            Profil 16 Faktor Kepribadian Cattell (Sten 1–10)
+                                        </h4>
+                                        <p class="text-xs text-primary-ink/70">
+                                            Menggambarkan kecenderungan trait kepribadian stabil yang mempengaruhi respon dan adaptasi dalam organisasi.
+                                        </p>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="inline-flex items-center px-3 py-1 rounded-md text-xs font-semibold bg-amber-50 text-amber-900 border border-amber-200">
+                                            Distorsi Motivasi (MD Score): {{ $fmt['md_score'] ?? 5 }} / 10
+                                        </span>
+                                    </div>
                                 </div>
 
-                                <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-8 gap-2.5">
-                                    @foreach ($fmt['sten_scores'] ?? [] as $stKey => $stVal)
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+                                    @foreach ($fmt['enriched_sten'] ?? [] as $fCode => $fData)
                                         @php
-                                            $stNum = (int) $stVal;
-                                            $color = $stNum >= 8 ? 'text-purple-700 bg-purple-50 border-purple-200' : ($stNum <= 3 ? 'text-amber-700 bg-amber-50 border-amber-200' : 'text-primary-ink bg-warm-ivory border-warm-border');
+                                            $stNum = (int) $fData['score'];
+                                            $cardBorder = $stNum >= 8 ? 'border-purple-200 bg-purple-50/40' : ($stNum <= 3 ? 'border-amber-200 bg-amber-50/40' : 'border-warm-border bg-white');
+                                            $badgeLevel = $stNum >= 8 ? 'bg-purple-100 text-purple-800' : ($stNum <= 3 ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-700');
                                         @endphp
-                                        <div class="border {{ $color }} p-3 rounded-lg text-center">
-                                            <span class="font-bold text-primary-ink/60 text-xs block uppercase">Faktor {{ $stKey }}</span>
-                                            <span class="font-mono text-xl font-bold mt-1 block">{{ $stVal }}</span>
+                                        <div class="border {{ $cardBorder }} p-3.5 rounded-lg flex flex-col justify-between">
+                                            <div>
+                                                <div class="flex items-center justify-between mb-1.5">
+                                                    <span class="font-mono text-xs font-bold text-purple-700">Faktor {{ $fCode }}</span>
+                                                    <span class="font-mono text-sm font-extrabold text-primary-ink">Sten: {{ $stNum }}</span>
+                                                </div>
+                                                <h5 class="font-bold text-xs text-primary-ink leading-tight mb-1">{{ $fData['name'] }}</h5>
+                                                <span class="inline-block px-1.5 py-0.5 rounded text-[11px] font-semibold {{ $badgeLevel }} mb-2">
+                                                    {{ $fData['level'] }}
+                                                </span>
+                                                <p class="text-xs text-primary-ink/70 leading-relaxed">{{ $fData['interpretation'] }}</p>
+                                            </div>
                                         </div>
                                     @endforeach
                                 </div>
-
-                                @if (! empty($fmt['descriptions']) && is_array($fmt['descriptions']))
-                                    <div class="pt-4 border-t border-warm-border">
-                                        <h4 class="text-xs font-bold uppercase tracking-wider text-primary-ink/80 mb-2">
-                                            Deskripsi Profil Kepribadian
-                                        </h4>
-                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs text-primary-ink/80">
-                                            @foreach ($fmt['descriptions'] as $fDescKey => $fDescVal)
-                                                <div class="bg-warm-ivory/40 border border-warm-border p-3 rounded-lg">
-                                                    <span class="font-bold text-primary-ink block mb-0.5">Faktor {{ $fDescKey }}</span>
-                                                    <span>{{ is_array($fDescVal) ? implode(', ', $fDescVal) : $fDescVal }}</span>
-                                                </div>
-                                            @endforeach
-                                        </div>
-                                    </div>
-                                @endif
                             </div>
 
                         @elseif ($code === 'D.2')
                             {{-- 4. Kraepelin Test (Sikap Kerja & Ketahanan) --}}
-                            <div class="space-y-4">
-                                <div class="flex items-center justify-between">
-                                    <h4 class="text-xs font-bold uppercase tracking-wider text-primary-ink/80">
-                                        4 Parameter Sikap Kerja & Ritme Kraepelin
-                                    </h4>
-                                    <span class="text-xs text-primary-ink/60">Standar Norma Pendidikan: {{ $fmt['pendidikan'] ?? 'S1/D4' }}</span>
+                            <div class="space-y-6">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-warm-border pb-3">
+                                    <div>
+                                        <h4 class="font-serif font-bold text-lg text-primary-ink">
+                                            4 Parameter Sikap Kerja & Ritme Kraepelin
+                                        </h4>
+                                        <p class="text-xs text-primary-ink/70">
+                                            Evaluasi ritme kerja, ketelitian, kestabilan emosi kerja, dan daya tahan mental di bawah tekanan waktu.
+                                        </p>
+                                    </div>
+                                    <span class="text-xs text-primary-ink/60">Norma Standar: {{ $fmt['pendidikan'] ?? 'S1/D4' }}</span>
                                 </div>
 
-                                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                    <div class="bg-warm-ivory border border-warm-border p-4 rounded-xl text-center">
-                                        <span class="text-xs font-bold uppercase tracking-wider text-primary-ink/60 block">Kecepatan (PANKER)</span>
-                                        <span class="font-mono text-3xl font-extrabold text-primary-ink my-1 block">{{ $fmt['pspeed'] }}</span>
-                                        <span class="text-xs text-primary-ink/60">Kecepatan tempo kerja</span>
-                                    </div>
-                                    <div class="bg-warm-ivory border border-warm-border p-4 rounded-xl text-center">
-                                        <span class="text-xs font-bold uppercase tracking-wider text-primary-ink/60 block">Ketelitian (JANKER)</span>
-                                        <span class="font-mono text-3xl font-extrabold text-primary-ink my-1 block">{{ $fmt['pacc'] }}</span>
-                                        <span class="text-xs text-primary-ink/60">Rentang deviasi: {{ $fmt['janker_range'] ?? 0 }}</span>
-                                    </div>
-                                    <div class="bg-warm-ivory border border-warm-border p-4 rounded-xl text-center">
-                                        <span class="text-xs font-bold uppercase tracking-wider text-primary-ink/60 block">Kestabilan (HANKER)</span>
-                                        <span class="font-mono text-3xl font-extrabold text-primary-ink my-1 block">{{ $fmt['pstab'] }}</span>
-                                        <span class="text-xs text-primary-ink/60">Konsistensi ritme grafik</span>
-                                    </div>
-                                    <div class="bg-warm-ivory border border-warm-border p-4 rounded-xl text-center">
-                                        <span class="text-xs font-bold uppercase tracking-wider text-primary-ink/60 block">Ketahanan (TIANKER)</span>
-                                        <span class="font-mono text-3xl font-extrabold text-primary-ink my-1 block">{{ $fmt['pstn'] }}</span>
-                                        <span class="text-xs text-primary-ink/60">Daya tahan saat jenuh</span>
-                                    </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                    @php
+                                        $kraepelinParams = [
+                                            ['key' => 'pspeed', 'val' => $fmt['pspeed'], 'name' => 'Kecepatan Kerja (PANKER)', 'sub' => 'Output item/menit', 'desc' => 'Mengukur tempo kecepatan output kerja per satuan waktu di bawah target.'],
+                                            ['key' => 'pacc', 'val' => $fmt['pacc'], 'name' => 'Ketelitian Kerja (JANKER)', 'sub' => 'Range deviasi: '.($fmt['janker_range'] ?? 0), 'desc' => 'Mengukur derajat akurasi kerja dan tingkat kekebalan terhadap kekeliruan (error rate).'],
+                                            ['key' => 'pstab', 'val' => $fmt['pstab'], 'name' => 'Kestabilan Kerja (HANKER)', 'sub' => 'Konsistensi grafik ritme', 'desc' => 'Mengukur konsistensi ritme kerja tanpa fluktuasi grafik energi yang ekstrem.'],
+                                            ['key' => 'pstn', 'val' => $fmt['pstn'], 'name' => 'Ketahanan Kerja (TIANKER)', 'sub' => 'Daya tahan saat jenuh', 'desc' => 'Mengukur daya tahan stamina kerja dan pemeliharaan fokus saat mengalami kejenuhan mental.'],
+                                        ];
+                                    @endphp
+                                    @foreach ($kraepelinParams as $kp)
+                                        <div class="bg-warm-ivory border border-warm-border p-4 rounded-xl flex flex-col justify-between">
+                                            <div>
+                                                <span class="text-xs font-bold uppercase tracking-wider text-primary-ink/60 block">{{ $kp['name'] }}</span>
+                                                <span class="font-mono text-3xl font-extrabold text-primary-ink my-1.5 block">{{ $kp['val'] }}</span>
+                                                <span class="text-xs font-semibold text-accent-amber block mb-2">{{ $kp['sub'] }}</span>
+                                                <p class="text-xs text-primary-ink/70 leading-relaxed">{{ $kp['desc'] }}</p>
+                                            </div>
+                                        </div>
+                                    @endforeach
                                 </div>
                             </div>
 
                         @elseif ($code === 'F.1')
                             {{-- 5. Typical EQ (Kecerdasan Emosional) --}}
-                            <div class="space-y-4">
+                            <div class="space-y-6">
                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                                     <div class="bg-warm-ivory border border-warm-border p-6 rounded-xl text-center flex flex-col justify-center items-center">
                                         <span class="text-xs uppercase font-bold tracking-wider text-primary-ink/60 block">Total Indeks EQ</span>
@@ -309,16 +368,19 @@
                                         <span class="inline-flex items-center px-3 py-1 rounded-md text-xs font-semibold bg-teal-50 text-teal-800 border border-teal-200">
                                             Kategori: {{ $fmt['kategori'] }}
                                         </span>
+                                        <p class="text-xs text-primary-ink/60 mt-3 leading-relaxed">
+                                            Mengukur kematangan kecerdasan emosional personal dan sosial dalam mengelola hubungan kerja.
+                                        </p>
                                     </div>
                                     <div class="md:col-span-2 space-y-3">
                                         <h4 class="text-xs font-bold uppercase tracking-wider text-primary-ink/80">
                                             Rincian Dimensi Kecerdasan Emosional
                                         </h4>
-                                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
                                             @foreach ($fmt['dimensions'] ?? [] as $dId => $dData)
-                                                <div class="bg-warm-ivory/60 border border-warm-border p-3 rounded-lg">
-                                                    <span class="font-bold text-primary-ink/70 text-xs block truncate">{{ $dData['nama'] ?? "Dimensi {$dId}" }}</span>
-                                                    <span class="font-mono text-base font-bold text-primary-ink mt-0.5 block">
+                                                <div class="bg-warm-ivory/60 border border-warm-border p-3 rounded-lg flex items-center justify-between">
+                                                    <span class="font-bold text-primary-ink/80 text-xs truncate mr-2">{{ $dData['nama'] ?? "Dimensi {$dId}" }}</span>
+                                                    <span class="font-mono text-sm font-bold text-primary-ink shrink-0">
                                                         {{ $dData['nilai'] ?? ($dData['skor'] ?? '-') }}
                                                     </span>
                                                 </div>
@@ -331,37 +393,42 @@
                         @elseif ($code === 'G.1')
                             {{-- 6. Typical Behavior Tendencies --}}
                             <div class="space-y-4">
-                                <div class="bg-warm-ivory border border-warm-border p-4 rounded-xl flex items-center justify-between">
+                                <div class="bg-warm-ivory border border-warm-border p-5 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                                     <div>
                                         <span class="text-xs font-bold uppercase tracking-wider text-primary-ink/60 block">Kecenderungan Perilaku Dominan</span>
-                                        <h4 class="font-serif text-xl font-bold text-primary-ink mt-0.5">{{ $fmt['tipe'] }}</h4>
+                                        <h4 class="font-serif text-2xl font-bold text-primary-ink mt-0.5">{{ $fmt['tipe'] }}</h4>
                                     </div>
-                                    <span class="px-3 py-1 rounded-md text-xs font-semibold bg-accent-amber/10 text-accent-amber border border-accent-amber/30">
-                                        Profile Active
+                                    <span class="px-3 py-1.5 rounded-md text-xs font-semibold bg-accent-amber/10 text-accent-amber border border-accent-amber/30 shrink-0">
+                                        Profil Perilaku Aktif
                                     </span>
                                 </div>
                                 @if (! empty($fmt['interpretasi']))
                                     <div class="bg-warm-ivory/40 border border-warm-border p-4 rounded-xl text-xs text-primary-ink/80 leading-relaxed">
-                                        <span class="font-semibold text-primary-ink block mb-1">Interpretasi Perilaku Kerja:</span>
+                                        <span class="font-bold text-primary-ink block mb-1">Interpretasi Dinamika Kebiasaan & Sikap Kerja:</span>
                                         {{ $fmt['interpretasi'] }}
                                     </div>
                                 @endif
                             </div>
 
                         @elseif ($code === 'H.1')
-                            {{-- 7. RMIB (Minat Jabatan) --}}
+                            {{-- 7. RMIB (Rothwell Miller Interest Blank - Minat Jabatan) --}}
                             <div class="space-y-4">
-                                <h4 class="text-xs font-bold uppercase tracking-wider text-primary-ink/80">
-                                    Top 3 Orientasi Minat Bidang Pekerjaan (RMIB)
-                                </h4>
+                                <div>
+                                    <h4 class="font-serif font-bold text-base text-primary-ink">
+                                        Top 3 Orientasi Minat Bidang Pekerjaan (RMIB)
+                                    </h4>
+                                    <p class="text-xs text-primary-ink/70 mt-0.5">
+                                        Memetakan minat okupasional intrinsik kandidat untuk penempatan peran dan jalur pengembangan karier yang selaras.
+                                    </p>
+                                </div>
                                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                                     @foreach ($fmt['top_interests'] ?? [] as $idx => $interest)
                                         <div class="bg-warm-ivory border border-warm-border p-4 rounded-xl flex items-center gap-3">
-                                            <div class="w-8 h-8 rounded-full bg-accent-amber text-white font-mono font-bold text-xs flex items-center justify-center shrink-0">
+                                            <div class="w-9 h-9 rounded-full bg-accent-amber text-white font-mono font-bold text-xs flex items-center justify-center shrink-0 shadow-sm">
                                                 #{{ $idx + 1 }}
                                             </div>
                                             <div class="min-w-0">
-                                                <span class="text-xs text-primary-ink/60 block">Pilihan Utama</span>
+                                                <span class="text-xs text-primary-ink/60 block">Prioritas Minat</span>
                                                 <span class="font-bold text-xs text-primary-ink truncate block">{{ $interest }}</span>
                                             </div>
                                         </div>
@@ -408,29 +475,35 @@
                     </div>
 
                     <div class="p-6 space-y-6">
+                        <div>
+                            <p class="text-xs text-primary-ink/70 leading-relaxed">
+                                Evaluasi kelaikan klinis kerja untuk menyaring risiko psikopatologi berat, dinamika stabilitas emosional, dan kapasitas koping stres kerja.
+                            </p>
+                        </div>
+
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <div class="bg-warm-ivory border border-warm-border p-4 rounded-xl text-center">
                                 <span class="text-xs font-bold uppercase tracking-wider text-primary-ink/60 block">Skala Validitas (L-F-K)</span>
                                 <span class="font-mono text-xl font-bold text-primary-ink my-1 block">{{ $mmpi->validitas ?? 'Valid' }}</span>
-                                <span class="text-xs text-primary-ink/60">Indikator konsistensi jawaban</span>
+                                <span class="text-xs text-primary-ink/60">Memverifikasi kejujuran & konsistensi respon</span>
                             </div>
                             <div class="bg-warm-ivory border border-warm-border p-4 rounded-xl text-center">
                                 <span class="text-xs font-bold uppercase tracking-wider text-primary-ink/60 block">Tingkat Stres</span>
                                 <span class="font-mono text-xl font-bold {{ strtolower((string) $mmpi->tingkat_stres) === 'tinggi' ? 'text-red-700' : 'text-primary-ink' }} my-1 block">
                                     {{ $mmpi->tingkat_stres ?? 'Rendah' }}
                                 </span>
-                                <span class="text-xs text-primary-ink/60">Kapasitas koping tekanan</span>
+                                <span class="text-xs text-primary-ink/60">Indeks ketahanan beban kerja</span>
                             </div>
                             <div class="bg-warm-ivory border border-warm-border p-4 rounded-xl text-center">
                                 <span class="text-xs font-bold uppercase tracking-wider text-primary-ink/60 block">Status Kelaikan</span>
                                 <span class="font-mono text-xl font-bold text-forest-green my-1 block">{{ $mmpi->kesimpulan ?? 'Memenuhi Syarat' }}</span>
-                                <span class="text-xs text-primary-ink/60">Diagnosis klinis kerja</span>
+                                <span class="text-xs text-primary-ink/60">Diagnosis kelaikan tugas institusi</span>
                             </div>
                         </div>
 
                         @if ($mmpi->klinik || $mmpi->internal || $mmpi->interpersonal)
                             <div class="bg-warm-ivory/40 border border-warm-border p-4 rounded-xl space-y-2 text-xs text-primary-ink/80 leading-relaxed">
-                                <h4 class="font-bold text-primary-ink uppercase tracking-wider text-xs">Catatan Klinis Asesor</h4>
+                                <h4 class="font-bold text-primary-ink uppercase tracking-wider text-xs">Catatan Klinis Asesor Psikologi SPSP</h4>
                                 @if ($mmpi->internal)
                                     <div><span class="font-semibold text-primary-ink">Dinamika Internal:</span> {{ $mmpi->internal }}</div>
                                 @endif
