@@ -109,13 +109,28 @@ class SeederGeneratorsTest extends TestCase
         $this->assertContains('G.1', $testCodes);
         $this->assertContains('H.1', $testCodes);
 
-        // Verify summary data json content
+        // Verify summary data, interpretation data, raw response, and source
+        foreach ($apiResults as $tr) {
+            $this->assertEquals('api', $tr['source']);
+            $this->assertNotNull($tr['summary_data']);
+            $this->assertNotNull($tr['interpretation_data'], "interpretation_data should not be null for {$tr['test_code']}");
+            $this->assertNotNull($tr['raw_response'], "raw_response should not be null for {$tr['test_code']}");
+
+            $decodedInterp = json_decode($tr['interpretation_data'], true);
+            $this->assertIsArray($decodedInterp);
+            $this->assertNotEmpty($decodedInterp);
+
+            $decodedRaw = json_decode($tr['raw_response'], true);
+            $this->assertIsArray($decodedRaw);
+            $this->assertTrue($decodedRaw['status'] ?? false);
+        }
+
         $kraepelinTr = collect($apiResults)->firstWhere('test_code', 'D.2');
         $kSummary = json_decode($kraepelinTr['summary_data'], true);
         $this->assertArrayHasKey('kesimpulan_akhir', $kSummary);
         $this->assertArrayHasKey('panker', $kSummary['kesimpulan_akhir']);
 
-        // 2. Legacy DB Event (PR-A-313)
+        // 2. Legacy Event (PR-A-313)
         $legacyEvent = new AssessmentEvent([
             'id' => 11,
             'code' => 'PR-A-313',
@@ -126,7 +141,12 @@ class SeederGeneratorsTest extends TestCase
         $this->assertContains('A.5', $legacyCodes);
         $this->assertContains('D.1', $legacyCodes);
         $this->assertContains('B.2', $legacyCodes);
-        $this->assertEquals('lsp_db', $legacyResults[0]['source']);
+
+        foreach ($legacyResults as $ltr) {
+            $this->assertEquals('api', $ltr['source']);
+            $this->assertNotNull($ltr['interpretation_data'], "interpretation_data should not be null for {$ltr['test_code']}");
+            $this->assertNotNull($ltr['raw_response'], "raw_response should not be null for {$ltr['test_code']}");
+        }
     }
 
     /**

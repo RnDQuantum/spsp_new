@@ -157,15 +157,16 @@ class TestReportService
     ];
 
     /**
-     * Format payload summary_data untuk kebutuhan tampilan UI Laporan Alat Tes.
+     * Format payload summary_data & interpretation_data untuk kebutuhan tampilan UI Laporan Alat Tes.
      */
     public function formatTestDataForDisplay(TestResult $tr): array
     {
         $data = $tr->summary_data ?? [];
+        $interp = $tr->interpretation_data ?? [];
 
         // Format per kode tes
         return match ($tr->test_code) {
-            'A.1', 'A.2', 'A.5' => (function () use ($data, $tr) {
+            'A.1', 'A.2', 'A.5' => (function () use ($data, $interp, $tr) {
                 $rawKategori = $data['kategori'] ?? ($data['hasil_kategori']['IQ'] ?? ($data['hasil_kategori'] ?? 'Rata-rata'));
                 $kategori = is_array($rawKategori) ? ($rawKategori['IQ'] ?? implode(', ', array_values($rawKategori))) : (string) $rawKategori;
                 $rawIq = $data['iq'] ?? $data['index_kecerdasan_umum'] ?? '100';
@@ -212,15 +213,18 @@ class TestReportService
                     }
                 }
 
+                $interpretasi = $interp['interpretasi_hasil'] ?? ($data['INTERPRETASI_HASIL'] ?? ($data['interpretasi_hasil'] ?? null));
+                $saran = $interp['saran_pengembangan'] ?? ($data['SARAN_PENGEMBANGAN'] ?? ($data['saran_pengembangan'] ?? null));
+
                 return [
                     'iq' => $iq,
                     'kategori' => $kategori,
                     'subtests' => $enrichedSub,
-                    'interpretasi' => $data['INTERPRETASI_HASIL'] ?? null,
-                    'saran' => $data['SARAN_PENGEMBANGAN'] ?? null,
+                    'interpretasi' => $interpretasi,
+                    'saran' => $saran,
                 ];
             })(),
-            'B.1', 'D.1' => (function () use ($data) {
+            'B.1', 'D.1' => (function () use ($data, $interp) {
                 $rawFactors = ! empty($data['nilaiAspek']) ? $data['nilaiAspek'] : (! empty($data['hasil']) ? $data['hasil'] : array_filter($data, fn ($k) => str_starts_with((string) $k, 'hasil_'), ARRAY_FILTER_USE_KEY));
                 $labels = $data['labels_aspek'] ?? [];
 
@@ -240,14 +244,17 @@ class TestReportService
                     $groupedDomains[$domainName] = $domainList;
                 }
 
+                $allNarratives = array_merge($data, $interp);
+                $narratives = array_filter($allNarratives, fn ($k) => str_contains((string) $k, '_1') || str_contains((string) $k, '_2') || str_contains((string) $k, '_3') || str_contains((string) $k, '_4'), ARRAY_FILTER_USE_KEY);
+
                 return [
                     'factors' => $rawFactors,
                     'labels' => $labels,
                     'grouped_domains' => $groupedDomains,
-                    'narratives' => array_filter($data, fn ($k) => str_contains((string) $k, '_1') || str_contains((string) $k, '_2') || str_contains((string) $k, '_3') || str_contains((string) $k, '_4'), ARRAY_FILTER_USE_KEY),
+                    'narratives' => $narratives,
                 ];
             })(),
-            'B.2' => (function () use ($data) {
+            'B.2' => (function () use ($data, $interp) {
                 $rawSten = $data['standart_final'] ?? $data['nilaiAspek'] ?? $data['nilai'] ?? [];
                 $enrichedSten = [];
 
@@ -276,11 +283,13 @@ class TestReportService
                     }
                 }
 
+                $descriptions = $interp['deskripsi_aspek'] ?? ($data['deskripsi_aspek'] ?? []);
+
                 return [
                     'sten_scores' => $rawSten,
                     'enriched_sten' => $enrichedSten,
                     'md_score' => is_array($data['MDStenScore'] ?? null) ? ($data['MDStenScore']['nilai'] ?? 5) : ($data['MDStenScore'] ?? 5),
-                    'descriptions' => $data['deskripsi_aspek'] ?? [],
+                    'descriptions' => $descriptions,
                 ];
             })(),
             'D.2' => [
@@ -291,6 +300,8 @@ class TestReportService
                 'janker_range' => $data['kesimpulan_akhir']['janker_range'] ?? $data['kesimpulan']['janker_range'] ?? 0,
                 'pendidikan' => $data['pendidikan'] ?? null,
                 'kesimpulan_akhir' => $data['kesimpulan_akhir'] ?? [],
+                'interpretasi' => $interp['interpretasi_hasil'] ?? ($data['interpretasi_hasil'] ?? null),
+                'saran' => $interp['saran_pengembangan'] ?? ($data['saran_pengembangan'] ?? null),
                 'meta' => self::$kraepelinMeta,
             ],
             'F.1' => [
@@ -299,8 +310,10 @@ class TestReportService
                 'dimensions' => $data['dimensi'] ?? [],
                 'final_ratings' => $data['hasil_akhir'] ?? [],
                 'aspects' => $data['labels_aspek'] ?? $data['aspek'] ?? [],
+                'interpretasi' => $interp['interpretasi_hasil'] ?? ($data['interpretasi_hasil'] ?? null),
+                'saran' => $interp['saran_pengembangan'] ?? ($data['saran_pengembangan'] ?? null),
             ],
-            'G.1' => (function () use ($data) {
+            'G.1' => (function () use ($data, $interp) {
                 $rawTipe = $data['hasil_kecenderungan'] ?? ($data['tipe'] ?? 'Perilaku');
                 $tipe = is_array($rawTipe) ? ($rawTipe['tipe'] ?? implode(', ', $rawTipe)) : (string) $rawTipe;
 
@@ -309,7 +322,7 @@ class TestReportService
                     'iman' => $data['iman'] ?? null,
                     'pikiran' => $data['pikiran'] ?? null,
                     'perasaan' => $data['perasaan'] ?? null,
-                    'interpretasi' => $data['interpretasi_kebiasaan'] ?? null,
+                    'interpretasi' => $interp['interpretasi_kebiasaan'] ?? ($data['interpretasi_kebiasaan'] ?? null),
                     'most' => $data['most'] ?? [],
                     'least' => $data['least'] ?? [],
                     'change' => $data['change'] ?? [],
@@ -318,6 +331,7 @@ class TestReportService
             'H.1' => [
                 'top_interests' => array_filter([$data['nilai_1'] ?? null, $data['nilai_2'] ?? null, $data['nilai_3'] ?? null]),
                 'scores' => is_array($data['nilai'] ?? null) ? implode(', ', $data['nilai']) : ($data['nilai'] ?? null),
+                'interpretasi' => $interp['interpretasi_hasil'] ?? ($data['interpretasi_hasil'] ?? null),
             ],
             default => [
                 'raw_payload' => $data,
