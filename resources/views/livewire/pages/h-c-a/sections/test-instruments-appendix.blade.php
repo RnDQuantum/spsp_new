@@ -501,6 +501,47 @@
                             </div>
                         </div>
 
+                        @if (! empty($mmpi->clinical_scales) || ! empty($mmpi->validity_scales))
+                            <div class="space-y-4 pt-2">
+                                <h4 class="font-bold text-primary-ink uppercase tracking-wider text-xs flex items-center justify-between">
+                                    <span>Profil T-Score Skala MMPI</span>
+                                    <span class="text-[11px] font-normal text-slate-400">Mean: 50 | Ambang Elevasi: T &ge; 65</span>
+                                </h4>
+
+                                @if (! empty($mmpi->validity_scales))
+                                    <div>
+                                        <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-2">Skala Validitas</span>
+                                        <div class="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                                            @foreach ($mmpi->validity_scales as $sCode => $sScore)
+                                                <div class="bg-warm-ivory border border-warm-border/60 rounded-lg p-2.5 text-center">
+                                                    <span class="text-[10px] font-bold font-mono text-slate-500 block">{{ $sCode }}</span>
+                                                    <span class="font-mono text-base font-bold {{ $sScore >= 65 ? 'text-amber-700 font-extrabold' : 'text-primary-ink' }}">
+                                                        {{ $sScore }}
+                                                    </span>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endif
+
+                                @if (! empty($mmpi->clinical_scales))
+                                    <div>
+                                        <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-2">Skala Klinis</span>
+                                        <div class="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                                            @foreach ($mmpi->clinical_scales as $sCode => $sScore)
+                                                <div class="bg-warm-ivory border border-warm-border/60 rounded-lg p-2.5 text-center">
+                                                    <span class="text-[10px] font-bold font-mono text-slate-500 block">{{ $sCode }}</span>
+                                                    <span class="font-mono text-base font-bold {{ $sScore >= 65 ? 'text-red-700 font-extrabold' : 'text-primary-ink' }}">
+                                                        {{ $sScore }}
+                                                    </span>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endif
+                            </div>
+                        @endif
+
                         @if ($mmpi->klinik || $mmpi->internal || $mmpi->interpersonal)
                             <div class="bg-warm-ivory/40 border border-warm-border p-4 rounded-xl space-y-2 text-xs text-primary-ink/80 leading-relaxed">
                                 <h4 class="font-bold text-primary-ink uppercase tracking-wider text-xs">Catatan Klinis Asesor Psikologi SPSP</h4>

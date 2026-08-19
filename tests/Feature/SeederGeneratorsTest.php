@@ -8,6 +8,7 @@ use App\Livewire\Pages\HCA\Sections\DevelopmentRecommendation;
 use App\Livewire\Pages\HCA\Sections\QualitativeListSection;
 use App\Models\AssessmentEvent;
 use App\Models\Batch;
+use App\Models\Mmpi;
 use App\Models\Participant;
 use App\Models\PositionFormation;
 use Database\Seeders\Data\AssessmentEventConfig;
@@ -223,5 +224,63 @@ class SeederGeneratorsTest extends TestCase
         $qualComp->sectionCode = 'personal_profile';
         $profView = $qualComp->render();
         $this->assertGreaterThanOrEqual(4, count($profView->getData()['items']));
+    }
+
+    /**
+     * Test AssessmentRecordGenerator generates authentic MMPI data matching Glosarium
+     */
+    public function test_assessment_record_generator_generates_authentic_mmpi_data(): void
+    {
+        $participant = new Participant([
+            'event_id' => 10,
+            'username' => 'test_user_mmpi',
+            'test_number' => 'TEST-001',
+        ]);
+        $participant->id = 777;
+
+        $mmpiData = AssessmentRecordGenerator::generateMmpiData($participant, 'K-9');
+
+        $this->assertIsArray($mmpiData);
+        $this->assertEquals(777, $mmpiData['participant_id']);
+        $this->assertEquals('test_user_mmpi', $mmpiData['username']);
+        $this->assertNotEmpty($mmpiData['validitas']);
+        $this->assertNotEmpty($mmpiData['internal']);
+        $this->assertNotEmpty($mmpiData['interpersonal']);
+        $this->assertNotEmpty($mmpiData['kap_kerja']);
+        $this->assertNotEmpty($mmpiData['klinik']);
+        $this->assertNotEmpty($mmpiData['kesimpulan']);
+        $this->assertGreaterThanOrEqual(85.0, $mmpiData['nilai_pq']);
+        $this->assertEquals('Rendah', $mmpiData['tingkat_stres']);
+
+        $decodedPsikogram = json_decode($mmpiData['psikogram'], true);
+        $this->assertIsArray($decodedPsikogram);
+        $this->assertEquals('MMPI-2', $decodedPsikogram['tipe']);
+
+        // Check Glosarium validity scales
+        $this->assertArrayHasKey('skala_validitas', $decodedPsikogram);
+        $this->assertArrayHasKey('L', $decodedPsikogram['skala_validitas']);
+        $this->assertArrayHasKey('F', $decodedPsikogram['skala_validitas']);
+        $this->assertArrayHasKey('K', $decodedPsikogram['skala_validitas']);
+        $this->assertArrayHasKey('VRIN', $decodedPsikogram['skala_validitas']);
+        $this->assertArrayHasKey('TRIN', $decodedPsikogram['skala_validitas']);
+
+        // Check Glosarium clinical scales (1-10)
+        $this->assertArrayHasKey('skala_klinis', $decodedPsikogram);
+        $this->assertArrayHasKey('Hs', $decodedPsikogram['skala_klinis']);
+        $this->assertArrayHasKey('D', $decodedPsikogram['skala_klinis']);
+        $this->assertArrayHasKey('Hy', $decodedPsikogram['skala_klinis']);
+        $this->assertArrayHasKey('Pd', $decodedPsikogram['skala_klinis']);
+        $this->assertArrayHasKey('Pa', $decodedPsikogram['skala_klinis']);
+        $this->assertArrayHasKey('Pt', $decodedPsikogram['skala_klinis']);
+        $this->assertArrayHasKey('Sc', $decodedPsikogram['skala_klinis']);
+        $this->assertArrayHasKey('Ma', $decodedPsikogram['skala_klinis']);
+        $this->assertArrayHasKey('Si', $decodedPsikogram['skala_klinis']);
+
+        // Check Mmpi model accessors
+        $mmpiModel = new Mmpi($mmpiData);
+        $this->assertCount(5, $mmpiModel->validity_scales);
+        $this->assertCount(10, $mmpiModel->clinical_scales);
+        $this->assertGreaterThanOrEqual(4.20, $mmpiModel->wellbeing_score);
+        $this->assertEquals('Sangat Baik / Prima', $mmpiModel->wellbeing_category);
     }
 }

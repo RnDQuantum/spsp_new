@@ -100,7 +100,10 @@ class ApiDataTransformerService
             'Z' => $kostikData['hasil_Z'] ?? 1,
         ];
 
-        // 2. Jika DB LSP lokal memiliki data pendukung wawancara & identitas, gabungkan!
+        // 2. Ekstraksi Detail MMPI (E.1 / E.2) Berdasarkan Glosarium Psikometri
+        $mmpiDetails = $this->extractMmpiDetails($mmpiData);
+
+        // 3. Jika DB LSP lokal memiliki data pendukung wawancara & identitas, gabungkan!
         $fallbackReport = null;
         try {
             $fallbackReport = $this->lspTransformer->getIndividualReport($username, $kodeProyek);
@@ -164,28 +167,8 @@ class ApiDataTransformerService
                 'kesimpulan_wawancara' => 'MS',
                 'kesimpulan_final' => 'MS',
             ],
-            'mmpi' => [
-                'validitas' => $mmpiData['validitas'] ?? '-',
-                'internal_pribadi' => $mmpiData['internal'] ?? '-',
-                'interpersonal' => $mmpiData['interpersonal'] ?? '-',
-                'kapasitas_kerja' => $mmpiData['kapasitas_kerja'] ?? '-',
-                'klinis' => $mmpiData['klinis'] ?? '-',
-                'kesimpulan' => $mmpiData['kesimpulan'] ?? 'TIDAK MENUNJUKKAN GEJALA GANGGUAN JIWA BERAT',
-                'psikogram' => $mmpiData['psikogram'] ?? '-',
-                'nilai_pq' => (float) ($mmpiData['pq'] ?? 90.0),
-                'tingkat_stres' => $mmpiData['stres'] ?? 'Normal',
-            ],
-            'kejiwaan' => [
-                'validitas' => $mmpiData['validitas'] ?? '-',
-                'internal_pribadi' => $mmpiData['internal'] ?? '-',
-                'interpersonal' => $mmpiData['interpersonal'] ?? '-',
-                'kapasitas_kerja' => $mmpiData['kapasitas_kerja'] ?? '-',
-                'klinis' => $mmpiData['klinis'] ?? '-',
-                'kesimpulan' => $mmpiData['kesimpulan'] ?? 'TIDAK MENUNJUKKAN GEJALA GANGGUAN JIWA BERAT',
-                'psikogram' => $mmpiData['psikogram'] ?? '-',
-                'nilai_pq' => (float) ($mmpiData['pq'] ?? 90.0),
-                'tingkat_stres' => $mmpiData['stres'] ?? 'Normal',
-            ],
+            'mmpi' => $mmpiDetails,
+            'kejiwaan' => $mmpiDetails,
             'raw_scores' => [
                 'ist' => $istData,
                 'pf16' => $pfData,
@@ -221,5 +204,159 @@ class ApiDataTransformerService
         ];
 
         return $dto;
+    }
+
+    /**
+     * Ekstraksi dan sintesis data MMPI (E.1 / E.2) berdasarkan Glosarium Psikometri.
+     *
+     * @param  array<string, mixed>  $mmpiData
+     * @return array<string, mixed>
+     */
+    private function extractMmpiDetails(array $mmpiData): array
+    {
+        if (empty($mmpiData)) {
+            return [
+                'validitas' => '-',
+                'internal_pribadi' => '-',
+                'interpersonal' => '-',
+                'kapasitas_kerja' => '-',
+                'klinis' => '-',
+                'kesimpulan' => 'TIDAK MENUNJUKKAN GEJALA GANGGUAN JIWA BERAT',
+                'psikogram' => '-',
+                'nilai_pq' => 90.0,
+                'tingkat_stres' => 'Normal',
+            ];
+        }
+
+        // 1. Ekstraksi seluruh T-Score dari skore_bro jika tersedia
+        $scoresMap = [];
+        $skoreBro = $mmpiData['skore_bro'] ?? ($mmpiData['datafix']['json']['skore_bro'] ?? []);
+        if (is_array($skoreBro)) {
+            foreach ($skoreBro as $scaleCode => $scaleObj) {
+                if (is_array($scaleObj) && isset($scaleObj['t_score'])) {
+                    $scoresMap[$scaleCode] = (int) $scaleObj['t_score'];
+                } elseif (is_numeric($scaleObj)) {
+                    $scoresMap[$scaleCode] = (int) $scaleObj;
+                }
+            }
+        }
+
+        // Tentukan jenis MMPI (E.1 MMPI-2-RF vs E.2 MMPI-2 Klasik)
+        $isRf = isset($scoresMap['VRIN-r']) || isset($scoresMap['EID']) || isset($scoresMap['RC1']);
+        $type = $isRf ? 'MMPI-2-RF' : 'MMPI-2';
+
+        // 2. Kelompokkan Skala
+        $validityKeys = $isRf
+            ? ['VRIN-r', 'TRIN-r', 'F-r', 'Fp-r', 'FBS-r', 'L-r', 'K-r']
+            : ['VRIN', 'TRIN', 'F', 'Fb', 'Fp', 'Fs', 'FBS', 'L', 'K', 'S'];
+
+        $clinicalKeys = $isRf
+            ? ['EID', 'THD', 'BXD', 'RC1', 'RC2', 'RC3', 'RC4', 'RC6', 'RC7', 'RC8', 'RC9']
+            : ['Hs', 'D', 'Hy', 'Pd', 'Mf', 'Pa', 'Pt', 'Sc', 'Ma', 'Si'];
+
+        $supplementaryKeys = $isRf
+            ? ['GIC', 'HPC', 'NUC', 'ANP', 'JCP', 'AGG', 'ACT', 'PSYC-r', 'DISC-r', 'INTR-r']
+            : ['ANX', 'FRS', 'OBS', 'DEP', 'HEA', 'BIZ', 'ANG', 'CYN', 'ASP', 'TPA', 'LSE', 'SOD', 'FAM', 'WRK', 'TRT', 'Es', 'A', 'R', 'Do', 'Re', 'PK'];
+
+        $skalaValiditas = [];
+        $skalaKlinis = [];
+        $skalaSuplementer = [];
+        $elevatedScales = [];
+
+        foreach ($validityKeys as $k) {
+            if (isset($scoresMap[$k])) {
+                $skalaValiditas[$k] = $scoresMap[$k];
+                if ($scoresMap[$k] >= 65) {
+                    $elevatedScales[] = $k;
+                }
+            }
+        }
+
+        foreach ($clinicalKeys as $k) {
+            if (isset($scoresMap[$k])) {
+                $skalaKlinis[$k] = $scoresMap[$k];
+                if ($scoresMap[$k] >= 65) {
+                    $elevatedScales[] = $k;
+                }
+            }
+        }
+
+        foreach ($supplementaryKeys as $k) {
+            if (isset($scoresMap[$k])) {
+                $skalaSuplementer[$k] = $scoresMap[$k];
+                if ($scoresMap[$k] >= 65) {
+                    $elevatedScales[] = $k;
+                }
+            }
+        }
+
+        // 3. Sintesis Validitas & Kelaikan
+        $hasInvalidF = ($scoresMap['F'] ?? 0) >= 75 || ($scoresMap['F-r'] ?? 0) >= 75;
+        $hasInvalidL = ($scoresMap['L'] ?? 0) >= 75 || ($scoresMap['L-r'] ?? 0) >= 75;
+        $validitasText = $hasInvalidF || $hasInvalidL
+            ? 'Validitas Perlu Perhatian - Terindikasi sikap defensif atau melebih-lebihkan keluhan'
+            : 'Valid - Protokol pengisian tes konsisten dan dapat dipercaya';
+
+        // 4. Sintesis Domain Psikologis
+        $anxietyScore = $scoresMap['A'] ?? ($scoresMap['Pt'] ?? ($scoresMap['RC7'] ?? ($scoresMap['ANX'] ?? 50)));
+        $depressionScore = $scoresMap['D'] ?? ($scoresMap['RC2'] ?? ($scoresMap['DEP'] ?? 50));
+        $internalText = ($anxietyScore >= 65 || $depressionScore >= 65)
+            ? 'Terdapat indikasi ketegangan emosional atau kecemasan yang memerlukan pengelolaan stres aktif.'
+            : 'Stabilitas emosi terjaga dengan baik, memiliki daya adaptasi personal yang matang.';
+
+        $interpersonalScore = $scoresMap['Pd'] ?? ($scoresMap['RC3'] ?? ($scoresMap['CYN'] ?? ($scoresMap['SOD'] ?? 50)));
+        $interpersonalText = ($interpersonalScore >= 65)
+            ? 'Cenderung kritis dan defensif dalam interaksi sosial; memerlukan penguatan komunikasi persuasif.'
+            : 'Mampu menjalin relasi kerja yang kooperatif, harmonis, dan adaptif di lingkungan organisasi.';
+
+        $workScore = $scoresMap['WRK'] ?? ($scoresMap['BXD'] ?? ($scoresMap['TPA'] ?? 50));
+        $kapKerjaText = ($workScore >= 65)
+            ? 'Kapasitas kerja memadai namun rentan mengalami hambatan kerja di bawah beban multi-tasking intensif.'
+            : 'Kapasitas dan ketahanan kerja sangat optimal dalam menyelesaikan target-target operasional.';
+
+        $hasClinicalElevation = false;
+        foreach (['Pa', 'Sc', 'Ma', 'THD', 'RC6', 'RC8', 'BIZ'] as $ck) {
+            if (($scoresMap[$ck] ?? 0) >= 65) {
+                $hasClinicalElevation = true;
+                break;
+            }
+        }
+        $klinikText = $hasClinicalElevation
+            ? 'Terdapat elevasi pada beberapa indikator klinis yang disarankan untuk observasi suportif berkelanjutan.'
+            : 'Tidak terdeteksi adanya indikasi klinis bermakna yang mengganggu stabilitas mental di tempat kerja.';
+
+        $kesimpulanText = $hasClinicalElevation
+            ? 'Kandidat dapat menjalankan tugas dengan pendampingan dan manajemen beban kerja yang terukur.'
+            : 'TIDAK MENUNJUKKAN GEJALA GANGGUAN JIWA BERAT';
+
+        // 5. Kalkulasi Nilai PQ & Tingkat Stres
+        $egoStrength = $scoresMap['Es'] ?? 55;
+        $nilaiPq = (float) ($mmpiData['pq'] ?? ($mmpiData['nilai_pq'] ?? round(max(50.0, min(95.0, ($egoStrength * 1.4))), 2)));
+
+        $tingkatStres = $anxietyScore >= 65 ? 'Tinggi' : ($anxietyScore >= 55 ? 'Sedang' : 'Normal');
+        if (isset($mmpiData['stres']) && is_string($mmpiData['stres'])) {
+            $tingkatStres = $mmpiData['stres'];
+        }
+
+        // 6. Susun Struktur Psikogram Terstandar
+        $psikogramData = [
+            'tipe' => $type,
+            'skala_validitas' => $skalaValiditas,
+            'skala_klinis' => $skalaKlinis,
+            'skala_suplementer' => $skalaSuplementer,
+            'elevated_scales' => array_unique($elevatedScales),
+        ];
+
+        return [
+            'validitas' => $validitasText,
+            'internal_pribadi' => $internalText,
+            'interpersonal' => $interpersonalText,
+            'kapasitas_kerja' => $kapKerjaText,
+            'klinis' => $klinikText,
+            'kesimpulan' => $kesimpulanText,
+            'psikogram' => $psikogramData,
+            'nilai_pq' => $nilaiPq,
+            'tingkat_stres' => $tingkatStres,
+        ];
     }
 }

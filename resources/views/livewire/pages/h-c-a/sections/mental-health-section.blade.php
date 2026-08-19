@@ -11,8 +11,8 @@
         <!-- Status Badge -->
         <div class="flex items-center gap-2">
             <span class="text-xs font-semibold text-slate-500">Status Kesehatan:</span>
-            <span class="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-100 px-3 py-1 rounded-md">
-                PRIMA & ADAPTIF
+            <span class="text-xs font-bold {{ str_contains($validityStatus, 'PERHATIAN') ? 'text-amber-700 bg-amber-50 border border-amber-200' : 'text-emerald-700 bg-emerald-50 border border-emerald-100' }} px-3 py-1 rounded-md">
+                {{ $validityStatus }}
             </span>
         </div>
     </div>
