@@ -278,8 +278,11 @@ class SeederGeneratorsTest extends TestCase
 
         // Check Mmpi model accessors
         $mmpiModel = new Mmpi($mmpiData);
-        $this->assertCount(5, $mmpiModel->validity_scales);
+        $this->assertCount(15, $mmpiModel->validity_scales);
         $this->assertCount(10, $mmpiModel->clinical_scales);
+        $this->assertCount(15, $mmpiModel->content_scales);
+        $this->assertCount(15, $mmpiModel->supplementary_scales);
+        $this->assertCount(55, $mmpiModel->all_scales);
         $this->assertGreaterThanOrEqual(4.20, $mmpiModel->wellbeing_score);
         $this->assertEquals('Sangat Baik / Prima', $mmpiModel->wellbeing_category);
     }

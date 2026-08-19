@@ -110,6 +110,57 @@ class Mmpi extends Model
     }
 
     /**
+     * Dapatkan skala konten terstruktur (ANX, FRS, OBS, DEP, HEA, BIZ, ANG, CYN, ASP, TPA, LSE, SOD, FAM, WRK, TRT).
+     *
+     * @return array<string, int|float>
+     */
+    public function getContentScalesAttribute(): array
+    {
+        $psi = $this->getDecodedPsikogram();
+        if (is_array($psi) && isset($psi['skala_konten']) && is_array($psi['skala_konten'])) {
+            return $psi['skala_konten'];
+        }
+
+        return [];
+    }
+
+    /**
+     * Dapatkan skala masalah spesifik terstruktur (E.1 / RF).
+     *
+     * @return array<string, int|float>
+     */
+    public function getSpecificProblemScalesAttribute(): array
+    {
+        $psi = $this->getDecodedPsikogram();
+        if (is_array($psi) && isset($psi['skala_masalah_spesifik']) && is_array($psi['skala_masalah_spesifik'])) {
+            return $psi['skala_masalah_spesifik'];
+        }
+
+        return [];
+    }
+
+    /**
+     * Dapatkan map seluruh skor T-score dari semua skala lengkap.
+     *
+     * @return array<string, int|float>
+     */
+    public function getAllScalesAttribute(): array
+    {
+        $psi = $this->getDecodedPsikogram();
+        if (is_array($psi) && isset($psi['semua_skala']) && is_array($psi['semua_skala'])) {
+            return $psi['semua_skala'];
+        }
+
+        return array_merge(
+            $this->validity_scales,
+            $this->clinical_scales,
+            $this->content_scales,
+            $this->supplementary_scales,
+            $this->specific_problem_scales
+        );
+    }
+
+    /**
      * Dapatkan daftar skala dengan elevasi klinis (T-score >= 65).
      *
      * @return array<int, string>
@@ -122,7 +173,7 @@ class Mmpi extends Model
         }
 
         $elevated = [];
-        foreach (array_merge($this->validity_scales, $this->clinical_scales, $this->supplementary_scales) as $code => $score) {
+        foreach ($this->all_scales as $code => $score) {
             if ($score >= 65) {
                 $elevated[] = (string) $code;
             }

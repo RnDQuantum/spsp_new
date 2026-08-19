@@ -326,94 +326,125 @@ class AssessmentRecordGenerator
             default => 'medium',
         };
 
+        // 1. Skala Validitas Lengkap (MMPI-2)
+        $generateValidity = fn (int $min, int $max, int $kMin, int $kMax) => [
+            'VRIN' => fake()->numberBetween($min, $max),
+            'TRIN' => fake()->numberBetween($min, $max),
+            'F' => fake()->numberBetween($min, $max),
+            'Fb' => fake()->numberBetween($min, $max),
+            'Fp' => fake()->numberBetween($min, min(65, $max)),
+            'Fs' => fake()->numberBetween($min, $max),
+            'FBS' => fake()->numberBetween($min, $max),
+            'L' => fake()->numberBetween($min, $max),
+            'K' => fake()->numberBetween($kMin, $kMax),
+            'S' => fake()->numberBetween($kMin, $kMax),
+            'RBS' => fake()->numberBetween($min, $max),
+            'DS' => fake()->numberBetween($min, $max),
+            'Wsd' => fake()->numberBetween($min, $max),
+            'Od' => fake()->numberBetween($min, $max),
+            'Mp' => fake()->numberBetween($min, $max),
+        ];
+
+        // 2. Skala Klinis Lengkap (1-10)
+        $generateClinical = fn (int $min, int $max) => [
+            'Hs' => fake()->numberBetween($min, $max),
+            'D' => fake()->numberBetween($min, $max),
+            'Hy' => fake()->numberBetween($min, $max),
+            'Pd' => fake()->numberBetween($min, $max),
+            'Mf' => fake()->numberBetween(46, 56),
+            'Pa' => fake()->numberBetween($min, $max),
+            'Pt' => fake()->numberBetween($min, $max),
+            'Sc' => fake()->numberBetween($min, $max),
+            'Ma' => fake()->numberBetween($min, $max),
+            'Si' => fake()->numberBetween($min, $max),
+        ];
+
+        // 3. Skala Konten Lengkap (ANX...TRT)
+        $generateContent = fn (int $min, int $max) => [
+            'ANX' => fake()->numberBetween($min, $max),
+            'FRS' => fake()->numberBetween($min, $max),
+            'OBS' => fake()->numberBetween($min, $max),
+            'DEP' => fake()->numberBetween($min, $max),
+            'HEA' => fake()->numberBetween($min, $max),
+            'BIZ' => fake()->numberBetween($min, min(60, $max)),
+            'ANG' => fake()->numberBetween($min, $max),
+            'CYN' => fake()->numberBetween($min, $max),
+            'ASP' => fake()->numberBetween($min, $max),
+            'TPA' => fake()->numberBetween($min, $max + 3),
+            'LSE' => fake()->numberBetween($min, $max),
+            'SOD' => fake()->numberBetween($min, $max),
+            'FAM' => fake()->numberBetween($min, $max),
+            'WRK' => fake()->numberBetween($min, $max),
+            'TRT' => fake()->numberBetween($min, $max),
+        ];
+
+        // 4. Skala Suplementer Lengkap (A...GF)
+        $generateSupplementary = fn (int $min, int $max, int $esMin, int $esMax) => [
+            'A' => fake()->numberBetween($min, $max),
+            'R' => fake()->numberBetween(46, 56),
+            'Es' => fake()->numberBetween($esMin, $esMax),
+            'Do' => fake()->numberBetween($esMin - 4, $esMax),
+            'Re' => fake()->numberBetween($esMin - 4, $esMax),
+            'Mt' => fake()->numberBetween($min, $max),
+            'PK' => fake()->numberBetween($min, $max),
+            'MDS' => fake()->numberBetween($min, $max),
+            'Ho' => fake()->numberBetween($min, $max),
+            'OH' => fake()->numberBetween(46, 56),
+            'MAC-R' => fake()->numberBetween($min, $max),
+            'AAS' => fake()->numberBetween(40, 52),
+            'APS' => fake()->numberBetween(40, 52),
+            'GM' => 50,
+            'GF' => 50,
+        ];
+
+        // Build Complete Profiles
+        $validityHigh = $generateValidity(40, 52, 55, 62);
+        $clinicalHigh = $generateClinical(40, 50);
+        $contentHigh = $generateContent(40, 50);
+        $suppHigh = $generateSupplementary(38, 48, 60, 68);
         $psikogramHigh = [
             'tipe' => 'MMPI-2',
-            'skala_validitas' => [
-                'L' => fake()->numberBetween(42, 50),
-                'F' => fake()->numberBetween(40, 52),
-                'K' => fake()->numberBetween(55, 62),
-                'VRIN' => fake()->numberBetween(44, 52),
-                'TRIN' => fake()->numberBetween(46, 54),
-            ],
-            'skala_klinis' => [
-                'Hs' => fake()->numberBetween(42, 50),
-                'D' => fake()->numberBetween(40, 50),
-                'Hy' => fake()->numberBetween(44, 52),
-                'Pd' => fake()->numberBetween(46, 54),
-                'Mf' => fake()->numberBetween(48, 55),
-                'Pa' => fake()->numberBetween(42, 50),
-                'Pt' => fake()->numberBetween(40, 48),
-                'Sc' => fake()->numberBetween(42, 50),
-                'Ma' => fake()->numberBetween(50, 58),
-                'Si' => fake()->numberBetween(42, 50),
-            ],
-            'skala_suplementer' => [
-                'Es' => fake()->numberBetween(60, 68),
-                'A' => fake()->numberBetween(38, 48),
-                'WRK' => fake()->numberBetween(40, 48),
-                'TPA' => fake()->numberBetween(45, 55),
-            ],
+            'skala_validitas' => $validityHigh,
+            'skala_klinis' => $clinicalHigh,
+            'skala_konten' => $contentHigh,
+            'skala_suplementer' => $suppHigh,
+            'semua_skala' => array_merge($validityHigh, $clinicalHigh, $contentHigh, $suppHigh),
             'elevated_scales' => [],
         ];
 
+        $validityMed = $generateValidity(45, 58, 48, 58);
+        $clinicalMed = $generateClinical(46, 58);
+        $contentMed = $generateContent(46, 58);
+        $suppMed = $generateSupplementary(46, 56, 50, 58);
         $psikogramMedium = [
             'tipe' => 'MMPI-2',
-            'skala_validitas' => [
-                'L' => fake()->numberBetween(46, 56),
-                'F' => fake()->numberBetween(45, 58),
-                'K' => fake()->numberBetween(48, 58),
-                'VRIN' => fake()->numberBetween(46, 55),
-                'TRIN' => fake()->numberBetween(48, 56),
-            ],
-            'skala_klinis' => [
-                'Hs' => fake()->numberBetween(48, 56),
-                'D' => fake()->numberBetween(46, 56),
-                'Hy' => fake()->numberBetween(48, 58),
-                'Pd' => fake()->numberBetween(50, 58),
-                'Mf' => fake()->numberBetween(48, 56),
-                'Pa' => fake()->numberBetween(46, 56),
-                'Pt' => fake()->numberBetween(46, 56),
-                'Sc' => fake()->numberBetween(46, 56),
-                'Ma' => fake()->numberBetween(50, 60),
-                'Si' => fake()->numberBetween(46, 56),
-            ],
-            'skala_suplementer' => [
-                'Es' => fake()->numberBetween(50, 58),
-                'A' => fake()->numberBetween(46, 56),
-                'WRK' => fake()->numberBetween(46, 56),
-                'TPA' => fake()->numberBetween(50, 60),
-            ],
+            'skala_validitas' => $validityMed,
+            'skala_klinis' => $clinicalMed,
+            'skala_konten' => $contentMed,
+            'skala_suplementer' => $suppMed,
+            'semua_skala' => array_merge($validityMed, $clinicalMed, $contentMed, $suppMed),
             'elevated_scales' => [],
         ];
 
+        $validityLow = $generateValidity(52, 66, 40, 50);
+        $clinicalLow = $generateClinical(54, 68);
+        $contentLow = $generateContent(55, 68);
+        $suppLow = $generateSupplementary(58, 70, 38, 48);
+        $allLowMerged = array_merge($validityLow, $clinicalLow, $contentLow, $suppLow);
+        $elevatedLow = [];
+        foreach ($allLowMerged as $k => $v) {
+            if ($v >= 65) {
+                $elevatedLow[] = $k;
+            }
+        }
         $psikogramLow = [
             'tipe' => 'MMPI-2',
-            'skala_validitas' => [
-                'L' => fake()->numberBetween(52, 66),
-                'F' => fake()->numberBetween(55, 68),
-                'K' => fake()->numberBetween(40, 50),
-                'VRIN' => fake()->numberBetween(50, 62),
-                'TRIN' => fake()->numberBetween(50, 62),
-            ],
-            'skala_klinis' => [
-                'Hs' => fake()->numberBetween(55, 66),
-                'D' => fake()->numberBetween(58, 68),
-                'Hy' => fake()->numberBetween(54, 65),
-                'Pd' => fake()->numberBetween(56, 68),
-                'Mf' => fake()->numberBetween(48, 58),
-                'Pa' => fake()->numberBetween(52, 66),
-                'Pt' => fake()->numberBetween(58, 68),
-                'Sc' => fake()->numberBetween(52, 65),
-                'Ma' => fake()->numberBetween(50, 64),
-                'Si' => fake()->numberBetween(54, 66),
-            ],
-            'skala_suplementer' => [
-                'Es' => fake()->numberBetween(38, 48),
-                'A' => fake()->numberBetween(60, 70),
-                'WRK' => fake()->numberBetween(60, 68),
-                'TPA' => fake()->numberBetween(55, 68),
-            ],
-            'elevated_scales' => ['D', 'Pt', 'A', 'WRK'],
+            'skala_validitas' => $validityLow,
+            'skala_klinis' => $clinicalLow,
+            'skala_konten' => $contentLow,
+            'skala_suplementer' => $suppLow,
+            'semua_skala' => $allLowMerged,
+            'elevated_scales' => array_values(array_unique($elevatedLow)),
         ];
 
         return match ($performanceLevel) {

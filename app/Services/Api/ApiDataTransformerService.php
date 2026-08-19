@@ -245,22 +245,33 @@ class ApiDataTransformerService
         $isRf = isset($scoresMap['VRIN-r']) || isset($scoresMap['EID']) || isset($scoresMap['RC1']);
         $type = $isRf ? 'MMPI-2-RF' : 'MMPI-2';
 
-        // 2. Kelompokkan Skala
+        // 2. Kelompokkan Skala Berdasarkan Glosarium MMPI (E.1 & E.2)
         $validityKeys = $isRf
             ? ['VRIN-r', 'TRIN-r', 'F-r', 'Fp-r', 'FBS-r', 'L-r', 'K-r']
-            : ['VRIN', 'TRIN', 'F', 'Fb', 'Fp', 'Fs', 'FBS', 'L', 'K', 'S'];
+            : ['VRIN', 'TRIN', 'F', 'Fb', 'Fp', 'Fs', 'FBS', 'L', 'K', 'S', 'RBS', 'DS', 'DSr', 'Wsd', 'Od', 'Mp', 'Esd', 'Ss'];
 
         $clinicalKeys = $isRf
             ? ['EID', 'THD', 'BXD', 'RC1', 'RC2', 'RC3', 'RC4', 'RC6', 'RC7', 'RC8', 'RC9']
             : ['Hs', 'D', 'Hy', 'Pd', 'Mf', 'Pa', 'Pt', 'Sc', 'Ma', 'Si'];
 
-        $supplementaryKeys = $isRf
-            ? ['GIC', 'HPC', 'NUC', 'ANP', 'JCP', 'AGG', 'ACT', 'PSYC-r', 'DISC-r', 'INTR-r']
-            : ['ANX', 'FRS', 'OBS', 'DEP', 'HEA', 'BIZ', 'ANG', 'CYN', 'ASP', 'TPA', 'LSE', 'SOD', 'FAM', 'WRK', 'TRT', 'Es', 'A', 'R', 'Do', 'Re', 'PK'];
+        $contentKeys = [
+            'ANX', 'FRS', 'OBS', 'DEP', 'HEA', 'BIZ', 'ANG', 'CYN', 'ASP', 'TPA', 'LSE', 'SOD', 'FAM', 'WRK', 'TRT',
+        ];
+
+        $supplementaryKeys = [
+            'A', 'R', 'Es', 'Do', 'Re', 'Mt', 'PK', 'MDS', 'Ho', 'OH', 'MAC-R', 'AAS', 'APS', 'GM', 'GF',
+        ];
+
+        $specificProblemKeys = [
+            'GIC', 'HPC', 'NUC', 'ANP', 'JCP', 'AGG', 'ACT', 'PSYC-r', 'DISC-r', 'INTR-r',
+            'AES', 'AGGR-r', 'AXY', 'BRF', 'COG', 'DSF', 'FML', 'Fs', 'HLP', 'IPP',
+        ];
 
         $skalaValiditas = [];
         $skalaKlinis = [];
+        $skalaKonten = [];
         $skalaSuplementer = [];
+        $skalaMasalahSpesifik = [];
         $elevatedScales = [];
 
         foreach ($validityKeys as $k) {
@@ -281,9 +292,27 @@ class ApiDataTransformerService
             }
         }
 
+        foreach ($contentKeys as $k) {
+            if (isset($scoresMap[$k])) {
+                $skalaKonten[$k] = $scoresMap[$k];
+                if ($scoresMap[$k] >= 65) {
+                    $elevatedScales[] = $k;
+                }
+            }
+        }
+
         foreach ($supplementaryKeys as $k) {
             if (isset($scoresMap[$k])) {
                 $skalaSuplementer[$k] = $scoresMap[$k];
+                if ($scoresMap[$k] >= 65) {
+                    $elevatedScales[] = $k;
+                }
+            }
+        }
+
+        foreach ($specificProblemKeys as $k) {
+            if (isset($scoresMap[$k])) {
+                $skalaMasalahSpesifik[$k] = $scoresMap[$k];
                 if ($scoresMap[$k] >= 65) {
                     $elevatedScales[] = $k;
                 }
@@ -338,13 +367,16 @@ class ApiDataTransformerService
             $tingkatStres = $mmpiData['stres'];
         }
 
-        // 6. Susun Struktur Psikogram Terstandar
+        // 6. Susun Struktur Psikogram Terstandar Lengkap 100%
         $psikogramData = [
             'tipe' => $type,
             'skala_validitas' => $skalaValiditas,
             'skala_klinis' => $skalaKlinis,
+            'skala_konten' => $skalaKonten,
             'skala_suplementer' => $skalaSuplementer,
-            'elevated_scales' => array_unique($elevatedScales),
+            'skala_masalah_spesifik' => $skalaMasalahSpesifik,
+            'semua_skala' => $scoresMap,
+            'elevated_scales' => array_values(array_unique($elevatedScales)),
         ];
 
         return [
@@ -352,7 +384,7 @@ class ApiDataTransformerService
             'internal_pribadi' => $internalText,
             'interpersonal' => $interpersonalText,
             'kapasitas_kerja' => $kapKerjaText,
-            'klinis' => $klinikText,
+            'klinik' => $klinikText,
             'kesimpulan' => $kesimpulanText,
             'psikogram' => $psikogramData,
             'nilai_pq' => $nilaiPq,
