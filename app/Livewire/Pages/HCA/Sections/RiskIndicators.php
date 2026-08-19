@@ -40,27 +40,35 @@ class RiskIndicators extends Component
             }
         }
 
-        $overallRisk = $stresLevel === 'Tinggi' ? 'Sedang' : 'Rendah';
+        $elevated = $mmpi?->elevated_scales ?? [];
+        $hasInterpersonalRisk = ! empty(array_intersect($elevated, ['ANG', 'CYN', 'Pd', 'RC3', 'RC4', 'SOD', 'Ho']));
+        $hasBurnoutRisk = ! empty(array_intersect($elevated, ['D', 'Hs', 'EID', 'RC1', 'RC2', 'HEA', 'GIC', 'HPC']));
+        $hasStressRisk = $stresLevel === 'Tinggi' || ! empty(array_intersect($elevated, ['A', 'PK', 'Pt', 'RC7', 'ANX', 'FRS']));
+        $hasProductivityRisk = ! empty(array_intersect($elevated, ['WRK', 'TPA', 'DISC-r', 'BXD', 'OBS', 'TRT']));
+
+        $overallRisk = (count($elevated) >= 3 || $stresLevel === 'Tinggi')
+            ? 'Perlu Perhatian'
+            : (count($elevated) > 0 ? 'Sedang' : 'Rendah / Aman');
 
         $indicators = [
             [
                 'label' => 'Saturasi Kejenuhan (Burnout Risk)',
-                'level' => $stresLevel === 'Tinggi' ? 'Sedang' : 'Rendah',
+                'level' => $hasBurnoutRisk ? 'Sedang' : ($stresLevel === 'Tinggi' ? 'Sedang' : 'Rendah'),
                 'desc' => 'Tingkat kelelahan fisik, emosional, dan mental akibat beban kerja harian dan dinamika tugas operasional.',
             ],
             [
                 'label' => 'Kerentanan Stres (Stress Susceptibility)',
-                'level' => $stresLevel,
+                'level' => $hasStressRisk ? 'Tinggi' : $stresLevel,
                 'desc' => 'Respon emosional kandidat saat berhadapan dengan tenggat waktu ketat secara beruntun dan situasi bertekanan tinggi.',
             ],
             [
                 'label' => 'Indeks Konflik Interpersonal',
-                'level' => 'Rendah',
+                'level' => $hasInterpersonalRisk ? 'Sedang' : 'Rendah',
                 'desc' => 'Kecenderungan kandidat untuk mengalami gesekan komunikasi dengan rekan sejawat atau bawahan.',
             ],
             [
                 'label' => 'Risiko Penurunan Produktivitas',
-                'level' => $stresLevel === 'Tinggi' ? 'Sedang' : 'Rendah',
+                'level' => $hasProductivityRisk ? 'Sedang' : ($stresLevel === 'Tinggi' ? 'Sedang' : 'Rendah'),
                 'desc' => 'Proyeksi fluktuasi kinerja kandidat dalam masa transisi organisasi atau perubahan target strategis.',
             ],
         ];
@@ -69,6 +77,7 @@ class RiskIndicators extends Component
             'participant' => $participant,
             'overallRisk' => $overallRisk,
             'indicators' => $indicators,
+            'elevatedScales' => $elevated,
         ]);
     }
 }

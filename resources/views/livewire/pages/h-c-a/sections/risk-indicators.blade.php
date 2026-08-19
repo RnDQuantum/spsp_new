@@ -11,8 +11,8 @@
         <!-- Overall Callout -->
         <div class="flex items-center gap-2">
             <span class="text-xs font-semibold text-slate-500">Tingkat Risiko Total:</span>
-            <span class="text-xs font-bold text-slate-600 bg-warm-ivory border border-warm-border px-3 py-1 rounded-md">
-                RENDAH (AMBIL PERAN)
+            <span class="text-xs font-bold {{ str_contains($overallRisk, 'Perhatian') || str_contains($overallRisk, 'Tinggi') ? 'text-amber-800 bg-amber-50 border border-amber-200' : 'text-slate-600 bg-warm-ivory border border-warm-border' }} px-3 py-1 rounded-md">
+                {{ strtoupper($overallRisk) }}
             </span>
         </div>
     </div>
@@ -60,9 +60,14 @@
 
     <!-- Section Bottom Info (Ethics and validation) -->
     <div class="bg-warm-ivory border border-warm-border rounded-xl p-6 text-xs text-slate-500 leading-relaxed flex items-start gap-3">
-        <i class="fas fa-circle-check text-accent-amber text-sm mt-0.5"></i>
+        <i class="fas {{ str_contains($overallRisk, 'Perhatian') || str_contains($overallRisk, 'Tinggi') ? 'fa-triangle-exclamation text-amber-600' : 'fa-circle-check text-accent-amber' }} text-sm mt-0.5"></i>
         <span>
-            <strong>Rekomendasi Penugasan:</strong> Mengingat tingkat risiko total berada pada kategori **Rendah**, kandidat tidak memiliki hambatan psikologis operasional yang berarti. Penugasan baru dapat segera dilaksanakan dengan pendampingan orientasi awal yang standar.
+            <strong>Rekomendasi Penugasan:</strong> Mengingat tingkat risiko total berada pada kategori <strong>{{ $overallRisk }}</strong>,
+            @if (str_contains($overallRisk, 'Perhatian') || str_contains($overallRisk, 'Tinggi'))
+                kandidat disarankan mendapatkan supervisi berkala dan pengelolaan beban kerja yang adaptif demi menjaga stabilitas kinerja.
+            @else
+                kandidat tidak memiliki hambatan psikologis operasional yang berarti. Penugasan baru dapat segera dilaksanakan dengan pendampingan orientasi awal yang standar.
+            @endif
         </span>
     </div>
 </div>
