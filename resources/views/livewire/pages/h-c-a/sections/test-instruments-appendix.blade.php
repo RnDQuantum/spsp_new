@@ -501,59 +501,307 @@
                             </div>
                         </div>
 
-                        @if (! empty($mmpi->clinical_scales) || ! empty($mmpi->validity_scales))
-                            <div class="space-y-4 pt-2">
-                                <h4 class="font-bold text-primary-ink uppercase tracking-wider text-xs flex items-center justify-between">
-                                    <span>Profil T-Score Skala MMPI</span>
-                                    <span class="text-[11px] font-normal text-slate-400">Mean: 50 | Ambang Elevasi: T &ge; 65</span>
-                                </h4>
+                        {{-- T-Score Guide Banner --}}
+                        <div class="bg-warm-ivory/80 border border-warm-border rounded-xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs text-primary-ink/70">
+                            <div class="flex items-center gap-2">
+                                <i class="fas fa-circle-info text-accent-amber text-sm shrink-0"></i>
+                                <span><strong>Panduan Skor T-Score:</strong> Rata-rata populasi normal = <strong>50</strong>. Rentang <strong>40–60</strong> adalah batas sehat/normal. Skor <strong>&ge; 65</strong> menandakan area yang menonjol dan memerlukan perhatian klinis (*Elevated*).</span>
+                            </div>
+                            <div class="flex items-center gap-3 shrink-0 text-[11px] font-semibold">
+                                <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Normal (40–60)</span>
+                                <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> Waspada (60–64)</span>
+                                <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-red-600"></span> Elevasi (&ge;65)</span>
+                            </div>
+                        </div>
 
-                                @if (! empty($mmpi->validity_scales))
-                                    <div>
-                                        <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-2">Skala Validitas</span>
-                                        <div class="grid grid-cols-2 sm:grid-cols-5 gap-2">
-                                            @foreach ($mmpi->validity_scales as $sCode => $sScore)
-                                                <div class="bg-warm-ivory border border-warm-border/60 rounded-lg p-2.5 text-center">
-                                                    <span class="text-[10px] font-bold font-mono text-slate-500 block">{{ $sCode }}</span>
-                                                    <span class="font-mono text-base font-bold {{ $sScore >= 65 ? 'text-amber-700 font-extrabold' : 'text-primary-ink' }}">
-                                                        {{ $sScore }}
+                        {{-- 1. Skala Validitas & Konsistensi Protokol --}}
+                        @if (! empty($mmpi->validity_scales))
+                            <div class="space-y-3 pt-2">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b border-warm-border pb-2">
+                                    <h4 class="font-serif font-bold text-base text-primary-ink flex items-center gap-2">
+                                        <i class="fas fa-shield-check text-accent-amber text-xs"></i>
+                                        1. Skala Validitas & Konsistensi Pengisian Tes
+                                    </h4>
+                                    <span class="text-xs text-primary-ink/60">Memverifikasi kejujuran & konsistensi respon</span>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
+                                    @foreach ($mmpi->validity_scales as $sCode => $sScore)
+                                        @php
+                                            $meta = $mmpiMetadata[$sCode] ?? ['name' => $sCode, 'label' => 'Skala Validitas', 'desc' => 'Parameter validitas protokol tes.'];
+                                            $isElevated = $sScore >= 65;
+                                            $isWarning = $sScore >= 60 && $sScore < 65;
+                                        @endphp
+                                        <div class="bg-warm-ivory/50 border {{ $isElevated ? 'border-red-300 bg-red-50/30' : ($isWarning ? 'border-amber-300 bg-amber-50/30' : 'border-warm-border') }} p-4 rounded-xl flex flex-col justify-between hover:border-warm-border/90 transition shadow-xs">
+                                            <div>
+                                                <div class="flex items-center justify-between mb-1.5">
+                                                    <div class="flex items-center gap-2">
+                                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-mono font-bold {{ $isElevated ? 'bg-red-100 text-red-900 border border-red-300' : ($isWarning ? 'bg-amber-100 text-amber-900 border border-amber-300' : 'bg-primary-ink/5 text-primary-ink border border-warm-border') }}">
+                                                            {{ $sCode }}
+                                                        </span>
+                                                        <span class="text-[11px] font-bold text-slate-500 truncate max-w-[130px]" title="{{ $meta['name'] }}">
+                                                            {{ $meta['name'] }}
+                                                        </span>
+                                                    </div>
+                                                    <span class="font-mono text-lg font-black {{ $isElevated ? 'text-red-700' : ($isWarning ? 'text-amber-600' : 'text-primary-ink') }}">
+                                                        T: {{ $sScore }}
                                                     </span>
                                                 </div>
-                                            @endforeach
-                                        </div>
-                                    </div>
-                                @endif
 
-                                @if (! empty($mmpi->clinical_scales))
-                                    <div>
-                                        <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-2">Skala Klinis</span>
-                                        <div class="grid grid-cols-2 sm:grid-cols-5 gap-2">
-                                            @foreach ($mmpi->clinical_scales as $sCode => $sScore)
-                                                <div class="bg-warm-ivory border border-warm-border/60 rounded-lg p-2.5 text-center">
-                                                    <span class="text-[10px] font-bold font-mono text-slate-500 block">{{ $sCode }}</span>
-                                                    <span class="font-mono text-base font-bold {{ $sScore >= 65 ? 'text-red-700 font-extrabold' : 'text-primary-ink' }}">
-                                                        {{ $sScore }}
-                                                    </span>
+                                                <h5 class="font-bold text-xs text-primary-ink leading-tight mb-1">
+                                                    {{ $meta['label'] }}
+                                                </h5>
+
+                                                <p class="text-xs text-primary-ink/70 leading-relaxed mb-3">
+                                                    {{ $meta['desc'] }}
+                                                </p>
+
+                                                {{-- 3-Zone Segmented Track Bar (Normal, Waspada, Elevasi) --}}
+                                                <div class="space-y-1 mb-2">
+                                                    <div class="w-full bg-slate-100 border border-warm-border rounded-full h-2.5 relative overflow-hidden">
+                                                        {{-- Area 1: Normal (0-60%) --}}
+                                                        <div class="absolute left-0 top-0 bottom-0 w-[60%] bg-emerald-500/10 border-r border-slate-300"></div>
+                                                        {{-- Area 2: Waspada (60-65%) --}}
+                                                        <div class="absolute left-[60%] top-0 bottom-0 w-[5%] bg-amber-500/25 border-r border-slate-300"></div>
+                                                        {{-- Area 3: Elevasi (65-100%) --}}
+                                                        <div class="absolute left-[65%] top-0 bottom-0 w-[35%] bg-red-500/15"></div>
+
+                                                        {{-- Marker lines --}}
+                                                        <div class="absolute left-[50%] top-0 bottom-0 w-px bg-slate-400/80 z-10" title="Mean: 50"></div>
+                                                        <div class="absolute left-[60%] top-0 bottom-0 w-px bg-amber-600/80 z-10" title="Batas Waspada: 60"></div>
+                                                        <div class="absolute left-[65%] top-0 bottom-0 w-px bg-red-600/80 z-10" title="Batas Elevasi: 65"></div>
+
+                                                        {{-- Dynamic Progress Fill: Hijau / Kuning / Merah --}}
+                                                        <div class="absolute top-0 bottom-0 left-0 transition-all duration-300 z-0 {{ $isElevated ? 'bg-red-600' : ($isWarning ? 'bg-amber-500' : 'bg-emerald-600') }}"
+                                                             style="width: {{ min(100, max(0, (float) $sScore)) }}%"></div>
+                                                    </div>
+
+                                                    <div class="relative w-full h-3 text-[9px] font-mono select-none leading-none mt-0.5">
+                                                        <span class="absolute left-0 text-slate-400">0</span>
+                                                        <span class="absolute left-[50%] -translate-x-1/2 text-slate-600 font-bold">50</span>
+                                                        <span class="absolute left-[60%] -translate-x-1/2 text-amber-700 font-bold">60</span>
+                                                        <span class="absolute left-[65%] -translate-x-1/2 text-red-700 font-bold">65</span>
+                                                        <span class="absolute right-0 text-slate-400">100</span>
+                                                    </div>
                                                 </div>
-                                            @endforeach
+                                            </div>
+
+                                            <div class="mt-2 pt-2 border-t border-warm-border/40 flex items-center justify-between text-[11px]">
+                                                <span class="text-slate-400">Status Validitas:</span>
+                                                <span class="font-bold {{ $isElevated ? 'text-red-700' : ($isWarning ? 'text-amber-700' : 'text-forest-green') }}">
+                                                    {{ $isElevated ? 'Perlu Konfirmasi' : ($isWarning ? 'Batas Waspada' : 'Konsisten / Valid') }}
+                                                </span>
+                                            </div>
                                         </div>
-                                    </div>
-                                @endif
+                                    @endforeach
+                                </div>
                             </div>
                         @endif
 
-                        @if ($mmpi->klinik || $mmpi->internal || $mmpi->interpersonal)
-                            <div class="bg-warm-ivory/40 border border-warm-border p-4 rounded-xl space-y-2 text-xs text-primary-ink/80 leading-relaxed">
-                                <h4 class="font-bold text-primary-ink uppercase tracking-wider text-xs">Catatan Klinis Asesor Psikologi SPSP</h4>
-                                @if ($mmpi->internal)
-                                    <div><span class="font-semibold text-primary-ink">Dinamika Internal:</span> {{ $mmpi->internal }}</div>
-                                @endif
-                                @if ($mmpi->interpersonal)
-                                    <div><span class="font-semibold text-primary-ink">Relasi Interpersonal:</span> {{ $mmpi->interpersonal }}</div>
-                                @endif
-                                @if ($mmpi->klinik)
-                                    <div><span class="font-semibold text-primary-ink">Evaluasi Klinis:</span> {{ $mmpi->klinik }}</div>
-                                @endif
+                        {{-- 2. Skala Klinis Inti (10 Skala) --}}
+                        @if (! empty($mmpi->clinical_scales))
+                            <div class="space-y-3 pt-4">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b border-warm-border pb-2">
+                                    <h4 class="font-serif font-bold text-base text-primary-ink flex items-center gap-2">
+                                        <i class="fas fa-heart-pulse text-accent-amber text-xs"></i>
+                                        2. Skala Klinis Inti & Dinamika Psikologis
+                                    </h4>
+                                    <span class="text-xs text-primary-ink/60">Skor terstandar psikometri T-Score (Mean = 50)</span>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                                    @foreach ($mmpi->clinical_scales as $sCode => $sScore)
+                                        @php
+                                            $meta = $mmpiMetadata[$sCode] ?? ['name' => $sCode, 'label' => 'Skala Klinis', 'desc' => 'Parameter evaluasi klinis.'];
+                                            $isElevated = $sScore >= 65;
+                                            $isWarning = $sScore >= 60 && $sScore < 65;
+                                        @endphp
+                                        <div class="bg-warm-ivory/50 border {{ $isElevated ? 'border-red-300 bg-red-50/30' : ($isWarning ? 'border-amber-300 bg-amber-50/30' : 'border-warm-border') }} p-4 rounded-xl flex flex-col justify-between hover:border-warm-border/90 transition shadow-xs">
+                                            <div>
+                                                <div class="flex items-center justify-between mb-1.5">
+                                                    <div class="flex items-center gap-2">
+                                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-mono font-bold {{ $isElevated ? 'bg-red-100 text-red-900 border border-red-300' : ($isWarning ? 'bg-amber-100 text-amber-900 border border-amber-300' : 'bg-primary-ink/5 text-primary-ink border border-warm-border') }}">
+                                                            {{ $sCode }}
+                                                        </span>
+                                                        <span class="text-[11px] font-bold text-slate-500">
+                                                            {{ $meta['name'] }}
+                                                        </span>
+                                                    </div>
+                                                    <span class="font-mono text-lg font-black {{ $isElevated ? 'text-red-700' : ($isWarning ? 'text-amber-600' : 'text-primary-ink') }}">
+                                                        T: {{ $sScore }}
+                                                    </span>
+                                                </div>
+
+                                                <h5 class="font-bold text-xs text-primary-ink leading-tight mb-1">
+                                                    {{ $meta['label'] }}
+                                                </h5>
+                                                
+                                                <p class="text-xs text-primary-ink/70 leading-relaxed mb-3">
+                                                    {{ $meta['desc'] }}
+                                                </p>
+
+                                                {{-- 3-Zone Segmented Track Bar (Normal, Waspada, Elevasi) --}}
+                                                <div class="space-y-1 mb-2">
+                                                    <div class="w-full bg-slate-100 border border-warm-border rounded-full h-2.5 relative overflow-hidden">
+                                                        {{-- Area 1: Normal (0-60%) --}}
+                                                        <div class="absolute left-0 top-0 bottom-0 w-[60%] bg-emerald-500/10 border-r border-slate-300"></div>
+                                                        {{-- Area 2: Waspada (60-65%) --}}
+                                                        <div class="absolute left-[60%] top-0 bottom-0 w-[5%] bg-amber-500/25 border-r border-slate-300"></div>
+                                                        {{-- Area 3: Elevasi (65-100%) --}}
+                                                        <div class="absolute left-[65%] top-0 bottom-0 w-[35%] bg-red-500/15"></div>
+
+                                                        {{-- Marker lines --}}
+                                                        <div class="absolute left-[50%] top-0 bottom-0 w-px bg-slate-400/80 z-10" title="Mean: 50"></div>
+                                                        <div class="absolute left-[60%] top-0 bottom-0 w-px bg-amber-600/80 z-10" title="Batas Waspada: 60"></div>
+                                                        <div class="absolute left-[65%] top-0 bottom-0 w-px bg-red-600/80 z-10" title="Batas Elevasi: 65"></div>
+
+                                                        {{-- Dynamic Progress Fill: Hijau / Kuning / Merah --}}
+                                                        <div class="absolute top-0 bottom-0 left-0 transition-all duration-300 z-0 {{ $isElevated ? 'bg-red-600' : ($isWarning ? 'bg-amber-500' : 'bg-emerald-600') }}"
+                                                             style="width: {{ min(100, max(0, (float) $sScore)) }}%"></div>
+                                                    </div>
+
+                                                    <div class="relative w-full h-3 text-[9px] font-mono select-none leading-none mt-0.5">
+                                                        <span class="absolute left-0 text-slate-400">0</span>
+                                                        <span class="absolute left-[50%] -translate-x-1/2 text-slate-600 font-bold">50</span>
+                                                        <span class="absolute left-[60%] -translate-x-1/2 text-amber-700 font-bold">60</span>
+                                                        <span class="absolute left-[65%] -translate-x-1/2 text-red-700 font-bold">65</span>
+                                                        <span class="absolute right-0 text-slate-400">100</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="mt-2 pt-2 border-t border-warm-border/40 flex items-center justify-between text-[11px]">
+                                                <span class="text-slate-400">Interpretasi:</span>
+                                                <span class="font-bold {{ $isElevated ? 'text-red-700' : ($isWarning ? 'text-amber-700' : 'text-forest-green') }}">
+                                                    {{ $isElevated ? 'Elevasi Klinis (Perlu Perhatian)' : ($isWarning ? 'Batas Waspada' : 'Normal / Stabil & Adaptif') }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
+
+                        {{-- 3. Skala Konten Kerja & Ketahanan Profesional --}}
+                        @php
+                            $workScales = array_merge($mmpi->content_scales ?? [], $mmpi->supplementary_scales ?? []);
+                        @endphp
+                        @if (! empty($workScales))
+                            <div class="space-y-3 pt-4">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b border-warm-border pb-2">
+                                    <h4 class="font-serif font-bold text-base text-primary-ink flex items-center gap-2">
+                                        <i class="fas fa-briefcase text-accent-amber text-xs"></i>
+                                        3. Skala Sikap Kerja, Ketahanan & Karakter Profesional
+                                    </h4>
+                                    <span class="text-xs text-primary-ink/60">Indikator penunjang kapasitas eksekusi tugas</span>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
+                                    @foreach ($workScales as $sCode => $sScore)
+                                        @php
+                                            $meta = $mmpiMetadata[$sCode] ?? ['name' => $sCode, 'label' => 'Skala Suplementer', 'desc' => 'Parameter performa kerja.'];
+                                            $isElevated = $sScore >= 65;
+                                            $isWarning = $sScore >= 60 && $sScore < 65;
+                                        @endphp
+                                        <div class="bg-warm-ivory/50 border {{ $isElevated ? 'border-red-300 bg-red-50/30' : ($isWarning ? 'border-amber-300 bg-amber-50/30' : 'border-warm-border') }} p-4 rounded-xl flex flex-col justify-between hover:border-warm-border/90 transition shadow-xs">
+                                            <div>
+                                                <div class="flex items-center justify-between mb-1.5">
+                                                    <div class="flex items-center gap-2">
+                                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-mono font-bold {{ $isElevated ? 'bg-red-100 text-red-900 border border-red-300' : ($isWarning ? 'bg-amber-100 text-amber-900 border border-amber-300' : 'bg-primary-ink/5 text-primary-ink border border-warm-border') }}">
+                                                            {{ $sCode }}
+                                                        </span>
+                                                        <span class="text-[11px] font-bold text-slate-500 truncate max-w-[130px]" title="{{ $meta['name'] }}">
+                                                            {{ $meta['name'] }}
+                                                        </span>
+                                                    </div>
+                                                    <span class="font-mono text-base font-black {{ $isElevated ? 'text-red-700' : ($isWarning ? 'text-amber-600' : 'text-primary-ink') }}">
+                                                        T: {{ $sScore }}
+                                                    </span>
+                                                </div>
+
+                                                <h5 class="font-bold text-xs text-primary-ink leading-tight mb-1">
+                                                    {{ $meta['label'] }}
+                                                </h5>
+
+                                                <p class="text-xs text-primary-ink/70 leading-relaxed mb-3">
+                                                    {{ $meta['desc'] }}
+                                                </p>
+
+                                                {{-- 3-Zone Segmented Track Bar (Normal, Waspada, Elevasi) --}}
+                                                <div class="space-y-1 mb-2">
+                                                    <div class="w-full bg-slate-100 border border-warm-border rounded-full h-2.5 relative overflow-hidden">
+                                                        {{-- Area 1: Normal (0-60%) --}}
+                                                        <div class="absolute left-0 top-0 bottom-0 w-[60%] bg-emerald-500/10 border-r border-slate-300"></div>
+                                                        {{-- Area 2: Waspada (60-65%) --}}
+                                                        <div class="absolute left-[60%] top-0 bottom-0 w-[5%] bg-amber-500/25 border-r border-slate-300"></div>
+                                                        {{-- Area 3: Elevasi (65-100%) --}}
+                                                        <div class="absolute left-[65%] top-0 bottom-0 w-[35%] bg-red-500/15"></div>
+
+                                                        {{-- Marker lines --}}
+                                                        <div class="absolute left-[50%] top-0 bottom-0 w-px bg-slate-400/80 z-10" title="Mean: 50"></div>
+                                                        <div class="absolute left-[60%] top-0 bottom-0 w-px bg-amber-600/80 z-10" title="Batas Waspada: 60"></div>
+                                                        <div class="absolute left-[65%] top-0 bottom-0 w-px bg-red-600/80 z-10" title="Batas Elevasi: 65"></div>
+
+                                                        {{-- Dynamic Progress Fill: Hijau / Kuning / Merah --}}
+                                                        <div class="absolute top-0 bottom-0 left-0 transition-all duration-300 z-0 {{ $isElevated ? 'bg-red-600' : ($isWarning ? 'bg-amber-500' : 'bg-emerald-600') }}"
+                                                             style="width: {{ min(100, max(0, (float) $sScore)) }}%"></div>
+                                                    </div>
+
+                                                    <div class="relative w-full h-3 text-[9px] font-mono select-none leading-none mt-0.5">
+                                                        <span class="absolute left-0 text-slate-400">0</span>
+                                                        <span class="absolute left-[50%] -translate-x-1/2 text-slate-600 font-bold">50</span>
+                                                        <span class="absolute left-[60%] -translate-x-1/2 text-amber-700 font-bold">60</span>
+                                                        <span class="absolute left-[65%] -translate-x-1/2 text-red-700 font-bold">65</span>
+                                                        <span class="absolute right-0 text-slate-400">100</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="mt-2 pt-2 border-t border-warm-border/40 flex items-center justify-between text-[11px]">
+                                                <span class="text-slate-400">Interpretasi:</span>
+                                                <span class="font-bold {{ $isElevated ? 'text-red-700' : ($isWarning ? 'text-amber-700' : 'text-forest-green') }}">
+                                                    {{ $isElevated ? 'Elevasi / Perhatian' : ($isWarning ? 'Batas Waspada' : 'Optimal / Sesuai Standar') }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
+
+                        {{-- 4. Catatan Klinis Asesor Psikologi SPSP --}}
+                        @if ($mmpi->klinik || $mmpi->internal || $mmpi->interpersonal || $mmpi->kap_kerja)
+                            <div class="pt-4 border-t border-warm-border space-y-3">
+                                <h4 class="font-bold text-primary-ink uppercase tracking-wider text-xs flex items-center gap-2">
+                                    <i class="fas fa-file-medical text-accent-amber text-xs"></i>
+                                    Sintesis & Catatan Asesor Psikologi Klinis
+                                </h4>
+                                <div class="bg-warm-ivory/40 border border-warm-border p-5 rounded-xl space-y-3 text-xs text-primary-ink/80 leading-relaxed">
+                                    @if ($mmpi->internal)
+                                        <div>
+                                            <span class="font-bold text-primary-ink block mb-0.5">Dinamika Emosi & Kepribadian Internal:</span>
+                                            <p class="text-primary-ink/70">{{ $mmpi->internal }}</p>
+                                        </div>
+                                    @endif
+                                    @if ($mmpi->interpersonal)
+                                        <div>
+                                            <span class="font-bold text-primary-ink block mb-0.5">Pola Relasi & Komunikasi Interpersonal:</span>
+                                            <p class="text-primary-ink/70">{{ $mmpi->interpersonal }}</p>
+                                        </div>
+                                    @endif
+                                    @if ($mmpi->kap_kerja)
+                                        <div>
+                                            <span class="font-bold text-primary-ink block mb-0.5">Kapasitas & Ketahanan Kerja Operasional:</span>
+                                            <p class="text-primary-ink/70">{{ $mmpi->kap_kerja }}</p>
+                                        </div>
+                                    @endif
+                                    @if ($mmpi->klinik)
+                                        <div>
+                                            <span class="font-bold text-primary-ink block mb-0.5">Evaluasi & Rekomendasi Klinis:</span>
+                                            <p class="text-primary-ink/70">{{ $mmpi->klinik }}</p>
+                                        </div>
+                                    @endif
+                                </div>
                             </div>
                         @endif
                     </div>
