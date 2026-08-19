@@ -113,8 +113,13 @@
             </div>
 
             <!-- 23 Rekomendasi Peran Berikutnya -->
-            <div class="p-8">
+            <div class="page-break p-8">
                 <livewire:pages.h-c-a.sections.next-role-recommendation :participant-id="$participantId" :key="'next_role_rec_print_'.$participantId" />
+            </div>
+
+            <!-- 24 Laporan Hasil Alat Tes -->
+            <div class="p-8">
+                <livewire:pages.h-c-a.sections.test-instruments-appendix :participant-id="$participantId" :key="'test_instruments_print_'.$participantId" />
             </div>
         </div>
 
@@ -325,6 +330,9 @@
                                     @break
                                 @case('next_role_rec')
                                     <livewire:pages.h-c-a.sections.next-role-recommendation :participant-id="$participantId" :key="'next_role_rec_'.$participantId" />
+                                    @break
+                                @case('test_instruments_appendix')
+                                    <livewire:pages.h-c-a.sections.test-instruments-appendix :participant-id="$participantId" :key="'test_instruments_'.$participantId" />
                                     @break
                             @endswitch
                         </div>

@@ -115,6 +115,13 @@ class HcaReportPage extends Component
                 ['code' => 'next_role_rec', 'label' => '23 — Rekomendasi Peran Berikutnya', 'active' => true],
             ],
         ],
+        [
+            'title' => 'Lampiran (Appendix)',
+            'icon' => 'fa-folder-open',
+            'sections' => [
+                ['code' => 'test_instruments_appendix', 'label' => '24 — Laporan Hasil Alat Tes', 'active' => true],
+            ],
+        ],
     ];
 
     /**

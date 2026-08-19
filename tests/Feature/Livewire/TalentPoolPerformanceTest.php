@@ -128,11 +128,14 @@ class TalentPoolPerformanceTest extends TestCase
     {
         Cache::flush();
 
+        session([
+            'filter.event_code' => $this->event->code,
+            'filter.position_formation_id' => $this->position->id,
+        ]);
+
         $startTime = microtime(true);
 
-        $component = Livewire::test(Index::class)
-            ->set('selectedEvent', $this->event)
-            ->set('selectedPositionId', $this->position->id);
+        $component = Livewire::test(Index::class);
 
         $renderTime = microtime(true) - $startTime;
 
