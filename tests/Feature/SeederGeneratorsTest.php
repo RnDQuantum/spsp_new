@@ -22,17 +22,18 @@ class SeederGeneratorsTest extends TestCase
     /**
      * Test AssessmentEventConfig returns valid configurations array
      */
-    public function test_assessment_event_config_returns_15_events(): void
+    public function test_assessment_event_config_returns_16_events(): void
     {
         $configs = AssessmentEventConfig::getConfigurations();
 
         $this->assertIsArray($configs);
-        $this->assertCount(15, $configs);
+        $this->assertCount(16, $configs);
 
         $eventCodes = collect($configs)->pluck('event.code')->all();
         $this->assertContains('PR-A-313', $eventCodes);
         $this->assertContains('PR-A-338', $eventCodes);
         $this->assertContains('PR-A-355', $eventCodes);
+        $this->assertContains('PR-DEBUG-ALL', $eventCodes);
     }
 
     /**
@@ -147,6 +148,27 @@ class SeederGeneratorsTest extends TestCase
             $this->assertNotNull($ltr['interpretation_data'], "interpretation_data should not be null for {$ltr['test_code']}");
             $this->assertNotNull($ltr['raw_response'], "raw_response should not be null for {$ltr['test_code']}");
         }
+
+        // 3. Comprehensive Debug Event (PR-DEBUG-ALL) - Contains all 10 instruments
+        $debugEvent = new AssessmentEvent([
+            'id' => 99,
+            'code' => 'PR-DEBUG-ALL',
+        ]);
+
+        $debugResults = TestResultGenerator::generateForParticipant($participant, $debugEvent, 'K-8');
+        $debugCodes = collect($debugResults)->pluck('test_code')->all();
+
+        $this->assertCount(10, $debugResults);
+        $this->assertContains('A.1', $debugCodes);
+        $this->assertContains('A.2', $debugCodes);
+        $this->assertContains('A.5', $debugCodes);
+        $this->assertContains('B.1', $debugCodes);
+        $this->assertContains('D.1', $debugCodes);
+        $this->assertContains('B.2', $debugCodes);
+        $this->assertContains('D.2', $debugCodes);
+        $this->assertContains('F.1', $debugCodes);
+        $this->assertContains('G.1', $debugCodes);
+        $this->assertContains('H.1', $debugCodes);
     }
 
     /**

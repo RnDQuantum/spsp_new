@@ -54,11 +54,142 @@ class TestResultGenerator
             default => 'medium',
         };
 
+        if ($event->code === 'PR-DEBUG-ALL') {
+            return self::generateAllInstrumentsForParticipant($participant, $event, $boxCategory);
+        }
+
         if ($isLegacy) {
             return self::generateLegacyTestResults($participant, $event, $performanceLevel, $now);
         }
 
         return self::generateApiOnlineTestResults($participant, $event, $performanceLevel, $now);
+    }
+
+    /**
+     * Generate seluruh 10 instrumen alat tes lengkap untuk 1 peserta (Comprehensive Debug Mode).
+     *
+     * Menghasilkan: A.1 (CFIT 3A), A.2 (CFIT 3B), A.5 (IST), B.1 (PAPI Online),
+     * D.1 (PAPI Kostik), B.2 (16PF), D.2 (Kraepelin), F.1 (EQ), G.1 (Behavior), H.1 (RMIB).
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public static function generateAllInstrumentsForParticipant(
+        Participant $participant,
+        AssessmentEvent $event,
+        string $boxCategory
+    ): array {
+        $now = now();
+        $performanceLevel = match ($boxCategory) {
+            'K-7', 'K-8', 'K-9' => 'high',
+            'K-1', 'K-3' => 'low',
+            default => 'medium',
+        };
+
+        $apiResults = self::generateApiOnlineTestResults($participant, $event, $performanceLevel, $now);
+        $legacyResults = self::generateLegacyTestResults($participant, $event, $performanceLevel, $now);
+        $cfit3b = self::generateSingleCfit3b($participant, $event, $performanceLevel, $now);
+
+        $merged = array_merge($apiResults, $legacyResults, [$cfit3b]);
+        $unique = [];
+        $seen = [];
+
+        foreach ($merged as $item) {
+            $code = $item['test_code'];
+            if (! isset($seen[$code])) {
+                $seen[$code] = true;
+                $unique[] = $item;
+            }
+        }
+
+        return $unique;
+    }
+
+    /**
+     * Generate instrumen tunggal CFIT 3B (A.2).
+     */
+    private static function generateSingleCfit3b(
+        Participant $participant,
+        AssessmentEvent $event,
+        string $performanceLevel,
+        $now
+    ): array {
+        [$iq, $kategoriIq] = match ($performanceLevel) {
+            'high' => [fake()->numberBetween(115, 132), 'Sangat Superior'],
+            'medium' => [fake()->numberBetween(95, 114), 'Rata-rata'],
+            'low' => [fake()->numberBetween(70, 94), 'Borderline'],
+        };
+        $subRating = match ($performanceLevel) {
+            'high' => 4, 'medium' => 3, 'low' => 2
+        };
+
+        $hasilSub = [
+            'sub1' => ['nilai' => $subRating * 3, 'total_soal' => 13, 'persentase' => round(($subRating / 5) * 100, 1), 'rating' => $subRating, 'deskripsi' => $subRating >= 4 ? 'Baik' : ($subRating >= 3 ? 'Cukup' : 'Kurang')],
+            'sub2' => ['nilai' => $subRating * 3, 'total_soal' => 14, 'persentase' => round(($subRating / 5) * 100, 1), 'rating' => $subRating, 'deskripsi' => $subRating >= 4 ? 'Baik' : ($subRating >= 3 ? 'Cukup' : 'Kurang')],
+            'sub3' => ['nilai' => $subRating * 2, 'total_soal' => 13, 'persentase' => round(($subRating / 5) * 100, 1), 'rating' => $subRating, 'deskripsi' => $subRating >= 4 ? 'Baik' : ($subRating >= 3 ? 'Cukup' : 'Kurang')],
+            'sub4' => ['nilai' => $subRating * 2, 'total_soal' => 10, 'persentase' => round(($subRating / 5) * 100, 1), 'rating' => $subRating, 'deskripsi' => $subRating >= 4 ? 'Baik' : ($subRating >= 3 ? 'Cukup' : 'Kurang')],
+        ];
+
+        $cfitInterp = [
+            'interpretasi_hasil' => [
+                'Kecerdasan Umum' => $kategoriIq === 'Sangat Superior' || $kategoriIq === 'Istimewa'
+                    ? 'Individu memiliki kemampuan abstraksi yang sangat luar biasa dan kecepatan berpikir yang sangat tinggi dalam mengintegrasikan berbagai informasi kompleks.'
+                    : 'Individu memiliki kapasitas kognitif yang memadai dalam menyelesaikan tugas kerja dan memahami instruksi umum.',
+                'Subtes 1 (Series/Serial Reasoning)' => 'Individu memiliki logika berpikir yang runtut dan sistematis dalam menghadapi persoalan yang dinamis.',
+                'Subtes 2 (Classification/Grouping)' => 'Individu cukup teliti dalam melihat perbedaan esensial dan mengklasifikasikan pola data.',
+                'Subtes 3 (Matrices/Analisis Visual)' => 'Mampu melakukan analisis yang mendalam terhadap sebuah situasi dan menyimpulkan hubungan antar bagian dengan tepat.',
+                'Subtes 4 (Conditions/Topologi)' => 'Memiliki pemahaman yang kuat terhadap simbol-simbol dan logika yang bersifat teoritis atau kondisional.',
+            ],
+            'saran_pengembangan' => [
+                'Tingkatkan simulasi pemecahan masalah dengan studi kasus bervolume tinggi.',
+                'Bermain catur atau board games berbasis strategi untuk melatih kemampuan prediksi langkah.',
+            ],
+        ];
+
+        $cfitTime = self::formatTestDateTime($participant->assessment_date, '08:45:00');
+        $cfitRaw = [
+            'status' => true,
+            'mulai_tes' => $cfitTime,
+            'total' => (int) round($iq / 4),
+            'hasil_sub' => $hasilSub,
+            'iq' => $iq,
+            'kategori' => $kategoriIq,
+            'umur_format' => '24_0',
+            'index_umur' => 'ge17',
+            'index_kecerdasan_umum' => $subRating,
+            'versi' => 1,
+            'INTERPRETASI_HASIL' => $cfitInterp['interpretasi_hasil'],
+            'SARAN_PENGEMBANGAN' => $cfitInterp['saran_pengembangan'],
+            'umur_asli' => '24 tahun, 0 bulan',
+            'nama_alat_tes' => 'Typical CFIT3B',
+        ];
+
+        return [
+            'participant_id' => $participant->id,
+            'event_id' => $event->id,
+            'test_code' => 'A.2',
+            'test_name' => 'Typical CFIT3B',
+            'test_category' => TestResult::getCategoryForCode('A.2'),
+            'status' => 'completed',
+            'source' => 'api',
+            'test_started_at' => $cfitTime,
+            'summary_data' => json_encode([
+                'iq' => $iq,
+                'kategori' => $kategoriIq,
+                'total' => (int) round($iq / 4),
+                'index_kecerdasan_umum' => $subRating,
+                'umur_format' => '24_0',
+                'index_umur' => 'ge17',
+                'umur_asli' => '24 tahun, 0 bulan',
+                'versi' => 1,
+                'hasil_sub' => $hasilSub,
+            ]),
+            'interpretation_data' => json_encode($cfitInterp),
+            'raw_response' => json_encode($cfitRaw),
+            'conversion_status' => 'converted',
+            'converted_at' => $now,
+            'created_at' => $now,
+            'updated_at' => $now,
+        ];
     }
 
     /**

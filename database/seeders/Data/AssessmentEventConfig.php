@@ -455,6 +455,35 @@ class AssessmentEventConfig
                     'K-7' => 15, 'K-8' => 15, 'K-9' => 10,
                 ],
             ],
+
+            // Configuration 16: Master Debug Assessment (100 Peserta x Seluruh 10 Alat Tes Lengkap)
+            [
+                'institution_code' => 'bkn',
+                'project_code' => 'AP-999',
+                'event' => [
+                    'code' => 'PR-DEBUG-ALL',
+                    'name' => 'Pelaksanaan Uji Coba Komprehensif Seluruh Alat Tes (100 Peserta)',
+                    'description' => 'Simulasi komprehensif memuat 100 peserta dengan seluruh 10 instrumen tes psikometri (A.1, A.2, A.5, B.1, D.1, B.2, D.2, F.1, G.1, H.1), MMPI klinis, dan penilaian 9-Box.',
+                    'year' => 2026,
+                    'start_date' => '2026-01-15',
+                    'end_date' => '2026-12-31',
+                    'status' => 'completed',
+                ],
+                'batches' => [
+                    ['code' => 'BATCH-DEBUG-01', 'name' => 'Gelombang 1 - Laboratorium Debug SPSP', 'location' => 'Pusat Riset Psikometri Jakarta', 'batch_number' => 1, 'start_date' => '2026-02-01', 'end_date' => '2026-02-02'],
+                ],
+                'positions' => [
+                    ['code' => 'analis_talenta', 'name' => 'Analis Potensi & Pengembangan Talenta', 'quota' => 35, 'template_code' => 'professional_standard_v1'],
+                    ['code' => 'supervisor_operasional', 'name' => 'Supervisor Operasional & Tata Kelola', 'quota' => 35, 'template_code' => 'supervisor_standard_v1'],
+                    ['code' => 'pranata_it', 'name' => 'Pranata Komputer & Sistem Informasi', 'quota' => 30, 'template_code' => 'staff_standard_v1'],
+                ],
+                'participants_count' => 100,
+                'nine_box_distribution' => [
+                    'K-1' => 10, 'K-2' => 10, 'K-3' => 10,
+                    'K-4' => 10, 'K-5' => 20, 'K-6' => 10,
+                    'K-7' => 10, 'K-8' => 10, 'K-9' => 10,
+                ],
+            ],
         ];
     }
 }
