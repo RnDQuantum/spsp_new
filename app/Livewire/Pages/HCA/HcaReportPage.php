@@ -127,10 +127,22 @@ class HcaReportPage extends Component
     /**
      * Mount component
      */
-    public function mount(?int $participant = null): void
+    public function mount(string|int|null $participant = null): void
     {
+        // Guard demo route in production environment
+        if (request()->routeIs('hca-report-demo') && app()->environment('production') && ! auth()->check()) {
+            abort(403, 'Akses demo dinonaktifkan di environment produksi.');
+        }
+
         if ($participant) {
-            $this->participantId = $participant;
+            if (is_numeric($participant)) {
+                $this->participantId = (int) $participant;
+            } else {
+                $foundParticipant = Participant::query()->where('test_number', (string) $participant)->first();
+                if ($foundParticipant) {
+                    $this->participantId = $foundParticipant->id;
+                }
+            }
         }
 
         if (! $this->participantId) {
@@ -149,6 +161,7 @@ class HcaReportPage extends Component
                 'filter.participant_id' => $p->id,
                 'filter.position_formation_id' => $p->position_formation_id,
                 'filter.event_code' => $this->selectedEventCode,
+                'filter.test_number' => $p->test_number,
             ]);
         }
     }
@@ -168,6 +181,7 @@ class HcaReportPage extends Component
                 'filter.participant_id' => $participant->id,
                 'filter.position_formation_id' => $participant->position_formation_id,
                 'filter.event_code' => $this->selectedEventCode,
+                'filter.test_number' => $participant->test_number,
             ]);
         }
         $this->showTalentModal = false;

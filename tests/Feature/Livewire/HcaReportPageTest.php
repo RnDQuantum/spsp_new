@@ -14,7 +14,9 @@ use App\Livewire\Pages\HCA\Sections\PerformanceDashboard;
 use App\Livewire\Pages\HCA\Sections\ScoreListSection;
 use App\Livewire\Pages\HCA\Sections\SuccessionReadiness;
 use App\Livewire\Pages\HCA\Sections\TimelineSection;
+use App\Models\Institution;
 use App\Models\Participant;
+use App\Models\User;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -26,6 +28,67 @@ class HcaReportPageTest extends TestCase
     public function test_demo_route_renders_successfully(): void
     {
         $response = $this->get(route('hca-report-demo'));
+
+        $response->assertStatus(200);
+        $response->assertSeeLivewire(HcaReportPage::class);
+    }
+
+    /**
+     * Test that the main hca-report route requires authentication
+     */
+    public function test_hca_report_route_requires_authentication(): void
+    {
+        $response = $this->get(route('hca-report'));
+
+        $response->assertRedirect(route('login'));
+    }
+
+    /**
+     * Test that authenticated user with valid institution can access the main hca-report route
+     */
+    public function test_authenticated_user_can_access_hca_report(): void
+    {
+        $institution = Institution::query()->first() ?? Institution::factory()->create();
+        /** @var User $user */
+        $user = User::factory()->create([
+            'institution_id' => $institution->id,
+        ]);
+
+        $response = $this->actingAs($user)->get(route('hca-report'));
+
+        $response->assertStatus(200);
+        $response->assertSeeLivewire(HcaReportPage::class);
+    }
+
+    /**
+     * Test that user without assigned institution is blocked with 403
+     */
+    public function test_user_without_institution_is_blocked(): void
+    {
+        /** @var User $user */
+        $user = User::factory()->create([
+            'institution_id' => null,
+        ]);
+
+        $response = $this->actingAs($user)->get(route('hca-report'));
+
+        $response->assertStatus(403);
+    }
+
+    /**
+     * Test that hca-report route with participant ID loads active participant
+     */
+    public function test_hca_report_with_participant_parameter_loads_correctly(): void
+    {
+        $institution = Institution::query()->first() ?? Institution::factory()->create();
+        /** @var User $user */
+        $user = User::factory()->create([
+            'institution_id' => $institution->id,
+        ]);
+        $participant = Participant::query()->where('institution_id', $institution->id)->first()
+            ?? Participant::factory()->create(['institution_id' => $institution->id]);
+
+        $response = $this->actingAs($user)->get(route('hca-report', ['participant' => $participant->id]));
 
         $response->assertStatus(200);
         $response->assertSeeLivewire(HcaReportPage::class);

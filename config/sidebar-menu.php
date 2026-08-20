@@ -79,6 +79,10 @@ return [
                 'title' => 'Laporan Individu',
                 'route' => 'final_report',
             ],
+            [
+                'title' => 'Executive HCA Report',
+                'route' => 'hca-report',
+            ],
         ],
     ],
 

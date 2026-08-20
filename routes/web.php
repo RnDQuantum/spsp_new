@@ -46,7 +46,6 @@ Route::get('/kebijakan-privasi', function () {
 })->name('privacy');
 
 Route::get('/hca-report-demo', HcaReportPage::class)->name('hca-report-demo');
-Route::get('/hca-report/{participant?}', HcaReportPage::class)->name('hca-report');
 
 Route::middleware(['guest'])->group(function () {
     // Authentication Routes
@@ -118,6 +117,7 @@ Route::middleware(['auth', 'institution.access'])->group(function () {
     Route::livewire('/general-report/mmpi', MmpiResultsReport::class)->name('general-report.mmpi');
 
     Route::livewire('/final-report/{eventCode}/{testNumber}', FinalReport::class)->name('final_report');
+    Route::livewire('/hca-report/{participant?}', HcaReportPage::class)->name('hca-report');
 
     // Custom Standards Routes
     Route::livewire('/custom-standards', Index::class)->name('custom-standards.index');

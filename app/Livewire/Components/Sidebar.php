@@ -222,10 +222,15 @@ class Sidebar extends Component
                     // Inject parameters if required
                     $params = [];
                     if ($requiresParticipant) {
-                        $params = [
-                            'eventCode' => $this->eventCode,
-                            'testNumber' => $this->testNumber,
-                        ];
+                        if ($item['route'] === 'hca-report') {
+                            $participantId = session('filter.participant_id');
+                            $params = $participantId ? ['participant' => $participantId] : ($this->testNumber ? ['participant' => $this->testNumber] : []);
+                        } else {
+                            $params = [
+                                'eventCode' => $this->eventCode,
+                                'testNumber' => $this->testNumber,
+                            ];
+                        }
                     }
                     try {
                         $item['href'] = route($item['route'], $params);
@@ -239,7 +244,8 @@ class Sidebar extends Component
                 // Check active state
                 $item['active'] = false;
                 if (isset($item['route'])) {
-                    $item['active'] = $this->isActiveRoute($item['route'], $requiresParticipant ? ['eventCode' => $this->eventCode, 'testNumber' => $this->testNumber] : []);
+                    $checkParams = ($requiresParticipant && $item['route'] !== 'hca-report') ? ['eventCode' => $this->eventCode, 'testNumber' => $this->testNumber] : [];
+                    $item['active'] = $this->isActiveRoute($item['route'], $checkParams);
                 }
             }
 

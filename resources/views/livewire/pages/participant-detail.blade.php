@@ -521,6 +521,46 @@
                         </div>
                     </div>
 
+                    <!-- KARTU 9: Executive HCA Report -->
+                    <div class="h-full">
+                        <div
+                            class="flex flex-col h-full border-2 border-accent-amber/40 dark:border-amber-500/40 rounded-md p-6 hover:border-accent-amber dark:hover:border-amber-500 transition-all bg-accent-amber/5 dark:bg-[#1f1b18] shadow-xs">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="flex items-center space-x-3">
+                                    <div class="flex-shrink-0">
+                                        <div
+                                            class="w-10 h-10 bg-accent-amber text-white rounded-lg flex items-center justify-center shadow-xs">
+                                            <i class="fa-solid fa-book-open text-base"></i>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="flex items-center gap-2">
+                                            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Executive HCA Report</h3>
+                                            <span class="text-[10px] bg-accent-amber text-white font-bold px-2 py-0.5 rounded-full">NEW</span>
+                                        </div>
+                                        <p class="text-sm text-gray-600 dark:text-gray-400">Executive Journal 24 Bab & Cetak PDF</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex-grow mb-4">
+                                <p class="text-sm text-gray-600 dark:text-gray-400">
+                                    Laporan eksekutif komprehensif mengintegrasikan HCI, 9-Box Matrix, DISC, Big Five, Riwayat Karier, hingga Rekomendasi Suksesi.
+                                </p>
+                            </div>
+                            <div class="mt-auto">
+                                <a href="{{ route('hca-report', ['participant' => $participant->id]) }}"
+                                    class="w-full inline-flex items-center justify-center px-4 py-2 bg-accent-amber hover:bg-accent-amber/90 text-white text-xs font-semibold rounded-md transition-colors shadow-xs">
+                                    Buka Executive HCA Report
+                                    <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M9 5l7 7-7 7"></path>
+                                    </svg>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </div>

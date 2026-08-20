@@ -255,8 +255,13 @@
                     </div>
 
                     <div class="flex items-center gap-3">
+                        @php
+                            $backUrl = ($currentTalent && $currentTalent->assessmentEvent) 
+                                ? route('participant_detail', ['eventCode' => $currentTalent->assessmentEvent->code, 'testNumber' => $currentTalent->test_number]) 
+                                : route('dashboard');
+                        @endphp
                         <a 
-                            href="{{ route('dashboard') }}"
+                            href="{{ $backUrl }}"
                             class="border border-warm-border hover:bg-warm-ivory text-primary-ink font-semibold text-xs px-4 py-2 rounded-md transition-all duration-200 flex items-center gap-2 cursor-pointer"
                         >
                             <i class="fas fa-arrow-left"></i>
