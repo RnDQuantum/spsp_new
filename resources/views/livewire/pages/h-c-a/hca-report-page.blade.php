@@ -271,25 +271,58 @@
                         </span>
                     </div>
 
-                    <div class="flex items-center gap-3">
+                    <div class="flex items-center gap-2.5">
                         @php
                             $backUrl = ($currentTalent && $currentTalent->assessmentEvent) 
                                 ? route('participant_detail', ['eventCode' => $currentTalent->assessmentEvent->code, 'testNumber' => $currentTalent->test_number]) 
                                 : route('dashboard');
+
+                            $downloadUrl = request()->routeIs('hca-report-demo')
+                                ? ($participantId ? route('hca-report.download-demo', $participantId) : '#')
+                                : ($participantId ? route('hca-report.download-pdf', $participantId) : '#');
+
+                            $previewUrl = request()->routeIs('hca-report-demo')
+                                ? ($participantId ? route('hca-report.preview-demo', $participantId) : '#')
+                                : ($participantId ? route('hca-report.preview-pdf', $participantId) : '#');
                         @endphp
                         <a 
                             href="{{ $backUrl }}"
-                            class="border border-warm-border hover:bg-warm-ivory text-primary-ink font-semibold text-xs px-4 py-2 rounded-md transition-all duration-200 flex items-center gap-2 cursor-pointer"
+                            class="border border-warm-border hover:bg-warm-ivory text-primary-ink font-semibold text-xs px-3 py-2 rounded-md transition-all duration-200 flex items-center gap-1.5 cursor-pointer"
                         >
                             <i class="fas fa-arrow-left"></i>
-                            Kembali ke SPSP
+                            Kembali
                         </a>
-                        <button 
-                            wire:click="togglePrintMode(true)"
-                            class="bg-[#171412] hover:bg-[#2c2724] text-warm-ivory font-medium text-xs px-4 py-2 rounded-md shadow-sm transition-all duration-200 flex items-center gap-2 cursor-pointer"
+
+                        <!-- 1-Click Server-Side PDF Download -->
+                        <a 
+                            href="{{ $downloadUrl }}"
+                            class="bg-[#171412] hover:bg-[#2c2724] text-white font-medium text-xs px-3.5 py-2 rounded-md shadow-sm transition-all duration-200 flex items-center gap-1.5 cursor-pointer"
+                            title="Download file PDF resmi 24 halaman langsung dari server (Headless Chromium)"
                         >
-                            <i class="fas fa-print"></i>
-                            Cetak PDF
+                            <i class="fas fa-file-pdf text-accent-amber"></i>
+                            Download PDF (1-Klik)
+                        </a>
+
+                        <!-- Inline Preview in New Tab -->
+                        <a 
+                            href="{{ $previewUrl }}"
+                            target="_blank"
+                            class="border border-warm-border hover:bg-warm-ivory text-primary-ink font-medium text-xs px-3 py-2 rounded-md transition-all duration-200 flex items-center gap-1.5 cursor-pointer hidden sm:inline-flex"
+                            title="Buka preview dokumen PDF di tab baru"
+                        >
+                            <i class="fas fa-arrow-up-right-from-square text-[10px] text-slate-400"></i>
+                            Preview PDF
+                        </a>
+
+                        <!-- Quick Browser Print -->
+                        <button 
+                            type="button"
+                            wire:click="togglePrintMode(true)"
+                            class="border border-slate-300 hover:bg-slate-100 text-slate-700 font-medium text-xs px-3 py-2 rounded-md transition-all duration-200 flex items-center gap-1.5 cursor-pointer"
+                            title="Buka dialog cetak browser langsung"
+                        >
+                            <i class="fas fa-print text-slate-500"></i>
+                            Cetak Cepat
                         </button>
                     </div>
                 </header>

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\HcaPdfExportController;
 use App\Livewire\Pages\Admin\ClientList;
 use App\Livewire\Pages\Admin\DashboardAdmin;
 use App\Livewire\Pages\Admin\Institutions\Show;
@@ -15,7 +16,6 @@ use App\Livewire\Pages\GeneralReport\Ranking\RekapRankingAssessment;
 use App\Livewire\Pages\GeneralReport\Statistic;
 use App\Livewire\Pages\GeneralReport\Training\TrainingRecommendation;
 use App\Livewire\Pages\HCA\HcaReportPage;
-use App\Livewire\Pages\IndividualReport\FinalReport;
 use App\Livewire\Pages\IndividualReport\GeneralMapping;
 use App\Livewire\Pages\IndividualReport\GeneralMatching;
 use App\Livewire\Pages\IndividualReport\GeneralMcMapping;
@@ -46,6 +46,8 @@ Route::get('/kebijakan-privasi', function () {
 })->name('privacy');
 
 Route::get('/hca-report-demo', HcaReportPage::class)->name('hca-report-demo');
+Route::get('/hca-report-demo/{participant}/download', [HcaPdfExportController::class, 'download'])->name('hca-report.download-demo');
+Route::get('/hca-report-demo/{participant}/preview', [HcaPdfExportController::class, 'preview'])->name('hca-report.preview-demo');
 
 Route::middleware(['guest'])->group(function () {
     // Authentication Routes
@@ -116,8 +118,9 @@ Route::middleware(['auth', 'institution.access'])->group(function () {
     Route::livewire('/standard-psikometrik', StandardPsikometrik::class)->name('standard-psikometrik');
     Route::livewire('/general-report/mmpi', MmpiResultsReport::class)->name('general-report.mmpi');
 
-    Route::livewire('/final-report/{eventCode}/{testNumber}', FinalReport::class)->name('final_report');
     Route::livewire('/hca-report/{participant?}', HcaReportPage::class)->name('hca-report');
+    Route::get('/hca-report/{participant}/download-pdf', [HcaPdfExportController::class, 'download'])->name('hca-report.download-pdf');
+    Route::get('/hca-report/{participant}/preview-pdf', [HcaPdfExportController::class, 'preview'])->name('hca-report.preview-pdf');
 
     // Custom Standards Routes
     Route::livewire('/custom-standards', Index::class)->name('custom-standards.index');

@@ -23,6 +23,7 @@
     "devDependencies": {
         "@tailwindcss/vite": "^4.1.14",
         "daisyui": "^5.1.27",
+        "puppeteer": "^25.8.0",
         "tailwindcss": "^4.1.14"
     }
 }
