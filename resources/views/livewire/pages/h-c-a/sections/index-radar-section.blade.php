@@ -96,150 +96,156 @@
     </div>
 </div>
 
-@script
 <script>
     (function() {
-        const chartId = '{{ $chartId }}';
-        const ctx = document.getElementById(chartId);
-        if (!ctx) return;
+        function initRadarChart_{{ str_replace('-', '_', $chartId) }}() {
+            const chartId = '{{ $chartId }}';
+            const ctx = document.getElementById(chartId);
+            if (!ctx) return;
+            if (typeof Chart === 'undefined') return;
 
-        const el = document.getElementById('radar-container-' + chartId);
-        if (!el) return;
+            const el = document.getElementById('radar-container-' + chartId);
+            if (!el) return;
 
-        const labels = JSON.parse(el.dataset.labels);
-        const actual = JSON.parse(el.dataset.actual);
-        const standard = JSON.parse(el.dataset.standard);   // standar penuh (mis. 3.00) -> jadi lapisan Toleransi (terluar)
-        const tolerance = JSON.parse(el.dataset.tolerance); // standar - toleransi% (mis. 2.70) -> jadi lapisan Standar (dalam)
+            const labels = JSON.parse(el.dataset.labels);
+            const actual = JSON.parse(el.dataset.actual);
+            const standard = JSON.parse(el.dataset.standard);   // standar penuh (mis. 3.00) -> jadi lapisan Toleransi (terluar)
+            const tolerance = JSON.parse(el.dataset.tolerance); // standar - toleransi% (mis. 2.70) -> jadi lapisan Standar (dalam)
 
-        const existingChart = Chart.getChart(ctx);
-        if (existingChart) existingChart.destroy();
+            const existingChart = Chart.getChart(ctx);
+            if (existingChart) existingChart.destroy();
 
-        new Chart(ctx, {
-    type: 'radar',
-    data: {
-        labels: labels,
-        datasets: [
-            {
-                label: 'Aktual',
-                data: actual,
-                fill: true,
-                backgroundColor: 'rgba(21, 128, 61, 0.55)',   // hijau, semi-transparan
-                borderColor: '#166534',
-                pointBackgroundColor: '#166534',
-                pointBorderColor: '#ffffff',
-                borderWidth: 2.5,
-                pointRadius: 4,
-                pointBorderWidth: 1.5,
-                tension: 0.1
-            },
-            {
-                label: 'Standar',
-                data: tolerance,
-                fill: true,
-                backgroundColor: 'rgba(185, 28, 28, 0.45)',   // merah, semi-transparan
-                borderColor: '#991b1b',
-                pointBackgroundColor: '#991b1b',
-                pointBorderColor: '#ffffff',
-                borderWidth: 2,
-                pointRadius: 4,
-                pointBorderWidth: 1.5,
-                tension: 0.1
-            },
-            {
-                label: 'Toleransi',
-                data: standard,
-                fill: true,
-                backgroundColor: 'rgba(234, 179, 8, 0.35)',   // amber, semi-transparan
-                borderColor: '#ca8a04',
-                pointBackgroundColor: '#ca8a04',
-                pointBorderColor: '#ffffff',
-                borderWidth: 1.5,
-                pointRadius: 4,
-                pointBorderWidth: 1.5,
-                tension: 0.1
-            }
-        ]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: { display: false },
-            datalabels: { display: false },
-            tooltip: {
-                callbacks: {
-                    label: (context) => context.dataset.label + ': ' + context.raw.toFixed(2)
-                }
-            }
-        },
-        scales: {
-            r: {
-                min: 0,
-                max: 5,
-                ticks: { display: false, stepSize: 1 },
-                grid: { color: 'rgba(23, 20, 18, 0.08)' },
-                angleLines: { color: 'rgba(23, 20, 18, 0.08)' },
-                pointLabels: {
-                    color: '#171412',
-                    font: { size: 11, weight: '600', family: 'Instrument Sans' }
-                }
-            }
+            new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Aktual',
+                            data: actual,
+                            fill: true,
+                            backgroundColor: 'rgba(21, 128, 61, 0.55)',   // hijau, semi-transparan
+                            borderColor: '#166534',
+                            pointBackgroundColor: '#166534',
+                            pointBorderColor: '#ffffff',
+                            borderWidth: 2.5,
+                            pointRadius: 4,
+                            pointBorderWidth: 1.5,
+                            tension: 0.1
+                        },
+                        {
+                            label: 'Standar',
+                            data: tolerance,
+                            fill: true,
+                            backgroundColor: 'rgba(185, 28, 28, 0.45)',   // merah, semi-transparan
+                            borderColor: '#991b1b',
+                            pointBackgroundColor: '#991b1b',
+                            pointBorderColor: '#ffffff',
+                            borderWidth: 2,
+                            pointRadius: 4,
+                            pointBorderWidth: 1.5,
+                            tension: 0.1
+                        },
+                        {
+                            label: 'Toleransi',
+                            data: standard,
+                            fill: true,
+                            backgroundColor: 'rgba(234, 179, 8, 0.35)',   // amber, semi-transparan
+                            borderColor: '#ca8a04',
+                            pointBackgroundColor: '#ca8a04',
+                            pointBorderColor: '#ffffff',
+                            borderWidth: 1.5,
+                            pointRadius: 4,
+                            pointBorderWidth: 1.5,
+                            tension: 0.1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        datalabels: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => context.dataset.label + ': ' + context.raw.toFixed(2)
+                            }
+                        }
+                    },
+                    scales: {
+                        r: {
+                            min: 0,
+                            max: 5,
+                            ticks: { display: false, stepSize: 1 },
+                            grid: { color: 'rgba(23, 20, 18, 0.08)' },
+                            angleLines: { color: 'rgba(23, 20, 18, 0.08)' },
+                            pointLabels: {
+                                color: '#171412',
+                                font: { size: 11, weight: '600', family: 'Instrument Sans' }
+                            }
+                        }
+                    }
+                },
+                plugins: [
+                    // Plugin 1: gambar angka skala manual (biar tetap kebaca di atas warna)
+                    {
+                        id: 'hcaShiftTicks_' + chartId,
+                        afterDraw: (chart) => {
+                            const { ctx, scales } = chart;
+                            const scale = scales.r;
+                            const yCenter = scale.yCenter;
+                            const xCenter = scale.xCenter;
+
+                            ctx.save();
+                            ctx.font = "600 9px 'Instrument Sans', sans-serif";
+                            ctx.textAlign = 'center';
+                            ctx.textBaseline = 'middle';
+
+                            for (let value = 1; value <= scale.max; value++) {
+                                const radius = scale.getDistanceFromCenterForValue(value);
+                                const labelY = yCenter - radius;
+                                const labelX = xCenter + 12;
+                                const text = String(value);
+                                const metrics = ctx.measureText(text);
+                                ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                                ctx.fillRect(labelX - metrics.width / 2 - 2, labelY - 6, metrics.width + 4, 12);
+                                ctx.fillStyle = 'rgba(23, 20, 18, 0.6)';
+                                ctx.fillText(text, labelX, labelY);
+                            }
+                            ctx.restore();
+                        }
+                    },
+                    // Plugin 2: paksa gambar ulang SEMUA titik di lapisan paling atas
+                    {
+                        id: 'hcaPointsOnTop_' + chartId,
+                        afterDatasetsDraw: (chart) => {
+                            const { ctx } = chart;
+                            chart.data.datasets.forEach((dataset, datasetIndex) => {
+                                const meta = chart.getDatasetMeta(datasetIndex);
+                                if (!meta.visible) return;
+                                meta.data.forEach((point) => {
+                                    ctx.save();
+                                    ctx.beginPath();
+                                    ctx.arc(point.x, point.y, dataset.pointRadius || 3, 0, Math.PI * 2);
+                                    ctx.fillStyle = dataset.pointBackgroundColor;
+                                    ctx.strokeStyle = dataset.pointBorderColor || '#ffffff';
+                                    ctx.lineWidth = dataset.pointBorderWidth || 1.5;
+                                    ctx.fill();
+                                    ctx.stroke();
+                                    ctx.restore();
+                                });
+                            });
+                        }
+                    }
+                ]
+            });
         }
-    },
-    plugins: [
-        // Plugin 1: gambar angka skala manual (biar tetap kebaca di atas warna)
-        {
-            id: 'hcaShiftTicks_' + chartId,
-            afterDraw: (chart) => {
-                const { ctx, scales } = chart;
-                const scale = scales.r;
-                const yCenter = scale.yCenter;
-                const xCenter = scale.xCenter;
 
-                ctx.save();
-                ctx.font = "600 9px 'Instrument Sans', sans-serif";
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-
-                for (let value = 1; value <= scale.max; value++) {
-                    const radius = scale.getDistanceFromCenterForValue(value);
-                    const labelY = yCenter - radius;
-                    const labelX = xCenter + 12;
-                    const text = String(value);
-                    const metrics = ctx.measureText(text);
-                    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-                    ctx.fillRect(labelX - metrics.width / 2 - 2, labelY - 6, metrics.width + 4, 12);
-                    ctx.fillStyle = 'rgba(23, 20, 18, 0.6)';
-                    ctx.fillText(text, labelX, labelY);
-                }
-                ctx.restore();
-            }
-        },
-        // Plugin 2: paksa gambar ulang SEMUA titik di lapisan paling atas
-        // supaya titik Standar & Toleransi tidak pernah tertutup area Aktual
-        {
-            id: 'hcaPointsOnTop_' + chartId,
-            afterDatasetsDraw: (chart) => {
-                const { ctx } = chart;
-                chart.data.datasets.forEach((dataset, datasetIndex) => {
-                    const meta = chart.getDatasetMeta(datasetIndex);
-                    if (!meta.visible) return;
-                    meta.data.forEach((point) => {
-                        ctx.save();
-                        ctx.beginPath();
-                        ctx.arc(point.x, point.y, dataset.pointRadius || 3, 0, Math.PI * 2);
-                        ctx.fillStyle = dataset.pointBackgroundColor;
-                        ctx.strokeStyle = dataset.pointBorderColor || '#ffffff';
-                        ctx.lineWidth = dataset.pointBorderWidth || 1.5;
-                        ctx.fill();
-                        ctx.stroke();
-                        ctx.restore();
-                    });
-                });
-            }
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initRadarChart_{{ str_replace('-', '_', $chartId) }});
+        } else {
+            initRadarChart_{{ str_replace('-', '_', $chartId) }}();
         }
-    ]
-});
     })();
 </script>
-@endscript

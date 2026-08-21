@@ -99,187 +99,194 @@
 
 </div>
 
-@script
 <script>
     (function() {
-        const chartId = '{{ $chartId }}';
-        const ctx = document.getElementById(chartId);
-        if (!ctx) return;
+        function initPerformanceChart_{{ str_replace('-', '_', $chartId) }}() {
+            const chartId = '{{ $chartId }}';
+            const ctx = document.getElementById(chartId);
+            if (!ctx) return;
+            if (typeof Chart === 'undefined') return;
 
-        const el = document.getElementById('performance-container-' + chartId);
-        if (!el) return;
+            const el = document.getElementById('performance-container-' + chartId);
+            if (!el) return;
 
-        const years = JSON.parse(el.dataset.years);
-        const trends = JSON.parse(el.dataset.trends);
-        const benchmarks = JSON.parse(el.dataset.benchmarks);
+            const years = JSON.parse(el.dataset.years);
+            const trends = JSON.parse(el.dataset.trends);
+            const benchmarks = JSON.parse(el.dataset.benchmarks);
 
-        // Destroy previous instance if it exists
-        const existingChart = Chart.getChart(ctx);
-        if (existingChart) {
-            existingChart.destroy();
-        }
-
-        // Calculate dynamic min and max based on data values
-        const allValues = [...trends, ...benchmarks].map(Number).filter(v => !isNaN(v) && v !== null);
-        let dynamicMin = 80;
-        let dynamicMax = 100;
-
-        if (allValues.length > 0) {
-            const minVal = Math.min(...allValues);
-            const maxVal = Math.max(...allValues);
-
-            // Berikan buffer 3-4% ke bawah dan ke atas, dibulatkan ke kelipatan 5 terdekat
-            dynamicMin = Math.max(0, Math.floor((minVal - 3) / 5) * 5);
-            dynamicMax = Math.ceil((maxVal + 3) / 5) * 5;
-
-            // Pastikan rentang minimal 15% agar visual kurva proporsional dan tidak flat
-            if (dynamicMax - dynamicMin < 15) {
-                dynamicMin = Math.max(0, dynamicMin - 5);
-                dynamicMax = dynamicMax + 5;
+            // Destroy previous instance if it exists
+            const existingChart = Chart.getChart(ctx);
+            if (existingChart) {
+                existingChart.destroy();
             }
-        }
 
-        const range = dynamicMax - dynamicMin;
-        let stepSize = 5;
-        if (range > 30 && range <= 60) {
-            stepSize = 10;
-        } else if (range > 60) {
-            stepSize = 20;
-        }
+            // Calculate dynamic min and max based on data values
+            const allValues = [...trends, ...benchmarks].map(Number).filter(v => !isNaN(v) && v !== null);
+            let dynamicMin = 80;
+            let dynamicMax = 100;
 
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: years,
-                datasets: [
-                    {
-                        label: 'Aktual KPI',
-                        data: trends,
-                        borderColor: '#15803d',
-                        backgroundColor: 'rgba(21, 128, 61, 0.08)',
-                        borderWidth: 3,
-                        pointBackgroundColor: '#15803d',
-                        pointBorderColor: '#ffffff',
-                        pointBorderWidth: 2,
-                        pointRadius: 5,
-                        pointHoverRadius: 7,
-                        fill: true,
-                        tension: 0.25,
-                        z: 2,
-                        datalabels: {
-                            display: true,
-                            align: 'top',
-                            anchor: 'end',
-                            offset: 6,
-                            color: '#15803d',
-                            backgroundColor: 'rgba(255, 255, 255, 0.92)',
-                            borderColor: 'rgba(21, 128, 61, 0.25)',
-                            borderWidth: 1,
-                            borderRadius: 4,
-                            padding: {
-                                top: 2,
-                                bottom: 1,
-                                left: 5,
-                                right: 5
-                            },
-                            font: {
+            if (allValues.length > 0) {
+                const minVal = Math.min(...allValues);
+                const maxVal = Math.max(...allValues);
+
+                // Berikan buffer 3-4% ke bawah dan ke atas, dibulatkan ke kelipatan 5 terdekat
+                dynamicMin = Math.max(0, Math.floor((minVal - 3) / 5) * 5);
+                dynamicMax = Math.ceil((maxVal + 3) / 5) * 5;
+
+                // Pastikan rentang minimal 15% agar visual kurva proporsional dan tidak flat
+                if (dynamicMax - dynamicMin < 15) {
+                    dynamicMin = Math.max(0, dynamicMin - 5);
+                    dynamicMax = dynamicMax + 5;
+                }
+            }
+
+            const range = dynamicMax - dynamicMin;
+            let stepSize = 5;
+            if (range > 30 && range <= 60) {
+                stepSize = 10;
+            } else if (range > 60) {
+                stepSize = 20;
+            }
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: years,
+                    datasets: [
+                        {
+                            label: 'Aktual KPI',
+                            data: trends,
+                            borderColor: '#15803d',
+                            backgroundColor: 'rgba(21, 128, 61, 0.08)',
+                            borderWidth: 3,
+                            pointBackgroundColor: '#15803d',
+                            pointBorderColor: '#ffffff',
+                            pointBorderWidth: 2,
+                            pointRadius: 5,
+                            pointHoverRadius: 7,
+                            fill: true,
+                            tension: 0.25,
+                            z: 2,
+                            datalabels: {
+                                display: true,
+                                align: 'top',
+                                anchor: 'end',
+                                offset: 6,
+                                color: '#15803d',
+                                backgroundColor: 'rgba(255, 255, 255, 0.92)',
+                                borderColor: 'rgba(21, 128, 61, 0.25)',
+                                borderWidth: 1,
+                                borderRadius: 4,
+                                padding: {
+                                    top: 2,
+                                    bottom: 1,
+                                    left: 5,
+                                    right: 5
+                                },
+                                font: {
+                                    family: 'Instrument Sans',
+                                    weight: '700',
+                                    size: 10
+                                },
+                                formatter: function(value) {
+                                    return Number(value).toFixed(2) + '%';
+                                }
+                            }
+                        },
+                        {
+                            label: 'Target',
+                            data: benchmarks,
+                            borderColor: '#94a3b8',
+                            borderWidth: 1.5,
+                            borderDash: [5, 4],
+                            pointRadius: 0,
+                            fill: false,
+                            tension: 0,
+                            z: 1,
+                            datalabels: {
+                                display: false
+                            }
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    layout: {
+                        padding: {
+                            top: 28,
+                            bottom: 8,
+                            left: 8,
+                            right: 12
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false // Menggunakan custom SVG legend di header
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(23, 20, 18, 0.9)',
+                            titleFont: {
                                 family: 'Instrument Sans',
-                                weight: '700',
-                                size: 10
+                                weight: '600'
                             },
-                            formatter: function(value) {
-                                return Number(value).toFixed(2) + '%';
+                            bodyFont: {
+                                family: 'Instrument Sans'
+                            },
+                            padding: 10,
+                            cornerRadius: 6,
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + Number(context.raw).toFixed(2) + '%';
+                                }
                             }
                         }
                     },
-                    {
-                        label: 'Target',
-                        data: benchmarks,
-                        borderColor: '#94a3b8',
-                        borderWidth: 1.5,
-                        borderDash: [5, 4],
-                        pointRadius: 0,
-                        fill: false,
-                        tension: 0,
-                        z: 1,
-                        datalabels: {
-                            display: false
-                        }
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                layout: {
-                    padding: {
-                        top: 28,
-                        bottom: 8,
-                        left: 8,
-                        right: 12
-                    }
-                },
-                plugins: {
-                    legend: {
-                        display: false // Menggunakan custom SVG legend di header
-                    },
-                    tooltip: {
-                        backgroundColor: 'rgba(23, 20, 18, 0.9)',
-                        titleFont: {
-                            family: 'Instrument Sans',
-                            weight: '600'
-                        },
-                        bodyFont: {
-                            family: 'Instrument Sans'
-                        },
-                        padding: 10,
-                        cornerRadius: 6,
-                        callbacks: {
-                            label: function(context) {
-                                return context.dataset.label + ': ' + Number(context.raw).toFixed(2) + '%';
+                    scales: {
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: '#64748b',
+                                font: {
+                                    family: 'Instrument Sans',
+                                    weight: '600',
+                                    size: 11
+                                },
+                                padding: 6
                             }
-                        }
-                    }
-                },
-                scales: {
-                    x: {
-                        grid: {
-                            display: false
                         },
-                        ticks: {
-                            color: '#64748b',
-                            font: {
-                                family: 'Instrument Sans',
-                                weight: '600',
-                                size: 11
+                        y: {
+                            min: dynamicMin,
+                            max: dynamicMax,
+                            grid: {
+                                color: '#f0ebe4',
+                                drawBorder: false
                             },
-                            padding: 6
-                        }
-                    },
-                    y: {
-                        min: dynamicMin,
-                        max: dynamicMax,
-                        grid: {
-                            color: '#f0ebe4',
-                            drawBorder: false
-                        },
-                        ticks: {
-                            stepSize: stepSize,
-                            color: '#94a3b8',
-                            font: {
-                                family: 'Instrument Sans',
-                                size: 10,
-                                weight: '500'
-                            },
-                            padding: 8,
-                            callback: function(value) {
-                                return value + '%';
+                            ticks: {
+                                stepSize: stepSize,
+                                color: '#94a3b8',
+                                font: {
+                                    family: 'Instrument Sans',
+                                    size: 10,
+                                    weight: '500'
+                                },
+                                padding: 8,
+                                callback: function(value) {
+                                    return value + '%';
+                                }
                             }
                         }
                     }
                 }
-            }
-        });
+            });
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initPerformanceChart_{{ str_replace('-', '_', $chartId) }});
+        } else {
+            initPerformanceChart_{{ str_replace('-', '_', $chartId) }}();
+        }
     })();
 </script>
-@endscript

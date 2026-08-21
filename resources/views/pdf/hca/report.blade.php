@@ -25,6 +25,8 @@
         }
         $chartJsPath = base_path('node_modules/chart.js/dist/chart.umd.js');
         $chartJsContent = file_exists($chartJsPath) ? file_get_contents($chartJsPath) : '';
+        $chartDataLabelsPath = base_path('node_modules/chartjs-plugin-datalabels/dist/chartjs-plugin-datalabels.min.js');
+        $chartDataLabelsContent = file_exists($chartDataLabelsPath) ? file_get_contents($chartDataLabelsPath) : '';
     @endphp
 
     <!-- Inlined Chart.js -->
@@ -32,6 +34,16 @@
         <script>{!! $chartJsContent !!}</script>
     @else
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    @endif
+
+    <!-- Inlined Chart.js DataLabels Plugin -->
+    @if ($chartDataLabelsContent)
+        <script>{!! $chartDataLabelsContent !!}</script>
+        <script>
+            if (typeof Chart !== 'undefined' && typeof ChartDataLabels !== 'undefined') {
+                Chart.register(ChartDataLabels);
+            }
+        </script>
     @endif
 
     <script>
