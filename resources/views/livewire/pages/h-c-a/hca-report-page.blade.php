@@ -145,7 +145,7 @@
                             title="Download file PDF resmi 24 halaman langsung dari server (Headless Chromium)"
                         >
                             <i class="fas fa-file-pdf text-accent-amber"></i>
-                            Download PDF (1-Klik)
+                            Download PDF
                         </a>
 
                         <!-- Inline Preview in New Tab -->
