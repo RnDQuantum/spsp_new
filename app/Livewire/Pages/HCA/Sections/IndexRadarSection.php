@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Livewire\Pages\HCA\Sections;
 
-use App\Models\CategoryType;
 use App\Models\Participant;
+use App\Services\HcaDataService;
 use App\Services\IndividualAssessmentService;
 use Illuminate\View\View;
 use Livewire\Attributes\Reactive;
@@ -28,19 +28,7 @@ class IndexRadarSection extends Component
 
     public function getParticipantProperty(): ?Participant
     {
-        if (! $this->participantId) {
-            return Participant::with([
-                'assessmentEvent',
-                'positionFormation.template',
-                'finalAssessment',
-            ])->first();
-        }
-
-        return Participant::with([
-            'assessmentEvent',
-            'positionFormation.template',
-            'finalAssessment',
-        ])->find($this->participantId);
+        return app(HcaDataService::class)->getParticipant($this->participantId);
     }
 
     private function getHciData(): array
@@ -63,10 +51,11 @@ class IndexRadarSection extends Component
         }
 
         $templateId = $participant->positionFormation->template_id;
+        $hcaDataService = app(HcaDataService::class);
         $service = app(IndividualAssessmentService::class);
 
-        $potensiCat = CategoryType::where('template_id', $templateId)->where('code', 'potensi')->first();
-        $kompetensiCat = CategoryType::where('template_id', $templateId)->where('code', 'kompetensi')->first();
+        $potensiCat = $hcaDataService->getCategoryByCode($templateId, 'potensi');
+        $kompetensiCat = $hcaDataService->getCategoryByCode($templateId, 'kompetensi');
 
         $potensiAspects = $potensiCat ? $service->getAspectAssessments($participant->id, $potensiCat->id, 0) : collect();
         $kompetensiAspects = $kompetensiCat ? $service->getAspectAssessments($participant->id, $kompetensiCat->id, 0) : collect();
@@ -202,8 +191,9 @@ class IndexRadarSection extends Component
         }
 
         $templateId = $participant->positionFormation->template_id;
+        $hcaDataService = app(HcaDataService::class);
         $service = app(IndividualAssessmentService::class);
-        $potensiCat = CategoryType::where('template_id', $templateId)->where('code', 'potensi')->first();
+        $potensiCat = $hcaDataService->getCategoryByCode($templateId, 'potensi');
 
         if (! $potensiCat) {
             return [

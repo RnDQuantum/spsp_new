@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Livewire\Pages\HCA\Sections;
 
-use App\Models\CategoryType;
 use App\Models\Participant;
 use App\Models\SubAspectAssessment;
+use App\Services\HcaDataService;
 use App\Services\IndividualAssessmentService;
 use Illuminate\View\View;
 use Livewire\Attributes\Reactive;
@@ -115,15 +115,11 @@ class ScoreListSection extends Component
     }
 
     /**
-     * Get active participant.
+     * Get active participant (memoized).
      */
     public function getParticipantProperty(): ?Participant
     {
-        if (! $this->participantId) {
-            return Participant::with(['positionFormation.template', 'finalAssessment', 'testResults'])->first();
-        }
-
-        return Participant::with(['positionFormation.template', 'finalAssessment', 'testResults'])->find($this->participantId);
+        return app(HcaDataService::class)->getParticipant($this->participantId);
     }
 
     /**
@@ -151,9 +147,10 @@ class ScoreListSection extends Component
         }
 
         $templateId = $participant->positionFormation->template_id;
+        $hcaDataService = app(HcaDataService::class);
         $service = app(IndividualAssessmentService::class);
 
-        $kompetensiCat = CategoryType::where('template_id', $templateId)->where('code', 'kompetensi')->first();
+        $kompetensiCat = $hcaDataService->getCategoryByCode($templateId, 'kompetensi');
 
         if (! $kompetensiCat) {
             return $this->datasets['competency'];

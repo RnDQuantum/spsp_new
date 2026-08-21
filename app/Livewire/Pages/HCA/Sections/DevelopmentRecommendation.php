@@ -6,6 +6,7 @@ namespace App\Livewire\Pages\HCA\Sections;
 
 use App\Models\AspectAssessment;
 use App\Models\Participant;
+use App\Services\HcaDataService;
 use Illuminate\View\View;
 use Livewire\Attributes\Reactive;
 use Livewire\Component;
@@ -17,11 +18,7 @@ class DevelopmentRecommendation extends Component
 
     public function render(): View
     {
-        $participant = null;
-        if ($this->participantId) {
-            $participant = Participant::with(['positionFormation', 'finalAssessment', 'assessmentEvent'])->find($this->participantId);
-        }
-
+        $participant = app(HcaDataService::class)->getParticipant($this->participantId);
         $analysis = $this->analyzeDevelopmentNeeds($participant);
 
         return view('livewire.pages.h-c-a.sections.development-recommendation', [

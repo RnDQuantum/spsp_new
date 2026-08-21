@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Pages\HCA\Sections;
 
 use App\Models\Participant;
+use App\Services\HcaDataService;
 use Illuminate\View\View;
 use Livewire\Attributes\Reactive;
 use Livewire\Component;
@@ -15,15 +16,11 @@ class TimelineSection extends Component
     public ?int $participantId = null;
 
     /**
-     * Get the active participant with career histories.
+     * Get the active participant with career histories (memoized).
      */
     public function getParticipantProperty(): ?Participant
     {
-        if (! $this->participantId) {
-            return Participant::with(['careerHistories', 'positionFormation', 'assessmentEvent.institution'])->first();
-        }
-
-        return Participant::with(['careerHistories', 'positionFormation', 'assessmentEvent.institution'])->find($this->participantId);
+        return app(HcaDataService::class)->getParticipant($this->participantId);
     }
 
     public function render(): View

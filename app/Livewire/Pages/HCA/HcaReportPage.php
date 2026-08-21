@@ -7,6 +7,7 @@ namespace App\Livewire\Pages\HCA;
 use App\Models\AssessmentEvent;
 use App\Models\Participant;
 use App\Models\PositionFormation;
+use App\Services\HcaDataService;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\View\View;
 use Livewire\Attributes\Layout;
@@ -33,14 +34,10 @@ class HcaReportPage extends Component
     public ?int $selectedPositionId = null;
 
     /**
-     * Active section code
+     * Active section code with URL deep-linking support
      */
+    #[Url(as: 'section')]
     public string $activeSection = 'cover';
-
-    /**
-     * Print mode flag
-     */
-    public bool $printMode = false;
 
     /**
      * Talent selector modal visibility flag
@@ -164,6 +161,11 @@ class HcaReportPage extends Component
                 'filter.test_number' => $p->test_number,
             ]);
         }
+
+        // Validate activeSection from URL query parameter
+        if ($this->activeSection !== 'cover' && ! $this->isValidSection($this->activeSection)) {
+            $this->activeSection = 'cover';
+        }
     }
 
     /**
@@ -227,25 +229,11 @@ class HcaReportPage extends Component
     }
 
     /**
-     * Get active participant model property
+     * Get active participant model property (memoized)
      */
     public function getParticipantProperty(): ?Participant
     {
-        if (! $this->participantId) {
-            return null;
-        }
-
-        return Participant::with([
-            'assessmentEvent.institution',
-            'positionFormation.template',
-            'batch',
-            'finalAssessment',
-            'mmpi',
-            'institution',
-            'personalProfile',
-            'careerHistories',
-            'performanceRecords',
-        ])->find($this->participantId);
+        return app(HcaDataService::class)->getParticipant($this->participantId);
     }
 
     /**
@@ -331,25 +319,25 @@ class HcaReportPage extends Component
      */
     public function setSection(string $sectionCode): void
     {
-        // Check if section is active (Phase A)
-        foreach ($this->menuGroups as $group) {
-            foreach ($group['sections'] as $sec) {
-                if ($sec['code'] === $sectionCode && $sec['active']) {
-                    $this->activeSection = $sectionCode;
-                    $this->printMode = false;
-
-                    return;
-                }
-            }
+        if ($this->isValidSection($sectionCode)) {
+            $this->activeSection = $sectionCode;
         }
     }
 
     /**
-     * Toggle print mode
+     * Validate whether section code is active and exists
      */
-    public function togglePrintMode(bool $state): void
+    private function isValidSection(string $sectionCode): bool
     {
-        $this->printMode = $state;
+        foreach ($this->menuGroups as $group) {
+            foreach ($group['sections'] as $sec) {
+                if ($sec['code'] === $sectionCode && ($sec['active'] ?? false)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     /**

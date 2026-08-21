@@ -100,8 +100,7 @@ class HcaReportPageTest extends TestCase
     public function test_component_initializes_with_default_values(): void
     {
         Livewire::test(HcaReportPage::class)
-            ->assertSet('activeSection', 'cover')
-            ->assertSet('printMode', false);
+            ->assertSet('activeSection', 'cover');
     }
 
     /**
@@ -156,16 +155,27 @@ class HcaReportPageTest extends TestCase
     }
 
     /**
-     * Test that print mode toggles state correctly
+     * Test that deep-linking query parameter sets the active section
      */
-    public function test_print_mode_toggles_state(): void
+    public function test_deep_linking_query_parameter_sets_active_section(): void
     {
-        Livewire::test(HcaReportPage::class)
-            ->assertSet('printMode', false)
-            ->call('togglePrintMode', true)
-            ->assertSet('printMode', true)
-            ->call('togglePrintMode', false)
-            ->assertSet('printMode', false);
+        Livewire::withQueryParams(['section' => 'competency'])
+            ->test(HcaReportPage::class)
+            ->assertSet('activeSection', 'competency');
+
+        Livewire::withQueryParams(['section' => 'nine_box'])
+            ->test(HcaReportPage::class)
+            ->assertSet('activeSection', 'nine_box');
+    }
+
+    /**
+     * Test that invalid deep-linking query parameter falls back to cover
+     */
+    public function test_invalid_deep_linking_query_parameter_falls_back_to_cover(): void
+    {
+        Livewire::withQueryParams(['section' => 'non_existent_section'])
+            ->test(HcaReportPage::class)
+            ->assertSet('activeSection', 'cover');
     }
 
     /**

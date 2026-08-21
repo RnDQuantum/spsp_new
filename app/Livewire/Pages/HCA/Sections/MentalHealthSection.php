@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Pages\HCA\Sections;
 
-use App\Models\Participant;
+use App\Services\HcaDataService;
 use Illuminate\View\View;
 use Livewire\Attributes\Reactive;
 use Livewire\Component;
@@ -45,13 +45,7 @@ class MentalHealthSection extends Component
 
     public function loadMmpiData(): void
     {
-        if (! $this->participantId) {
-            $this->setDefaultAspects();
-
-            return;
-        }
-
-        $participant = Participant::with('mmpi')->find($this->participantId);
+        $participant = app(HcaDataService::class)->getParticipant($this->participantId);
         $mmpi = $participant?->mmpi;
 
         if (! $mmpi) {

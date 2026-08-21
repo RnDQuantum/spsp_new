@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Pages\HCA\Sections;
 
 use App\Models\Participant;
+use App\Services\HcaDataService;
 use Illuminate\View\View;
 use Livewire\Attributes\Reactive;
 use Livewire\Component;
@@ -23,11 +24,7 @@ class PerformanceDashboard extends Component
 
     public function getParticipantProperty(): ?Participant
     {
-        if (! $this->participantId) {
-            return Participant::with(['performanceRecords'])->first();
-        }
-
-        return Participant::with(['performanceRecords'])->find($this->participantId);
+        return app(HcaDataService::class)->getParticipant($this->participantId);
     }
 
     public function render(): View

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Pages\HCA\Sections;
 
 use App\Models\Participant;
+use App\Services\HcaDataService;
 use App\Services\TestReportService;
 use Illuminate\View\View;
 use Livewire\Attributes\Reactive;
@@ -61,27 +62,11 @@ class TestInstrumentsAppendix extends Component
     }
 
     /**
-     * Get active participant model
+     * Get active participant model (memoized)
      */
     public function getParticipantProperty(): ?Participant
     {
-        if (! $this->participantId) {
-            return Participant::with([
-                'assessmentEvent.institution',
-                'assessmentEvent.project',
-                'positionFormation',
-                'batch',
-                'mmpi',
-            ])->first();
-        }
-
-        return Participant::with([
-            'assessmentEvent.institution',
-            'assessmentEvent.project',
-            'positionFormation',
-            'batch',
-            'mmpi',
-        ])->find($this->participantId);
+        return app(HcaDataService::class)->getParticipant($this->participantId);
     }
 
     /**
