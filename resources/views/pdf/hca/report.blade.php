@@ -44,6 +44,15 @@
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     @endif
 
+    <script>
+        // Disable Chart.js animation for instant zero-latency canvas rendering in PDF
+        if (typeof Chart !== 'undefined') {
+            Chart.defaults.animation = false;
+            Chart.defaults.animations = false;
+            Chart.defaults.transitions = false;
+        }
+    </script>
+
     <style>
         {!! $cssContent !!}
 

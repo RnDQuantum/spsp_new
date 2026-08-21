@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 use App\Models\Participant;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Spatie\LaravelPdf\Facades\Pdf;
 use Spatie\LaravelPdf\PdfBuilder;
@@ -17,27 +18,53 @@ class HcaPdfExportController extends Controller
     /**
      * Download HCA Report PDF as a physical file attachment
      */
-    public function download(Request $request, Participant $participant): PdfBuilder|SymfonyResponse
+    public function download(Request $request, Participant $participant): SymfonyResponse
     {
+        $startTime = microtime(true);
+        $timeStr = now()->format('Y-m-d H:i:s');
+        Log::info("[{$timeStr}] [HCA PDF] 🚀 Memulai proses Download PDF | Peserta: {$participant->name} (ID: {$participant->id}, No Tes: {$participant->test_number})");
+
         $this->authorizeAccess($participant);
 
         $pdf = $this->buildPdf($participant);
         $fileName = $this->generateFileName($participant);
 
-        return $pdf->download($fileName);
+        // Eksekusi render Chromium secara langsung agar total durasi riil terukur
+        $response = $pdf->download($fileName)->toResponse($request);
+
+        $durationMs = round((microtime(true) - $startTime) * 1000, 2);
+        $durationSec = round(microtime(true) - $startTime, 2);
+        $fileSizeKb = round(strlen((string) $response->getContent()) / 1024, 2);
+
+        Log::info("[{$timeStr}] [HCA PDF] ✅ Selesai render PDF (Download) | Peserta: {$participant->name} | Total Waktu Nyata: {$durationSec} detik ({$durationMs} ms) | Ukuran File: {$fileSizeKb} KB | File: {$fileName}");
+
+        return $response;
     }
 
     /**
      * Preview HCA Report PDF inline in the browser tab
      */
-    public function preview(Request $request, Participant $participant): PdfBuilder|SymfonyResponse
+    public function preview(Request $request, Participant $participant): SymfonyResponse
     {
+        $startTime = microtime(true);
+        $timeStr = now()->format('Y-m-d H:i:s');
+        Log::info("[{$timeStr}] [HCA PDF] 🚀 Memulai proses Preview PDF | Peserta: {$participant->name} (ID: {$participant->id}, No Tes: {$participant->test_number})");
+
         $this->authorizeAccess($participant);
 
         $pdf = $this->buildPdf($participant);
         $fileName = $this->generateFileName($participant);
 
-        return $pdf->inline($fileName);
+        // Eksekusi render Chromium secara langsung agar total durasi riil terukur
+        $response = $pdf->inline($fileName)->toResponse($request);
+
+        $durationMs = round((microtime(true) - $startTime) * 1000, 2);
+        $durationSec = round(microtime(true) - $startTime, 2);
+        $fileSizeKb = round(strlen((string) $response->getContent()) / 1024, 2);
+
+        Log::info("[{$timeStr}] [HCA PDF] ✅ Selesai render PDF (Preview) | Peserta: {$participant->name} | Total Waktu Nyata: {$durationSec} detik ({$durationMs} ms) | Ukuran File: {$fileSizeKb} KB | File: {$fileName}");
+
+        return $response;
     }
 
     /**
@@ -72,12 +99,28 @@ class HcaPdfExportController extends Controller
                 $browsershot
                     ->noSandbox()
                     ->showBackground()
-                    ->setDelay(1500)
+                    ->setDelay(300)
                     ->addChromiumArguments([
                         '--headless=new',
                         '--disable-gpu',
                         '--disable-dev-shm-usage',
                         '--no-sandbox',
+                        '--disable-extensions',
+                        '--disable-background-networking',
+                        '--disable-background-timer-throttling',
+                        '--disable-backgrounding-occluded-windows',
+                        '--disable-breakpad',
+                        '--disable-component-extensions-with-background-pages',
+                        '--disable-default-apps',
+                        '--disable-features=TranslateUI,BlinkGenPropertyTrees',
+                        '--disable-ipc-flooding-protection',
+                        '--disable-renderer-backgrounding',
+                        '--enable-features=NetworkService,NetworkServiceInProcess',
+                        '--force-color-profile=srgb',
+                        '--hide-scrollbars',
+                        '--metrics-recording-only',
+                        '--mute-audio',
+                        '--no-first-run',
                     ]);
             });
     }
