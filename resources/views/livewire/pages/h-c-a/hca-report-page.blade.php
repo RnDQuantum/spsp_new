@@ -1,5 +1,36 @@
 <div class="min-h-screen bg-warm-ivory font-sans text-primary-ink leading-relaxed">
     @if ($printMode)
+        <!-- Sticky Floating Toolbar for Print Flat View (Hidden on Print) -->
+        <div class="no-print sticky top-0 z-50 bg-[#171412] text-white px-6 py-3.5 shadow-xl flex flex-wrap items-center justify-between gap-4 border-b border-warm-border/20">
+            <div class="flex items-center gap-3">
+                <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-accent-amber/20 text-accent-amber border border-accent-amber/40">
+                    <i class="fas fa-file-pdf text-sm"></i>
+                </span>
+                <div>
+                    <h2 class="text-sm font-semibold tracking-wide text-white">Mode Cetak & Preview PDF Eksekutif (24 Bab)</h2>
+                    <p class="text-[11px] text-slate-400">Tips: Pada dialog cetak browser, pilih Destination <strong class="text-slate-200">"Save as PDF"</strong> dan pastikan opsi <strong class="text-slate-200">"Background graphics"</strong> dicentang.</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <button 
+                    type="button"
+                    onclick="window.print()"
+                    class="bg-accent-amber hover:bg-amber-600 text-white font-medium text-xs px-4 py-2 rounded-md shadow-sm transition-all flex items-center gap-2 cursor-pointer"
+                >
+                    <i class="fas fa-print"></i>
+                    Buka Dialog Cetak
+                </button>
+                <button 
+                    type="button"
+                    wire:click="togglePrintMode(false)"
+                    class="bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white font-medium text-xs px-4 py-2 rounded-md border border-slate-700 transition-all flex items-center gap-2 cursor-pointer"
+                >
+                    <i class="fas fa-arrow-left"></i>
+                    Kembali ke Tampilan Web
+                </button>
+            </div>
+        </div>
+
         <!-- PRINT FLAT VIEW -->
         <div class="print-container bg-white p-0">
             <!-- 01 Cover -->
@@ -122,20 +153,6 @@
                 <livewire:pages.h-c-a.sections.test-instruments-appendix :participant-id="$participantId" :key="'test_instruments_print_'.$participantId" />
             </div>
         </div>
-
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                // Auto trigger print when printMode is active
-                setTimeout(() => {
-                    window.print();
-                }, 800);
-            });
-
-            // Restore normal view after printing
-            window.onafterprint = function() {
-                @this.togglePrintMode(false);
-            };
-        </script>
     @else
         <!-- WEB INTERACTIVE VIEW -->
         <div class="flex flex-col md:flex-row min-h-screen md:h-screen md:overflow-hidden">
@@ -622,4 +639,15 @@
             }
         }
     </style>
+
+    @script
+    <script>
+        $wire.on('initiate-print', () => {
+            // Beri jeda 1 detik agar 24 komponen Livewire & grafik Chart.js selesai di-mount di DOM
+            setTimeout(() => {
+                window.print();
+            }, 1000);
+        });
+    </script>
+    @endscript
 </div>
