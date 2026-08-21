@@ -1,6 +1,22 @@
 <div class="min-h-screen bg-warm-ivory font-sans text-primary-ink leading-relaxed">
     <!-- WEB INTERACTIVE VIEW -->
-    <div class="flex flex-col md:flex-row min-h-screen md:h-screen md:overflow-hidden">
+    <div 
+        x-data="{
+            activeSection: @entangle('activeSection').live,
+            sectionLabels: @js($this->sectionLabels),
+            get activeLabel() {
+                return this.sectionLabels[this.activeSection] || '01 — Cover Page';
+            },
+            setSection(code) {
+                this.activeSection = code;
+                const url = new URL(window.location);
+                url.searchParams.set('section', code);
+                window.history.replaceState({}, '', url);
+                window.dispatchEvent(new CustomEvent('hca-tab-switched', { detail: { section: code } }));
+            }
+        }"
+        class="flex flex-col md:flex-row min-h-screen md:h-screen md:overflow-hidden"
+    >
             <!-- Left Sidebar (TOC) -->
             <aside class="w-full md:w-80 bg-primary-ink text-slate-200 flex flex-col border-r border-warm-border/10 shrink-0 md:h-full">
                 <!-- Branded Header -->
@@ -63,11 +79,13 @@
                                     <li>
                                         @if ($section['active'])
                                             <button 
-                                                wire:click="setSection('{{ $section['code'] }}')"
-                                                class="w-full text-left px-3 py-2 rounded-md text-xs font-medium transition-all duration-200 flex items-center justify-between {{ $activeSection === $section['code'] ? 'bg-accent-amber text-white shadow-sm' : 'text-slate-300 hover:bg-[#2c2724] hover:text-white' }}"
+                                                type="button"
+                                                @click="setSection('{{ $section['code'] }}')"
+                                                :class="activeSection === '{{ $section['code'] }}' ? 'bg-accent-amber text-white shadow-sm font-semibold' : 'text-slate-300 hover:bg-[#2c2724] hover:text-white'"
+                                                class="w-full text-left px-3 py-2 rounded-md text-xs font-medium transition-all duration-150 flex items-center justify-between cursor-pointer"
                                             >
                                                 <span>{{ $section['label'] }}</span>
-                                                 <i class="fas fa-chevron-right text-xs opacity-60"></i>
+                                                <i class="fas fa-chevron-right text-xs opacity-60"></i>
                                             </button>
                                         @else
                                             <div 
@@ -100,19 +118,8 @@
                 <header class="bg-white border-b border-warm-border px-8 py-4 flex items-center justify-between shrink-0 sticky top-0 z-30">
                     <div class="flex items-center gap-2">
                         <span class="text-xs font-bold uppercase tracking-widest text-slate-400">Section Aktif</span>
-                        <span class="text-xs font-semibold text-primary-ink/80 bg-warm-ivory px-2.5 py-1 rounded-md border border-warm-border">
-                            @php
-                                $activeLabel = '';
-                                foreach ($menuGroups as $group) {
-                                    foreach ($group['sections'] as $sec) {
-                                        if ($sec['code'] === $activeSection) {
-                                            $activeLabel = $sec['label'];
-                                            break 2;
-                                        }
-                                    }
-                                }
-                            @endphp
-                            {{ $activeLabel }}
+                        <span class="text-xs font-semibold text-primary-ink/80 bg-warm-ivory px-2.5 py-1 rounded-md border border-warm-border" x-text="activeLabel">
+                            {{ $this->sectionLabels[$activeSection] ?? '01 — Cover Page' }}
                         </span>
                     </div>
 
@@ -161,69 +168,127 @@
                     </div>
                 </header>
 
-                <!-- Scrollable Content Frame -->
+                <!-- Scrollable Content Frame (Instant SPA with x-show) -->
                 <div class="flex-1 overflow-y-auto p-8 md:p-12 scrollbar-hidden">
                     <div class="max-w-5xl mx-auto">
-                        <!-- Transition wrapper -->
-                        <div class="transition-all duration-300">
-                            @switch($activeSection)
-                                @case('cover')
-                                    <livewire:pages.h-c-a.sections.cover :participant-id="$participantId" :key="'cover_'.$participantId" />
-                                    @break
-                                @case('exec_summary')
-                                    <livewire:pages.h-c-a.sections.executive-summary :participant-id="$participantId" :key="'exec_summary_'.$participantId" />
-                                    @break
-                                @case('participant_id')
-                                    <livewire:pages.h-c-a.sections.participant-profile :participant-id="$participantId" :key="'participant_profile_'.$participantId" />
-                                    @break
-                                @case('hci')
-                                @case('potential')
-                                @case('eq')
-                                    <livewire:pages.h-c-a.sections.index-radar-section :sectionCode="$activeSection" :participant-id="$participantId" :key="'radar_' . $activeSection . '_' . $participantId" />
-                                    @break
-                                @case('competency')
-                                @case('cognitive')
-                                @case('big_five')
-                                @case('learning_agility')
-                                @case('leadership_potential')
-                                @case('integrity')
-                                    <livewire:pages.h-c-a.sections.score-list-section :sectionCode="$activeSection" :participant-id="$participantId" :key="'scores_' . $activeSection . '_' . $participantId" />
-                                    @break
-                                @case('career')
-                                    <livewire:pages.h-c-a.sections.timeline-section :participant-id="$participantId" :key="'career_'.$participantId" />
-                                    @break
-                                @case('disc')
-                                    <livewire:pages.h-c-a.sections.disc-profile :participant-id="$participantId" :key="'disc_'.$participantId" />
-                                    @break
-                                @case('performance')
-                                    <livewire:pages.h-c-a.sections.performance-dashboard :participant-id="$participantId" :key="'performance_'.$participantId" />
-                                    @break
-                                @case('nine_box')
-                                    <livewire:pages.h-c-a.sections.nine-box-matrix :participant-id="$participantId" :key="'nine_box_'.$participantId" />
-                                    @break
-                                @case('succession')
-                                    <livewire:pages.h-c-a.sections.succession-readiness :participant-id="$participantId" :key="'succession_'.$participantId" />
-                                    @break
-                                @case('personal_profile')
-                                @case('strengths')
-                                    <livewire:pages.h-c-a.sections.qualitative-list-section :sectionCode="$activeSection" :participant-id="$participantId" :key="'qualitative_' . $activeSection . '_' . $participantId" />
-                                    @break
-                                @case('mental_health')
-                                    <livewire:pages.h-c-a.sections.mental-health-section :participant-id="$participantId" :key="'mental_health_'.$participantId" />
-                                    @break
-                                @case('risk_indicators')
-                                    <livewire:pages.h-c-a.sections.risk-indicators :participant-id="$participantId" :key="'risk_indicators_'.$participantId" />
-                                    @break
-                                @case('development_rec')
-                                    <livewire:pages.h-c-a.sections.development-recommendation :participant-id="$participantId" :key="'development_rec_'.$participantId" />
-                                    @break
-                                @case('next_role_rec')
-                                    <livewire:pages.h-c-a.sections.next-role-recommendation :participant-id="$participantId" :key="'next_role_rec_'.$participantId" />
-                                    @break
-                                @case('test_instruments_appendix')
-                                    <livewire:pages.h-c-a.sections.test-instruments-appendix :participant-id="$participantId" :key="'test_instruments_'.$participantId" />
-                                    @break
-                            @endswitch
+                        <!-- 01 Cover -->
+                        <div x-show="activeSection === 'cover'" x-cloak>
+                            <livewire:pages.h-c-a.sections.cover :participant-id="$participantId" :key="'cover_'.$participantId" />
+                        </div>
+
+                        <!-- 02 Ringkasan Eksekutif -->
+                        <div x-show="activeSection === 'exec_summary'" x-cloak>
+                            <livewire:pages.h-c-a.sections.executive-summary :participant-id="$participantId" :key="'exec_summary_'.$participantId" />
+                        </div>
+
+                        <!-- 03 Identitas Peserta -->
+                        <div x-show="activeSection === 'participant_id'" x-cloak>
+                            <livewire:pages.h-c-a.sections.participant-profile :participant-id="$participantId" :key="'participant_profile_'.$participantId" />
+                        </div>
+
+                        <!-- 04 Human Capital Index -->
+                        <div x-show="activeSection === 'hci'" x-cloak>
+                            <livewire:pages.h-c-a.sections.index-radar-section sectionCode="hci" :participant-id="$participantId" :key="'radar_hci_'.$participantId" />
+                        </div>
+
+                        <!-- 05 Layer 1: Kompetensi -->
+                        <div x-show="activeSection === 'competency'" x-cloak>
+                            <livewire:pages.h-c-a.sections.score-list-section sectionCode="competency" :participant-id="$participantId" :key="'scores_competency_'.$participantId" />
+                        </div>
+
+                        <!-- 06 Riwayat Karier -->
+                        <div x-show="activeSection === 'career'" x-cloak>
+                            <livewire:pages.h-c-a.sections.timeline-section :participant-id="$participantId" :key="'career_'.$participantId" />
+                        </div>
+
+                        <!-- 07 Layer 2: Potensi -->
+                        <div x-show="activeSection === 'potential'" x-cloak>
+                            <livewire:pages.h-c-a.sections.index-radar-section sectionCode="potential" :participant-id="$participantId" :key="'radar_potential_'.$participantId" />
+                        </div>
+
+                        <!-- 08 IQ & Profil Kognitif -->
+                        <div x-show="activeSection === 'cognitive'" x-cloak>
+                            <livewire:pages.h-c-a.sections.score-list-section sectionCode="cognitive" :participant-id="$participantId" :key="'scores_cognitive_'.$participantId" />
+                        </div>
+
+                        <!-- 09 Big Five Personality -->
+                        <div x-show="activeSection === 'big_five'" x-cloak>
+                            <livewire:pages.h-c-a.sections.score-list-section sectionCode="big_five" :participant-id="$participantId" :key="'scores_big_five_'.$participantId" />
+                        </div>
+
+                        <!-- 10 DISC Profile -->
+                        <div x-show="activeSection === 'disc'" x-cloak>
+                            <livewire:pages.h-c-a.sections.disc-profile :participant-id="$participantId" :key="'disc_'.$participantId" />
+                        </div>
+
+                        <!-- 11 Learning Agility -->
+                        <div x-show="activeSection === 'learning_agility'" x-cloak>
+                            <livewire:pages.h-c-a.sections.score-list-section sectionCode="learning_agility" :participant-id="$participantId" :key="'scores_learning_agility_'.$participantId" />
+                        </div>
+
+                        <!-- 12 Leadership Potential -->
+                        <div x-show="activeSection === 'leadership_potential'" x-cloak>
+                            <livewire:pages.h-c-a.sections.score-list-section sectionCode="leadership_potential" :participant-id="$participantId" :key="'scores_leadership_potential_'.$participantId" />
+                        </div>
+
+                        <!-- 13 Emotional Intelligence (EQ) -->
+                        <div x-show="activeSection === 'eq'" x-cloak>
+                            <livewire:pages.h-c-a.sections.index-radar-section sectionCode="eq" :participant-id="$participantId" :key="'radar_eq_'.$participantId" />
+                        </div>
+
+                        <!-- 14 Values & Integrity -->
+                        <div x-show="activeSection === 'integrity'" x-cloak>
+                            <livewire:pages.h-c-a.sections.score-list-section sectionCode="integrity" :participant-id="$participantId" :key="'scores_integrity_'.$participantId" />
+                        </div>
+
+                        <!-- 15 Performance Dashboard -->
+                        <div x-show="activeSection === 'performance'" x-cloak>
+                            <livewire:pages.h-c-a.sections.performance-dashboard :participant-id="$participantId" :key="'performance_'.$participantId" />
+                        </div>
+
+                        <!-- 16 Talent 9-Box Matrix -->
+                        <div x-show="activeSection === 'nine_box'" x-cloak>
+                            <livewire:pages.h-c-a.sections.nine-box-matrix :participant-id="$participantId" :key="'nine_box_'.$participantId" />
+                        </div>
+
+                        <!-- 17 Succession Readiness -->
+                        <div x-show="activeSection === 'succession'" x-cloak>
+                            <livewire:pages.h-c-a.sections.succession-readiness :participant-id="$participantId" :key="'succession_'.$participantId" />
+                        </div>
+
+                        <!-- 18 Profil Personal -->
+                        <div x-show="activeSection === 'personal_profile'" x-cloak>
+                            <livewire:pages.h-c-a.sections.qualitative-list-section sectionCode="personal_profile" :participant-id="$participantId" :key="'qualitative_personal_profile_'.$participantId" />
+                        </div>
+
+                        <!-- 19 Kesehatan Jiwa -->
+                        <div x-show="activeSection === 'mental_health'" x-cloak>
+                            <livewire:pages.h-c-a.sections.mental-health-section :participant-id="$participantId" :key="'mental_health_'.$participantId" />
+                        </div>
+
+                        <!-- 20 Kekuatan Psikologis -->
+                        <div x-show="activeSection === 'strengths'" x-cloak>
+                            <livewire:pages.h-c-a.sections.qualitative-list-section sectionCode="strengths" :participant-id="$participantId" :key="'qualitative_strengths_'.$participantId" />
+                        </div>
+
+                        <!-- 21 Indikator Risiko -->
+                        <div x-show="activeSection === 'risk_indicators'" x-cloak>
+                            <livewire:pages.h-c-a.sections.risk-indicators :participant-id="$participantId" :key="'risk_indicators_'.$participantId" />
+                        </div>
+
+                        <!-- 22 Rekomendasi Pengembangan -->
+                        <div x-show="activeSection === 'development_rec'" x-cloak>
+                            <livewire:pages.h-c-a.sections.development-recommendation :participant-id="$participantId" :key="'development_rec_'.$participantId" />
+                        </div>
+
+                        <!-- 23 Rekomendasi Peran Berikutnya -->
+                        <div x-show="activeSection === 'next_role_rec'" x-cloak>
+                            <livewire:pages.h-c-a.sections.next-role-recommendation :participant-id="$participantId" :key="'next_role_rec_'.$participantId" />
+                        </div>
+
+                        <!-- 24 Laporan Hasil Alat Tes -->
+                        <div x-show="activeSection === 'test_instruments_appendix'" x-cloak>
+                            <livewire:pages.h-c-a.sections.test-instruments-appendix :participant-id="$participantId" :key="'test_instruments_'.$participantId" />
                         </div>
                     </div>
                 </div>

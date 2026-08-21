@@ -247,5 +247,11 @@
         } else {
             initRadarChart_{{ str_replace('-', '_', $chartId) }}();
         }
+
+        window.addEventListener('hca-tab-switched', function(e) {
+            if (['hci', 'potential', 'eq'].includes(e.detail?.section)) {
+                setTimeout(initRadarChart_{{ str_replace('-', '_', $chartId) }}, 30);
+            }
+        });
     })();
 </script>

@@ -60,9 +60,9 @@ class HcaTestInstrumentsAppendixTest extends TestCase
         Livewire::test(HcaReportPage::class, [
             'participant' => $participant?->id,
         ])
+            ->assertSeeLivewire(TestInstrumentsAppendix::class)
             ->call('setSection', 'test_instruments_appendix')
-            ->assertSet('activeSection', 'test_instruments_appendix')
-            ->assertSeeLivewire(TestInstrumentsAppendix::class);
+            ->assertSet('activeSection', 'test_instruments_appendix');
     }
 
     /**

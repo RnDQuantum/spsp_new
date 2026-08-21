@@ -288,5 +288,11 @@
         } else {
             initPerformanceChart_{{ str_replace('-', '_', $chartId) }}();
         }
+
+        window.addEventListener('hca-tab-switched', function(e) {
+            if (e.detail?.section === 'performance') {
+                setTimeout(initPerformanceChart_{{ str_replace('-', '_', $chartId) }}, 30);
+            }
+        });
     })();
 </script>

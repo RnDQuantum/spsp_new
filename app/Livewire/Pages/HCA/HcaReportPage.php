@@ -341,6 +341,23 @@ class HcaReportPage extends Component
     }
 
     /**
+     * Get associative map of section code => section label
+     *
+     * @return array<string, string>
+     */
+    public function getSectionLabelsProperty(): array
+    {
+        $labels = [];
+        foreach ($this->menuGroups as $group) {
+            foreach ($group['sections'] as $sec) {
+                $labels[$sec['code']] = $sec['label'];
+            }
+        }
+
+        return $labels;
+    }
+
+    /**
      * Render component
      */
     public function render(): View
