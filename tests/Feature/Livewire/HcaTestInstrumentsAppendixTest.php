@@ -66,17 +66,16 @@ class HcaTestInstrumentsAppendixTest extends TestCase
     }
 
     /**
-     * Test print mode on HcaReportPage includes appendix section
+     * Test PDF report view includes appendix section
      */
-    public function test_print_mode_includes_appendix(): void
+    public function test_pdf_report_view_includes_appendix(): void
     {
-        $participant = Participant::first();
+        $participant = Participant::query()->first() ?? Participant::factory()->create();
 
-        Livewire::test(HcaReportPage::class, [
-            'participant' => $participant?->id,
-        ])
-            ->call('togglePrintMode', true)
-            ->assertSet('printMode', true)
-            ->assertSeeLivewire(TestInstrumentsAppendix::class);
+        $view = $this->view('pdf.hca.report', [
+            'participant' => $participant,
+        ]);
+
+        $view->assertSeeLivewire(TestInstrumentsAppendix::class);
     }
 }

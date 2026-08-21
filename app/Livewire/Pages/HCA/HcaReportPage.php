@@ -350,10 +350,6 @@ class HcaReportPage extends Component
     public function togglePrintMode(bool $state): void
     {
         $this->printMode = $state;
-
-        if ($state) {
-            $this->dispatch('initiate-print');
-        }
     }
 
     /**

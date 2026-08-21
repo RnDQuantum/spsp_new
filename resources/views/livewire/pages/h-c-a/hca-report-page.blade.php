@@ -1,161 +1,6 @@
 <div class="min-h-screen bg-warm-ivory font-sans text-primary-ink leading-relaxed">
-    @if ($printMode)
-        <!-- Sticky Floating Toolbar for Print Flat View (Hidden on Print) -->
-        <div class="no-print sticky top-0 z-50 bg-[#171412] text-white px-6 py-3.5 shadow-xl flex flex-wrap items-center justify-between gap-4 border-b border-warm-border/20">
-            <div class="flex items-center gap-3">
-                <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-accent-amber/20 text-accent-amber border border-accent-amber/40">
-                    <i class="fas fa-file-pdf text-sm"></i>
-                </span>
-                <div>
-                    <h2 class="text-sm font-semibold tracking-wide text-white">Mode Cetak & Preview PDF Eksekutif (24 Bab)</h2>
-                    <p class="text-[11px] text-slate-400">Tips: Pada dialog cetak browser, pilih Destination <strong class="text-slate-200">"Save as PDF"</strong> dan pastikan opsi <strong class="text-slate-200">"Background graphics"</strong> dicentang.</p>
-                </div>
-            </div>
-            <div class="flex items-center gap-3">
-                <button 
-                    type="button"
-                    onclick="window.print()"
-                    class="bg-accent-amber hover:bg-amber-600 text-white font-medium text-xs px-4 py-2 rounded-md shadow-sm transition-all flex items-center gap-2 cursor-pointer"
-                >
-                    <i class="fas fa-print"></i>
-                    Buka Dialog Cetak
-                </button>
-                <button 
-                    type="button"
-                    wire:click="togglePrintMode(false)"
-                    class="bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white font-medium text-xs px-4 py-2 rounded-md border border-slate-700 transition-all flex items-center gap-2 cursor-pointer"
-                >
-                    <i class="fas fa-arrow-left"></i>
-                    Kembali ke Tampilan Web
-                </button>
-            </div>
-        </div>
-
-        <!-- PRINT FLAT VIEW -->
-        <div class="print-container bg-white p-0">
-            <!-- 01 Cover -->
-            <div class="page-break">
-                <livewire:pages.h-c-a.sections.cover :participant-id="$participantId" :key="'cover_print_'.$participantId" />
-            </div>
-
-            <!-- 02 Ringkasan Eksekutif -->
-            <div class="page-break p-8">
-                <livewire:pages.h-c-a.sections.executive-summary :participant-id="$participantId" :key="'exec_summary_print_'.$participantId" />
-            </div>
-
-            <!-- 03 Identitas Peserta -->
-            <div class="page-break p-8">
-                <livewire:pages.h-c-a.sections.participant-profile :participant-id="$participantId" :key="'participant_profile_print_'.$participantId" />
-            </div>
-
-            <!-- 04 HCI -->
-            <div class="page-break p-8">
-                <livewire:pages.h-c-a.sections.index-radar-section sectionCode="hci" :participant-id="$participantId" :key="'hci_print_'.$participantId" />
-            </div>
-
-            <!-- 05 Kompetensi -->
-            <div class="page-break p-8">
-                <livewire:pages.h-c-a.sections.score-list-section sectionCode="competency" :participant-id="$participantId" :key="'competency_print_'.$participantId" />
-            </div>
-
-            <!-- 06 Riwayat Karier -->
-            <div class="page-break p-8">
-                <livewire:pages.h-c-a.sections.timeline-section :participant-id="$participantId" :key="'timeline_print_'.$participantId" />
-            </div>
-
-            <!-- 07 Potensi -->
-            <div class="page-break p-8">
-                <livewire:pages.h-c-a.sections.index-radar-section sectionCode="potential" :participant-id="$participantId" :key="'potential_print_'.$participantId" />
-            </div>
-
-            <!-- 08 IQ -->
-            <div class="page-break p-8">
-                <livewire:pages.h-c-a.sections.score-list-section sectionCode="cognitive" :participant-id="$participantId" :key="'cognitive_print_'.$participantId" />
-            </div>
-
-            <!-- 09 Big Five -->
-            <div class="page-break p-8">
-                <livewire:pages.h-c-a.sections.score-list-section sectionCode="big_five" :participant-id="$participantId" :key="'big_five_print_'.$participantId" />
-            </div>
-
-            <!-- 10 DISC -->
-            <div class="page-break p-8">
-                <livewire:pages.h-c-a.sections.disc-profile :participant-id="$participantId" :key="'disc_print_'.$participantId" />
-            </div>
-
-            <!-- 11 Learning Agility -->
-            <div class="page-break p-8">
-                <livewire:pages.h-c-a.sections.score-list-section sectionCode="learning_agility" :participant-id="$participantId" :key="'learning_agility_print_'.$participantId" />
-            </div>
-
-            <!-- 12 Leadership Potential -->
-            <div class="page-break p-8">
-                <livewire:pages.h-c-a.sections.score-list-section sectionCode="leadership_potential" :participant-id="$participantId" :key="'leadership_potential_print_'.$participantId" />
-            </div>
-
-            <!-- 13 EQ -->
-            <div class="page-break p-8">
-                <livewire:pages.h-c-a.sections.index-radar-section sectionCode="eq" :participant-id="$participantId" :key="'eq_print_'.$participantId" />
-            </div>
-
-            <!-- 14 Values & Integrity -->
-            <div class="page-break p-8">
-                <livewire:pages.h-c-a.sections.score-list-section sectionCode="integrity" :participant-id="$participantId" :key="'integrity_print_'.$participantId" />
-            </div>
-
-            <!-- 15 Performance Dashboard -->
-            <div class="page-break p-8">
-                <livewire:pages.h-c-a.sections.performance-dashboard :participant-id="$participantId" :key="'performance_print_'.$participantId" />
-            </div>
-
-            <!-- 16 9-Box Matrix -->
-            <div class="page-break p-8">
-                <livewire:pages.h-c-a.sections.nine-box-matrix :participant-id="$participantId" :key="'nine_box_print_'.$participantId" />
-            </div>
-
-            <!-- 17 Succession Readiness -->
-            <div class="page-break p-8">
-                <livewire:pages.h-c-a.sections.succession-readiness :participant-id="$participantId" :key="'succession_print_'.$participantId" />
-            </div>
-
-            <!-- 18 Profil Personal -->
-            <div class="page-break p-8">
-                <livewire:pages.h-c-a.sections.qualitative-list-section sectionCode="personal_profile" :participant-id="$participantId" :key="'personal_profile_print_'.$participantId" />
-            </div>
-
-            <!-- 19 Kesehatan Jiwa -->
-            <div class="page-break p-8">
-                <livewire:pages.h-c-a.sections.mental-health-section :participant-id="$participantId" :key="'mental_health_print_'.$participantId" />
-            </div>
-
-            <!-- 20 Kekuatan Psikologis -->
-            <div class="page-break p-8">
-                <livewire:pages.h-c-a.sections.qualitative-list-section sectionCode="strengths" :participant-id="$participantId" :key="'strengths_print_'.$participantId" />
-            </div>
-
-            <!-- 21 Indikator Risiko -->
-            <div class="page-break p-8">
-                <livewire:pages.h-c-a.sections.risk-indicators :participant-id="$participantId" :key="'risk_indicators_print_'.$participantId" />
-            </div>
-
-            <!-- 22 Rekomendasi Pengembangan -->
-            <div class="page-break p-8">
-                <livewire:pages.h-c-a.sections.development-recommendation :participant-id="$participantId" :key="'development_rec_print_'.$participantId" />
-            </div>
-
-            <!-- 23 Rekomendasi Peran Berikutnya -->
-            <div class="page-break p-8">
-                <livewire:pages.h-c-a.sections.next-role-recommendation :participant-id="$participantId" :key="'next_role_rec_print_'.$participantId" />
-            </div>
-
-            <!-- 24 Laporan Hasil Alat Tes -->
-            <div class="p-8">
-                <livewire:pages.h-c-a.sections.test-instruments-appendix :participant-id="$participantId" :key="'test_instruments_print_'.$participantId" />
-            </div>
-        </div>
-    @else
-        <!-- WEB INTERACTIVE VIEW -->
-        <div class="flex flex-col md:flex-row min-h-screen md:h-screen md:overflow-hidden">
+    <!-- WEB INTERACTIVE VIEW -->
+    <div class="flex flex-col md:flex-row min-h-screen md:h-screen md:overflow-hidden">
             <!-- Left Sidebar (TOC) -->
             <aside class="w-full md:w-80 bg-primary-ink text-slate-200 flex flex-col border-r border-warm-border/10 shrink-0 md:h-full">
                 <!-- Branded Header -->
@@ -307,23 +152,12 @@
                         <a 
                             href="{{ $previewUrl }}"
                             target="_blank"
-                            class="border border-warm-border hover:bg-warm-ivory text-primary-ink font-medium text-xs px-3 py-2 rounded-md transition-all duration-200 flex items-center gap-1.5 cursor-pointer hidden sm:inline-flex"
+                            class="border border-warm-border hover:bg-warm-ivory text-primary-ink font-medium text-xs px-3 py-2 rounded-md transition-all duration-200 flex items-center gap-1.5 cursor-pointer"
                             title="Buka preview dokumen PDF di tab baru"
                         >
                             <i class="fas fa-arrow-up-right-from-square text-[10px] text-slate-400"></i>
                             Preview PDF
                         </a>
-
-                        <!-- Quick Browser Print -->
-                        <button 
-                            type="button"
-                            wire:click="togglePrintMode(true)"
-                            class="border border-slate-300 hover:bg-slate-100 text-slate-700 font-medium text-xs px-3 py-2 rounded-md transition-all duration-200 flex items-center gap-1.5 cursor-pointer"
-                            title="Buka dialog cetak browser langsung"
-                        >
-                            <i class="fas fa-print text-slate-500"></i>
-                            Cetak Cepat
-                        </button>
                     </div>
                 </header>
 
@@ -648,39 +482,5 @@
 
             </main>
         </div>
-    @endif
-
-    <style>
-        /* Print Stylesheet */
-        @media print {
-            .page-break {
-                page-break-after: always;
-                break-after: page;
-            }
-            body {
-                background: white !important;
-                color: black !important;
-            }
-            main, aside, header, .no-print {
-                display: none !important;
-            }
-            .print-container {
-                display: block !important;
-                width: 100% !important;
-                margin: 0 !important;
-                padding: 0 !important;
-            }
-        }
-    </style>
-
-    @script
-    <script>
-        $wire.on('initiate-print', () => {
-            // Beri jeda 1 detik agar 24 komponen Livewire & grafik Chart.js selesai di-mount di DOM
-            setTimeout(() => {
-                window.print();
-            }, 1000);
-        });
-    </script>
-    @endscript
+    </div>
 </div>
