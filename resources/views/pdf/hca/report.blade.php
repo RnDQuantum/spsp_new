@@ -27,16 +27,6 @@
         $chartJsContent = file_exists($chartJsPath) ? file_get_contents($chartJsPath) : '';
     @endphp
 
-    @livewireStyles
-
-    <!-- Google Fonts: Lora & Instrument Sans -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Lora:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
-
-    <!-- FontAwesome for icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-
     <!-- Inlined Chart.js -->
     @if ($chartJsContent)
         <script>{!! $chartJsContent !!}</script>
@@ -45,11 +35,12 @@
     @endif
 
     <script>
-        // Disable Chart.js animation for instant zero-latency canvas rendering in PDF
+        // Disable Chart.js animations & force standard 1x DPI for fast, lightweight PDF canvas rasterization
         if (typeof Chart !== 'undefined') {
             Chart.defaults.animation = false;
             Chart.defaults.animations = false;
             Chart.defaults.transitions = false;
+            Chart.defaults.devicePixelRatio = 1;
         }
     </script>
 
@@ -64,7 +55,7 @@
         body {
             background-color: #ffffff !important;
             color: #171412 !important;
-            font-family: 'Instrument Sans', sans-serif;
+            font-family: 'Instrument Sans', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Arial, sans-serif;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
         }

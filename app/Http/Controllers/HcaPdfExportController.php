@@ -84,6 +84,8 @@ class HcaPdfExportController extends Controller
             'performanceRecords',
         ]);
 
+        $cacheKey = "hca_pdf_{$participant->id}_".($participant->updated_at?->timestamp ?? '0');
+
         return Pdf::view('pdf.hca.report', [
             'participant' => $participant,
         ])
@@ -91,6 +93,7 @@ class HcaPdfExportController extends Controller
             ->portrait()
             ->footerView('pdf.hca.footer')
             ->margins(8, 8, 12, 8, 'mm')
+            ->cache(key: $cacheKey, ttl: 86400)
             ->withBrowsershot(function ($browsershot) {
                 $chromePath = config('laravel-pdf.browsershot.chrome_path');
                 if ($chromePath && file_exists($chromePath)) {
