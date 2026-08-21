@@ -27,7 +27,10 @@ Dokumentasi HCA Report dibagi menjadi 4 dokumen utama dan 1 folder spesifikasi p
   * Pengelompokan status data: 🟢 **Reuse**, 🟡 **Partial**, dan 🔴 **New**.
 
 * **[DESIGN_AND_UI_SPEC.md](./DESIGN_AND_UI_SPEC.md)**
-  * Spesifikasi visual identity theme *"Executive Journal"*, token warna, tipografi (`Lora` & `Instrument Sans`), serta arsitektur komponen Livewire v3.
+  * Spesifikasi visual identity theme *"Executive Journal"*, token warna, tipografi (`Lora` & `Instrument Sans`), serta arsitektur komponen Livewire.
+
+* **[NAVIGATION_OPTIMIZATION_SPEC.md](./NAVIGATION_OPTIMIZATION_SPEC.md)**
+  * Arsitektur optimasi navigasi 0ms Instant SPA, Livewire Deep-Linking (`#[Url]`), memoisasi query `HcaDataService`, dan sinkronisasi Chart.js.
 
 ### 2. Spesifikasi Per-Halaman & Section ([docs/hca/sections/](./sections/))
 
