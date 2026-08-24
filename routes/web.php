@@ -16,6 +16,7 @@ use App\Livewire\Pages\GeneralReport\Ranking\RekapRankingAssessment;
 use App\Livewire\Pages\GeneralReport\Statistic;
 use App\Livewire\Pages\GeneralReport\Training\TrainingRecommendation;
 use App\Livewire\Pages\HCA\HcaReportPage;
+use App\Livewire\Pages\IndividualReport\FinalReport;
 use App\Livewire\Pages\IndividualReport\GeneralMapping;
 use App\Livewire\Pages\IndividualReport\GeneralMatching;
 use App\Livewire\Pages\IndividualReport\GeneralMcMapping;
@@ -100,6 +101,9 @@ Route::middleware(['auth', 'institution.access'])->group(function () {
 
     // Individual Report Route - Ringkasan Asesmen
     Route::livewire('/ringkasan-assessment/{eventCode}/{testNumber}', RingkasanAssessment::class)->name('ringkasan_assessment');
+
+    // Individual Report Route - Final Report (Laporan Individu)
+    Route::livewire('/final-report/{eventCode}/{testNumber}', FinalReport::class)->name('final_report');
 
     // General report Routes
     Route::livewire('/ranking-psy-mapping', RankingPsyMapping::class)->name('ranking-psy-mapping');
