@@ -85,7 +85,7 @@ class HcaPdfExportController extends Controller
         ]);
 
         $tolerancePercentage = (int) session('individual_report.tolerance', 0);
-        $cacheKey = "hca_pdf_v3_{$participant->id}_tol_{$tolerancePercentage}_".($participant->updated_at?->timestamp ?? '0');
+        $cacheKey = "hca_pdf_v5_{$participant->id}_tol_{$tolerancePercentage}_".($participant->updated_at?->timestamp ?? '0');
 
         return Pdf::view('pdf.hca.report', [
             'participant' => $participant,

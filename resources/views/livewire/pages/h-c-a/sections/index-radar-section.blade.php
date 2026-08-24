@@ -202,6 +202,7 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     animation: false,
+                    devicePixelRatio: Math.max(window.devicePixelRatio || 1, 3),
                     plugins: {
                         legend: { display: false },
                         datalabels: { display: false },

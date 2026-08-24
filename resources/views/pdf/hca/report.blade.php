@@ -47,12 +47,12 @@
     @endif
 
     <script>
-        // Disable Chart.js animations & force standard 1x DPI for fast, lightweight PDF canvas rasterization
+        // Disable Chart.js animations & use 3x HiDPI devicePixelRatio for crystal-clear 300 DPI PDF canvas rendering
         if (typeof Chart !== 'undefined') {
             Chart.defaults.animation = false;
             Chart.defaults.animations = false;
             Chart.defaults.transitions = false;
-            Chart.defaults.devicePixelRatio = 1;
+            Chart.defaults.devicePixelRatio = 3;
         }
     </script>
 
