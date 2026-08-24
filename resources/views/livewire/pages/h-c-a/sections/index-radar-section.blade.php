@@ -201,7 +201,10 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    animation: false,
+                    animation: {
+                        duration: 600,
+                        easing: 'easeOutQuart'
+                    },
                     devicePixelRatio: Math.max(window.devicePixelRatio || 1, 3),
                     plugins: {
                         legend: { display: false },
