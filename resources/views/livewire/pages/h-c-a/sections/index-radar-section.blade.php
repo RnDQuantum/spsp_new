@@ -1,190 +1,5 @@
 <div 
-    x-data="{
-        chartId: @js($chartId),
-        labels: @js($labels),
-        actual: @js($actualRatings),
-        standard: @js($standardRatings),
-        tolerance: @js($toleranceRatings),
-        tolerancePercentage: {{ (int) $tolerancePercentage }},
-        participantName: @js($participant->name ?? 'Skor Aktual'),
-        sectionCode: @js($sectionCode),
-        chartInstance: null,
-
-        init() {
-            this.$nextTick(() => {
-                this.ensureChart();
-            });
-        },
-
-        ensureChart() {
-            const canvas = document.getElementById(this.chartId);
-            if (!canvas) return;
-            if (typeof Chart === 'undefined') {
-                setTimeout(() => this.ensureChart(), 50);
-                return;
-            }
-
-            const existing = Chart.getChart(canvas);
-            if (existing) {
-                this.chartInstance = existing;
-                this.updateChartData();
-                return;
-            }
-
-            this.chartInstance = new Chart(canvas, {
-                type: 'radar',
-                data: {
-                    labels: this.labels,
-                    datasets: [
-                        {
-                            label: this.participantName,
-                            data: this.actual,
-                            fill: true,
-                            backgroundColor: 'rgba(93, 176, 16, 0.45)', // SPSP Green Layer
-                            borderColor: '#5db010',
-                            pointBackgroundColor: '#8fd006',
-                            pointBorderColor: '#ffffff',
-                            borderWidth: 2.5,
-                            pointRadius: 4.5,
-                            pointHoverRadius: 6,
-                            tension: 0.1
-                        },
-                        {
-                            label: 'Standar Formasi',
-                            data: this.standard,
-                            fill: true,
-                            backgroundColor: 'rgba(181, 5, 5, 0.28)', // SPSP Red Layer
-                            borderColor: '#b50505',
-                            pointBackgroundColor: '#9a0404',
-                            pointBorderColor: '#ffffff',
-                            borderWidth: 2,
-                            pointRadius: 4,
-                            pointHoverRadius: 5.5,
-                            tension: 0.1
-                        },
-                        {
-                            label: 'Batas Toleransi ' + this.tolerancePercentage + '%',
-                            data: this.tolerance,
-                            fill: true,
-                            backgroundColor: 'rgba(250, 250, 5, 0.22)', // SPSP Yellow Layer
-                            borderColor: '#e6d105',
-                            pointBackgroundColor: '#e6d105',
-                            pointBorderColor: '#ffffff',
-                            borderWidth: 2,
-                            pointRadius: 4,
-                            pointHoverRadius: 5.5,
-                            tension: 0.1
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    animation: {
-                        duration: 250
-                    },
-                    plugins: {
-                        legend: { display: false },
-                        datalabels: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: (context) => context.dataset.label + ': ' + Number(context.raw).toFixed(2)
-                            }
-                        }
-                    },
-                    scales: {
-                        r: {
-                            min: 0,
-                            max: 5,
-                            ticks: {
-                                display: true,
-                                stepSize: 1,
-                                backdropColor: 'transparent',
-                                color: '#64748b',
-                                font: {
-                                    size: 11,
-                                    weight: '600',
-                                    family: '\'Instrument Sans\', system-ui, sans-serif'
-                                }
-                            },
-                            pointLabels: {
-                                color: '#171412',
-                                font: {
-                                    size: 13,
-                                    weight: '700',
-                                    family: '\'Instrument Sans\', system-ui, sans-serif'
-                                },
-                                padding: 14
-                            },
-                            grid: {
-                                color: 'rgba(23, 20, 18, 0.10)'
-                            },
-                            angleLines: {
-                                color: 'rgba(23, 20, 18, 0.10)'
-                            }
-                        }
-                    }
-                }
-            });
-        },
-
-        updateChartData() {
-            if (!this.chartInstance) return;
-            const factor = this.tolerancePercentage > 0 ? (1 - (this.tolerancePercentage / 100)) : 1.0;
-            this.tolerance = this.standard.map(val => Number((val * factor).toFixed(2)));
-
-            this.chartInstance.data.labels = this.labels;
-            this.chartInstance.data.datasets[0].data = this.actual;
-            this.chartInstance.data.datasets[0].label = this.participantName;
-            this.chartInstance.data.datasets[1].data = this.standard;
-            this.chartInstance.data.datasets[2].label = 'Batas Toleransi ' + this.tolerancePercentage + '%';
-            this.chartInstance.data.datasets[2].data = this.tolerance;
-            this.chartInstance.update();
-        },
-
-        handleToleranceUpdated(detail) {
-            const tol = typeof detail === 'object' && detail !== null && 'tolerance' in detail 
-                ? Number(detail.tolerance) 
-                : Number(detail || 0);
-            this.tolerancePercentage = tol;
-
-            const factor = tol > 0 ? (1 - (tol / 100)) : 1.0;
-            this.tolerance = this.standard.map(val => Number((val * factor).toFixed(2)));
-
-            const canvas = document.getElementById(this.chartId);
-            if (canvas) {
-                const chart = Chart.getChart(canvas) || this.chartInstance;
-                if (chart) {
-                    this.chartInstance = chart;
-                    chart.data.datasets[2].label = 'Batas Toleransi ' + tol + '%';
-                    chart.data.datasets[2].data = this.tolerance;
-                    chart.update();
-                } else {
-                    this.ensureChart();
-                }
-            }
-        },
-
-        handleTabSwitched(section) {
-            if (section === this.sectionCode) {
-                setTimeout(() => {
-                    const canvas = document.getElementById(this.chartId);
-                    if (canvas) {
-                        const chart = Chart.getChart(canvas) || this.chartInstance;
-                        if (chart) {
-                            this.chartInstance = chart;
-                            chart.resize();
-                            chart.update();
-                        } else {
-                            this.ensureChart();
-                        }
-                    }
-                }, 40);
-            }
-        }
-    }"
-    @tolerance-updated.window="handleToleranceUpdated($event.detail)"
-    @hca-tab-switched.window="handleTabSwitched($event.detail.section)"
+    id="radar-container-{{ $chartId }}"
     class="w-full max-w-5xl mx-auto bg-white border border-warm-border rounded-xl p-8 md:p-12 shadow-xs print:border-none print:shadow-none space-y-8"
 >
     <!-- Section Header -->
@@ -255,12 +70,12 @@
                 <!-- Dataset 2: Batas Toleransi (Kuning) -->
                 <div class="flex items-center gap-2 px-3 py-1.5 rounded-md bg-white border border-warm-border shadow-2xs">
                     <span class="w-3 h-3 rounded-full shrink-0" style="background-color: #fafa05; border: 1px solid #e6d105;"></span>
-                    <span class="text-primary-ink font-medium">Batas Toleransi <span x-text="tolerancePercentage + '%'">{{ $tolerancePercentage }}%</span></span>
+                    <span class="text-primary-ink font-medium">Batas Toleransi <span class="hca-tol-label-{{ str_replace('-', '_', $chartId) }}">{{ (int) $tolerancePercentage }}%</span></span>
                 </div>
             </div>
         </div>
 
-        <!-- Radar Canvas with wire:ignore to prevent Livewire morph from clearing canvas -->
+        <!-- Radar Canvas with wire:ignore -->
         <div class="relative w-full h-[460px] md:h-[500px]" wire:ignore>
             <canvas id="{{ $chartId }}"></canvas>
         </div>
@@ -279,10 +94,8 @@
                 <tr class="hover:bg-warm-ivory/50 transition-colors">
                     <td class="py-3 px-4 font-semibold text-primary-ink">{{ $label }}</td>
                     <td class="py-3 px-4 text-center font-mono">{{ number_format($standardRatings[$index], 2) }}</td>
-                    <td class="py-3 px-4 text-center font-mono text-slate-500 font-medium bg-amber-50/20">
-                        <span x-text="tolerance[{{ $index }}] ? Number(tolerance[{{ $index }}]).toFixed(2) : '{{ number_format($toleranceRatings[$index], 2) }}'">
-                            {{ number_format($toleranceRatings[$index], 2) }}
-                        </span>
+                    <td class="py-3 px-4 text-center font-mono text-slate-500 font-medium bg-amber-50/20" id="tol-cell-{{ str_replace('-', '_', $chartId) }}-{{ $index }}">
+                        {{ number_format($toleranceRatings[$index], 2) }}
                     </td>
                     <td class="py-3 px-4 text-center font-mono font-bold text-forest-green bg-emerald-50/30">{{ number_format($actualRatings[$index], 2) }}</td>
                     <td class="py-3 px-4 text-right font-mono font-semibold {{ $actualRatings[$index] >= $standardRatings[$index] ? 'text-forest-green' : 'text-rust-red' }}">
@@ -299,13 +112,12 @@
         <div class="p-3.5 rounded-lg bg-warm-ivory/60 border border-warm-border/80 text-[11px] text-slate-600 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <div class="flex items-center gap-2">
                 <i class="fas fa-scale-balanced text-accent-amber text-xs"></i>
-                <span>
-                    <template x-if="tolerancePercentage > 0">
-                        <span>Penilaian menerapkan Ambang Toleransi <strong x-text="tolerancePercentage + '%'">{{ $activeTol }}%</strong> (Ambang kelulusan: ≥ <strong x-text="(100 - tolerancePercentage) + '%'">{{ 100 - $activeTol }}%</strong> Standar Formasi Jabatan).</span>
-                    </template>
-                    <template x-if="tolerancePercentage === 0">
-                        <span>Penilaian menerapkan <strong>Standar Murni (0% Toleransi)</strong> tanpa penyesuaian ambang batas.</span>
-                    </template>
+                <span id="tol-audit-text-{{ str_replace('-', '_', $chartId) }}">
+                    @if ($activeTol > 0)
+                        Penilaian menerapkan Ambang Toleransi <strong>{{ $activeTol }}%</strong> (Ambang kelulusan: ≥ <strong>{{ 100 - $activeTol }}%</strong> Standar Formasi Jabatan).
+                    @else
+                        Penilaian menerapkan <strong>Standar Murni (0% Toleransi)</strong> tanpa penyesuaian ambang batas.
+                    @endif
                 </span>
             </div>
             <div class="font-mono text-[10px] text-slate-500 font-medium shrink-0">
@@ -314,3 +126,195 @@
         </div>
     </div>
 </div>
+
+<script>
+    (function() {
+        const chartId = '{{ $chartId }}';
+        const sectionCode = '{{ $sectionCode }}';
+        const participantName = @json($participant->name ?? 'Skor Aktual');
+        const labels = @json($labels);
+        const actual = @json($actualRatings);
+        const standard = @json($standardRatings);
+        const tolerance = @json($toleranceRatings);
+        const tolPercent = {{ (int) $tolerancePercentage }};
+        let initialStandard = standard;
+
+        function initRadarChart_{{ str_replace('-', '_', $chartId) }}() {
+            const ctx = document.getElementById(chartId);
+            if (!ctx) return;
+            if (typeof Chart === 'undefined') {
+                setTimeout(initRadarChart_{{ str_replace('-', '_', $chartId) }}, 50);
+                return;
+            }
+
+            const existingChart = Chart.getChart(ctx);
+            if (existingChart) {
+                existingChart.destroy();
+            }
+
+            new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: participantName,
+                            data: actual,
+                            fill: true,
+                            backgroundColor: 'rgba(93, 176, 16, 0.45)', // SPSP Green Layer
+                            borderColor: '#5db010',
+                            pointBackgroundColor: '#8fd006',
+                            pointBorderColor: '#ffffff',
+                            borderWidth: 2.5,
+                            pointRadius: 4.5,
+                            pointHoverRadius: 6,
+                            tension: 0.1
+                        },
+                        {
+                            label: 'Standar Formasi',
+                            data: standard,
+                            fill: true,
+                            backgroundColor: 'rgba(181, 5, 5, 0.28)', // SPSP Red Layer
+                            borderColor: '#b50505',
+                            pointBackgroundColor: '#9a0404',
+                            pointBorderColor: '#ffffff',
+                            borderWidth: 2,
+                            pointRadius: 4,
+                            pointHoverRadius: 5.5,
+                            tension: 0.1
+                        },
+                        {
+                            label: 'Batas Toleransi ' + tolPercent + '%',
+                            data: tolerance,
+                            fill: true,
+                            backgroundColor: 'rgba(250, 250, 5, 0.22)', // SPSP Yellow Layer
+                            borderColor: '#e6d105',
+                            pointBackgroundColor: '#e6d105',
+                            pointBorderColor: '#ffffff',
+                            borderWidth: 2,
+                            pointRadius: 4,
+                            pointHoverRadius: 5.5,
+                            tension: 0.1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: false,
+                    plugins: {
+                        legend: { display: false },
+                        datalabels: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => context.dataset.label + ': ' + Number(context.raw).toFixed(2)
+                            }
+                        }
+                    },
+                    scales: {
+                        r: {
+                            min: 0,
+                            max: 5,
+                            ticks: {
+                                display: true,
+                                stepSize: 1,
+                                backdropColor: 'transparent',
+                                color: '#64748b',
+                                font: {
+                                    size: 11,
+                                    weight: '600',
+                                    family: "'Instrument Sans', system-ui, sans-serif"
+                                }
+                            },
+                            pointLabels: {
+                                color: '#171412',
+                                font: {
+                                    size: 13,
+                                    weight: '700',
+                                    family: "'Instrument Sans', system-ui, sans-serif"
+                                },
+                                padding: 14
+                            },
+                            grid: {
+                                color: 'rgba(23, 20, 18, 0.10)'
+                            },
+                            angleLines: {
+                                color: 'rgba(23, 20, 18, 0.10)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initialize immediately or on load
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initRadarChart_{{ str_replace('-', '_', $chartId) }});
+        } else {
+            initRadarChart_{{ str_replace('-', '_', $chartId) }}();
+        }
+
+        // Handle tab switches in interactive web report
+        window.addEventListener('hca-tab-switched', function(e) {
+            if (e.detail?.section === sectionCode) {
+                setTimeout(() => {
+                    const ctx = document.getElementById(chartId);
+                    if (ctx) {
+                        const chart = Chart.getChart(ctx);
+                        if (chart) {
+                            chart.resize();
+                            chart.update();
+                        } else {
+                            initRadarChart_{{ str_replace('-', '_', $chartId) }}();
+                        }
+                    }
+                }, 40);
+            }
+        });
+
+        // Handle dynamic tolerance updates in interactive web report
+        window.addEventListener('tolerance-updated', function(e) {
+            const tol = typeof e.detail === 'object' && e.detail !== null && 'tolerance' in e.detail 
+                ? Number(e.detail.tolerance) 
+                : Number(e.detail || 0);
+
+            const ctx = document.getElementById(chartId);
+            if (!ctx) return;
+            let chart = Chart.getChart(ctx);
+            if (!chart) {
+                initRadarChart_{{ str_replace('-', '_', $chartId) }}();
+                chart = Chart.getChart(ctx);
+            }
+            if (!chart) return;
+
+            const factor = tol > 0 ? (1 - (tol / 100)) : 1.0;
+            const newTolData = initialStandard.map(val => Number((val * factor).toFixed(2)));
+
+            chart.data.datasets[2].label = 'Batas Toleransi ' + tol + '%';
+            chart.data.datasets[2].data = newTolData;
+            chart.update();
+
+            // Update legend label
+            const tolLabels = document.querySelectorAll('.hca-tol-label-{{ str_replace('-', '_', $chartId) }}');
+            tolLabels.forEach(el => { el.textContent = tol + '%'; });
+
+            // Update table tolerance column
+            newTolData.forEach((val, idx) => {
+                const cell = document.getElementById('tol-cell-{{ str_replace('-', '_', $chartId) }}-' + idx);
+                if (cell) {
+                    cell.textContent = Number(val).toFixed(2);
+                }
+            });
+
+            // Update audit text
+            const auditEl = document.getElementById('tol-audit-text-{{ str_replace('-', '_', $chartId) }}');
+            if (auditEl) {
+                if (tol > 0) {
+                    auditEl.innerHTML = 'Penilaian menerapkan Ambang Toleransi <strong>' + tol + '%</strong> (Ambang kelulusan: ≥ <strong>' + (100 - tol) + '%</strong> Standar Formasi Jabatan).';
+                } else {
+                    auditEl.innerHTML = 'Penilaian menerapkan <strong>Standar Murni (0% Toleransi)</strong> tanpa penyesuaian ambang batas.';
+                }
+            }
+        });
+    })();
+</script>

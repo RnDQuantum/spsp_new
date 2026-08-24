@@ -7,6 +7,11 @@
             get activeLabel() {
                 return this.sectionLabels[this.activeSection] || '01 — Cover Page';
             },
+            init() {
+                this.$watch('activeSection', (val) => {
+                    window.dispatchEvent(new CustomEvent('hca-tab-switched', { detail: { section: val } }));
+                });
+            },
             setSection(code) {
                 this.activeSection = code;
                 const url = new URL(window.location);
