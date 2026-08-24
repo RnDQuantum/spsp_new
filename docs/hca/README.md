@@ -43,9 +43,9 @@ Setiap section memiliki dokumentasi mandiri yang menjelaskan **Tujuan & Maksud K
 | **02** | **Ringkasan Eksekutif** | [02_executive_summary.md](./sections/02_executive_summary.md) | ✅ **DONE (Dynamic)** |
 | **03** | **Identitas Peserta** | [03_participant_profile.md](./sections/03_participant_profile.md) | ✅ **DONE (Dynamic)** |
 | **04** | **Human Capital Index (HCI)** | [04_human_capital_index.md](./sections/04_human_capital_index.md) | ✅ **DONE (Dynamic)** |
-| **05** | **Layer 1: Kompetensi** | [05_layer1_kompetensi.md](./sections/05_layer1_kompetensi.md) | ✅ **DONE (Dynamic)** |
-| **06** | **Riwayat Karier** | [06_riwayat_karier.md](./sections/06_riwayat_karier.md) | ✅ **DONE (Dynamic)** |
-| **07** | **Layer 2: Potensi** | [07_layer2_potensi.md](./sections/07_layer2_potensi.md) | ✅ **DONE (Dynamic)** |
+| **05** | **Evaluasi Kompetensi Manajerial** | [05_layer1_kompetensi.md](./sections/05_layer1_kompetensi.md) | ✅ **DONE (Dynamic)** |
+| **06** | **Riwayat Karier & Rekam Jejak** | [06_riwayat_karier.md](./sections/06_riwayat_karier.md) | ✅ **DONE (Dynamic)** |
+| **07** | **Evaluasi Potensi Psikologis** | [07_layer2_potensi.md](./sections/07_layer2_potensi.md) | ✅ **DONE (Dynamic)** |
 | **08** | **IQ & Profil Kognitif** | [08_iq_kognitif.md](./sections/08_iq_kognitif.md) | ✅ **DONE (Dynamic)** |
 | **09** | **Big Five Personality** | [09_big_five_personality.md](./sections/09_big_five_personality.md) | ✅ **DONE (Dynamic)** |
 | **10** | **DISC Profile** | [10_disc_profile.md](./sections/10_disc_profile.md) | ✅ **DONE (Dynamic)** |
@@ -53,9 +53,9 @@ Setiap section memiliki dokumentasi mandiri yang menjelaskan **Tujuan & Maksud K
 | **12** | **Leadership Potential** | [12_leadership_potential.md](./sections/12_leadership_potential.md) | ✅ **DONE (Dynamic)** |
 | **13** | **Emotional Intelligence (EQ)** | [13_emotional_intelligence.md](./sections/13_emotional_intelligence.md) | ✅ **DONE (Dynamic)** |
 | **14** | **Values & Integrity** | [14_values_integrity.md](./sections/14_values_integrity.md) | ✅ **DONE (Dynamic)** |
-| **15** | **Performance Dashboard** | [15_performance_dashboard.md](./sections/15_performance_dashboard.md) | ✅ **DONE (Dynamic)** |
-| **16** | **Talent 9-Box Matrix** | [16_talent_9box_matrix.md](./sections/16_talent_9box_matrix.md) | ✅ **DONE (Dynamic)** |
-| **17** | **Succession Readiness** | [17_succession_readiness.md](./sections/17_succession_readiness.md) | ✅ **DONE (Dynamic)** |
+| **15** | **Dashboard Kinerja & KPI** | [15_performance_dashboard.md](./sections/15_performance_dashboard.md) | ✅ **DONE (Dynamic)** |
+| **16** | **Matriks Talenta (9-Box Grid)** | [16_talent_9box_matrix.md](./sections/16_talent_9box_matrix.md) | ✅ **DONE (Dynamic)** |
+| **17** | **Kesiapan Suksesi Kepemimpinan** | [17_succession_readiness.md](./sections/17_succession_readiness.md) | ✅ **DONE (Dynamic)** |
 | **18** | **Profil Personal (Pelengkap)** | [18_profil_personal.md](./sections/18_profil_personal.md) | ✅ **DONE (Dynamic)** |
 | **19** | **Kesehatan Jiwa** | [19_kesehatan_jiwa.md](./sections/19_kesehatan_jiwa.md) | ✅ **DONE (Dynamic)** |
 | **20** | **Kekuatan Psikologis** | [20_kekuatan_psikologis.md](./sections/20_kekuatan_psikologis.md) | ✅ **DONE (Dynamic)** |

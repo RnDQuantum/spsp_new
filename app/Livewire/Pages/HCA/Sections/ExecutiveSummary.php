@@ -106,6 +106,47 @@ class ExecutiveSummary extends Component
         $readinessStatus = $participant->finalAssessment->conclusion_text
             ?? ($participant->finalAssessment->conclusion_code ?? 'DISARANKAN');
 
+        // Find Top Strength (Aspect with highest positive gap or score)
+        $allAspects = $kompetensiAspects->concat($potensiAspects);
+        $topAspect = $allAspects->sortByDesc(fn ($item) => (float) ($item['individual_rating'] ?? 0))->first();
+        $topStrength = $topAspect ? [
+            'name' => $topAspect['name'] ?? ($topAspect['aspect_name'] ?? 'Kompetensi Manajerial'),
+            'score' => (float) ($topAspect['individual_rating'] ?? $kompetensiRating),
+            'standard' => (float) ($topAspect['standard_rating'] ?? 3.00),
+            'gap' => (float) (($topAspect['individual_rating'] ?? $kompetensiRating) - ($topAspect['standard_rating'] ?? 3.00)),
+        ] : [
+            'name' => 'Kompetensi Manajerial',
+            'score' => $kompetensiRating,
+            'standard' => 3.00,
+            'gap' => $kompetensiRating - 3.00,
+        ];
+
+        // Find Critical Growth Area (Aspect with lowest score or biggest deficit gap)
+        $lowestAspect = $allAspects->sortBy(fn ($item) => (float) ($item['individual_rating'] ?? 5))->first();
+        $criticalGap = $lowestAspect ? [
+            'name' => $lowestAspect['name'] ?? ($lowestAspect['aspect_name'] ?? 'Sistematika Kerja'),
+            'score' => (float) ($lowestAspect['individual_rating'] ?? 3.00),
+            'standard' => (float) ($lowestAspect['standard_rating'] ?? 3.00),
+            'gap' => (float) (($lowestAspect['individual_rating'] ?? 3.00) - ($lowestAspect['standard_rating'] ?? 3.00)),
+        ] : [
+            'name' => 'Sistematika Kerja',
+            'score' => 3.00,
+            'standard' => 3.00,
+            'gap' => 0.00,
+        ];
+
+        // Determine Succession Outlook
+        $successionHorizon = match (true) {
+            $talentIndex >= 4.20 && str_contains(strtoupper($readinessStatus), 'DISARANKAN') => 'Horizon 1 — Ready Now (Siap Promosi Segera)',
+            $talentIndex >= 3.50 => 'Horizon 2 — Ready in 1–2 Years (Pengembangan Manajerial)',
+            default => 'Horizon 3 — Ready in 2–3 Years (Konsolidasi Fungsional)',
+        };
+
+        // Person-Job Fit Summary
+        $targetPosition = $participant->positionFormation?->name ?? 'Jabatan Target';
+        $fitSummary = "Berdasarkan integrasi hasil asesmen kompetensi perilaku, kapasitas potensi psikologis, serta konsistensi kinerja, {$participant->name} menunjukkan profil kapabilitas yang "
+            .($talentIndex >= 3.75 ? "sangat selaras dan melampaui tuntutan standar minimal formasi {$targetPosition}." : "secara umum telah memenuhi prasyarat dasar formasi {$targetPosition} dengan kebutuhan penguatan terarah pada beberapa dimensi.");
+
         $pillars = [
             [
                 'name' => 'Kompetensi',
@@ -138,6 +179,12 @@ class ExecutiveSummary extends Component
             'talentIndex' => $talentIndex,
             'talentCategory' => $talentCategory,
             'readinessStatus' => strtoupper($readinessStatus),
+            'topStrength' => $topStrength,
+            'criticalGap' => $criticalGap,
+            'successionHorizon' => $successionHorizon,
+            'fitSummary' => $fitSummary,
+            'targetPosition' => $targetPosition,
+            'participantName' => $participant->name,
             'pillars' => $pillars,
         ];
     }

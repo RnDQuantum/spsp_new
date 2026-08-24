@@ -1,6 +1,6 @@
-# Section 05 — Layer 1: Kompetensi
+# Section 05 — Evaluasi Kompetensi Manajerial
 
-* **Nama Visual**: Evaluasi Kompetensi Manajerial & Teknis
+* **Nama Visual**: Evaluasi Kompetensi Perilaku & Manajerial Jabatan
 * **Kode Section**: `competency`
 * **Komponen File**: [ScoreListSection.php](file:///c:/laragon/www/spsp_new/app/Livewire/Pages/HCA/Sections/ScoreListSection.php) & [score-list-section.blade.php](file:///c:/laragon/www/spsp_new/resources/views/livewire/pages/h-c-a/sections/score-list-section.blade.php)
 * **Status Dynamic**: ✅ **DONE (Dynamic DB Sync)**

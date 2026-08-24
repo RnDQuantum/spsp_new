@@ -24,7 +24,7 @@ class ScoreListSection extends Component
      */
     public array $datasets = [
         'competency' => [
-            'title' => 'Layer 1: Kompetensi',
+            'title' => 'Evaluasi Kompetensi Manajerial',
             'subtitle' => 'Hard Evidence & Perilaku Manajerial',
             'desc' => 'Hasil evaluasi komparatif tingkat kompetensi manajerial, sosial kultural, teknis, dan kepemimpinan peserta terhadap standar formasi jabatan.',
             'average' => 3.90,
@@ -131,7 +131,7 @@ class ScoreListSection extends Component
 
         if (! $participant || ! $participant->positionFormation?->template) {
             return [
-                'title' => 'Layer 1: Kompetensi',
+                'title' => 'Evaluasi Kompetensi Manajerial',
                 'subtitle' => 'Hard Evidence & Perilaku Manajerial',
                 'desc' => 'Hasil evaluasi komparatif tingkat kompetensi manajerial peserta terhadap standar formasi jabatan.',
                 'average' => 3.90,
@@ -176,7 +176,7 @@ class ScoreListSection extends Component
         $average = (float) $aspectAssessments->avg('individual_rating');
 
         return [
-            'title' => 'Layer 1: Kompetensi',
+            'title' => 'Evaluasi Kompetensi Manajerial',
             'subtitle' => 'Hard Evidence & Perilaku Manajerial',
             'desc' => 'Hasil evaluasi komparatif tingkat kompetensi manajerial, sosial kultural, teknis, dan kepemimpinan peserta terhadap standar formasi jabatan yang dipersyaratkan.',
             'average' => round($average, 2),

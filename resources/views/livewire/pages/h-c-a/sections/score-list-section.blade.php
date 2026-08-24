@@ -193,33 +193,49 @@
         @endforeach
     </div>
 
-    <!-- Bottom Card Legend -->
-    <div class="mt-10 pt-6 border-t border-warm-border flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 text-xs text-slate-500">
-        <div class="flex items-center gap-2">
-            <i class="fas fa-info-circle text-accent-amber text-xs"></i>
-            <span>
-                @if (!empty($is_synthesized))
-                    Indeks dihitung dari agregasi terbobot sub-aspek kompetensi dan potensi psikologis terkait (skala 1.00 – {{ number_format($max_score, 2) }}).
-                @else
-                    Skala penilaian 1.00 – {{ number_format($max_score, $is_iq ? 0 : 2) }} terstandarisasi.
-                @endif
-            </span>
-        </div>
-        <div class="flex items-center gap-6">
-            <!-- Legend Item 1: Skor Aktual -->
+    <!-- Bottom Card Legend & Rubric Explanation -->
+    <div class="mt-10 pt-6 border-t border-warm-border space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 text-xs text-slate-500">
             <div class="flex items-center gap-2">
-                <span class="w-3.5 h-3 rounded-xs bg-accent-amber border border-amber-700/30 shrink-0"></span>
-                <span class="text-slate-600 font-medium">Skor aktual</span>
+                <i class="fas fa-info-circle text-accent-amber text-xs"></i>
+                <span>
+                    @if (!empty($is_synthesized))
+                        Indeks tematik dihitung dari agregasi terbobot sub-aspek kompetensi dan potensi psikologis terkait (skala 1.00 – {{ number_format($max_score, 2) }}).
+                    @else
+                        Skala penilaian baku 1.00 – {{ number_format($max_score, $is_iq ? 0 : 2) }} terstandarisasi.
+                    @endif
+                </span>
             </div>
-            <!-- Legend Item 2: Standar -->
-            <div class="flex items-center gap-2">
-                <div class="flex flex-col items-center justify-center h-4 w-2.5 shrink-0 relative">
-                    <svg class="w-2 h-1.5 text-[#171412]" viewBox="0 0 10 8" fill="currentColor">
-                        <path d="M5 8L0 0H10L5 8Z" />
-                    </svg>
-                    <span class="w-0.5 h-2.5 bg-[#171412]"></span>
+            <div class="flex items-center gap-6">
+                <!-- Legend Item 1: Skor Aktual -->
+                <div class="flex items-center gap-2">
+                    <span class="w-3.5 h-3 rounded-xs bg-accent-amber border border-amber-700/30 shrink-0"></span>
+                    <span class="text-slate-600 font-medium">Skor Aktual</span>
                 </div>
-                <span class="text-slate-600 font-medium">Standar</span>
+                <!-- Legend Item 2: Standar -->
+                <div class="flex items-center gap-2">
+                    <div class="flex flex-col items-center justify-center h-4 w-2.5 shrink-0 relative">
+                        <svg class="w-2 h-1.5 text-[#171412]" viewBox="0 0 10 8" fill="currentColor">
+                            <path d="M5 8L0 0H10L5 8Z" />
+                        </svg>
+                        <span class="w-0.5 h-2.5 bg-[#171412]"></span>
+                    </div>
+                    <span class="text-slate-600 font-medium">Standar Jabatan Minimal</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Collapsible / Compact Standard Rubric Box -->
+        <div class="p-3.5 rounded-lg bg-warm-ivory/60 border border-warm-border/80 text-[11px] text-slate-600">
+            <div class="font-bold uppercase tracking-wider text-slate-500 mb-1.5 flex items-center gap-1.5">
+                <i class="fas fa-scale-balanced text-accent-amber text-[10px]"></i>
+                Pedoman Kategori & Standar Formasi:
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 text-[11px] leading-relaxed">
+                <div><span class="font-bold text-emerald-700">Di Atas Standar:</span> Skor > Standar Formasi (Gap positif)</div>
+                <div><span class="font-bold text-slate-700">Memenuhi Standar:</span> Skor = Standar Formasi (Gap 0.00)</div>
+                <div><span class="font-bold text-rose-700">Di Bawah Standar:</span> Skor < Standar Formasi (Gap defisit)</div>
+                <div><span class="font-bold text-primary-ink">Batas Toleransi:</span> 90% dari Standar Jabatan Target</div>
             </div>
         </div>
     </div>

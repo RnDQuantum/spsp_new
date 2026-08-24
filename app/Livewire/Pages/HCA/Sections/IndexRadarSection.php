@@ -156,7 +156,7 @@ class IndexRadarSection extends Component
 
         return [
             'title' => 'Human Capital Index',
-            'subtitle' => 'Dimensi Utama (Layer 1-3)',
+            'subtitle' => 'Evaluasi Keseimbangan 5 Dimensi',
             'desc' => $desc,
             'talentIndex' => $talentIndex,
             'talentIndexPercent' => $talentIndexPercent,
@@ -177,8 +177,8 @@ class IndexRadarSection extends Component
 
         if (! $participant || ! $participant->positionFormation?->template) {
             return [
-                'title' => 'Layer 2: Potensi',
-                'subtitle' => 'Evaluasi Kapasitas Psikologis Laten',
+                'title' => 'Evaluasi Potensi Psikologis',
+                'subtitle' => 'Kapasitas Kognitif & Sikap Kerja Laten',
                 'desc' => 'Profil aspek potensi kandidat belum dikalkulasi.',
                 'talentIndex' => 4.00,
                 'talentIndexPercent' => 80.00,
@@ -197,8 +197,8 @@ class IndexRadarSection extends Component
 
         if (! $potensiCat) {
             return [
-                'title' => 'Layer 2: Potensi',
-                'subtitle' => 'Evaluasi Kapasitas Psikologis Laten',
+                'title' => 'Evaluasi Potensi Psikologis',
+                'subtitle' => 'Kapasitas Kognitif & Sikap Kerja Laten',
                 'desc' => 'Kategori potensi tidak ditemukan pada template jabatan ini.',
                 'talentIndex' => 4.00,
                 'talentIndexPercent' => 80.00,
@@ -214,8 +214,8 @@ class IndexRadarSection extends Component
 
         if ($aspectAssessments->isEmpty()) {
             return [
-                'title' => 'Layer 2: Potensi',
-                'subtitle' => 'Evaluasi Kapasitas Psikologis Laten',
+                'title' => 'Evaluasi Potensi Psikologis',
+                'subtitle' => 'Kapasitas Kognitif & Sikap Kerja Laten',
                 'desc' => 'Data asesmen aspek potensi belum tersedia.',
                 'talentIndex' => 4.00,
                 'talentIndexPercent' => 80.00,
@@ -246,8 +246,8 @@ class IndexRadarSection extends Component
         $desc = "Evaluasi aspek potensi psikologis {$participant->name} menghasilkan rata-rata skor {$avgRating} dari skala 5.00 ({$talentIndexPercent}%). Mengukur kapasitas daya pikir, sikap kerja, stabilitas emosi, dan orientasi prestasi laten sebagai fondasi adaptabilitas kerja jangka panjang.";
 
         return [
-            'title' => 'Layer 2: Potensi',
-            'subtitle' => 'Evaluasi Kapasitas Psikologis Laten',
+            'title' => 'Evaluasi Potensi Psikologis',
+            'subtitle' => 'Kapasitas Kognitif & Sikap Kerja Laten',
             'desc' => $desc,
             'talentIndex' => $avgRating,
             'talentIndexPercent' => $talentIndexPercent,

@@ -215,11 +215,11 @@ class HcaReportPageTest extends TestCase
 
         Livewire::test(ExecutiveSummary::class, ['participantId' => $participant->id])
             ->assertSee('Ringkasan')
-            ->assertSee('Talent Index Score')
-            ->assertSee('Pilar Evaluasi Asesmen')
-            ->assertSee('Kompetensi')
-            ->assertSee('Potensi')
-            ->assertSee('Kinerja');
+            ->assertSee('Composite Talent Index')
+            ->assertSee('Rekomendasi Penugasan')
+            ->assertSee('Kekuatan Utama')
+            ->assertSee('Area Perhatian Kritis')
+            ->assertSee('Prospek Suksesi');
     }
 
     /**
@@ -283,10 +283,10 @@ class HcaReportPageTest extends TestCase
             'sectionCode' => 'competency',
             'participantId' => $participant->id,
         ])
-            ->assertSee('Layer 1')
+            ->assertSee('Evaluasi')
             ->assertSee('Kompetensi')
             ->assertSee('Skor Rata-Rata')
-            ->assertSee('Skor aktual')
+            ->assertSee('Skor Aktual')
             ->assertSee('Standar');
     }
 
@@ -304,7 +304,7 @@ class HcaReportPageTest extends TestCase
             'sectionCode' => 'potential',
             'participantId' => $participant->id,
         ])
-            ->assertSee('Layer')
+            ->assertSee('Evaluasi')
             ->assertSee('Potensi')
             ->assertSee('Score Index');
     }

@@ -54,7 +54,7 @@ class HcaReportPage extends Component
      */
     public array $menuGroups = [
         [
-            'title' => 'Pembuka',
+            'title' => 'Pembuka & Ringkasan',
             'icon' => 'fa-file-invoice',
             'sections' => [
                 ['code' => 'cover', 'label' => '01 — Cover Page', 'active' => true],
@@ -64,12 +64,12 @@ class HcaReportPage extends Component
             ],
         ],
         [
-            'title' => 'Kompetensi & Potensi (Layer 1–2)',
+            'title' => 'Evaluasi Kapabilitas & Potensi',
             'icon' => 'fa-layer-group',
             'sections' => [
-                ['code' => 'competency', 'label' => '05 — Layer 1: Kompetensi', 'active' => true],
-                ['code' => 'career', 'label' => '06 — Riwayat Karier', 'active' => true],
-                ['code' => 'potential', 'label' => '07 — Layer 2: Potensi', 'active' => true],
+                ['code' => 'competency', 'label' => '05 — Evaluasi Kompetensi Manajerial', 'active' => true],
+                ['code' => 'career', 'label' => '06 — Riwayat Karier & Rekam Jejak', 'active' => true],
+                ['code' => 'potential', 'label' => '07 — Evaluasi Potensi Psikologis', 'active' => true],
                 ['code' => 'cognitive', 'label' => '08 — IQ & Profil Kognitif', 'active' => true],
             ],
         ],
@@ -86,12 +86,12 @@ class HcaReportPage extends Component
             ],
         ],
         [
-            'title' => 'Kinerja & Kesiapan (Layer 3)',
+            'title' => 'Kinerja & Suksesi Jabatan',
             'icon' => 'fa-chart-line',
             'sections' => [
-                ['code' => 'performance', 'label' => '15 — Performance Dashboard', 'active' => true],
-                ['code' => 'nine_box', 'label' => '16 — Talent 9-Box Matrix', 'active' => true],
-                ['code' => 'succession', 'label' => '17 — Succession Readiness', 'active' => true],
+                ['code' => 'performance', 'label' => '15 — Dashboard Kinerja & KPI', 'active' => true],
+                ['code' => 'nine_box', 'label' => '16 — Matriks Talenta (9-Box Grid)', 'active' => true],
+                ['code' => 'succession', 'label' => '17 — Kesiapan Suksesi Kepemimpinan', 'active' => true],
             ],
         ],
         [

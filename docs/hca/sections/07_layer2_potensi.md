@@ -1,6 +1,6 @@
-# Section 07 — Layer 2: Potensi
+# Section 07 — Evaluasi Potensi Psikologis
 
-* **Nama Visual**: Evaluasi Potensi Psikologis Laten
+* **Nama Visual**: Evaluasi Potensi Kapasitas Psikologis Laten
 * **Kode Section**: `potential`
 * **Komponen File**: [IndexRadarSection.php](file:///c:/laragon/www/spsp_new/app/Livewire/Pages/HCA/Sections/IndexRadarSection.php) & [index-radar-section.blade.php](file:///c:/laragon/www/spsp_new/resources/views/livewire/pages/h-c-a/sections/index-radar-section.blade.php)
 * **Status Dynamic**: ✅ **DONE (Dynamic DB Sync)**
