@@ -93,6 +93,25 @@
                 </tr>
             @endforeach
         </x-hca-table>
+
+        @php
+            $activeTol = (int) ($tolerancePercentage ?? 0);
+        @endphp
+        <div class="mt-4 p-3 rounded-lg bg-warm-ivory/60 border border-warm-border/80 text-[11px] text-slate-600 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <div class="flex items-center gap-2">
+                <i class="fas fa-scale-balanced text-accent-amber text-xs"></i>
+                <span>
+                    @if ($activeTol > 0)
+                        Penilaian menerapkan Ambang Toleransi <strong>{{ $activeTol }}%</strong> (Ambang kelulusan: ≥ {{ 100 - $activeTol }}% Standar Formasi Jabatan).
+                    @else
+                        Penilaian menerapkan <strong>Standar Murni (0% Toleransi)</strong> tanpa penyesuaian ambang batas.
+                    @endif
+                </span>
+            </div>
+            <div class="font-mono text-[10px] text-slate-500 font-medium shrink-0">
+                Formula Gap: Skor Aktual − Standar Jabatan
+            </div>
+        </div>
     </div>
 </div>
 

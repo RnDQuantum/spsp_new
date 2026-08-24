@@ -6,9 +6,11 @@ namespace App\Livewire\Pages\HCA\Sections;
 
 use App\Models\Participant;
 use App\Models\SubAspectAssessment;
+use App\Services\ConclusionService;
 use App\Services\HcaDataService;
 use App\Services\IndividualAssessmentService;
 use Illuminate\View\View;
+use Livewire\Attributes\On;
 use Livewire\Attributes\Reactive;
 use Livewire\Component;
 
@@ -18,6 +20,44 @@ class ScoreListSection extends Component
     public ?int $participantId = null;
 
     public string $sectionCode = '';
+
+    /**
+     * Listen to tolerance update events to re-render component
+     */
+    #[On('tolerance-updated')]
+    public function onToleranceUpdated(): void
+    {
+        // Automatically triggers component re-render with new session tolerance
+    }
+
+    /**
+     * Get active tolerance percentage from session
+     */
+    public function getTolerancePercentage(): int
+    {
+        return (int) session('individual_report.tolerance', 0);
+    }
+
+    /**
+     * Helper to compute standardized gap and conclusion via ConclusionService
+     */
+    public function determineConclusion(float $value, float $standard, ?int $tolerance = null): array
+    {
+        $tol = $tolerance ?? $this->getTolerancePercentage();
+        $toleranceFactor = $tol > 0 ? (1 - ($tol / 100)) : 1.0;
+        $adjustedStandard = round($standard * $toleranceFactor, 2);
+        $originalGap = round($value - $standard, 2);
+        $adjustedGap = round($value - $adjustedStandard, 2);
+        $conclusion = ConclusionService::getGapBasedConclusion($originalGap, $adjustedGap);
+
+        return [
+            'standard' => $standard,
+            'adjusted_standard' => $adjustedStandard,
+            'gap' => $originalGap,
+            'adjusted_gap' => $adjustedGap,
+            'conclusion' => $conclusion,
+        ];
+    }
 
     /**
      * Datasets for parameterized score list sections
@@ -31,9 +71,9 @@ class ScoreListSection extends Component
             'max_score' => 5.00,
             'scores' => [
                 ['label' => 'Integritas', 'value' => 4.00, 'standard' => 3.00, 'gap' => 1.00, 'conclusion' => 'Di Atas Standar', 'desc' => 'Konsisten berperilaku selaras dengan nilai, norma, dan etika organisasi.'],
-                ['label' => 'Kerjasama', 'value' => 3.80, 'standard' => 3.00, 'gap' => 0.80, 'conclusion' => 'Memenuhi Standar', 'desc' => 'Kemampuan membangun hubungan kerja yang produktif dan saling mendukung.'],
+                ['label' => 'Kerjasama', 'value' => 3.80, 'standard' => 3.00, 'gap' => 0.80, 'conclusion' => 'Di Atas Standar', 'desc' => 'Kemampuan membangun hubungan kerja yang produktif dan saling mendukung.'],
                 ['label' => 'Komunikasi', 'value' => 4.10, 'standard' => 3.00, 'gap' => 1.10, 'conclusion' => 'Di Atas Standar', 'desc' => 'Kemampuan menyampaikan informasi secara jelas, persuasif, dan efektif.'],
-                ['label' => 'Orientasi pada Hasil', 'value' => 3.70, 'standard' => 3.00, 'gap' => 0.70, 'conclusion' => 'Memenuhi Standar', 'desc' => 'Fokus pada pencapaian target kerja dengan standar kualitas tinggi.'],
+                ['label' => 'Orientasi pada Hasil', 'value' => 3.70, 'standard' => 3.00, 'gap' => 0.70, 'conclusion' => 'Di Atas Standar', 'desc' => 'Fokus pada pencapaian target kerja dengan standar kualitas tinggi.'],
                 ['label' => 'Pelayanan Publik', 'value' => 4.00, 'standard' => 3.00, 'gap' => 1.00, 'conclusion' => 'Di Atas Standar', 'desc' => 'Komitmen memberikan pelayanan prima bagi para pemangku kepentingan.'],
             ],
         ],
@@ -55,15 +95,15 @@ class ScoreListSection extends Component
         'big_five' => [
             'title' => 'Big Five Personality',
             'subtitle' => 'Inventori Kepribadian Model OCEAN',
-            'desc' => 'Mengukur lima dimensi dasar kepribadian untuk memproyeksikan stabilitas emosi, kecenderungan berinteraksi, dan disiplin pencapaian tugas kerja.',
+            'desc' => 'Mengukur lima dimensi dasar kepribadian untuk memproyeksikan stabilitas emosi, kecenderungan berinteraksi, dan disiplin pencapaian target kerja.',
             'average' => 4.12,
             'max_score' => 5.00,
             'scores' => [
-                ['label' => 'Openness to Experience', 'value' => 4.10, 'standard' => 3.00, 'gap' => 1.10, 'conclusion' => 'Memenuhi Standar', 'desc' => 'Keterbukaan terhadap ide baru, imajinasi kreatif, dan keragaman pengalaman.'],
-                ['label' => 'Conscientiousness', 'value' => 4.50, 'standard' => 3.50, 'gap' => 1.00, 'conclusion' => 'Memenuhi Standar', 'desc' => 'Tingkat disiplin diri, keteraturan kerja, orientasi prestasi, dan keandalan.'],
-                ['label' => 'Extraversion', 'value' => 3.80, 'standard' => 3.00, 'gap' => 0.80, 'conclusion' => 'Memenuhi Standar', 'desc' => 'Tingkat kenyamanan dalam interaksi sosial, keaktifan bergaul, dan asertivitas.'],
-                ['label' => 'Agreeableness', 'value' => 4.20, 'standard' => 3.00, 'gap' => 1.20, 'conclusion' => 'Memenuhi Standar', 'desc' => 'Kecenderungan untuk kooperatif, berempati, mempercayai, dan membantu orang lain.'],
-                ['label' => 'Emotional Stability', 'value' => 4.00, 'standard' => 3.50, 'gap' => 0.50, 'conclusion' => 'Memenuhi Standar', 'desc' => 'Kapasitas mengelola stres, ketenangan emosional, dan ketahanan terhadap tekanan.'],
+                ['label' => 'Openness to Experience', 'value' => 4.10, 'standard' => 3.00, 'gap' => 1.10, 'conclusion' => 'Di Atas Standar', 'desc' => 'Keterbukaan terhadap ide baru, imajinasi kreatif, dan keragaman pengalaman.'],
+                ['label' => 'Conscientiousness', 'value' => 4.50, 'standard' => 3.50, 'gap' => 1.00, 'conclusion' => 'Di Atas Standar', 'desc' => 'Tingkat disiplin diri, keteraturan kerja, orientasi prestasi, dan keandalan.'],
+                ['label' => 'Extraversion', 'value' => 3.80, 'standard' => 3.00, 'gap' => 0.80, 'conclusion' => 'Di Atas Standar', 'desc' => 'Tingkat kenyamanan dalam interaksi sosial, keaktifan bergaul, dan asertivitas.'],
+                ['label' => 'Agreeableness', 'value' => 4.20, 'standard' => 3.00, 'gap' => 1.20, 'conclusion' => 'Di Atas Standar', 'desc' => 'Kecenderungan untuk kooperatif, berempati, mempercayai, dan membantu orang lain.'],
+                ['label' => 'Emotional Stability', 'value' => 4.00, 'standard' => 3.50, 'gap' => 0.50, 'conclusion' => 'Di Atas Standar', 'desc' => 'Kapasitas mengelola stres, ketenangan emosional, dan ketahanan terhadap tekanan.'],
             ],
         ],
         'learning_agility' => [
@@ -73,10 +113,10 @@ class ScoreListSection extends Component
             'average' => 4.00,
             'max_score' => 5.00,
             'scores' => [
-                ['label' => 'Mental Agility', 'value' => 4.20, 'standard' => 3.00, 'gap' => 1.20, 'conclusion' => 'Memenuhi Standar', 'desc' => 'Kelincahan berpikir dan memecahkan ketidakpastian secara rasional.'],
-                ['label' => 'People Agility', 'value' => 3.90, 'standard' => 3.00, 'gap' => 0.90, 'conclusion' => 'Memenuhi Standar', 'desc' => 'Kapasitas berkolaborasi dan memahami dinamika kelompok secara cepat.'],
-                ['label' => 'Change Agility', 'value' => 4.10, 'standard' => 3.00, 'gap' => 1.10, 'conclusion' => 'Memenuhi Standar', 'desc' => 'Kesiapan bereksperimen dengan metode baru dan menyukai perubahan.'],
-                ['label' => 'Result Agility', 'value' => 3.80, 'standard' => 3.00, 'gap' => 0.80, 'conclusion' => 'Memenuhi Standar', 'desc' => 'Kemampuan memberikan hasil prima dalam situasi transisi atau baru.'],
+                ['label' => 'Mental Agility', 'value' => 4.20, 'standard' => 3.00, 'gap' => 1.20, 'conclusion' => 'Di Atas Standar', 'desc' => 'Kelincahan berpikir dan memecahkan ketidakpastian secara rasional.'],
+                ['label' => 'People Agility', 'value' => 3.90, 'standard' => 3.00, 'gap' => 0.90, 'conclusion' => 'Di Atas Standar', 'desc' => 'Kapasitas berkolaborasi dan memahami dinamika kelompok secara cepat.'],
+                ['label' => 'Change Agility', 'value' => 4.10, 'standard' => 3.00, 'gap' => 1.10, 'conclusion' => 'Di Atas Standar', 'desc' => 'Kesiapan bereksperimen dengan metode baru dan menyukai perubahan.'],
+                ['label' => 'Result Agility', 'value' => 3.80, 'standard' => 3.00, 'gap' => 0.80, 'conclusion' => 'Di Atas Standar', 'desc' => 'Kemampuan memberikan hasil prima dalam situasi transisi atau baru.'],
             ],
         ],
         'leadership_potential' => [
@@ -86,12 +126,12 @@ class ScoreListSection extends Component
             'average' => 3.85,
             'max_score' => 5.00,
             'scores' => [
-                ['label' => 'Visioning', 'value' => 4.00, 'standard' => 3.00, 'gap' => 1.00, 'conclusion' => 'Memenuhi Standar', 'desc' => 'Kemampuan merumuskan arah dan target unit kerja jangka panjang.'],
-                ['label' => 'Decision Making', 'value' => 3.70, 'standard' => 3.00, 'gap' => 0.70, 'conclusion' => 'Memenuhi Standar', 'desc' => 'Kecepatan dan ketepatan pengambilan keputusan di situasi kritis.'],
-                ['label' => 'Strategic Influence', 'value' => 3.90, 'standard' => 3.00, 'gap' => 0.90, 'conclusion' => 'Memenuhi Standar', 'desc' => 'Kekuatan persuasi dan kapasitas merangkul pemangku kepentingan.'],
-                ['label' => 'Execution Control', 'value' => 3.80, 'standard' => 3.00, 'gap' => 0.80, 'conclusion' => 'Memenuhi Standar', 'desc' => 'Disiplin mengawal rencana kerja hingga tuntas.'],
-                ['label' => 'Coaching & Developing', 'value' => 3.95, 'standard' => 3.00, 'gap' => 0.95, 'conclusion' => 'Memenuhi Standar', 'desc' => 'Kapasitas membimbing dan mempromosikan kapabilitas anggota tim.'],
-                ['label' => 'Strategic Thinking', 'value' => 3.75, 'standard' => 3.00, 'gap' => 0.75, 'conclusion' => 'Memenuhi Standar', 'desc' => 'Kemampuan membaca tren eksternal organisasi dan dampaknya.'],
+                ['label' => 'Visioning', 'value' => 4.00, 'standard' => 3.00, 'gap' => 1.00, 'conclusion' => 'Di Atas Standar', 'desc' => 'Kemampuan merumuskan arah dan target unit kerja jangka panjang.'],
+                ['label' => 'Decision Making', 'value' => 3.70, 'standard' => 3.00, 'gap' => 0.70, 'conclusion' => 'Di Atas Standar', 'desc' => 'Kecepatan dan ketepatan pengambilan keputusan di situasi kritis.'],
+                ['label' => 'Strategic Influence', 'value' => 3.90, 'standard' => 3.00, 'gap' => 0.90, 'conclusion' => 'Di Atas Standar', 'desc' => 'Kekuatan persuasi dan kapasitas merangkul pemangku kepentingan.'],
+                ['label' => 'Execution Control', 'value' => 3.80, 'standard' => 3.00, 'gap' => 0.80, 'conclusion' => 'Di Atas Standar', 'desc' => 'Disiplin mengawal rencana kerja hingga tuntas.'],
+                ['label' => 'Coaching & Developing', 'value' => 3.95, 'standard' => 3.00, 'gap' => 0.95, 'conclusion' => 'Di Atas Standar', 'desc' => 'Kapasitas membimbing dan mempromosikan kapabilitas anggota tim.'],
+                ['label' => 'Strategic Thinking', 'value' => 3.75, 'standard' => 3.00, 'gap' => 0.75, 'conclusion' => 'Di Atas Standar', 'desc' => 'Kemampuan membaca tren eksternal organisasi dan dampaknya.'],
             ],
         ],
         'integrity' => [
@@ -101,10 +141,10 @@ class ScoreListSection extends Component
             'average' => 4.50,
             'max_score' => 5.00,
             'scores' => [
-                ['label' => 'Honesty & Transparency', 'value' => 4.60, 'standard' => 3.50, 'gap' => 1.10, 'conclusion' => 'Memenuhi Standar', 'desc' => 'Keterbukaan dan kejujuran dalam menyampaikan fakta tanpa distorsi.'],
-                ['label' => 'Ethical Compliance', 'value' => 4.50, 'standard' => 3.50, 'gap' => 1.00, 'conclusion' => 'Memenuhi Standar', 'desc' => 'Ketaatan total terhadap regulasi dan prinsip etika korporasi.'],
-                ['label' => 'Accountability', 'value' => 4.40, 'standard' => 3.50, 'gap' => 0.90, 'conclusion' => 'Memenuhi Standar', 'desc' => 'Keberanian bertanggung jawab atas hasil keputusan kerja sendiri.'],
-                ['label' => 'Consistency', 'value' => 4.50, 'standard' => 3.50, 'gap' => 1.00, 'conclusion' => 'Memenuhi Standar', 'desc' => 'Kesesuaian antara ucapan dan tindakan nyata di lapangan.'],
+                ['label' => 'Honesty & Transparency', 'value' => 4.60, 'standard' => 3.50, 'gap' => 1.10, 'conclusion' => 'Di Atas Standar', 'desc' => 'Keterbukaan dan kejujuran dalam menyampaikan fakta tanpa distorsi.'],
+                ['label' => 'Ethical Compliance', 'value' => 4.50, 'standard' => 3.50, 'gap' => 1.00, 'conclusion' => 'Di Atas Standar', 'desc' => 'Ketaatan total terhadap regulasi dan prinsip etika korporasi.'],
+                ['label' => 'Accountability', 'value' => 4.40, 'standard' => 3.50, 'gap' => 0.90, 'conclusion' => 'Di Atas Standar', 'desc' => 'Keberanian bertanggung jawab atas hasil keputusan kerja sendiri.'],
+                ['label' => 'Consistency', 'value' => 4.50, 'standard' => 3.50, 'gap' => 1.00, 'conclusion' => 'Di Atas Standar', 'desc' => 'Kesesuaian antara ucapan dan tindakan nyata di lapangan.'],
             ],
         ],
     ];
@@ -156,7 +196,7 @@ class ScoreListSection extends Component
             return $this->datasets['competency'];
         }
 
-        $aspectAssessments = $service->getAspectAssessments($participant->id, $kompetensiCat->id, 0);
+        $aspectAssessments = $service->getAspectAssessments($participant->id, $kompetensiCat->id, $this->getTolerancePercentage());
 
         if ($aspectAssessments->isEmpty()) {
             return $this->datasets['competency'];
@@ -166,8 +206,10 @@ class ScoreListSection extends Component
             return [
                 'label' => $item['name'],
                 'value' => (float) $item['individual_rating'],
-                'standard' => (float) ($item['standard_rating'] ?? 3.00),
-                'gap' => (float) ($item['gap_rating'] ?? 0.00),
+                'standard' => (float) ($item['original_standard_rating'] ?? $item['standard_rating'] ?? 3.00),
+                'adjusted_standard' => (float) ($item['standard_rating'] ?? 3.00),
+                'gap' => (float) ($item['original_gap_rating'] ?? $item['gap_rating'] ?? 0.00),
+                'adjusted_gap' => (float) ($item['gap_rating'] ?? 0.00),
                 'conclusion' => (string) ($item['conclusion_text'] ?? ''),
                 'desc' => (string) ($item['description'] ?? 'Aspek kompetensi perilaku dan manajerial jabatan.'),
             ];
@@ -239,19 +281,16 @@ class ScoreListSection extends Component
             $scores = $subAssessments->map(function ($item) {
                 $val = (float) $item->individual_rating;
                 $std = (float) ($item->standard_rating ?? 3.00);
-                $gap = $val - $std;
-                $conclusion = match (true) {
-                    $gap > 0 => 'Di Atas Standar',
-                    $gap === 0.0 => 'Memenuhi Standar',
-                    default => 'Di Bawah Standar',
-                };
+                $concData = $this->determineConclusion($val, $std);
 
                 return [
                     'label' => $item->subAspect?->name ?? 'Sub-Aspek Kognitif',
                     'value' => $val,
                     'standard' => $std,
-                    'gap' => $gap,
-                    'conclusion' => $conclusion,
+                    'adjusted_standard' => $concData['adjusted_standard'],
+                    'gap' => $concData['gap'],
+                    'adjusted_gap' => $concData['adjusted_gap'],
+                    'conclusion' => $concData['conclusion'],
                     'desc' => $item->subAspect?->description ?? 'Kapasitas pemrosesan kognitif spesifik.',
                 ];
             })->toArray();
@@ -308,47 +347,28 @@ class ScoreListSection extends Component
             $agreeableness = round(((($na['A'] ?? 5) + (11 - ($na['L'] ?? 5)) + (11 - ($na['E'] ?? 5))) / 3) / 2, 2);
             $emotionalStability = round(((($na['C'] ?? 5) + (11 - ($na['O'] ?? 5)) + (11 - ($na['Q4'] ?? 5))) / 3) / 2, 2);
 
+            $buildScore = function (string $label, float $val, float $std, string $desc) {
+                $v = min(5.00, max(1.00, $val));
+                $concData = $this->determineConclusion($v, $std);
+
+                return [
+                    'label' => $label,
+                    'value' => $v,
+                    'standard' => $std,
+                    'adjusted_standard' => $concData['adjusted_standard'],
+                    'gap' => $concData['gap'],
+                    'adjusted_gap' => $concData['adjusted_gap'],
+                    'conclusion' => $concData['conclusion'],
+                    'desc' => $desc,
+                ];
+            };
+
             $scores = [
-                [
-                    'label' => 'Openness to Experience',
-                    'value' => min(5.00, max(1.00, $openness)),
-                    'standard' => 3.00,
-                    'gap' => round($openness - 3.00, 2),
-                    'conclusion' => $openness >= 3.00 ? 'Memenuhi Standar' : 'Perlu Penguatan',
-                    'desc' => 'Keterbukaan terhadap ide baru, pemikiran konseptual-kreatif, dan fleksibilitas beradaptasi.',
-                ],
-                [
-                    'label' => 'Conscientiousness',
-                    'value' => min(5.00, max(1.00, $conscientiousness)),
-                    'standard' => 3.50,
-                    'gap' => round($conscientiousness - 3.50, 2),
-                    'conclusion' => $conscientiousness >= 3.50 ? 'Memenuhi Standar' : 'Perlu Penguatan',
-                    'desc' => 'Tingkat disiplin diri, keteraturan kerja, orientasi penyelesaian tugas, dan ketelitian detail.',
-                ],
-                [
-                    'label' => 'Extraversion',
-                    'value' => min(5.00, max(1.00, $extraversion)),
-                    'standard' => 3.00,
-                    'gap' => round($extraversion - 3.00, 2),
-                    'conclusion' => $extraversion >= 3.00 ? 'Memenuhi Standar' : 'Kecenderungan Introvert',
-                    'desc' => 'Kenyamanan dalam interaksi sosial, inisiatif komunikasi interpersonal, dan asertivitas.',
-                ],
-                [
-                    'label' => 'Agreeableness',
-                    'value' => min(5.00, max(1.00, $agreeableness)),
-                    'standard' => 3.00,
-                    'gap' => round($agreeableness - 3.00, 2),
-                    'conclusion' => $agreeableness >= 3.00 ? 'Memenuhi Standar' : 'Perlu Penguatan Empati',
-                    'desc' => 'Kecenderungan kooperatif, empati terhadap rekan kerja, dan kemampuan memelihara iklim kolaboratif.',
-                ],
-                [
-                    'label' => 'Emotional Stability',
-                    'value' => min(5.00, max(1.00, $emotionalStability)),
-                    'standard' => 3.50,
-                    'gap' => round($emotionalStability - 3.50, 2),
-                    'conclusion' => $emotionalStability >= 3.50 ? 'Memenuhi Standar' : 'Sensitif terhadap Tekanan',
-                    'desc' => 'Kapasitas mengelola stres, ketenangan emosional di bawah tekanan kerja, dan resiliensi psikologis.',
-                ],
+                $buildScore('Openness to Experience', $openness, 3.00, 'Keterbukaan terhadap ide baru, pemikiran konseptual-kreatif, dan fleksibilitas beradaptasi.'),
+                $buildScore('Conscientiousness', $conscientiousness, 3.50, 'Tingkat disiplin diri, keteraturan kerja, orientasi penyelesaian tugas, dan ketelitian detail.'),
+                $buildScore('Extraversion', $extraversion, 3.00, 'Kenyamanan dalam interaksi sosial, inisiatif komunikasi interpersonal, dan asertivitas.'),
+                $buildScore('Agreeableness', $agreeableness, 3.00, 'Kecenderungan kooperatif, empati terhadap rekan kerja, dan kemampuan memelihara iklim kolaboratif.'),
+                $buildScore('Emotional Stability', $emotionalStability, 3.50, 'Kapasitas mengelola stres, ketenangan emosional di bawah tekanan kerja, dan resiliensi psikologis.'),
             ];
 
             $avg = round((float) collect($scores)->avg('value'), 2);
@@ -387,11 +407,26 @@ class ScoreListSection extends Component
             $change = round($getVal(['Penyesuaian Diri', 'Agen Perubahan', 'Mobilitas', 'Inisiatif']), 2);
             $result = round($getVal(['Hasrat Berprestasi', 'Daya Tahan Kerja', 'Semangat Kerja', 'Result Focus']), 2);
 
+            $buildScore = function (string $label, float $val, float $std, string $desc) {
+                $concData = $this->determineConclusion($val, $std);
+
+                return [
+                    'label' => $label,
+                    'value' => $val,
+                    'standard' => $std,
+                    'adjusted_standard' => $concData['adjusted_standard'],
+                    'gap' => $concData['gap'],
+                    'adjusted_gap' => $concData['adjusted_gap'],
+                    'conclusion' => $concData['conclusion'],
+                    'desc' => $desc,
+                ];
+            };
+
             $scores = [
-                ['label' => 'Mental Agility', 'value' => $mental ?: 4.20, 'standard' => 3.00, 'gap' => round(($mental ?: 4.20) - 3.00, 2), 'conclusion' => ($mental ?: 4.20) >= 3.00 ? 'Memenuhi Standar' : 'Perlu Penguatan', 'desc' => 'Kelincahan berpikir dan memecahkan ketidakpastian secara rasional.'],
-                ['label' => 'People Agility', 'value' => $people ?: 3.90, 'standard' => 3.00, 'gap' => round(($people ?: 3.90) - 3.00, 2), 'conclusion' => ($people ?: 3.90) >= 3.00 ? 'Memenuhi Standar' : 'Perlu Penguatan', 'desc' => 'Kapasitas berkolaborasi dan memahami dinamika kelompok secara cepat.'],
-                ['label' => 'Change Agility', 'value' => $change ?: 4.10, 'standard' => 3.00, 'gap' => round(($change ?: 4.10) - 3.00, 2), 'conclusion' => ($change ?: 4.10) >= 3.00 ? 'Memenuhi Standar' : 'Perlu Penguatan', 'desc' => 'Kesiapan bereksperimen dengan metode baru dan menyukai perubahan.'],
-                ['label' => 'Result Agility', 'value' => $result ?: 3.80, 'standard' => 3.00, 'gap' => round(($result ?: 3.80) - 3.00, 2), 'conclusion' => ($result ?: 3.80) >= 3.00 ? 'Memenuhi Standar' : 'Perlu Penguatan', 'desc' => 'Kemampuan memberikan hasil prima dalam situasi transisi atau baru.'],
+                $buildScore('Mental Agility', $mental ?: 4.20, 3.00, 'Kelincahan berpikir dan memecahkan ketidakpastian secara rasional.'),
+                $buildScore('People Agility', $people ?: 3.90, 3.00, 'Kapasitas berkolaborasi dan memahami dinamika kelompok secara cepat.'),
+                $buildScore('Change Agility', $change ?: 4.10, 3.00, 'Kesiapan bereksperimen dengan metode baru dan menyukai perubahan.'),
+                $buildScore('Result Agility', $result ?: 3.80, 3.00, 'Kemampuan memberikan hasil prima dalam situasi transisi atau baru.'),
             ];
 
             $avg = round((float) collect($scores)->avg('value'), 2);
@@ -432,13 +467,28 @@ class ScoreListSection extends Component
             $coaching = round($getVal(['Mengarahkan', 'Koordinasi', 'Kerjasama']), 2);
             $strategic = round($getVal(['Kepemimpinan', 'Agen Perubahan', 'Analisa dan Sintesa', 'Result Focus']), 2);
 
+            $buildScore = function (string $label, float $val, float $std, string $desc) {
+                $concData = $this->determineConclusion($val, $std);
+
+                return [
+                    'label' => $label,
+                    'value' => $val,
+                    'standard' => $std,
+                    'adjusted_standard' => $concData['adjusted_standard'],
+                    'gap' => $concData['gap'],
+                    'adjusted_gap' => $concData['adjusted_gap'],
+                    'conclusion' => $concData['conclusion'],
+                    'desc' => $desc,
+                ];
+            };
+
             $scores = [
-                ['label' => 'Visioning', 'value' => $visioning ?: 4.00, 'standard' => 3.00, 'gap' => round(($visioning ?: 4.00) - 3.00, 2), 'conclusion' => 'Memenuhi Standar', 'desc' => 'Kemampuan merumuskan arah dan target unit kerja jangka panjang.'],
-                ['label' => 'Decision Making', 'value' => $decision ?: 3.70, 'standard' => 3.00, 'gap' => round(($decision ?: 3.70) - 3.00, 2), 'conclusion' => 'Memenuhi Standar', 'desc' => 'Kecepatan dan ketepatan pengambilan keputusan di situasi kritis.'],
-                ['label' => 'Strategic Influence', 'value' => $influence ?: 3.90, 'standard' => 3.00, 'gap' => round(($influence ?: 3.90) - 3.00, 2), 'conclusion' => 'Memenuhi Standar', 'desc' => 'Kekuatan persuasi dan kapasitas merangkul pemangku kepentingan.'],
-                ['label' => 'Execution Control', 'value' => $execution ?: 3.80, 'standard' => 3.00, 'gap' => round(($execution ?: 3.80) - 3.00, 2), 'conclusion' => 'Memenuhi Standar', 'desc' => 'Disiplin mengawal rencana kerja hingga tuntas.'],
-                ['label' => 'Coaching & Developing', 'value' => $coaching ?: 3.95, 'standard' => 3.00, 'gap' => round(($coaching ?: 3.95) - 3.00, 2), 'conclusion' => 'Memenuhi Standar', 'desc' => 'Kapasitas membimbing dan mempromosikan kapabilitas anggota tim.'],
-                ['label' => 'Strategic Thinking', 'value' => $strategic ?: 3.75, 'standard' => 3.00, 'gap' => round(($strategic ?: 3.75) - 3.00, 2), 'conclusion' => 'Memenuhi Standar', 'desc' => 'Kemampuan membaca tren eksternal organisasi dan dampaknya.'],
+                $buildScore('Visioning', $visioning ?: 4.00, 3.00, 'Kemampuan merumuskan arah dan target unit kerja jangka panjang.'),
+                $buildScore('Decision Making', $decision ?: 3.70, 3.00, 'Kecepatan dan ketepatan pengambilan keputusan di situasi kritis.'),
+                $buildScore('Strategic Influence', $influence ?: 3.90, 3.00, 'Kekuatan persuasi dan kapasitas merangkul pemangku kepentingan.'),
+                $buildScore('Execution Control', $execution ?: 3.80, 3.00, 'Disiplin mengawal rencana kerja hingga tuntas.'),
+                $buildScore('Coaching & Developing', $coaching ?: 3.95, 3.00, 'Kapasitas membimbing dan mempromosikan kapabilitas anggota tim.'),
+                $buildScore('Strategic Thinking', $strategic ?: 3.75, 3.00, 'Kemampuan membaca tren eksternal organisasi dan dampaknya.'),
             ];
 
             $avg = round((float) collect($scores)->avg('value'), 2);
@@ -477,11 +527,26 @@ class ScoreListSection extends Component
             $accountability = round($getVal(['Tanggung Jawab', 'Commitment']), 2);
             $consistency = round($getVal(['Loyalitas', 'Kestabilan Kerja']), 2);
 
+            $buildScore = function (string $label, float $val, float $std, string $desc) {
+                $concData = $this->determineConclusion($val, $std);
+
+                return [
+                    'label' => $label,
+                    'value' => $val,
+                    'standard' => $std,
+                    'adjusted_standard' => $concData['adjusted_standard'],
+                    'gap' => $concData['gap'],
+                    'adjusted_gap' => $concData['adjusted_gap'],
+                    'conclusion' => $concData['conclusion'],
+                    'desc' => $desc,
+                ];
+            };
+
             $scores = [
-                ['label' => 'Honesty & Transparency', 'value' => $honesty ?: 4.60, 'standard' => 3.50, 'gap' => round(($honesty ?: 4.60) - 3.50, 2), 'conclusion' => 'Memenuhi Standar', 'desc' => 'Keterbukaan dan kejujuran dalam menyampaikan fakta tanpa distorsi.'],
-                ['label' => 'Ethical Compliance', 'value' => $compliance ?: 4.50, 'standard' => 3.50, 'gap' => round(($compliance ?: 4.50) - 3.50, 2), 'conclusion' => 'Memenuhi Standar', 'desc' => 'Ketaatan total terhadap regulasi dan prinsip etika korporasi.'],
-                ['label' => 'Accountability', 'value' => $accountability ?: 4.40, 'standard' => 3.50, 'gap' => round(($accountability ?: 4.40) - 3.50, 2), 'conclusion' => 'Memenuhi Standar', 'desc' => 'Keberanian bertanggung jawab atas hasil keputusan kerja sendiri.'],
-                ['label' => 'Consistency', 'value' => $consistency ?: 4.50, 'standard' => 3.50, 'gap' => round(($consistency ?: 4.50) - 3.50, 2), 'conclusion' => 'Memenuhi Standar', 'desc' => 'Kesesuaian antara ucapan dan tindakan nyata di lapangan.'],
+                $buildScore('Honesty & Transparency', $honesty ?: 4.60, 3.50, 'Keterbukaan dan kejujuran dalam menyampaikan fakta tanpa distorsi.'),
+                $buildScore('Ethical Compliance', $compliance ?: 4.50, 3.50, 'Ketaatan total terhadap regulasi dan prinsip etika korporasi.'),
+                $buildScore('Accountability', $accountability ?: 4.40, 3.50, 'Keberanian bertanggung jawab atas hasil keputusan kerja sendiri.'),
+                $buildScore('Consistency', $consistency ?: 4.50, 3.50, 'Kesesuaian antara ucapan dan tindakan nyata di lapangan.'),
             ];
 
             $avg = round((float) collect($scores)->avg('value'), 2);
@@ -526,6 +591,7 @@ class ScoreListSection extends Component
             'iqTestName' => $data['iq_test_name'] ?? null,
             'iqInterpretation' => $data['iq_interpretation'] ?? null,
             'scores' => $data['scores'],
+            'tolerancePercentage' => $this->getTolerancePercentage(),
             'participant' => $this->participant,
         ]);
     }

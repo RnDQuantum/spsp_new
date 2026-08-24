@@ -109,7 +109,7 @@
                                     {{ $score['conclusion'] }}
                                 </span>
                             @else
-                                <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-md border bg-slate-100 text-slate-700 border-slate-200">
+                                <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-md border bg-amber-50 text-amber-800 border-amber-300">
                                     {{ $score['conclusion'] }}
                                 </span>
                             @endif
@@ -187,6 +187,7 @@
                     </div>
                 </div>
             </div>
+
             @if (!$loop->last)
                 <hr class="border-t border-warm-border/50">
             @endif
@@ -225,17 +226,31 @@
             </div>
         </div>
 
-        <!-- Collapsible / Compact Standard Rubric Box -->
+        @php
+            $activeTol = (int) ($tolerancePercentage ?? 0);
+        @endphp
+        <!-- Dynamic Standard & Tolerance Rubric Box -->
         <div class="p-3.5 rounded-lg bg-warm-ivory/60 border border-warm-border/80 text-[11px] text-slate-600">
-            <div class="font-bold uppercase tracking-wider text-slate-500 mb-1.5 flex items-center gap-1.5">
-                <i class="fas fa-scale-balanced text-accent-amber text-[10px]"></i>
-                Pedoman Kategori & Standar Formasi:
+            <div class="font-bold uppercase tracking-wider text-slate-500 mb-1.5 flex items-center justify-between">
+                <span class="flex items-center gap-1.5">
+                    <i class="fas fa-scale-balanced text-accent-amber text-[10px]"></i>
+                    Pedoman Kategori & Ambang Toleransi Formasi:
+                </span>
+                <span class="font-mono text-[10px] px-2 py-0.5 rounded bg-slate-200/80 text-slate-700">
+                    Toleransi Aktif: {{ $activeTol }}%
+                </span>
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 text-[11px] leading-relaxed">
-                <div><span class="font-bold text-emerald-700">Di Atas Standar:</span> Skor > Standar Formasi (Gap positif)</div>
-                <div><span class="font-bold text-slate-700">Memenuhi Standar:</span> Skor = Standar Formasi (Gap 0.00)</div>
-                <div><span class="font-bold text-rose-700">Di Bawah Standar:</span> Skor < Standar Formasi (Gap defisit)</div>
-                <div><span class="font-bold text-primary-ink">Batas Toleransi:</span> 90% dari Standar Jabatan Target</div>
+                <div><span class="font-bold text-emerald-700">Di Atas Standar:</span> Skor ≥ Standar Formasi (Gap ≥ 0.00)</div>
+                @if ($activeTol > 0)
+                    <div><span class="font-bold text-amber-700">Memenuhi Standar:</span> Masuk Ambang Toleransi (≥ {{ 100 - $activeTol }}% Standar)</div>
+                    <div><span class="font-bold text-rose-700">Di Bawah Standar:</span> Di Bawah Ambang (< {{ 100 - $activeTol }}% Standar)</div>
+                    <div><span class="font-bold text-primary-ink">Ambang Kelulusan:</span> {{ 100 - $activeTol }}% Standar Target</div>
+                @else
+                    <div><span class="font-bold text-slate-700">Memenuhi Standar:</span> Skor = Standar Formasi (Gap = 0.00)</div>
+                    <div><span class="font-bold text-rose-700">Di Bawah Standar:</span> Skor < Standar Formasi (Gap < 0.00)</div>
+                    <div><span class="font-bold text-primary-ink">Status:</span> Standar Murni (0% Toleransi)</div>
+                @endif
             </div>
         </div>
     </div>

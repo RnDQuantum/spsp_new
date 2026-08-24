@@ -11,6 +11,7 @@ use App\Services\HcaDataService;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\View\View;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 
@@ -48,6 +49,15 @@ class HcaReportPage extends Component
      * Search query for talent selector modal
      */
     public string $searchParticipant = '';
+
+    /**
+     * Listen to tolerance update events
+     */
+    #[On('tolerance-updated')]
+    public function onToleranceUpdated(): void
+    {
+        // Re-renders master page and propagates to reactive children
+    }
 
     /**
      * Available sections grouping for sidebar TOC

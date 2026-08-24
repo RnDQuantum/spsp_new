@@ -8,6 +8,7 @@ use App\Models\Participant;
 use App\Services\HcaDataService;
 use App\Services\IndividualAssessmentService;
 use Illuminate\View\View;
+use Livewire\Attributes\On;
 use Livewire\Attributes\Reactive;
 use Livewire\Component;
 
@@ -20,6 +21,15 @@ class IndexRadarSection extends Component
 
     public string $chartId;
 
+    /**
+     * Listen to tolerance update events to re-render component
+     */
+    #[On('tolerance-updated')]
+    public function onToleranceUpdated(): void
+    {
+        // Re-renders component
+    }
+
     public function mount(string $sectionCode = 'hci'): void
     {
         $this->sectionCode = $sectionCode;
@@ -31,14 +41,24 @@ class IndexRadarSection extends Component
         return app(HcaDataService::class)->getParticipant($this->participantId);
     }
 
+    /**
+     * Get active tolerance percentage from session
+     */
+    public function getTolerancePercentage(): int
+    {
+        return (int) session('individual_report.tolerance', 0);
+    }
+
     private function getHciData(): array
     {
         $participant = $this->participant;
+        $tolerancePercentage = $this->getTolerancePercentage();
+        $toleranceFactor = $tolerancePercentage > 0 ? (1 - ($tolerancePercentage / 100)) : 1.0;
 
         if (! $participant || ! $participant->positionFormation?->template) {
             return [
                 'title' => 'Human Capital Index',
-                'subtitle' => 'Dimensi Utama (Layer 1-3)',
+                'subtitle' => 'Evaluasi Keseimbangan 5 Dimensi',
                 'desc' => 'Profil kompetensi dan potensi kandidat belum dikalkulasi.',
                 'talentIndex' => 4.12,
                 'talentIndexPercent' => 82.40,
@@ -46,7 +66,7 @@ class IndexRadarSection extends Component
                 'labels' => ['Kompetensi', 'Potensi', 'Kinerja', 'Kepemimpinan', 'Integritas'],
                 'actualRatings' => [4.00, 4.25, 4.50, 3.80, 4.30],
                 'standardRatings' => [3.00, 3.00, 3.00, 3.00, 3.00],
-                'toleranceRatings' => [2.70, 2.70, 2.70, 2.70, 2.70],
+                'toleranceRatings' => [round(3.00 * $toleranceFactor, 2), round(3.00 * $toleranceFactor, 2), round(3.00 * $toleranceFactor, 2), round(3.00 * $toleranceFactor, 2), round(3.00 * $toleranceFactor, 2)],
             ];
         }
 
@@ -57,8 +77,8 @@ class IndexRadarSection extends Component
         $potensiCat = $hcaDataService->getCategoryByCode($templateId, 'potensi');
         $kompetensiCat = $hcaDataService->getCategoryByCode($templateId, 'kompetensi');
 
-        $potensiAspects = $potensiCat ? $service->getAspectAssessments($participant->id, $potensiCat->id, 0) : collect();
-        $kompetensiAspects = $kompetensiCat ? $service->getAspectAssessments($participant->id, $kompetensiCat->id, 0) : collect();
+        $potensiAspects = $potensiCat ? $service->getAspectAssessments($participant->id, $potensiCat->id, $tolerancePercentage) : collect();
+        $kompetensiAspects = $kompetensiCat ? $service->getAspectAssessments($participant->id, $kompetensiCat->id, $tolerancePercentage) : collect();
 
         // 1. Pilar Kompetensi
         $kompetensiRating = $kompetensiAspects->isNotEmpty()
@@ -97,18 +117,18 @@ class IndexRadarSection extends Component
             : round(($potensiRating + $kompetensiRating) / 2, 2);
 
         // Standard Ratings (Full Standard Baseline)
-        $kompetensiStd = $kompetensiAspects->isNotEmpty() ? (float) $kompetensiAspects->avg('standard_rating') : 3.00;
-        $potensiStd = $potensiAspects->isNotEmpty() ? (float) $potensiAspects->avg('standard_rating') : 3.00;
+        $kompetensiStd = $kompetensiAspects->isNotEmpty() ? (float) ($kompetensiAspects->avg('original_standard_rating') ?? $kompetensiAspects->avg('standard_rating')) : 3.00;
+        $potensiStd = $potensiAspects->isNotEmpty() ? (float) ($potensiAspects->avg('original_standard_rating') ?? $potensiAspects->avg('standard_rating')) : 3.00;
         $kinerjaStd = 3.00;
         $kepemimpinanStd = 3.00;
         $integritasStd = 3.00;
 
-        // Tolerance Ratings (Standard minus 10% tolerance)
-        $kompetensiTol = round($kompetensiStd * 0.9, 2);
-        $potensiTol = round($potensiStd * 0.9, 2);
-        $kinerjaTol = 2.70;
-        $kepemimpinanTol = 2.70;
-        $integritasTol = 2.70;
+        // Tolerance Ratings (Standard multiplied by tolerance factor)
+        $kompetensiTol = round($kompetensiStd * $toleranceFactor, 2);
+        $potensiTol = round($potensiStd * $toleranceFactor, 2);
+        $kinerjaTol = round($kinerjaStd * $toleranceFactor, 2);
+        $kepemimpinanTol = round($kepemimpinanStd * $toleranceFactor, 2);
+        $integritasTol = round($integritasStd * $toleranceFactor, 2);
 
         $actualRatings = [
             round($kompetensiRating, 2),
@@ -145,14 +165,7 @@ class IndexRadarSection extends Component
             default => 'Needs Focus',
         };
 
-        $desc = "{$participant->name} memiliki skor Human Capital Index sebesar {$talentIndex} dari 5.00 ({$talentIndexPercent}%). ";
-        if ($talentIndex >= 4.00) {
-            $desc .= 'Profil kompetensi dan potensi berada di atas rata-rata standar institusi, mengindikasikan kesiapan tinggi untuk peran kepemimpinan masa depan.';
-        } elseif ($talentIndex >= 3.00) {
-            $desc .= 'Profil kompetensi dan potensi secara umum memenuhi standar institusi dengan beberapa area pengembangan yang disarankan.';
-        } else {
-            $desc .= 'Profil kandidat memerlukan perhatian khusus pada area pengembangan kompetensi utama.';
-        }
+        $desc = "Evaluasi komprehensif 5 pilar modal manusia menghasilkan Talent Index {$talentIndex} dari skala 5.00 ({$talentIndexPercent}%) dengan kategori {$talentCategory}. Mengintegrasikan kapabilitas manajerial, kapasitas psikologis laten, pembuktian kinerja, efektivitas kepemimpinan, dan benteng etika.";
 
         return [
             'title' => 'Human Capital Index',
@@ -174,6 +187,8 @@ class IndexRadarSection extends Component
     private function getPotentialData(): array
     {
         $participant = $this->participant;
+        $tolerancePercentage = $this->getTolerancePercentage();
+        $toleranceFactor = $tolerancePercentage > 0 ? (1 - ($tolerancePercentage / 100)) : 1.0;
 
         if (! $participant || ! $participant->positionFormation?->template) {
             return [
@@ -186,7 +201,7 @@ class IndexRadarSection extends Component
                 'labels' => ['Intelektual', 'Sikap Kerja', 'Potensi Kerja', 'Sosualitas', 'Kepribadian'],
                 'actualRatings' => [4.00, 4.20, 3.80, 4.10, 3.90],
                 'standardRatings' => [3.00, 3.00, 3.00, 3.00, 3.00],
-                'toleranceRatings' => [2.70, 2.70, 2.70, 2.70, 2.70],
+                'toleranceRatings' => [round(3.00 * $toleranceFactor, 2), round(3.00 * $toleranceFactor, 2), round(3.00 * $toleranceFactor, 2), round(3.00 * $toleranceFactor, 2), round(3.00 * $toleranceFactor, 2)],
             ];
         }
 
@@ -206,11 +221,11 @@ class IndexRadarSection extends Component
                 'labels' => ['Intelektual', 'Sikap Kerja', 'Potensi Kerja', 'Sosualitas', 'Kepribadian'],
                 'actualRatings' => [4.00, 4.20, 3.80, 4.10, 3.90],
                 'standardRatings' => [3.00, 3.00, 3.00, 3.00, 3.00],
-                'toleranceRatings' => [2.70, 2.70, 2.70, 2.70, 2.70],
+                'toleranceRatings' => [round(3.00 * $toleranceFactor, 2), round(3.00 * $toleranceFactor, 2), round(3.00 * $toleranceFactor, 2), round(3.00 * $toleranceFactor, 2), round(3.00 * $toleranceFactor, 2)],
             ];
         }
 
-        $aspectAssessments = $service->getAspectAssessments($participant->id, $potensiCat->id, 0);
+        $aspectAssessments = $service->getAspectAssessments($participant->id, $potensiCat->id, $tolerancePercentage);
 
         if ($aspectAssessments->isEmpty()) {
             return [
@@ -223,14 +238,14 @@ class IndexRadarSection extends Component
                 'labels' => ['Intelektual', 'Sikap Kerja', 'Potensi Kerja', 'Sosualitas', 'Kepribadian'],
                 'actualRatings' => [4.00, 4.20, 3.80, 4.10, 3.90],
                 'standardRatings' => [3.00, 3.00, 3.00, 3.00, 3.00],
-                'toleranceRatings' => [2.70, 2.70, 2.70, 2.70, 2.70],
+                'toleranceRatings' => [round(3.00 * $toleranceFactor, 2), round(3.00 * $toleranceFactor, 2), round(3.00 * $toleranceFactor, 2), round(3.00 * $toleranceFactor, 2), round(3.00 * $toleranceFactor, 2)],
             ];
         }
 
         $labels = $aspectAssessments->pluck('name')->toArray();
         $actualRatings = $aspectAssessments->pluck('individual_rating')->map(fn ($v) => round((float) $v, 2))->toArray();
-        $standardRatings = $aspectAssessments->pluck('standard_rating')->map(fn ($v) => round((float) $v, 2))->toArray();
-        $toleranceRatings = $aspectAssessments->map(fn ($item) => round(((float) $item['standard_rating']) * 0.9, 2))->toArray();
+        $standardRatings = $aspectAssessments->map(fn ($item) => round((float) ($item['original_standard_rating'] ?? $item['standard_rating'] ?? 3.00), 2))->toArray();
+        $toleranceRatings = $aspectAssessments->map(fn ($item) => round((float) ($item['standard_rating'] ?? 3.00), 2))->toArray();
 
         $avgRating = round((float) $aspectAssessments->avg('individual_rating'), 2);
         $talentIndexPercent = round(($avgRating / 5.00) * 100, 2);
@@ -264,6 +279,9 @@ class IndexRadarSection extends Component
      */
     private function getEqData(): array
     {
+        $tolerancePercentage = $this->getTolerancePercentage();
+        $toleranceFactor = $tolerancePercentage > 0 ? (1 - ($tolerancePercentage / 100)) : 1.0;
+
         return [
             'title' => 'Emotional Intelligence (EQ)',
             'subtitle' => 'Kematangan Emosional & Hubungan Kerja',
@@ -274,7 +292,7 @@ class IndexRadarSection extends Component
             'labels' => ['Self Awareness', 'Self Regulation', 'Social Skills', 'Empathy', 'Motivation'],
             'actualRatings' => [4.20, 4.50, 4.10, 4.60, 4.35],
             'standardRatings' => [3.00, 3.00, 3.00, 3.00, 3.00],
-            'toleranceRatings' => [2.70, 2.70, 2.70, 2.70, 2.70],
+            'toleranceRatings' => [round(3.00 * $toleranceFactor, 2), round(3.00 * $toleranceFactor, 2), round(3.00 * $toleranceFactor, 2), round(3.00 * $toleranceFactor, 2), round(3.00 * $toleranceFactor, 2)],
         ];
     }
 
@@ -298,6 +316,7 @@ class IndexRadarSection extends Component
             'actualRatings' => $data['actualRatings'],
             'standardRatings' => $data['standardRatings'],
             'toleranceRatings' => $data['toleranceRatings'],
+            'tolerancePercentage' => $this->getTolerancePercentage(),
         ]);
     }
 }

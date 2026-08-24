@@ -544,4 +544,77 @@ class HcaReportPageTest extends TestCase
             ->assertSee($participant->name)
             ->assertSee($participant->test_number);
     }
+
+    /**
+     * Test HCA report toolbar contains tolerance selector and single-page print button
+     */
+    public function test_hca_report_toolbar_renders_tolerance_selector_and_print_button(): void
+    {
+        /** @var User $user */
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        $participant = Participant::query()->first();
+        if (! $participant) {
+            $this->markTestSkipped('No participant found');
+        }
+
+        Livewire::test(HcaReportPage::class, [
+            'participantId' => $participant->id,
+        ])
+            ->assertSee('Cetak Halaman Ini')
+            ->assertSee('Download PDF')
+            ->assertSee('Preview PDF')
+            ->assertSeeLivewire('components.tolerance-selector');
+    }
+
+    /**
+     * Test score list section reacts to dynamic tolerance and ConclusionService calculations
+     */
+    public function test_score_list_section_handles_dynamic_tolerance_and_events(): void
+    {
+        $participant = Participant::query()->first();
+        if (! $participant) {
+            $this->markTestSkipped('No participant found');
+        }
+
+        // Test with 0% tolerance
+        session(['individual_report.tolerance' => 0]);
+
+        $test = Livewire::test(ScoreListSection::class, [
+            'sectionCode' => 'competency',
+            'participantId' => $participant->id,
+        ])
+            ->assertSee('Toleransi Aktif: 0%')
+            ->assertSee('Standar Murni (0% Toleransi)');
+
+        // Change session tolerance to 10% and dispatch tolerance-updated event
+        session(['individual_report.tolerance' => 10]);
+        $test->dispatch('tolerance-updated', tolerance: 10)
+            ->assertSee('Toleransi Aktif: 10%')
+            ->assertSee('Ambang Toleransi');
+    }
+
+    /**
+     * Test index radar section reacts to dynamic tolerance updates
+     */
+    public function test_index_radar_section_handles_dynamic_tolerance_and_events(): void
+    {
+        $participant = Participant::query()->first();
+        if (! $participant) {
+            $this->markTestSkipped('No participant found');
+        }
+
+        session(['individual_report.tolerance' => 0]);
+
+        $test = Livewire::test(IndexRadarSection::class, [
+            'sectionCode' => 'hci',
+            'participantId' => $participant->id,
+        ])
+            ->assertSee('Standar Murni (0% Toleransi)');
+
+        session(['individual_report.tolerance' => 15]);
+        $test->dispatch('tolerance-updated', tolerance: 15)
+            ->assertSee('Ambang Toleransi');
+    }
 }
