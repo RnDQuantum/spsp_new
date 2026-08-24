@@ -317,6 +317,7 @@ class IndexRadarSection extends Component
             'standardRatings' => $data['standardRatings'],
             'toleranceRatings' => $data['toleranceRatings'],
             'tolerancePercentage' => $this->getTolerancePercentage(),
+            'participant' => $this->participant,
         ]);
     }
 }
