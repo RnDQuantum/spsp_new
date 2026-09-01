@@ -25,9 +25,12 @@
 
 ## 📊 Sumber Data DB SPSP & Logic Calculation
 
-* **Model Utama**: `App\Models\Participant`, `App\Models\PositionFormation`, `App\Models\FinalAssessment`, `App\Models\ParticipantPerformanceRecord`.
-* **Formula Penentuan Horizon & Keyakinan**:
-  * **Peran Target Utama**: Diderivasi dari formasi posisi aktif (`PositionFormation::name` / `current_position`).
-  * **Persentase Kesiapan Horizon 1**: Dihitung dari kombinasi skor capaian KPI aktual dan skor potensi individual ($\le 98\%$).
-  * **Deskripsi Horizon**: Disesuaikan secara otomatis berdasarkan klasifikasi 9-Box untuk memberikan arahan pengembangan spesifik tiap horizon.
-* **Tampilan Visual UI**: Kartu peran target utama, timeline bertingkat 3 horizon (Siap Sekarang, 1 Tahun, 2-3 Tahun) dengan persentase keyakinan kesiapan, status badge, dan deskripsi intervensi pendukung.
+* **Model Utama**: `App\Models\Participant`, `App\Models\PositionFormation`, `App\Models\FinalAssessment`, `App\Models\ParticipantPerformanceRecord`, `App\Models\ParticipantPersonalProfile`.
+* **Formula Penentuan Horizon & Keyakinan (Smart Default with Human-in-the-Loop Override)**:
+  * **Default (Algoritmik Otomatis)**: Diderivasi dari formasi posisi aktif (`PositionFormation::name` / `current_position`), skor potensi SPSP, dan rata-rata capaian KPI tahunan.
+  * **Human-in-the-Loop Override (Kurasi Dewan Suksesi)**: Asesor / HR dapat meng-override melalui Sub-tab 4 *"Kurasi Suksesi & Rekomendasi Peran"* pada formulir data pelengkap (Tier 1 maupun Tier 2):
+    * `succession_target_role`: Nama jabatan definitif riil target suksesi.
+    * `readiness_horizon`: Penetapan horizon definitif (`ready_now`, `1_year`, `2_year`).
+    * `readiness_percentage`: Persentase *readiness confidence* manual.
+    * `succession_notes`: Catatan kualitatif resmi Dewan Suksesi (*Strategic Succession Verdict*).
+* **Tampilan Visual UI**: Kartu peran target utama, badge kurasi resmi Dewan Suksesi (jika dikurasi), timeline bertingkat 3 horizon (Siap Sekarang, 1 Tahun, 2-3 Tahun) dengan persentase keyakinan kesiapan, status badge, deskripsi intervensi pendukung, dan kartu catatan strategis Dewan Suksesi.

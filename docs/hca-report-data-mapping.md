@@ -53,8 +53,8 @@
 
 Seluruh pertanyaan dan kebutuhan data pada dokumen preliminary ini **telah diselesaikan dan diimplementasikan penuh 100% dinamis**:
 1. **Big Five (16PF) & DISC (PAPI Kostik)**: Menggunakan data instrumen psikometri baku pada tabel `test_results` via `TestReportService`.
-2. **Data Pelengkap (Kinerja/KPI, Riwayat Karier, Profil Personal)**: Diimplementasikan menggunakan **Hybrid Two-Tier Entry System** (Tier 1: Base SPSP Participant Detail Tab `ParticipantDetail.php` & Tier 2: In-Context Slide-over Modal `HcaDataEditorModal.php` dengan transaksi database atomik dan event reaktif `hca-data-updated`).
-3. **9-Box Matrix, Succession Horizon, & Role Recommendation**: Menggunakan formula *Criterion-Referenced* berbasis integrasi Potensi $\times$ Kinerja Aktual KPI.
+2. **Data Pelengkap (Kinerja/KPI, Riwayat Karier, Profil Personal, Kurasi Suksesi)**: Diimplementasikan menggunakan **Hybrid Two-Tier Entry System** (Tier 1: Base SPSP Participant Detail Tab `ParticipantDetail.php` & Tier 2: In-Context Slide-over Modal `HcaDataEditorModal.php` dengan 4 sub-tab, transaksi database atomik, dan event reaktif `hca-data-updated`).
+3. **9-Box Matrix, Succession Horizon, & Role Recommendation**: Menggunakan formula *Criterion-Referenced* berbasis integrasi Potensi $\times$ Kinerja Aktual KPI dengan dukungan kurasi resmi Asesor/Dewan Suksesi (*Smart Default with Human-in-the-Loop Override*).
 
 > 📖 **Dokumentasi Resmi Terkini**: Silakan merujuk ke master dokumentasi di [docs/hca/DATA_MAPPING_SPEC.md](./hca/DATA_MAPPING_SPEC.md) dan [docs/hca/README.md](./hca/README.md).
 

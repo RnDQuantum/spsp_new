@@ -9,6 +9,7 @@ use App\Livewire\Pages\HCA\HcaReportPage;
 use App\Livewire\Pages\HCA\Sections\DiscProfile;
 use App\Livewire\Pages\HCA\Sections\ExecutiveSummary;
 use App\Livewire\Pages\HCA\Sections\IndexRadarSection;
+use App\Livewire\Pages\HCA\Sections\NextRoleRecommendation;
 use App\Livewire\Pages\HCA\Sections\NineBoxMatrix;
 use App\Livewire\Pages\HCA\Sections\ParticipantProfile;
 use App\Livewire\Pages\HCA\Sections\PerformanceDashboard;
@@ -702,6 +703,10 @@ class HcaReportPageTest extends TestCase
         // Modify and save
         $test->set('bloodType', 'O+')
             ->set('hobbies', 'Fotografi & Desain')
+            ->set('successionTargetRole', 'Kepala Kantor Wilayah Terpilih')
+            ->set('readinessHorizon', 'ready_now')
+            ->set('readinessPercentage', 95)
+            ->set('successionNotes', 'Kandidat telah diverifikasi Dewan Suksesi untuk promosi langsung.')
             ->call('saveSupplementaryData')
             ->assertSee('Data pelengkap HCA berhasil diperbarui');
 
@@ -709,5 +714,42 @@ class HcaReportPageTest extends TestCase
         $savedProfile = ParticipantPersonalProfile::where('participant_id', $participant->id)->first();
         $this->assertNotNull($savedProfile);
         $this->assertEquals('Fotografi & Desain', $savedProfile->hobbies);
+        $this->assertEquals('Kepala Kantor Wilayah Terpilih', $savedProfile->succession_target_role);
+        $this->assertEquals('ready_now', $savedProfile->readiness_horizon);
+        $this->assertEquals(95, $savedProfile->readiness_percentage);
+    }
+
+    /**
+     * Test Succession Readiness and Next Role Recommendation reflect curation overrides
+     */
+    public function test_succession_and_next_role_sections_reflect_curation_overrides(): void
+    {
+        $participant = Participant::with('personalProfile')->first();
+        if (! $participant) {
+            $this->markTestSkipped('No participant found');
+        }
+
+        // Set curation override on participant
+        ParticipantPersonalProfile::updateOrCreate(
+            ['participant_id' => $participant->id],
+            [
+                'succession_target_role' => 'Direktur Utama Transisi & Operasional',
+                'readiness_horizon' => '1_year',
+                'readiness_percentage' => 88,
+                'succession_notes' => 'Catatan kurasi khusus asesor utama dewan komisaris.',
+            ]
+        );
+
+        // Test SuccessionReadiness section
+        Livewire::test(SuccessionReadiness::class, ['participantId' => $participant->id])
+            ->assertSee('Direktur Utama Transisi & Operasional')
+            ->assertSee('88% Kesiapan')
+            ->assertSee('Catatan kurasi khusus asesor utama dewan komisaris')
+            ->assertSee('Kurasi Resmi Dewan Suksesi');
+
+        // Test NextRoleRecommendation section
+        Livewire::test(NextRoleRecommendation::class, ['participantId' => $participant->id])
+            ->assertSee('Direktur Utama Transisi & Operasional')
+            ->assertSee('Kurasi Suksesi');
     }
 }

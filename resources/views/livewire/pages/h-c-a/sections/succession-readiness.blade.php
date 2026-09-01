@@ -9,11 +9,18 @@
             </h2>
         </div>
         <!-- Target Role Header -->
-        <div class="flex items-center gap-2">
-            <span class="text-xs font-semibold text-slate-500">Jabatan Target Utama:</span>
-            <span class="text-xs font-bold text-accent-amber bg-accent-amber/10 border border-accent-amber/20 px-3 py-1 rounded-md uppercase tracking-wider shadow-xs">
-                {{ $primaryTargetRole }}
-            </span>
+        <div class="flex flex-col sm:flex-row sm:items-center gap-2">
+            @if($isCurated)
+                <span class="text-[10px] bg-accent-amber/15 text-accent-amber border border-accent-amber/30 px-2.5 py-1 rounded-md font-bold flex items-center gap-1.5 w-fit">
+                    <i class="fas fa-stamp text-[11px]"></i> Kurasi Resmi Dewan Suksesi
+                </span>
+            @endif
+            <div class="flex items-center gap-2">
+                <span class="text-xs font-semibold text-slate-500">Jabatan Target Utama:</span>
+                <span class="text-xs font-bold text-accent-amber bg-accent-amber/10 border border-accent-amber/20 px-3 py-1 rounded-md uppercase tracking-wider shadow-xs">
+                    {{ $primaryTargetRole }}
+                </span>
+            </div>
         </div>
     </div>
 
@@ -23,7 +30,7 @@
     </p>
 
     <!-- Succession Horizon Stack (Progressive) -->
-    <div class="relative pl-6 md:pl-8 border-l border-warm-border space-y-12">
+    <div class="relative pl-6 md:pl-8 border-l border-warm-border space-y-12 mb-10">
         @foreach ($horizons as $index => $horizon)
             <div class="relative">
                 <!-- Timeline Dot Indicator -->
@@ -64,4 +71,17 @@
             </div>
         @endforeach
     </div>
+
+    @if(!empty($successionNotes))
+    <!-- Strategic Succession Verdict Callout Box -->
+    <div class="p-6 bg-warm-ivory/70 border border-warm-border rounded-xl space-y-2">
+        <div class="flex items-center gap-2 text-primary-ink font-display font-bold text-xs">
+            <i class="fas fa-feather-pointed text-accent-amber"></i>
+            <span>Catatan Strategis Dewan Suksesi & Asesor (Strategic Succession Verdict)</span>
+        </div>
+        <p class="text-xs text-slate-700 leading-relaxed italic">
+            &ldquo;{{ $successionNotes }}&rdquo;
+        </p>
+    </div>
+    @endif
 </div>

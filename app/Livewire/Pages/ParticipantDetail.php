@@ -74,6 +74,17 @@ class ParticipantDetail extends Component
 
     public string $mottoOrValues = '';
 
+    /**
+     * Succession Curation state (Override)
+     */
+    public ?string $successionTargetRole = null;
+
+    public ?string $readinessHorizon = null;
+
+    public ?int $readinessPercentage = null;
+
+    public ?string $successionNotes = null;
+
     public function mount(string $eventCode, string $testNumber): void
     {
         // Load participant dengan semua relasi yang diperlukan
@@ -218,7 +229,7 @@ class ParticipantDetail extends Component
             ];
         }
 
-        // 3. Personal profile
+        // 3. Personal profile & Succession Curation
         $profile = $this->participant->personalProfile;
         if ($profile) {
             $this->bloodType = $profile->blood_type ?? 'O+';
@@ -227,6 +238,10 @@ class ParticipantDetail extends Component
             $this->medicalNotes = $profile->medical_notes ?? '';
             $this->culturalNotes = $profile->cultural_notes ?? '';
             $this->mottoOrValues = $profile->motto_or_values ?? '';
+            $this->successionTargetRole = $profile->succession_target_role ?? null;
+            $this->readinessHorizon = $profile->readiness_horizon ?? null;
+            $this->readinessPercentage = $profile->readiness_percentage !== null ? (int) $profile->readiness_percentage : null;
+            $this->successionNotes = $profile->succession_notes ?? null;
         } else {
             $this->bloodType = 'O+';
             $this->hobbies = 'Membaca, Fotografi, Riset Kebijakan';
@@ -234,6 +249,10 @@ class ParticipantDetail extends Component
             $this->medicalNotes = 'Kondisi fisik prima, tidak ada riwayat penyakit kronis berat.';
             $this->culturalNotes = 'Menjunjung tinggi nilai kejujuran, integritas, dan budaya gotong royong.';
             $this->mottoOrValues = 'Integritas dalam Bekerja, Keunggulan dalam Melayani.';
+            $this->successionTargetRole = null;
+            $this->readinessHorizon = null;
+            $this->readinessPercentage = null;
+            $this->successionNotes = null;
         }
     }
 
@@ -369,7 +388,7 @@ class ParticipantDetail extends Component
                 ]);
             }
 
-            // 3. Save Personal Profile
+            // 3. Save Personal Profile & Succession Curation
             ParticipantPersonalProfile::updateOrCreate(
                 ['participant_id' => $participantId],
                 [
@@ -379,6 +398,10 @@ class ParticipantDetail extends Component
                     'medical_notes' => trim($this->medicalNotes),
                     'cultural_notes' => trim($this->culturalNotes),
                     'motto_or_values' => trim($this->mottoOrValues),
+                    'succession_target_role' => ! empty(trim((string) $this->successionTargetRole)) ? trim((string) $this->successionTargetRole) : null,
+                    'readiness_horizon' => ! empty($this->readinessHorizon) ? $this->readinessHorizon : null,
+                    'readiness_percentage' => $this->readinessPercentage !== null && $this->readinessPercentage !== '' ? (int) $this->readinessPercentage : null,
+                    'succession_notes' => ! empty(trim((string) $this->successionNotes)) ? trim((string) $this->successionNotes) : null,
                 ]
             );
         });

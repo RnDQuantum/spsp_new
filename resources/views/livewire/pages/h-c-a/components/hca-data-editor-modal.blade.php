@@ -69,6 +69,18 @@
                     <i class="fas fa-id-card-clip text-xs"></i>
                     <span>3. Profil Personal</span>
                 </button>
+
+                <button 
+                    type="button"
+                    wire:click="setActiveTab('succession')"
+                    class="py-3 px-4 text-xs font-semibold border-b-2 transition-all flex items-center gap-2 cursor-pointer {{ $activeTab === 'succession' ? 'border-accent-amber text-accent-amber font-bold' : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white' }}"
+                >
+                    <i class="fas fa-chess-king text-xs"></i>
+                    <span>4. Kurasi Suksesi & Peran</span>
+                    @if($successionTargetRole || $readinessHorizon)
+                        <span class="w-1.5 h-1.5 rounded-full bg-accent-amber"></span>
+                    @endif
+                </button>
             </div>
 
             <!-- Success Alert Banner -->
@@ -396,6 +408,78 @@
                                 placeholder="Integritas dalam Bekerja, Keunggulan dalam Melayani"
                             />
                         </div>
+                    </div>
+                </div>
+                @endif
+
+                <!-- TAB 4: KURASI SUKSESI & REKOMENDASI PERAN -->
+                @if($activeTab === 'succession')
+                <div class="space-y-4">
+                    <div class="p-3.5 rounded-lg bg-amber-500/10 border border-accent-amber/20 text-xs text-slate-700 dark:text-slate-300 flex items-start gap-3">
+                        <i class="fas fa-circle-info text-accent-amber text-sm mt-0.5 shrink-0"></i>
+                        <div>
+                            <p class="font-semibold text-primary-ink dark:text-white">Smart Default with Human-in-the-Loop Override</p>
+                            <p class="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5 leading-relaxed">
+                                Jika kolom di bawah dikosongkan, sistem secara otomatis menghitung proyeksi suksesi berbasis algoritma 9-box (Section 17 & 23). Isi kolom berikut jika Asesor atau Dewan Suksesi ingin menetapkan keputusan definitif kustom.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                                Target Posisi Suksesi Definitif
+                            </label>
+                            <input 
+                                type="text" 
+                                wire:model="successionTargetRole"
+                                class="w-full text-xs px-3 py-2 rounded-md border border-warm-border dark:border-[#25211e] bg-white dark:bg-[#171412] text-primary-ink dark:text-white focus:outline-none focus:ring-1 focus:ring-accent-amber"
+                                placeholder="Contoh: Direktur Operasi & Transformasi Bisnis"
+                            />
+                            <p class="text-[10px] text-slate-500 mt-1">Kosongkan untuk menggunakan target peran otomatis sistem.</p>
+                        </div>
+
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                                Horizon Kesiapan Suksesi Definitif
+                            </label>
+                            <select 
+                                wire:model="readinessHorizon"
+                                class="w-full text-xs px-3 py-2 rounded-md border border-warm-border dark:border-[#25211e] bg-white dark:bg-[#171412] text-primary-ink dark:text-white focus:outline-none focus:ring-1 focus:ring-accent-amber"
+                            >
+                                <option value="">-- Otomatis (Sesuai Algoritma 9-Box) --</option>
+                                <option value="ready_now">Siap Sekarang (Ready Now &bull; 0–6 Bulan)</option>
+                                <option value="1_year">Kesiapan 1 Tahun (Ready in 12 Months)</option>
+                                <option value="2_year">Kesiapan 2 Tahun (Ready in 24 Months)</option>
+                            </select>
+                            <p class="text-[10px] text-slate-500 mt-1">Menentukan segmen kesiapan suksesi di Section 17.</p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                            Tingkat Keyakinan Kesiapan / Confidence Index (0–100%)
+                        </label>
+                        <input 
+                            type="number" 
+                            min="0"
+                            max="100"
+                            wire:model="readinessPercentage"
+                            class="w-full sm:w-1/2 text-xs px-3 py-2 rounded-md border border-warm-border dark:border-[#25211e] bg-white dark:bg-[#171412] text-primary-ink dark:text-white focus:outline-none focus:ring-1 focus:ring-accent-amber"
+                            placeholder="Contoh: 92 (Kosongkan jika otomatis)"
+                        />
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                            Catatan Strategis Dewan Suksesi & Asesor (Strategic Succession Verdict)
+                        </label>
+                        <textarea 
+                            rows="3"
+                            wire:model="successionNotes"
+                            class="w-full text-xs px-3 py-2 rounded-md border border-warm-border dark:border-[#25211e] bg-white dark:bg-[#171412] text-primary-ink dark:text-white focus:outline-none focus:ring-1 focus:ring-accent-amber"
+                            placeholder="Contoh: Kandidat diproyeksikan untuk suksesi Direktur Operasi dengan syarat mengikuti rotasi unit regional dan sertifikasi kepemimpinan eksekutif dalam 6 bulan pertama..."
+                        ></textarea>
                     </div>
                 </div>
                 @endif

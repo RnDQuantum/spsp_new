@@ -15,7 +15,12 @@
         </div>
         <!-- Target Role & Readiness Badges -->
         <div class="flex flex-col sm:items-end gap-1.5">
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2 flex-wrap sm:justify-end">
+                @if($isCurated ?? false)
+                    <span class="text-[10px] bg-accent-amber/15 text-accent-amber border border-accent-amber/30 px-2 py-0.5 rounded font-bold flex items-center gap-1">
+                        <i class="fas fa-stamp text-[9px]"></i> Kurasi Suksesi
+                    </span>
+                @endif
                 <span class="text-xs font-semibold text-slate-500">Target Peran:</span>
                 <span class="text-xs font-bold text-accent-amber bg-accent-amber/10 border border-accent-amber/20 px-3 py-1 rounded-md">
                     {{ $recommendedRole }}

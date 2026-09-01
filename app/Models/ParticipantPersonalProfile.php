@@ -23,6 +23,10 @@ class ParticipantPersonalProfile extends Model
         'medical_notes',
         'cultural_notes',
         'motto_or_values',
+        'succession_target_role',
+        'readiness_horizon',
+        'readiness_percentage',
+        'succession_notes',
     ];
 
     public function participant(): BelongsTo

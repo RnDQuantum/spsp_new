@@ -7,6 +7,7 @@ namespace App\Livewire\Pages\HCA\Sections;
 use App\Models\Participant;
 use App\Services\HcaDataService;
 use Illuminate\View\View;
+use Livewire\Attributes\On;
 use Livewire\Attributes\Reactive;
 use Livewire\Component;
 
@@ -14,6 +15,12 @@ class SuccessionReadiness extends Component
 {
     #[Reactive]
     public ?int $participantId = null;
+
+    #[On('hca-data-updated')]
+    public function onDataUpdated(): void
+    {
+        // Re-renders component on data update
+    }
 
     public function getParticipantProperty(): ?Participant
     {
@@ -23,6 +30,7 @@ class SuccessionReadiness extends Component
     public function render(): View
     {
         $participant = $this->participant;
+        $profile = $participant?->personalProfile;
 
         $posName = $participant?->positionFormation?->name
             ?? $participant?->current_position
@@ -30,7 +38,7 @@ class SuccessionReadiness extends Component
 
         $name = $participant?->name ?? 'Kandidat';
 
-        // 1. Calculate Potential & Performance Level
+        // 1. Calculate Potential & Performance Level (Default automatic)
         $potScore = (float) ($participant?->finalAssessment?->potensi_individual_score ?? 3.85);
         $latestKpi = (float) ($participant?->performanceRecords?->last()?->kpi_score ?? 95.50);
 
@@ -88,9 +96,47 @@ class SuccessionReadiness extends Component
             ];
         }
 
+        // 2. Apply Human-in-the-loop Committee Overrides (if set)
+        $isCurated = false;
+        $successionNotes = null;
+
+        if ($profile) {
+            if (! empty($profile->succession_target_role)) {
+                $primaryTargetRole = $profile->succession_target_role;
+                $horizons[0]['role'] = $profile->succession_target_role;
+                $isCurated = true;
+            }
+
+            if (! empty($profile->readiness_horizon)) {
+                $isCurated = true;
+                if ($profile->readiness_horizon === 'ready_now') {
+                    $horizons[0]['timeframe'] = 'Siap Sekarang';
+                    $horizons[0]['status'] = 'Ready Now';
+                } elseif ($profile->readiness_horizon === '1_year') {
+                    $horizons[0]['timeframe'] = 'Kesiapan 1 Tahun';
+                    $horizons[0]['status'] = 'Ready in 12 Months';
+                } elseif ($profile->readiness_horizon === '2_year') {
+                    $horizons[0]['timeframe'] = 'Kesiapan 2 Tahun';
+                    $horizons[0]['status'] = 'Ready in 24 Months';
+                }
+            }
+
+            if ($profile->readiness_percentage !== null) {
+                $horizons[0]['percentage'] = (int) $profile->readiness_percentage;
+                $isCurated = true;
+            }
+
+            if (! empty($profile->succession_notes)) {
+                $successionNotes = $profile->succession_notes;
+                $isCurated = true;
+            }
+        }
+
         return view('livewire.pages.h-c-a.sections.succession-readiness', [
             'horizons' => $horizons,
             'primaryTargetRole' => $primaryTargetRole,
+            'isCurated' => $isCurated,
+            'successionNotes' => $successionNotes,
             'participant' => $participant,
         ]);
     }

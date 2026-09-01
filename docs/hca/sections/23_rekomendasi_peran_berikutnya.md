@@ -32,8 +32,8 @@
 
 ## 📊 Sumber Data DB SPSP & Logic Calculation
 
-* **Model Utama**: `App\Models\Participant`, `App\Models\PositionFormation`, `App\Models\FinalAssessment`, `App\Models\ParticipantPerformanceRecord`.
-* **Formula Derivasi Peran**:
-  * Mengambil nama jabatan saat ini dari `$participant->positionFormation->name`.
-  * Memetakan ke level jabatan target setingkat lebih tinggi berdasarkan kata kunci ("Kepala/Head" $\rightarrow$ "Direktur / VP", "Manager" $\rightarrow$ "Senior VP / GM", "Analis/Ahli" $\rightarrow$ "Lead Specialist / Sub-Division Head").
-* **Tampilan Visual UI**: Kartu peran target utama di header dengan badge kesiapan suksesi, serta kartu 3 fase transisi berurutan (Bulan 1–3, 4–6, 7+) lengkap dengan rincian tindakan spesifik.
+* **Model Utama**: `App\Models\Participant`, `App\Models\PositionFormation`, `App\Models\FinalAssessment`, `App\Models\ParticipantPerformanceRecord`, `App\Models\ParticipantPersonalProfile`.
+* **Formula Derivasi Peran (Smart Default with Human-in-the-Loop Override)**:
+  * **Default (Algoritmik)**: Mengambil nama jabatan saat ini dari `$participant->positionFormation->name` dan memetakan ke level jabatan target setingkat lebih tinggi berdasarkan kata kunci ("Kepala/Head" $\rightarrow$ "Direktur / VP", "Manager" $\rightarrow$ "Senior VP / GM", "Analis/Ahli" $\rightarrow$ "Lead Specialist / Sub-Division Head").
+  * **Human-in-the-Loop Override**: Asesor / HR dapat menetapkan nama peran definitif riil melalui `ParticipantPersonalProfile::$succession_target_role` dan horizon kesiapan kustom melalui `ParticipantPersonalProfile::$readiness_horizon` (Sub-tab 4 pada form Tier 1 / Tier 2).
+* **Tampilan Visual UI**: Kartu peran target utama di header dengan badge kurasi suksesi (jika dikurasi), status horizon kesiapan, serta kartu 3 fase transisi berurutan (Bulan 1–3, 4–6, 7+) lengkap dengan rincian tindakan spesifik.

@@ -191,18 +191,19 @@ This phase stitches all 23 sections together into a single, cohesive web applica
 
 ## 8. Supplementary Data Entry System (Hybrid Two-Tier)
 
-HCA Report incorporates supplementary organizational data not produced automatically by standard psychological tests:
-1. **Annual Performance & KPI History** (`participant_performance_records`)
-2. **Career Progression & Tenure** (`participant_career_histories`)
-3. **Personal Profile & Lifestyle Context** (`participant_personal_profiles`)
+HCA Report incorporates supplementary organizational and strategic data not produced automatically by standard psychological tests:
+1. **Annual Performance & KPI History** (`participant_performance_records`) &rarr; Section 15 & Section 16.
+2. **Career Progression & Tenure** (`participant_career_histories`) &rarr; Section 06.
+3. **Personal Profile & Lifestyle Context** (`participant_personal_profiles`) &rarr; Section 18.
+4. **Succession Curation & Next Role Override** (`participant_personal_profiles` columns: `succession_target_role`, `readiness_horizon`, `readiness_percentage`, `succession_notes`) &rarr; Section 17 & Section 23 (*Smart Default with Human-in-the-Loop Override*).
 
 ### Two-Tier Architecture:
 - **Tier 1 (Base SPSP — Participant Detail Page)**:
-  - Tabbed interface on `ParticipantDetail.php` (`/participant-detail/{event}/{testNumber}`).
+  - Tabbed interface on `ParticipantDetail.php` (`/participant-detail/{event}/{testNumber}`) featuring 4 sub-tabs.
   - Allows bulk entry/updates of candidate histories before assessment review sessions.
 - **Tier 2 (In-Context Modal Drawer — HCA Report)**:
-  - Slide-over drawer triggerable from the sticky topbar (`HcaDataEditorModal.php`).
+  - Slide-over drawer triggerable from the sticky topbar (`HcaDataEditorModal.php`) with 4 sub-tabs.
   - Allows assessors to review and edit supplementary data on-the-fly without leaving the executive report.
-  - Emits Livewire event `hca-data-updated` to trigger real-time, 0ms re-rendering of Section 15 (KPI Line Chart), Section 16 (9-Box Grid), Section 06 (Timeline), Section 18 (Personal Profile), and Section 02 (Executive Summary).
+  - Emits Livewire event `hca-data-updated` to trigger real-time, 0ms re-rendering of Section 15 (KPI Line Chart), Section 16 (9-Box Grid), Section 06 (Timeline), Section 18 (Personal Profile), Section 17 (Succession Readiness), Section 23 (Next Role Recommendation), and Section 02 (Executive Summary).
 
 

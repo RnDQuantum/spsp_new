@@ -7,6 +7,7 @@ namespace App\Livewire\Pages\HCA\Sections;
 use App\Models\Participant;
 use App\Services\HcaDataService;
 use Illuminate\View\View;
+use Livewire\Attributes\On;
 use Livewire\Attributes\Reactive;
 use Livewire\Component;
 
@@ -14,6 +15,12 @@ class NextRoleRecommendation extends Component
 {
     #[Reactive]
     public ?int $participantId = null;
+
+    #[On('hca-data-updated')]
+    public function onDataUpdated(): void
+    {
+        // Re-renders component on data update
+    }
 
     public function getParticipantProperty(): ?Participant
     {
@@ -23,6 +30,7 @@ class NextRoleRecommendation extends Component
     public function render(): View
     {
         $participant = $this->participant;
+        $profile = $participant?->personalProfile;
 
         // 1. Calculate Potential and Performance Level
         $potScore = (float) ($participant?->finalAssessment?->potensi_individual_score ?? 3.85);
@@ -44,7 +52,7 @@ class NextRoleRecommendation extends Component
         $isStarOrHighPot = ($activePotential === 3 && $activePerformance >= 2);
         $isHighPerformerOrCore = ($activePotential === 2 || $activePerformance === 3);
 
-        // Derive target role name
+        // Derive target role name (default)
         $recommendedRole = match (true) {
             $isStarOrHighPot => 'VP / Head of Strategic Division',
             $isHighPerformerOrCore => 'Senior Specialist / Project Lead',
@@ -59,6 +67,30 @@ class NextRoleRecommendation extends Component
                 $recommendedRole = 'Senior Vice President / General Manager';
             } elseif (str_contains(strtolower($posName), 'analis') || str_contains(strtolower($posName), 'ahli')) {
                 $recommendedRole = 'Lead Specialist / Sub-Division Head';
+            }
+        }
+
+        $readinessStatus = match (true) {
+            $isStarOrHighPot => 'Siap Sekarang (Ready Now)',
+            $isHighPerformerOrCore => 'Kesiapan 1–2 Tahun (Promotable)',
+            default => 'Kesiapan 2–3 Tahun (Development Needed)',
+        };
+
+        // 2. Human-in-the-Loop Curation Overrides
+        $isCurated = false;
+        if ($profile) {
+            if (! empty($profile->succession_target_role)) {
+                $recommendedRole = $profile->succession_target_role;
+                $isCurated = true;
+            }
+            if (! empty($profile->readiness_horizon)) {
+                $readinessStatus = match ($profile->readiness_horizon) {
+                    'ready_now' => 'Siap Sekarang (Ready Now)',
+                    '1_year' => 'Kesiapan 1 Tahun (Ready in 12 Months)',
+                    '2_year' => 'Kesiapan 2 Tahun (Ready in 24 Months)',
+                    default => $readinessStatus,
+                };
+                $isCurated = true;
             }
         }
 
@@ -117,16 +149,11 @@ class NextRoleRecommendation extends Component
             ],
         };
 
-        $readinessStatus = match (true) {
-            $isStarOrHighPot => 'Ready Now (Siap Promosi Segera)',
-            $isHighPerformerOrCore => 'Ready 1–2 Years (Akselerasi Terarah)',
-            default => 'Ready 2–3 Years (Pengembangan Kapabilitas)',
-        };
-
         return view('livewire.pages.h-c-a.sections.next-role-recommendation', [
             'participant' => $participant,
             'recommendedRole' => $recommendedRole,
             'readinessStatus' => $readinessStatus,
+            'isCurated' => $isCurated,
             'phases' => $phases,
         ]);
     }
