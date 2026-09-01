@@ -62,15 +62,15 @@
                     <span class="w-3 h-3 rounded-full shrink-0" style="background-color: #5db010;"></span>
                     <span class="text-primary-ink font-medium">{{ $participant->name ?? 'Skor Aktual' }}</span>
                 </div>
-                <!-- Dataset 1: Standar Formasi (Merah) -->
+                <!-- Dataset 1: Batas Toleransi (Merah) -->
                 <div class="flex items-center gap-2 px-3 py-1.5 rounded-md bg-white border border-warm-border shadow-2xs">
                     <span class="w-3 h-3 rounded-full shrink-0" style="background-color: #b50505;"></span>
-                    <span class="text-primary-ink font-medium">Standar Formasi</span>
+                    <span class="text-primary-ink font-medium">Batas Toleransi <span class="hca-tol-label-{{ str_replace('-', '_', $chartId) }}">{{ (int) $tolerancePercentage }}%</span></span>
                 </div>
-                <!-- Dataset 2: Batas Toleransi (Kuning) -->
+                <!-- Dataset 2: Standar Formasi (Kuning) -->
                 <div class="flex items-center gap-2 px-3 py-1.5 rounded-md bg-white border border-warm-border shadow-2xs">
                     <span class="w-3 h-3 rounded-full shrink-0" style="background-color: #fafa05; border: 1px solid #e6d105;"></span>
-                    <span class="text-primary-ink font-medium">Batas Toleransi <span class="hca-tol-label-{{ str_replace('-', '_', $chartId) }}">{{ (int) $tolerancePercentage }}%</span></span>
+                    <span class="text-primary-ink font-medium">Standar Formasi</span>
                 </div>
             </div>
         </div>
@@ -158,41 +158,47 @@
                     labels: labels,
                     datasets: [
                         {
+                            // LAYER 1: PESERTA (HIJAU) - Dataset 0
                             label: participantName,
                             data: actual,
                             fill: true,
-                            backgroundColor: 'rgba(93, 176, 16, 0.45)', // SPSP Green Layer
-                            borderColor: '#5db010',
+                            backgroundColor: '#5db010', // SPSP Green Layer (Solid)
+                            borderColor: '#8fd006',
                             pointBackgroundColor: '#8fd006',
                             pointBorderColor: '#ffffff',
                             borderWidth: 2.5,
-                            pointRadius: 4.5,
+                            pointRadius: 4,
+                            pointBorderWidth: 2,
                             pointHoverRadius: 6,
                             tension: 0.1
                         },
                         {
-                            label: 'Standar Formasi',
-                            data: standard,
+                            // LAYER 2: BATAS TOLERANSI (MERAH) - Dataset 1
+                            label: 'Batas Toleransi ' + tolPercent + '%',
+                            data: tolerance,
                             fill: true,
-                            backgroundColor: 'rgba(181, 5, 5, 0.28)', // SPSP Red Layer
+                            backgroundColor: '#b50505', // SPSP Red Layer (Solid)
                             borderColor: '#b50505',
                             pointBackgroundColor: '#9a0404',
                             pointBorderColor: '#ffffff',
                             borderWidth: 2,
-                            pointRadius: 4,
+                            pointRadius: 3,
+                            pointBorderWidth: 2,
                             pointHoverRadius: 5.5,
                             tension: 0.1
                         },
                         {
-                            label: 'Batas Toleransi ' + tolPercent + '%',
-                            data: tolerance,
+                            // LAYER 3: STANDAR FORMASI (KUNING) - Dataset 2
+                            label: 'Standar Formasi',
+                            data: standard,
                             fill: true,
-                            backgroundColor: 'rgba(250, 250, 5, 0.22)', // SPSP Yellow Layer
+                            backgroundColor: '#fafa05', // SPSP Yellow Layer (Solid)
                             borderColor: '#e6d105',
                             pointBackgroundColor: '#e6d105',
                             pointBorderColor: '#ffffff',
-                            borderWidth: 2,
+                            borderWidth: 2.5,
                             pointRadius: 4,
+                            pointBorderWidth: 2,
                             pointHoverRadius: 5.5,
                             tension: 0.1
                         }
@@ -294,8 +300,12 @@
             const factor = tol > 0 ? (1 - (tol / 100)) : 1.0;
             const newTolData = initialStandard.map(val => Number((val * factor).toFixed(2)));
 
-            chart.data.datasets[2].label = 'Batas Toleransi ' + tol + '%';
-            chart.data.datasets[2].data = newTolData;
+            // Dataset 1 is Batas Toleransi (Merah)
+            chart.data.datasets[1].label = 'Batas Toleransi ' + tol + '%';
+            chart.data.datasets[1].data = newTolData;
+
+            // Dataset 2 is Standar Formasi (Kuning)
+            chart.data.datasets[2].data = initialStandard;
             chart.update();
 
             // Update legend label
