@@ -8,6 +8,7 @@ use App\Models\AspectAssessment;
 use App\Models\Participant;
 use App\Services\HcaDataService;
 use Illuminate\View\View;
+use Livewire\Attributes\On;
 use Livewire\Attributes\Reactive;
 use Livewire\Component;
 
@@ -17,6 +18,12 @@ class QualitativeListSection extends Component
     public ?int $participantId = null;
 
     public string $sectionCode = 'strengths';
+
+    #[On('hca-data-updated')]
+    public function onDataUpdated(): void
+    {
+        // Re-renders component on data update
+    }
 
     public function mount(string $sectionCode = 'strengths'): void
     {

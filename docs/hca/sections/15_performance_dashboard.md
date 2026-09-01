@@ -31,3 +31,7 @@
     $$\text{dynamicMin} = \max\left(0, \left\lfloor \frac{\min(\text{data}) - 3}{5} \right\rfloor \times 5\right)$$
     $$\text{dynamicMax} = \left\lceil \frac{\max(\text{data}) + 3}{5} \right\rceil \times 5$$
 * **Tampilan Visual UI**: Line chart time-series Chart.js (Forest Green) vs garis putus-putus benchmark target institusi, pill badge persentase bersih di atas setiap titik data, ringkasan rata-rata dan pertumbuhan per tahun, serta tabel rincian metrik KPI tahun buku aktif.
+* **Pengelolaan & Penginputan Data (Two-Tier Entry)**:
+  * **Tier 1 (Base SPSP)**: Diinput melalui menu Detail Peserta SPSP &rarr; Tab *"Data Pelengkap HCA"* &rarr; Subtab *"1. Rekam Kinerja & KPI Tahunan"*.
+  * **Tier 2 (In-Context HCA)**: Diedit langsung di HCA Report via tombol topbar *"Kelola Data Pelengkap"* (Modal Drawer `HcaDataEditorModal`). Perubahan tersinkronisasi instan via event `hca-data-updated` yang otomatis me-render ulang chart time-series dan kartu metrik.
+

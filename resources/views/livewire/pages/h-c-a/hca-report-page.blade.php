@@ -157,6 +157,17 @@
                             Kembali
                         </a>
 
+                        <!-- In-Context Supplementary Data Editor Button -->
+                        <button 
+                            type="button"
+                            wire:click="$dispatch('open-hca-editor', { participantId: {{ $participantId ?? 'null' }} })"
+                            class="border border-accent-amber/40 bg-accent-amber/10 hover:bg-accent-amber/20 text-accent-amber font-semibold text-xs px-3 py-2 rounded-md transition-all duration-200 flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                            title="Kelola data kinerja (KPI), riwayat karier, dan profil personal peserta ini secara langsung"
+                        >
+                            <i class="fas fa-sliders text-accent-amber"></i>
+                            <span>Kelola Data Pelengkap</span>
+                        </button>
+
                         <!-- Print Active Single Page Button -->
                         <button 
                             type="button"
@@ -567,8 +578,9 @@
                 </div>
             </div>
         </div>
+    </main>
+</div>
 
-            </main>
-        </div>
-    </div>
+    <!-- Supplementary Data Editor Modal / Drawer -->
+    <livewire:pages.h-c-a.components.hca-data-editor-modal :key="'hca-editor-'.$participantId" />
 </div>

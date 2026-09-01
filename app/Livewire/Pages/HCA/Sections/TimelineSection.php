@@ -7,6 +7,7 @@ namespace App\Livewire\Pages\HCA\Sections;
 use App\Models\Participant;
 use App\Services\HcaDataService;
 use Illuminate\View\View;
+use Livewire\Attributes\On;
 use Livewire\Attributes\Reactive;
 use Livewire\Component;
 
@@ -14,6 +15,12 @@ class TimelineSection extends Component
 {
     #[Reactive]
     public ?int $participantId = null;
+
+    #[On('hca-data-updated')]
+    public function onDataUpdated(): void
+    {
+        // Re-renders component on data update
+    }
 
     /**
      * Get the active participant with career histories (memoized).

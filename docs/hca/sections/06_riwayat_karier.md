@@ -35,3 +35,7 @@
   * `order_index`: Pengurutan kronologis jabatan (terkini ke terlama).
 * **Seeder Generator**: Didukung oleh `Database\Seeders\Support\CareerHistoryGenerator` yang terintegrasi di seeder dinamis.
 * **Tampilan UI**: Timeline vertikal asimetris dengan indikator posisi aktif (*live pulse ping*), total masa kerja efektif akumulatif, badge periode tahun, dan daftar poin capaian terstruktur per posisi.
+* **Pengelolaan & Penginputan Data (Two-Tier Entry)**:
+  * **Tier 1 (Base SPSP)**: Diinput melalui menu Detail Peserta SPSP &rarr; Tab *"Data Pelengkap HCA"* &rarr; Subtab *"2. Riwayat Karier & Rekam Jejak"*.
+  * **Tier 2 (In-Context HCA)**: Diedit langsung di HCA Report via tombol topbar *"Kelola Data Pelengkap"* (Modal Drawer `HcaDataEditorModal`). Perubahan tersinkronisasi instan via event `hca-data-updated`.
+

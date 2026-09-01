@@ -2,32 +2,28 @@
 
 declare(strict_types=1);
 
-namespace App\Livewire\Pages;
+namespace App\Livewire\Pages\HCA\Components;
 
-use App\Livewire\Concerns\SyncsSessionFromUrlParams;
 use App\Models\Participant;
 use App\Models\ParticipantCareerHistory;
 use App\Models\ParticipantPerformanceRecord;
 use App\Models\ParticipantPersonalProfile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
-use Livewire\Attributes\Layout;
+use Livewire\Attributes\On;
 use Livewire\Component;
 
-#[Layout('components.layouts.app', ['title' => 'Detail Peserta'])]
-class ParticipantDetail extends Component
+class HcaDataEditorModal extends Component
 {
-    use SyncsSessionFromUrlParams;
+    public bool $isOpen = false;
 
-    public ?Participant $participant = null;
+    public ?int $participantId = null;
 
-    public string $mainTab = 'reports'; // 'reports', 'supplementary_data'
-
-    public string $supplementarySubTab = 'performance'; // 'performance', 'career', 'personal'
-
-    public ?string $successMessage = null;
+    public string $activeTab = 'performance'; // 'performance', 'career', 'personal'
 
     public bool $isSaving = false;
+
+    public ?string $successMessage = null;
 
     /**
      * Performance Records state
@@ -74,60 +70,66 @@ class ParticipantDetail extends Component
 
     public string $mottoOrValues = '';
 
-    public function mount(string $eventCode, string $testNumber): void
+    /**
+     * Listen for open modal event
+     */
+    #[On('open-hca-editor')]
+    public function openEditor(?int $participantId = null): void
     {
-        // Load participant dengan semua relasi yang diperlukan
-        $this->participant = Participant::with([
-            'assessmentEvent.institution',
-            'batch',
-            'positionFormation.template',
+        if ($participantId) {
+            $this->participantId = $participantId;
+        }
+
+        if (! $this->participantId) {
+            $this->participantId = session('filter.participant_id') ?? Participant::query()->first()?->id;
+        }
+
+        $this->loadData();
+        $this->isOpen = true;
+        $this->successMessage = null;
+    }
+
+    /**
+     * Close modal
+     */
+    public function closeEditor(): void
+    {
+        $this->isOpen = false;
+        $this->successMessage = null;
+    }
+
+    /**
+     * Set active tab in drawer
+     */
+    public function setActiveTab(string $tab): void
+    {
+        $this->activeTab = $tab;
+        $this->successMessage = null;
+    }
+
+    /**
+     * Load current participant data from database
+     */
+    public function loadData(): void
+    {
+        if (! $this->participantId) {
+            return;
+        }
+
+        $participant = Participant::with([
             'performanceRecords' => fn ($q) => $q->orderBy('year', 'asc'),
             'careerHistories' => fn ($q) => $q->orderBy('start_year', 'asc'),
             'personalProfile',
-        ])
-            ->whereHas('assessmentEvent', function ($query) use ($eventCode) {
-                $query->where('code', $eventCode);
-            })
-            ->where('test_number', $testNumber)
-            ->firstOrFail();
+        ])->find($this->participantId);
 
-        // Sync session from URL parameters
-        $this->syncSessionFromParticipant($this->participant);
-
-        $this->loadSupplementaryData();
-    }
-
-    /**
-     * Switch main tab
-     */
-    public function setMainTab(string $tab): void
-    {
-        $this->mainTab = $tab;
-        $this->successMessage = null;
-    }
-
-    /**
-     * Switch supplementary sub-tab
-     */
-    public function setSupplementarySubTab(string $tab): void
-    {
-        $this->supplementarySubTab = $tab;
-        $this->successMessage = null;
-    }
-
-    /**
-     * Load supplementary data into form arrays
-     */
-    public function loadSupplementaryData(): void
-    {
-        if (! $this->participant) {
+        if (! $participant) {
             return;
         }
 
         // 1. Performance records
         $this->performanceRecords = [];
-        if ($this->participant->performanceRecords->isNotEmpty()) {
-            foreach ($this->participant->performanceRecords as $rec) {
+        if ($participant->performanceRecords->isNotEmpty()) {
+            foreach ($participant->performanceRecords as $rec) {
                 $achievements = $rec->achievements ?? [];
                 $achievementsText = is_array($achievements) ? implode("\n", $achievements) : (string) $achievements;
 
@@ -142,6 +144,7 @@ class ParticipantDetail extends Component
                 ];
             }
         } else {
+            // Default 3 sample years if totally empty
             $currentYear = (int) date('Y');
             $this->performanceRecords = [
                 [
@@ -176,8 +179,8 @@ class ParticipantDetail extends Component
 
         // 2. Career histories
         $this->careerHistories = [];
-        if ($this->participant->careerHistories->isNotEmpty()) {
-            foreach ($this->participant->careerHistories as $car) {
+        if ($participant->careerHistories->isNotEmpty()) {
+            foreach ($participant->careerHistories as $car) {
                 $achievements = $car->achievements ?? [];
                 $achievementsText = is_array($achievements) ? implode("\n", $achievements) : (string) $achievements;
 
@@ -192,8 +195,8 @@ class ParticipantDetail extends Component
                 ];
             }
         } else {
-            $currentPos = $this->participant->current_position ?? 'Pejabat Fungsional / Struktural';
-            $instName = $this->participant->assessmentEvent?->institution?->name ?? 'Instansi Pemerintahan / Korporasi';
+            $currentPos = $participant->current_position ?? 'Pejabat Fungsional / Struktural';
+            $instName = $participant->assessmentEvent?->institution?->name ?? 'Instansi Pemerintahan / Korporasi';
             $currentYear = (int) date('Y');
 
             $this->careerHistories = [
@@ -219,7 +222,7 @@ class ParticipantDetail extends Component
         }
 
         // 3. Personal profile
-        $profile = $this->participant->personalProfile;
+        $profile = $participant->personalProfile;
         if ($profile) {
             $this->bloodType = $profile->blood_type ?? 'O+';
             $this->hobbies = $profile->hobbies ?? '';
@@ -238,7 +241,7 @@ class ParticipantDetail extends Component
     }
 
     /**
-     * Add performance row
+     * Add a new performance record row
      */
     public function addPerformanceRow(): void
     {
@@ -258,7 +261,7 @@ class ParticipantDetail extends Component
     }
 
     /**
-     * Remove performance row
+     * Remove a performance record row
      */
     public function removePerformanceRow(int $index): void
     {
@@ -269,7 +272,7 @@ class ParticipantDetail extends Component
     }
 
     /**
-     * Add career row
+     * Add a new career history row
      */
     public function addCareerRow(): void
     {
@@ -285,7 +288,7 @@ class ParticipantDetail extends Component
     }
 
     /**
-     * Remove career row
+     * Remove a career history row
      */
     public function removeCareerRow(int $index): void
     {
@@ -296,7 +299,7 @@ class ParticipantDetail extends Component
     }
 
     /**
-     * Toggle current career
+     * Toggle is_current for career history row
      */
     public function toggleCurrentCareer(int $index): void
     {
@@ -310,21 +313,26 @@ class ParticipantDetail extends Component
     }
 
     /**
-     * Save supplementary data
+     * Save all supplementary data atomically
      */
-    public function saveSupplementaryData(): void
+    public function save(): void
     {
-        if (! $this->participant) {
+        if (! $this->participantId) {
             return;
         }
 
         $this->isSaving = true;
 
-        DB::transaction(function () {
-            $participantId = $this->participant->id;
+        $participant = Participant::find($this->participantId);
+        if (! $participant) {
+            $this->isSaving = false;
 
+            return;
+        }
+
+        DB::transaction(function () use ($participant) {
             // 1. Save Performance Records
-            ParticipantPerformanceRecord::where('participant_id', $participantId)->delete();
+            ParticipantPerformanceRecord::where('participant_id', $participant->id)->delete();
             foreach ($this->performanceRecords as $rec) {
                 if (empty($rec['year']) || empty($rec['kpi_score'])) {
                     continue;
@@ -335,7 +343,7 @@ class ParticipantDetail extends Component
                 ));
 
                 ParticipantPerformanceRecord::create([
-                    'participant_id' => $participantId,
+                    'participant_id' => $participant->id,
                     'year' => (int) $rec['year'],
                     'kpi_score' => (float) $rec['kpi_score'],
                     'target_score' => ! empty($rec['target_score']) ? (float) $rec['target_score'] : 100.00,
@@ -346,7 +354,7 @@ class ParticipantDetail extends Component
             }
 
             // 2. Save Career Histories
-            ParticipantCareerHistory::where('participant_id', $participantId)->delete();
+            ParticipantCareerHistory::where('participant_id', $participant->id)->delete();
             $orderIndex = 0;
             foreach ($this->careerHistories as $car) {
                 if (empty($car['position_title']) || empty($car['company_or_institution'])) {
@@ -358,7 +366,7 @@ class ParticipantDetail extends Component
                 ));
 
                 ParticipantCareerHistory::create([
-                    'participant_id' => $participantId,
+                    'participant_id' => $participant->id,
                     'position_title' => trim($car['position_title']),
                     'company_or_institution' => trim($car['company_or_institution']),
                     'start_year' => (int) $car['start_year'],
@@ -371,7 +379,7 @@ class ParticipantDetail extends Component
 
             // 3. Save Personal Profile
             ParticipantPersonalProfile::updateOrCreate(
-                ['participant_id' => $participantId],
+                ['participant_id' => $participant->id],
                 [
                     'blood_type' => $this->bloodType ?: 'O+',
                     'hobbies' => trim($this->hobbies),
@@ -384,14 +392,22 @@ class ParticipantDetail extends Component
         });
 
         $this->isSaving = false;
-        $this->successMessage = 'Data pelengkap HCA berhasil diperbarui dan disimpan ke database.';
+        $this->successMessage = 'Data pelengkap berhasil disimpan dan disinkronkan ke seluruh section laporan.';
 
-        // Reload fresh relations
-        $this->participant->load(['performanceRecords', 'careerHistories', 'personalProfile']);
+        // Dispatch livewire events to parent and child components
+        $this->dispatch('hca-data-updated', participantId: $this->participantId);
+    }
+
+    /**
+     * Get participant property
+     */
+    public function getParticipantProperty(): ?Participant
+    {
+        return $this->participantId ? Participant::with(['positionFormation', 'assessmentEvent.institution'])->find($this->participantId) : null;
     }
 
     public function render(): View
     {
-        return view('livewire.pages.participant-detail');
+        return view('livewire.pages.h-c-a.components.hca-data-editor-modal');
     }
 }

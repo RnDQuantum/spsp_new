@@ -8,6 +8,7 @@ use App\Models\Participant;
 use App\Services\HcaDataService;
 use App\Services\IndividualAssessmentService;
 use Illuminate\View\View;
+use Livewire\Attributes\On;
 use Livewire\Attributes\Reactive;
 use Livewire\Component;
 
@@ -15,6 +16,12 @@ class ExecutiveSummary extends Component
 {
     #[Reactive]
     public ?int $participantId = null;
+
+    #[On('hca-data-updated')]
+    public function onDataUpdated(): void
+    {
+        // Re-renders component on data update
+    }
 
     public function render(): View
     {

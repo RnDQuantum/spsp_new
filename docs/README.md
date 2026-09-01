@@ -84,13 +84,13 @@ Dokumentasi lengkap untuk arsitektur, UI/UX, data mapping, tracker integrasi din
 *   **[hca/README.md](./hca/README.md)**
     *   Master Index & Navigation Dokumentasi HCA Report.
 *   **[DYNAMIC_INTEGRATION_TRACKER.md](./hca/DYNAMIC_INTEGRATION_TRACKER.md)**
-    *   Tracker kemajuan integrasi dinamis per-halaman/section untuk 24 section HCA Report + Navigasi (24 Dinamis Selesai / 96%).
+    *   Tracker kemajuan integrasi dinamis per-halaman/section untuk 24 section HCA Report + Navigasi (100% Selesai / 25 Modul Terintegrasi Dinamis).
 *   **[DATA_MAPPING_SPEC.md](./hca/DATA_MAPPING_SPEC.md)**
-    *   Spesifikasi pemetaan model, tabel database, service SPSP, dan komponen Livewire HCA.
+    *   Spesifikasi pemetaan model, tabel database, formula agregasi keilmuan, dan **Arsitektur Hybrid Two-Tier Entry System** (Base SPSP vs In-Context Modal Drawer).
 *   **[DESIGN_AND_UI_SPEC.md](./hca/DESIGN_AND_UI_SPEC.md)**
     *   Spesifikasi desain visual "Executive Journal", palette, layout, dan arsitektur komponen Livewire v3 HCA.
 *   **[docs/hca/sections/](./hca/sections/)**
-    *   Folder dokumentasi mandiri per-section (25 file) memuat latar belakang ilmiah HR & sumber data DB SPSP.
+    *   Folder dokumentasi mandiri per-section (25 file) memuat latar belakang ilmiah HR, sumber data DB SPSP, dan alur input data pelengkap.
 
 
 

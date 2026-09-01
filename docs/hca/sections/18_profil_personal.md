@@ -34,3 +34,7 @@
   * `motto_or_values`: Prinsip hidup atau moto profesional.
 * **Seeder Generator**: `Database\Seeders\Support\PersonalProfileGenerator` dan `ParticipantPersonalProfileSeeder`.
 * **Tampilan Visual UI**: Kartu-kartu kualitatif modular dengan icon tematik (*Active Life, Medical Reference, Cultural Profile, Tradition, Motto*) dan deskripsi kontekstual yang elegan.
+* **Pengelolaan & Penginputan Data (Two-Tier Entry)**:
+  * **Tier 1 (Base SPSP)**: Diinput melalui menu Detail Peserta SPSP &rarr; Tab *"Data Pelengkap HCA"* &rarr; Subtab *"3. Profil Personal Pelengkap"*.
+  * **Tier 2 (In-Context HCA)**: Diedit langsung di HCA Report via tombol topbar *"Kelola Data Pelengkap"* (Modal Drawer `HcaDataEditorModal`). Data golongan darah, hobi, olahraga, catatan medis, catatan budaya, dan moto hidup langsung ter-update di layar via event `hca-data-updated`.
+

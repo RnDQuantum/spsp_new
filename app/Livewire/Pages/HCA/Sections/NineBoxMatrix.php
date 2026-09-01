@@ -7,6 +7,7 @@ namespace App\Livewire\Pages\HCA\Sections;
 use App\Models\Participant;
 use App\Services\HcaDataService;
 use Illuminate\View\View;
+use Livewire\Attributes\On;
 use Livewire\Attributes\Reactive;
 use Livewire\Component;
 
@@ -14,6 +15,12 @@ class NineBoxMatrix extends Component
 {
     #[Reactive]
     public ?int $participantId = null;
+
+    #[On('hca-data-updated')]
+    public function onDataUpdated(): void
+    {
+        // Re-renders component on data update
+    }
 
     public array $grid = [
         // Format: [pot_level, perf_level, label, desc, box_number]

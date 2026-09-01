@@ -60,6 +60,15 @@ class HcaReportPage extends Component
     }
 
     /**
+     * Listen to supplementary data update events
+     */
+    #[On('hca-data-updated')]
+    public function onHcaDataUpdated(): void
+    {
+        // Re-renders master page and propagates to reactive children
+    }
+
+    /**
      * Available sections grouping for sidebar TOC
      */
     public array $menuGroups = [

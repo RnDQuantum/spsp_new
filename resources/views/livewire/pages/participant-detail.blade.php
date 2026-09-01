@@ -150,15 +150,64 @@
             </div>
         </div>
 
-        <!-- Menu Individual Report - DARK MODE READY -->
-        <!-- MENU INDIVIDUAL REPORT - SEMUA BUTTON FIXED DI BAWAH -->
+        <!-- Menu Tabs: Individual Report & Data Pelengkap HCA - DARK MODE READY -->
         <div class="bg-white dark:bg-[#171412] rounded-md border border-warm-border dark:border-[#25211e] shadow-xs overflow-hidden">
-            <div class="px-6 py-4 bg-warm-ivory dark:bg-[#1f1b18] border-b border-warm-border dark:border-[#25211e]">
-                <h2 class="font-display text-lg font-bold text-primary-ink dark:text-neutral-100">Individual Report</h2>
-                <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Pilih laporan individual yang ingin dilihat
-                    untuk peserta ini</p>
+            <div class="px-6 py-3 bg-warm-ivory dark:bg-[#1f1b18] border-b border-warm-border dark:border-[#25211e] flex flex-wrap items-center justify-between gap-4">
+                <div class="flex items-center gap-2">
+                    <button 
+                        type="button" 
+                        wire:click="setMainTab('reports')"
+                        class="px-4 py-2 text-xs font-semibold rounded-md transition-all flex items-center gap-2 cursor-pointer {{ $mainTab === 'reports' ? 'bg-primary-ink text-white shadow-xs dark:bg-accent-amber' : 'text-primary-ink/80 dark:text-neutral-300 hover:bg-black/5 dark:hover:bg-white/5' }}"
+                    >
+                        <i class="fas fa-file-lines text-xs"></i>
+                        <span>Individual Reports & HCA (9 Modul)</span>
+                    </button>
+
+                    <button 
+                        type="button" 
+                        wire:click="setMainTab('supplementary_data')"
+                        class="px-4 py-2 text-xs font-semibold rounded-md transition-all flex items-center gap-2 cursor-pointer {{ $mainTab === 'supplementary_data' ? 'bg-primary-ink text-white shadow-xs dark:bg-accent-amber' : 'text-primary-ink/80 dark:text-neutral-300 hover:bg-black/5 dark:hover:bg-white/5' }}"
+                    >
+                        <i class="fas fa-sliders text-xs"></i>
+                        <span>Data Pelengkap HCA</span>
+                        <span class="text-[10px] px-1.5 py-0.2 rounded-full {{ $mainTab === 'supplementary_data' ? 'bg-white/20 text-white' : 'bg-accent-amber/20 text-accent-amber font-bold' }}">
+                            {{ count($performanceRecords) + count($careerHistories) }} Record
+                        </span>
+                    </button>
+                </div>
+
+                @if($mainTab === 'supplementary_data')
+                <div class="flex items-center gap-2">
+                    <button 
+                        type="button" 
+                        wire:click="saveSupplementaryData"
+                        wire:loading.attr="disabled"
+                        class="px-3.5 py-1.5 bg-accent-amber hover:bg-accent-amber/90 text-white text-xs font-semibold rounded-md transition-all shadow-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                    >
+                        <span wire:loading.remove wire:target="saveSupplementaryData">
+                            <i class="fas fa-floppy-disk text-xs"></i> Simpan Data Pelengkap
+                        </span>
+                        <span wire:loading wire:target="saveSupplementaryData">
+                            <i class="fas fa-spinner fa-spin text-xs"></i> Menyimpan...
+                        </span>
+                    </button>
+                </div>
+                @endif
             </div>
 
+            @if($successMessage)
+            <div class="mx-6 mt-4 p-3 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/40 rounded-lg text-forest-green dark:text-emerald-400 text-xs flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <i class="fas fa-circle-check text-sm"></i>
+                    <span>{{ $successMessage }}</span>
+                </div>
+                <button type="button" wire:click="$set('successMessage', null)" class="text-slate-400 hover:text-slate-600">
+                    <i class="fas fa-times text-xs"></i>
+                </button>
+            </div>
+            @endif
+
+            @if($mainTab === 'reports')
             <div class="px-6 py-6">
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
@@ -563,6 +612,381 @@
 
                 </div>
             </div>
+            @endif
+
+            @if($mainTab === 'supplementary_data')
+            <div class="px-6 py-6 space-y-6">
+                <!-- Subtab Navigation -->
+                <div class="border-b border-warm-border dark:border-[#25211e] flex items-center gap-2 overflow-x-auto pb-1">
+                    <button 
+                        type="button"
+                        wire:click="setSupplementarySubTab('performance')"
+                        class="py-2.5 px-4 text-xs font-semibold border-b-2 transition-all flex items-center gap-2 cursor-pointer {{ $supplementarySubTab === 'performance' ? 'border-accent-amber text-accent-amber font-bold' : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white' }}"
+                    >
+                        <i class="fas fa-chart-line text-xs"></i>
+                        <span>1. Rekam Kinerja & KPI Tahunan</span>
+                        <span class="text-[10px] px-1.5 py-0.2 rounded-full {{ $supplementarySubTab === 'performance' ? 'bg-accent-amber text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300' }}">
+                            {{ count($performanceRecords) }}
+                        </span>
+                    </button>
+
+                    <button 
+                        type="button"
+                        wire:click="setSupplementarySubTab('career')"
+                        class="py-2.5 px-4 text-xs font-semibold border-b-2 transition-all flex items-center gap-2 cursor-pointer {{ $supplementarySubTab === 'career' ? 'border-accent-amber text-accent-amber font-bold' : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white' }}"
+                    >
+                        <i class="fas fa-briefcase text-xs"></i>
+                        <span>2. Riwayat Karier & Rekam Jejak</span>
+                        <span class="text-[10px] px-1.5 py-0.2 rounded-full {{ $supplementarySubTab === 'career' ? 'bg-accent-amber text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300' }}">
+                            {{ count($careerHistories) }}
+                        </span>
+                    </button>
+
+                    <button 
+                        type="button"
+                        wire:click="setSupplementarySubTab('personal')"
+                        class="py-2.5 px-4 text-xs font-semibold border-b-2 transition-all flex items-center gap-2 cursor-pointer {{ $supplementarySubTab === 'personal' ? 'border-accent-amber text-accent-amber font-bold' : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white' }}"
+                    >
+                        <i class="fas fa-id-card-clip text-xs"></i>
+                        <span>3. Profil Personal Pelengkap</span>
+                    </button>
+                </div>
+
+                <!-- SUBTAB 1: KINERJA & KPI -->
+                @if($supplementarySubTab === 'performance')
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="font-display font-bold text-sm text-primary-ink dark:text-white">Rekam Kinerja & KPI Tahunan</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                                Data ini disinkronkan ke <strong class="text-slate-700 dark:text-slate-300">Dashboard Kinerja (Section 15)</strong> dan menjadi <strong class="text-slate-700 dark:text-slate-300">Sumbu Kinerja Matriks 9-Box (Section 16)</strong> pada HCA Report.
+                            </p>
+                        </div>
+                        <button 
+                            type="button" 
+                            wire:click="addPerformanceRow"
+                            class="px-3 py-1.5 rounded-md bg-accent-amber/10 hover:bg-accent-amber/20 text-accent-amber border border-accent-amber/30 text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer"
+                        >
+                            <i class="fas fa-plus text-[10px]"></i>
+                            Tambah Tahun
+                        </button>
+                    </div>
+
+                    <div class="space-y-3">
+                        @forelse($performanceRecords as $index => $record)
+                        <div class="p-4 rounded-lg border border-warm-border dark:border-[#25211e] bg-warm-ivory/30 dark:bg-[#1f1b18]/40 space-y-3">
+                            <div class="flex items-center justify-between border-b border-warm-border/60 dark:border-[#25211e] pb-2.5">
+                                <span class="text-xs font-bold text-primary-ink dark:text-white flex items-center gap-2">
+                                    <span class="w-5 h-5 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 flex items-center justify-center text-[10px]">
+                                        {{ $index + 1 }}
+                                    </span>
+                                    Tahun Evaluasi: {{ $record['year'] }}
+                                </span>
+                                <button 
+                                    type="button" 
+                                    wire:click="removePerformanceRow({{ $index }})"
+                                    class="text-xs text-rose-500 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/30 px-2 py-1 rounded transition-colors cursor-pointer"
+                                    title="Hapus baris tahun ini"
+                                >
+                                    <i class="fas fa-trash-can mr-1"></i> Hapus
+                                </button>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+                                <div>
+                                    <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">Tahun</label>
+                                    <input 
+                                        type="number" 
+                                        wire:model="performanceRecords.{{ $index }}.year"
+                                        class="w-full text-xs px-3 py-2 rounded-md border border-warm-border dark:border-[#25211e] bg-white dark:bg-[#171412] text-primary-ink dark:text-white focus:outline-none focus:ring-1 focus:ring-accent-amber"
+                                        placeholder="YYYY"
+                                    />
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">Capaian KPI (%)</label>
+                                    <input 
+                                        type="number" 
+                                        step="0.01"
+                                        wire:model="performanceRecords.{{ $index }}.kpi_score"
+                                        class="w-full text-xs px-3 py-2 rounded-md border border-warm-border dark:border-[#25211e] bg-white dark:bg-[#171412] text-primary-ink dark:text-white focus:outline-none focus:ring-1 focus:ring-accent-amber"
+                                        placeholder="95.50"
+                                    />
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">Target (%)</label>
+                                    <input 
+                                        type="number" 
+                                        step="0.01"
+                                        wire:model="performanceRecords.{{ $index }}.target_score"
+                                        class="w-full text-xs px-3 py-2 rounded-md border border-warm-border dark:border-[#25211e] bg-white dark:bg-[#171412] text-primary-ink dark:text-white focus:outline-none focus:ring-1 focus:ring-accent-amber"
+                                        placeholder="100.00"
+                                    />
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">Predikat / Rating</label>
+                                    <select 
+                                        wire:model="performanceRecords.{{ $index }}.performance_rating"
+                                        class="w-full text-xs px-3 py-2 rounded-md border border-warm-border dark:border-[#25211e] bg-white dark:bg-[#171412] text-primary-ink dark:text-white focus:outline-none focus:ring-1 focus:ring-accent-amber"
+                                    >
+                                        <option value="Istimewa">Istimewa (Exceeded)</option>
+                                        <option value="Sangat Baik">Sangat Baik</option>
+                                        <option value="Baik">Baik (Achieved)</option>
+                                        <option value="Cukup">Cukup (Needs Improvement)</option>
+                                        <option value="Kurang">Kurang (Underperformed)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                                    Pencapaian Kunci / Metrik Strategis (1 poin per baris)
+                                </label>
+                                <textarea 
+                                    rows="2"
+                                    wire:model="performanceRecords.{{ $index }}.achievements_text"
+                                    class="w-full text-xs px-3 py-2 rounded-md border border-warm-border dark:border-[#25211e] bg-white dark:bg-[#171412] text-primary-ink dark:text-white focus:outline-none focus:ring-1 focus:ring-accent-amber"
+                                    placeholder="Contoh: Realisasi efisiensi anggaran sebesar 12%&#10;Implementasi sistem digitalisasi operasional"
+                                ></textarea>
+                            </div>
+                        </div>
+                        @empty
+                        <div class="text-center py-8 border-2 border-dashed border-warm-border dark:border-[#25211e] rounded-lg">
+                            <p class="text-xs text-slate-500">Belum ada rekam kinerja tahunan.</p>
+                            <button type="button" wire:click="addPerformanceRow" class="mt-2 text-xs text-accent-amber font-semibold">
+                                + Tambah Tahun Pertama
+                            </button>
+                        </div>
+                        @endforelse
+                    </div>
+                </div>
+                @endif
+
+                <!-- SUBTAB 2: RIWAYAT KARIER -->
+                @if($supplementarySubTab === 'career')
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="font-display font-bold text-sm text-primary-ink dark:text-white">Riwayat Jabatan & Rekam Jejak Penugasan</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                                Data ini disinkronkan ke <strong class="text-slate-700 dark:text-slate-300">Riwayat Karier (Section 06)</strong> dan perhitungan total masa kerja efektif (*tenure*) HCA Report.
+                            </p>
+                        </div>
+                        <button 
+                            type="button" 
+                            wire:click="addCareerRow"
+                            class="px-3 py-1.5 rounded-md bg-accent-amber/10 hover:bg-accent-amber/20 text-accent-amber border border-accent-amber/30 text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer"
+                        >
+                            <i class="fas fa-plus text-[10px]"></i>
+                            Tambah Jabatan
+                        </button>
+                    </div>
+
+                    <div class="space-y-3">
+                        @forelse($careerHistories as $index => $career)
+                        <div class="p-4 rounded-lg border border-warm-border dark:border-[#25211e] bg-warm-ivory/30 dark:bg-[#1f1b18]/40 space-y-3">
+                            <div class="flex items-center justify-between border-b border-warm-border/60 dark:border-[#25211e] pb-2.5">
+                                <span class="text-xs font-bold text-primary-ink dark:text-white flex items-center gap-2">
+                                    <span class="w-5 h-5 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 flex items-center justify-center text-[10px]">
+                                        {{ $index + 1 }}
+                                    </span>
+                                    {{ $career['position_title'] ?: 'Posisi Baru' }}
+                                    @if(!empty($career['is_current']))
+                                        <span class="text-[10px] px-2 py-0.5 rounded bg-emerald-100 text-forest-green font-bold">Posisi Aktif</span>
+                                    @endif
+                                </span>
+                                <button 
+                                    type="button" 
+                                    wire:click="removeCareerRow({{ $index }})"
+                                    class="text-xs text-rose-500 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/30 px-2 py-1 rounded transition-colors cursor-pointer"
+                                    title="Hapus baris jabatan ini"
+                                >
+                                    <i class="fas fa-trash-can mr-1"></i> Hapus
+                                </button>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">Nama Jabatan / Posisi</label>
+                                    <input 
+                                        type="text" 
+                                        wire:model="careerHistories.{{ $index }}.position_title"
+                                        class="w-full text-xs px-3 py-2 rounded-md border border-warm-border dark:border-[#25211e] bg-white dark:bg-[#171412] text-primary-ink dark:text-white focus:outline-none focus:ring-1 focus:ring-accent-amber"
+                                        placeholder="Contoh: Manager Operasional"
+                                    />
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">Instansi / Perusahaan / Unit Kerja</label>
+                                    <input 
+                                        type="text" 
+                                        wire:model="careerHistories.{{ $index }}.company_or_institution"
+                                        class="w-full text-xs px-3 py-2 rounded-md border border-warm-border dark:border-[#25211e] bg-white dark:bg-[#171412] text-primary-ink dark:text-white focus:outline-none focus:ring-1 focus:ring-accent-amber"
+                                        placeholder="Contoh: Direktorat Jenderal Pajak"
+                                    />
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-center">
+                                <div>
+                                    <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">Tahun Mulai</label>
+                                    <input 
+                                        type="number" 
+                                        wire:model="careerHistories.{{ $index }}.start_year"
+                                        class="w-full text-xs px-3 py-2 rounded-md border border-warm-border dark:border-[#25211e] bg-white dark:bg-[#171412] text-primary-ink dark:text-white focus:outline-none focus:ring-1 focus:ring-accent-amber"
+                                        placeholder="YYYY"
+                                    />
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">Tahun Selesai</label>
+                                    <input 
+                                        type="number" 
+                                        wire:model="careerHistories.{{ $index }}.end_year"
+                                        :disabled="{{ !empty($career['is_current']) ? 'true' : 'false' }}"
+                                        class="w-full text-xs px-3 py-2 rounded-md border border-warm-border dark:border-[#25211e] bg-white dark:bg-[#171412] text-primary-ink dark:text-white focus:outline-none focus:ring-1 focus:ring-accent-amber disabled:opacity-50 disabled:bg-slate-100"
+                                        placeholder="{{ !empty($career['is_current']) ? 'Sekarang' : 'YYYY' }}"
+                                    />
+                                </div>
+                                <div class="pt-4 flex items-center">
+                                    <label class="inline-flex items-center gap-2 cursor-pointer text-xs font-semibold text-primary-ink dark:text-white">
+                                        <input 
+                                            type="checkbox" 
+                                            wire:click="toggleCurrentCareer({{ $index }})"
+                                            {{ !empty($career['is_current']) ? 'checked' : '' }}
+                                            class="rounded text-accent-amber focus:ring-accent-amber w-4 h-4"
+                                        />
+                                        <span>Jabatan Saat Ini (Aktif)</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                                    Pencapaian & Tanggung Jawab Utama (1 poin per baris)
+                                </label>
+                                <textarea 
+                                    rows="2"
+                                    wire:model="careerHistories.{{ $index }}.achievements_text"
+                                    class="w-full text-xs px-3 py-2 rounded-md border border-warm-border dark:border-[#25211e] bg-white dark:bg-[#171412] text-primary-ink dark:text-white focus:outline-none focus:ring-1 focus:ring-accent-amber"
+                                    placeholder="Contoh: Memimpin tim dalam transformasi tata kelola layanan&#10;Meningkatkan kepatuhan SOP divisi hingga 99%"
+                                ></textarea>
+                            </div>
+                        </div>
+                        @empty
+                        <div class="text-center py-8 border-2 border-dashed border-warm-border dark:border-[#25211e] rounded-lg">
+                            <p class="text-xs text-slate-500">Belum ada riwayat jabatan.</p>
+                            <button type="button" wire:click="addCareerRow" class="mt-2 text-xs text-accent-amber font-semibold">
+                                + Tambah Riwayat Jabatan
+                            </button>
+                        </div>
+                        @endforelse
+                    </div>
+                </div>
+                @endif
+
+                <!-- SUBTAB 3: PROFIL PERSONAL -->
+                @if($supplementarySubTab === 'personal')
+                <div class="space-y-4">
+                    <div>
+                        <h3 class="font-display font-bold text-sm text-primary-ink dark:text-white">Profil Personal & Informasi Gaya Hidup</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                            Data ini disinkronkan ke <strong class="text-slate-700 dark:text-slate-300">Profil Personal Pelengkap (Section 18)</strong> untuk memberikan konteks personal yang humanis bagi pimpinan C-Level.
+                        </p>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">Golongan Darah</label>
+                            <select 
+                                wire:model="bloodType"
+                                class="w-full text-xs px-3 py-2 rounded-md border border-warm-border dark:border-[#25211e] bg-white dark:bg-[#171412] text-primary-ink dark:text-white focus:outline-none focus:ring-1 focus:ring-accent-amber"
+                            >
+                                <option value="A+">A+</option>
+                                <option value="A-">A-</option>
+                                <option value="B+">B+</option>
+                                <option value="B-">B-</option>
+                                <option value="AB+">AB+</option>
+                                <option value="AB-">AB-</option>
+                                <option value="O+">O+</option>
+                                <option value="O-">O-</option>
+                                <option value="-">- (Belum Diketahui)</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">Hobi & Kegemaran</label>
+                            <input 
+                                type="text" 
+                                wire:model="hobbies"
+                                class="w-full text-xs px-3 py-2 rounded-md border border-warm-border dark:border-[#25211e] bg-white dark:bg-[#171412] text-primary-ink dark:text-white focus:outline-none focus:ring-1 focus:ring-accent-amber"
+                                placeholder="Membaca, Riset Kebijakan, Musik"
+                            />
+                        </div>
+
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">Olahraga Favorit</label>
+                            <input 
+                                type="text" 
+                                wire:model="sports"
+                                class="w-full text-xs px-3 py-2 rounded-md border border-warm-border dark:border-[#25211e] bg-white dark:bg-[#171412] text-primary-ink dark:text-white focus:outline-none focus:ring-1 focus:ring-accent-amber"
+                                placeholder="Jogging, Bulu Tangkis, Bersepeda"
+                            />
+                        </div>
+                    </div>
+
+                    <div class="space-y-3 pt-2">
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">Catatan Medis & Kebugaran Fisik</label>
+                            <textarea 
+                                rows="2"
+                                wire:model="medicalNotes"
+                                class="w-full text-xs px-3 py-2 rounded-md border border-warm-border dark:border-[#25211e] bg-white dark:bg-[#171412] text-primary-ink dark:text-white focus:outline-none focus:ring-1 focus:ring-accent-amber"
+                                placeholder="Kondisi kesehatan umum prima, siap ditugaskan untuk mobilitas tinggi..."
+                            ></textarea>
+                        </div>
+
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">Catatan Budaya & Karakteristik Sosial</label>
+                            <textarea 
+                                rows="2"
+                                wire:model="culturalNotes"
+                                class="w-full text-xs px-3 py-2 rounded-md border border-warm-border dark:border-[#25211e] bg-white dark:bg-[#171412] text-primary-ink dark:text-white focus:outline-none focus:ring-1 focus:ring-accent-amber"
+                                placeholder="Menjunjung tinggi nilai kejujuran, integritas, dan budaya gotong royong..."
+                            ></textarea>
+                        </div>
+
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">Moto Hidup / Nilai Utama (Core Values)</label>
+                            <input 
+                                type="text" 
+                                wire:model="mottoOrValues"
+                                class="w-full text-xs px-3 py-2 rounded-md border border-warm-border dark:border-[#25211e] bg-white dark:bg-[#171412] text-primary-ink dark:text-white focus:outline-none focus:ring-1 focus:ring-accent-amber"
+                                placeholder="Integritas dalam Bekerja, Keunggulan dalam Melayani"
+                            />
+                        </div>
+                    </div>
+                </div>
+                @endif
+
+                <!-- Bottom Save Button Bar -->
+                <div class="pt-4 border-t border-warm-border dark:border-[#25211e] flex items-center justify-between">
+                    <p class="text-xs text-slate-500">
+                        Pastikan data yang diinput sudah diverifikasi sebelum disimpan.
+                    </p>
+                    <button 
+                        type="button" 
+                        wire:click="saveSupplementaryData"
+                        wire:loading.attr="disabled"
+                        class="px-5 py-2.5 bg-primary-ink dark:bg-amber-600 hover:bg-[#2c2724] dark:hover:bg-amber-700 text-white text-xs font-semibold rounded-md transition-all shadow-xs flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                    >
+                        <span wire:loading.remove wire:target="saveSupplementaryData">
+                            <i class="fas fa-floppy-disk text-accent-amber dark:text-white mr-1"></i> Simpan Seluruh Data Pelengkap
+                        </span>
+                        <span wire:loading wire:target="saveSupplementaryData">
+                            <i class="fas fa-spinner fa-spin mr-1"></i> Menyimpan Data...
+                        </span>
+                    </button>
+                </div>
+            </div>
+            @endif
         </div>
     @else
         <!-- Peserta tidak ditemukan - DARK MODE READY -->

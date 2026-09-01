@@ -19,15 +19,15 @@ Dokumentasi HCA Report dibagi menjadi 4 dokumen utama dan 1 folder spesifikasi p
 ### 1. Dokumentasi Utama (Master Files)
 
 * **[DYNAMIC_INTEGRATION_TRACKER.md](./DYNAMIC_INTEGRATION_TRACKER.md)**
-  * Tracker kemajuan migrasi data dinamis per-halaman/section (9 Dynamic DB Sync + 14 Component Active / 100% Active UI).
+  * Tracker kemajuan migrasi data dinamis per-halaman/section (100% Selesai / 25 Modul Terintegrasi Dinamis).
   * Menghubungkan ringkasan status dengan file spesifikasi individual di folder `sections/`.
 
 * **[DATA_MAPPING_SPEC.md](./DATA_MAPPING_SPEC.md)**
   * Spesifikasi pemetaan data backend SPSP vs kebutuhan HCA Report.
-  * Pengelompokan status data: 🟢 **Reuse**, 🟡 **Partial**, dan 🔴 **New**.
+  * Formula agregasi pilar keilmuan, model 9-box matrix McKinsey vs Norm-Referenced, dan **Arsitektur Hybrid Two-Tier Entry System** (Base SPSP vs In-Context Modal Drawer).
 
 * **[DESIGN_AND_UI_SPEC.md](./DESIGN_AND_UI_SPEC.md)**
-  * Spesifikasi visual identity theme *"Executive Journal"*, token warna, tipografi (`Lora` & `Instrument Sans`), serta arsitektur komponen Livewire.
+  * Spesifikasi visual identity theme *"Executive Journal"*, token warna (`#171412`, `#faf8f5`, `#f0ebe4`, `#b45309`), tipografi (`Lora` & `Instrument Sans`), serta arsitektur komponen Livewire.
 
 * **[NAVIGATION_OPTIMIZATION_SPEC.md](./NAVIGATION_OPTIMIZATION_SPEC.md)**
   * Arsitektur optimasi navigasi 0ms Instant SPA, Livewire Deep-Linking (`#[Url]`), memoisasi query `HcaDataService`, dan sinkronisasi Chart.js.

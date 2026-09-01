@@ -70,3 +70,36 @@ Kedua model 9-box di SPSP memiliki landasan ilmiah resmi yang diakui, namun dite
 2. **Model HCA Report (Section 16 — Criterion-Referenced / Ambang Mutlak)**:
    - **Sumbu**: Kinerja Aktual KPI (X) $\times$ Potensi Masa Depan (Y).
    - **Tujuan**: Standar global McKinsey/GE untuk *Executive Talent Review* & suksesi kepemimpinan internal korporasi/instansi.
+
+---
+
+### 5. Arsitektur Input Data Pelengkap HCA (*Hybrid Two-Tier Entry System*)
+HCA Report membutuhkan data pelengkap yang tidak dihasilkan otomatis dari instrumen psikotes dasar SPSP, yaitu:
+1. **Rekam Kinerja & Tren KPI Tahunan** (`participant_performance_records`) &rarr; untuk Section 15 & Sumbu Kinerja Section 16.
+2. **Riwayat Jabatan & Masa Kerja** (`participant_career_histories`) &rarr; untuk Section 06.
+3. **Profil Personal & Karakter Pelengkap** (`participant_personal_profiles`) &rarr; untuk Section 18.
+
+Untuk memberikan fleksibilitas operasional optimal, data di atas dikelola melalui sistem **Hybrid Two-Tier**:
+
+```mermaid
+flowchart TD
+    subgraph Tier1["Tier 1: Base SPSP Participant Detail (Admin/Operator)"]
+        A["Halaman Detail Peserta<br/>(/participant-detail/{event}/{testNumber})"] -->|Tab 'Data Pelengkap HCA'| B["ParticipantDetail.php<br/>• Form Tabbed Kinerja, Karier, Profil"]
+    end
+
+    subgraph Tier2["Tier 2: In-Context HCA Report Editor (Asesor/Reviewer)"]
+        C["Topbar HCA Report<br/>(/hca-report/{participant})"] -->|Tombol 'Kelola Data Pelengkap'| D["HcaDataEditorModal.php<br/>• Slide-Over Modal / Drawer"]
+    end
+
+    subgraph DB["Database SPSP & Reaktivitas"]
+        B -->|Transaksi DB Atomik| E[("Database SPSP<br/>• participant_performance_records<br/>• participant_career_histories<br/>• participant_personal_profiles")]
+        D -->|Transaksi DB Atomik| E
+        D -.->|Livewire Event 'hca-data-updated'| F["Reaktif Auto-Refresh 0ms<br/>• Section 15 (Chart KPI)<br/>• Section 16 (9-Box Grid)<br/>• Section 06 (Timeline Karier)<br/>• Section 18 (Profil Personal)<br/>• Section 02 (Executive Summary)"]
+    end
+```
+
+#### Karakteristik Teknis Two-Tier Entry:
+- **Tier 1 (Base SPSP — Operasional Massal)**: Terletak pada tab *"Data Pelengkap HCA"* di menu Detail Peserta SPSP. Cocok untuk operator/administrasi yang menginput berkas riwayat hidup sebelum sesi asesmen dimulai.
+- **Tier 2 (In-Context HCA Report — Fast Review & Edit)**: Terletak pada modal slide-over topbar HCA Report. Memungkinkan asesor/konsultan mengoreksi data atau menambahkan poin pencapaian langsung saat menelaah laporan eksekutif tanpa harus keluar berpindah halaman.
+- **Keamanan Transaksi & Integritas Data**: Setiap operasi simpan menggunakan `DB::transaction()` dengan isolasi per `participant_id` dan pembersihan baris kosong otomatis.
+- **Auto-Sync 0ms**: Saat modal ditutup setelah penyimpanan, event `hca-data-updated` otomatis dikirim ke seluruh komponen child section HCA yang terdaftar sehingga visualisasi grafik, matriks, dan timeline langsung diperbarui seketika.

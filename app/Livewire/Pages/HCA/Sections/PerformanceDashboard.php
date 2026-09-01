@@ -7,6 +7,7 @@ namespace App\Livewire\Pages\HCA\Sections;
 use App\Models\Participant;
 use App\Services\HcaDataService;
 use Illuminate\View\View;
+use Livewire\Attributes\On;
 use Livewire\Attributes\Reactive;
 use Livewire\Component;
 
@@ -16,6 +17,12 @@ class PerformanceDashboard extends Component
     public ?int $participantId = null;
 
     public string $chartId;
+
+    #[On('hca-data-updated')]
+    public function onDataUpdated(): void
+    {
+        // Re-renders component on data update
+    }
 
     public function mount(): void
     {

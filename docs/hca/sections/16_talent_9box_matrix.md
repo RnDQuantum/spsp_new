@@ -46,3 +46,7 @@
      * Level 2 (Sedang): $85.00\% - 94.99\%$
      * Level 1 (Rendah): $< 85.00\%$
 * **Tampilan Visual UI**: Grid interaktif 3x3 dengan highlight emas pada kuadran aktif peserta (*active cell*), lencana kuadran, serta narasi interpretasi penempatan talenta personal (*Talent Placement Narrative*).
+* **Pengelolaan & Penginputan Data Sumbu Kinerja (Two-Tier Entry)**:
+  * **Tier 1 (Base SPSP)**: Sumbu kinerja diisi via menu Detail Peserta SPSP &rarr; Tab *"Data Pelengkap HCA"* &rarr; Subtab *"1. Rekam Kinerja & KPI Tahunan"*.
+  * **Tier 2 (In-Context HCA)**: Jika rekam kinerja belum terisi atau perlu dikoreksi, asesor dapat langsung membuka modal *"Kelola Data Pelengkap"* pada topbar HCA Report. Perubahan KPI langsung memicu pergeseran posisi kuadran 9-Box secara otomatis via event `hca-data-updated`.
+

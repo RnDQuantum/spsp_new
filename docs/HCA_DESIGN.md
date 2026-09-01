@@ -187,3 +187,22 @@ This phase stitches all 23 sections together into a single, cohesive web applica
   - Apply CSS page-break rules (`page-break-after: always;`) to each major section wrapper to guarantee clean page boundaries during PDF export.
   - Enforce `max-w-full` on printing view layouts so they span the entire paper width dynamically.
 
+---
+
+## 8. Supplementary Data Entry System (Hybrid Two-Tier)
+
+HCA Report incorporates supplementary organizational data not produced automatically by standard psychological tests:
+1. **Annual Performance & KPI History** (`participant_performance_records`)
+2. **Career Progression & Tenure** (`participant_career_histories`)
+3. **Personal Profile & Lifestyle Context** (`participant_personal_profiles`)
+
+### Two-Tier Architecture:
+- **Tier 1 (Base SPSP — Participant Detail Page)**:
+  - Tabbed interface on `ParticipantDetail.php` (`/participant-detail/{event}/{testNumber}`).
+  - Allows bulk entry/updates of candidate histories before assessment review sessions.
+- **Tier 2 (In-Context Modal Drawer — HCA Report)**:
+  - Slide-over drawer triggerable from the sticky topbar (`HcaDataEditorModal.php`).
+  - Allows assessors to review and edit supplementary data on-the-fly without leaving the executive report.
+  - Emits Livewire event `hca-data-updated` to trigger real-time, 0ms re-rendering of Section 15 (KPI Line Chart), Section 16 (9-Box Grid), Section 06 (Timeline), Section 18 (Personal Profile), and Section 02 (Executive Summary).
+
+

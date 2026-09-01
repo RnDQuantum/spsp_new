@@ -49,15 +49,12 @@
 
 ---
 
-## Rekomendasi urutan pengerjaan integrasi
+## ✅ Status Implementasi & Resolusi Arsitektur (Final)
 
-1. **Tahap 1 (cepat):** Identitas Peserta, Layer 1 Kompetensi, Layer 2 Potensi, IQ/Kognitif — tinggal reuse component existing dengan props berbeda.
-2. **Tahap 2 (butuh kerja backend sedang):** Ringkasan Eksekutif, HCI, Learning Agility, Leadership Potential, EQ, Values & Integrity, Kesehatan Jiwa, Kekuatan Psikologis, Rekomendasi Pengembangan — data induk sudah ada, perlu service/breakdown tambahan.
-3. **Tahap 3 (butuh keputusan produk dulu, baru bisa dikerjakan):** Riwayat Karier, Big Five, DISC, Performance Dashboard, 9-Box, Succession Readiness, Profil Personal, Indikator Risiko, Rekomendasi Peran Berikutnya — perlu keputusan sumber data/instrumen sebelum ada pekerjaan teknis yang bisa dimulai.
+Seluruh pertanyaan dan kebutuhan data pada dokumen preliminary ini **telah diselesaikan dan diimplementasikan penuh 100% dinamis**:
+1. **Big Five (16PF) & DISC (PAPI Kostik)**: Menggunakan data instrumen psikometri baku pada tabel `test_results` via `TestReportService`.
+2. **Data Pelengkap (Kinerja/KPI, Riwayat Karier, Profil Personal)**: Diimplementasikan menggunakan **Hybrid Two-Tier Entry System** (Tier 1: Base SPSP Participant Detail Tab `ParticipantDetail.php` & Tier 2: In-Context Slide-over Modal `HcaDataEditorModal.php` dengan transaksi database atomik dan event reaktif `hca-data-updated`).
+3. **9-Box Matrix, Succession Horizon, & Role Recommendation**: Menggunakan formula *Criterion-Referenced* berbasis integrasi Potensi $\times$ Kinerja Aktual KPI.
 
-## Pertanyaan terbuka untuk product owner
+> 📖 **Dokumentasi Resmi Terkini**: Silakan merujuk ke master dokumentasi di [docs/hca/DATA_MAPPING_SPEC.md](./hca/DATA_MAPPING_SPEC.md) dan [docs/hca/README.md](./hca/README.md).
 
-- Apakah Big Five & DISC akan jadi instrumen tes baru yang dikembangkan sendiri, atau integrasi ke alat tes pihak ketiga yang sudah ada?
-- Apakah data Performance (KPI, revenue, dll) akan diinput manual oleh admin instansi, atau perlu integrasi ke sistem HR performance existing klien?
-- Apakah Profil Personal (zodiak, dll) tetap masuk cakupan rilis pertama, mengingat sifatnya non-esensial?
-- Siapa yang menentukan business rule untuk Succession Readiness dan Career Pathing (Rekomendasi Peran Berikutnya)?

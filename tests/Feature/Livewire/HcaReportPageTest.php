@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Livewire;
 
+use App\Livewire\Pages\HCA\Components\HcaDataEditorModal;
 use App\Livewire\Pages\HCA\HcaReportPage;
 use App\Livewire\Pages\HCA\Sections\DiscProfile;
 use App\Livewire\Pages\HCA\Sections\ExecutiveSummary;
@@ -14,8 +15,10 @@ use App\Livewire\Pages\HCA\Sections\PerformanceDashboard;
 use App\Livewire\Pages\HCA\Sections\ScoreListSection;
 use App\Livewire\Pages\HCA\Sections\SuccessionReadiness;
 use App\Livewire\Pages\HCA\Sections\TimelineSection;
+use App\Livewire\Pages\ParticipantDetail;
 use App\Models\Institution;
 use App\Models\Participant;
+use App\Models\ParticipantPersonalProfile;
 use App\Models\User;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -616,5 +619,95 @@ class HcaReportPageTest extends TestCase
         session(['individual_report.tolerance' => 15]);
         $test->dispatch('tolerance-updated', tolerance: 15)
             ->assertSee('Ambang Toleransi');
+    }
+
+    /**
+     * Test HCA In-Context Data Editor Modal loads and saves supplementary data atomically
+     */
+    public function test_hca_data_editor_modal_loads_and_saves_data_atomically(): void
+    {
+        $participant = Participant::query()->first();
+        if (! $participant) {
+            $this->markTestSkipped('No participant found');
+        }
+
+        $test = Livewire::test(HcaDataEditorModal::class)
+            ->dispatch('open-hca-editor', participantId: $participant->id)
+            ->assertSet('isOpen', true)
+            ->assertSet('participantId', $participant->id)
+            ->assertSee('Kelola Data Pelengkap HCA');
+
+        // Test tab switching
+        $test->call('setActiveTab', 'career')
+            ->assertSet('activeTab', 'career')
+            ->call('setActiveTab', 'personal')
+            ->assertSet('activeTab', 'personal')
+            ->call('setActiveTab', 'performance')
+            ->assertSet('activeTab', 'performance');
+
+        // Test adding and modifying performance row
+        $test->call('addPerformanceRow');
+        $performanceRecords = $test->get('performanceRecords');
+        $this->assertNotEmpty($performanceRecords);
+
+        // Update personal profile fields
+        $test->set('bloodType', 'AB+')
+            ->set('hobbies', 'Catur, Menulis, Riset')
+            ->set('sports', 'Bulu Tangkis, Renang')
+            ->set('mottoOrValues', 'Keunggulan Melalui Dedikasi dan Kejujuran');
+
+        // Save
+        $test->call('save')
+            ->assertDispatched('hca-data-updated', participantId: $participant->id)
+            ->assertSee('Data pelengkap berhasil disimpan');
+
+        // Verify DB persistence
+        $savedProfile = ParticipantPersonalProfile::where('participant_id', $participant->id)->first();
+        $this->assertNotNull($savedProfile);
+        $this->assertEquals('AB+', $savedProfile->blood_type);
+        $this->assertEquals('Catur, Menulis, Riset', $savedProfile->hobbies);
+    }
+
+    /**
+     * Test ParticipantDetail page tab switching and saving supplementary data
+     */
+    public function test_participant_detail_can_manage_supplementary_data(): void
+    {
+        $participant = Participant::with('assessmentEvent')->first();
+        if (! $participant || ! $participant->assessmentEvent) {
+            $this->markTestSkipped('No participant or assessment event found');
+        }
+
+        $test = Livewire::test(ParticipantDetail::class, [
+            'eventCode' => $participant->assessmentEvent->code,
+            'testNumber' => $participant->test_number,
+        ])
+            ->assertSet('mainTab', 'reports')
+            ->assertSee('Individual Reports')
+            ->assertSee('Data Pelengkap HCA');
+
+        // Switch to supplementary data tab
+        $test->call('setMainTab', 'supplementary_data')
+            ->assertSet('mainTab', 'supplementary_data')
+            ->assertSee('Rekam Kinerja');
+
+        // Switch subtabs
+        $test->call('setSupplementarySubTab', 'career')
+            ->assertSet('supplementarySubTab', 'career')
+            ->assertSee('Riwayat Jabatan')
+            ->call('setSupplementarySubTab', 'personal')
+            ->assertSet('supplementarySubTab', 'personal')
+            ->assertSee('Profil Personal');
+
+        // Modify and save
+        $test->set('bloodType', 'O+')
+            ->set('hobbies', 'Fotografi & Desain')
+            ->call('saveSupplementaryData')
+            ->assertSee('Data pelengkap HCA berhasil diperbarui');
+
+        // Verify in DB
+        $savedProfile = ParticipantPersonalProfile::where('participant_id', $participant->id)->first();
+        $this->assertNotNull($savedProfile);
+        $this->assertEquals('Fotografi & Desain', $savedProfile->hobbies);
     }
 }
